@@ -42,7 +42,7 @@ export const of = async <T, E = any>(
 ): Promise<[T | undefined, E | undefined, boolean]> => {
   try {
     return [await promise, undefined, true];
-  } catch (error) {
+  } catch (error: any) {
     return [undefined, error, false];
   }
 };

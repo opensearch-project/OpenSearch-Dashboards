@@ -55,7 +55,7 @@ export function shortUrlLookupProvider({ logger }: { logger: Logger }): ShortUrl
         accessDate: new Date().valueOf(),
         accessCount: get(doc, 'attributes.accessCount', 0) + 1,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Warning: Error updating url metadata');
       logger.warn(error);
       // swallow errors. It isn't critical if there is no update.
@@ -80,7 +80,7 @@ export function shortUrlLookupProvider({ logger }: { logger: Logger }): ShortUrl
         );
 
         return doc.id;
-      } catch (error) {
+      } catch (error: any) {
         if (isConflictError(error)) {
           return id;
         }

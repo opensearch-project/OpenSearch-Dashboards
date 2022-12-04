@@ -117,7 +117,7 @@ describe('filter manager utilities', () => {
 
       try {
         chain(filter);
-      } catch (err) {
+      } catch (err: any) {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toBe('No mappings have been found for filter.');
         done();

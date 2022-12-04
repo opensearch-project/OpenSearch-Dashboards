@@ -171,7 +171,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     let layout;
     try {
       layout = this.buildLayoutFromPanels();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error); // eslint-disable-line no-console
 
       isLayoutInvalid = true;

@@ -111,7 +111,7 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
       throw new Error(
         `Unexpected result from OnPostAuth. Expected OnPostAuthResult or OpenSearchDashboardsResponse, but given: ${result}.`
       );
-    } catch (error) {
+    } catch (error: any) {
       log.error(error);
       return hapiResponseAdapter.toInternalError();
     }

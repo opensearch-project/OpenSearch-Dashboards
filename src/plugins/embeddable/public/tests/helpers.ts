@@ -45,7 +45,7 @@ export const expectError = (fn: (...args: any) => any): Error => {
   try {
     fn();
     throw new Error('Expected an error throw.');
-  } catch (error) {
+  } catch (error: any) {
     if (error.message === 'Expected an error throw.') {
       throw error;
     }
@@ -58,7 +58,7 @@ export const of = async <T, P extends Promise<T>>(
 ): Promise<[T | undefined, Error | any]> => {
   try {
     return [await promise, undefined];
-  } catch (error) {
+  } catch (error: any) {
     return [, error];
   }
 };

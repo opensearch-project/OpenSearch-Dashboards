@@ -100,7 +100,7 @@ export async function applyOpenSearchResp(
       } else {
         savedObject.searchSourceFields = searchSourceValues;
       }
-    } catch (error) {
+    } catch (error: any) {
       if (
         error.constructor.name === 'SavedObjectNotFound' &&
         error.savedObjectType === 'index-pattern'

@@ -60,7 +60,7 @@ const anyCustomRule: Rules = {
     let validationResultMessage;
     try {
       validationResultMessage = params.validator(value);
-    } catch (e) {
+    } catch (e: any) {
       validationResultMessage = e.message || e;
     }
 
@@ -161,7 +161,7 @@ export const internals = Joi.extend([
         if (typeof value === 'number') {
           return new ByteSizeValue(value);
         }
-      } catch (e) {
+      } catch (e: any) {
         return this.createError('bytes.parse', { value, message: e.message }, state, options);
       }
 
@@ -215,7 +215,7 @@ export const internals = Joi.extend([
         if (typeof value === 'string' || typeof value === 'number') {
           return ensureDuration(value);
         }
-      } catch (e) {
+      } catch (e: any) {
         return this.createError('duration.parse', { value, message: e.message }, state, options);
       }
 
@@ -271,7 +271,7 @@ export const internals = Joi.extend([
             return parsed;
           }
           return this.createError('object.base', { value: parsed }, state, options);
-        } catch (e) {
+        } catch (e: any) {
           return this.createError('object.parse', { value }, state, options);
         }
       }
@@ -297,7 +297,7 @@ export const internals = Joi.extend([
             return new Map(Object.entries(parsed));
           }
           return this.createError('map.base', { value: parsed }, state, options);
-        } catch (e) {
+        } catch (e: any) {
           return this.createError('map.parse', { value }, state, options);
         }
       }
@@ -369,7 +369,7 @@ export const internals = Joi.extend([
             return parsed;
           }
           return this.createError('record.base', { value: parsed }, state, options);
-        } catch (e) {
+        } catch (e: any) {
           return this.createError('record.parse', { value }, state, options);
         }
       }
@@ -433,7 +433,7 @@ export const internals = Joi.extend([
             return parsed;
           }
           return this.createError('array.base', { value: parsed }, state, options);
-        } catch (e) {
+        } catch (e: any) {
           return this.createError('array.parse', { value }, state, options);
         }
       }

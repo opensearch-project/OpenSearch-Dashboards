@@ -160,7 +160,7 @@ export class Field extends PureComponent<FieldProps> {
         newUnsavedValue = value.trim() || (isJsonArray ? '[]' : '{}');
         try {
           JSON.parse(newUnsavedValue);
-        } catch (e) {
+        } catch (e: any) {
           errorParams = {
             error: i18n.translate('advancedSettings.field.codeEditorSyntaxErrorMessage', {
               defaultMessage: 'Invalid JSON syntax',
@@ -258,7 +258,7 @@ export class Field extends PureComponent<FieldProps> {
         value: base64Image,
         ...errorParams,
       });
-    } catch (err) {
+    } catch (err: any) {
       this.props.toasts.addDanger(
         i18n.translate('advancedSettings.field.imageChangeErrorMessage', {
           defaultMessage: 'Image could not be saved',
@@ -268,7 +268,7 @@ export class Field extends PureComponent<FieldProps> {
     }
   };
 
-  async getImageAsBase64(file: Blob): Promise<string | ArrayBuffer> {
+  async getImageAsBase64(file: Blob): Promise<string | ArrayBuffer | undefined> {
     const reader = new FileReader();
     reader.readAsDataURL(file);
 

@@ -94,7 +94,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     try {
       const relationships = await getRelationships(savedObject.type, savedObject.id);
       this.setState({ relationships, isLoading: false, error: undefined });
-    } catch (err) {
+    } catch (err: any) {
       this.setState({ error: err.message, isLoading: false });
     }
   }

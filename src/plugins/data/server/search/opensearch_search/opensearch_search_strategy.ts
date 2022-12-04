@@ -88,7 +88,7 @@ export const opensearchSearchStrategyProvider = (
           rawResponse,
           ...getTotalLoaded(rawResponse._shards),
         };
-      } catch (e) {
+      } catch (e: any) {
         if (usage) usage.trackError();
 
         if (dataSource && request.dataSourceId) {

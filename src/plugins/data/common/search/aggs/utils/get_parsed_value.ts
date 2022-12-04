@@ -39,7 +39,7 @@
 export const getParsedValue = (data: any, key: string) => {
   try {
     return data[key] ? JSON.parse(data[key]) : undefined;
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`Unable to parse ${key} argument string`);
   }
 };

@@ -72,7 +72,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
     try {
       const data = await loadStatus({ http, notifications });
       this.setState({ loading: false, fetchError: false, data });
-    } catch (e) {
+    } catch (e: any) {
       this.setState({ fetchError: true, loading: false, data: null });
     }
   }

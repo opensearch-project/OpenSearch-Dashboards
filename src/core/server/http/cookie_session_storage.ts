@@ -103,7 +103,7 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
       // is the safest option.
       this.log.warn(`Found ${session.length} auth sessions when we were only expecting 1.`);
       return null;
-    } catch (error) {
+    } catch (error: any) {
       this.log.debug(String(error));
       return null;
     }
@@ -129,7 +129,7 @@ function validateOptions(options: SessionStorageCookieOptions<any>) {
  * @param server - hapi server to create SessionStorage for
  * @param cookieOptions - cookies configuration
  */
-export async function createCookieSessionStorageFactory<T>(
+export async function createCookieSessionStorageFactory<T extends Record<string, any>>(
   log: Logger,
   server: Server,
   cookieOptions: SessionStorageCookieOptions<T>,

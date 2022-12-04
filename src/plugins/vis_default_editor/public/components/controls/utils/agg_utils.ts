@@ -122,7 +122,7 @@ function useValidation(setValidity: (isValid: boolean) => void, isValid: boolean
 function safeMakeLabel(agg: IAggConfig): string {
   try {
     return agg.makeLabel();
-  } catch (e) {
+  } catch (e: any) {
     return i18n.translate('visDefaultEditor.controls.aggNotValidLabel', {
       defaultMessage: '- agg not valid -',
     });

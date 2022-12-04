@@ -76,7 +76,7 @@ describe('mkdirp()', () => {
     try {
       await mkdirp('foo/bar');
       throw new Error('Expected mkdirp() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -96,7 +96,7 @@ describe('write()', () => {
       // @ts-expect-error missing content intentional
       await write('foo/bar');
       throw new Error('Expected write() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -121,7 +121,7 @@ describe('read()', () => {
     try {
       await read('foo/bar');
       throw new Error('Expected read() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -136,7 +136,7 @@ describe('getChildPaths()', () => {
     try {
       await getChildPaths('foo/bar');
       throw new Error('Expected getChildPaths() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -154,7 +154,7 @@ describe('getChildPaths()', () => {
     try {
       await getChildPaths(resolve(FIXTURES, 'notrealpath'));
       throw new Error('Expected getChildPaths() to reject');
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toHaveProperty('code', 'ENOENT');
     }
   });
@@ -165,7 +165,7 @@ describe('copyAll()', () => {
     try {
       await copyAll('foo/bar', __dirname);
       throw new Error('Expected copyAll() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -174,7 +174,7 @@ describe('copyAll()', () => {
     try {
       await copyAll(__dirname, 'foo/bar');
       throw new Error('Expected copyAll() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -183,7 +183,7 @@ describe('copyAll()', () => {
     try {
       await copyAll('foo/bar', 'foo/bar');
       throw new Error('Expected copyAll() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -220,14 +220,14 @@ describe('copyAll()', () => {
     try {
       statSync(resolve(destination, 'bin/world_executable'));
       throw new Error('expected bin/world_executable to not by copied');
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toHaveProperty('code', 'ENOENT');
     }
 
     try {
       statSync(resolve(destination, 'foo_dir/.bar'));
       throw new Error('expected foo_dir/.bar to not by copied');
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toHaveProperty('code', 'ENOENT');
     }
 
@@ -244,7 +244,7 @@ describe('copyAll()', () => {
     try {
       statSync(resolve(destination, 'bin/world_executable'));
       throw new Error('expected bin/world_executable to not by copied');
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toHaveProperty('code', 'ENOENT');
     }
 
@@ -274,7 +274,7 @@ describe('getFileHash()', () => {
     try {
       await getFileHash('foo/bar', 'some content');
       throw new Error('Expected getFileHash() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -299,7 +299,7 @@ describe('untar()', () => {
     try {
       await untar('foo/bar', '**/*');
       throw new Error('Expected untar() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -308,7 +308,7 @@ describe('untar()', () => {
     try {
       await untar(__dirname, '**/*');
       throw new Error('Expected untar() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -317,7 +317,7 @@ describe('untar()', () => {
     try {
       await untar('foo/bar', '**/*');
       throw new Error('Expected untar() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -347,7 +347,7 @@ describe('gunzip()', () => {
     try {
       await gunzip('foo/bar', '**/*');
       throw new Error('Expected gunzip() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -356,7 +356,7 @@ describe('gunzip()', () => {
     try {
       await gunzip(__dirname, '**/*');
       throw new Error('Expected gunzip() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });
@@ -365,7 +365,7 @@ describe('gunzip()', () => {
     try {
       await gunzip('foo/bar', '**/*');
       throw new Error('Expected gunzip() to reject');
-    } catch (error) {
+    } catch (error: any) {
       assertNonAbsoluteError(error);
     }
   });

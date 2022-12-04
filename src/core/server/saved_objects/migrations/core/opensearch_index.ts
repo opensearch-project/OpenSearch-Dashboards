@@ -213,7 +213,7 @@ export async function migrationsUpToDate(
     assertResponseIncludeAllShards(body);
 
     return body.count === 0;
-  } catch (e) {
+  } catch (e: any) {
     // retry for Service Unavailable
     if (e.status !== 503 || retryCount === 0) {
       throw e;

@@ -98,7 +98,7 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
         const screenshot = await (el ? el.takeScreenshot() : browser.takeScreenshot());
         await mkdirAsync(dirname(path), { recursive: true });
         await writeFileAsync(path, screenshot, 'base64');
-      } catch (err) {
+      } catch (err: any) {
         log.error('SCREENSHOT FAILED');
         log.error(err);
       }

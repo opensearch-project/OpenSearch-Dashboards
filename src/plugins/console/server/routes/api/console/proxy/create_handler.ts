@@ -174,7 +174,7 @@ export const createHandler = ({
       });
 
       break;
-    } catch (e) {
+    } catch (e: any) {
       // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
       // We try contacting another node in that case.
       log.error(e);

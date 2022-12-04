@@ -79,7 +79,7 @@ export class GithubApi {
         owner,
         sourceBranch,
       };
-    } catch (error) {
+    } catch (error: any) {
       if (!isRateLimitError(error)) {
         throw error;
       }

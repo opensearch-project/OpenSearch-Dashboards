@@ -44,7 +44,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       try {
         mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'find');
         await getDataSources(savedObjects.client);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeTruthy();
       }
     });
@@ -76,7 +76,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       try {
         mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'get');
         await getDataSourceById('alpha-test', savedObjects.client);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeTruthy();
       }
     });
@@ -95,7 +95,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       try {
         mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'create');
         await createSingleDataSource(savedObjects.client, mockDataSourceAttributesWithAuth);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeTruthy();
       }
     });
@@ -119,7 +119,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           'ds-1234',
           mockDataSourceAttributesWithAuth
         );
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeTruthy();
       }
     });
@@ -135,7 +135,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       try {
         mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'delete');
         await deleteDataSourceById('ds-1234', savedObjects.client);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeTruthy();
       }
     });
@@ -192,7 +192,7 @@ describe('DataSourceManagement: Utils.ts', () => {
         mockResponseForSavedObjectsCalls(savedObjects.client, 'delete', {});
         await deleteMultipleDataSources(savedObjects.client, getMappedDataSources);
         expect(true).toBe(true); // This will be executed if multiple delete call is successful.
-      } catch (e) {
+      } catch (e: any) {
         // this block should not execute as the test case name suggests
         expect(e).toBeFalsy();
       }
@@ -201,7 +201,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       try {
         mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'delete');
         await deleteMultipleDataSources(savedObjects.client, getMappedDataSources);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeTruthy();
       }
     });

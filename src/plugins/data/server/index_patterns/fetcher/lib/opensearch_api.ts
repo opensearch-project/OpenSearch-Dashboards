@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
+import { LegacyAPICaller } from 'opensearch-dashboards/server';
 import { convertOpenSearchError } from './errors';
 import { FieldCapsResponse } from './field_capabilities';
 
@@ -66,7 +66,7 @@ export async function callIndexAliasApi(
       ignoreUnavailable: true,
       allowNoIndices: false,
     })) as Promise<IndicesAliasResponse>;
-  } catch (error) {
+  } catch (error: any) {
     throw convertOpenSearchError(indices, error);
   }
 }
@@ -95,7 +95,7 @@ export async function callFieldCapsApi(
       ignoreUnavailable: true,
       ...fieldCapsOptions,
     })) as FieldCapsResponse;
-  } catch (error) {
+  } catch (error: any) {
     throw convertOpenSearchError(indices, error);
   }
 }

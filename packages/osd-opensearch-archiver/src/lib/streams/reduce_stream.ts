@@ -71,7 +71,7 @@ export function createReduceStream(
         }
 
         callback();
-      } catch (err) {
+      } catch (err: any) {
         failed = true;
         callback(err);
       }

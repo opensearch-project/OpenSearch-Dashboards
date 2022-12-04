@@ -226,7 +226,7 @@ export function adoptToHapiAuthFormat(
       throw new Error(
         `Unexpected result from Authenticate. Expected AuthResult or OpenSearchDashboardsResponse, but given: ${result}.`
       );
-    } catch (error) {
+    } catch (error: any) {
       log.error(error);
       return hapiResponseAdapter.toInternalError();
     }

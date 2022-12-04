@@ -55,7 +55,7 @@ export async function getTranslationPaths({ cwd, glob }: { cwd: string; glob: st
           translationPaths.push(translationFullPath);
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       throw new Error(`Failed to parse .i18nrc.json file at ${entryFullPath}`);
     }
   }

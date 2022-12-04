@@ -78,7 +78,7 @@ export class HttpsRedirectServer {
     try {
       await this.server.start();
       this.log.debug(`http --> https redirect server running at ${this.server.info.uri}`);
-    } catch (err) {
+    } catch (err: any) {
       if (err.code === 'EADDRINUSE') {
         throw new Error(
           'The redirect server failed to start up because port ' +

@@ -258,7 +258,7 @@ export class Execution<
 
         if (getType(output) === 'error') return output;
         input = output;
-      } catch (rawError) {
+      } catch (rawError: any) {
         const timeEnd: number = this.params.debug ? now() : 0;
         const error = createError(rawError) as ExpressionValueError;
         error.error.message = `[${fnName}] > ${error.error.message}`;
@@ -306,7 +306,7 @@ export class Execution<
     if (type && type.validate) {
       try {
         type.validate(output);
-      } catch (e) {
+      } catch (e: any) {
         throw new Error(`Output of '${fn.name}' is not a valid type '${fn.type}': ${e}`);
       }
     }

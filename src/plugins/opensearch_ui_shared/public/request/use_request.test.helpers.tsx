@@ -108,7 +108,7 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
           setTimeout(() => {
             try {
               resolve(sendRequestSpy(path, options));
-            } catch (e) {
+            } catch (e: any) {
               reject(e);
             }
           }, (requestTimings && requestTimings[requestCount++]) || REQUEST_TIME);

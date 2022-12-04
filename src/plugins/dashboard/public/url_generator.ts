@@ -112,7 +112,7 @@ export const createDashboardUrlGenerator = (
       try {
         const dashboard = await startServices.savedDashboardLoader.get(state.dashboardId);
         return dashboard?.searchSource?.getField('filter') ?? [];
-      } catch (e) {
+      } catch (e: any) {
         // in case dashboard is missing, built the url without those filters
         // dashboard app will handle redirect to landing page with toast message
         return [];

@@ -89,7 +89,7 @@ describe('mapSpatialFilter()', () => {
 
     try {
       mapSpatialFilter(filter);
-    } catch (e) {
+    } catch (e: any) {
       expect(e).toBe(filter);
 
       done();

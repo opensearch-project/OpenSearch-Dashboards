@@ -97,7 +97,7 @@ export function createCreateIndexStream({
         } as any);
 
         stats.createdIndex(index, { settings });
-      } catch (err) {
+      } catch (err: any) {
         if (
           err?.body?.error?.reason?.includes('index exists with the same name as the alias') &&
           attemptNumber < 3
@@ -150,7 +150,7 @@ export function createCreateIndexStream({
         }
 
         callback();
-      } catch (err) {
+      } catch (err: any) {
         callback(err);
       }
     },

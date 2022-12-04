@@ -1019,7 +1019,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
           })
         );
       }
-    } catch (e) {
+    } catch (e: any) {
       // eslint-disable-next-line no-console
       console.error(e);
       callback(e, null);

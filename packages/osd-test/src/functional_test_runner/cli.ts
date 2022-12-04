@@ -109,7 +109,7 @@ export function runFtrCli() {
           const failureCount = await functionalTestRunner.run();
           process.exitCode = failureCount ? 1 : 0;
         }
-      } catch (err) {
+      } catch (err: any) {
         await teardown(err);
       } finally {
         await teardown();

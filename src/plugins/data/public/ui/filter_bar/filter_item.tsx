@@ -299,7 +299,7 @@ export function FilterItem(props: Props) {
     } else if (isFilterApplicable()) {
       try {
         label.title = getDisplayValueFromFilter(filter, indexPatterns);
-      } catch (e) {
+      } catch (e: any) {
         label.status = FILTER_ITEM_ERROR;
         label.title = props.intl.formatMessage({
           id: 'data.filter.filterBar.labelErrorText',

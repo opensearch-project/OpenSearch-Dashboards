@@ -42,7 +42,7 @@ export function checkConfigs(additionalConfigPaths: string | string[] = []) {
     task: async (context: { reporter: ErrorReporter }) => {
       try {
         await checkConfigNamespacePrefix(configPath);
-      } catch (err) {
+      } catch (err: any) {
         const { reporter } = context;
         const reporterWithContext = reporter.withContext({ name: configPath });
         reporterWithContext.report(err);

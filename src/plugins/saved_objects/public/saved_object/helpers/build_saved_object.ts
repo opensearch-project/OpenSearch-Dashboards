@@ -120,7 +120,7 @@ export function buildSavedObject(
     try {
       const result = await saveSavedObject(savedObject, config, opts, services);
       return Promise.resolve(result);
-    } catch (e) {
+    } catch (e: any) {
       return Promise.reject(e);
     }
   };

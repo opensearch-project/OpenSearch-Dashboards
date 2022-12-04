@@ -55,7 +55,7 @@ const getFullPathSync = (path: string) => {
 
     // Make sure we got something back
     if (fullName?.length > 2) return fullName;
-  } catch (ex) {
+  } catch (ex: any) {
     // Do nothing
   }
 
@@ -80,7 +80,7 @@ const getShortPathSync = (path: string) => {
 
     // Make sure we got something back
     if (shortPath?.length > 2) return shortPath;
-  } catch (ex) {
+  } catch (ex: any) {
     // Do nothing
   }
 

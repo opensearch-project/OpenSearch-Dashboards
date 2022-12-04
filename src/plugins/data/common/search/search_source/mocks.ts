@@ -54,6 +54,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   history: [],
   getSerializedFields: jest.fn(),
   serialize: jest.fn(),
+  flatten: jest.fn(),
 };
 
 export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {

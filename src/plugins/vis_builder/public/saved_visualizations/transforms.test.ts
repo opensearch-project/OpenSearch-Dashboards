@@ -14,8 +14,8 @@ const getConfig = (cfg: any) => cfg;
 
 describe('transforms', () => {
   describe('saveStateToSavedObject', () => {
-    let TEST_INDEX_PATTERN_ID;
-    let savedObject;
+    let TEST_INDEX_PATTERN_ID: string;
+    let savedObject: VisBuilderVisSavedObject;
     let rootState: RootState;
     let indexPattern: IndexPattern;
 

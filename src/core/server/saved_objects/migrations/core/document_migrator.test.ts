@@ -578,7 +578,7 @@ describe('DocumentMigrator', () => {
     try {
       migrator.migrate(_.cloneDeep(failedDoc));
       expect('Did not throw').toEqual('But it should have!');
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).toMatch(/Dang diggity!/);
       const warning = loggingSystemMock.collect(mockLoggerFactory).warn[0][0];
       expect(warning).toContain(JSON.stringify(failedDoc));

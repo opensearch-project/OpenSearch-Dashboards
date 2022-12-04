@@ -309,7 +309,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
         } else {
           return found instanceof WebElementWrapper;
         }
-      } catch (err) {
+      } catch (err: any) {
         await this._withTimeout(defaultFindTimeout);
         return false;
       }
@@ -342,7 +342,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
             throw new Error(`${selector} is not displayed`);
           }
         });
-      } catch (err) {
+      } catch (err: any) {
         await this._withTimeout(defaultFindTimeout);
         return false;
       }

@@ -143,7 +143,7 @@ export class RunWithCommands<T> {
 
         await command.run(extendedContext);
       });
-    } catch (error) {
+    } catch (error: any) {
       cleanup.execute(error);
       // exitCode is set by `cleanup` when necessary
       process.exit();

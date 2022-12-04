@@ -195,14 +195,14 @@ export class VisBuilderPlugin
         visualizations: {
           docTypes: [VISBUILDER_SAVED_OBJECT],
           toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
-            description: attributes?.description,
+            description: attributes?.description!,
             editApp: PLUGIN_ID,
             editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
             icon: visBuilderIcon,
             id,
             savedObjectType: VISBUILDER_SAVED_OBJECT,
             stage: 'experimental',
-            title: attributes?.title,
+            title: attributes?.title!,
             typeTitle: VIS_BUILDER_CHART_TYPE,
             updated_at: updatedAt,
           }),

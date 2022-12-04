@@ -44,7 +44,7 @@ export function parseConfigsTask() {
         configs.forEach((config) => {
           context.roots.push({ config });
         });
-      } catch (err) {
+      } catch (err: any) {
         const { reporter } = context;
         const reporterWithContext = reporter.withContext({ name: configRoot });
         reporterWithContext.report(err);

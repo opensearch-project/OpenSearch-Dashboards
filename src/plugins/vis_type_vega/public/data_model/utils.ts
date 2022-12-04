@@ -44,7 +44,7 @@ export class Utils {
         } else {
           value += '\n' + compactStringify(args[1], { maxLength: 70 });
         }
-      } catch (err) {
+      } catch (err: any) {
         // ignore
       }
     }

@@ -267,7 +267,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     let result: ReturnType<typeof validateFn>;
     try {
       result = validateFn(data, RouteValidator.ResultFactory);
-    } catch (err) {
+    } catch (err: any) {
       result = { error: new RouteValidationError(err) };
     }
 

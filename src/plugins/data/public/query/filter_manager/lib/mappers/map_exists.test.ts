@@ -60,7 +60,7 @@ describe('filter manager utilities', () => {
 
       try {
         mapQueryString(filter);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBe(filter);
         done();
       }

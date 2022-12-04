@@ -129,7 +129,7 @@ it('rejects and deletes destination if sha256 does not match', async () => {
       sha256: 'bar',
     });
     throw new Error('Expected download() to reject');
-  } catch (error) {
+  } catch (error: any) {
     expect(error).toHaveProperty(
       'message',
       expect.stringContaining('does not match the expected sha256 checksum')
@@ -139,7 +139,7 @@ it('rejects and deletes destination if sha256 does not match', async () => {
   try {
     readFileSync(TMP_DESTINATION);
     throw new Error('Expected download to be deleted');
-  } catch (error) {
+  } catch (error: any) {
     expect(error).toHaveProperty('code', 'ENOENT');
   }
 });
@@ -209,7 +209,7 @@ describe('reties download retries: number of times', () => {
         retries: 5,
       });
       throw new Error('Expected download() to reject');
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toHaveProperty(
         'message',
         expect.stringContaining('Request failed with status code 500')
@@ -230,7 +230,7 @@ describe('sha256 option not supplied', () => {
       });
 
       throw new Error('expected download() to reject');
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toHaveProperty('message', expect.stringContaining('refusing to download'));
     }
   });

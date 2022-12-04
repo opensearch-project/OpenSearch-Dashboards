@@ -68,7 +68,7 @@ export function createRunner({ config, log }: Options) {
     try {
       await task.run(config, log, lastArg);
       log.success(chalk.green('✓'), time());
-    } catch (error) {
+    } catch (error: any) {
       if (!isErrorLogged(error)) {
         log.error(`failure ${time()}`);
         log.error(error);

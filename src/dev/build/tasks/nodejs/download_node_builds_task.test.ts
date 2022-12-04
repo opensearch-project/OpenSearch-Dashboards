@@ -65,6 +65,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
       linux: false,
       linuxArm: false,
       darwin: false,
+      windows: false,
     },
   });
 

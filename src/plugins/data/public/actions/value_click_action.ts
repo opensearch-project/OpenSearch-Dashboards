@@ -58,7 +58,7 @@ export function createValueClickAction(
             timeFieldName: context.data.timeFieldName,
           });
         }
-      } catch (e) {
+      } catch (e: any) {
         // eslint-disable-next-line no-console
         console.warn(
           `Error [ACTION_EMIT_APPLY_FILTER_TRIGGER]: can\'t extract filters from action context`

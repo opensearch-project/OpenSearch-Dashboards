@@ -85,7 +85,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
       let readStream: Readable;
       try {
         readStream = await createSavedObjectsStreamFromNdJson(file);
-      } catch (e) {
+      } catch (e: any) {
         return res.badRequest({
           body: e,
         });

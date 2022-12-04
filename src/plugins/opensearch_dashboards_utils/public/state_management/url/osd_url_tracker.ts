@@ -170,7 +170,7 @@ export function createOsdUrlTracker({
     let urlWithStates = '';
     try {
       urlWithStates = unhashUrl(urlWithHashes);
-    } catch (e) {
+    } catch (e: any) {
       toastNotifications.addDanger(e.message);
     }
 

@@ -135,7 +135,7 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
       throw new Error(
         `Unexpected result from OnPreRouting. Expected OnPreRoutingResult or OpenSearchDashboardsResponse, but given: ${result}.`
       );
-    } catch (error) {
+    } catch (error: any) {
       log.error(error);
       return hapiResponseAdapter.toInternalError();
     }

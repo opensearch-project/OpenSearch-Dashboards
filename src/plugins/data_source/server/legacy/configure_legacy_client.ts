@@ -23,7 +23,7 @@ import { CryptographyServiceSetup } from '../cryptography_service';
 import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
 import { OpenSearchClientPoolSetup, getCredential, getDataSource } from '../client';
 import { parseClientOptions } from './client_config';
-import { createDataSourceError, DataSourceError } from '../lib/error';
+import { createDataSourceError } from '../lib/error';
 
 export const configureLegacyClient = async (
   { dataSourceId, savedObjects, cryptography }: DataSourceClientParams,
@@ -136,7 +136,7 @@ const callAPI = async (
       }
       return request.then(resolve, reject);
     });
-  } catch (err) {
+  } catch (err: any) {
     if (!options.wrap401Errors || err.statusCode !== 401) {
       throw err;
     }

@@ -57,7 +57,7 @@ export function fromUser(userInput: object | string) {
     if (trimmedUserInput[0] === '{') {
       try {
         return JSON.parse(trimmedUserInput);
-      } catch (e) {
+      } catch (e: any) {
         return userInput;
       }
     } else {

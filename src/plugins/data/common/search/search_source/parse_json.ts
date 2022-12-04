@@ -36,7 +36,7 @@ export const parseSearchSourceJSON = (searchSourceJSON: string) => {
   let searchSourceValues: SearchSourceFields;
   try {
     searchSourceValues = JSON.parse(searchSourceJSON);
-  } catch (e) {
+  } catch (e: any) {
     throw new InvalidJSONProperty(
       `Invalid JSON in search source. ${e.message} JSON: ${searchSourceJSON}`
     );

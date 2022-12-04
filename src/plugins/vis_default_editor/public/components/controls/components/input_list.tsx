@@ -97,7 +97,7 @@ const validateValue = (
     result.model = new InputObject(inputValue).toString();
     result.isInvalid = false;
     return result;
-  } catch (e) {
+  } catch (e: any) {
     result.isInvalid = true;
     return result;
   }

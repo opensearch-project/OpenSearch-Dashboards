@@ -77,7 +77,7 @@ export class Cleanup {
     for (const task of tasks) {
       try {
         task();
-      } catch (error) {
+      } catch (error: any) {
         this.onError(error);
       }
     }

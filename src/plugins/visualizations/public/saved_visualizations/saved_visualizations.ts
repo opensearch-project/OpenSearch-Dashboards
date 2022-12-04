@@ -56,7 +56,7 @@ export function createSavedVisLoader(
       if (source.visState) {
         try {
           typeName = JSON.parse(String(source.visState)).type;
-        } catch (e) {
+        } catch (e: any) {
           /* missing typename handled below */
         }
       }

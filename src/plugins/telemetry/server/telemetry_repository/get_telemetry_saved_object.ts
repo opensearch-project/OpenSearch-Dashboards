@@ -41,7 +41,7 @@ export const getTelemetrySavedObject: GetTelemetrySavedObject = async (
   try {
     const { attributes } = await repository.get<TelemetrySavedObject>('telemetry', 'telemetry');
     return attributes;
-  } catch (error) {
+  } catch (error: any) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return null;
     }

@@ -71,7 +71,7 @@ export class BundleRefs {
     let spec;
     try {
       spec = JSON.parse(json);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('`bundleRefs` spec must be valid JSON');
     }
 

@@ -104,7 +104,7 @@ export const isValidUrl = (endpoint: string) => {
   try {
     const url = new URL(endpoint);
     return Boolean(url) && (url.protocol === 'http:' || url.protocol === 'https:');
-  } catch (e) {
+  } catch (e: any) {
     return false;
   }
 };

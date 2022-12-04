@@ -137,7 +137,7 @@ describe('promiseFromStreams', () => {
       try {
         await createPromiseFromStreams([readStream, transformStream]);
         throw new Error('Should fail');
-      } catch (e) {
+      } catch (e: any) {
         expect(e.message).toBe('Test error');
         expect(destroyCalled).toBe(true);
       }

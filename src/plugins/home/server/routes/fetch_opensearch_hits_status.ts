@@ -61,7 +61,7 @@ export const registerHitsStatusRoute = (router: IRouter) => {
             count,
           },
         });
-      } catch (e) {
+      } catch (e: any) {
         return res.badRequest({
           body: e,
         });

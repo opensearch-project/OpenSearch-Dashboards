@@ -182,7 +182,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     try {
       await handleOldSettings(savedObjectsClient, uiSettingsClient);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn('Unable to update legacy telemetry configs.');
     }
     // Set the mark in the AsyncSubject as complete so all the methods that require this method to be completed before working, can move on

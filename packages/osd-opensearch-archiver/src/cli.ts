@@ -158,7 +158,7 @@ export function runCli() {
         if (typeof query === 'string' && query.length > 0) {
           try {
             parsedQuery = JSON.parse(query);
-          } catch (err) {
+          } catch (err: any) {
             throw createFlagError('--query should be valid JSON');
           }
         }
@@ -239,7 +239,7 @@ export function runCli() {
             output: process.stdout,
           });
 
-          await new Promise((resolveInput) => {
+          await new Promise<void>((resolveInput) => {
             rl.question(`Press enter when you're done`, () => {
               rl.close();
               resolveInput();

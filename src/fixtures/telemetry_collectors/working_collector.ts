@@ -79,7 +79,7 @@ export const myCollector = makeUsageCollector<Usage>({
         ],
         my_str_array: ['hello', 'world'],
       };
-    } catch (err) {
+    } catch (err: any) {
       return {
         my_objects: {
           total: 0,

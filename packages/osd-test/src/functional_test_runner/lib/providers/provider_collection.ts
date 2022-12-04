@@ -66,7 +66,7 @@ export class ProviderCollection {
           if (isAsyncInstance(instance)) {
             await instance.init();
           }
-        } catch (err) {
+        } catch (err: any) {
           this.log.warning('Failure loading service %j', name);
           this.log.error(err);
           asyncInitFailures.push(name);

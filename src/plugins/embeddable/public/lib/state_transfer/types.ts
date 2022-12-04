@@ -64,8 +64,8 @@ export function isEmbeddablePackageState(state: unknown): state is EmbeddablePac
 
 function ensureFieldOfTypeExists(key: string, obj: unknown, type?: string): boolean {
   return (
-    obj &&
-    key in (obj as { [key: string]: unknown }) &&
-    (!type || typeof (obj as { [key: string]: unknown })[key] === type)
+    !!obj &&
+    key in (obj as { [key: string]: any }) &&
+    (!type || typeof (obj as { [key: string]: any })[key] === type)
   );
 }

@@ -403,7 +403,7 @@ export function timechartFn(dependencies: TimelineVisualizationDependencies) {
             // legend has been re-created. Apply focus on legend element when previously set
             if (focusedSeries || focusedSeries === 0) {
               const $legendLabels = canvasElem.find('div.legend table .legendLabel>span');
-              $legendLabels.get(focusedSeries).focus();
+              $legendLabels.get(focusedSeries)?.focus();
             }
           }
         }

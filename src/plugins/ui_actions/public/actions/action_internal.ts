@@ -41,14 +41,23 @@ import { ActionType } from '../types';
  */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
-  constructor(public readonly definition: A) {}
+  constructor(definition: A) {
+    this.definition = definition;
+    this.id = definition.id;
+    this.type = definition.type || '';
+    this.order = definition.order || 0;
+    this.MenuItem = definition.MenuItem;
+    this.ReactMenuItem = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
+    this.grouping = definition.grouping;
+  }
 
-  public readonly id: string = this.definition.id;
-  public readonly type: ActionType = this.definition.type || '';
-  public readonly order: number = this.definition.order || 0;
-  public readonly MenuItem? = this.definition.MenuItem;
-  public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
-  public readonly grouping?: PresentableGrouping<Context<A>> = this.definition.grouping;
+  public readonly definition: A;
+  public readonly id: string;
+  public readonly type: ActionType;
+  public readonly order: number;
+  public readonly MenuItem?;
+  public readonly ReactMenuItem?: any;
+  public readonly grouping?: PresentableGrouping<Context<A>>;
 
   public execute(context: Context<A>) {
     return this.definition.execute(context);

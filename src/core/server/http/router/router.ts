@@ -278,7 +278,7 @@ export class Router implements IRouter {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request, routeSchemas);
-    } catch (e) {
+    } catch (e: any) {
       return hapiResponseAdapter.toBadRequest(e.message);
     }
 
@@ -288,7 +288,7 @@ export class Router implements IRouter {
         opensearchDashboardsResponseFactory
       );
       return hapiResponseAdapter.handle(opensearchDashboardsResponse);
-    } catch (e) {
+    } catch (e: any) {
       this.log.error(e);
       // forward 401 errors from OpenSearch client
       if (isOpenSearchUnauthorizedError(e)) {

@@ -65,7 +65,7 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
       ...config,
       osd,
     });
-  } catch (error) {
+  } catch (error: any) {
     log.error(`[${command.name}] failed:`);
 
     if (error instanceof CliError) {

@@ -58,7 +58,7 @@ export class Field extends PureComponent<FieldProps> {
     let invalid = false;
     try {
       JSON.parse(targetValue);
-    } catch (e) {
+    } catch (e: any) {
       invalid = true;
     }
     onChange(name, {
@@ -75,7 +75,7 @@ export class Field extends PureComponent<FieldProps> {
     if (type === 'number') {
       try {
         newParsedValue = Number(newParsedValue);
-      } catch (e) {
+      } catch (e: any) {
         invalid = true;
       }
     }

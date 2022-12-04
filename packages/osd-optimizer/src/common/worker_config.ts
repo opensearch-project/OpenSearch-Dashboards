@@ -105,7 +105,7 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       browserslistEnv,
       themeTags: themes,
     };
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(`unable to parse worker config: ${error.message}`);
   }
 }

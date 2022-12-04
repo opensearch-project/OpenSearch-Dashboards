@@ -47,7 +47,7 @@ function callInDigest($scope: IScope, fn: () => void, fatalError?: FatalErrorFn)
     } else {
       $scope.$apply(() => fn());
     }
-  } catch (error) {
+  } catch (error: any) {
     if (fatalError) {
       fatalError(error);
     }

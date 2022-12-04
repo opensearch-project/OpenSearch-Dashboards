@@ -147,7 +147,7 @@ export const createSavedQueryService = (
     try {
       parsedQuery = JSON.parse(queryString);
       parsedQuery = isObject(parsedQuery) ? parsedQuery : queryString;
-    } catch (error) {
+    } catch (error: any) {
       parsedQuery = queryString;
     }
 

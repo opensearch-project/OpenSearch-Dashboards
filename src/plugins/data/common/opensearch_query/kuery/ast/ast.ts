@@ -69,7 +69,7 @@ export const fromKueryExpression = (
 ): KueryNode => {
   try {
     return fromExpression(expression, parseOptions, parseKuery);
-  } catch (error) {
+  } catch (error: any) {
     if (error.name === 'SyntaxError') {
       throw new DQLSyntaxError(error, expression);
     } else {
@@ -84,7 +84,7 @@ export const doesKueryExpressionHaveLuceneSyntaxError = (
   try {
     fromExpression(expression, { errorOnLuceneSyntax: true }, parseKuery);
     return false;
-  } catch (e) {
+  } catch (e: any) {
     return e.message.startsWith('Lucene');
   }
 };

@@ -100,7 +100,7 @@ export const AppContainer: FunctionComponent<Props> = ({
             onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
           })) || null;
-      } catch (e) {
+      } catch (e: any) {
         // TODO: add error UI
         // eslint-disable-next-line no-console
         console.error(e);

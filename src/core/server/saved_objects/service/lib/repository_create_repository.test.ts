@@ -95,7 +95,7 @@ describe('SavedObjectsRepository#createRepository', () => {
         callAdminCluster,
         ['unMappedType1', 'unmappedType2']
       );
-    } catch (e) {
+    } catch (e: any) {
       expect(e).toMatchInlineSnapshot(
         `[Error: Missing mappings for saved objects types: 'unMappedType1, unmappedType2']`
       );

@@ -130,7 +130,7 @@ export class WebElementWrapper {
   ): Promise<T> {
     try {
       return await fn(this);
-    } catch (err) {
+    } catch (err: any) {
       const { name, message } = err as Error;
       if (
         !RETRY_CLICK_RETRY_ON_ERRORS.includes(name) ||

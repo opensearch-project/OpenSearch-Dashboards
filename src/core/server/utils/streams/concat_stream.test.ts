@@ -69,14 +69,14 @@ describe('concatStream', () => {
       let promise;
       try {
         promise = createPromiseFromStreams([createListStream([1, '1']), createConcatStream()]);
-      } catch (err) {
+      } catch (err: any) {
         throw new Error('createPromiseFromStreams() should not fail synchronously');
       }
 
       try {
         await promise;
         throw new Error('Promise should have rejected');
-      } catch (err) {
+      } catch (err: any) {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toContain('concat');
       }

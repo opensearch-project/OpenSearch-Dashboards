@@ -46,7 +46,7 @@ export const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
 
     try {
       searchSource = JSON.parse(searchSourceJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
       return doc;
     }

@@ -143,7 +143,7 @@ export class Bundle {
     let json: string;
     try {
       json = Fs.readFileSync(this.manifestPath, 'utf8');
-    } catch (error) {
+    } catch (error: any) {
       if (error.code !== 'ENOENT') {
         throw error;
       }
@@ -154,7 +154,7 @@ export class Bundle {
     let parsedManifest: { requiredPlugins?: string[]; requiredBundles?: string[] };
     try {
       parsedManifest = JSON.parse(json);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(
         `unable to parse manifest at [${this.manifestPath}], error: [${error.message}]`
       );
@@ -256,7 +256,7 @@ export function parseBundles(json: string) {
         });
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(`unable to parse bundles: ${error.message}`);
   }
 }

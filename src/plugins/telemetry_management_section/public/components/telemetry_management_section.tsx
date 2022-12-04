@@ -278,7 +278,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   })
             );
             resolve(true);
-          } catch (err) {
+          } catch (err: any) {
             this.setState({ processing: false });
             reject(err);
           }

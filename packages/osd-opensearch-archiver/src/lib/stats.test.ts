@@ -64,7 +64,7 @@ function assertDeepClones(a: any, b: any) {
         path.pop();
       });
     })(a, b);
-  } catch (err) {
+  } catch (err: any) {
     const { stack } = err as Error;
     throw new Error(
       `Expected a and b to be deep clones of each other, error at:\n\n` +

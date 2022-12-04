@@ -60,7 +60,7 @@ export function isFileReadable(path: string): boolean {
     // ignore files above the limit
     const stats = statSync(path);
     return stats.size <= MAX_FILE_SIZE;
-  } catch (e) {
+  } catch (e: any) {
     return false;
   }
 }
@@ -81,12 +81,12 @@ export async function readTelemetryFile<T extends object>(
       const data = safeLoad(yaml.toString());
 
       // don't bother returning empty objects
-      if (Object.keys(data).length) {
+      if (Object.keys(data || {}).length) {
         // ensure { "a.b": "value" } becomes { "a": { "b": "value" } }
         return ensureDeepObject(data);
       }
     }
-  } catch (e) {
+  } catch (e: any) {
     // ignored
   }
 

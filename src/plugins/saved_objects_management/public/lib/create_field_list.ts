@@ -79,7 +79,7 @@ const createFields = (key: string, value: any, parents: string[] = []): ObjectFi
     try {
       field.value = JSON.stringify(JSON.parse(field.value), undefined, 2);
       field.type = 'json';
-    } catch (err) {
+    } catch (err: any) {
       field.type = 'text';
     }
   } else if (isNumber(field.value)) {

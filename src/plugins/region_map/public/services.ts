@@ -21,7 +21,7 @@ export function getServices(http: CoreStart['http']): Services {
           }),
         });
         return response;
-      } catch (e) {
+      } catch (e: any) {
         return e;
       }
     },
@@ -33,7 +33,7 @@ export function getServices(http: CoreStart['http']): Services {
           }),
         });
         return response;
-      } catch (e) {
+      } catch (e: any) {
         return e;
       }
     },
@@ -45,7 +45,7 @@ export function getServices(http: CoreStart['http']): Services {
           }),
         });
         return response;
-      } catch (e) {
+      } catch (e: any) {
         return e;
       }
     },

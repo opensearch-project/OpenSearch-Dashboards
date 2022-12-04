@@ -57,7 +57,7 @@ export async function getIntegrityHash(filepath: string): Promise<Hash | null> {
       return data.toString('hex');
     }
     return data;
-  } catch (err) {
+  } catch (err: any) {
     return null;
   }
 }

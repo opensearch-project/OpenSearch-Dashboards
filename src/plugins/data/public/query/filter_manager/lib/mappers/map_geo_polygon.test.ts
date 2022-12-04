@@ -89,7 +89,7 @@ describe('filter manager utilities', () => {
 
       try {
         mapGeoPolygon(wrongFilter);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBe(wrongFilter);
 
         done();

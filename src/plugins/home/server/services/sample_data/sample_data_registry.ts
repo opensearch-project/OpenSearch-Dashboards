@@ -173,7 +173,7 @@ export class SampleDataRegistry {
           }
           panel.embeddableConfig = embeddableConfig;
           dashboard.attributes.panelsJSON = JSON.stringify(panels);
-        } catch (error) {
+        } catch (error: any) {
           throw new Error(
             `Unable to replace panel with embeddable ${oldEmbeddableId}, error: ${error}`
           );

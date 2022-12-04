@@ -407,7 +407,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       if (toastShown) {
         try {
           await this.closeToast();
-        } catch (err) {
+        } catch (err: any) {
           // ignore errors, toast clear themselves after timeout
         }
       }
@@ -420,7 +420,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           await toastElement.moveMouseTo();
           const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
           await closeBtn.click();
-        } catch (err) {
+        } catch (err: any) {
           // ignore errors, toast clear themselves after timeout
         }
       }

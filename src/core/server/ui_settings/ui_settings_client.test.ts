@@ -129,7 +129,7 @@ describe('ui settings', () => {
       try {
         await uiSettings.setMany({ foo: 'bar' });
         throw new Error('expected setMany to throw a NotFound error');
-      } catch (error) {
+      } catch (error: any) {
         expect(SavedObjectsClient.errors.isNotFoundError(error)).toBe(true);
       }
 
@@ -152,7 +152,7 @@ describe('ui settings', () => {
           bar: 'box',
           foo: 'baz',
         });
-      } catch (error) {
+      } catch (error: any) {
         expect(error).toBeInstanceOf(CannotOverrideError);
         expect(error.message).toBe('Unable to update "foo" because it is overridden');
       }
@@ -211,7 +211,7 @@ describe('ui settings', () => {
 
       try {
         await uiSettings.set('foo', 'baz');
-      } catch (error) {
+      } catch (error: any) {
         expect(error).toBeInstanceOf(CannotOverrideError);
         expect(error.message).toBe('Unable to update "foo" because it is overridden');
       }
@@ -255,7 +255,7 @@ describe('ui settings', () => {
 
       try {
         await uiSettings.remove('foo');
-      } catch (error) {
+      } catch (error: any) {
         expect(error).toBeInstanceOf(CannotOverrideError);
         expect(error.message).toBe('Unable to update "foo" because it is overridden');
       }
@@ -311,7 +311,7 @@ describe('ui settings', () => {
 
       try {
         await uiSettings.setMany({ baz: 'baz', foo: 'foo' });
-      } catch (error) {
+      } catch (error: any) {
         expect(error).toBeInstanceOf(CannotOverrideError);
         expect(error.message).toBe('Unable to update "foo" because it is overridden');
       }
@@ -451,7 +451,7 @@ describe('ui settings', () => {
       try {
         await uiSettings.getUserProvided();
         throw new Error('expect getUserProvided() to throw');
-      } catch (err) {
+      } catch (err: any) {
         expect(err).toBe(error);
       }
     });
@@ -465,7 +465,7 @@ describe('ui settings', () => {
       try {
         await uiSettings.getUserProvided();
         throw new Error('expect getUserProvided() to throw');
-      } catch (err) {
+      } catch (err: any) {
         expect(err).toBe(error);
       }
     });

@@ -51,7 +51,7 @@ export function getServices(core: CoreStart): Services {
       try {
         const response = await core.http.fetch<{ randomNumber: number }>(RANDOM_NUMBER_ROUTE_PATH);
         return response.randomNumber;
-      } catch (e) {
+      } catch (e: any) {
         return e;
       }
     },
@@ -62,7 +62,7 @@ export function getServices(core: CoreStart): Services {
           { query: { max } }
         );
         return response.randomNumber;
-      } catch (e) {
+      } catch (e: any) {
         return e;
       }
     },
@@ -71,7 +71,7 @@ export function getServices(core: CoreStart): Services {
         await core.http.post(`${POST_MESSAGE_ROUTE_PATH}/${id}`, {
           body: JSON.stringify({ message }),
         });
-      } catch (e) {
+      } catch (e: any) {
         return e;
       }
     },
@@ -81,7 +81,7 @@ export function getServices(core: CoreStart): Services {
           `${INTERNAL_GET_MESSAGE_BY_ID_ROUTE}/${id}`
         );
         return response.message;
-      } catch (e) {
+      } catch (e: any) {
         return e;
       }
     },

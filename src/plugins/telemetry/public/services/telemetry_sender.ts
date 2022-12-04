@@ -100,7 +100,7 @@ export class TelemetrySender {
       */
       this.lastReported = `${Date.now()}`;
       this.saveToBrowser();
-    } catch (err) {
+    } catch (err: any) {
       // ignore err
     } finally {
       this.isSending = false;

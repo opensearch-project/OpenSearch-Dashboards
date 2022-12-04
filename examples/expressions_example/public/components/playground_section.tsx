@@ -67,7 +67,7 @@ export function PlaygroundSection({
         setLoading(false);
         setResult(parsedValue);
       });
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
       setResult(String(error));
     }

@@ -49,7 +49,7 @@ export class Storage implements IStorageWrapper {
 
     try {
       return JSON.parse(storageItem);
-    } catch (error) {
+    } catch (error: any) {
       return null;
     }
   };
@@ -57,7 +57,7 @@ export class Storage implements IStorageWrapper {
   public set = (key: string, value: any) => {
     try {
       return this.store.setItem(key, JSON.stringify(value));
-    } catch (e) {
+    } catch (e: any) {
       return false;
     }
   };

@@ -182,7 +182,7 @@ export class CoreSystem {
       await this.plugins.setup(core);
 
       return { fatalErrors: this.fatalErrorsSetup };
-    } catch (error) {
+    } catch (error: any) {
       if (this.fatalErrorsSetup && (typeof error === 'string' || error instanceof Error)) {
         this.fatalErrorsSetup.add(error);
       } else {
@@ -282,7 +282,7 @@ export class CoreSystem {
       return {
         application,
       };
-    } catch (error) {
+    } catch (error: any) {
       if (this.fatalErrorsSetup && (typeof error === 'string' || error instanceof Error)) {
         this.fatalErrorsSetup.add(error);
       } else {

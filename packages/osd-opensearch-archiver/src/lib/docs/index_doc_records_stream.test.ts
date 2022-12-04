@@ -200,7 +200,7 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
         createIndexDocRecordsStream(client, stats, progress),
       ]);
       throw new Error('expected stream to emit error');
-    } catch (err) {
+    } catch (err: any) {
       const { message } = err as Error;
       expect(message).to.match(/"forcedError":\s*true/);
     }

@@ -69,7 +69,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       let parsedFields: string[] = [];
       try {
         parsedFields = parseMetaFields(metaFields);
-      } catch (error) {
+      } catch (error: any) {
         return response.badRequest();
       }
 
@@ -85,7 +85,7 @@ export function registerRoutes(http: HttpServiceSetup) {
             'content-type': 'application/json',
           },
         });
-      } catch (error) {
+      } catch (error: any) {
         if (
           typeof error === 'object' &&
           !!error?.isBoom &&
@@ -130,7 +130,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       let parsedFields: string[] = [];
       try {
         parsedFields = parseMetaFields(metaFields);
-      } catch (error) {
+      } catch (error: any) {
         return response.badRequest();
       }
 
@@ -148,7 +148,7 @@ export function registerRoutes(http: HttpServiceSetup) {
             'content-type': 'application/json',
           },
         });
-      } catch (error) {
+      } catch (error: any) {
         return response.notFound();
       }
     }

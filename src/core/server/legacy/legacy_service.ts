@@ -335,7 +335,7 @@ export class LegacyService implements CoreService {
     if (autoListen) {
       try {
         await osdServer.listen();
-      } catch (err) {
+      } catch (err: any) {
         await osdServer.close();
         throw err;
       }

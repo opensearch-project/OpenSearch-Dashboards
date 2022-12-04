@@ -158,7 +158,7 @@ export class IndexPattern implements IIndexPattern {
   private deserializeFieldFormatMap(mapping: SerializedFieldFormat<Record<string, any>>) {
     try {
       return this.fieldFormats.getInstance(mapping.id as string, mapping.params);
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof FieldFormatNotFoundError) {
         return undefined;
       } else {

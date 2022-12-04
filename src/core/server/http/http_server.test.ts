@@ -1043,7 +1043,7 @@ describe('body options', () => {
           expect(req.body).toBeInstanceOf(Buffer);
           expect(req.body.toString()).toBe(JSON.stringify({ test: 1 }));
           return res.ok({ body: req.route.options.body });
-        } catch (err) {
+        } catch (err: any) {
           return res.internalError({ body: err.message });
         }
       }
@@ -1082,7 +1082,7 @@ describe('timeout options', () => {
                 timeout: req.route.options.timeout,
               },
             });
-          } catch (err) {
+          } catch (err: any) {
             return res.internalError({ body: err.message });
           }
         }
@@ -1120,7 +1120,7 @@ describe('timeout options', () => {
                 timeout: req.route.options.timeout,
               },
             });
-          } catch (err) {
+          } catch (err: any) {
             return res.internalError({ body: err.message });
           }
         }
@@ -1157,7 +1157,7 @@ describe('timeout options', () => {
                 timeout: req.route.options.timeout,
               },
             });
-          } catch (err) {
+          } catch (err: any) {
             return res.internalError({ body: err.message });
           }
         }
@@ -1194,7 +1194,7 @@ describe('timeout options', () => {
                 timeout: req.route.options.timeout,
               },
             });
-          } catch (err) {
+          } catch (err: any) {
             return res.internalError({ body: err.message });
           }
         }
@@ -1320,7 +1320,7 @@ test('should return a stream in the body', async () => {
       try {
         expect(req.body).toBeInstanceOf(Readable);
         return res.ok({ body: req.route.options.body });
-      } catch (err) {
+      } catch (err: any) {
         return res.internalError({ body: err.message });
       }
     }

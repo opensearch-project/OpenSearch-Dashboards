@@ -63,7 +63,7 @@ export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesRetur
           setSavedQuery(newSavedQuery);
           populateStateFromSavedQuery(props.queryService, newSavedQuery);
         }
-      } catch (error) {
+      } catch (error: any) {
         // Clear saved query
         setSavedQuery(undefined);
         clearStateFromSavedQuery(props.queryService);

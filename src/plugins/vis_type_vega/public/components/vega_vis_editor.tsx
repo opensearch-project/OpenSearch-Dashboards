@@ -63,7 +63,7 @@ function format(
   try {
     const spec = hjson.parse(value, { legacyRoot: false, keepWsc: true });
     return stringify(spec, options);
-  } catch (err) {
+  } catch (err: any) {
     // This is a common case - user tries to format an invalid HJSON text
     getNotifications().toasts.addError(err, {
       title: i18n.translate('visTypeVega.editor.formatError', {

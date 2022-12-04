@@ -49,7 +49,7 @@ function isValidCalendarInterval(interval: string) {
   try {
     parseOpenSearchInterval(interval);
     return { isValidCalendarValue: true };
-  } catch (e) {
+  } catch (e: any) {
     if (e instanceof InvalidOpenSearchCalendarIntervalError) {
       return { isValidCalendarValue: false, error: e.message };
     }

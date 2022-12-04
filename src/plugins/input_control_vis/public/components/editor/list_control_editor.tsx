@@ -129,7 +129,7 @@ export class ListControlEditor extends PureComponent<
     let indexPattern: IIndexPattern;
     try {
       indexPattern = await this.props.getIndexPattern(this.props.controlParams.indexPattern);
-    } catch (err) {
+    } catch (err: any) {
       // index pattern no longer exists
       return;
     }

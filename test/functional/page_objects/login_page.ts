@@ -51,7 +51,7 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
       await find.setValue('input[type="password"]', pwd);
       await find.clickByCssSelector('.auth0-label-submit');
       await find.byCssSelector('[data-test-subj="opensearchDashboardsChrome"]', 60000); // 60 sec waiting
-    } catch (err) {
+    } catch (err: any) {
       log.debug(`${err} \nFailed to find Auth0 login page, trying the Auth0 last login page`);
       await find.clickByCssSelector('.auth0-lock-social-button');
     }

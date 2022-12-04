@@ -35,7 +35,7 @@ export const wrapErrors: RequestHandlerWrapper = (handler) => {
   return async (context, request, response) => {
     try {
       return await handler(context, request, response);
-    } catch (e) {
+    } catch (e: any) {
       if (Boom.isBoom(e)) {
         return response.customError({
           body: e.output.payload,

@@ -427,7 +427,7 @@ describe('Saved Object', () => {
         try {
           savedObject.applyOpenSearchResp(response);
           expect(true).toBe(false);
-        } catch (err) {
+        } catch (err: any) {
           expect(!!err).toBe(true);
         }
       });
@@ -733,7 +733,7 @@ describe('Saved Object', () => {
         try {
           savedObject.init!();
           expect(false).toBe(true);
-        } catch (err) {
+        } catch (err: any) {
           expect(err).not.toBeNull();
         }
       });

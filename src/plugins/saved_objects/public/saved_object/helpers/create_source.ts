@@ -60,7 +60,7 @@ export async function createSource(
   const { savedObjectsClient, overlays } = services;
   try {
     return await savedObjectsClient.create(opensearchType, source, options);
-  } catch (err) {
+  } catch (err: any) {
     // record exists, confirm overwriting
     if (_.get(err, 'res.status') === 409) {
       const confirmMessage = i18n.translate(

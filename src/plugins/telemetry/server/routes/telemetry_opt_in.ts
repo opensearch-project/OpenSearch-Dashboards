@@ -123,7 +123,7 @@ export function registerTelemetryOptInRoutes({
 
       try {
         await updateTelemetrySavedObject(context.core.savedObjects.client, attributes);
-      } catch (e) {
+      } catch (e: any) {
         if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
           return res.forbidden();
         }

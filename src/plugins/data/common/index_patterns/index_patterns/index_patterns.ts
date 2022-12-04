@@ -266,7 +266,7 @@ export class IndexPatternsService {
       const fields = await this.getFieldsForIndexPattern(indexPattern);
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       indexPattern.fields.replaceAll([...fields, ...scripted]);
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
       }
@@ -297,7 +297,7 @@ export class IndexPatternsService {
     try {
       const newFields = await this.getFieldsForWildcard(options);
       return this.fieldArrayToMap([...newFields, ...scriptdFields]);
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
         return {};
@@ -422,7 +422,7 @@ export class IndexPatternsService {
             dataSourceId: dataSourceRef?.id,
           })
         : spec.fields;
-    } catch (err) {
+    } catch (err: any) {
       isSaveRequired = false;
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({
@@ -452,7 +452,7 @@ export class IndexPatternsService {
     if (isSaveRequired) {
       try {
         this.updateSavedObject(indexPattern);
-      } catch (err) {
+      } catch (err: any) {
         this.onError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldSaveErrorTitle', {
             defaultMessage:

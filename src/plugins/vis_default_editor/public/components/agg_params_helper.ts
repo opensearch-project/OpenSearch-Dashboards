@@ -192,7 +192,7 @@ function buildAggDescription(agg: IAggConfig) {
   if (agg.type && agg.type.makeLabel) {
     try {
       description = agg.type.makeLabel(agg);
-    } catch (e) {
+    } catch (e: any) {
       // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including interval's 'write',
       // which throws an error when interval is undefined.
     }

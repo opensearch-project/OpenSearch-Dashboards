@@ -210,7 +210,7 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
       return shouldUsePseudoLocale
         ? translateUsingPseudoLocale(formattedMessage)
         : formattedMessage;
-    } catch (e) {
+    } catch (e: any) {
       throw new Error(
         `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
       );
@@ -221,7 +221,7 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
     const msg = getMessageFormat(defaultMessage, getDefaultLocale(), getFormats());
 
     return msg.format(values);
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`[I18n] Error formatting the default message for: "${id}".\n${e}`);
   }
 }

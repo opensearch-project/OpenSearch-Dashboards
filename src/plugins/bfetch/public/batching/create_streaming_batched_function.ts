@@ -139,7 +139,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           },
         });
         await stream.toPromise();
-      } catch (error) {
+      } catch (error: any) {
         for (const item of items) item.future.reject(error);
       }
     },

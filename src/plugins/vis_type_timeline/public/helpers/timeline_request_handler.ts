@@ -127,7 +127,7 @@ export function getTimelineRequestHandler({
           },
         }),
       });
-    } catch (e) {
+    } catch (e: any) {
       if (e && e.body) {
         const err = new Error(
           `${i18n.translate('timeline.requestHandlerErrorTitle', {

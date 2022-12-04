@@ -202,7 +202,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       this.cache = defaultsDeep({}, defaults, settings);
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
-    } catch (error) {
+    } catch (error: any) {
       this.setLocally(key, initialVal);
       this.updateErrors$.next(error);
       return false;

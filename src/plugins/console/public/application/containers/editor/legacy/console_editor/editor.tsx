@@ -176,7 +176,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
       try {
         const content = editor.getCoreEditor().getValue();
         saveCurrentTextObject(content);
-      } catch (e) {
+      } catch (e: any) {
         // Ignoring saving error
       }
     }

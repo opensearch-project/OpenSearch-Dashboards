@@ -129,7 +129,7 @@ export const useSavedVisInstance = (
           savedVisInstance,
           visEditorController,
         });
-      } catch (error) {
+      } catch (error: any) {
         const managementRedirectTarget = {
           app: 'management',
           path: `opensearch-dashboards/objects/savedVisualizations/${visualizationIdFromUrl}`,
@@ -151,7 +151,7 @@ export const useSavedVisInstance = (
               setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
             },
           })(error);
-        } catch (e) {
+        } catch (e: any) {
           toastNotifications.addWarning({
             title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
               defaultMessage: 'Failed to load the visualization',

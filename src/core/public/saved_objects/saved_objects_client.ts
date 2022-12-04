@@ -211,7 +211,7 @@ export class SavedObjectsClient {
             );
           }
         });
-      } catch (err) {
+      } catch (err: any) {
         queue.forEach((queueItem) => {
           queueItem.reject(err);
         });

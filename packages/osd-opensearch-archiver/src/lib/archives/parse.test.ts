@@ -119,7 +119,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
             createConcatStream([]),
           ] as [Readable, ...Writable[]]);
           throw new Error('should have failed');
-        } catch (err) {
+        } catch (err: any) {
           const { message } = err as Error;
           expect(message).to.contain('Unexpected number');
         }
@@ -183,7 +183,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
             createConcatStream([]),
           ] as [Readable, ...Writable[]]);
           throw new Error('should have failed');
-        } catch (err) {
+        } catch (err: any) {
           const { message } = err as Error;
           expect(message).to.contain('incorrect header check');
         }

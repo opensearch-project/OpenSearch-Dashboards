@@ -60,7 +60,7 @@ export function createRepositoryOpenSearchClient(
           return await retryCallCluster(() =>
             (client[key] as Function)(params, { maxRetries: 0, ...options })
           );
-        } catch (e) {
+        } catch (e: any) {
           throw decorateOpenSearchError(e);
         }
       },

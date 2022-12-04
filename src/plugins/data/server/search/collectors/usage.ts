@@ -61,7 +61,7 @@ export function usageProvider(
         try {
           const response = await repository.get<Usage>(SAVED_OBJECT_ID, SAVED_OBJECT_ID);
           attributes = response.attributes;
-        } catch (e) {
+        } catch (e: any) {
           doesSavedObjectExist = false;
           attributes = {
             successCount: 0,
@@ -84,7 +84,7 @@ export function usageProvider(
           } else {
             await repository.create(SAVED_OBJECT_ID, attributes, { id: SAVED_OBJECT_ID });
           }
-        } catch (e) {
+        } catch (e: any) {
           // Version conflict error, swallow
         }
       }

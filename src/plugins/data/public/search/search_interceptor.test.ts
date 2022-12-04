@@ -78,7 +78,7 @@ describe('SearchInterceptor', () => {
 
       try {
         await response.toPromise();
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBe(mockResponse);
       }
     });
@@ -98,7 +98,7 @@ describe('SearchInterceptor', () => {
 
       try {
         await response.toPromise();
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeInstanceOf(SearchTimeoutError);
         expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
       }
@@ -117,7 +117,7 @@ describe('SearchInterceptor', () => {
       };
       try {
         await searchInterceptor.search(mockRequest).toPromise();
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeInstanceOf(SearchTimeoutError);
         try {
           await searchInterceptor.search(mockRequest).toPromise();
@@ -154,7 +154,7 @@ describe('SearchInterceptor', () => {
 
       try {
         await response.toPromise();
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeInstanceOf(PainlessError);
       }
     });

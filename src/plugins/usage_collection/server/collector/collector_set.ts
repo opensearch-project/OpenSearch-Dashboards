@@ -149,7 +149,7 @@ export class CollectorSet {
             type: collector.type,
             result: await collector.fetch(callCluster, opensearchClient), // each collector must ensure they handle the response appropriately.
           };
-        } catch (err) {
+        } catch (err: any) {
           this.logger.warn(err);
           this.logger.warn(`Unable to fetch data from ${collector.type} collector`);
         }

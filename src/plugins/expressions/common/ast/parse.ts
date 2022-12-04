@@ -39,7 +39,7 @@ export function parse<E extends string, S extends 'expression' | 'argument'>(
 ): S extends 'expression' ? ExpressionAstExpression : ExpressionAstArgument {
   try {
     return parseRaw(String(expression), { startRule });
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`Unable to parse expression: ${e.message}`);
   }
 }

@@ -105,7 +105,7 @@ const getFieldValueCounts = (params: FieldValueCountsParams): FieldValueCounts =
       missing,
       buckets: counts,
     };
-  } catch (e) {
+  } catch (e: any) {
     return {
       error: e instanceof Error ? e.message : String(e),
     };

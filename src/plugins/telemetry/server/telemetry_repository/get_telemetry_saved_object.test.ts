@@ -60,7 +60,7 @@ describe('getTelemetrySavedObject', () => {
     let threw = false;
     try {
       await callGetTelemetrySavedObject(params);
-    } catch (err) {
+    } catch (err: any) {
       threw = true;
       expect(err.message).toBe(SavedObjectOtherErrorMessage);
     }

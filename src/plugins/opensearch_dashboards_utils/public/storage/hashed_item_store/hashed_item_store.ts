@@ -177,7 +177,7 @@ export class HashedItemStore implements IStorage<string, boolean> {
     try {
       this.storage.setItem(hash, item);
       return true;
-    } catch (e) {
+    } catch (e: any) {
       // If there was an error then we need to make some space for the item.
       if (this.getIndexedItems().length === 0) {
         // If there's nothing left to remove, then we've run out of space and we're trying to

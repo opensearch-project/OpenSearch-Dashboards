@@ -40,7 +40,7 @@ const readOpenSearchDashboardsPkgJson = (dir: string) => {
     if (json?.name === 'opensearch-dashboards') {
       return json;
     }
-  } catch (error) {
+  } catch (error: any) {
     if (error && error.code === 'ENOENT') {
       return;
     }

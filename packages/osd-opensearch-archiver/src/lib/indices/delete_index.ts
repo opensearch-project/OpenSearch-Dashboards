@@ -57,7 +57,7 @@ export async function deleteIndex(options: {
       const indexToDelete = indicesToDelete[i];
       stats.deletedIndex(indexToDelete);
     }
-  } catch (error) {
+  } catch (error: any) {
     if (retryIfSnapshottingCount > 0 && isDeleteWhileSnapshotInProgressError(error)) {
       stats.waitingForInProgressSnapshot(index);
       await waitForSnapshotCompletion(client, index, log);

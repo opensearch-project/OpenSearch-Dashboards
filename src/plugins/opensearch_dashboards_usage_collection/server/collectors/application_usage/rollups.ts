@@ -103,7 +103,7 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
         );
       }
     } while (toCreate.size > 0);
-  } catch (err) {
+  } catch (err: any) {
     logger.warn(`Failed to rollup transactional to daily entries`);
     logger.warn(err);
   }
@@ -124,7 +124,7 @@ async function getDailyDoc(
 ): Promise<ApplicationUsageDailyWithVersion> {
   try {
     return await savedObjectsClient.get<ApplicationUsageDaily>(SAVED_OBJECTS_DAILY_TYPE, id);
-  } catch (err) {
+  } catch (err: any) {
     if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
       return {
         attributes: {
@@ -206,7 +206,7 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
         ({ id }) => savedObjectsClient.delete(SAVED_OBJECTS_DAILY_TYPE, id) // There is no bulkDelete :(
       ),
     ]);
-  } catch (err) {
+  } catch (err: any) {
     logger.warn(`Failed to rollup daily entries to totals`);
     logger.warn(err);
   }

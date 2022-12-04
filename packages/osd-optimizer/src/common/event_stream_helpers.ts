@@ -88,7 +88,7 @@ export const summarizeEventStream = <Event, State>(
         if (eventStreamComplete) {
           subscriber.complete();
         }
-      } catch (error) {
+      } catch (error: any) {
         subscriber.error(error);
       } finally {
         processingEventBuffer = false;

@@ -114,7 +114,7 @@ export function runRoute(
             stats: chainRunner.getStats(),
           },
         });
-      } catch (err) {
+      } catch (err: any) {
         logger.error(`${err.toString()}: ${err.stack}`);
         // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
         if (err.isBoom) {

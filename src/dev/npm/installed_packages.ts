@@ -58,7 +58,7 @@ function resolveLicenses(
         throw new Error('no license field');
       }
       return [pkg.license as string];
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(
         `Unable to detect license for \`"private": true\` package at ${realPath}: ${error.message}`
       );

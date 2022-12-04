@@ -234,7 +234,7 @@ describe('IndexPattern', () => {
       expect.assertions(1);
       try {
         await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string');
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBeInstanceOf(DuplicateField);
       }
     });

@@ -240,7 +240,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         },
       ])) as SavedObjectsBatchResponse<TelemetrySavedObjectAttributes>;
       return attributes;
-    } catch (error) {
+    } catch (error: any) {
       const errorCode = error[Symbol('SavedObjectsClientErrorCode')];
       if (errorCode === 'SavedObjectsClient/notFound') {
         return null;

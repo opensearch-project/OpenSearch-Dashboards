@@ -45,7 +45,7 @@ export const createNDJSONStream = <Response>(
       try {
         const line = JSON.stringify(message);
         stream.write(`${line}${delimiter}`);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Could not serialize or stream a message.');
         logger.error(error);
       }

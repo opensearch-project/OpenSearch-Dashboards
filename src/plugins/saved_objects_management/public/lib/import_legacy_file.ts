@@ -35,7 +35,7 @@ export async function importLegacyFile(file: File) {
       const result = event.target!.result as string;
       try {
         resolve(JSON.parse(result));
-      } catch (e) {
+      } catch (e: any) {
         reject(e);
       }
     };

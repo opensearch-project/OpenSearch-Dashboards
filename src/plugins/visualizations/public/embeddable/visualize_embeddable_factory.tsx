@@ -168,7 +168,7 @@ export class VisualizeEmbeddableFactory
         await this.getAttributeService(),
         parent
       );
-    } catch (e) {
+    } catch (e: any) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
     }
@@ -233,7 +233,7 @@ export class VisualizeEmbeddableFactory
         );
       }
       return { id };
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }

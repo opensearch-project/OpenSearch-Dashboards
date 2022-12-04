@@ -69,7 +69,7 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
         });
 
         return res.ok({ body: response });
-      } catch (err) {
+      } catch (err: any) {
         return res.customError({
           statusCode: err.statusCode || 500,
           body: {

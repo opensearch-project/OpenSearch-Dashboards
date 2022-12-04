@@ -58,7 +58,7 @@ export function createSelectRangeAction(
             timeFieldName: context.data.timeFieldName,
           });
         }
-      } catch (e) {
+      } catch (e: any) {
         // eslint-disable-next-line no-console
         console.warn(`Error [ACTION_SELECT_RANGE]: can\'t extract filters from action context`);
       }

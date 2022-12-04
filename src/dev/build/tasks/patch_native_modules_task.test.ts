@@ -30,7 +30,7 @@ const { untar } = jest.requireMock('../lib/fs');
 const { gunzip } = jest.requireMock('../lib/fs');
 const { download } = jest.requireMock('../lib/download');
 
-async function setup() {
+async function setup(targetPlatforms: any) {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: false,
@@ -38,6 +38,8 @@ async function setup() {
       linux: false,
       linuxArm: false,
       darwin: false,
+      windows: false,
+      ...targetPlatforms,
     },
   });
 
@@ -56,8 +58,7 @@ beforeEach(() => {
 });
 
 it('patch native modules task downloads the correct platform package', async () => {
-  const { config, build } = await setup();
-  config.targetPlatforms.linuxArm = true;
+  const { config, build } = await setup({ linuxArm: true });
   await PatchNativeModules.run(config, log, build);
   expect(download.mock.calls.length).toBe(1);
   expect(download.mock.calls).toMatchInlineSnapshot(`
@@ -76,16 +77,14 @@ it('patch native modules task downloads the correct platform package', async () 
 });
 
 it('for .tar.gz artifact, patch native modules task unzip it via untar', async () => {
-  const { config, build } = await setup();
-  config.targetPlatforms.linuxArm = true;
+  const { config, build } = await setup({ linuxArm: true });
   await PatchNativeModules.run(config, log, build);
   expect(untar.mock.calls.length).toBe(1);
   expect(gunzip.mock.calls.length).toBe(0);
 });
 
 it('for .gz artifact, patch native modules task unzip it via gunzip', async () => {
-  const { config, build } = await setup();
-  config.targetPlatforms.linux = true;
+  const { config, build } = await setup({ linux: true });
   await PatchNativeModules.run(config, log, build);
   expect(untar.mock.calls.length).toBe(0);
   expect(gunzip.mock.calls.length).toBe(1);

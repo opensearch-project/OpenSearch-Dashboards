@@ -44,7 +44,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
           index: '.kibana',
           id: 'telemetry:telemetry',
         } as DeleteDocumentParams);
-      } catch (err) {
+      } catch (err: any) {
         if (err.statusCode !== 404) {
           throw err;
         }

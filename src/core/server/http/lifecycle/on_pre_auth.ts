@@ -113,7 +113,7 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
       throw new Error(
         `Unexpected result from OnPreAuth. Expected OnPreAuthResult or OpenSearchDashboardsResponse, but given: ${result}.`
       );
-    } catch (error) {
+    } catch (error: any) {
       log.error(error);
       return hapiResponseAdapter.toInternalError();
     }

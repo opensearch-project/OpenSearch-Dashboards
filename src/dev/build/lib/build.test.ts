@@ -42,6 +42,7 @@ const config = new Config(
     darwin: false,
     linux: false,
     linuxArm: false,
+    windows: false,
   },
   {
     version: '1.0.0',

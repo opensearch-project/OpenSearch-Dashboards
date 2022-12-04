@@ -156,7 +156,7 @@ async function getLastCommit() {
 async function getBootstrapCacheKey() {
   try {
     return await readFile(resolve(OPTIMIZER_DIR, 'target/.bootstrap-cache'), { encoding: 'utf8' });
-  } catch (error) {
+  } catch (error: any) {
     if (error?.code !== 'ENOENT') {
       throw error;
     }

@@ -188,7 +188,7 @@ export class TelemetryCollectionManagerPlugin
             }
             return encryptTelemetry(optInStats, { useProdKey: this.isDistributable });
           }
-        } catch (err) {
+        } catch (err: any) {
           this.logger.debug(`Failed to collect any opt in stats with registered collections.`);
           // swallow error to try next collection;
         }
@@ -245,7 +245,7 @@ export class TelemetryCollectionManagerPlugin
               useProdKey: this.isDistributable,
             });
           }
-        } catch (err) {
+        } catch (err: any) {
           this.logger.debug(
             `Failed to collect any usage with registered collection ${collection.title}.`
           );

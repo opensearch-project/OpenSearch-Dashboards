@@ -46,7 +46,7 @@ Object {
     let error;
     try {
       decodeVersion('[1,4]');
-    } catch (err) {
+    } catch (err: any) {
       error = err;
     }
 
@@ -69,7 +69,7 @@ Object {
     let error;
     try {
       decodeVersion('MSwy');
-    } catch (err) {
+    } catch (err: any) {
       error = err;
     }
 
@@ -92,7 +92,7 @@ Object {
     let error;
     try {
       decodeVersion('WzEsMy41XQ==');
-    } catch (err) {
+    } catch (err: any) {
       error = err;
     }
 

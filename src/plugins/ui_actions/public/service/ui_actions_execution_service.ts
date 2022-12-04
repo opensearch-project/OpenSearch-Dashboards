@@ -72,7 +72,7 @@ export class UiActionsExecutionService {
       try {
         await action.execute({ ...context, trigger });
         this.pendingTasks.delete(task);
-      } catch (e) {
+      } catch (e: any) {
         this.pendingTasks.delete(task);
         throw new Error(e);
       }
@@ -114,7 +114,7 @@ export class UiActionsExecutionService {
         trigger,
       });
       defer.resolve();
-    } catch (e) {
+    } catch (e: any) {
       defer.reject(e);
     }
   }

@@ -182,7 +182,7 @@ const observeCompiler = (
         files.map((path): [string, number | undefined] => {
           try {
             return [path, compiler.inputFileSystem.statSync(path)?.mtimeMs];
-          } catch (error) {
+          } catch (error: any) {
             if (error?.code === 'ENOENT') {
               return [path, undefined];
             }

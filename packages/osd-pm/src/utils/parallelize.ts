@@ -61,7 +61,7 @@ export async function parallelize<T>(items: T[], fn: (item: T) => Promise<void>,
           // completed all the work.
           resolve();
         }
-      } catch (error) {
+      } catch (error: any) {
         reject(error);
       }
     }

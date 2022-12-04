@@ -20,7 +20,7 @@ export const useCanSave = () => {
 };
 
 // TODO: Need to finalize the error messages
-const getErrorMsg = (isEmpty, hasNoChange, hasDraftAgg) => {
+const getErrorMsg = (isEmpty: any, hasNoChange: any, hasDraftAgg: any) => {
   const i18nTranslate = (key: string, defaultMessage: string) =>
     i18n.translate(`visBuilder.saveVisualizationTooltip.${key}`, {
       defaultMessage,

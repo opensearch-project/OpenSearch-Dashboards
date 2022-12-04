@@ -205,7 +205,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
     try {
       await renameExtractedApiPackageName(folder);
       await runApiDocumenter(folder);
-    } catch (e) {
+    } catch (e: any) {
       log.error(e);
       return false;
     }

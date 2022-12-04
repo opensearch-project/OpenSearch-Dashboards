@@ -41,7 +41,7 @@ export async function makeSampleDataUsageCollector(
   try {
     const config = await context.config.legacy.globalConfig$.pipe(first()).toPromise();
     index = config.opensearchDashboards.index;
-  } catch (err) {
+  } catch (err: any) {
     return; // OpenSearch Dashboards plugin is not enabled (test environment)
   }
   const collector = usageCollection.makeUsageCollector<TelemetryResponse>({

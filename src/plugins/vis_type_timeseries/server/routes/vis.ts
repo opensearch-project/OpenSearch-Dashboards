@@ -52,7 +52,7 @@ export const visDataRoutes = (
     async (requestContext, request, response) => {
       try {
         visPayloadSchema.validate(request.body);
-      } catch (error) {
+      } catch (error: any) {
         logFailedValidation();
         const savedObjectId =
           (typeof request.body === 'object' && (request.body as any).savedObjectId) ||
@@ -69,7 +69,7 @@ export const visDataRoutes = (
           framework
         );
         return response.ok({ body: results });
-      } catch (error) {
+      } catch (error: any) {
         return response.internalError({
           body: error.message,
         });

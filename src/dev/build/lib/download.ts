@@ -45,7 +45,7 @@ import { mkdirp } from './fs';
 function tryUnlink(path: string) {
   try {
     unlinkSync(path);
-  } catch (error) {
+  } catch (error: any) {
     if (error.code !== 'ENOENT') {
       throw error;
     }
@@ -70,7 +70,7 @@ export async function download(options: DownloadOptions): Promise<void> {
   await mkdirp(dirname(destination));
   const fileHandle = openSync(destination, 'w');
 
-  let error;
+  let error: Error | undefined;
   try {
     log.debug(`Attempting download of ${url}`, chalk.dim(sha256));
 
@@ -101,7 +101,7 @@ export async function download(options: DownloadOptions): Promise<void> {
         `Downloaded checksum ${downloadedSha256} does not match the expected sha256 checksum.`
       );
     }
-  } catch (_error) {
+  } catch (_error: any) {
     error = _error;
   } finally {
     closeSync(fileHandle);
@@ -112,7 +112,7 @@ export async function download(options: DownloadOptions): Promise<void> {
     return;
   }
 
-  log.debug(`Download failed: ${error.message}`);
+  log.debug(`Download failed: ${error.message!}`);
 
   // cleanup downloaded data and log error
   log.debug(`Deleting downloaded data at ${destination}`);

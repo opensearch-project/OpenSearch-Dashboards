@@ -65,7 +65,7 @@ export async function saveWithConfirmation(
   const { savedObjectsClient, overlays } = services;
   try {
     return await savedObjectsClient.create(savedObject.getOpenSearchType(), source, options);
-  } catch (err) {
+  } catch (err: any) {
     // record exists, confirm overwriting
     if (get(err, 'res.status') === 409) {
       const confirmMessage = i18n.translate(

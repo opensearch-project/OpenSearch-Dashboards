@@ -106,7 +106,7 @@ export function verifyMessages(
           typeof message === 'string' ? message : message.text,
           messageId
         );
-      } catch (err) {
+      } catch (err: any) {
         if (options.ignoreIncompatible) {
           localizedMessagesMap.delete(messageId);
           options.log.warning(`Incompatible translation ignored: ${err.message}`);
@@ -123,7 +123,7 @@ export function verifyMessages(
       try {
         const message = localizedMessagesMap.get(messageId)!;
         verifyICUMessage(typeof message === 'string' ? message : message?.text);
-      } catch (err) {
+      } catch (err: any) {
         if (options.ignoreMalformed) {
           localizedMessagesMap.delete(messageId);
           options.log.warning(`Malformed translation ignored (${messageId}): ${err}`);

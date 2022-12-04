@@ -24,14 +24,14 @@ export interface SearchableDropdownOption {
 
 interface SearchableDropdownProps {
   selected?: SearchableDropdownOption;
-  onChange: (selection) => void;
+  onChange: (selection: any) => void;
   options: SearchableDropdownOption[];
   loading: boolean;
   error?: Error;
   prepend: string;
   // not just the first time!
   onOpen?: () => void;
-  equality: (A, B) => boolean;
+  equality: (A: any, B: any) => boolean;
 }
 
 type DisplayError = any;
@@ -60,12 +60,12 @@ export const SearchableDropdown = ({
   };
   const closePopover = () => setIsPopoverOpen(false);
 
-  function selectNewOption(newOptions) {
+  function selectNewOption(newOptions: any) {
     // alright, the EUI Selectable is pretty ratchet
     // this is as smarmy as it is because it needs to be
 
     // first go through and count all the "checked" options
-    const selectedCount = newOptions.filter((o) => o.checked === 'on').length;
+    const selectedCount = newOptions.filter((o: any) => o.checked === 'on').length;
 
     // if the count is 0, the user just "unchecked" our selection and we can just do nothing
     if (selectedCount === 0) {
@@ -82,7 +82,7 @@ export const SearchableDropdown = ({
     }
 
     // finally, we can pick the checked option as the actual selection
-    const newSelection = newOptions.filter((o) => o.checked === 'on')[0];
+    const newSelection = newOptions.filter((o: any) => o.checked === 'on')[0];
 
     setLocalOptions(newOptions);
     setIsPopoverOpen(false);
@@ -98,7 +98,7 @@ export const SearchableDropdown = ({
     );
   }, [selected, options, equality]);
 
-  const listDisplay = (list, search) =>
+  const listDisplay = (list: any, search: any) =>
     loading ? (
       <div style={{ textAlign: 'center' }}>
         <EuiLoadingSpinner />

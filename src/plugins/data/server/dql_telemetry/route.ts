@@ -57,7 +57,7 @@ export function registerDqlTelemetryRoute(
 
       try {
         await internalRepository.incrementCounter('dql-telemetry', 'dql-telemetry', counterName);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(`Unable to increment counter: ${error}`);
         return response.customError({
           statusCode: error.status,

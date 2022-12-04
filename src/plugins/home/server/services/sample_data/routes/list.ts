@@ -74,7 +74,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
             sampleDataset.status = NOT_INSTALLED;
             return;
           }
-        } catch (err) {
+        } catch (err: any) {
           sampleDataset.status = UNKNOWN;
           sampleDataset.statusMsg = err.message;
           return;
@@ -82,7 +82,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
       }
       try {
         await context.core.savedObjects.client.get('dashboard', sampleDataset.overviewDashboard);
-      } catch (err) {
+      } catch (err: any) {
         if (context.core.savedObjects.client.errors.isNotFoundError(err)) {
           sampleDataset.status = NOT_INSTALLED;
           return;

@@ -82,7 +82,7 @@ export async function loadConfig(log: ToolingLog, plugin: Plugin): Promise<Confi
       skipInstallDependencies,
       serverSourcePatterns: ssp,
     };
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT') {
       return {
         skipInstallDependencies: false,

@@ -48,7 +48,7 @@ export const copyDirectory = promisify(ncp);
 async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
   try {
     return block(await lstat(path));
-  } catch (e) {
+  } catch (e: any) {
     if (e.code === 'ENOENT') {
       return false;
     }
@@ -108,7 +108,7 @@ async function forceCreate(src: string, dest: string, type: string) {
   try {
     // If something exists at `dest` we need to remove it first.
     await unlink(dest);
-  } catch (error) {
+  } catch (error: any) {
     if (error.code !== 'ENOENT') {
       throw error;
     }

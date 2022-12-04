@@ -55,7 +55,7 @@ export function usage(
       try {
         const internalRepository = await internalRepositoryPromise;
         await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
-      } catch (err) {
+      } catch (err: any) {
         handleIncrementError(err);
       }
     },
@@ -63,7 +63,7 @@ export function usage(
       try {
         const internalRepository = await internalRepositoryPromise;
         await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `unInstallCount`);
-      } catch (err) {
+      } catch (err: any) {
         handleIncrementError(err);
       }
     },

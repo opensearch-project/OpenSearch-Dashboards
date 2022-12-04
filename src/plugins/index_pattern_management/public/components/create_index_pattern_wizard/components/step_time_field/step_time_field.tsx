@@ -168,7 +168,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     this.setState({ isCreating: true });
     try {
       await createIndexPattern(selectedTimeField, indexPatternId);
-    } catch (error) {
+    } catch (error: any) {
       if (!this.mounted) return;
       this.setState({
         error: error instanceof Error ? error.message : String(error),

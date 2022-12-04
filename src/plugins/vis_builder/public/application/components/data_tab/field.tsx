@@ -45,7 +45,7 @@ import './field.scss';
 
 export interface FieldProps {
   field: IndexPatternField;
-  getDetails: (field) => FieldDetails;
+  getDetails: (field: any) => FieldDetails;
 }
 
 // TODO: Add field sections (Available fields, popular fields from src/plugins/discover/public/application/components/sidebar/discover_sidebar.tsx)

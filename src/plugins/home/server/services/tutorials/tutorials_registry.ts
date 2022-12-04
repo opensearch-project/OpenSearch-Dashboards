@@ -36,7 +36,6 @@ import {
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
 import { tutorialSchema } from './lib/tutorial_schema';
-import { builtInTutorials } from '../../tutorials/register';
 
 export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here

@@ -79,7 +79,7 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
       try {
         const response = await callMsearch({ body: request.body });
         return res.ok(response);
-      } catch (err) {
+      } catch (err: any) {
         return res.customError({
           statusCode: err.statusCode || 500,
           body: {

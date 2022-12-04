@@ -312,7 +312,7 @@ export class UrlPanelContent extends Component<Props, State> {
           this.setUrl
         );
       }
-    } catch (fetchError) {
+    } catch (fetchError: any) {
       if (this.mounted) {
         this.shortUrlCache = undefined;
         this.setState(

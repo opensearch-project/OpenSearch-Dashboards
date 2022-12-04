@@ -228,7 +228,7 @@ export class GithubApi {
 
     try {
       return await this.x.request<T>(options);
-    } catch (error) {
+    } catch (error: any) {
       const unableToReachGithub = isAxiosRequestError(error);
       const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
       const errorResponseLog =

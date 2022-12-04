@@ -133,7 +133,7 @@ export class ExpressionRenderHandler {
           ...this.handlers,
           uiState,
         });
-    } catch (e) {
+    } catch (e: any) {
       return this.handleRenderError(e as Error);
     }
   };

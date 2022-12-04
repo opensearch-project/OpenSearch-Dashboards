@@ -98,7 +98,7 @@ export function useOpenSearchDocSearch({
         } else {
           setStatus(OpenSearchRequestState.NotFound);
         }
-      } catch (err) {
+      } catch (err: any) {
         if (err.savedObjectId) {
           setStatus(OpenSearchRequestState.NotFoundIndexPattern);
         } else if (err.status === 404) {
