@@ -141,7 +141,7 @@ describe('DataSourceManagement: Utils.ts', () => {
     });
   });
 
-  describe('Test connection - success', () => {
+  describe('Test connection to the endpoint of the data source - success', () => {
     let http: jest.Mocked<HttpStart>;
     const mockSuccess = jest.fn().mockResolvedValue({ body: { success: true } });
     const mockError = jest.fn().mockRejectedValue(null);
@@ -149,7 +149,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       http = coreMock.createStart().http;
       http.post.mockResolvedValue(mockSuccess);
     });
-    test('Success: Test Connection on create', async () => {
+    test('Success:  Test Connection to the endpoint while creating a new data source', async () => {
       await testConnection(http, getDataSourceByIdWithoutCredential.attributes);
       expect(http.post.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -163,7 +163,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       `);
     });
 
-    test('Success: Test Connection on update', async () => {
+    test('Success: Test Connection to the endpoint while existing data source is updated', async () => {
       await testConnection(http, getDataSourceByIdWithoutCredential.attributes, 'test1234');
       expect(http.post.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -176,7 +176,7 @@ describe('DataSourceManagement: Utils.ts', () => {
         ]
       `);
     });
-    test('failure: Test connection', async () => {
+    test('failure:  Test Connection to the endpoint while creating/updating a data source', async () => {
       try {
         http.post.mockRejectedValue(mockError);
         await testConnection(http, getDataSourceByIdWithoutCredential.attributes, 'test1234');

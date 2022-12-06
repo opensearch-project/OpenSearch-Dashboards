@@ -70,7 +70,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
       expect(utils.createSingleDataSource).toHaveBeenCalled();
     });
 
-    test('should test connection successfully', async () => {
+    test('should test connection to the endpoint successfully', async () => {
       spyOn(utils, 'testConnection').and.returnValue({});
 
       await act(async () => {
@@ -82,7 +82,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
       expect(utils.testConnection).toHaveBeenCalled();
     });
 
-    test('should fail to test connection', async () => {
+    test('should fail to test connection to the endpoint', async () => {
       spyOn(utils, 'testConnection').and.throwError('error');
       await act(async () => {
         // @ts-ignore
