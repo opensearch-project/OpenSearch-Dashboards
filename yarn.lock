@@ -11797,10 +11797,10 @@ leaflet-responsive-popup@0.6.4:
   resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.6.4.tgz#b93d9368ef9f96d6dc911cf5b96d90e08601c6b3"
   integrity sha512-2D8G9aQA6NHkulDBPN9kqbUCkCpWQQ6dF0xFL11AuEIWIbsL4UC/ZPP5m8GYM0dpU6YTlmyyCh1Tz+cls5Q4dg==
 
-"leaflet-vega@npm:@amoo-miki/leaflet-vega@0.8.8":
-  version "0.8.8"
-  resolved "https://registry.yarnpkg.com/@amoo-miki/leaflet-vega/-/leaflet-vega-0.8.8.tgz#675abf37d72fbea859755e982f4fd19dea776557"
-  integrity sha512-W2gGgFDxzy/XUx+fQJfz0NYVXsKl7V+G6QywiMcOV5NEodDId9c60up7NNf+cfM7ggpo+5BuLqrKmosuGO1CsA==
+leaflet-vega@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/leaflet-vega/-/leaflet-vega-0.9.0.tgz#ea3d87221bae452dbeea7f435f4d6165d3c71eb7"
+  integrity sha512-mECYEAf4/k9JPWyWv0/OhA0vTjkRilsQas2PdDjALR1q9/SHkA056SDFNidIgQzg4/d/5NiQLpwBC7Hk4k43wA==
   dependencies:
     vega-spec-injector "^0.0.2"
 

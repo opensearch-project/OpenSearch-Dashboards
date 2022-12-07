@@ -15,6 +15,7 @@
 | Yan Zeng | [zengyan-amazon](https://github.com/zengyan-amazon) | Amazon |
 | Kristen Tian | [kristenTian](https://github.com/kristenTian) | Amazon |
 | Zhongnan Su | [zhongnansu](https://github.com/zhongnansu) | Amazon |
+| Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs) | Amazon |
 
 ## Emeritus
 
