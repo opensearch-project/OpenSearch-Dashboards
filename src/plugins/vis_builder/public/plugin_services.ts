@@ -37,3 +37,7 @@ export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContr
 export const [getTypeService, setTypeService] = createGetterSetter<TypeServiceStart>('TypeService');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+
+export const [getQueryService, setQueryService] = createGetterSetter<
+  DataPublicPluginStart['query']
+>('Query');
