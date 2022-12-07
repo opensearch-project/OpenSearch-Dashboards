@@ -26,6 +26,7 @@ exports[`EmptyState should render normally 1`] = `
         </EuiTitle>
       </EuiPageContentHeaderSection>
       <EuiButton
+        data-test-subj="createPITBtnInHeader"
         fill={true}
         iconType="plusInCircle"
       >
@@ -67,7 +68,9 @@ exports[`EmptyState should render normally 1`] = `
           No point in time objects have been created yet.
         </EuiFlexItem>
         <EuiSpacer />
-        <EuiButton>
+        <EuiButton
+          data-test-subj="createPITBtnInBody"
+        >
           <FormattedMessage
             defaultMessage="Create point in time"
             id="pointInTimeManagement.createPointInTimeButton"

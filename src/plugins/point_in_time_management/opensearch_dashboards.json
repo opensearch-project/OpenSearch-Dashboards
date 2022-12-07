@@ -1,5 +1,5 @@
 {
-  "id": "pointInTimeManagement",
+  "id": "pit",
   "version": "1.0.0",
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,

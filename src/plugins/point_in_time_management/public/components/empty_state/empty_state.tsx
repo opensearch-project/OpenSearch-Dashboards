@@ -39,7 +39,7 @@ export const EmptyState = () => {
               </h1>
             </EuiTitle>
           </EuiPageContentHeaderSection>
-          <EuiButton fill={true} iconType="plusInCircle">
+          <EuiButton fill={true} iconType="plusInCircle" data-test-subj="createPITBtnInHeader">
             <FormattedMessage
               id="pointInTimeManagement.header.createPointInTimeButton"
               defaultMessage="Create point in time"
@@ -64,7 +64,7 @@ export const EmptyState = () => {
           >
             <EuiFlexItem grow={false}>No point in time objects have been created yet.</EuiFlexItem>
             <EuiSpacer />
-            <EuiButton>
+            <EuiButton data-test-subj="createPITBtnInBody">
               <FormattedMessage
                 id="pointInTimeManagement.createPointInTimeButton"
                 defaultMessage="Create point in time"
