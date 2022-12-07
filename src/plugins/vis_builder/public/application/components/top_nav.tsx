@@ -36,6 +36,9 @@ export const TopNav = () => {
   const savedVisBuilderVis = useSavedVisBuilderVis(visualizationIdFromUrl);
   const { selected: indexPattern } = useIndexPatterns();
   const [config, setConfig] = useState<TopNavMenuData[] | undefined>();
+  const originatingApp = useTypedSelector((state) => {
+    return state.metadata.originatingApp;
+  });
 
   useEffect(() => {
     const getConfig = () => {
@@ -47,6 +50,7 @@ export const TopNav = () => {
           savedVisBuilderVis: saveStateToSavedObject(savedVisBuilderVis, rootState, indexPattern),
           saveDisabledReason,
           dispatch,
+          originatingApp,
         },
         services
       );
@@ -61,6 +65,7 @@ export const TopNav = () => {
     saveDisabledReason,
     dispatch,
     indexPattern,
+    originatingApp,
   ]);
 
   // reset validity before component destroyed
