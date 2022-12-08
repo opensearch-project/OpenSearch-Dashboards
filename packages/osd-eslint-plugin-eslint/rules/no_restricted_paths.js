@@ -58,7 +58,7 @@ function traverseToTopFolder(src, pattern) {
     const srcIdx = src.lastIndexOf(path.sep);
     src = src.slice(0, srcIdx);
   }
-  return src.replace(/\\/g, '/');
+  return src.replace(/\\/g, '/').replace(/\/$/, '');
 }
 
 function isSameFolderOrDescendent(src, imported, pattern) {
