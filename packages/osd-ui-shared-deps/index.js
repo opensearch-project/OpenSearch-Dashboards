@@ -34,10 +34,8 @@ exports.distDir = Path.resolve(__dirname, 'target');
 exports.jsDepFilenames = ['osd-ui-shared-deps.@elastic.js'];
 exports.jsFilename = 'osd-ui-shared-deps.js';
 exports.baseCssDistFilename = 'osd-ui-shared-deps.css';
-exports.lightCssDistFilename = 'osd-ui-shared-deps.v7.light.css';
-exports.lightV8CssDistFilename = 'osd-ui-shared-deps.v8.light.css';
-exports.darkCssDistFilename = 'osd-ui-shared-deps.v7.dark.css';
-exports.darkV8CssDistFilename = 'osd-ui-shared-deps.v8.dark.css';
+exports.lightCssDistFilename = 'osd-ui-shared-deps.v1.light.css';
+exports.darkCssDistFilename = 'osd-ui-shared-deps.v1.dark.css';
 exports.externals = {
   // stateful deps
   angular: '__osdSharedDeps__.Angular',

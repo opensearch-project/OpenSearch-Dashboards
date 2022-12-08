@@ -57,7 +57,6 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
-
     params.done$.subscribe({
       complete: () => {
         this.update$.complete();

@@ -46,17 +46,8 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       schema: schema.boolean(),
     },
     'theme:version': {
-      name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
-        defaultMessage: 'Theme version',
-      }),
-      value: 'v7',
-      type: 'select',
-      options: ['v7', 'v8 (beta)'],
-      description: i18n.translate('core.ui_settings.params.themeVersionText', {
-        defaultMessage: `Switch between the theme used for the current and next version of OpenSearch Dashboards, A page refresh is required for the setting to be applied.`,
-      }),
-      requiresPageReload: true,
-      schema: schema.oneOf([schema.literal('v7'), schema.literal('v8 (beta)')]),
+      value: 'v1',
+      schema: schema.oneOf([schema.literal('v1')]),
       readonly: true,
     },
   };
