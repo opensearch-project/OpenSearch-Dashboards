@@ -33,6 +33,17 @@ import { ToolingLog } from '@osd/dev-utils';
 
 const NOTICE_COMMENT_RE = /\/\*[\s\n\*]*@notice([\w\W]+?)\*\//g;
 const NEWLINE_RE = /\r?\n/g;
+const NOTICE_TEXT = `Copyright OpenSearch Contributors
+
+This product includes software, including Kibana source code,
+developed by Elasticsearch (http://www.elastic.co).
+Copyright 2009-2018 Elasticsearch B.V.
+
+This product includes software developed by The Apache Software
+Foundation (http://www.apache.org/)
+
+This product includes software developed by
+Joda.org (http://www.joda.org/).`;
 
 interface Options {
   /**
@@ -89,17 +100,10 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
       .on('end', resolve);
   });
 
-  let noticeText = '';
-  noticeText += `${productName}\n`;
-  noticeText += `Copyright ${new Date().getUTCFullYear()} OpenSearch Contributors\n\n`;
-  noticeText += `This product includes software developed by Elasticsearch (http://www.elastic.co).\n`;
-  noticeText += `Copyright 2009-2018 Elasticsearch\n\n`;
-  noticeText += `This product includes software developed by The Apache Software Foundation (http://www.apache.org/)\n\n`;
-  noticeText += `This product includes software developed by Joda.org (http://www.joda.org/).\n`;
-
+  let notice = `${productName}\n` + NOTICE_TEXT;
   for (const comment of noticeComments.sort()) {
-    noticeText += '\n---\n';
-    noticeText += comment
+    notice += '\n---\n';
+    notice += comment
       .split(NEWLINE_RE)
       .map((line) =>
         line
@@ -110,11 +114,9 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
       )
       .join('\n')
       .trim();
-    noticeText += '\n';
+    notice += '\n';
   }
-
-  noticeText += '\n';
-
-  log.debug(`notice text:\n\n${noticeText}`);
-  return noticeText;
+  notice += '\n';
+  log.debug(`notice text:\n\n${notice}`);
+  return notice;
 }
