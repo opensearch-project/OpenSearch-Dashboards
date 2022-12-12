@@ -16,7 +16,7 @@ export const getDataGridColumns = (
   cols: FormattedColumn[],
   table: Table,
   event: IInterpreterRenderHandlers['event'],
-  columnsWidth: ColumnWidth[]
+  columnWidths: ColumnWidth[]
 ) => {
   const filterBucket = (rowIndex: number, columnIndex: number, negate: boolean) => {
     const foramttedColumnId = cols[columnIndex].id;
@@ -117,7 +117,7 @@ export const getDataGridColumns = (
         ]
       : undefined;
 
-    const initialWidth = columnsWidth.find((c) => c.colIndex === colIndex);
+    const initialWidth = columnWidths.find((c) => c.colIndex === colIndex);
 
     const dataGridColumn: EuiDataGridColumn = {
       id: col.id,

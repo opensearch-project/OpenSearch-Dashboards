@@ -50,8 +50,7 @@ export const TableVisComponent = ({
     return (({ rowIndex, columnId }) => {
       const rawContent = sortedRows[rowIndex][columnId];
       const colIndex = columns.findIndex((col) => col.id === columnId);
-      const column = columns[colIndex];
-      const htmlContent = column.formatter.convert(rawContent, 'html');
+      const htmlContent = columns[colIndex].formatter.convert(rawContent, 'html');
       const formattedContent = (
         /*
          * Justification for dangerouslySetInnerHTML:
@@ -119,8 +118,7 @@ export const TableVisComponent = ({
 
   const footerCellValue = visConfig.showTotal
     ? ({ columnId }: { columnId: any }) => {
-        const colIndex = columns.findIndex((col) => col.id === columnId);
-        return columns[colIndex]?.formattedTotal || null;
+        return columns.find((col) => col.id === columnId)?.formattedTotal || null;
       }
     : undefined;
 

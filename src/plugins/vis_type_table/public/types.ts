@@ -80,5 +80,5 @@ export interface TableUiState {
   sort: SortColumn;
   setSort: (sort: SortColumn) => void;
   width: ColumnWidth[];
-  setWidth: (columnsWidth: ColumnWidth[]) => void;
+  setWidth: (columnWidths: ColumnWidth[]) => void;
 }
