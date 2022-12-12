@@ -14,6 +14,8 @@ import { DataPublicPluginStart } from '../../data/public';
 import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { AppMountParameters, CoreStart, ToastsStart, ScopedHistory } from '../../../core/public';
+import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
+import { DataPublicPluginSetup } from '../../data/public';
 
 export type VisBuilderSetup = TypeServiceSetup;
 export interface VisBuilderStart extends TypeServiceStart {
@@ -23,6 +25,7 @@ export interface VisBuilderStart extends TypeServiceStart {
 export interface VisBuilderPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
+  data: DataPublicPluginSetup;
 }
 export interface VisBuilderPluginStartDependencies {
   embeddable: EmbeddableStart;
@@ -45,6 +48,8 @@ export interface VisBuilderServices extends CoreStart {
   history: History;
   embeddable: EmbeddableStart;
   scopedHistory: ScopedHistory;
+  osdUrlStateStorage: IOsdUrlStateStorage;
+  dashboard: DashboardStart;
 }
 
 export interface ISavedVis {
