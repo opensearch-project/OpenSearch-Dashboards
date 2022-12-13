@@ -29,7 +29,6 @@
  */
 
 import { getUrlOrigin } from '@osd/std';
-import { URL } from 'url';
 import { IBasePath } from '../../http';
 import { App, ParsedAppUrl } from '../types';
 

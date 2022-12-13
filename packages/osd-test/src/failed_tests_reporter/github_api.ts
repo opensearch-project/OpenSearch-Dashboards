@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import { URL } from 'url';
-
 import Axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
 import parseLinkHeader from 'parse-link-header';
 import { ToolingLog, isAxiosResponseError, isAxiosRequestError } from '@osd/dev-utils';

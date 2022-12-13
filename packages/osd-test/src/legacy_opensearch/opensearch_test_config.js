@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { URL } from 'url';
 import pkg from '../../../../package.json';
 import { adminTestUser } from '../osd';
 

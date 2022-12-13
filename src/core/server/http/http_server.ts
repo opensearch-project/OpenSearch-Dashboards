@@ -30,7 +30,6 @@
 
 import { Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
-import { URL } from 'url';
 import uuid from 'uuid';
 
 import { Logger, LoggerFactory } from '../logging';

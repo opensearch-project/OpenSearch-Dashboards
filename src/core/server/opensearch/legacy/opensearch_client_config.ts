@@ -32,7 +32,6 @@ import { ConfigOptions } from 'elasticsearch';
 import { cloneDeep } from 'lodash';
 import { Duration } from 'moment';
 import { checkServerIdentity } from 'tls';
-import { URL } from 'url';
 import { pick } from '@osd/std';
 import { Logger } from '../../logging';
 import { OpenSearchConfig } from '../opensearch_config';

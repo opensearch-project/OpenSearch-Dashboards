@@ -32,7 +32,6 @@ import { set as lodashSet } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
-import { URL } from 'url';
 
 import { getConfigPath } from '@osd/utils';
 import { IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE } from '../../legacy/utils';

@@ -29,7 +29,6 @@
  */
 
 import { Request, ResponseToolkit, Server } from '@hapi/hapi';
-import { URL } from 'url';
 
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { URL } from 'url';
 import { Request } from '@hapi/hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';

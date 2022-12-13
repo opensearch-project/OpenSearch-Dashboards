@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { URL } from 'url';
 import expect from '@osd/expect';
 import {
   AppNavLinkStatus,

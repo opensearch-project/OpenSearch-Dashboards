@@ -29,7 +29,6 @@
  */
 
 import { Agent, IncomingMessage } from 'http';
-import { URL } from 'url';
 import { pick, trimStart, trimEnd } from 'lodash';
 
 import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';

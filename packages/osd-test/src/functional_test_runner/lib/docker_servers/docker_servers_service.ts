@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { URL } from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs/operators';

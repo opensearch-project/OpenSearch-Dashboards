@@ -31,7 +31,6 @@
 import _ from 'lodash';
 import http from 'http';
 import https from 'https';
-import { URL } from 'url';
 
 import { OpenSearchConfigForProxy } from '../types';
 

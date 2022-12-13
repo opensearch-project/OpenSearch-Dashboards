@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { URL } from 'url';
 import Https from 'https';
 import Axios, { AxiosResponse } from 'axios';
 

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { URL } from 'url';
 import expect from '@osd/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_app_status/public/types';

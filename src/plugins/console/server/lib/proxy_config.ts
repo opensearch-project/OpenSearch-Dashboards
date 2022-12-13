@@ -29,7 +29,6 @@
  */
 
 import { values } from 'lodash';
-import { URL } from 'url';
 import { Agent as HttpsAgent, AgentOptions } from 'https';
 
 import { WildcardMatcher } from './wildcard_matcher';

@@ -30,7 +30,6 @@
 
 import { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
-import { URL } from 'url';
 
 import { schema } from './schema';
 

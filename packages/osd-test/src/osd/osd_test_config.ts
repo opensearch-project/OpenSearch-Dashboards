@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { URL } from 'url';
 import { opensearchDashboardsTestUser } from './users';
 
 export const osdTestConfig = new (class OsdTestConfig {

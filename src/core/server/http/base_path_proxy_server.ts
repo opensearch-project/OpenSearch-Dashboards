@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { URL } from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 
 import apm from 'elastic-apm-node';

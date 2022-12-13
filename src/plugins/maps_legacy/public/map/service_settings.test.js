@@ -34,8 +34,6 @@ jest.mock('../opensearch_dashboards_services', () => ({
   },
 }));
 
-import { URL } from 'url';
-
 import EMS_FILES from '../__tests__/map/ems_mocks/sample_files.json';
 import EMS_TILES from '../__tests__/map/ems_mocks/sample_tiles.json';
 import EMS_STYLE_ROAD_MAP_BRIGHT from '../__tests__/map/ems_mocks/sample_style_bright';
