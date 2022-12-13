@@ -8,6 +8,8 @@ import {
   EuiButton,
   EuiFieldPassword,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPageContent,
@@ -37,6 +39,7 @@ import { isValidUrl } from '../../../utils';
 export interface CreateDataSourceProps {
   existingDatasourceNamesList: string[];
   handleSubmit: (formValues: DataSourceAttributes) => void;
+  handleTestConnection: (formValues: DataSourceAttributes) => void;
 }
 export interface CreateDataSourceState {
   /* Validation */
@@ -179,12 +182,7 @@ export class CreateDataSourceForm extends React.Component<
 
   onClickCreateNewDataSource = () => {
     if (this.isFormValid()) {
-      const formValues: DataSourceAttributes = {
-        title: this.state.title,
-        description: this.state.description,
-        endpoint: this.state.endpoint,
-        auth: { ...this.state.auth },
-      };
+      const formValues: DataSourceAttributes = this.getFormValues();
 
       /* Remove credentials object for NoAuth */
       if (this.state.auth.type === AuthType.NoAuth) {
@@ -193,6 +191,22 @@ export class CreateDataSourceForm extends React.Component<
       /* Submit */
       this.props.handleSubmit(formValues);
     }
+  };
+
+  onClickTestConnection = () => {
+    if (this.isFormValid()) {
+      /* Submit */
+      this.props.handleTestConnection(this.getFormValues());
+    }
+  };
+
+  getFormValues = (): DataSourceAttributes => {
+    return {
+      title: this.state.title,
+      description: this.state.description,
+      endpoint: this.state.endpoint,
+      auth: { ...this.state.auth, credentials: { ...this.state.auth.credentials } },
+    };
   };
 
   /* Render methods */
@@ -409,19 +423,40 @@ export class CreateDataSourceForm extends React.Component<
             : null}
 
           <EuiSpacer size="xl" />
-          {/* Create Data Source button*/}
-          <EuiButton
-            type="submit"
-            fill={this.isFormValid()}
-            disabled={!this.isFormValid()}
-            onClick={this.onClickCreateNewDataSource}
-            data-test-subj="createDataSourceButton"
-          >
-            <FormattedMessage
-              id="dataSourcesManagement.createDataSource.createButton"
-              defaultMessage="Create data source connection"
-            />
-          </EuiButton>
+          <EuiFormRow>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                {/* Test Connection button*/}
+                <EuiButton
+                  type="submit"
+                  fill={false}
+                  disabled={!this.isFormValid()}
+                  onClick={this.onClickTestConnection}
+                  data-test-subj="createDataSourceTestConnectionButton"
+                >
+                  <FormattedMessage
+                    id="dataSourcesManagement.createDataSource.testConnectionButton"
+                    defaultMessage="Test Connection"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              {/* Create Data Source button*/}
+              <EuiFlexItem>
+                <EuiButton
+                  type="submit"
+                  fill={this.isFormValid()}
+                  disabled={!this.isFormValid()}
+                  onClick={this.onClickCreateNewDataSource}
+                  data-test-subj="createDataSourceButton"
+                >
+                  <FormattedMessage
+                    id="dataSourcesManagement.createDataSource.createButton"
+                    defaultMessage="Create data source connection"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
         </EuiForm>
       </EuiPageContent>
     );

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientContract } from 'src/core/public';
-import { DataSourceTableItem, DataSourceAttributes } from '../types';
+import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
+import { AuthType, DataSourceAttributes, DataSourceTableItem } from '../types';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -77,6 +77,25 @@ export async function deleteMultipleDataSources(
       await deleteDataSourceById(selectedDataSource.id, savedObjectsClient);
     })
   );
+}
+
+export async function testConnection(
+  http: HttpStart,
+  { endpoint, auth: { type, credentials } }: DataSourceAttributes,
+  dataSourceID?: string
+) {
+  const query: any = {
+    id: dataSourceID || '',
+    endpoint,
+    auth: {
+      type,
+      credentials: type === AuthType.NoAuth ? null : { ...credentials },
+    },
+  };
+
+  await http.post(`/internal/data-source-management/validate`, {
+    body: JSON.stringify(query),
+  });
 }
 
 export const isValidUrl = (endpoint: string) => {

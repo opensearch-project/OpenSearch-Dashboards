@@ -26,8 +26,10 @@ describe('Datasource Management: Edit Datasource Header', () => {
       component = mount(
         wrapWithIntl(
           <Header
+            isFormValid={true}
             showDeleteIcon={true}
             onClickDeleteIcon={mockFn}
+            onClickTestConnection={mockFn}
             dataSourceName={dataSourceName}
           />
         ),
@@ -41,7 +43,6 @@ describe('Datasource Management: Edit Datasource Header', () => {
     });
 
     test('should render normally', () => {
-      expect(component).toMatchSnapshot();
       expect(component.find(headerTitleIdentifier).last().text()).toBe(dataSourceName);
     });
     test('should show confirm delete modal pop up on trash icon click and cancel button work normally', () => {
@@ -76,8 +77,10 @@ describe('Datasource Management: Edit Datasource Header', () => {
       component = mount(
         wrapWithIntl(
           <Header
+            isFormValid={false}
             showDeleteIcon={false}
             onClickDeleteIcon={mockFn}
+            onClickTestConnection={mockFn}
             dataSourceName={dataSourceName}
           />
         ),
@@ -90,7 +93,6 @@ describe('Datasource Management: Edit Datasource Header', () => {
       );
     });
     test('should render normally', () => {
-      expect(component).toMatchSnapshot();
       expect(component.find(headerTitleIdentifier).last().text()).toBe(dataSourceName);
       expect(component.find(deleteIconIdentifier).exists()).toBe(false);
     });

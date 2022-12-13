@@ -29,7 +29,7 @@ export class OpenSearchClientPool {
 
   constructor(private logger: Logger) {}
 
-  public async setup(config: DataSourcePluginConfigType): Promise<OpenSearchClientPoolSetup> {
+  public setup(config: DataSourcePluginConfigType): OpenSearchClientPoolSetup {
     const logger = this.logger;
     const { size } = config.clientPool;
 

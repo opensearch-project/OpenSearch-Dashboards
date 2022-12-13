@@ -85,7 +85,6 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
     });
 
     test('should render normally', () => {
-      expect(component).toMatchSnapshot();
       expect(component.find(notFoundIdentifier).exists()).toBe(false);
       expect(utils.getDataSources).toHaveBeenCalled();
       expect(utils.getDataSourceById).toHaveBeenCalled();
@@ -135,6 +134,15 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       });
       component.update();
       expect(utils.deleteDataSourceById).toHaveBeenCalled();
+    });
+    test('should test connection', () => {
+      spyOn(utils, 'testConnection');
+      // @ts-ignore
+      component.find('EditDataSourceForm').first().prop('handleTestConnection')(
+        mockDataSourceAttributesWithAuth
+      );
+      component.update();
+      expect(utils.testConnection).toHaveBeenCalled();
     });
   });
 });
