@@ -109,7 +109,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       const opensearchHosts = (
         (customOpenSearchHosts.length > 0 && customOpenSearchHosts) || ['https://localhost:9200']
       ).map((hostUrl) => {
-        const parsedUrl = new URL(hostUrl);
+        const parsedUrl = new URL('', hostUrl);
         if (parsedUrl.hostname !== 'localhost') {
           throw new Error(
             `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`

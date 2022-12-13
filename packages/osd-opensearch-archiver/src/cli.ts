@@ -71,7 +71,7 @@ export function runCli() {
         throw createFlagError('--opensearch-url must be a string');
       }
       if (!opensearchUrl && config) {
-        opensearchUrl = config.get('servers.opensearch').toString();
+        opensearchUrl = new URL('', config.get('servers.opensearch')).toString();
       }
       if (!opensearchUrl) {
         throw createFlagError('--opensearch-url or --config must be defined');

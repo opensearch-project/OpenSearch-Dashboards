@@ -35,7 +35,7 @@ export async function shortenUrl(
   absoluteUrl: string,
   { basePath, post }: { basePath: string; post: HttpStart['post'] }
 ) {
-  const parsedUrl = new URL(absoluteUrl);
+  const parsedUrl = new URL('', absoluteUrl);
   if (!parsedUrl || !parsedUrl.pathname) {
     return;
   }

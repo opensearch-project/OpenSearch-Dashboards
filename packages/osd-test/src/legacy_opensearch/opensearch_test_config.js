@@ -55,7 +55,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
   getUrlParts() {
     // Allow setting one complete TEST_OPENSEARCH_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_URL) {
-      return new URL(process.env.TEST_OPENSEARCH_URL);
+      return new URL('', process.env.TEST_OPENSEARCH_URL);
     }
     const username = process.env.TEST_OPENSEARCH_USERNAME || adminTestUser.username;
     const password = process.env.TEST_OPENSEARCH_PASSWORD || adminTestUser.password;

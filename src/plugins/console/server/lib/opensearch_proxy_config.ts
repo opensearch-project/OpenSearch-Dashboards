@@ -35,7 +35,7 @@ import https from 'https';
 import { OpenSearchConfigForProxy } from '../types';
 
 const createAgent = (legacyConfig: OpenSearchConfigForProxy): http.Agent | https.Agent => {
-  const target = new URL(_.head(legacyConfig.hosts)!);
+  const target = new URL('', _.head(legacyConfig.hosts)!);
   if (!/^https/.test(target.protocol || '')) return new http.Agent();
 
   const agentOptions: https.AgentOptions = {};

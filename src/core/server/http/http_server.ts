@@ -293,7 +293,7 @@ export class HttpServer {
       this.server.ext('onRequest', (request, h) => {
         const { referrer } = request.info;
         if (referrer !== '') {
-          const { hostname } = new URL(referrer);
+          const { hostname } = new URL('', referrer);
           if (!hostname || !list.includes(hostname)) {
             request.info.acceptEncoding = '';
           }

@@ -183,7 +183,7 @@ export class UrlPanelContent extends Component<Props, State> {
 
     const url = this.getSnapshotUrl();
 
-    const parsedUrl = new URL(url);
+    const parsedUrl = new URL('', url);
     if (!parsedUrl || !parsedUrl.hash) {
       return;
     }

@@ -39,7 +39,7 @@ declare global {
 }
 
 const getPathWithHash = (absoluteUrl: string) => {
-  const parsed = new URL(absoluteUrl);
+  const parsed = new URL('', absoluteUrl);
   return parsed.toString().substring(parsed.origin.length);
 };
 

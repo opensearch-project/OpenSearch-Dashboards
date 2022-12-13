@@ -56,7 +56,7 @@ export function _checkFilePathDeprecation(sourceUrl, logger) {
 export function _downloadSingle(settings, logger, sourceUrl) {
   let urlInfo;
   try {
-    urlInfo = new URL(sourceUrl);
+    urlInfo = new URL('', sourceUrl);
   } catch (e) {
     return Promise.reject(new UnsupportedProtocolError());
   }

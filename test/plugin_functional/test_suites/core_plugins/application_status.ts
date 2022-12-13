@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await navigateToApp('app_status');
       expect(await testSubjects.exists('appStatusApp')).to.eql(true);
       const currentUrl = await browser.getCurrentUrl();
-      expect(new URL(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
+      expect(new URL('', currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
     });
 
     it('can change the state of the currently mounted app', async () => {

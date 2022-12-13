@@ -38,7 +38,7 @@ export const osdTestConfig = new (class OsdTestConfig {
   getUrlParts() {
     // allow setting one complete TEST_OPENSEARCH_DASHBOARDS_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_DASHBOARDS_URL) {
-      return new URL(process.env.TEST_OPENSEARCH_DASHBOARDS_URL);
+      return new URL('', process.env.TEST_OPENSEARCH_DASHBOARDS_URL);
     }
     const username =
       process.env.TEST_OPENSEARCH_DASHBOARDS_USERNAME || opensearchDashboardsTestUser.username;

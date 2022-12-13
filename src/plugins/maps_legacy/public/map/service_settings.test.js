@@ -119,7 +119,7 @@ describe('service_settings (FKA tile_map test)', function () {
         '<a rel="noreferrer noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> | <a rel="noreferrer noopener" href="https://openmaptiles.org">OpenMapTiles</a> | <a rel="noreferrer noopener" href="https://www.maptiler.com">MapTiler</a> | <a rel="noreferrer noopener" href="https://opensearch.org/docs/latest/dashboards/maptiles/">&lt;iframe id=\'iframe\' style=\'position:fixed;height: 40%;width: 100%;top: 60%;left: 5%;right:5%;border: 0px;background:white;\' src=\'http://256.256.256.256\'&gt;&lt;/iframe&gt;</a>'
       );
 
-      const urlObject = new URL(attrs.url);
+      const urlObject = new URL('', attrs.url);
       expect(urlObject.hostname).toEqual('tiles.foobar');
       expect(urlObject.searchParams.get('my_app_name')).toEqual('opensearchDashboards');
       expect(urlObject.searchParams.get('opensearch_tile_service_tos')).toEqual('agree');
@@ -141,7 +141,7 @@ describe('service_settings (FKA tile_map test)', function () {
       let serviceSettings;
       async function assertQuery(expected) {
         const attrs = await serviceSettings.getAttributesForTMSLayer(tilemapServices[0]);
-        const urlObject = new URL(attrs.url);
+        const urlObject = new URL('', attrs.url);
         Object.keys(expected).forEach((key) => {
           expect(urlObject.searchParams.get(key)).toEqual(expected[key]);
         });
@@ -315,7 +315,7 @@ describe('service_settings (FKA tile_map test)', function () {
       const assertions = fileLayers.map(async function (fileLayer) {
         expect(fileLayer.origin).toEqual(ORIGIN.EMS);
         const fileUrl = await serviceSettings.getUrlForRegionLayer(fileLayer);
-        const urlObject = new URL(fileUrl);
+        const urlObject = new URL('', fileUrl);
         Object.keys({ foo: 'bar', opensearch_tile_service_tos: 'agree' }).forEach((key) => {
           expect(typeof urlObject.searchParams.get(key)).toEqual('string');
         });

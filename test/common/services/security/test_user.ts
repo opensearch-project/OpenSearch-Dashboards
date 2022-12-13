@@ -114,7 +114,7 @@ export async function createTestUserService(
 export function TestUserSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const opensearchDashboardsServerConfig = config.get('servers.opensearchDashboards');
-  const url = new URL(opensearchDashboardsServerConfig);
+  const url = new URL('', opensearchDashboardsServerConfig);
   url.username = TEST_USER_NAME;
   url.password = TEST_USER_PASSWORD;
 

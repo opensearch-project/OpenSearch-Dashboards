@@ -130,7 +130,7 @@ export function parseOpenSearchClientConfig(
   if (Array.isArray(config.hosts)) {
     const needsAuth = auth !== false && config.username && config.password;
     opensearchClientConfig.hosts = config.hosts.map((nodeUrl: string) => {
-      const uri = new URL(nodeUrl);
+      const uri = new URL('', nodeUrl);
 
       const httpsURI = uri.protocol === 'https:';
       const httpURI = uri.protocol === 'http:';
