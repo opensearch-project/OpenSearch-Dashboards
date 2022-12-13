@@ -46,9 +46,6 @@ describe('Datasource Management: Create Datasource Wizard', () => {
       });
       component.update();
     });
-    test('should render normally', () => {
-      expect(component).toMatchSnapshot();
-    });
     test('should create datasource successfully', async () => {
       spyOn(utils, 'createSingleDataSource').and.returnValue({});
 
@@ -71,6 +68,30 @@ describe('Datasource Management: Create Datasource Wizard', () => {
       });
       component.update();
       expect(utils.createSingleDataSource).toHaveBeenCalled();
+    });
+
+    test('should test connection to the endpoint successfully', async () => {
+      spyOn(utils, 'testConnection').and.returnValue({});
+
+      await act(async () => {
+        // @ts-ignore
+        await component.find('CreateDataSourceForm').first().prop('handleTestConnection')(
+          mockDataSourceAttributesWithAuth
+        );
+      });
+      expect(utils.testConnection).toHaveBeenCalled();
+    });
+
+    test('should fail to test connection to the endpoint', async () => {
+      spyOn(utils, 'testConnection').and.throwError('error');
+      await act(async () => {
+        // @ts-ignore
+        await component.find('CreateDataSourceForm').first().prop('handleTestConnection')(
+          mockDataSourceAttributesWithAuth
+        );
+      });
+      component.update();
+      expect(utils.testConnection).toHaveBeenCalled();
     });
   });
   describe('case2: should fail to load resources', () => {
@@ -96,7 +117,6 @@ describe('Datasource Management: Create Datasource Wizard', () => {
       component.update();
     });
     test('should not render component and go back to listing page', () => {
-      expect(component).toMatchSnapshot();
       expect(history.push).toBeCalledWith('');
     });
   });
