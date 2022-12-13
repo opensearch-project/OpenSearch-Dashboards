@@ -15,6 +15,7 @@ import {
   deleteDataSourceById,
   getDataSourceById,
   getDataSources,
+  testConnection,
   updateDataSourceById,
 } from '../utils';
 import { getEditBreadcrumbs } from '../breadcrumbs';
@@ -39,6 +40,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const {
     savedObjects,
     setBreadcrumbs,
+    http,
     notifications: { toasts },
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const dataSourceID: string = props.match.params.id;
@@ -110,6 +112,11 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     }
   };
 
+  /* Handle Test connection */
+  const handleTestConnection = async (attributes: DataSourceAttributes) => {
+    await testConnection(http, attributes, dataSourceID);
+  };
+
   /* Render the edit wizard */
   const renderContent = () => {
     if (!isLoading && (!dataSource || !dataSource.id)) {
@@ -124,6 +131,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
             onDeleteDataSource={handleDelete}
             handleSubmit={handleSubmit}
             displayToastMessage={handleDisplayToastMessage}
+            handleTestConnection={handleTestConnection}
           />
         ) : null}
         {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}
