@@ -8,12 +8,16 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
+import {
+  DataSourceAttributes,
+  DataSourceManagementContext,
+  DataSourceTableItem,
+  ToastMessageItem,
+} from '../../types';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CreateDataSourceForm } from './components/create_form';
-import { createSingleDataSource, getDataSources } from '../utils';
+import { createSingleDataSource, getDataSources, testConnection } from '../utils';
 import { LoadingMask } from '../loading_mask';
-import { DataSourceAttributes } from '../../types';
 
 type CreateDataSourceWizardProps = RouteComponentProps;
 
@@ -24,6 +28,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   const {
     savedObjects,
     setBreadcrumbs,
+    http,
     notifications: { toasts },
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
@@ -74,8 +79,34 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     }
   };
 
-  const handleDisplayToastMessage = ({ id, defaultMessage }: ToastMessageItem) => {
-    toasts.addDanger(i18n.translate(id, { defaultMessage }));
+  /* Handle submit - create data source*/
+  const handleTestConnection = async (attributes: DataSourceAttributes) => {
+    setIsLoading(true);
+    try {
+      await testConnection(http, attributes);
+      handleDisplayToastMessage({
+        id: 'dataSourcesManagement.createDataSource.testConnectionSuccessMsg',
+        defaultMessage:
+          'Connecting to the endpoint using the provided authentication method was successful.',
+        success: true,
+      });
+    } catch (e) {
+      handleDisplayToastMessage({
+        id: 'dataSourcesManagement.createDataSource.testConnectionFailMsg',
+        defaultMessage:
+          'Failed Connecting to the endpoint using the provided authentication method.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDisplayToastMessage = ({ id, defaultMessage, success }: ToastMessageItem) => {
+    if (success) {
+      toasts.addSuccess(i18n.translate(id, { defaultMessage }));
+    } else {
+      toasts.addDanger(i18n.translate(id, { defaultMessage }));
+    }
   };
 
   /* Render the creation wizard */
@@ -84,6 +115,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
       <>
         <CreateDataSourceForm
           handleSubmit={handleSubmit}
+          handleTestConnection={handleTestConnection}
           existingDatasourceNamesList={existingDatasourceNamesList}
         />
         {isLoading ? <LoadingMask /> : null}
