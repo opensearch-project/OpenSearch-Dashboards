@@ -248,6 +248,10 @@ describe('VegaParser.parseSchema', () => {
     check('https://vega.github.io/schema/vega-lite/v5.json', true, 0)
   );
   test(
+    'should not warn on older vega-lite version',
+    check('https://vega.github.io/schema/vega-lite/v4.json', true, 0)
+  );
+  test(
     'should warn on vega-lite version too new to be supported',
     check('https://vega.github.io/schema/vega-lite/v6.json', true, 1)
   );
