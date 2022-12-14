@@ -1,36 +1,44 @@
 # Data persistence
 There are four plugins that currently have data persistence ability in opensearch dashboard: dashboard, discover, timeline, visualize, and vis-builder. They are using the following services and mechanisms from opensearch_dashboard_utils plugin to achieve data persistence.
 
-State syncing utils are a set of helpers to sync application state with URL or browser storage(when turning state: storeInSessionStore on in advanced setting, in case of overflowed URL):
-1. syncState(): subscribe to state changes and push them to state storage; subscribe to state storage and push them to state container
-2. storages that are compatible with syncState()
-* OsdUrlStateStorage: serialize state and persist it to URL's query param in rison format; listen for state change in URL and update them back to state
-* SessionStorageStateStorage: serialize state and persist it to URL's query param in session storage
+State syncing utils are a set of helpers to sync application state with URL or browser storage(when turning state: `storeInSessionStore` on in advanced setting, in case of overflowed URL):
+1. `syncState()`: subscribe to state changes and push them to state storage; subscribe to state storage and push them to state container
+2. storages that are compatible with `syncState()`
+* `OsdUrlStateStorage`: serialize state and persist it to URL's query param in rison format; listen for state change in URL and update them back to state
+* `SessionStorageStateStorage`: serialize state and persist it to URL's query param in session storage
 3. state containers: redux-store like objects to help manage states and provide a central place to store state
 
 # Two type of persistence
 There are two parts for data persistence: 
-1. app state (example from visualization plugin)
-    1. app state storage key: '_a'
-    2. app state is persistent only within the specific app, values will persist when we refresh the page, values will not be persist when we navigate away from the app
-    3. for visualize app, the params are:
-       1. query
+1. App state (example from visualization plugin)
+    1. App state storage key: '_a'
+    2. App state is persistent only within the specific app, values will persist when we refresh the page, values will not be persist when we navigate away from the app
+    3. For visualize app, the params are:
+       1. Query
+
        ![img](./img/app_query.png)
 
-       2. app filters 
+       2. App filters 
+
        ![img](./img/app_filter.png)
        
-       3. vis & ui state
+       3. Vis & UI state
+
        ![img](./img/visualization.png)
-2. global query state 
-    1. global state storage key: '_g'
-    2. global query state is persistent across the entire application, values will persist when we refresh the page, or when we navigate across visualize, discover, timeline or dashboard page. For example, if we set time range to last 24 hours, and refresh intervals to every 30 min, the same time range and refresh intervals will be applied if we navigate to any of the other pages.
-    3. params:
+2. Global query state 
+    1. Global state storage key: '_g'
+    2. Global query state is persistent across the entire application, values will persist when we refresh the page, or when we navigate across visualize, discover, timeline or dashboard page. For example, if we set time range to last 24 hours, and refresh intervals to every 30 min, the same time range and refresh intervals will be applied if we navigate to any of the other pages.
+    3. Params:
        1. global filters (Select `pin filter` to make the filters global)
+
        ![img](./img/global_filter.png)
+
        2. refresh intervals
+
        ![img](./img/refresh_interval.png)
+
        3. time range
+
        ![img](./img/time_range.png)
 
 # URL breakdown & example
@@ -40,33 +48,33 @@ There are two parts for data persistence:
 
 1. In plugin.ts, during plugin setup, call `createOsdUrlTracker()`, listen to history changes and global state changes, then update the nav link URL. This also returns function such as `onMountApp()`, `onUnmountedApp()`
     ```ts
-    const {
-    appMounted,
-    appUnMounted,
-    ...
-    } = createOsdUrlTracker({
-    baseUrl: core.http.basePath.prepend('/app/visualize'),
-    defaultSubUrl: '#/',
-    storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
-    navLinkUpdater$: this.appStateUpdater,
-    stateParams: [
-    {
-    osdUrlKey: '_g',
-    stateUpdate$: data.query.state$.pipe(
-    filter(
-    ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-    ),
-    map(({ state }) => ({
-    ...state,
-    filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-    }))
-    ),
-    },
-    ],
-    ....
+            const {
+        appMounted,
+        appUnMounted,
+        ...
+        } = createOsdUrlTracker({
+        baseUrl: core.http.basePath.prepend('/app/visualize'),
+        defaultSubUrl: '#/',
+        storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
+        navLinkUpdater$: this.appStateUpdater,
+        stateParams: [
+        {
+            osdUrlKey: '_g',
+            stateUpdate$: data.query.state$.pipe(
+            filter(
+                ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            ),
+            map(({ state }) => ({
+                ...state,
+                filters: state.filters?.filter(opensearchFilters.isFilterPinned),
+            }))
+            ),
+        },
+        ],
+        ....
     ```
 
-    * when we enter the app and app is mounted, it initialize nav link by getting previously stored URL from storage instance: const storedUrl = storageInstance.getItem(storageKey). (Storage instance is a browser wide session storage instance.) Then it unsubscribes to global state$ and subscribes to URL$. The current app actively listens to history location changes. If there are changes, set the updated URL as the active URL
+    * When we enter the app and app is mounted, it initialize nav link by getting previously stored URL from storage instance: const storedUrl = storageInstance.getItem(storageKey). (Storage instance is a browser wide session storage instance.) Then it unsubscribes to global state$ and subscribes to URL$. The current app actively listens to history location changes. If there are changes, set the updated URL as the active URL
 
     ```ts
       function onMountApp() {
@@ -81,7 +89,7 @@ There are two parts for data persistence:
          }
     ```
 
-    * when we are leaving the app and app is unmounted, unsubscribe URL$ and subscribe to global state$. If the global states are changed in another app, the global state listener will still get triggered in this app even though it is unmounted, it will set the updated URL in storage instance, so next time when we enter the app, it gets the URL from the storage instance thus the global state will persist.
+    * When we are leaving the app and app is unmounted, unsubscribe URL$ and subscribe to global state$. If the global states are changed in another app, the global state listener will still get triggered in this app even though it is unmounted, it will set the updated URL in storage instance, so next time when we enter the app, it gets the URL from the storage instance thus the global state will persist.
 
     ```ts
         function onUnmountApp() {
@@ -99,7 +107,7 @@ There are two parts for data persistence:
     ```
 
 2. In app.tsx, call syncQueryStateWithUrl(query, osdUrlStateStorage) to sync '_g' portion of url with global state params
-    * when we first enter the app, there is no initial state in the URL, then we initialize and put the _g key into url
+    * When we first enter the app, there is no initial state in the URL, then we initialize and put the _g key into url
 
     ```ts
         if (!initialStateFromUrl) {
@@ -109,7 +117,7 @@ There are two parts for data persistence:
         }
     ```
 
-    * when we enter the app, if there is some initial state in the URL(the previous saved URL in storageInstance), then we retrieve global state from '_g' URL
+    * When we enter the app, if there is some initial state in the URL(the previous saved URL in storageInstance), then we retrieve global state from '_g' URL
 
     ```ts
       // retrieve current state from `_g` url
@@ -146,7 +154,7 @@ There are two parts for data persistence:
 
 # App state persistence
 
-1. we use `useVisualizeAppState()` hook to instantiate the visualize app state container, which is in sync with '_a' URL
+1. We use `useVisualizeAppState()` hook to instantiate the visualize app state container, which is in sync with '_a' URL
 
 ```ts
     const { stateContainer, stopStateSync } = createVisualizeAppState({
@@ -155,9 +163,9 @@ There are two parts for data persistence:
             byValue,
         });
 ```
-2. when we first enter the app, there is no app state in the URL, so we set the default states into URL in `createDefaultVisualizeAppState()`: `osdUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });`
+2. When we first enter the app, there is no app state in the URL, so we set the default states into URL in `createDefaultVisualizeAppState()`: `osdUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });`
 
-3. when we make changes to the app state, the `dirtyStateChange` event emitter will get triggered, then osd state container will call `updateStorage()` to update the URL state storage, then state container(appState) will also be in sync with URL state storage
+3. When we make changes to the app state, the `dirtyStateChange` event emitter will get triggered, then osd state container will call `updateStorage()` to update the URL state storage, then state container(appState) will also be in sync with URL state storage
 
 ```ts
     const onDirtyStateChange = ({ isDirty }: { isDirty: boolean }) => {
@@ -185,7 +193,7 @@ There are two parts for data persistence:
         startStateSync();
 ```
 
-4. in `useEditorUpdates()`, we use the saved appState to load the visualize editor
+4. In `useEditorUpdates()`, we use the saved appState to load the visualize editor
 
 # Refresh
 When we refresh the page, both app state and global state should persist:
@@ -193,8 +201,8 @@ When we refresh the page, both app state and global state should persist:
 1. `appMounted()` gets triggered for the current app, so current app subscribe to URL$
 2. `syncQueryStateWithUrl()` gets called within app.tsx for the current app, and we are getting the global states from URL '_g', and then `connectToQueryState()` gets called to sync global states and state container for the current app so the current app load the saved global states in top nav
 3. `stateUpdate$` will get triggered for every other unmounted app, so the global states are updated for their URL in storage instance as well by calling `setStateOsdUrl()`
-4. when we load the visualize editor, `createDefaultVisualizeAppState()` gets called, and it gets app state from URL '_a', and it updates appState based on URL
-5. in `useEditorUpdates()`, it uses the updated appState to load the visualization with previous saved states
+4. When we load the visualize editor, `createDefaultVisualizeAppState()` gets called, and it gets app state from URL '_a', and it updates appState based on URL
+5. In `useEditorUpdates()`, it uses the updated appState to load the visualization with previous saved states
 # Navigate to another app
 
 When we navigate to another app from the current app, global state should persist:
