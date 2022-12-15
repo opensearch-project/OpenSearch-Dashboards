@@ -13,6 +13,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Legacy Maps Plugin] Prevent reverse-tabnabbing ([#2540](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2540))
 - Eliminate dependency on `got` versions older than 11.8.5 ([#2801](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2801))
 - [Multi DataSource] Add explicit no spellcheck on password fields ([#2818](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2818))
+- [CVE-2022-25912] Bumps simple-git from 3.4.0 to 3.15.0 ([#3036](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3036))
 
 ### 📈 Features/Enhancements
 
