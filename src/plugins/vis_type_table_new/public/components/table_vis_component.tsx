@@ -5,6 +5,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
+import dompurify from 'dompurify';
 import { EuiDataGridProps, EuiDataGrid, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
@@ -50,9 +51,18 @@ export const TableVisComponent = ({
       const rawContent = sortedRows[rowIndex][columnId];
       const colIndex = columns.findIndex((col) => col.id === columnId);
       const column = columns[colIndex];
-      // use formatter to format raw content
-      // this can format date and percentage data
-      const formattedContent = column.formatter.convert(rawContent, 'text');
+      const htmlContent = column.formatter.convert(rawContent, 'html');
+      const formattedContent = (
+        /*
+         * Justification for dangerouslySetInnerHTML:
+         * This is one of the visualizations which makes use of the HTML field formatters.
+         * Since these formatters produce raw HTML, this visualization needs to be able to render them as-is, relying
+         * on the field formatter to only produce safe HTML.
+         * `htmlContent` is created by converting raw data via HTML field formatter, so we need to make sure this value never contains
+         * any unsafe HTML (e.g. by bypassing the field formatter).
+         */
+        <div dangerouslySetInnerHTML={{ __html: dompurify.sanitize(htmlContent) }} /> // eslint-disable-line react/no-danger
+      );
       return sortedRows.hasOwnProperty(rowIndex) ? formattedContent || null : null;
     }) as EuiDataGridProps['renderCellValue'];
   }, [sortedRows, columns]);
