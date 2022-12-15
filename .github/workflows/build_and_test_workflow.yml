@@ -152,9 +152,8 @@ jobs:
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
 
-      # image has the latest chrome v99
       - name: Setup chromedriver
-        run: yarn add --dev chromedriver@99.0.0
+        run: node scripts/upgrade_chromedriver.js
 
       - name: Run bootstrap
         run: yarn osd bootstrap
@@ -204,9 +203,8 @@ jobs:
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
 
-      # image has the latest chrome v99
       - name: Setup chromedriver
-        run: yarn add --dev chromedriver@106.0.1
+        run: node scripts/upgrade_chromedriver.js
 
       - name: Run bootstrap
         run: yarn osd bootstrap
