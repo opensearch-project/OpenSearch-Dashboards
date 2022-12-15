@@ -52,6 +52,14 @@ interface Arguments {
 
 export type VisParams = Required<Arguments>;
 
+export type VegaExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'vega',
+  Input,
+  Arguments,
+  Output,
+  ExecutionContext<unknown, VegaInspectorAdapters>
+>;
+
 interface RenderValue extends VisRenderValue {
   visData: VegaParser;
   visType: 'vega';
@@ -60,13 +68,7 @@ interface RenderValue extends VisRenderValue {
 
 export const createVegaFn = (
   dependencies: VegaVisualizationDependencies
-): ExpressionFunctionDefinition<
-  'vega',
-  Input,
-  Arguments,
-  Output,
-  ExecutionContext<unknown, VegaInspectorAdapters>
-> => ({
+): VegaExpressionFunctionDefinition => ({
   name: 'vega',
   type: 'render',
   inputTypes: ['opensearch_dashboards_context', 'null'],
@@ -81,6 +83,7 @@ export const createVegaFn = (
     },
   },
   async fn(input, args, context) {
+    console.log("geting to vegafn");
     const vegaRequestHandler = createVegaRequestHandler(dependencies, context);
 
     const response = await vegaRequestHandler({

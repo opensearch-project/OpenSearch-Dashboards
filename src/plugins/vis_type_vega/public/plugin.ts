@@ -50,6 +50,7 @@ import './index.scss';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
+import { createVegaSpecFn } from './line_vega_spec_expression';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -104,6 +105,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+    expressions.registerFunction(() => createVegaSpecFn(visualizationDependencies));
 
     visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
   }
