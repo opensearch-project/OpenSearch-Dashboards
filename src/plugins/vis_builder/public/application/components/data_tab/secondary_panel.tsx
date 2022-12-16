@@ -14,15 +14,15 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { VisBuilderServices } from '../../../types';
 import { AggParam, IAggType, IFieldParamType } from '../../../../../data/public';
 import { saveDraftAgg, editDraftAgg } from '../../utils/state_management/visualization_slice';
-import { setValidity } from '../../utils/state_management/metadata_slice';
+import { setError } from '../../utils/state_management/metadata_slice';
 
-const EDITOR_KEY = 'CONFIG_PANEL';
+const PANEL_KEY = 'SECONDARY_PANEL';
 
 export function SecondaryPanel() {
   const { draftAgg, aggConfigParams } = useTypedSelector(
     (state) => state.visualization.activeVisualization!
   );
-  const isEditorValid = useTypedSelector((state) => state.metadata.editor.validity[EDITOR_KEY]);
+  const isEditorValid = useTypedSelector((state) => !state.metadata.editor.errors[PANEL_KEY]);
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
   const vizType = useVisualizationType();
@@ -71,9 +71,9 @@ export function SecondaryPanel() {
     (isValid: boolean) => {
       // Set validity state globally
       dispatch(
-        setValidity({
-          key: EDITOR_KEY,
-          valid: isValid,
+        setError({
+          key: PANEL_KEY,
+          error: !isValid,
         })
       );
     },

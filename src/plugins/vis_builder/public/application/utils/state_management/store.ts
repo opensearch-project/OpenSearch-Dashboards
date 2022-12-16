@@ -4,12 +4,14 @@
  */
 
 import { combineReducers, configureStore, PreloadedState } from '@reduxjs/toolkit';
+import { isEqual } from 'lodash';
 import { reducer as styleReducer } from './style_slice';
 import { reducer as visualizationReducer } from './visualization_slice';
 import { reducer as metadataReducer } from './metadata_slice';
 import { VisBuilderServices } from '../../..';
-import { setEditorState } from './metadata_slice';
 import { loadReduxState, saveReduxState } from './redux_persistence';
+import { handlerEditorState } from './handlers/editor_state';
+import { handlerParentAggs } from './handlers/parent_aggs';
 
 const rootReducer = combineReducers({
   style: styleReducer,
@@ -28,40 +30,16 @@ export const getPreloadedStore = async (services: VisBuilderServices) => {
   const preloadedState = await loadReduxState(services);
   const store = configurePreloadedStore(preloadedState);
 
-  const { metadata: metadataState, style: styleState, visualization: vizState } = store.getState();
-  let previousStore = {
-    viz: vizState,
-    style: styleState,
-  };
-  let previousMetadata = metadataState;
+  let previousState = store.getState();
 
   // Listen to changes
   const handleChange = () => {
-    const {
-      metadata: currentMetadataState,
-      style: currentStyleState,
-      visualization: currentVizState,
-    } = store.getState();
-    const currentStore = {
-      viz: currentVizState,
-      style: currentStyleState,
-    };
-    const currentMetadata = currentMetadataState;
+    const state = store.getState();
 
-    // Need to make sure the editorStates are in the clean states(not the initial states) to indicate the viz finished loading
-    // Because when loading a saved viz from saved object, the previousStore will differ from
-    // the currentStore even tho there is no changes applied ( aggParams will
-    // first be empty, and it then will change to not empty once the viz finished loading)
-    if (
-      previousMetadata.editor.state === 'clean' &&
-      currentMetadata.editor.state === 'clean' &&
-      JSON.stringify(currentStore) !== JSON.stringify(previousStore)
-    ) {
-      store.dispatch(setEditorState({ state: 'dirty' }));
-    }
+    if (isEqual(state, previousState)) return;
 
-    previousStore = currentStore;
-    previousMetadata = currentMetadata;
+    previousState = handlerEditorState(store, state, previousState);
+    handlerParentAggs(store, state, services);
 
     saveReduxState(
       {
@@ -82,7 +60,7 @@ export const getPreloadedStore = async (services: VisBuilderServices) => {
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof rootReducer>;
 export type RenderState = Omit<RootState, 'metadata'>; // Remaining state after auxillary states are removed
-type Store = ReturnType<typeof configurePreloadedStore>;
+export type Store = ReturnType<typeof configurePreloadedStore>;
 export type AppDispatch = Store['dispatch'];
 
 export { setState as setStyleState, StyleState } from './style_slice';
