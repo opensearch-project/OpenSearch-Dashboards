@@ -18,6 +18,8 @@ import { setEditorState } from '../utils/state_management/metadata_slice';
 import { useCanSave } from '../utils/use/use_can_save';
 import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
 import { TopNavMenuData } from '../../../../navigation/public';
+import { opensearchFilters } from '../../../../data/public';
+import { useQueryStateWithNoContainer } from '../../../../data/public';
 
 export const TopNav = () => {
   // id will only be set for the edit route
@@ -34,6 +36,10 @@ export const TopNav = () => {
 
   const saveDisabledReason = useCanSave();
   const savedVisBuilderVis = useSavedVisBuilderVis(visualizationIdFromUrl);
+  useQueryStateWithNoContainer(services.data.query, services.osdUrlStateStorage, {
+    filters: opensearchFilters.FilterStateStore.APP_STATE,
+    query: true,
+  });
   const { selected: indexPattern } = useIndexPatterns();
   const [config, setConfig] = useState<TopNavMenuData[] | undefined>();
   const originatingApp = useTypedSelector((state) => {

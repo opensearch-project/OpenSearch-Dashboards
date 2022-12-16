@@ -31,11 +31,184 @@
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import _ from 'lodash';
-import { BaseStateContainer } from '../../../../opensearch_dashboards_utils/public';
+import {
+  BaseStateContainer,
+  IOsdUrlStateStorage,
+} from '../../../../opensearch_dashboards_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
 import { validateTimeRange } from '../timefilter';
+
+export const useQueryStateWithNoContainer = (
+  {
+    timefilter: { timefilter },
+    filterManager,
+    queryString,
+    state$,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
+  OsdUrlStateStorage: IOsdUrlStateStorage,
+  syncConfig: {
+    filters?: FilterStateStore | boolean;
+    query?: boolean;
+  }
+) => {
+  const syncKeys: Array<keyof QueryStateChange> = [];
+  if (syncConfig.query) {
+    syncKeys.push('query');
+  }
+  if (syncConfig.filters) {
+    switch (syncConfig.filters) {
+      case true:
+        syncKeys.push('filters');
+        break;
+      case FilterStateStore.APP_STATE:
+        syncKeys.push('appFilters');
+        break;
+      case FilterStateStore.GLOBAL_STATE:
+        syncKeys.push('globalFilters');
+        break;
+    }
+  }
+
+  const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
+    query: queryString.getDefaultQuery(),
+    filters: filterManager.getGlobalFilters(),
+  };
+  let initialDirty = false;
+
+  if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
+    initialStateFromURL.query = queryString.getQuery();
+    initialDirty = true;
+  }
+
+  if (syncConfig.filters) {
+    if (syncConfig.filters === true) {
+      if (
+        !initialStateFromURL.filters ||
+        !compareFilters(
+          initialStateFromURL.filters,
+          filterManager.getFilters(),
+          COMPARE_ALL_OPTIONS
+        )
+      ) {
+        initialStateFromURL.filters = filterManager.getFilters();
+        initialDirty = true;
+      }
+    } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
+      if (
+        !initialStateFromURL.filters ||
+        !compareFilters(initialStateFromURL.filters, filterManager.getGlobalFilters(), {
+          ...COMPARE_ALL_OPTIONS,
+          state: false,
+        })
+      ) {
+        initialStateFromURL.filters = filterManager.getGlobalFilters();
+        initialDirty = true;
+      }
+    } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
+      if (
+        !initialStateFromURL.filters ||
+        !compareFilters(initialStateFromURL.filters, filterManager.getAppFilters(), {
+          ...COMPARE_ALL_OPTIONS,
+          state: false,
+        })
+      ) {
+        initialStateFromURL.filters = filterManager.getAppFilters();
+        initialDirty = true;
+      }
+    }
+  }
+
+  if (initialDirty) {
+    OsdUrlStateStorage.set('_q', initialStateFromURL, {
+      replace: true,
+    });
+  }
+
+  // to ignore own state updates
+  const updateInProgress = false;
+
+  const subs: Subscription[] = [
+    state$
+      .pipe(
+        filter(({ changes, state }) => {
+          if (updateInProgress) return false;
+          return syncKeys.some((syncKey) => changes[syncKey]);
+        }),
+        map(({ changes }) => {
+          const newState: QueryState = {};
+          if (syncConfig.query && changes.query) {
+            newState.query = queryString.getQuery();
+          }
+          if (syncConfig.filters) {
+            if (syncConfig.filters === true && changes.filters) {
+              newState.filters = filterManager.getFilters();
+            } else if (
+              syncConfig.filters === FilterStateStore.GLOBAL_STATE &&
+              changes.globalFilters
+            ) {
+              newState.filters = filterManager.getGlobalFilters();
+            } else if (syncConfig.filters === FilterStateStore.APP_STATE && changes.appFilters) {
+              newState.filters = filterManager.getAppFilters();
+            }
+          }
+          return newState;
+        })
+      )
+      .subscribe((newState) => {
+        OsdUrlStateStorage.set('_q', newState, {
+          replace: true,
+        });
+      }),
+    /* stateContainer.state$.subscribe((state) => {
+      updateInProgress = true;
+
+      // cloneDeep is required because services are mutating passed objects
+      // and state in state container is frozen
+
+      if (syncConfig.query) {
+        const curQuery = state.query || queryString.getQuery();
+        if (!_.isEqual(curQuery, queryString.getQuery())) {
+          queryString.setQuery(_.cloneDeep(curQuery));
+        }
+      }
+
+      if (syncConfig.filters) {
+        const filters = state.filters || [];
+        if (syncConfig.filters === true) {
+          if (!compareFilters(filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
+            filterManager.setFilters(_.cloneDeep(filters));
+          }
+        } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
+          if (
+            !compareFilters(filters, filterManager.getAppFilters(), {
+              ...COMPARE_ALL_OPTIONS,
+              state: false,
+            })
+          ) {
+            filterManager.setAppFilters(_.cloneDeep(filters));
+          }
+        } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
+          if (
+            !compareFilters(filters, filterManager.getGlobalFilters(), {
+              ...COMPARE_ALL_OPTIONS,
+              state: false,
+            })
+          ) {
+            filterManager.setGlobalFilters(_.cloneDeep(filters));
+          }
+        }
+      }
+
+      updateInProgress = false;
+    }),*/
+  ];
+
+  return () => {
+    subs.forEach((s) => s.unsubscribe());
+  };
+};
 
 /**
  * Helper to setup two-way syncing of global data and a state container
