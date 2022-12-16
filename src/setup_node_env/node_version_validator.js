@@ -40,14 +40,14 @@ var requiredVersionMajorMinorPatch = requiredVersion.match(/^v(\d+)\.(\d+)\.(\d+
 
 var version = {
   current: {
-      major: currentVersionMajorMinorPatch[1],
-      minor: parseInt(currentVersionMajorMinorPatch[2], 10),
-      patch: parseInt(currentVersionMajorMinorPatch[3], 10),
+    major: currentVersionMajorMinorPatch[1],
+    minor: parseInt(currentVersionMajorMinorPatch[2], 10),
+    patch: parseInt(currentVersionMajorMinorPatch[3], 10),
   },
   required: {
-      major: requiredVersionMajorMinorPatch[1],
-      minor: parseInt(requiredVersionMajorMinorPatch[2], 10),
-      patch: parseInt(requiredVersionMajorMinorPatch[3], 10),
+    major: requiredVersionMajorMinorPatch[1],
+    minor: parseInt(requiredVersionMajorMinorPatch[2], 10),
+    patch: parseInt(requiredVersionMajorMinorPatch[3], 10),
   },
 }
 
@@ -56,10 +56,9 @@ var isVersionValid =
   version.current.minor === version.required.minor &&
   version.current.patch >= version.required.patch;
 
-  var isMinorValid =
-    version.current.major === version.required.major &&
-    version.current.minor > version.required.minor;
-
+var isMinorValid =
+  version.current.major === version.required.major &&
+  version.current.minor > version.required.minor;
 
 // Validates current the NodeJS version compatibility when OpenSearch Dashboards starts.
 if (!isVersionValid && !isMinorValid) {
