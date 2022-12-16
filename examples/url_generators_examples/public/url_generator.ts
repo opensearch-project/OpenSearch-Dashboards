@@ -54,7 +54,7 @@ export const createHelloPageLinkGenerator = (
     const appBasePath = startServices.appBasePath;
 
     const url = new URL(`${appBasePath}/hello`, window.location.origin);
-    url.search = new URLSearchParams((state as unknown) as Record<string, string>).toString();
+    url.search = new URLSearchParams({ ...state }).toString();
 
     return url.toString();
   },
