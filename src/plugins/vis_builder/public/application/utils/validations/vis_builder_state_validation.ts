@@ -4,12 +4,12 @@
  */
 
 import Ajv from 'ajv';
-import visBuilderStateSchema from './schema.json';
+import visBuilderStateSchema from '../schema.json';
 
 const ajv = new Ajv();
 const validateState = ajv.compile(visBuilderStateSchema);
 
-export const validateVisBuilderState = (visBuilderState) => {
+export const validateVisBuilderState = (visBuilderState: any) => {
   const isVisBuilderStateValid = validateState(visBuilderState);
 
   return {

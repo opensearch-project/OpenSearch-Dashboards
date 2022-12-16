@@ -4,8 +4,8 @@
  */
 
 import { countBy } from 'lodash';
-import { Schemas } from '../../../../vis_default_editor/public';
-import { VisualizationState } from './state_management';
+import { Schemas } from '../../../../../vis_default_editor/public';
+import { VisualizationState } from '../state_management';
 
 /**
  * Validate if the visualization state fits the  vis type schema criteria

@@ -9,9 +9,9 @@ import React, { FC, useState, useMemo, useEffect, useLayoutEffect } from 'react'
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { VisBuilderServices } from '../../types';
-import { validateSchemaState } from '../utils/validate_schema_state';
+import { validateSchemaState, validateAggregations } from '../utils/validations';
 import { useTypedSelector } from '../utils/state_management';
-import { useVisualizationType } from '../utils/use';
+import { useAggs, useVisualizationType } from '../utils/use';
 import { PersistedState } from '../../../../visualizations/public';
 
 import hand_field from '../../assets/hand_field.svg';
@@ -29,6 +29,7 @@ export const Workspace: FC = ({ children }) => {
     },
   } = useOpenSearchDashboards<VisBuilderServices>();
   const { toExpression, ui } = useVisualizationType();
+  const { aggConfigs } = useAggs();
   const [expression, setExpression] = useState<string>();
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: data.query.queryString.getQuery(),
@@ -42,11 +43,13 @@ export const Workspace: FC = ({ children }) => {
   useEffect(() => {
     async function loadExpression() {
       const schemas = ui.containerConfig.data.schemas;
-      const [valid, errorMsg] = validateSchemaState(schemas, rootState.visualization);
+      const [validSchema, schemaError] = validateSchemaState(schemas, rootState.visualization);
+      const [validAggs, aggregationError] = await validateAggregations(aggConfigs?.aggs || []);
 
-      if (!valid) {
-        if (errorMsg) {
-          toasts.addWarning(errorMsg);
+      if (!validSchema || !validAggs) {
+        const err = schemaError || aggregationError;
+        if (typeof err === 'string' && aggConfigs?.aggs.length) {
+          toasts.addWarning(err);
         }
         setExpression(undefined);
         return;
@@ -57,7 +60,7 @@ export const Workspace: FC = ({ children }) => {
     }
 
     loadExpression();
-  }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas, searchContext]);
+  }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas, searchContext, aggConfigs]);
 
   useLayoutEffect(() => {
     const subscription = data.query.state$.subscribe(({ state }) => {
