@@ -32,10 +32,10 @@ import { opensearchDashboardsTestUser } from './users';
 
 export const osdTestConfig = new (class OsdTestConfig {
   getPort() {
-    return parseInt(this.getUrlParts().port, 10);
+    return parseInt(this.getURL().port, 10);
   }
 
-  getUrlParts() {
+  getURL() {
     // allow setting one complete TEST_OPENSEARCH_DASHBOARDS_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_DASHBOARDS_URL) {
       return new URL('', process.env.TEST_OPENSEARCH_DASHBOARDS_URL);

@@ -34,8 +34,8 @@ import { services } from './services';
 
 export default function () {
   const servers = {
-    opensearchDashboards: osdTestConfig.getUrlParts(),
-    opensearch: opensearchTestConfig.getUrlParts(),
+    opensearchDashboards: osdTestConfig.getURL(),
+    opensearch: opensearchTestConfig.getURL(),
   };
 
   return {

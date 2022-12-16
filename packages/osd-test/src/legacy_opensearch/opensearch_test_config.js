@@ -37,11 +37,11 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
   }
 
   getPort() {
-    return this.getUrlParts().port;
+    return this.getURL().port;
   }
 
   getUrl() {
-    return this.getUrlParts().toString();
+    return this.getURL().toString();
   }
 
   getBuildFrom() {
@@ -52,7 +52,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
     return process.env.TEST_OPENSEARCH_TRANSPORT_PORT || '9300-9400';
   }
 
-  getUrlParts() {
+  getURL() {
     // Allow setting one complete TEST_OPENSEARCH_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_URL) {
       return new URL('', process.env.TEST_OPENSEARCH_URL);
