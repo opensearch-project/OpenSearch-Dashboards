@@ -37,21 +37,32 @@ var rawRequiredVersion = (pkg && pkg.engines && pkg.engines.node) || null;
 var requiredVersion = rawRequiredVersion ? 'v' + rawRequiredVersion : rawRequiredVersion;
 var currentVersionMajorMinorPatch = currentVersion.match(/^v(\d+)\.(\d+)\.(\d+)/);
 var requiredVersionMajorMinorPatch = requiredVersion.match(/^v(\d+)\.(\d+)\.(\d+)/);
-var currentMinorPatch = currentVersionMajorMinorPatch[2].concat(
-  '.',
-  currentVersionMajorMinorPatch[3]
-);
-var requiredMinorPatch = requiredVersionMajorMinorPatch[2].concat(
-  '.',
-  requiredVersionMajorMinorPatch[3]
-);
+
+var version = {
+  current: {
+      major: currentVersionMajorMinorPatch[1],
+      minor: parseInt(currentVersionMajorMinorPatch[2], 10),
+      patch: parseInt(currentVersionMajorMinorPatch[3], 10),
+  },
+  required: {
+      major: requiredVersionMajorMinorPatch[1],
+      minor: parseInt(requiredVersionMajorMinorPatch[2], 10),
+      patch: parseInt(requiredVersionMajorMinorPatch[3], 10),
+  },
+}
+
 var isVersionValid =
-  currentVersionMajorMinorPatch[1] === requiredVersionMajorMinorPatch[1] &&
-  parseFloat(currentMinorPatch) >= parseFloat(requiredMinorPatch);
-var isMinorValid = currentVersionMajorMinorPatch[2] === requiredVersionMajorMinorPatch[2];
+  version.current.major === version.required.major &&
+  version.current.minor === version.required.minor &&
+  version.current.patch >= version.required.patch;
+
+  var isMinorValid =
+    version.current.major === version.required.major &&
+    version.current.minor > version.required.minor;
+
 
 // Validates current the NodeJS version compatibility when OpenSearch Dashboards starts.
-if (!isVersionValid) {
+if (!isVersionValid && !isMinorValid) {
   var errorMessage =
     `OpenSearch Dashboards was built with ${requiredVersion} and does not support the current Node.js version ${currentVersion}. ` +
     `Please use Node.js ${requiredVersion} or a higher patch version.`;
