@@ -42,14 +42,13 @@ import { validateTimeRange } from '../timefilter';
 
 export const useQueryStateWithNoContainer = (
   {
-    timefilter: { timefilter },
     filterManager,
     queryString,
     state$,
   }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
   OsdUrlStateStorage: IOsdUrlStateStorage,
   syncConfig: {
-    filters: FilterStateStore | boolean;
+    filters: FilterStateStore;
     query: boolean;
   }
 ) => {
@@ -57,23 +56,13 @@ export const useQueryStateWithNoContainer = (
   if (syncConfig.query) {
     syncKeys.push('query');
   }
-  if (syncConfig.filters) {
-    switch (syncConfig.filters) {
-      case true:
-        syncKeys.push('filters');
-        break;
-      case FilterStateStore.APP_STATE:
-        syncKeys.push('appFilters');
-        break;
-      case FilterStateStore.GLOBAL_STATE:
-        syncKeys.push('globalFilters');
-        break;
-    }
+  if (syncConfig.filters === FilterStateStore.APP_STATE) {
+    syncKeys.push('appFilters');
   }
 
   const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
     query: queryString.getDefaultQuery(),
-    filters: filterManager.getGlobalFilters(),
+    filters: filterManager.getAppFilters(),
   };
 
   // set up initial '_q' flag in the URL to sync query and filter changes
@@ -89,86 +78,52 @@ export const useQueryStateWithNoContainer = (
     }
   }
 
-  if (syncConfig.filters) {
-    if (syncConfig.filters === true) {
-      if (
-        !initialStateFromURL.filters ||
-        !compareFilters(
-          initialStateFromURL.filters,
-          filterManager.getFilters(),
-          COMPARE_ALL_OPTIONS
-        )
-      ) {
-        if (initialStateFromURL.filters) {
-          filterManager.setFilters(_.cloneDeep(initialStateFromURL.filters));
-        }
-      }
-    } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
-      if (
-        !initialStateFromURL.filters ||
-        !compareFilters(initialStateFromURL.filters, filterManager.getGlobalFilters(), {
-          ...COMPARE_ALL_OPTIONS,
-          state: false,
-        })
-      ) {
-        if (initialStateFromURL.filters) {
-          filterManager.setGlobalFilters(_.cloneDeep(initialStateFromURL.filters));
-        }
-      }
-    } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
-      if (
-        !initialStateFromURL.filters ||
-        !compareFilters(initialStateFromURL.filters, filterManager.getAppFilters(), {
-          ...COMPARE_ALL_OPTIONS,
-          state: false,
-        })
-      ) {
-        if (initialStateFromURL.filters) {
-          filterManager.setAppFilters(_.cloneDeep(initialStateFromURL.filters));
-        }
+  if (syncConfig.filters === FilterStateStore.APP_STATE) {
+    if (
+      !initialStateFromURL.filters ||
+      !compareFilters(initialStateFromURL.filters, filterManager.getAppFilters(), {
+        ...COMPARE_ALL_OPTIONS,
+        state: false,
+      })
+    ) {
+      if (initialStateFromURL.filters) {
+        filterManager.setAppFilters(_.cloneDeep(initialStateFromURL.filters));
       }
     }
-  }
 
-  const subs: Subscription[] = [
-    state$
-      .pipe(
-        filter(({ changes }) => {
-          return syncKeys.some((syncKey) => changes[syncKey]);
-        }),
-        map(({ changes, state }) => {
-          const newState: QueryState = {
-            query: state.query,
-            filters: state.filters,
-          };
-          if (syncConfig.query && changes.query) {
-            newState.query = queryString.getQuery();
-          }
-          if (syncConfig.filters) {
-            if (syncConfig.filters === true && changes.filters) {
-              newState.filters = filterManager.getFilters();
-            } else if (
-              syncConfig.filters === FilterStateStore.GLOBAL_STATE &&
-              changes.globalFilters
-            ) {
-              newState.filters = filterManager.getGlobalFilters();
-            } else if (syncConfig.filters === FilterStateStore.APP_STATE && changes.appFilters) {
+    const subs: Subscription[] = [
+      state$
+        .pipe(
+          filter(({ changes }) => {
+            return syncKeys.some((syncKey) => changes[syncKey]);
+          }),
+          map(({ changes, state }) => {
+            const newState: QueryState = {
+              query: state.query,
+              filters: state.filters,
+            };
+            if (syncConfig.query && changes.query) {
+              newState.query = queryString.getQuery();
+            }
+
+            if (syncConfig.filters === FilterStateStore.APP_STATE && changes.appFilters) {
               newState.filters = filterManager.getAppFilters();
             }
-          }
-          return newState;
-        })
-      )
-      .subscribe((newState) => {
-        OsdUrlStateStorage.set('_q', newState, {
-          replace: true,
-        });
-      }),
-  ];
 
-  return () => {
-    subs.forEach((s) => s.unsubscribe());
-  };
+            return newState;
+          })
+        )
+        .subscribe((newState) => {
+          OsdUrlStateStorage.set('_q', newState, {
+            replace: true,
+          });
+        }),
+    ];
+
+    return () => {
+      subs.forEach((s) => s.unsubscribe());
+    };
+  }
 };
 
 /**
