@@ -107,12 +107,12 @@ export async function scanCopy(options: Options) {
       await copyFileAsync(record.absolute, record.absoluteDest, Fs.constants.COPYFILE_EXCL);
     }
 
-    if (time) {
-      await utimesAsync(record.absoluteDest, time, time);
-    }
-
     if (record.isDirectory) {
       await copyChildren(record);
+    }
+
+    if (time) {
+      await utimesAsync(record.absoluteDest, time, time);
     }
   };
 
