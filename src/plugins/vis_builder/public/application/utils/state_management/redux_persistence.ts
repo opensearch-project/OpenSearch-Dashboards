@@ -10,13 +10,14 @@ import { RootState } from './store';
 export const loadReduxState = async (services: VisBuilderServices) => {
   try {
     const serializedState = services.osdUrlStateStorage.get<RootState>('_a');
-    if (serializedState === null) {
-      return await getPreloadedState(services);
-    }
-    return serializedState;
+    if (serializedState !== null) return serializedState;
   } catch (err) {
-    return await getPreloadedState(services);
+    /* eslint-disable no-console */
+    console.error(err);
+    /* eslint-enable no-console */
   }
+
+  return await getPreloadedState(services);
 };
 
 export const saveReduxState = (
