@@ -49,7 +49,7 @@ export const createTableConfig = (): VisualizationTypeOptions<TableOptionsDefaul
             title: i18n.translate('visTypeTableNewNew.tableVisEditorConfig.schemas.bucketTitle', {
               defaultMessage: 'Split rows',
             }),
-            aggFilter: ['!filter'],
+            aggFilter: ['!filter', '!filters'],
             defaults: {
               aggTypes: ['terms'],
             },
@@ -62,7 +62,7 @@ export const createTableConfig = (): VisualizationTypeOptions<TableOptionsDefaul
             }),
             min: 0,
             max: 1,
-            aggFilter: ['!filter'],
+            aggFilter: ['!filter', '!filters'],
             defaults: {
               aggTypes: ['terms'],
             },
@@ -75,7 +75,7 @@ export const createTableConfig = (): VisualizationTypeOptions<TableOptionsDefaul
             }),
             min: 0,
             max: 1,
-            aggFilter: ['!filter'],
+            aggFilter: ['!filter', '!filters'],
             defaults: {
               aggTypes: ['terms'],
             },
