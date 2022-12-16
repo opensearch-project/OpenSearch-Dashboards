@@ -49,7 +49,7 @@ var version = {
     minor: parseInt(requiredVersionMajorMinorPatch[2], 10),
     patch: parseInt(requiredVersionMajorMinorPatch[3], 10),
   },
-}
+};
 
 var isVersionValid =
   version.current.major === version.required.major &&
