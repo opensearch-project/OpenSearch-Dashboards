@@ -49,8 +49,8 @@ export const useQueryStateWithNoContainer = (
   }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
   OsdUrlStateStorage: IOsdUrlStateStorage,
   syncConfig: {
-    filters?: FilterStateStore | boolean;
-    query?: boolean;
+    filters: FilterStateStore | boolean;
+    query: boolean;
   }
 ) => {
   const syncKeys: Array<keyof QueryStateChange> = [];
@@ -75,11 +75,18 @@ export const useQueryStateWithNoContainer = (
     query: queryString.getDefaultQuery(),
     filters: filterManager.getGlobalFilters(),
   };
-  let initialDirty = false;
+
+  // set up initial '_q' flag in the URL to sync query and filter changes
+  if (!OsdUrlStateStorage.get('_q')) {
+    OsdUrlStateStorage.set('_q', initialStateFromURL, {
+      replace: true,
+    });
+  }
 
   if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
-    initialStateFromURL.query = queryString.getQuery();
-    initialDirty = true;
+    if (initialStateFromURL.query) {
+      queryString.setQuery(_.cloneDeep(initialStateFromURL.query));
+    }
   }
 
   if (syncConfig.filters) {
@@ -92,8 +99,9 @@ export const useQueryStateWithNoContainer = (
           COMPARE_ALL_OPTIONS
         )
       ) {
-        initialStateFromURL.filters = filterManager.getFilters();
-        initialDirty = true;
+        if (initialStateFromURL.filters) {
+          filterManager.setFilters(_.cloneDeep(initialStateFromURL.filters));
+        }
       }
     } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
       if (
@@ -103,8 +111,9 @@ export const useQueryStateWithNoContainer = (
           state: false,
         })
       ) {
-        initialStateFromURL.filters = filterManager.getGlobalFilters();
-        initialDirty = true;
+        if (initialStateFromURL.filters) {
+          filterManager.setGlobalFilters(_.cloneDeep(initialStateFromURL.filters));
+        }
       }
     } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
       if (
@@ -114,30 +123,24 @@ export const useQueryStateWithNoContainer = (
           state: false,
         })
       ) {
-        initialStateFromURL.filters = filterManager.getAppFilters();
-        initialDirty = true;
+        if (initialStateFromURL.filters) {
+          filterManager.setAppFilters(_.cloneDeep(initialStateFromURL.filters));
+        }
       }
     }
   }
 
-  if (initialDirty) {
-    OsdUrlStateStorage.set('_q', initialStateFromURL, {
-      replace: true,
-    });
-  }
-
-  // to ignore own state updates
-  const updateInProgress = false;
-
   const subs: Subscription[] = [
     state$
       .pipe(
-        filter(({ changes, state }) => {
-          if (updateInProgress) return false;
+        filter(({ changes }) => {
           return syncKeys.some((syncKey) => changes[syncKey]);
         }),
-        map(({ changes }) => {
-          const newState: QueryState = {};
+        map(({ changes, state }) => {
+          const newState: QueryState = {
+            query: state.query,
+            filters: state.filters,
+          };
           if (syncConfig.query && changes.query) {
             newState.query = queryString.getQuery();
           }
@@ -161,48 +164,6 @@ export const useQueryStateWithNoContainer = (
           replace: true,
         });
       }),
-    /* stateContainer.state$.subscribe((state) => {
-      updateInProgress = true;
-
-      // cloneDeep is required because services are mutating passed objects
-      // and state in state container is frozen
-
-      if (syncConfig.query) {
-        const curQuery = state.query || queryString.getQuery();
-        if (!_.isEqual(curQuery, queryString.getQuery())) {
-          queryString.setQuery(_.cloneDeep(curQuery));
-        }
-      }
-
-      if (syncConfig.filters) {
-        const filters = state.filters || [];
-        if (syncConfig.filters === true) {
-          if (!compareFilters(filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
-            filterManager.setFilters(_.cloneDeep(filters));
-          }
-        } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
-          if (
-            !compareFilters(filters, filterManager.getAppFilters(), {
-              ...COMPARE_ALL_OPTIONS,
-              state: false,
-            })
-          ) {
-            filterManager.setAppFilters(_.cloneDeep(filters));
-          }
-        } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
-          if (
-            !compareFilters(filters, filterManager.getGlobalFilters(), {
-              ...COMPARE_ALL_OPTIONS,
-              state: false,
-            })
-          ) {
-            filterManager.setGlobalFilters(_.cloneDeep(filters));
-          }
-        }
-      }
-
-      updateInProgress = false;
-    }),*/
   ];
 
   return () => {
