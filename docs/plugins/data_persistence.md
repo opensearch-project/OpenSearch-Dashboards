@@ -1,15 +1,15 @@
 # Data persistence
-There are four plugins that currently have data persistence ability in opensearch dashboard: dashboard, discover, timeline, visualize, and vis-builder. They are using the following services and mechanisms from opensearch_dashboard_utils plugin to achieve data persistence.
+There are currently five plugins that have the ability to persist user data and configurations: `dashboard`, `discover`, `timeline`, `visualize`, and `vis-builder`. Data will be persisted globally when users navigate between them in OpenSearch Dashboards; data will also be persisted locally across the action of refreshes. To achieve this, they use services and mechanisms from `opensearch_dashboard_utils` plugin.
 
-State syncing utils are a set of helpers to sync application state with URL or browser storage(when turning state: `storeInSessionStore` on in advanced setting, in case of overflowed URL):
+State syncing utils are a set of helpers to sync application state with URL or browser storage (when setting state: `storeInSessionStore` to `true` in advanced setting, or in the case of an overflowed URL):
 1. `syncState()`: subscribe to state changes and push them to state storage; subscribe to state storage and push them to state container
 2. storages that are compatible with `syncState()`
-* `OsdUrlStateStorage`: serialize state and persist it to URL's query param in rison format; listen for state change in URL and update them back to state
-* `SessionStorageStateStorage`: serialize state and persist it to URL's query param in session storage
+    1. `OsdUrlStateStorage`: serialize state and persist it to URL's query param in [Rison](https://github.com/w33ble/rison-node) format; listen for state change in URL and update them back to state
+    2. `SessionStorageStateStorage`: serialize state and persist it to URL's query param in session storage
 3. state containers: redux-store like objects to help manage states and provide a central place to store state
 
-# Two type of persistence
-There are two parts for data persistence: 
+# Two types of persistence
+There are two types for data persistence: 
 1. App state (example from visualization plugin)
     1. App state storage key: '_a'
     2. App state is persistent only within the specific app, values will persist when we refresh the page, values will not be persist when we navigate away from the app
@@ -27,7 +27,7 @@ There are two parts for data persistence:
        ![img](./img/visualization.png)
 2. Global query state 
     1. Global state storage key: '_g'
-    2. Global query state is persistent across the entire application, values will persist when we refresh the page, or when we navigate across visualize, discover, timeline or dashboard page. For example, if we set time range to last 24 hours, and refresh intervals to every 30 min, the same time range and refresh intervals will be applied if we navigate to any of the other pages.
+    2. Global query state is persistent across the entire OpenSearch Dashboards application, values will persist when we refresh the page, or when we navigate across visualize, discover, timeline or dashboard page. For example, if we set time range to last 24 hours, and refresh intervals to every 30 min, the same time range and refresh intervals will be applied if we navigate to any of the other pages.
     3. Params:
        1. global filters (Select `pin filter` to make the filters global)
 
@@ -44,6 +44,7 @@ There are two parts for data persistence:
 # URL breakdown & example
 
 ![img](./img/URL_example.png)
+
 # Global state persistence
 
 1. In plugin.ts, during plugin setup, call `createOsdUrlTracker()`, listen to history changes and global state changes, then update the nav link URL. This also returns function such as `onMountApp()`, `onUnmountedApp()`
@@ -74,7 +75,7 @@ There are two parts for data persistence:
         ....
     ```
 
-    * When we enter the app and app is mounted, it initialize nav link by getting previously stored URL from storage instance: const storedUrl = storageInstance.getItem(storageKey). (Storage instance is a browser wide session storage instance.) Then it unsubscribes to global state$ and subscribes to URL$. The current app actively listens to history location changes. If there are changes, set the updated URL as the active URL
+    * When we enter the app and app is mounted, it initializes nav link by getting previously stored URL from storage instance: `const storedUrl = storageInstance.getItem(storageKey)`. (Storage instance is a browser wide session storage instance.) Then it unsubscribes to global `state$` and subscribes to `URL$`. The current app actively listens to history location changes. If there are changes, set the updated URL as the active URL
 
     ```ts
       function onMountApp() {
@@ -89,7 +90,7 @@ There are two parts for data persistence:
          }
     ```
 
-    * When we are leaving the app and app is unmounted, unsubscribe URL$ and subscribe to global state$. If the global states are changed in another app, the global state listener will still get triggered in this app even though it is unmounted, it will set the updated URL in storage instance, so next time when we enter the app, it gets the URL from the storage instance thus the global state will persist.
+    * When we are leaving the app and app is unmounted, unsubscribe `URL$` and subscribe to global `state$`. If the global states are changed in another app, the global state listener will still get triggered in this app even though it is unmounted, it will set the updated URL in storage instance, so next time when we enter the app, it gets the URL from the storage instance thus the global state will persist.
 
     ```ts
         function onUnmountApp() {
@@ -106,7 +107,7 @@ There are two parts for data persistence:
         }
     ```
 
-2. In app.tsx, call syncQueryStateWithUrl(query, osdUrlStateStorage) to sync '_g' portion of url with global state params
+2. In `app.tsx`, call `syncQueryStateWithUrl(query, osdUrlStateStorage)` to sync `_g` portion of url with global state params
     * When we first enter the app, there is no initial state in the URL, then we initialize and put the _g key into url
 
     ```ts
@@ -117,7 +118,7 @@ There are two parts for data persistence:
         }
     ```
 
-    * When we enter the app, if there is some initial state in the URL(the previous saved URL in storageInstance), then we retrieve global state from '_g' URL
+    * When we enter the app, if there is some initial state in the URL(the previous saved URL in `storageInstance`), so we retrieve global state from `_g` URL
 
     ```ts
       // retrieve current state from `_g` url
@@ -133,7 +134,7 @@ There are two parts for data persistence:
         };
     ```
 
-    * if we make some changes to the global state: 1. stateUpdate$ get triggered for all other unmounted app(if we made the change in visualize plugin, then the stateUpdate$ will get triggered for dashboard, discover, timeline), then it will call setStateToOsdUrl() to set updatedURL in storageInstance so global state get updated for all unmounted app. 2. updateStorage() get triggered for currentApp to update current URL state storage, then global query state container will also be in sync with URL state storage
+    * If we make some changes to the global state: 1. `stateUpdate$` get triggered for all other unmounted app(if we made the change in visualize plugin, then the `stateUpdate$` will get triggered for dashboard, discover, timeline), then it will call `setStateToOsdUrl()` to set `updatedURL` in `storageInstance` so global state get updated for all unmounted app. 2. `updateStorage()` get triggered for `currentApp` to update current URL state storage, then global query state container will also be in sync with URL state storage
 
     ```ts
         const { start, stop: stopSyncingWithUrl } = syncState({
