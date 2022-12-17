@@ -5,7 +5,7 @@
 import { DataSourcePluginConfigType } from '../../config';
 import { parseClientOptions } from './client_config';
 
-const TEST_DATA_SOURCE_ENDPOINT = 'http://datasource.com';
+const TEST_DATA_SOURCE_ENDPOINT = 'http://test.com/';
 
 const config = {
   enabled: true,
