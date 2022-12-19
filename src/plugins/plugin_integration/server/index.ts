@@ -34,5 +34,4 @@ import { PluginIntegrationPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new PluginIntegrationPlugin(initializerContext);
 }
-
 export { PluginIntegrationPluginSetup, PluginIntegrationPluginStart } from './plugin';
