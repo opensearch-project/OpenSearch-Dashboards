@@ -52,9 +52,6 @@ export type VegaSpecExpressionFunctionDefinition = ExpressionFunctionDefinition<
   Output
 >;
 
-/*
-TODO: Support legend orientation location, make the legend better to look the same
- */
 const createSpecFromDatatable = (
   datatable: OpenSearchDashboardsDatatable,
   visParams: string,
@@ -64,13 +61,11 @@ const createSpecFromDatatable = (
   // of the fields and sub-fields don't have other optional params that we want for customizing.
   // For now, we make this more loosely-typed by just specifying it as a generic object.
   const spec = {} as any;
-
-  // console.log(JSON.parse(visParams));
-
   const xAxis = datatable.columns[0];
 
   const parseParams = JSON.parse(visParams);
   const dimensions = JSON.parse(dimensionsString);
+  const legendPosition = parseParams.legendPosition;
 
   // Get time range for the data in case there is only data for a small range so it will show the full time range
   const startTime = {};
@@ -81,8 +76,6 @@ const createSpecFromDatatable = (
   // @ts-ignore
   endTime[xAxisId] = new Date(dimensions.x.params.bounds.max).valueOf();
   const updatedTable = datatable.rows.concat([startTime, endTime]);
-
-  // const legendPosition = parseParams.legendPosition;
 
   // TODO: update this to v5 when available
   spec.$schema = 'https://vega.github.io/schema/vega-lite/v4.json';
@@ -104,46 +97,95 @@ const createSpecFromDatatable = (
     rule: {
       color: 'red',
     },
+    legend: {
+      orient: legendPosition,
+    },
   };
 
   // assuming the first column in the datatable represents the x-axis / the time-related field.
   // need to confirm if that's always the case or not
   spec.layer = [] as any[];
 
-  let yTitle: string;
-  // The value axes are the different axes added by the visBuilder
-  if (parseParams.valueAxes != null && parseParams.valueAxes[0].title != null) {
-    yTitle = parseParams.valueAxes[0].title.text;
+  const valueAxis = {};
+  parseParams.valueAxes.forEach((yAxis: { id: { toString: () => string | number } }) => {
+    // @ts-ignore
+    valueAxis[yAxis.id.toString()] = yAxis;
+  });
+
+  if (datatable.rows.length > 0) {
+    datatable.columns.forEach((column, index) => {
+      if (index !== 0) {
+        const currentValueAxis =
+          // @ts-ignore
+          valueAxis[parseParams.seriesParams[index - 1].valueAxis.toString()];
+        let tooltip: Array<{ field: string; type: string; title: string }> = [];
+        if (parseParams.addTooltip) {
+          tooltip = [
+            { field: xAxis.id, type: 'temporal', title: xAxis.name },
+            { field: column.id, type: 'quantitative', title: column.name },
+          ];
+        }
+        spec.layer.push({
+          mark: {
+            type: parseParams.seriesParams[index - 1].type,
+            interpolate: parseParams.seriesParams[index - 1].interpolate,
+            strokeWidth: parseParams.seriesParams[index - 1].lineWidth,
+            point: parseParams.seriesParams[index - 1].showCircles,
+          },
+          encoding: {
+            x: {
+              axis: {
+                title: xAxis.name,
+                grid: parseParams.grid.categoryLines,
+              },
+              field: xAxis.id,
+              type: 'temporal',
+            },
+            y: {
+              axis: {
+                title: currentValueAxis.title.text || column.name,
+                grid: parseParams.grid.valueAxis !== '',
+                orient: currentValueAxis.position,
+                labels: currentValueAxis.labels.show,
+                labelAngle: currentValueAxis.labels.rotate,
+              },
+              field: column.id,
+              type: 'quantitative',
+            },
+            tooltip,
+            color: {
+              datum: column.name,
+            },
+          },
+        });
+      }
+    });
   }
 
-  datatable.columns.forEach((column, index) => {
-    if (index !== 0) {
-      spec.layer.push({
-        mark: 'line',
-        encoding: {
-          x: {
-            axis: {
-              title: xAxis.name,
-              grid: false,
-            },
-            field: xAxis.id,
-            type: 'temporal',
-          },
-          y: {
-            axis: {
-              title: yTitle || column.name,
-              grid: false,
-            },
-            field: column.id,
-            type: 'quantitative',
-          },
-          color: {
-            datum: column.name,
-          },
+  if (parseParams.addTimeMarker) {
+    spec.transform = [
+      {
+        calculate: 'now()',
+        as: 'now_field',
+      },
+    ];
+
+    spec.layer.push({
+      mark: 'rule',
+      encoding: {
+        x: {
+          type: 'temporal',
+          field: 'now_field',
         },
-      });
-    }
-  });
+        color: {
+          value: 'red',
+        },
+        size: {
+          value: 1,
+        },
+      },
+    });
+  }
 
   if (parseParams.thresholdLine.show as boolean) {
     spec.layer.push({
@@ -193,9 +235,6 @@ export const createVegaSpecFn = (
 
     // creating initial vega spec from table
     const spec = createSpecFromDatatable(table, args.visParams, args.dimensions);
-    console.log("spec for vega")
-
-    console.log(JSON.stringify(spec));
 
     return JSON.stringify(spec);
   },

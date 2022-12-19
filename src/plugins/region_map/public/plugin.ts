@@ -134,9 +134,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
 
     expressions.registerFunction(createRegionMapFn);
 
-    visualizations.createBaseVisualization(
-      createRegionMapTypeDefinition(visualizationDependencies)
-    );
+    visualizations.createBaseVisualization(createRegionMapTypeDefinition(visualizationDependencies));
 
     return {
       config,

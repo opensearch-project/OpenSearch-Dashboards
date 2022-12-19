@@ -51,10 +51,8 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
     }
   );
 
-  console.log("params vis layers: " + JSON.stringify(params.visLayers));
-
   // Checks if there are vislayers to overlay. If not, default to the vislib implementation.
-  if (params != null && params.visLayers != null && Object.keys(params.visLayers).length === 2) {
+  if (params.visLayers != null && Object.keys(params.visLayers).length === 0) {
     // This wont work but is needed so then it will default to the original vis lib renderer
     const dimensions = await buildVislibDimensions(vis, params);
     const visConfig = { ...vis.params, dimensions };
@@ -74,17 +72,12 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
     });
     const vegaSpecFnExpressionBuilder = buildExpression([vegaSpecFn]);
 
-    console.log("builder");
-    console.log(vegaSpecFnExpressionBuilder);
     // build vega expr fn. use nested expression fn syntax to first construct the
     // spec via 'vega_spec' fn, then set as the arg for the final 'vega' fn
     const vegaFn = buildExpressionFunction<VegaExpressionFunctionDefinition>('vega', {
       spec: vegaSpecFnExpressionBuilder,
     });
-    console.log("hi")
     const ast = buildExpression([opensearchaggsFn, vegaFn]);
-    console.log("hi2")
-    console.log(ast.toAst());
     return ast.toAst();
   }
 };

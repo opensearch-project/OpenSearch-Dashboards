@@ -32,6 +32,13 @@ import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
 import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
 import { VisType } from './types';
+import { VisOptionsProps } from '../../../vis_default_editor/public';
+import { BasicVislibParams } from '../../../vis_type_vislib/public';
+import { ExpressionAstExpression } from '../../../expressions/common/ast';
+import { PieVisParams } from '../../../vis_type_vislib/public/pie';
+import { ColorSchema, ColorSchemas } from '../../../charts/public/static/color_maps';
+import { HeatmapVisParams } from '../../../vis_type_vislib/public/heatmap';
+import { GaugeVisParams } from '../../../vis_type_vislib/public/gauge';
 
 /**
  * Vis Types Service
