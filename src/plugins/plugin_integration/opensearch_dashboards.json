@@ -1,0 +1,7 @@
+{
+  "id": "pluginIntegration",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "visualizations", "savedObjects", "opensearchDashboardsUtils"]
+}
