@@ -83,7 +83,6 @@ export const createVegaFn = (
     },
   },
   async fn(input, args, context) {
-    console.log("geting to vegafn");
     const vegaRequestHandler = createVegaRequestHandler(dependencies, context);
 
     const response = await vegaRequestHandler({
