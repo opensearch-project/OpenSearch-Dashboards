@@ -34,5 +34,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new PluginIntegrationPlugin(initializerContext);
 }
 
-/** @public types */
 export { PluginIntegrationSetup, PluginIntegrationStart };
