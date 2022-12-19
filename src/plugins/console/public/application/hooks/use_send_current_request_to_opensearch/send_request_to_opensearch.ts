@@ -107,7 +107,8 @@ export function sendRequestToOpenSearch(
           return;
         }
         const statusCode = httpResponse.response?.status;
-        const isSuccess = statusCode && (statusCode >= 200 || statusCode === 404);
+        const isSuccess =
+          statusCode && ((statusCode >= 200 && statusCode < 300) || statusCode === 404);
         if (isSuccess) {
           const contentType = httpResponse.response.headers.get('Content-Type') as BaseResponseType;
           let value = '';
