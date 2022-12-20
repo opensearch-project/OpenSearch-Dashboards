@@ -71,14 +71,14 @@ export interface ColumnWidth {
   width: number;
 }
 
-export interface SortColumn {
-  colIndex: number | null;
-  direction: 'asc' | 'desc' | null;
+export interface ColumnSort {
+  colIndex?: number;
+  direction?: 'asc' | 'desc';
 }
 
 export interface TableUiState {
-  sort: SortColumn;
-  setSort: (sort: SortColumn) => void;
+  sort: ColumnSort;
+  setSort: (sort: ColumnSort) => void;
   width: ColumnWidth[];
   setWidth: (columnWidths: ColumnWidth[]) => void;
 }

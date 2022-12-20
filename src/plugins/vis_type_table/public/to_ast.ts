@@ -21,7 +21,10 @@ export const toExpressionAst = (vis: Vis, params: any) => {
   );
 
   const schemas = getVisSchemas(vis, params);
-  // remove duplicate metrics
+  // if customer selects showPartialRows without showMetricsAtAllLevels,
+  // we need to remove the duplicated metrics.
+  // First, we need to calculate the required number of metrics
+  // Then, we return one copy of the required metrics from metric array
   const metrics =
     schemas.bucket && vis.params.showPartialRows && !vis.params.showMetricsAtAllLevels
       ? schemas.metric.slice(-1 * (schemas.metric.length / schemas.bucket.length))

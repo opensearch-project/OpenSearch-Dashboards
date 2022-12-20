@@ -8,19 +8,19 @@ To create a data table in OpenSearch Dashboards, first select `Visualize` from t
 ## Select Metrics
 
 ### Metrics Aggregation
-At the `Metrics`, select the metric aggregation type from the menu and config it accordinly.
+At the `Metrics`, select the metric aggregation type from the menu and configure it accordingly. You could also add multiple metrics and each metrics is a separate column in table visualization.
 
 ### Buckets Aggregation
-At the `Buckets`, config the columns to be displayed in the table visualization.
-- `Split Rows` is used when you want to divide one row into more categories. It splits one row into multiple and add columns based on the categories you choose to split. For example, if you split the data based on gender then you want to know more on each gender's clothing preference. You could click `Split Rows` and input `clothing.category` in terms. Each genger's data is now splitted to multiple rows based on a new added column `clothing.category`.
-- `Split Table` splits the table into seperate tables for the aggregation you choose. It is similar to `Split Rows`, but this time you will see multiple tables.
+At the `Buckets`, configure the columns to be displayed in the table visualization.
+- `Split Rows` is used when you want to divide one row into more based on some category. It splits one row into multiple and add columns based on the categories you choose to split. For example, if you split the data based on gender then you want to know more on each gender's clothing preference. You could click `Split Rows` and input `clothing.category` in terms. Each gender's data is now split across to multiple rows based on a new added column `clothing.category`.
+- `Split Table` splits the table into separate tables for the aggregation you choose. It is similar to `Split Rows`, but this time each row becomes a single table with aggregation columns arranged horizontally or vertically.
 
 ## Select Options
-In the `Options` tab, you could config more options.
+In the `Options` tab, you can configure more options.
 - `Max rows per page` is the maximum number of rows displayed per page.
-- `Show metrics for every bucket/level` adds metrics aggregation to every columns.
+- `Show metrics for every bucket/level` adds metrics aggregation to every column.
 - `Show partial rows` will include data with missing columns.
-- `Show total` calculates the selected metrics per column and displays the result at the bottom.
+- `Show total` calculates the selected metrics per column and displays the result at the bottom. Warning - depending on your columns and the total aggregation function selected, this may generate statistically invalid results. For example, avoid summing or averaging averages.
 - `Percentage column` adds one percentage column based on the chosen metrics aggregation.
 
 ## Example

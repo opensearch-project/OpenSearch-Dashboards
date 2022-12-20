@@ -10,7 +10,7 @@ import { EuiDataGridProps, EuiDataGrid, EuiDataGridSorting, EuiTitle } from '@el
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
-import { TableVisConfig, ColumnWidth, SortColumn, TableUiState } from '../types';
+import { TableVisConfig, ColumnWidth, ColumnSort, TableUiState } from '../types';
 import { getDataGridColumns } from './table_vis_grid_columns';
 import { usePagination } from '../utils';
 import { convertToFormattedData } from '../utils/convert_to_formatted_data';
@@ -79,7 +79,7 @@ export const TableVisComponent = ({
   const onSort = useCallback(
     (sortingCols: EuiDataGridSorting['columns'] | []) => {
       const nextSortValue = sortingCols[sortingCols.length - 1];
-      const nextSort: SortColumn =
+      const nextSort: ColumnSort =
         sortingCols.length > 0
           ? {
               colIndex: dataGridColumns.findIndex((col) => col.id === nextSortValue?.id),
