@@ -36,6 +36,7 @@ Add the release runbook to RELEASING.md ([#2533](https://github.com/opensearch-p
 
 ### 🛠 Maintenance
 * Remove storybook package and related code ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
+* [Version] Increment to 1.3.8 ([#3087](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3087))
 
 ### 🪛 Refactoring
 
