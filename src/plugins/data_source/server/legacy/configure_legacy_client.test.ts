@@ -19,7 +19,7 @@ import { configureLegacyClient } from './configure_legacy_client';
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
 // TODO: improve UT
-describe.skip('configureLegacyClient', () => {
+describe('configureLegacyClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let config: DataSourcePluginConfigType;
   let savedObjectsMock: jest.Mocked<SavedObjectsClientContract>;

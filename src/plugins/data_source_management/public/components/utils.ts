@@ -85,11 +85,13 @@ export async function testConnection(
   dataSourceID?: string
 ) {
   const query: any = {
-    id: dataSourceID || '',
-    endpoint,
-    auth: {
-      type,
-      credentials: type === AuthType.NoAuth ? null : { ...credentials },
+    id: dataSourceID,
+    dataSourceAttr: {
+      endpoint,
+      auth: {
+        type,
+        credentials: type === AuthType.NoAuth ? null : { ...credentials },
+      },
     },
   };
 
