@@ -102,40 +102,44 @@ const createSpecFromDatatable = (
     },
   };
 
-  // assuming the first column in the datatable represents the x-axis / the time-related field.
-  // need to confirm if that's always the case or not
-  spec.layer = [] as any[];
-
+  // Get the valueAxes data and generate a map to easily fetch the different valueAxes data
   const valueAxis = {};
   parseParams.valueAxes.forEach((yAxis: { id: { toString: () => string | number } }) => {
     // @ts-ignore
     valueAxis[yAxis.id.toString()] = yAxis;
   });
 
+  spec.layer = [] as any[];
+
   if (datatable.rows.length > 0) {
+    let skip = 0;
     datatable.columns.forEach((column, index) => {
-      if (index !== 0) {
+      const currentSeriesParams = parseParams.seriesParams[index - skip];
+      // Check if its not xAxis column data
+      if (column.meta?.aggConfigParams?.interval != null) {
+        skip++;
+      } else {
         const currentValueAxis =
           // @ts-ignore
-          valueAxis[parseParams.seriesParams[index - 1].valueAxis.toString()];
+          valueAxis[currentSeriesParams.valueAxis.toString()];
         let tooltip: Array<{ field: string; type: string; title: string }> = [];
         if (parseParams.addTooltip) {
           tooltip = [
-            { field: xAxis.id, type: 'temporal', title: xAxis.name },
-            { field: column.id, type: 'quantitative', title: column.name },
+            { field: xAxis.id, type: 'temporal', title: xAxis.name.replaceAll('"', '') },
+            { field: column.id, type: 'quantitative', title: column.name.replaceAll('"', '') },
           ];
         }
         spec.layer.push({
           mark: {
-            type: parseParams.seriesParams[index - 1].type,
-            interpolate: parseParams.seriesParams[index - 1].interpolate,
-            strokeWidth: parseParams.seriesParams[index - 1].lineWidth,
-            point: parseParams.seriesParams[index - 1].showCircles,
+            type: currentSeriesParams.type,
+            interpolate: currentSeriesParams.interpolate,
+            strokeWidth: currentSeriesParams.lineWidth,
+            point: currentSeriesParams.showCircles,
           },
           encoding: {
             x: {
               axis: {
-                title: xAxis.name,
+                title: xAxis.name.replaceAll('"', ''),
                 grid: parseParams.grid.categoryLines,
               },
               field: xAxis.id,
@@ -143,7 +147,9 @@ const createSpecFromDatatable = (
             },
             y: {
               axis: {
-                title: currentValueAxis.title.text || column.name,
+                title:
+                  currentValueAxis.title.text.replaceAll('"', '') ||
+                  column.name.replaceAll('"', ''),
                 grid: parseParams.grid.valueAxis !== '',
                 orient: currentValueAxis.position,
                 labels: currentValueAxis.labels.show,
@@ -154,7 +160,7 @@ const createSpecFromDatatable = (
             },
             tooltip,
             color: {
-              datum: column.name,
+              datum: column.name.replaceAll('"', ''),
             },
           },
         });
@@ -235,7 +241,6 @@ export const createVegaSpecFn = (
 
     // creating initial vega spec from table
     const spec = createSpecFromDatatable(table, args.visParams, args.dimensions);
-
     return JSON.stringify(spec);
   },
 });
