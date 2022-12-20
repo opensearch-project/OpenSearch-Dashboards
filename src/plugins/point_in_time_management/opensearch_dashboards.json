@@ -1,0 +1,10 @@
+{
+  "id": "pit",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation", "management"],
+  "optionalPlugins": [],
+  "requiredBundles": ["opensearchDashboardsReact"]
+}
