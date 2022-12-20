@@ -108,6 +108,7 @@ export function sendRequestToOpenSearch(
         }
         const statusCode = httpResponse.response?.status;
         const isSuccess =
+          // Things like DELETE index where the index is not there are OK.
           statusCode && ((statusCode >= 200 && statusCode < 300) || statusCode === 404);
         if (isSuccess) {
           const contentType = httpResponse.response.headers.get('Content-Type') as BaseResponseType;
