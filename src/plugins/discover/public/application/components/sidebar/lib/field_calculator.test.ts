@@ -34,14 +34,19 @@ import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { coreMock } from '../../../../../../../core/public/mocks';
-import { IndexPattern } from '../../../../../../data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
 import { getStubIndexPattern } from '../../../../../../data/public/test_utils';
-// @ts-ignore
-import { fieldCalculator } from './field_calculator';
+import {
+  groupValues,
+  getFieldValues,
+  getFieldValueCounts,
+  FieldValueCountsParams,
+} from './field_calculator';
+import { Bucket } from '../types';
 
 let indexPattern: IndexPattern;
 
-describe('fieldCalculator', function () {
+describe('field_calculator', function () {
   beforeEach(function () {
     indexPattern = getStubIndexPattern(
       'logstash-*',
@@ -51,28 +56,11 @@ describe('fieldCalculator', function () {
       coreMock.createSetup()
     );
   });
-  it('should have a _countMissing that counts nulls & undefineds in an array', function () {
-    const values = [
-      ['foo', 'bar'],
-      'foo',
-      'foo',
-      undefined,
-      ['foo', 'bar'],
-      'bar',
-      'baz',
-      null,
-      null,
-      null,
-      'foo',
-      undefined,
-    ];
-    expect(fieldCalculator._countMissing(values)).toBe(5);
-  });
 
-  describe('_groupValues', function () {
+  describe('groupValues', function () {
     let groups: Record<string, any>;
-    let params: any;
-    let values: any;
+    let grouped: boolean;
+    let values: any[];
     beforeEach(function () {
       values = [
         ['foo', 'bar'],
@@ -88,30 +76,28 @@ describe('fieldCalculator', function () {
         'foo',
         undefined,
       ];
-      params = {};
-      groups = fieldCalculator._groupValues(values, params);
+      groups = groupValues(values, grouped);
     });
 
-    it('should have a _groupValues that counts values', function () {
+    it('should return an object values', function () {
       expect(groups).toBeInstanceOf(Object);
     });
 
     it('should throw an error if any value is a plain object', function () {
       expect(function () {
-        fieldCalculator._groupValues([{}, true, false], params);
+        groupValues([{}, true, false], grouped);
       }).toThrowError();
     });
 
     it('should handle values with dots in them', function () {
       values = ['0', '0.........', '0.......,.....'];
-      params = {};
-      groups = fieldCalculator._groupValues(values, params);
+      groups = groupValues(values, grouped);
       expect(groups[values[0]].count).toBe(1);
       expect(groups[values[1]].count).toBe(1);
       expect(groups[values[2]].count).toBe(1);
     });
 
-    it('should have a a key for value in the array when not grouping array terms', function () {
+    it('should have a key for value in the array when not grouping array terms', function () {
       expect(_.keys(groups).length).toBe(3);
       expect(groups.foo).toBeInstanceOf(Object);
       expect(groups.bar).toBeInstanceOf(Object);
@@ -119,7 +105,7 @@ describe('fieldCalculator', function () {
     });
 
     it('should count array terms independently', function () {
-      expect(groups['foo,bar']).toBe(undefined);
+      expect(groups['foo,bar']).toBeUndefined();
       expect(groups.foo.count).toBe(5);
       expect(groups.bar.count).toBe(3);
       expect(groups.baz.count).toBe(1);
@@ -127,11 +113,11 @@ describe('fieldCalculator', function () {
 
     describe('grouped array terms', function () {
       beforeEach(function () {
-        params.grouped = true;
-        groups = fieldCalculator._groupValues(values, params);
+        grouped = true;
+        groups = groupValues(values, grouped);
       });
 
-      it('should group array terms when passed params.grouped', function () {
+      it('should group array terms when grouped is true', function () {
         expect(_.keys(groups).length).toBe(4);
         expect(groups['foo,bar']).toBeInstanceOf(Object);
       });
@@ -155,12 +141,12 @@ describe('fieldCalculator', function () {
       hits = _.each(_.cloneDeep(realHits), (hit) => indexPattern.flattenHit(hit));
     });
 
-    it('Should return an array of values for _source fields', function () {
-      const extensions = fieldCalculator.getFieldValues(
+    it('should return an array of values for _source fields', function () {
+      const extensions = getFieldValues({
         hits,
-        indexPattern.fields.getByName('extension'),
-        indexPattern
-      );
+        field: indexPattern.fields.getByName('extension') as IndexPatternField,
+        indexPattern,
+      });
       expect(extensions).toBeInstanceOf(Array);
       expect(
         _.filter(extensions, function (v) {
@@ -170,12 +156,12 @@ describe('fieldCalculator', function () {
       expect(_.uniq(_.clone(extensions)).sort()).toEqual(['gif', 'html', 'php', 'png']);
     });
 
-    it('Should return an array of values for core meta fields', function () {
-      const types = fieldCalculator.getFieldValues(
+    it('should return an array of values for core meta fields', function () {
+      const types = getFieldValues({
         hits,
-        indexPattern.fields.getByName('_type'),
-        indexPattern
-      );
+        field: indexPattern.fields.getByName('_type') as IndexPatternField,
+        indexPattern,
+      });
       expect(types).toBeInstanceOf(Array);
       expect(
         _.filter(types, function (v) {
@@ -187,48 +173,96 @@ describe('fieldCalculator', function () {
   });
 
   describe('getFieldValueCounts', function () {
-    let params: { hits: any; field: any; count: number; indexPattern: IndexPattern };
+    let params: FieldValueCountsParams;
     beforeEach(function () {
       params = {
         hits: _.cloneDeep(realHits),
-        field: indexPattern.fields.getByName('extension'),
+        field: indexPattern.fields.getByName('extension') as IndexPatternField,
         count: 3,
         indexPattern,
       };
     });
 
-    it('counts the top 3 values', function () {
-      const extensions = fieldCalculator.getFieldValueCounts(params);
+    it('counts the top 5 values by default', function () {
+      params.hits = params.hits.map((hit: Record<string, any>, i) => ({
+        ...hit,
+        _source: {
+          extension: `${hit._source.extension}-${i}`,
+        },
+      }));
+      params.count = undefined;
+      const extensions = getFieldValueCounts(params);
       expect(extensions).toBeInstanceOf(Object);
       expect(extensions.buckets).toBeInstanceOf(Array);
-      expect(extensions.buckets.length).toBe(3);
-      expect(_.map(extensions.buckets, 'value')).toEqual(['html', 'php', 'gif']);
-      expect(extensions.error).toBe(undefined);
+      const buckets = extensions.buckets as Bucket[];
+      expect(buckets.length).toBe(5);
+      expect(extensions.error).toBeUndefined();
+    });
+
+    it('counts only distinct values if less than default', function () {
+      params.count = undefined;
+      const extensions = getFieldValueCounts(params);
+      expect(extensions).toBeInstanceOf(Object);
+      expect(extensions.buckets).toBeInstanceOf(Array);
+      const buckets = extensions.buckets as Bucket[];
+      expect(buckets.length).toBe(4);
+      expect(extensions.error).toBeUndefined();
+    });
+
+    it('counts only distinct values if less than specified count', function () {
+      params.count = 10;
+      const extensions = getFieldValueCounts(params);
+      expect(extensions).toBeInstanceOf(Object);
+      expect(extensions.buckets).toBeInstanceOf(Array);
+      const buckets = extensions.buckets as Bucket[];
+      expect(buckets.length).toBe(4);
+      expect(extensions.error).toBeUndefined();
+    });
+
+    it('counts the top 3 values', function () {
+      const extensions = getFieldValueCounts(params);
+      expect(extensions).toBeInstanceOf(Object);
+      expect(extensions.buckets).toBeInstanceOf(Array);
+      const buckets = extensions.buckets as Bucket[];
+      expect(buckets.length).toBe(3);
+      expect(_.map(buckets, 'value')).toEqual(['html', 'gif', 'php']);
+      expect(extensions.error).toBeUndefined();
     });
 
     it('fails to analyze geo and attachment types', function () {
-      params.field = indexPattern.fields.getByName('point');
-      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
+      params.field = indexPattern.fields.getByName('point') as IndexPatternField;
+      expect(getFieldValueCounts(params).error).not.toBeUndefined();
 
-      params.field = indexPattern.fields.getByName('area');
-      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
+      params.field = indexPattern.fields.getByName('area') as IndexPatternField;
+      expect(getFieldValueCounts(params).error).not.toBeUndefined();
 
-      params.field = indexPattern.fields.getByName('request_body');
-      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
+      params.field = indexPattern.fields.getByName('request_body') as IndexPatternField;
+      expect(getFieldValueCounts(params).error).not.toBeUndefined();
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function () {
-      params.field = indexPattern.fields.getByName('ip');
-      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
+      params.field = indexPattern.fields.getByName('ip') as IndexPatternField;
+      expect(getFieldValueCounts(params).error).not.toBeUndefined();
     });
 
     it('counts the total hits', function () {
-      expect(fieldCalculator.getFieldValueCounts(params).total).toBe(params.hits.length);
+      expect(getFieldValueCounts(params).total).toBe(params.hits.length);
     });
 
     it('counts the hits the field exists in', function () {
-      params.field = indexPattern.fields.getByName('phpmemory');
-      expect(fieldCalculator.getFieldValueCounts(params).exists).toBe(5);
+      params.field = indexPattern.fields.getByName('phpmemory') as IndexPatternField;
+      expect(getFieldValueCounts(params).exists).toBe(5);
+    });
+
+    it('catches and returns errors', function () {
+      params.hits = params.hits.map((hit: Record<string, any>) => ({
+        ...hit,
+        _source: {
+          extension: { foo: hit._source.extension },
+        },
+      }));
+      params.grouped = true;
+      expect(typeof getFieldValueCounts(params).error).toBe('string');
     });
   });
 });

@@ -46,22 +46,24 @@ export interface TopNavConfigParams {
   savedVisBuilderVis: VisBuilderVisSavedObject;
   saveDisabledReason?: string;
   dispatch: AppDispatch;
+  originatingApp?: string;
 }
 
 export const getTopNavConfig = (
-  { visualizationIdFromUrl, savedVisBuilderVis, saveDisabledReason, dispatch }: TopNavConfigParams,
+  {
+    visualizationIdFromUrl,
+    savedVisBuilderVis,
+    saveDisabledReason,
+    dispatch,
+    originatingApp,
+  }: TopNavConfigParams,
   services: VisBuilderServices
 ) => {
   const {
     i18n: { Context: I18nContext },
     embeddable,
-    scopedHistory,
   } = services;
 
-  const { originatingApp, embeddableId } =
-    embeddable
-      .getStateTransfer(scopedHistory)
-      .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
   const stateTransfer = embeddable.getStateTransfer();
 
   const topNavConfig: TopNavMenuData[] = [
@@ -105,7 +107,7 @@ export const getTopNavConfig = (
         showSaveModal(saveModal, I18nContext);
       },
     },
-    ...(originatingApp && ((savedVisBuilderVis && savedVisBuilderVis.id) || embeddableId)
+    ...(originatingApp && savedVisBuilderVis && savedVisBuilderVis.id
       ? [
           {
             id: 'saveAndReturn',

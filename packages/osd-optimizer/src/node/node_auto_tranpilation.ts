@@ -50,7 +50,7 @@ import Crypto from 'crypto';
 
 import * as babel from '@babel/core';
 import { addHook } from 'pirates';
-import { REPO_ROOT, UPSTREAM_BRANCH } from '@osd/dev-utils';
+import { REPO_ROOT, REPO_ROOT_8_3, UPSTREAM_BRANCH } from '@osd/dev-utils';
 import sourceMapSupport from 'source-map-support';
 
 import { Cache } from './cache';
@@ -142,7 +142,7 @@ export function registerNodeAutoTranspilation() {
   installed = true;
 
   const cache = new Cache({
-    pathRoot: REPO_ROOT,
+    pathRoot: [REPO_ROOT, REPO_ROOT_8_3],
     dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache_v1', UPSTREAM_BRANCH),
     prefix: determineCachePrefix(),
     log: process.env.DEBUG_NODE_TRANSPILER_CACHE

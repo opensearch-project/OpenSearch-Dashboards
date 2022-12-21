@@ -31,7 +31,7 @@
 import { relative, sep } from 'path';
 import { SchemaError } from '.';
 
-import { standardize, PROCESS_WORKING_DIR } from '@osd/cross-platform';
+import { standardize, getRepoRoot } from '@osd/cross-platform';
 
 /**
  * Make all paths in stacktrace relative.
@@ -48,7 +48,7 @@ export const cleanStack = (stack: string) =>
       }
 
       const path = parts[1];
-      const relativePath = standardize(relative(PROCESS_WORKING_DIR, path));
+      const relativePath = standardize(relative(getRepoRoot(path) || '.', path));
 
       return line.replace(path, relativePath);
     })

@@ -36,6 +36,7 @@ import del from 'del';
 import execa from 'execa';
 import xml2js from 'xml2js';
 import { getUniqueJunitReportPath } from '@osd/test';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 const MINUTE = 1000 * 60;
 const ROOT_DIR = resolve(__dirname, '../../../../');
@@ -44,7 +45,7 @@ const TARGET_DIR = resolve(FIXTURE_DIR, 'target');
 const XML_PATH = getUniqueJunitReportPath(FIXTURE_DIR, 'Jest Tests');
 
 afterAll(async () => {
-  await del(TARGET_DIR);
+  await del(TARGET_DIR, { cwd: PROCESS_WORKING_DIR });
 });
 
 const parseXml = promisify(xml2js.parseString);

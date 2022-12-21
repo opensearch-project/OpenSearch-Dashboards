@@ -28,14 +28,25 @@
  * under the License.
  */
 
-import { REPO_ROOT } from '@osd/utils';
+// Not importing from @osd/cross-platform to allow some complicated tests to run: suite_tracker.test.ts
+import { REPO_ROOT, REPO_ROOT_8_3 } from '@osd/utils';
 
 export function createAbsolutePathSerializer(
-  rootPath: string = REPO_ROOT,
+  rootPath: string | string[] = [REPO_ROOT, REPO_ROOT_8_3],
   replacement = '<absolute path>'
 ) {
+  const rootPaths = Array.isArray(rootPath) ? rootPath : [rootPath];
+
   return {
-    test: (value: any) => typeof value === 'string' && value.startsWith(rootPath),
-    serialize: (value: string) => value.replace(rootPath, replacement).replace(/\\/g, '/'),
+    test: (value: any) =>
+      typeof value === 'string' && rootPaths.some((path) => value.startsWith(path)),
+    serialize: (value: string) =>
+      rootPaths
+        // Replace all instances of `rootPaths` found at the beginning of the `value`
+        .reduce(
+          (result, path) => (result.startsWith(path) ? result.replace(path, replacement) : result),
+          value
+        )
+        .replace(/\\/g, '/'),
   };
 }

@@ -13,7 +13,7 @@ RUN apt-get update && \
 # Specify the version of Chrome that matches the version of chromedriver in the package.json.
 # A list of Chrome versions can be found here:
 # https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
-ARG CHROME_VERSION=100.0.4896.127-1
+ARG CHROME_VERSION=107.0.5304.121-1
 RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
   && wget -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb \
   && apt-get update \

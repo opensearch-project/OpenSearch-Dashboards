@@ -97,6 +97,22 @@ ruleTester.run('@osd/eslint/no-restricted-paths', rule, {
         },
       ],
     },
+    {
+      code: 'import b from "testfiles/no_restricted_paths/server/deep/deeper/e.js"',
+      filename: path.join(__dirname, 'testfiles/no_restricted_paths/server/deep/d.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              target: 'testfiles/**/server/**/*',
+              from: 'testfiles/**/server/**/*',
+              allowSameFolder: true,
+            },
+          ],
+        },
+      ],
+    },
 
     // irrelevant function calls
     {

@@ -5,3 +5,4 @@
 
 export * from './path';
 export * from './process';
+export * from './repo_root';

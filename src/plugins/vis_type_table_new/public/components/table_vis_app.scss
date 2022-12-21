@@ -1,0 +1,14 @@
+.visTable__group {
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeL;
+
+  > h3 {
+    text-align: center;
+  }
+}
+
+.visTable__groupInColumns {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
