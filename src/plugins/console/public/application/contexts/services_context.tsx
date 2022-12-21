@@ -29,7 +29,7 @@
  */
 
 import React, { createContext, useContext, useEffect } from 'react';
-import { NotificationsSetup } from 'opensearch-dashboards/public';
+import { HttpSetup, NotificationsSetup } from 'opensearch-dashboards/public';
 import { History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { MetricsTracker } from '../../types';
@@ -43,6 +43,7 @@ interface ContextServices {
   objectStorageClient: ObjectStorageClient;
   trackUiMetric: MetricsTracker;
   opensearchHostService: OpenSearchHostService;
+  http: HttpSetup;
 }
 
 export interface ContextValue {
