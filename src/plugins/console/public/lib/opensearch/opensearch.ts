@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import $ from 'jquery';
-import { stringify } from 'query-string';
+import { HttpResponse, HttpSetup } from 'opensearch-dashboards/public';
 
 const opensearchVersion: string[] = [];
 
@@ -42,35 +41,21 @@ export function getContentType(body: any) {
   return 'application/json';
 }
 
-export function send(method: string, path: string, data: any) {
-  const wrappedDfd = $.Deferred();
-
-  const options: JQuery.AjaxSettings = {
-    url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
-    headers: {
-      'osd-xsrf': 'opensearchDashboards',
+export async function send(
+  http: HttpSetup,
+  method: string,
+  path: string,
+  data: any
+): Promise<HttpResponse> {
+  return await http.post<HttpResponse>('/api/console/proxy', {
+    query: {
+      path,
+      method,
     },
-    data,
-    contentType: getContentType(data),
-    cache: false,
-    crossDomain: true,
-    type: 'POST',
-    dataType: 'text', // disable automatic guessing
-  };
-
-  $.ajax(options).then(
-    (responseData: any, textStatus: string, jqXHR: any) => {
-      wrappedDfd.resolveWith({}, [responseData, textStatus, jqXHR]);
-    },
-    ((jqXHR: any, textStatus: string, errorThrown: Error) => {
-      if (jqXHR.status === 0) {
-        jqXHR.responseText =
-          "\n\nFailed to connect to Console's backend.\nPlease check the OpenSearch Dashboards server is up and running";
-      }
-      wrappedDfd.rejectWith({}, [jqXHR, textStatus, errorThrown]);
-    }) as any
-  );
-  return wrappedDfd;
+    body: data,
+    prependBasePath: true,
+    asResponse: true,
+  });
 }
 
 export function constructOpenSearchUrl(baseUri: string, path: string) {
