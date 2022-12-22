@@ -7,37 +7,32 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginIntegrationSetup {}
+export interface VisAugmenterSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginIntegrationStart {}
+export interface VisAugmenterStart {}
 
-export interface PluginIntegrationSetupDeps {
+export interface VisAugmenterSetupDeps {
   data: DataPublicPluginSetup;
 }
 
-export interface PluginIntegrationStartDeps {
+export interface VisAugmenterStartDeps {
   data: DataPublicPluginStart;
 }
 
-export class PluginIntegrationPlugin
+export class VisAugmenterPlugin
   implements
-    Plugin<
-      PluginIntegrationSetup,
-      PluginIntegrationStart,
-      PluginIntegrationSetupDeps,
-      PluginIntegrationStartDeps
-    > {
+    Plugin<VisAugmenterSetup, VisAugmenterStart, VisAugmenterSetupDeps, VisAugmenterStartDeps> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<PluginIntegrationStartDeps, PluginIntegrationStart>,
-    { data }: PluginIntegrationSetupDeps
-  ): PluginIntegrationSetup {
+    core: CoreSetup<VisAugmenterStartDeps, VisAugmenterStart>,
+    { data }: VisAugmenterSetupDeps
+  ): VisAugmenterSetup {
     return {};
   }
 
-  public start(core: CoreStart, { data }: PluginIntegrationStartDeps): PluginIntegrationStart {
+  public start(core: CoreStart, { data }: VisAugmenterStartDeps): VisAugmenterStart {
     return {};
   }
 

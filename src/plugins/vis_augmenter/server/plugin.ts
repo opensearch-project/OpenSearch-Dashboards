@@ -12,12 +12,12 @@ import {
 } from '../../../core/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginIntegrationPluginSetup {}
+export interface VisAugmenterPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginIntegrationPluginStart {}
+export interface VisAugmenterPluginStart {}
 
-export class PluginIntegrationPlugin
-  implements Plugin<PluginIntegrationPluginSetup, PluginIntegrationPluginStart> {
+export class VisAugmenterPlugin
+  implements Plugin<VisAugmenterPluginSetup, VisAugmenterPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -25,12 +25,12 @@ export class PluginIntegrationPlugin
   }
 
   public setup(core: CoreSetup) {
-    this.logger.debug('pluginIntegration: Setup');
+    this.logger.debug('VisAugmenter: Setup');
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('pluginIntegration: Started');
+    this.logger.debug('VisAugmenter: Started');
     return {};
   }
 

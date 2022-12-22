@@ -4,9 +4,9 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { PluginIntegrationPlugin } from './plugin';
+import { VisAugmenterPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new PluginIntegrationPlugin(initializerContext);
+  return new VisAugmenterPlugin(initializerContext);
 }
-export { PluginIntegrationPluginSetup, PluginIntegrationPluginStart } from './plugin';
+export { VisAugmenterPluginSetup, VisAugmenterPluginStart } from './plugin';

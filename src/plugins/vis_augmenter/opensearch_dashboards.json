@@ -1,5 +1,5 @@
 {
-  "id": "pluginIntegration",
+  "id": "visAugmenter",
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
