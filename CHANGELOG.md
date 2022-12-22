@@ -96,6 +96,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 * [Multi DataSource] UX enhancement on Data source management stack ([#2521](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2521))
 * [Multi DataSource] UX enhancement on Update stored password modal for Data source management stack ([#2532](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2532))
 * [Viz Builder] Create a new wizard directly on a dashboard ([#2384](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2384))
+- [Monaco editor] add json worker and language implement ([#3121](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3121))
 
 ### 🐛 Bug Fixes
 
