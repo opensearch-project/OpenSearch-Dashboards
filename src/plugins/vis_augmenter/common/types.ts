@@ -14,6 +14,9 @@ export interface VisLayer {
 
 export type VisLayers = VisLayer[];
 
+// resourceId & resourceName are required so that the
+// events flyout can partition data based on these attributes
+// (e.g., partitioning anomalies based on the detector they came from)
 export interface PointInTimeEventMetadata {
   resourceId: string;
   resourceName: string;
