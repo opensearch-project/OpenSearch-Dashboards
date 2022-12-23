@@ -19,6 +19,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 * [CVE-2022-37601] Bump loader-utils to 2.0.3 ([#2707](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2707))
 * [CVE-2022-37599] Bump loader-utils to 2.0.4 ([#2995](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2995))
 * [CVE-2022-37603] Bump loader-utils to 2.0.4 ([#2995](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2995))
+- [CVE-2022-25912] Bumps simple-git from 1.116.0 to 3.15.0 ([#3136](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3136))
 
 ### 📈 Features/Enhancements
 
