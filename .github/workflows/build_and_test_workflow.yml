@@ -53,6 +53,10 @@ jobs:
         id: linter
         run: yarn lint
 
+      - name: Validate NOTICE file
+        id: notice-validate
+        run: yarn notice:validate
+
       - name: Run unit tests with coverage
         id: unit-tests
         run: yarn test:jest:ci:coverage
@@ -106,6 +110,10 @@ jobs:
       - name: Run linter
         id: linter
         run: yarn lint
+
+      - name: Validate NOTICE file
+        id: notice-validate
+        run: yarn notice:validate
 
       - name: Run unit tests with coverage
         id: unit-tests
