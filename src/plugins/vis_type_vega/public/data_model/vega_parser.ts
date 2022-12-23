@@ -92,6 +92,7 @@ export class VegaParser {
   getServiceSettings: () => Promise<IServiceSettings>;
   filters: Bool;
   timeCache: TimeCache;
+  showEvents: boolean;
 
   constructor(
     spec: VegaSpec | string,
@@ -102,6 +103,7 @@ export class VegaParser {
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
+    this.showEvents = false;
 
     this.error = undefined;
     this.warnings = [];
@@ -158,6 +160,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
 
     this._config = this._parseConfig();
     this.hideWarnings = !!this._config.hideWarnings;
+    this.showEvents = !!this._config.showEvents;
     this.useMap = this._config.type === 'map';
     this.renderer = this._config.renderer === 'svg' ? 'svg' : 'canvas';
     this.tooltips = this._parseTooltips();
@@ -187,6 +190,15 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
   private _compileWithAutosize() {
     const defaultAutosize = {
       type: 'fit',
+      contains: 'padding',
+    };
+
+    // If showEvents is true, it means we are showing a base vis + event vis.
+    // Because this will be using a vconcat spec, we can autosize the width
+    // via fit-x. Note the regular 'fit' (to autosize width + height) does not work here.
+    // See limitations: https://vega.github.io/vega-lite/docs/size.html#limitations
+    const showEventsAutosize = {
+      type: 'fit-x',
       contains: 'padding',
     };
 
@@ -224,6 +236,10 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       autosize = defaultAutosize;
     }
 
+    if (this.showEvents) {
+      autosize = showEventsAutosize;
+    }
+
     if (
       useResize &&
       ((this.spec.width && this.spec.width !== 'container') ||
@@ -243,7 +259,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       );
     }
 
-    if (useResize) {
+    if (useResize && !this.showEvents) {
       this.spec.width = 'container';
       this.spec.height = 'container';
     }

@@ -28,30 +28,5 @@
  * under the License.
  */
 
-import { vega } from '../lib/vega';
-import { VegaBaseView } from './vega_base_view';
-
-export class VegaView extends VegaBaseView {
-  async _initViewCustomizations() {
-    // In some cases, Vega may be initialized twice... TBD
-    if (!this._$container) return;
-
-    const view = new vega.View(
-      vega.parse(this._parser.spec, null, this._vegaViewOptions),
-      this._vegaViewConfig
-    );
-
-    view.warn = this.onWarn.bind(this);
-    view.error = this.onError.bind(this);
-    if (this._parser.useResize) this.updateVegaSize(view);
-    if (this._parser.showEvents) {
-      this.updateBaseVisHeight(view);
-    }
-    view.initialize(this._$container.get(0), this._$controls.get(0));
-
-    if (this._parser.useHover) view.hover();
-
-    await this.setView(view);
-    this.setDebugValues(view, this._parser.spec, this._parser.vlspec);
-  }
-}
+export { LineVegaSpecExpressionFunctionDefinition } from './line_vega_spec_fn';
+export { VegaExpressionFunctionDefinition } from './vega_fn';

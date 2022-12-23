@@ -3,5 +3,11 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "savedObjects", "opensearchDashboardsUtils", "expressions"]
+  "requiredPlugins": [
+    "data",
+    "savedObjects",
+    "opensearchDashboardsUtils",
+    "expressions",
+    "visTypeVega"
+  ]
 }

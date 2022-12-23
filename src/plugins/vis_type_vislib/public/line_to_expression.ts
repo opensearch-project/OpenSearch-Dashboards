@@ -42,7 +42,7 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
     const vegaSpecFn = buildExpressionFunction<LineVegaSpecExpressionFunctionDefinition>(
       'line_vega_spec',
       {
-        visLayers: JSON.stringify([]),
+        visLayers: JSON.stringify(params.visLayers),
         visParams: JSON.stringify(vis.params),
         dimensions: JSON.stringify(dimensions),
       }
