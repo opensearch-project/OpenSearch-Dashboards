@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisLayerExpressionFn } from '../types';
-import { VisLayerTypes } from '../../common';
+import { VisLayerExpressionFn, VisLayerTypes } from '../types';
 import {
   createSavedAugmentVisLoader,
   SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
@@ -19,15 +18,23 @@ describe('SavedObjectLoaderAugmentVis', () => {
       testArg: 'test-value',
     },
   } as VisLayerExpressionFn;
-  const validObj1 = generateAugmentVisSavedObject('valid-obj-id-1', fn);
-  const validObj2 = generateAugmentVisSavedObject('valid-obj-id-2', fn);
-  const invalidFnTypeObj = generateAugmentVisSavedObject('invalid-fn-obj-id-1', {
-    ...fn,
-    // @ts-ignore
-    type: 'invalid-type',
-  });
-  // @ts-ignore
-  const missingFnObj = generateAugmentVisSavedObject('missing-fn-obj-id-1', {});
+  const validObj1 = generateAugmentVisSavedObject('valid-obj-id-1', fn, 'test-vis-id');
+  const validObj2 = generateAugmentVisSavedObject('valid-obj-id-2', fn, 'test-vis-id');
+  const invalidFnTypeObj = generateAugmentVisSavedObject(
+    'invalid-fn-obj-id-1',
+    {
+      ...fn,
+      // @ts-ignore
+      type: 'invalid-type',
+    },
+    'test-vis-id'
+  );
+
+  const missingFnObj = generateAugmentVisSavedObject(
+    'missing-fn-obj-id-1',
+    {} as VisLayerExpressionFn,
+    'test-vis-id'
+  );
 
   it('find returns single saved obj', async () => {
     const loader = createSavedAugmentVisLoader({

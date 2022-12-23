@@ -4,7 +4,7 @@
  */
 
 import { ExpressionTypeDefinition } from '../../../expressions';
-import { VisLayers } from '../../common';
+import { VisLayers } from '../';
 
 const name = 'vis_layers';
 

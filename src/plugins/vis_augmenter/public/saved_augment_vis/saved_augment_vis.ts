@@ -9,7 +9,7 @@ import {
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
 import { createSavedAugmentVisClass } from './_saved_augment_vis';
-import { VisLayerTypes } from '../../common';
+import { VisLayerTypes } from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectOpenSearchDashboardsServicesWithAugmentVis

@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { extractReferences, injectReferences } from './saved_augment_vis_references';
+import {
+  extractReferences,
+  injectReferences,
+  VIS_REFERENCE_NAME,
+} from './saved_augment_vis_references';
 import { AugmentVisSavedObject } from '../types';
-import { VIS_REFERENCE_NAME } from './saved_augment_vis_references';
 
 describe('extractReferences()', () => {
   test('extracts nothing if visId is null', () => {
