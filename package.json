@@ -227,7 +227,6 @@
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.1.0",
     "@microsoft/api-documenter": "^7.13.78",
     "@microsoft/api-extractor": "^7.19.3",
