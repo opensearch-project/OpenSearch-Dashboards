@@ -36,6 +36,8 @@ import { registerLexerRules } from './lexer_rules';
 import { ID } from './constants';
 // @ts-ignore
 import workerSrc from '!!raw-loader!../../target/public/xjson.editor.worker.js';
+// @ts-ignore
+import jsonWorkerSrc from '!!raw-loader!../../target/public/json.editor.worker.js';
 
 const wps = new WorkerProxyService();
 
@@ -48,8 +50,11 @@ registerLexerRules(monaco);
 // @ts-ignore
 window.MonacoEnvironment = {
   getWorker: (module: string, languageId: string) => {
-    if (languageId === ID) {
-      // In OpenSearch Dashboards we will probably build this once and then load with raw-loader
+    // In OpenSearch Dashboards we will probably build this once and then load with raw-loader
+    if (languageId === 'json') {
+      const blob = new Blob([jsonWorkerSrc], { type: 'application/javascript' });
+      return new Worker(URL.createObjectURL(blob));
+    } else if (languageId === ID) {
       const blob = new Blob([workerSrc], { type: 'application/javascript' });
       return new Worker(URL.createObjectURL(blob));
     }
