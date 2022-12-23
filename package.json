@@ -56,6 +56,8 @@
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:ftr:runner": "node scripts/functional_test_runner",
     "checkLicenses": "node scripts/check_licenses --dev",
+    "notice:validate": "node scripts/notice --validate",
+    "notice:generate": "node scripts/notice",
     "build-platform": "node scripts/build",
     "build": "node scripts/build --all-platforms",
     "start": "node scripts/opensearch_dashboards --dev",
