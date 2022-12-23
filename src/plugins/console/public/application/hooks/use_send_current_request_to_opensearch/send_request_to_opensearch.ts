@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { HttpFetchError, HttpSetup } from 'opensearch-dashboards/public';
 import { extractDeprecationMessages } from '../../../lib/utils';
 import { XJson } from '../../../../../opensearch_ui_shared/public';
 const { collapseLiteralStrings } = XJson;
@@ -36,6 +37,7 @@ import * as opensearch from '../../../lib/opensearch/opensearch';
 import { BaseResponseType } from '../../../types';
 
 export interface OpenSearchRequestArgs {
+  http: HttpSetup;
   requests: any;
 }
 
@@ -76,7 +78,7 @@ export function sendRequestToOpenSearch(
 
     const isMultiRequest = requests.length > 1;
 
-    const sendNextRequest = () => {
+    const sendNextRequest = async () => {
       if (reqId !== CURRENT_REQ_ID) {
         resolve(results);
         return;
@@ -94,79 +96,96 @@ export function sendRequestToOpenSearch(
       } // append a new line for bulk requests.
 
       const startTime = Date.now();
-      opensearch
-        .send(opensearchMethod, opensearchPath, opensearchData)
-        .always((dataOrjqXHR: any, textStatus: string, jqXhrORerrorThrown: any) => {
-          if (reqId !== CURRENT_REQ_ID) {
-            return;
-          }
-
-          const xhr = dataOrjqXHR.promise ? dataOrjqXHR : jqXhrORerrorThrown;
-
-          const isSuccess =
-            typeof xhr.status === 'number' &&
-            // Things like DELETE index where the index is not there are OK.
-            ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 404);
-
-          if (isSuccess) {
-            let value = xhr.responseText;
-
-            const warnings = xhr.getResponseHeader('warning');
-            if (warnings) {
-              const deprecationMessages = extractDeprecationMessages(warnings);
-              value = deprecationMessages.join('\n') + '\n' + value;
-            }
-
-            if (isMultiRequest) {
-              value = '# ' + req.method + ' ' + req.url + '\n' + value;
-            }
-
-            results.push({
-              response: {
-                timeMs: Date.now() - startTime,
-                statusCode: xhr.status,
-                statusText: xhr.statusText,
-                contentType: xhr.getResponseHeader('Content-Type'),
-                value,
-              },
-              request: {
-                data: opensearchData,
-                method: opensearchMethod,
-                path: opensearchPath,
-              },
-            });
-
-            // single request terminate via sendNextRequest as well
-            sendNextRequest();
+      try {
+        const httpResponse = await opensearch.send(
+          args.http,
+          opensearchMethod,
+          opensearchPath,
+          opensearchData
+        );
+        if (reqId !== CURRENT_REQ_ID) {
+          return;
+        }
+        const statusCode = httpResponse.response?.status;
+        const isSuccess =
+          // Things like DELETE index where the index is not there are OK.
+          statusCode && ((statusCode >= 200 && statusCode < 300) || statusCode === 404);
+        if (isSuccess) {
+          const contentType = httpResponse.response.headers.get('Content-Type') as BaseResponseType;
+          let value = '';
+          if (contentType.includes('application/json')) {
+            value = JSON.stringify(httpResponse.body, null, 2);
           } else {
-            let value;
-            let contentType: string;
-            if (xhr.responseText) {
-              value = xhr.responseText; // OpenSearch error should be shown
-              contentType = xhr.getResponseHeader('Content-Type');
-            } else {
-              value = 'Request failed to get to the server (status code: ' + xhr.status + ')';
-              contentType = 'text/plain';
-            }
-            if (isMultiRequest) {
-              value = '# ' + req.method + ' ' + req.url + '\n' + value;
-            }
-            reject({
-              response: {
-                value,
-                contentType,
-                timeMs: Date.now() - startTime,
-                statusCode: xhr.status,
-                statusText: xhr.statusText,
-              },
-              request: {
-                data: opensearchData,
-                method: opensearchMethod,
-                path: opensearchPath,
-              },
-            });
+            value = httpResponse.body;
           }
+          const warnings = httpResponse.response.headers.get('warning');
+          if (warnings) {
+            const deprecationMessages = extractDeprecationMessages(warnings);
+            value = deprecationMessages.join('\n') + '\n' + value;
+          }
+          if (isMultiRequest) {
+            value = '# ' + req.method + ' ' + req.url + '\n' + value;
+          }
+          results.push({
+            response: {
+              timeMs: Date.now() - startTime,
+              statusCode,
+              statusText: httpResponse.response.statusText,
+              contentType,
+              value,
+            },
+            request: {
+              data: opensearchData,
+              method: opensearchMethod,
+              path: opensearchPath,
+            },
+          });
+
+          // single request terminate via sendNextRequest as well
+          await sendNextRequest();
+        }
+      } catch (error) {
+        const httpError = error as HttpFetchError;
+        const httpResponse = httpError.response;
+        let value;
+        let contentType: string;
+        if (httpResponse) {
+          if (httpError.body) {
+            contentType = httpResponse.headers.get('Content-Type') as string;
+            if (contentType?.includes('application/json')) {
+              value = JSON.stringify(httpError.body, null, 2);
+            } else {
+              value = httpError.body;
+            }
+          } else {
+            value =
+              'Request failed to get to the server (status code: ' + httpResponse.status + ')';
+            contentType = 'text/plain';
+          }
+        } else {
+          value =
+            "\n\nFailed to connect to Console's backend.\nPlease check the OpenSearch Dashboards server is up and running";
+          contentType = 'text/plain';
+        }
+
+        if (isMultiRequest) {
+          value = '# ' + req.method + ' ' + req.url + '\n' + value;
+        }
+        reject({
+          response: {
+            value,
+            contentType,
+            timeMs: Date.now() - startTime,
+            statusCode: httpResponse?.status,
+            statusText: httpResponse?.statusText,
+          },
+          request: {
+            data: opensearchData,
+            method: opensearchMethod,
+            path: opensearchPath,
+          },
         });
+      }
     };
 
     sendNextRequest();

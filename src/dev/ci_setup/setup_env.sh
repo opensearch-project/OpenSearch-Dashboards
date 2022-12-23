@@ -126,13 +126,12 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
 
+# TODO: Find out if these are OSD's or if this entire file should be removed
 # use a proxy to fetch chromedriver/geckodriver asset
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
-
-export CHECKS_REPORTER_ACTIVE=false
 
 # This is mainly for release-manager builds, which run in an environment that doesn't have Chrome installed
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
@@ -142,26 +141,6 @@ if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
 else
   echo "Chrome not detected, installing default chromedriver binary for the package version"
 fi
-
-### only run on pr jobs for opensearch-project/OpenSearch-Dashboards, checks-reporter doesn't work for other repos
-if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'opensearch-project/OpenSearch-Dashboards' ]] ; then
-  export CHECKS_REPORTER_ACTIVE=true
-fi
-
-###
-### Implements github-checks-reporter kill switch when scripts are called from the command line
-### $@ - all arguments
-###
-function checks-reporter-with-killswitch() {
-  if [ "$CHECKS_REPORTER_ACTIVE" == "true" ] ; then
-    yarn run github-checks-reporter "$@"
-  else
-    arguments=("$@");
-    "${arguments[@]:1}";
-  fi
-}
-
-export -f checks-reporter-with-killswitch
 
 source "$OPENSEARCH_DASHBOARDS_DIR/src/dev/ci_setup/load_env_keys.sh"
 
