@@ -81,4 +81,3 @@ export * from './render';
 export * from './shape';
 export * from './string';
 export * from './style';
-export * from './vis_layers';
