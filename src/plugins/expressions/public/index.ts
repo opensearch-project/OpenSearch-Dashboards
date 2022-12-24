@@ -132,6 +132,5 @@ export {
   TypeString,
   TypeToString,
   UnmappedTypeStrings,
-  ExprVisLayers,
   ExpressionValueRender as Render,
 } from '../common';

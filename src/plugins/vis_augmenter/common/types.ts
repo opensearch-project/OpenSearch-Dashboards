@@ -5,10 +5,12 @@
 
 import { ExpressionFunctionDefinition } from '../../expressions';
 
+export enum VisLayerTypes {
+  PointInTimeEvents = 'PointInTimeEvents',
+}
+
 export interface VisLayer {
-  // will be used as the column ID
-  id: string;
-  // will be used as the name when hovering over the tooltip
+  type: keyof typeof VisLayerTypes;
   name: string;
 }
 
@@ -17,7 +19,7 @@ export type VisLayers = VisLayer[];
 // resourceId & resourceName are required so that the
 // events flyout can partition data based on these attributes
 // (e.g., partitioning anomalies based on the detector they came from)
-export interface PointInTimeEventMetadata {
+export interface EventMetadata {
   resourceId: string;
   resourceName: string;
   tooltip?: string;
@@ -25,17 +27,19 @@ export interface PointInTimeEventMetadata {
 
 export interface PointInTimeEvent {
   timestamp: number;
-  metadata: PointInTimeEventMetadata;
+  metadata: EventMetadata;
 }
 
 export interface PointInTimeEventsVisLayer extends VisLayer {
   events: PointInTimeEvent[];
 }
 
-// used to determine what vis layer's interface is being implemented.
-// currently PointInTimeEventsLayer is the only interface extending VisLayer
 export const isPointInTimeEventsVisLayer = (obj: any) => {
-  return 'events' in obj;
+  return obj?.type === VisLayerTypes.PointInTimeEvents;
+};
+
+export const isValidVisLayer = (obj: any) => {
+  return obj?.type in VisLayerTypes;
 };
 
 export interface VisLayerResponseValue {

@@ -44,7 +44,6 @@ import { render } from './render';
 import { shape } from './shape';
 import { string } from './string';
 import { style } from './style';
-import { visLayers } from './vis_layers';
 import { AnyExpressionTypeDefinition } from '../types';
 
 export const typeSpecs: AnyExpressionTypeDefinition[] = [
@@ -64,7 +63,6 @@ export const typeSpecs: AnyExpressionTypeDefinition[] = [
   shape,
   string,
   style,
-  visLayers,
 ];
 
 export * from './boolean';
