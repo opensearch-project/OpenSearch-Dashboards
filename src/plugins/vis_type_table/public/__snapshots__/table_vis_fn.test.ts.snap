@@ -3,9 +3,6 @@
 exports[`interpreter/functions#table returns an object with the correct structure 1`] = `
 Object {
   "as": "table_vis",
-  "params": Object {
-    "listenOnChange": true,
-  },
   "type": "render",
   "value": Object {
     "visConfig": Object {

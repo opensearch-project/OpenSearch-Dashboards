@@ -57,9 +57,6 @@ export const createTableVisFn = (): TableVisExpressionFunctionDefinition => ({
         visType: 'table',
         visConfig,
       },
-      params: {
-        listenOnChange: true,
-      },
     };
   },
 });
