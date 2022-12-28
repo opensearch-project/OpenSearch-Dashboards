@@ -40,7 +40,7 @@ import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
 import { validateTimeRange } from '../timefilter';
 
-export const useQueryStateWithNoContainer = (
+export const connectStorageToQueryState = (
   {
     filterManager,
     queryString,

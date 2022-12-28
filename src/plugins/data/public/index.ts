@@ -444,7 +444,7 @@ export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
-  useQueryStateWithNoContainer,
+  connectStorageToQueryState,
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,

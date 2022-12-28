@@ -19,7 +19,7 @@ import { useCanSave } from '../utils/use/use_can_save';
 import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
 import { TopNavMenuData } from '../../../../navigation/public';
 import { opensearchFilters } from '../../../../data/public';
-import { useQueryStateWithNoContainer } from '../../../../data/public';
+import { connectStorageToQueryState } from '../../../../data/public';
 
 export const TopNav = () => {
   // id will only be set for the edit route
@@ -36,7 +36,7 @@ export const TopNav = () => {
 
   const saveDisabledReason = useCanSave();
   const savedVisBuilderVis = useSavedVisBuilderVis(visualizationIdFromUrl);
-  useQueryStateWithNoContainer(services.data.query, services.osdUrlStateStorage, {
+  connectStorageToQueryState(services.data.query, services.osdUrlStateStorage, {
     filters: opensearchFilters.FilterStateStore.APP_STATE,
     query: true,
   });
