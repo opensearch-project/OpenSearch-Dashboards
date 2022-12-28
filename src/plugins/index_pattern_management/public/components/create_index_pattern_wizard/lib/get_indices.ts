@@ -163,6 +163,7 @@ export async function getIndices({
   showAllIndices = false,
   searchClient,
   dataSourceId,
+  skipCCS,
 }: {
   http: HttpStart;
   getIndexTags?: IndexPatternCreationConfig['getIndexTags'];
@@ -170,6 +171,7 @@ export async function getIndices({
   showAllIndices?: boolean;
   searchClient: DataPublicPluginStart['search']['search'];
   dataSourceId?: string;
+  skipCCS?: boolean;
 }): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
   const isCCS = pattern.indexOf(':') !== -1;
@@ -209,7 +211,7 @@ export async function getIndices({
   });
   requests.push(promiseResolve);
 
-  if (isCCS) {
+  if (isCCS && !skipCCS) {
     // CCS supports ±1 major version. We won't be able to expect resolve endpoint to exist until v9
     const promiseSearch = getIndicesViaSearch({
       getIndexTags,

@@ -180,7 +180,7 @@ export class CreateIndexPatternWizard extends Component<
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices({ http, getIndexTags, pattern: '*:*', searchClient, dataSourceId }),
+      getIndices({ http, getIndexTags, pattern: '*:*', searchClient, dataSourceId, skipCCS: true }),
 
       ['a'],
       clustersFailMsg

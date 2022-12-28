@@ -135,13 +135,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
     })();
-  }, [
-    history.push,
-    indexPatterns.length,
-    indexPatternManagementStart,
-    uiSettings,
-    savedObjects.client,
-  ]);
+  }, [history.push, indexPatternManagementStart, uiSettings, savedObjects.client]);
 
   const removeAliases = (item: MatchedItem) =>
     !((item as unknown) as ResolveIndexResponseItemAlias).indices;
@@ -168,11 +162,12 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         setSources(dataSources.filter(removeAliases));
         setIsLoadingSources(false);
       });
-      getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
+      getIndices({ http, pattern: '*:*', searchClient, skipCCS: true }).then((dataSources) =>
         setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
       );
     }
-  }, [http, creationOptions, searchClient, dataSourceEnabled]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffectOnce(() => {
     loadColumnData();
