@@ -27,10 +27,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import './json';
 export { monaco } from './monaco';
 export { XJsonLang } from './xjson';
-import './json';
 
 /* eslint-disable-next-line @osd/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
