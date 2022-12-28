@@ -88,7 +88,7 @@
     "**/hoist-non-react-statics": "^3.3.2",
     "**/json-schema": "^0.4.0",
     "**/kind-of": ">=6.0.3",
-    "**/loader-utils": "^2.0.3",
+    "**/loader-utils": "^2.0.4",
     "**/node-jose": "^2.1.0",
     "**/nth-check": "^2.0.1",
     "**/qs": "^6.10.3",

@@ -135,6 +135,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Resolve sub-dependent d3-color version and potential security issue ([#2454](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2454))
 - [CVE-2022-3517] Bumps minimatch from 3.0.4 to 3.0.5 and [IBM X-Force ID: 220063] unset-value from 1.0.1 to 2.0.1 ([#2640](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2640))
 - [CVE-2022-37601] Bump loader-utils to 2.0.3 ([#2689](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2689))
+- [CVE-2022-37599] Bump loader-utils to 2.0.4 ([#3031](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3031))
+- [CVE-2022-37603] Bump loader-utils to 2.0.4 ([#3031](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3031))
 - [WS-2021-0638][Security] bump mocha to 10.1.0 ([#2711](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2711))
 
 ### 📈 Features/Enhancements
