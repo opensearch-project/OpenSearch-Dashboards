@@ -39,6 +39,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import _ from 'lodash';
 import { indexPatterns, IndexPatternAttributes, UI_SETTINGS } from '../../../../../../data/public';
 import {
   getIndices,
@@ -141,6 +142,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       initialQuery || context.services.uiSettings.get(UI_SETTINGS.INDEXPATTERN_PLACEHOLDER);
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
     this.dataSrouceEnabled = context.services.dataSourceEnabled;
+    this.fetchIndices = _.debounce(this.fetchIndices.bind(this), 1000) as any;
   }
 
   lastQuery = '';
@@ -149,7 +151,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     this.fetchExistingIndexPatterns();
     if (this.state.query) {
       this.lastQuery = this.state.query;
-      this.fetchIndices(this.state.query);
+      this.fetchIndices();
     }
   }
 
@@ -169,10 +171,10 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     this.setState({ existingIndexPatterns });
   };
 
-  fetchIndices = async (query: string) => {
+  fetchIndices = async () => {
     const { indexPatternCreationType, dataSourceRef, catchAndWarn } = this.props;
     const dataSourceId = dataSourceRef?.id;
-    const { existingIndexPatterns } = this.state;
+    const { existingIndexPatterns, query } = this.state;
     const { http } = this.context.services;
     const getIndexTags = (indexName: string) => indexPatternCreationType.getIndexTags(indexName);
     const searchClient = this.context.services.data.search.search;
@@ -220,7 +222,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         getIndices({
           http,
           getIndexTags,
-          pattern: `${query}*`,
+          pattern: `${query}`,
           showAllIndices,
           searchClient,
           dataSourceId,
@@ -272,7 +274,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     this.lastQuery = query;
     this.setState({ query, showingIndexPatternQueryErrors: !!query.length });
-    this.fetchIndices(query);
+    this.fetchIndices();
   };
 
   renderLoadingState() {
@@ -436,9 +438,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
-    this.setState({ isIncludingSystemIndices: event.target.checked }, () =>
-      this.fetchIndices(this.state.query)
-    );
+    this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchIndices());
   };
 
   render() {
