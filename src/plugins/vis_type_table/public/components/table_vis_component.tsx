@@ -10,7 +10,7 @@ import { EuiDataGridProps, EuiDataGrid, EuiDataGridSorting, EuiTitle } from '@el
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
-import { TableVisConfig, ColumnWidth, SortColumn, TableUiState } from '../types';
+import { TableVisConfig, ColumnWidth, ColumnSort, TableUiState } from '../types';
 import { getDataGridColumns } from './table_vis_grid_columns';
 import { usePagination } from '../utils';
 import { convertToFormattedData } from '../utils/convert_to_formatted_data';
@@ -50,8 +50,7 @@ export const TableVisComponent = ({
     return (({ rowIndex, columnId }) => {
       const rawContent = sortedRows[rowIndex][columnId];
       const colIndex = columns.findIndex((col) => col.id === columnId);
-      const column = columns[colIndex];
-      const htmlContent = column.formatter.convert(rawContent, 'html');
+      const htmlContent = columns[colIndex].formatter.convert(rawContent, 'html');
       const formattedContent = (
         /*
          * Justification for dangerouslySetInnerHTML:
@@ -80,7 +79,7 @@ export const TableVisComponent = ({
   const onSort = useCallback(
     (sortingCols: EuiDataGridSorting['columns'] | []) => {
       const nextSortValue = sortingCols[sortingCols.length - 1];
-      const nextSort: SortColumn =
+      const nextSort: ColumnSort =
         sortingCols.length > 0
           ? {
               colIndex: dataGridColumns.findIndex((col) => col.id === nextSortValue?.id),
@@ -117,6 +116,12 @@ export const TableVisComponent = ({
 
   const ariaLabel = title || visConfig.title || 'tableVis';
 
+  const footerCellValue = visConfig.showTotal
+    ? ({ columnId }: { columnId: any }) => {
+        return columns.find((col) => col.id === columnId)?.formattedTotal || null;
+      }
+    : undefined;
+
   return (
     <>
       {title && (
@@ -141,6 +146,7 @@ export const TableVisComponent = ({
           header: 'underline',
         }}
         minSizeForControls={1}
+        renderFooterCellValue={footerCellValue}
         toolbarVisibility={{
           showColumnSelector: false,
           showSortSelector: false,
