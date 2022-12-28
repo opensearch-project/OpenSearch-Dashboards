@@ -36,7 +36,6 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
-  const table = getService('table');
   const defaultFindTimeout = config.get('timeouts.find');
   const { common } = getPageObjects(['common']);
 
@@ -294,18 +293,6 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       });
     }
 
-    public async filterOnTableCell(column: string, row: string) {
-      await retry.try(async () => {
-        const tableVis = await testSubjects.find('tableVis');
-        const cell = await tableVis.findByCssSelector(
-          `tbody tr:nth-child(${row}) td:nth-child(${column})`
-        );
-        await cell.moveMouseTo();
-        const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
-        await filterBtn.click();
-      });
-    }
-
     public async getMarkdownText() {
       const markdownContainer = await testSubjects.find('markdownBody');
       return markdownContainer.getVisibleText();
@@ -315,65 +302,6 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       const markdownContainer = await testSubjects.find('markdownBody');
       const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
       return element.getVisibleText();
-    }
-
-    public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
-      const tableVis = await testSubjects.find('tableVis');
-      const $ = await tableVis.parseDomContent();
-      const headers = $('span[ng-bind="::col.title"]')
-        .toArray()
-        .map((header: any) => $(header).text());
-      const fieldColumnIndex = headers.indexOf(fieldName);
-      return await find.byCssSelector(
-        `[data-test-subj="paginated-table-body"] tr:nth-of-type(${rowIndex}) td:nth-of-type(${
-          fieldColumnIndex + 1
-        }) a`
-      );
-    }
-
-    /**
-     * If you are writing new tests, you should rather look into getTableVisContent method instead.
-     * @deprecated Use getTableVisContent instead.
-     */
-    public async getTableVisData() {
-      return await testSubjects.getVisibleText('paginated-table-body');
-    }
-
-    /**
-     * This function is the newer function to retrieve data from within a table visualization.
-     * It uses a better return format, than the old getTableVisData, by properly splitting
-     * cell values into arrays. Please use this function for newer tests.
-     */
-    public async getTableVisContent({ stripEmptyRows = true } = {}) {
-      return await retry.try(async () => {
-        const container = await testSubjects.find('tableVis');
-        const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
-
-        if (allTables.length === 0) {
-          return [];
-        }
-
-        const allData = await Promise.all(
-          allTables.map(async (t) => {
-            let data = await table.getDataFromElement(t);
-            if (stripEmptyRows) {
-              data = data.filter(
-                (row) => row.length > 0 && row.some((cell) => cell.trim().length > 0)
-              );
-            }
-            return data;
-          })
-        );
-
-        if (allTables.length === 1) {
-          // If there was only one table we return only the data for that table
-          // This prevents an unnecessary array around that single table, which
-          // is the case we have in most tests.
-          return allData[0];
-        }
-
-        return allData;
-      });
     }
 
     public async getMetric() {
