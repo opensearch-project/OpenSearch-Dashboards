@@ -37,7 +37,7 @@ jest.mock('../services');
 
 jest.mock('../lib/vega', () => ({
   vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
+  vegaLite: jest.requireActual('vega-lite/src'),
 }));
 
 describe(`VegaParser.parseAsync`, () => {
