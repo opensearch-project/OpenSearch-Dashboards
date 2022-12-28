@@ -57,12 +57,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_custom_branding'));
-      loadTestFile(require.resolve('./_embedding_chart'));
       loadTestFile(require.resolve('./_chart_types'));
       loadTestFile(require.resolve('./_area_chart'));
-      loadTestFile(require.resolve('./_data_table'));
-      loadTestFile(require.resolve('./_data_table_nontimeindex'));
-      loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
     });
 
     describe('', function () {
@@ -73,7 +69,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_gauge_chart'));
       loadTestFile(require.resolve('./_heatmap_chart'));
       loadTestFile(require.resolve('./input_control_vis'));
-      loadTestFile(require.resolve('./_histogram_request_start'));
       loadTestFile(require.resolve('./_metric_chart'));
     });
 
@@ -86,7 +81,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_markdown_vis'));
       loadTestFile(require.resolve('./_shared_item'));
       loadTestFile(require.resolve('./_lab_mode'));
-      loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
       if (isOss) {
         loadTestFile(require.resolve('./_tile_map'));
