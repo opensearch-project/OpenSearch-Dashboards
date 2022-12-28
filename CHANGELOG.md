@@ -38,6 +38,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multi DataSource] Update MD data source documentation link ([#2693](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2693))
 - [Save Object Aggregation View] Add extension point in saved object management to register namespaces and show filter ([#2656](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2656))
 - [Save Object Aggregation View] Fix for export all after scroll count response changed in PR#2656 ([#2696](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2696))
+- [Table Visualization] Refactor table visualization using React and DataGrid component ([#2863](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2863))
 
 ### 🐛 Bug Fixes
 
