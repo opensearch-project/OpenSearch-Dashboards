@@ -11,7 +11,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { TableContext } from '../table_vis_response_handler';
-import { TableVisConfig, SortColumn, ColumnWidth, TableUiState } from '../types';
+import { TableVisConfig, ColumnSort, ColumnWidth, TableUiState } from '../types';
 import { TableVisComponent } from './table_vis_component';
 import { TableVisComponentGroup } from './table_vis_component_group';
 
@@ -40,7 +40,7 @@ export const TableVisApp = ({
 
   // TODO: remove duplicate sort and width state
   // Issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2704#issuecomment-1299380818
-  const [sort, setSort] = useState<SortColumn>({ colIndex: null, direction: null });
+  const [sort, setSort] = useState<ColumnSort>({ colIndex: null, direction: null });
   const [width, setWidth] = useState<ColumnWidth[]>([]);
 
   const tableUiState: TableUiState = { sort, setSort, width, setWidth };

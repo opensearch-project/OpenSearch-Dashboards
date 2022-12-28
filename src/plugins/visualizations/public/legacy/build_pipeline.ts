@@ -278,13 +278,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     const paramsArray = [paramsJson, uiStateJson].filter((param) => Boolean(param));
     return `tsvb ${paramsArray.join(' ')}`;
   },
-  table: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.table(schemas, params),
-    };
-    return `opensearch_dashboards_table ${prepareJson('visConfig', visConfig)}`;
-  },
   region_map: (params, schemas) => {
     const visConfig = {
       ...params,
@@ -309,26 +302,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
-  table: (schemas, visParams = {}) => {
-    const visConfig = {} as any;
-    const metrics = schemas.metric;
-    const buckets = schemas.bucket || [];
-    visConfig.dimensions = {
-      metrics,
-      buckets,
-      splitRow: schemas.split_row,
-      splitColumn: schemas.split_column,
-    };
-
-    if (visParams.showMetricsAtAllLevels === false && visParams.showPartialRows === true) {
-      // Handle case where user wants to see partial rows but not metrics at all levels.
-      // This requires calculating how many metrics will come back in the tabified response,
-      // and removing all metrics from the dimensions except the last set.
-      const metricsPerBucket = metrics.length / buckets.length;
-      visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
-    }
-    return visConfig;
-  },
   region_map: (schemas) => {
     const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
