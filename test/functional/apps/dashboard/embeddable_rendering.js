@@ -67,7 +67,6 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
     await dashboardExpect.vegaTextsExist(['5,000']);
     await dashboardExpect.goalAndGuageLabelsExist(['62.925%', '55.625%', '11.915 GB']);
-    await dashboardExpect.dataTableRowCount(5);
     await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
     // TODO add test for 'region map viz'
     // TODO add test for 'tsvb gauge' viz
@@ -90,7 +89,6 @@ export default function ({ getService, getPageObjects }) {
   const expectNoDataRenders = async () => {
     await pieChart.expectPieSliceCount(0);
     await dashboardExpect.seriesElementCount(0);
-    await dashboardExpect.dataTableRowCount(0);
     await dashboardExpect.savedSearchRowCount(0);
     await dashboardExpect.inputControlItemCount(5);
     await dashboardExpect.metricValuesExist(['0']);
@@ -146,7 +144,7 @@ export default function ({ getService, getPageObjects }) {
       visNames.push(await dashboardAddPanel.addVisualization('Filter Bytes Test: vega'));
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visNames);
-      expect(visNames.length).to.be.equal(27);
+      expect(visNames.length).to.be.equal(26);
       await PageObjects.dashboard.waitForRenderComplete();
     });
 
@@ -157,7 +155,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visAndSearchNames);
-      expect(visAndSearchNames.length).to.be.equal(28);
+      expect(visAndSearchNames.length).to.be.equal(27);
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', {
