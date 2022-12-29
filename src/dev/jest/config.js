@@ -109,4 +109,5 @@ export default {
   globals: {
     Uint8Array: Uint8Array,
   },
+  flakyTestRetries: 2,
 };
