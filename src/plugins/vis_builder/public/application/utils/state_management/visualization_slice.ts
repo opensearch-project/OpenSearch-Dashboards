@@ -104,9 +104,11 @@ export const slice = createSlice({
   },
   extraReducers(builder) {
     builder.addCase(setActiveVisualization, (state, action) => {
+      console.log(action.payload.aggParams);
       state.activeVisualization = {
         name: action.payload.name,
-        aggConfigParams: [],
+        aggConfigParams: action.payload.aggParams,
+        // aggConfigParams: []
       };
     });
   },

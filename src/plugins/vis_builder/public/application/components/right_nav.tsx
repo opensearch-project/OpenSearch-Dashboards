@@ -17,7 +17,11 @@ import { useVisualizationType } from '../utils/use';
 import './side_nav.scss';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { VisBuilderServices } from '../../types';
-import { setActiveVisualization, useTypedDispatch } from '../utils/state_management';
+import {
+  setActiveVisualization,
+  useTypedDispatch,
+  useTypedSelector,
+} from '../utils/state_management';
 
 export const RightNav = () => {
   const [newVisType, setNewVisType] = useState<string>();
@@ -27,6 +31,10 @@ export const RightNav = () => {
   const { ui, name: activeVisName } = useVisualizationType();
   const dispatch = useTypedDispatch();
   const StyleSection = ui.containerConfig.style.render;
+
+  const { activeVisualization } = useTypedSelector((state) => state.visualization);
+  const oldAggParams = activeVisualization?.aggConfigParams;
+  console.log(oldAggParams);
 
   const options: Array<EuiSuperSelectOption<string>> = types.all().map(({ name, icon, title }) => ({
     value: name,
@@ -64,10 +72,29 @@ export const RightNav = () => {
           })}
           onCancel={() => setNewVisType(undefined)}
           onConfirm={() => {
+            const oldVisualizationType = types.get(activeVisName)?.ui.containerConfig.data.schemas
+              .all;
+            const newVisualizationType = types.get(newVisType)?.ui.containerConfig.data.schemas.all;
+
+            console.log('old type', oldVisualizationType);
+            console.log('new type', newVisualizationType);
+            console.log(types.all());
+            // usePersistedAggParams(newVisType)
+
+            let persistedAggParams;
+            if (oldAggParams) {
+              persistedAggParams = [oldAggParams[0]];
+            } else {
+              persistedAggParams = [];
+            }
+
+            console.log(persistedAggParams);
+
             dispatch(
               setActiveVisualization({
                 name: newVisType,
                 style: types.get(newVisType)?.ui.containerConfig.style.defaults,
+                aggParams: persistedAggParams,
               })
             );
 
