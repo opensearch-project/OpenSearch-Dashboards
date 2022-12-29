@@ -8,7 +8,7 @@ import { Schema } from '../../../../../vis_default_editor/public';
 
 export const usePersistedAggParams = (
   types,
-  oldAggParams?: CreateAggConfigParams[],
+  oldAggParams: CreateAggConfigParams[],
   oldVisType?: string,
   newVisType?: string
 ): CreateAggConfigParams[] => {
@@ -18,7 +18,6 @@ export const usePersistedAggParams = (
     oldVisType === 'table' ||
     newVisType === 'metric' ||
     newVisType === 'table' ||
-    !oldAggParams ||
     !newVisType
   ) {
     return [];
