@@ -22,6 +22,7 @@ import {
   useTypedDispatch,
   useTypedSelector,
 } from '../utils/state_management';
+import { usePersistedAggParams } from '../utils/use/use_persisted_agg_param';
 
 export const RightNav = () => {
   const [newVisType, setNewVisType] = useState<string>();
@@ -34,7 +35,7 @@ export const RightNav = () => {
 
   const { activeVisualization } = useTypedSelector((state) => state.visualization);
   const oldAggParams = activeVisualization?.aggConfigParams;
-  console.log(oldAggParams);
+  const persistedAggParams = usePersistedAggParams(types, oldAggParams, activeVisName, newVisType);
 
   const options: Array<EuiSuperSelectOption<string>> = types.all().map(({ name, icon, title }) => ({
     value: name,
@@ -72,24 +73,6 @@ export const RightNav = () => {
           })}
           onCancel={() => setNewVisType(undefined)}
           onConfirm={() => {
-            const oldVisualizationType = types.get(activeVisName)?.ui.containerConfig.data.schemas
-              .all;
-            const newVisualizationType = types.get(newVisType)?.ui.containerConfig.data.schemas.all;
-
-            console.log('old type', oldVisualizationType);
-            console.log('new type', newVisualizationType);
-            console.log(types.all());
-            // usePersistedAggParams(newVisType)
-
-            let persistedAggParams;
-            if (oldAggParams) {
-              persistedAggParams = [oldAggParams[0]];
-            } else {
-              persistedAggParams = [];
-            }
-
-            console.log(persistedAggParams);
-
             dispatch(
               setActiveVisualization({
                 name: newVisType,
