@@ -107,7 +107,9 @@
     "**/url-parse": "^1.5.8",
     "**/shelljs": "0.8.5",
     "**/unset-value": "^2.0.1",
-    "**/minimatch": "^3.0.5"
+    "**/minimatch": "^3.0.5",
+    "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
+    "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1"
   },
   "workspaces": {
     "packages": [
