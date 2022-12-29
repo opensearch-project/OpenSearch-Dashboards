@@ -10,13 +10,11 @@ import { useTypedSelector } from '../state_management';
 
 export const useVisualizationType = (): VisualizationType => {
   const { activeVisualization } = useTypedSelector((state) => state.visualization);
-  // console.log("activeViz", activeVisualization)
   const {
     services: { types },
   } = useOpenSearchDashboards<VisBuilderServices>();
 
   const visualizationType = types.get(activeVisualization?.name ?? '');
-  // console.log(types.all())
 
   if (!visualizationType) {
     throw new Error(`Invalid visualization type ${activeVisualization}`);
