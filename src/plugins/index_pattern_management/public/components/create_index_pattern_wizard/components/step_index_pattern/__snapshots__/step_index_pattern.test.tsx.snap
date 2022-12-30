@@ -28,7 +28,13 @@ exports[`StepIndexPattern renders indices which match the initial query 1`] = `
     Array [
       Object {
         "item": Object {},
+        "name": "opensearch-dashboards",
+        "tags": Array [],
+      },
+      Object {
+        "item": Object {},
         "name": "opensearch",
+        "tags": Array [],
       },
     ]
   }
@@ -43,7 +49,13 @@ exports[`StepIndexPattern renders matching indices when input is valid 1`] = `
     Array [
       Object {
         "item": Object {},
+        "name": "opensearch-dashboards",
+        "tags": Array [],
+      },
+      Object {
+        "item": Object {},
         "name": "opensearch",
+        "tags": Array [],
       },
     ]
   }
