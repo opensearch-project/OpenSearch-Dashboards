@@ -17,16 +17,18 @@ import {
 import { IIndexPattern } from '../../../data/public';
 import { extractReferences, injectReferences } from './saved_augment_vis_references';
 
+const name = 'augment-vis';
+
 export function createSavedAugmentVisClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedAugmentVis extends SavedObjectClass {
-    public static type: string = 'augment-vis';
+    public static type: string = name;
     public static mapping: Record<string, string> = {
       description: 'text',
       pluginResourceId: 'text',
       visId: 'keyword',
-      visLayerExpressionFn: 'object',
+      visLayerExpressionFn: 'text',
       version: 'integer',
     };
 
@@ -51,11 +53,9 @@ export function createSavedAugmentVisClass(services: SavedObjectOpenSearchDashbo
       });
       // TODO: determine if this saved obj should be visible in saved_obj_management plugin.
       // if not, we can set showInRecentlyAccessed to false and not persist any edit URL
-      // probably set to false since this saved obj should be hidden by default
+      // if yes, we will need to revisit this, and possibly provide an edit url if editing
+      // via saved objects management plugin.
       this.showInRecentlyAccessed = false;
-
-      // we probably don't need this below field. we aren't going to need a full path
-      // since we aren't going to allow editing by default
       //   this.getFullPath = () => {
       //     return `/app/visualize#/edit/${this.id}`;
       //   };

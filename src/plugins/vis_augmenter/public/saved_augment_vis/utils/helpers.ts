@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
 import { getSavedAugmentVisLoader } from '../../services';
-import { ISavedAugmentVis } from '../../../common';
+import { ISavedAugmentVis } from '../../types';
 
 /**
  * Create an augment vis saved object given an object that

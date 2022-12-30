@@ -120,7 +120,6 @@ export interface VisualizeServices extends CoreStart {
   visualizations: VisualizationsStart;
   savedObjectsPublic: SavedObjectsStart;
   savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
-  savedAugmentVis: VisAugmenterStart['savedAugmentVisLoader'];
   setActiveUrl: (newUrl: string) => void;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
   restorePreviousUrl: () => void;

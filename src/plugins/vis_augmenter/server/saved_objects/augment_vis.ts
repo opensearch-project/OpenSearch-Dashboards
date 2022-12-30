@@ -16,6 +16,7 @@ export const augmentVisSavedObjectType: SavedObjectsType = {
       visName: { type: 'keyword', index: false, doc_values: false },
       visLayerExpressionFn: {
         properties: {
+          type: { type: 'text' },
           name: { type: 'text' },
           // keeping generic to not limit what users may pass as args to their fns
           // users may not have this field at all, if no args are needed

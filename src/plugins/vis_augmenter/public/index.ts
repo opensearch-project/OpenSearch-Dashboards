@@ -11,6 +11,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 export { VisAugmenterSetup, VisAugmenterStart };
 
-export * from './saved_augment_vis';
+export {
+  createSavedAugmentVisLoader,
+  SavedAugmentVisLoader,
+  SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
+} from './saved_augment_vis';
 
 export { ISavedAugmentVis, VisLayerExpressionFn, AugmentVisSavedObject } from './types';
