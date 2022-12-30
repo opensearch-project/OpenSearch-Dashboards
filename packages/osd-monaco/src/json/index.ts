@@ -32,9 +32,9 @@
  * monaco-editor under v0.20.0 has the bug that use the global monaco uncorrectly in ESM mode. https://github.com/microsoft/monaco-editor/issues/1974
  * copy the language implement and import by our self.
  * */
+import { monaco } from '../monaco';
 // @ts-ignore
 import * as mode from 'monaco-editor/esm/vs/language/json/jsonMode.js'; // eslint-disable-line
-import { monaco } from '../monaco';
 
 const Emitter = monaco.Emitter;
 class LanguageServiceDefaultsImpl {
