@@ -77,8 +77,7 @@ function onClick(
     const fromParsed = new URL(document.location.href);
     const sameProto = toParsed.protocol === fromParsed.protocol;
     const sameHost = toParsed.host === fromParsed.host;
-    const samePath =
-      toParsed.pathname === fromParsed.pathname && toParsed.search === fromParsed.search;
+    const samePath = toParsed.pathname === fromParsed.pathname;
 
     if (sameProto && sameHost && samePath) {
       if (toParsed.hash) {
