@@ -4,6 +4,7 @@
  */
 
 import { VisLayerExpressionFn } from '../types';
+import { VisLayerTypes } from '../../common';
 import {
   createSavedAugmentVisLoader,
   SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
@@ -12,8 +13,7 @@ import { generateAugmentVisSavedObject, getMockAugmentVisSavedObjectClient } fro
 
 describe('SavedObjectLoaderAugmentVis', () => {
   const fn = {
-    // TODO: VisLayerTypes will resolve after rebasing with earlier PR
-    type: VisLayerTypes.PointInTimeEventsLayer,
+    type: VisLayerTypes.PointInTimeEvents,
     name: 'test-fn',
     args: {
       testArg: 'test-value',

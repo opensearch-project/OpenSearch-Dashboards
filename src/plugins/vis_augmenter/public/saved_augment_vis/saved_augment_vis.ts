@@ -9,6 +9,7 @@ import {
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
 import { createSavedAugmentVisClass } from './_saved_augment_vis';
+import { VisLayerTypes } from '../../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectOpenSearchDashboardsServicesWithAugmentVis
@@ -30,7 +31,6 @@ export function createSavedAugmentVisLoader(
       if (isEmpty(source.visLayerExpressionFn)) {
         source.error = 'visLayerExpressionFn is missing in augment-vis saved object';
       }
-      // TODO: will resolve after rebasing with earlier PR
       if (!(get(source, 'visLayerExpressionFn.type', '') in VisLayerTypes)) {
         source.error = 'Unknown VisLayer expression function type';
       }

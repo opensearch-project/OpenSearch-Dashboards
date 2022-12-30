@@ -6,12 +6,9 @@
 import { ExpressionsSetup } from '../../expressions/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
-<<<<<<< HEAD
 import { visLayers } from './expressions';
-=======
 import { setSavedAugmentVisLoader } from './services';
 import { createSavedAugmentVisLoader, SavedAugmentVisLoader } from './saved_augment_vis';
->>>>>>> c3e46d9dc9 (Add augment-vis saved obj)
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterSetup {}

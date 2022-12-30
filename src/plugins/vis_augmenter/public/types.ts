@@ -4,6 +4,7 @@
  */
 
 import { SavedObject } from '../../saved_objects/public';
+import { VisLayerTypes } from '../common';
 
 export interface ISavedAugmentVis {
   id?: string;
@@ -16,7 +17,6 @@ export interface ISavedAugmentVis {
 }
 
 export interface VisLayerExpressionFn {
-  // TODO: VisLayerTypes will resolve after rebasing with earlier PR
   type: keyof typeof VisLayerTypes;
   name: string;
   // plugin expression fns can freely set custom arguments

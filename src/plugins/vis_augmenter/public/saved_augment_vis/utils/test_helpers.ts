@@ -3,17 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEmpty } from 'lodash';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { getSavedAugmentVisLoader } from '../../services';
-import { ISavedAugmentVis } from '../../../common';
-import { VisLayerExpressionFn } from '../../types';
+import { VisLayerTypes } from '../../../common';
+import { VisLayerExpressionFn, ISavedAugmentVis } from '../../types';
 
 const id = 'test-id';
 const pluginResourceId = 'test-plugin-resource-id';
 const visLayerExpressionFn = {
-  // TODO: VisLayerTypes will resolve after rebasing with earlier PR
-  type: VisLayerTypes.PointInTimeEventsLayer,
+  type: VisLayerTypes.PointInTimeEvents,
   name: 'test-fn',
   args: {
     testArg: 'test-value',
