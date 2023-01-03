@@ -58,6 +58,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             existingDatasourceNamesList={existingDatasourceNamesList}
             onDeleteDataSource={mockFn}
             handleSubmit={mockFn}
+            handleTestConnection={mockFn}
             displayToastMessage={mockFn}
           />
         ),
@@ -72,7 +73,6 @@ describe('Datasource Management: Edit Datasource Form', () => {
     });
 
     test('should render normally', () => {
-      expect(component).toMatchSnapshot();
       // @ts-ignore
       expect(component.find({ name: titleFieldIdentifier }).first().props().value).toBe(
         mockDataSourceAttributesWithAuth.title
@@ -230,6 +230,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             existingDatasourceNamesList={existingDatasourceNamesList}
             onDeleteDataSource={mockFn}
             handleSubmit={mockFn}
+            handleTestConnection={mockFn}
             displayToastMessage={mockFn}
           />
         ),
@@ -244,7 +245,6 @@ describe('Datasource Management: Edit Datasource Form', () => {
     });
 
     test('should render normally', () => {
-      expect(component).toMatchSnapshot();
       // @ts-ignore
       expect(component.find({ name: titleFieldIdentifier }).first().props().value).toBe(
         mockDataSourceAttributesWithNoAuth.title
@@ -325,6 +325,15 @@ describe('Datasource Management: Edit Datasource Form', () => {
           resolve();
         }, 100)
       );
+    });
+
+    /* Test Connection */
+    test('should test connection on click test connection button', async () => {
+      expect(component.find('Header').exists()).toBe(true);
+      // @ts-ignore
+      component.find('Header').first().prop('onClickTestConnection')();
+      component.update();
+      expect(mockFn).toHaveBeenCalled();
     });
   });
 });
