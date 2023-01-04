@@ -13,6 +13,7 @@ export { VisAugmenterSetup, VisAugmenterStart };
 
 export {
   createSavedAugmentVisLoader,
+  createAugmentVisSavedObject,
   SavedAugmentVisLoader,
   SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
 } from './saved_augment_vis';

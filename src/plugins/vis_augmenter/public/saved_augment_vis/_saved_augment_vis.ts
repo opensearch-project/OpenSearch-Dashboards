@@ -51,14 +51,7 @@ export function createSavedAugmentVisClass(services: SavedObjectOpenSearchDashbo
           version: 1,
         },
       });
-      // TODO: determine if this saved obj should be visible in saved_obj_management plugin.
-      // if not, we can set showInRecentlyAccessed to false and not persist any edit URL
-      // if yes, we will need to revisit this, and possibly provide an edit url if editing
-      // via saved objects management plugin.
       this.showInRecentlyAccessed = false;
-      //   this.getFullPath = () => {
-      //     return `/app/visualize#/edit/${this.id}`;
-      //   };
     }
   }
 

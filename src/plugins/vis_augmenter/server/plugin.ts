@@ -11,6 +11,7 @@ import {
   Logger,
 } from '../../../core/server';
 import { augmentVisSavedObjectType } from './saved_objects';
+import { capabilitiesProvider } from './capabilities_provider';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterPluginSetup {}
@@ -28,6 +29,7 @@ export class VisAugmenterPlugin
   public setup(core: CoreSetup) {
     this.logger.debug('VisAugmenter: Setup');
     core.savedObjects.registerType(augmentVisSavedObjectType);
+    core.capabilities.registerProvider(capabilitiesProvider);
     return {};
   }
 
