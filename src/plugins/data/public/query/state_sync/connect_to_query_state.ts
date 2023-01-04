@@ -40,6 +40,14 @@ import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
 import { validateTimeRange } from '../timefilter';
 
+/**
+ * Helper function to sync up filter and query services in data plugin
+ * with a URL state storage so plugins can persist the app filter and query
+ * values across refresh
+ * @param QueryService: either setup or start
+ * @param  OsdUrlStateStorage to use for syncing and store data
+ * @param syncConfig app filter and query
+ */
 export const connectStorageToQueryState = (
   {
     filterManager,
