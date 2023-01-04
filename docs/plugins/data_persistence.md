@@ -196,6 +196,8 @@ There are two types for data persistence:
 
 4. In `useEditorUpdates()`, we use the saved appState to load the visualize editor
 
+5. Since we implement state management in Vis Builder with redux store, the app state persistence implementation for vis builder is also different than other plugins. While the global state persistence is the same, we implement app state persistence without using any state containers or state syncing utils. For the actual visual data, we directly hook up redux store with `OsdUrlStateStorage` to sync the values by using `saveReduxState()` and `loadReduxState()`. For app filter and query, since they are part of the app states but not part of the redux store, we directly hook up their state managers from data plugin with `OsdUrlStateStorage` and `connectStorageToQueryState()`.
+
 # Refresh
 When we refresh the page, both app state and global state should persist:
 
