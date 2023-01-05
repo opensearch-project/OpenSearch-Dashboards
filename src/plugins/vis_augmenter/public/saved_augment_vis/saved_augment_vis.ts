@@ -27,16 +27,16 @@ export function createSavedAugmentVisLoader(
 
       if (isEmpty(source.visReference)) {
         source.error = 'visReference is missing in augment-vis saved object';
+        return source;
       }
       if (isEmpty(source.visLayerExpressionFn)) {
         source.error = 'visLayerExpressionFn is missing in augment-vis saved object';
+        return source;
       }
       if (!(get(source, 'visLayerExpressionFn.type', '') in VisLayerTypes)) {
         source.error = 'Unknown VisLayer expression function type';
+        return source;
       }
-
-      delete source.visReference;
-      delete source.visName;
       return source;
     };
 

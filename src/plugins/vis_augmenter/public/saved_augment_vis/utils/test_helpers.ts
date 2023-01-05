@@ -3,27 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisLayerTypes } from '../../../common';
+import { cloneDeep } from 'lodash';
 import { VisLayerExpressionFn, ISavedAugmentVis } from '../../types';
 
-const id = 'test-id';
 const pluginResourceId = 'test-plugin-resource-id';
-const visLayerExpressionFn = {
-  type: VisLayerTypes.PointInTimeEvents,
-  name: 'test-fn',
-  args: {
-    testArg: 'test-value',
-  },
-};
 const visName = 'visualization_0';
 const visId = 'test-vis-id';
 const version = 1;
 
-export const generateAugmentVisSavedObject = (idArg?: string, exprFnArg?: VisLayerExpressionFn) => {
+export const generateAugmentVisSavedObject = (idArg: string, exprFnArg: VisLayerExpressionFn) => {
   return {
-    testId: idArg ? idArg : id,
+    id: idArg,
     pluginResourceId,
-    visLayerExpressionFn: exprFnArg ? exprFnArg : visLayerExpressionFn,
+    visLayerExpressionFn: exprFnArg,
     visName,
     visId,
     version,
@@ -31,31 +23,32 @@ export const generateAugmentVisSavedObject = (idArg?: string, exprFnArg?: VisLay
 };
 
 export const getMockAugmentVisSavedObjectClient = (
-  augmentVisSavedObjs?: ISavedAugmentVis[]
+  augmentVisSavedObjs: ISavedAugmentVis[],
+  keepReferences: boolean = true
 ): any => {
-  const savedObjs = augmentVisSavedObjs ? augmentVisSavedObjs : ([] as ISavedAugmentVis[]);
+  const savedObjs = (augmentVisSavedObjs = cloneDeep(augmentVisSavedObjs));
 
   const client = {
-    findAll: jest.fn(() =>
-      Promise.resolve({
-        hits: savedObjs,
-      })
-    ),
     find: jest.fn(() =>
       Promise.resolve({
         total: savedObjs.length,
         savedObjects: savedObjs.map((savedObj) => {
           const objVisId = savedObj.visId;
+          const objId = savedObj.id;
           delete savedObj.visId;
+          delete savedObj.id;
           return {
-            ...savedObj,
-            references: [
-              {
-                name: savedObj.visName,
-                type: 'visualization',
-                id: objVisId,
-              },
-            ],
+            id: objId,
+            attributes: savedObj as Record<string, any>,
+            references: keepReferences
+              ? [
+                  {
+                    name: savedObj.visName,
+                    type: 'visualization',
+                    id: objVisId,
+                  },
+                ]
+              : [],
           };
         }),
       })
