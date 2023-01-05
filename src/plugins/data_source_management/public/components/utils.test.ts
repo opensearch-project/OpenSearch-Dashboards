@@ -10,6 +10,7 @@ import {
   getDataSourceById,
   getDataSources,
   isValidUrl,
+  testConnection,
   updateDataSourceById,
 } from './utils';
 import { coreMock } from '../../../../core/public/mocks';
@@ -23,6 +24,7 @@ import {
   mockResponseForSavedObjectsCalls,
 } from '../mocks';
 import { AuthType } from '../types';
+import { HttpStart } from 'opensearch-dashboards/public';
 
 const { savedObjects } = coreMock.createStart();
 
@@ -133,6 +135,51 @@ describe('DataSourceManagement: Utils.ts', () => {
       try {
         mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'delete');
         await deleteDataSourceById('ds-1234', savedObjects.client);
+      } catch (e) {
+        expect(e).toBeTruthy();
+      }
+    });
+  });
+
+  describe('Test connection to the endpoint of the data source - success', () => {
+    let http: jest.Mocked<HttpStart>;
+    const mockSuccess = jest.fn().mockResolvedValue({ body: { success: true } });
+    const mockError = jest.fn().mockRejectedValue(null);
+    beforeEach(() => {
+      http = coreMock.createStart().http;
+      http.post.mockResolvedValue(mockSuccess);
+    });
+    test('Success:  Test Connection to the endpoint while creating a new data source', async () => {
+      await testConnection(http, getDataSourceByIdWithoutCredential.attributes);
+      expect(http.post.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/internal/data-source-management/validate",
+            Object {
+              "body": "{\\"id\\":\\"\\",\\"endpoint\\":\\"https://test.com\\",\\"auth\\":{\\"type\\":\\"no_auth\\",\\"credentials\\":null}}",
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('Success: Test Connection to the endpoint while existing data source is updated', async () => {
+      await testConnection(http, getDataSourceByIdWithoutCredential.attributes, 'test1234');
+      expect(http.post.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/internal/data-source-management/validate",
+            Object {
+              "body": "{\\"id\\":\\"test1234\\",\\"endpoint\\":\\"https://test.com\\",\\"auth\\":{\\"type\\":\\"no_auth\\",\\"credentials\\":null}}",
+            },
+          ],
+        ]
+      `);
+    });
+    test('failure:  Test Connection to the endpoint while creating/updating a data source', async () => {
+      try {
+        http.post.mockRejectedValue(mockError);
+        await testConnection(http, getDataSourceByIdWithoutCredential.attributes, 'test1234');
       } catch (e) {
         expect(e).toBeTruthy();
       }
