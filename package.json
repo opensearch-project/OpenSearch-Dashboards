@@ -398,7 +398,7 @@
     "jimp": "^0.14.0",
     "jquery": "^3.5.0",
     "json-stringify-pretty-compact": "1.2.0",
-    "json5": "^1.0.1",
+    "json5": "^1.0.2",
     "leaflet": "1.5.1",
     "leaflet-draw": "0.4.14",
     "leaflet-responsive-popup": "0.6.4",
