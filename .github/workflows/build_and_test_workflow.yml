@@ -129,10 +129,13 @@ jobs:
           restore-keys: |
             yarn-
 
+      # https://github.com/yarnpkg/yarn/issues/8242#issuecomment-776561223
+      # Increase network timeout for Windows, retry once if bootstrap fails
       - name: Run bootstrap
         run: |
-          yarn osd bootstrap
-          if ($LASTEXITCODE) { yarn osd bootstrap }
+          yarn cache clean
+          yarn config set network-timeout 1000000 -g
+          yarn osd bootstrap || yarn osd bootstrap
 
       - name: Run linter
         id: linter
@@ -294,10 +297,13 @@ jobs:
           Remove-Item -Recurse -Force "$Env:Programfiles/Google/Chrome/Application/*"
           Copy-Item -Force -Recurse "${{steps.download-chrome.outputs.path}}/*" "$Env:Programfiles/Google/Chrome/Application"
 
+      # https://github.com/yarnpkg/yarn/issues/8242#issuecomment-776561223
+      # Increase network timeout for Windows, retry once if bootstrap fails
       - name: Run bootstrap
         run: |
-          yarn osd bootstrap
-          if ($LASTEXITCODE) { yarn osd bootstrap }
+          yarn cache clean
+          yarn config set network-timeout 1000000 -g
+          yarn osd bootstrap || yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
