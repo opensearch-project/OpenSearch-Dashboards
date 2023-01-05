@@ -44,6 +44,8 @@ import {
 
 import { runCompilers } from './run_compilers';
 
+export const TIMEOUT_MS = process.platform === 'win32' ? 10000 : 5000;
+
 /**
  **
  **
@@ -78,11 +80,11 @@ const exit = (code: number) => {
   setTimeout(() => {
     send(
       workerMsgs.error(
-        new Error('process did not automatically exit within 5 seconds, forcing exit')
+        new Error(`process did not automatically exit within ${TIMEOUT_MS} ms, forcing exit`)
       )
     );
     process.exit(1);
-  }, 5000).unref();
+  }, TIMEOUT_MS).unref();
 };
 
 // check for connected parent on an unref'd timer rather than listening
