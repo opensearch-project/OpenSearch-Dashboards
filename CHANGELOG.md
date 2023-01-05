@@ -14,6 +14,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Eliminate dependency on `got` versions older than 11.8.5 ([#2801](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2801))
 - [Multi DataSource] Add explicit no spellcheck on password fields ([#2818](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2818))
 - [CVE-2022-25912] Bumps simple-git from 3.4.0 to 3.15.0 ([#3036](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3036))
+- [CVE-2022-35256] Bumps node version from 14.20.0 to 14.20.1 [#3166](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3166))
 
 ### 📈 Features/Enhancements
 
