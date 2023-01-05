@@ -107,7 +107,7 @@ jobs:
       # https://github.com/yarnpkg/yarn/issues/8242#issuecomment-776561223
       # Increase network timeout for Windows, retry once if bootstrap fails
       - name: Run bootstrap
-        run: | 
+        run: |
           yarn cache clean
           yarn config set network-timeout 1000000 -g
           yarn osd bootstrap || yarn osd bootstrap
@@ -183,6 +183,14 @@ jobs:
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
 
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: failure-artifacts
+          path: |
+            test/*/failure_debug/
+            test/*/screenshots/
+
   functional-tests-windows:
     runs-on: windows-latest
     name: Run functional tests on Windows
@@ -222,7 +230,7 @@ jobs:
       # https://github.com/yarnpkg/yarn/issues/8242#issuecomment-776561223
       # Increase network timeout for Windows, retry once if bootstrap fails
       - name: Run bootstrap
-        run: | 
+        run: |
           yarn cache clean
           yarn config set network-timeout 1000000 -g
           yarn osd bootstrap || yarn osd bootstrap
@@ -238,6 +246,14 @@ jobs:
           CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: failure-artifacts-ci${{ matrix.group }}
+          path: |
+            test/*/failure_debug/
+            test/*/screenshots/
 
   build-min-artifact-tests-linux:
     runs-on: ubuntu-latest
