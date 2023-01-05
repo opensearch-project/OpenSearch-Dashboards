@@ -104,8 +104,13 @@ jobs:
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
 
+      # https://github.com/yarnpkg/yarn/issues/8242#issuecomment-776561223
+      # Increase network timeout for Windows, retry once if bootstrap fails
       - name: Run bootstrap
-        run: yarn osd bootstrap
+        run: | 
+          yarn cache clean
+          yarn config set network-timeout 1000000 -g
+          yarn osd bootstrap || yarn osd bootstrap
 
       - name: Run linter
         id: linter
@@ -214,8 +219,13 @@ jobs:
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
 
+      # https://github.com/yarnpkg/yarn/issues/8242#issuecomment-776561223
+      # Increase network timeout for Windows, retry once if bootstrap fails
       - name: Run bootstrap
-        run: yarn osd bootstrap
+        run: | 
+          yarn cache clean
+          yarn config set network-timeout 1000000 -g
+          yarn osd bootstrap || yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
