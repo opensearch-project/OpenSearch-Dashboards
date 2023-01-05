@@ -20,36 +20,40 @@ export const registerTestConnectionRoute = (
       path: '/internal/data-source-management/validate',
       validate: {
         body: schema.object({
-          id: schema.string(),
-          endpoint: schema.string(),
-          auth: schema.maybe(
-            schema.object({
-              type: schema.oneOf([schema.literal('username_password'), schema.literal('no_auth')]),
-              credentials: schema.oneOf([
-                schema.object({
-                  username: schema.string(),
-                  password: schema.string(),
-                }),
-                schema.literal(null),
-              ]),
-            })
-          ),
+          id: schema.maybe(schema.string()),
+          dataSourceAttr: schema.object({
+            endpoint: schema.string(),
+            auth: schema.maybe(
+              schema.object({
+                type: schema.oneOf([
+                  schema.literal('username_password'),
+                  schema.literal('no_auth'),
+                ]),
+                credentials: schema.oneOf([
+                  schema.object({
+                    username: schema.string(),
+                    password: schema.string(),
+                  }),
+                  schema.literal(null),
+                ]),
+              })
+            ),
+          }),
         }),
       },
     },
     async (context, request, response) => {
-      const dataSource: DataSourceAttributes = request.body as DataSourceAttributes;
-
-      const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getTestingClient(
-        {
-          dataSourceId: dataSource.id || '',
-          savedObjects: context.core.savedObjects.client,
-          cryptography,
-        },
-        dataSource
-      );
+      const { dataSourceAttr, id: dataSourceId } = request.body;
 
       try {
+        const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getTestingClient(
+          {
+            dataSourceId,
+            savedObjects: context.core.savedObjects.client,
+            cryptography,
+          },
+          dataSourceAttr as DataSourceAttributes
+        );
         const dsValidator = new DataSourceConnectionValidator(dataSourceClient);
 
         await dsValidator.validate();
