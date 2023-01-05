@@ -40,8 +40,8 @@ export class DataSourceService {
   }
 
   async setup(config: DataSourcePluginConfigType): Promise<DataSourceServiceSetup> {
-    const opensearchClientPoolSetup = await this.openSearchClientPool.setup(config);
-    const legacyClientPoolSetup = await this.legacyClientPool.setup(config);
+    const opensearchClientPoolSetup = this.openSearchClientPool.setup(config);
+    const legacyClientPoolSetup = this.legacyClientPool.setup(config);
 
     const getDataSourceClient = async (
       params: DataSourceClientParams
