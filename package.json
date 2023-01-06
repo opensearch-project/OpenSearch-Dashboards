@@ -91,7 +91,9 @@
     "**/trim": "^0.0.3",
     "**/typescript": "4.0.2",
     "**/unset-value": "^2.0.1",
-    "**/minimatch": "^3.0.5"
+    "**/minimatch": "^3.0.5",
+    "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
+    "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1"
   },
   "workspaces": {
     "packages": [
@@ -226,7 +228,6 @@
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.1.0",
     "@microsoft/api-documenter": "^7.13.78",
     "@microsoft/api-extractor": "^7.19.3",

@@ -64,6 +64,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 * Corrected README and help command of osd-plugin-helpers ([#2810](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2810))
 ### 🛠 Maintenance
 
+- Remove `github-checks-reporter`, an unused dependency ([#3126](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3126))
+
 ### 🪛 Refactoring
 * [MD] Refactor data source error handling ([#2661](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2661))
 - Refactor and improve Discover field summaries ([#2391](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2391))
@@ -72,6 +74,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - [Multi DataSource] Add unit test coverage for Update Data source management stack ([#2567](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2567))
 - [BWC Tests] Add BWC tests for 2.5.0 ([#2890](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2890))
+- Add retrial of flaky tests ([#2967](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2967))
 
 ## [2.x]
 ### 💥 Breaking Changes
