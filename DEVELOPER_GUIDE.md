@@ -36,6 +36,11 @@ $ npm i -g yarn
 $ yarn osd bootstrap # This command will also install npm dependencies
 ```
 
+If you experience a network timeout while bootstrapping, you can update the timeout by configuring it in the `.yarnrc`. For example:
+```
+network-timeout 1000000
+```
+
 ### Configure OpenSearch Dashboards
 
 *This step is only mandatory if you have https/authentication enabled, or if you use the OpenSearch Docker image in its default configuration.*
