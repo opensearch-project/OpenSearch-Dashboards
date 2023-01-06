@@ -9,10 +9,12 @@ on:
     branches: [ '**', '!backport/**' ]
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
   pull_request:
     branches: [ '**' ]
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
 
 env:
   TEST_BROWSER_HEADLESS: 1
