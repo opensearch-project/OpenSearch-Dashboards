@@ -45,6 +45,18 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Run bootstrap
         run: yarn osd bootstrap
@@ -103,14 +115,23 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
-
-      # https://github.com/yarnpkg/yarn/issues/8242#issuecomment-776561223
-      # Increase network timeout for Windows, retry once if bootstrap fails
-      - name: Run bootstrap
-        run: |
-          yarn cache clean
           yarn config set network-timeout 1000000 -g
-          yarn osd bootstrap || yarn osd bootstrap
+
+      - name: Configure Yarn Cache
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Run linter
         id: linter
@@ -164,6 +185,18 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
@@ -223,17 +256,26 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
 
-      # https://github.com/yarnpkg/yarn/issues/8242#issuecomment-776561223
-      # Increase network timeout for Windows, retry once if bootstrap fails
       - name: Run bootstrap
-        run: |
-          yarn cache clean
-          yarn config set network-timeout 1000000 -g
-          yarn osd bootstrap || yarn osd bootstrap
+        run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
@@ -291,6 +333,18 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Get package version
         run: |
@@ -347,6 +401,20 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Get package version
         run: |
@@ -401,6 +469,18 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Get package version
         run: |
