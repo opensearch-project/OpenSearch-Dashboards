@@ -13,11 +13,7 @@ export class DataSourceConnectionValidator {
     try {
       return await this.callDataCluster.info<OpenSearchClient>();
     } catch (e) {
-      if (e.statusCode === 403) {
-        return true;
-      } else {
-        throw createDataSourceError(e);
-      }
+      throw createDataSourceError(e);
     }
   }
 }
