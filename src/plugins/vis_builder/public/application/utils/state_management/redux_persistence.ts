@@ -20,7 +20,7 @@ export const loadReduxState = async (services: VisBuilderServices) => {
   return await getPreloadedState(services);
 };
 
-export const saveReduxState = (
+export const persistReduxState = (
   { style, visualization, metadata },
   services: VisBuilderServices
 ) => {

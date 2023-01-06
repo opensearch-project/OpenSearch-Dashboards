@@ -5,8 +5,7 @@
 
 import { VisBuilderServices } from '../../../types';
 import { createVisBuilderServicesMock } from '../mocks';
-import { getPreloadedState } from './preload';
-import { loadReduxState, saveReduxState } from './redux_persistence';
+import { loadReduxState, persistReduxState } from './redux_persistence';
 
 describe('test redux state persistence', () => {
   let mockServices: jest.Mocked<VisBuilderServices>;
@@ -45,8 +44,8 @@ describe('test redux state persistence', () => {
     expect(returnStates).toStrictEqual(reduxStateParams);
   });
 
-  test('test save redux state', () => {
-    saveReduxState(reduxStateParams, mockServices);
+  test('test persist redux state', () => {
+    persistReduxState(reduxStateParams, mockServices);
     const urlStates = mockServices.osdUrlStateStorage.get('_a');
     expect(urlStates).toStrictEqual(reduxStateParams);
   });

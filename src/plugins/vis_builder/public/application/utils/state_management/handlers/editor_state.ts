@@ -21,6 +21,4 @@ export const handlerEditorState = (store: Store, state: RootState, previousState
   ) {
     store.dispatch(setEditorState({ state: 'dirty' }));
   }
-
-  return state;
 };

@@ -48,6 +48,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
         text: message,
       });
     };
+
     const loadSavedVisBuilderVis = async () => {
       try {
         const savedVisBuilderVis = await getSavedVisBuilderVis(services, visualizationIdFromUrl);
@@ -73,11 +74,13 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
 
           const validateResult = validateVisBuilderState({ styleState, visualizationState });
           if (!validateResult.valid) {
-            const err = validateResult.errors;
-            if (err) {
-              const errMsg = err[0].instancePath + ' ' + err[0].message;
-              throw new InvalidJSONProperty(errMsg);
-            }
+            throw new InvalidJSONProperty(
+              validateResult.errorMsg ||
+                i18n.translate('visBuilder.useSavedVisBuilderVis.genericJSONError', {
+                  defaultMessage:
+                    'Something went wrong while loading your saved object. The object may be corrupted or does not match the latest schema',
+                })
+            );
           }
 
           dispatch(setStyleState(styleState));

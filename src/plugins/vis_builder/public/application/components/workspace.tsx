@@ -43,15 +43,17 @@ export const Workspace: FC = ({ children }) => {
   useEffect(() => {
     async function loadExpression() {
       const schemas = ui.containerConfig.data.schemas;
-      const [validSchema, schemaError] = validateSchemaState(schemas, rootState.visualization);
-      const [validAggs, aggregationError] = await validateAggregations(aggConfigs?.aggs || []);
 
-      if (!validSchema || !validAggs) {
-        const err = schemaError || aggregationError;
-        if (typeof err === 'string' && aggConfigs?.aggs.length) {
-          toasts.addWarning(err);
-        }
+      const noAggs = aggConfigs?.aggs?.length === 0;
+      const schemaValidation = validateSchemaState(schemas, rootState.visualization);
+      const aggValidation = validateAggregations(aggConfigs?.aggs || []);
+
+      if (noAggs || !aggValidation.valid || !schemaValidation.valid) {
+        const err = schemaValidation.errorMsg || aggValidation.errorMsg;
+
+        if (err) toasts.addWarning(err);
         setExpression(undefined);
+
         return;
       }
 

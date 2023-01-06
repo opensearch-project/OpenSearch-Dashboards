@@ -17,7 +17,7 @@ export const handlerParentAggs = async (
   store: Store,
   state: RootState,
   services: VisBuilderServices
-): Promise<RootState> => {
+) => {
   const {
     visualization: { activeVisualization, indexPattern = '' },
   } = state;
@@ -64,6 +64,4 @@ export const handlerParentAggs = async (
       );
     }
   });
-
-  return state;
 };

@@ -9,7 +9,7 @@ import { reducer as styleReducer } from './style_slice';
 import { reducer as visualizationReducer } from './visualization_slice';
 import { reducer as metadataReducer } from './metadata_slice';
 import { VisBuilderServices } from '../../..';
-import { loadReduxState, saveReduxState } from './redux_persistence';
+import { loadReduxState, persistReduxState } from './redux_persistence';
 import { handlerEditorState } from './handlers/editor_state';
 import { handlerParentAggs } from './handlers/parent_aggs';
 
@@ -35,20 +35,15 @@ export const getPreloadedStore = async (services: VisBuilderServices) => {
   // Listen to changes
   const handleChange = () => {
     const state = store.getState();
+    persistReduxState(state, services);
 
     if (isEqual(state, previousState)) return;
 
-    previousState = handlerEditorState(store, state, previousState);
+    // Side effects to apply after changes to the store are made
+    handlerEditorState(store, state, previousState);
     handlerParentAggs(store, state, services);
 
-    saveReduxState(
-      {
-        style: store.getState().style,
-        visualization: store.getState().visualization,
-        metadata: store.getState().metadata,
-      },
-      services
-    );
+    previousState = state;
   };
 
   // the store subscriber will automatically detect changes and call handleChange function

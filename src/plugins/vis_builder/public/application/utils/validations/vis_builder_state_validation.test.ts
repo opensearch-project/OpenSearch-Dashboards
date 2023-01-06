@@ -27,7 +27,7 @@ describe('visBuilder state validation', () => {
         visualizationState: validVisualizationState,
       });
       expect(validationResult.valid).toBeTruthy();
-      expect(validationResult.errors).toBeNull();
+      expect(validationResult.errorMsg).toBeNull();
     });
   });
   describe('correct return with errors when validation fails', () => {
@@ -37,7 +37,7 @@ describe('visBuilder state validation', () => {
         visualizationState: validVisualizationState,
       });
       expect(validationResult.valid).toBeFalsy();
-      expect(validationResult.errors).toBeDefined();
+      expect(validationResult.errorMsg).toBeDefined();
     });
   });
 });
