@@ -31,19 +31,32 @@
 import { Subscription } from 'rxjs';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
+import { Filter, FilterStateStore, Query, UI_SETTINGS } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   BaseStateContainer,
   createStateContainer,
+  IOsdUrlStateStorage,
+  createOsdUrlStateStorage,
   Storage,
 } from '../../../../opensearch_dashboards_utils/public';
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from '../../../../../test_utils/public/stub_browser_storage';
-import { connectToQueryState } from './connect_to_query_state';
+import { connectStorageToQueryState, connectToQueryState } from './connect_to_query_state';
 import { TimefilterContract } from '../timefilter';
 import { QueryState } from './types';
+import { createBrowserHistory, History } from 'history';
+import { QueryStringContract } from '../query_string';
 
+const connectStorageToQueryStateFn = (
+  query: QueryStart,
+  OsdUrlStateStorage: IOsdUrlStateStorage
+) => {
+  connectStorageToQueryState(query, OsdUrlStateStorage, {
+    filters: FilterStateStore.APP_STATE,
+    query: true,
+  });
+};
 const connectToQueryGlobalState = (query: QueryStart, state: BaseStateContainer<QueryState>) =>
   connectToQueryState(query, state, {
     refreshInterval: true,
@@ -72,6 +85,110 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
     default:
       throw new Error(`sync_query test: not mocked uiSetting: ${key}`);
   }
+});
+
+describe('connect_storage_to_query_state', () => {
+  let queryServiceStart: QueryStart;
+  let queryString: QueryStringContract;
+  let queryChangeSub: Subscription;
+  let queryChangeTriggered = jest.fn();
+  let filterManager: FilterManager;
+  let filterManagerChangeSub: Subscription;
+  let filterManagerChangeTriggered = jest.fn();
+  let osdUrlStateStorage: IOsdUrlStateStorage;
+  let history: History;
+  let gF1: Filter;
+  let gF2: Filter;
+  let aF1: Filter;
+  let aF2: Filter;
+  let q1: Query;
+
+  beforeEach(() => {
+    const queryService = new QueryService();
+    queryService.setup({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+    });
+    queryServiceStart = queryService.start({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+      savedObjectsClient: startMock.savedObjects.client,
+    });
+
+    queryString = queryServiceStart.queryString;
+    queryChangeTriggered = jest.fn();
+    queryChangeSub = queryString.getUpdates$().subscribe(queryChangeTriggered);
+
+    filterManager = queryServiceStart.filterManager;
+    filterManagerChangeTriggered = jest.fn();
+    filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
+
+    window.location.href = '/';
+    history = createBrowserHistory();
+    osdUrlStateStorage = createOsdUrlStateStorage({ useHash: false, history });
+
+    gF1 = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
+    gF2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'key2', 'value2');
+    aF1 = getFilter(FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
+    aF2 = getFilter(FilterStateStore.APP_STATE, false, false, 'key4', 'value4');
+
+    q1 = {
+      query: 'count is less than 100',
+      language: 'kuery',
+    };
+  });
+
+  afterEach(() => {
+    filterManagerChangeSub.unsubscribe();
+    queryChangeSub.unsubscribe();
+  });
+
+  test('state is initialized with default state', () => {
+    expect(osdUrlStateStorage.get('_q')).toBeNull();
+    connectStorageToQueryStateFn(queryServiceStart, osdUrlStateStorage);
+
+    expect(osdUrlStateStorage.get('_q')).toEqual({
+      query: queryString.getDefaultQuery(),
+      filters: filterManager.getAppFilters(),
+    });
+  });
+
+  test('state is initialized with URL states', () => {
+    const initialStates = {
+      filters: [aF1, aF2],
+      query: q1,
+    };
+    osdUrlStateStorage.set('_q', initialStates, {
+      replace: true,
+    });
+    connectStorageToQueryStateFn(queryServiceStart, osdUrlStateStorage);
+    expect(filterManager.getFilters().length).toBe(2);
+    expect(queryString.getQuery()).toStrictEqual(q1);
+  });
+
+  test('when global filter changes, filter in storage should not be updated', () => {
+    connectStorageToQueryStateFn(queryServiceStart, osdUrlStateStorage);
+    const previousStorage = osdUrlStateStorage.get('_q');
+    filterManager.setFilters([gF1, gF1]);
+    const updatedStorage = osdUrlStateStorage.get('_q');
+    expect(previousStorage).toStrictEqual(updatedStorage);
+  });
+
+  test('when app filter changes, filter storage should be updated', () => {
+    connectStorageToQueryStateFn(queryServiceStart, osdUrlStateStorage);
+    const previousStorage = osdUrlStateStorage.get('_q');
+    filterManager.setFilters([aF1, aF1]);
+    const updatedStorage = osdUrlStateStorage.get('_q');
+    expect(previousStorage).not.toStrictEqual(updatedStorage);
+  });
+
+  test('when query changes, state updates query', () => {
+    connectStorageToQueryStateFn(queryServiceStart, osdUrlStateStorage);
+    const previousStorage = osdUrlStateStorage.get('_q');
+    queryString.setQuery(q1);
+    const updatedStorage = osdUrlStateStorage.get('_q');
+    expect(previousStorage).not.toStrictEqual(updatedStorage);
+  });
 });
 
 describe('connect_to_global_state', () => {
