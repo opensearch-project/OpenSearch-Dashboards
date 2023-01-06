@@ -94,7 +94,9 @@
     "**/qs": "^6.10.3",
     "**/trim": "^0.0.3",
     "**/typescript": "4.0.2",
-    "**/unset-value": "^2.0.1"
+    "**/unset-value": "^2.0.1",
+    "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
+    "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1"
   },
   "workspaces": {
     "packages": [
@@ -463,7 +465,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "14.20.0",
+    "node": "14.20.1",
     "yarn": "^1.21.1"
   }
 }
