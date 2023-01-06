@@ -139,7 +139,7 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     }
     const { toExpression, ui } = visualizationType;
     const schemas = ui.containerConfig.data.schemas;
-    const [valid, errorMsg] = validateSchemaState(schemas, visualizationState);
+    const { valid, errorMsg } = validateSchemaState(schemas, visualizationState);
 
     if (!valid) {
       if (errorMsg) {
