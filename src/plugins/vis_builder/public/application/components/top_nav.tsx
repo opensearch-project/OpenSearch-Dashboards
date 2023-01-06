@@ -18,8 +18,7 @@ import { setEditorState } from '../utils/state_management/metadata_slice';
 import { useCanSave } from '../utils/use/use_can_save';
 import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
 import { TopNavMenuData } from '../../../../navigation/public';
-import { opensearchFilters } from '../../../../data/public';
-import { connectStorageToQueryState } from '../../../../data/public';
+import { opensearchFilters, connectStorageToQueryState } from '../../../../data/public';
 
 export const TopNav = () => {
   // id will only be set for the edit route
