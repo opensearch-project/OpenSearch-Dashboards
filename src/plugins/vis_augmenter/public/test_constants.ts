@@ -4,8 +4,16 @@
  */
 
 import { OpenSearchDashboardsDatatable } from '../../expressions/public';
-import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, HOVER_PARAM } from './';
 import { VisAnnotationType } from './vega/constants';
+import {
+  VIS_LAYER_COLUMN_TYPE,
+  VisLayerTypes,
+  HOVER_PARAM,
+  EVENT_MARK_SIZE,
+  EVENT_MARK_SIZE_ENLARGED,
+  EVENT_COLOR,
+  EVENT_MARK_SHAPE,
+} from './';
 
 const TEST_X_AXIS_ID = 'test-x-axis-id';
 const TEST_X_AXIS_ID_DIRTY = 'test.x.axis.id';
@@ -493,10 +501,11 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
   height: 25,
   mark: {
     type: 'point',
-    shape: 'triangle-up',
-    color: 'red',
-    filled: true,
-    opacity: 1,
+    shape: EVENT_MARK_SHAPE,
+    fill: EVENT_COLOR,
+    fillOpacity: 1,
+    stroke: EVENT_COLOR,
+    strokeOpacity: 1,
     style: [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`],
     tooltip: true,
   },
@@ -539,7 +548,10 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
         ],
       },
     },
-    size: { condition: { empty: false, param: HOVER_PARAM, value: 140 }, value: 100 },
+    size: {
+      condition: { empty: false, param: HOVER_PARAM, value: EVENT_MARK_SIZE_ENLARGED },
+      value: EVENT_MARK_SIZE,
+    },
     tooltip: [{ field: TEST_PLUGIN_EVENT_TYPE }],
   },
 };

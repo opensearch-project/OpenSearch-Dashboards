@@ -83,6 +83,8 @@ interface Props {
   SavedObjectFinder: React.ComponentType<any>;
   stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
+  hasBorder?: boolean;
+  hasShadow?: boolean;
 }
 
 interface State {
@@ -234,6 +236,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
+        hasBorder={this.props.hasBorder}
+        hasShadow={this.props.hasShadow}
       >
         {!this.props.hideHeader && (
           <PanelHeader

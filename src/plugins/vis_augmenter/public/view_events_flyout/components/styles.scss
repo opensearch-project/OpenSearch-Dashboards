@@ -1,0 +1,58 @@
+$vis-description-width: 150px;
+$event-vis-height: 55px;
+$timeline-panel-height: 100px;
+
+.view-events-flyout {
+  &__baseVis {
+    min-height: 25vh; // Visualizations require the container to have a valid width and height to render
+  }
+
+  &__eventVis {
+    height: $event-vis-height;
+  }
+
+  &__timelinePanel {
+    height: $timeline-panel-height;
+  }
+
+  &__visDescription {
+    min-width: $vis-description-width;
+    max-width: $vis-description-width;
+  }
+
+  &__content {
+    position: absolute;
+    top: 110px;
+    right: $euiSizeM;
+    bottom: $euiSizeM;
+    left: $euiSizeM;
+  }
+
+  &__contentPanel {
+    @include euiYScroll;
+
+    overflow: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable both-edges;
+  }
+}
+
+.hide-y-scroll {
+  overflow-y: hidden;
+}
+
+.show-y-scroll {
+  overflow-y: scroll;
+}
+
+.date-range-panel-height {
+  height: 45px;
+}
+
+.timeline-panel-height {
+  height: $timeline-panel-height;
+}
+
+.error-icon-padding {
+  margin-right: -8px;
+}

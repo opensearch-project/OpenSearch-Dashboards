@@ -107,7 +107,12 @@ export interface EmbeddableStart extends PersistableState<EmbeddableInput> {
   getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
 }
 
-export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
+export type EmbeddablePanelHOC = React.FC<{
+  embeddable: IEmbeddable;
+  hideHeader?: boolean;
+  hasBorder?: boolean;
+  hasShadow?: boolean;
+}>;
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactoryDefinitions: Map<
@@ -168,12 +173,18 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     const getEmbeddablePanelHoc = (stateTransfer?: EmbeddableStateTransfer) => ({
       embeddable,
       hideHeader,
+      hasBorder,
+      hasShadow,
     }: {
       embeddable: IEmbeddable;
       hideHeader?: boolean;
+      hasBorder?: boolean;
+      hasShadow?: boolean;
     }) => (
       <EmbeddablePanel
         hideHeader={hideHeader}
+        hasBorder={hasBorder}
+        hasShadow={hasShadow}
         embeddable={embeddable}
         stateTransfer={stateTransfer ? stateTransfer : this.outgoingOnlyStateTransfer}
         getActions={uiActions.getTriggerCompatibleActions}

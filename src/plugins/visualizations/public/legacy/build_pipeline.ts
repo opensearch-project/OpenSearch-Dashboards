@@ -33,7 +33,7 @@ import moment from 'moment';
 import { formatExpression, SerializedFieldFormat } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
-import { VisLayers } from '../../../../plugins/vis_augmenter/public';
+import { VisAugmenterEmbeddableConfig, VisLayers } from '../../../../plugins/vis_augmenter/public';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
@@ -88,6 +88,7 @@ export interface BuildPipelineParams {
   timeRange?: any;
   abortSignal?: AbortSignal;
   visLayers?: VisLayers;
+  visAugmenterConfig?: VisAugmenterEmbeddableConfig;
 }
 
 const vislibCharts: string[] = [
