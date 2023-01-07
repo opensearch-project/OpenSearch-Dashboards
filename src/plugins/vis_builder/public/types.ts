@@ -37,6 +37,7 @@ export interface VisBuilderPluginStartDependencies {
 }
 
 export interface VisBuilderServices extends CoreStart {
+  appName: string;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedVisBuilderLoader: VisBuilderStart['savedVisBuilderLoader'];
   toastNotifications: ToastsStart;
