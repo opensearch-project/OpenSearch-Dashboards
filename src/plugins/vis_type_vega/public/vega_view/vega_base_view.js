@@ -30,6 +30,7 @@
 
 import $ from 'jquery';
 import moment from 'moment';
+import { get } from 'lodash';
 import dateMath from '@elastic/datemath';
 import { vega, vegaLite, vegaExpressionInterpreter } from '../lib/vega';
 import { Utils } from '../data_model/utils';
@@ -38,8 +39,9 @@ import { i18n } from '@osd/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { opensearchFilters } from '../../../data/public';
 
-import { getEnableExternalUrls, getData } from '../services';
+import { getEnableExternalUrls, getData, getUiActions } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { OPEN_EVENTS_FLYOUT_TRIGGER } from '../../../ui_actions/public';
 
 vega.scheme('elastic', euiPaletteColorBlind());
 
@@ -84,6 +86,7 @@ export class VegaBaseView {
     this._destroyHandlers = [];
     this._initialized = false;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._visInput = opts.visInput;
   }
 
   async init() {
@@ -280,6 +283,14 @@ export class VegaBaseView {
         // Vega bug workaround - need to destroy tooltip by hand
         this._addDestroyHandler(() => tthandler.hideTooltip());
       }
+
+      // trigger the open events flyout UIAction if a click happens on an annotation datapoint
+      view.addEventListener('click', function (event, item) {
+        // TODO: add filtering to determine if the item is a datapoint, and whether or not it is an
+        // "annotation" datapoint vs. regular datapoint
+        const { savedObjectId } = get(view, '_opensearchDashboardsView._visInput', {});
+        getUiActions().getTrigger(OPEN_EVENTS_FLYOUT_TRIGGER).exec({ savedObjectId });
+      });
 
       return view.runAsync(); // Allows callers to await rendering
     }

@@ -210,6 +210,7 @@ export class VisualizationsPlugin
       overlays: core.overlays,
     });
     setSavedSearchLoader(savedSearchLoader);
+
     return {
       ...types,
       showNewVisModal,

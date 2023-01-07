@@ -48,6 +48,7 @@ type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
   spec: string;
+  savedObjectId: string;
 }
 
 export type VisParams = Required<Arguments>;
@@ -79,15 +80,24 @@ export const createVegaFn = (
       default: '',
       help: '',
     },
+    savedObjectId: {
+      types: ['string'],
+      default: '',
+      help: '',
+    },
   },
   async fn(input, args, context) {
     const vegaRequestHandler = createVegaRequestHandler(dependencies, context);
 
+    const timeRange = get(input, 'timeRange') as TimeRange;
+    const query = get(input, 'query') as Query;
+    const filters = get(input, 'filters') as any;
+
     const response = await vegaRequestHandler({
-      timeRange: get(input, 'timeRange') as TimeRange,
-      query: get(input, 'query') as Query,
-      filters: get(input, 'filters') as any,
-      visParams: { spec: args.spec },
+      timeRange,
+      query,
+      filters,
+      visParams: { spec: args.spec, savedObjectId: args.savedObjectId },
     });
 
     return {
@@ -98,6 +108,7 @@ export const createVegaFn = (
         visType: 'vega',
         visConfig: {
           spec: args.spec,
+          savedObjectId: args.savedObjectId,
         },
       },
     };

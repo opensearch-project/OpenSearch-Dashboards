@@ -265,8 +265,11 @@ const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): vo
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  vega: (params) => {
-    return `vega ${prepareString('spec', params.spec)}`;
+  vega: (params, schemas, uiState, meta) => {
+    return `vega ${prepareString('spec', params.spec)} ${prepareString(
+      'savedObjectId',
+      meta?.savedObjectId
+    )}`;
   },
   input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
@@ -405,11 +408,16 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
 
     const schemas = getSchemas(vis, params);
 
+    const meta = {
+      savedObjectId: get(vis, 'id', ''),
+    };
+
     if (buildPipelineVisFunction[vis.type.name]) {
       pipeline += buildPipelineVisFunction[vis.type.name](
         { title, ...vis.params },
         schemas,
-        uiState
+        uiState,
+        meta
       );
     } else if (vislibCharts.includes(vis.type.name)) {
       const visConfig = { ...vis.params };

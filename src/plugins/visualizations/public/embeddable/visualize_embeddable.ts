@@ -65,6 +65,7 @@ import { SavedObjectAttributes } from '../../../../core/types';
 import { AttributeService } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
+import { PointInTimeEventsVisLayer, VisLayer, VisLayerTypes } from '../../../vis_augmenter/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -83,6 +84,7 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  visLayerResourceIds?: string[];
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -127,6 +129,7 @@ export class VisualizeEmbeddable
     VisualizeByReferenceInput
   >;
   private savedVisualizationsLoader?: SavedVisualizationsLoader;
+  public visLayers?: Array<VisLayer>;
 
   constructor(
     timefilter: TimefilterContract,
@@ -362,6 +365,7 @@ export class VisualizeEmbeddable
   }
 
   public destroy() {
+    console.log('destroying...');
     super.destroy();
     this.subscriptions.forEach((s) => s.unsubscribe());
     this.vis.uiState.off('change', this.uiStateChangeHandler);
@@ -393,6 +397,133 @@ export class VisualizeEmbeddable
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
+
+    // TODO: remove later. testing dummy vis layers that may be returned from the set
+    // of expressions functinos ran by the plugins
+    const dummyVisLayers = [
+      {
+        originPlugin: 'Anomaly Detection',
+        type: VisLayerTypes.PointInTimeEvents,
+        pluginResource: {
+          type: 'Anomaly Detectors',
+          id: 'detector-1-id',
+          name: 'detector-1',
+          urlPath: 'anomaly-detection-dashboards#/detectors/anomaly-detector-1-id/configurations',
+        },
+        events: [
+          {
+            timestamp: 1234,
+            metadata: {
+              pluginResourceId: 'detector-1-id',
+            },
+          },
+          {
+            timestamp: 5678,
+            metadata: {
+              pluginResourceId: 'detector-1-id',
+            },
+          },
+        ],
+      },
+      {
+        originPlugin: 'Anomaly Detection',
+        type: VisLayerTypes.PointInTimeEvents,
+        pluginResource: {
+          type: 'Anomaly Detectors',
+          id: 'detector-2-id',
+          name: 'detector-2',
+          urlPath: 'anomaly-detection-dashboards#/detectors/anomaly-detector-2-id/configurations',
+        },
+        events: [
+          {
+            timestamp: 1234,
+            metadata: {
+              pluginResourceId: 'detector-2-id',
+            },
+          },
+        ],
+      },
+      {
+        originPlugin: 'Alerting',
+        type: VisLayerTypes.PointInTimeEvents,
+        pluginResource: {
+          type: 'Alerting Monitors',
+          id: 'monitor-1-id',
+          name: 'monitor-1',
+          urlPath: 'alerting#/monitors/monitor-1-id/details',
+        },
+        events: [
+          {
+            timestamp: 1234,
+            metadata: {
+              pluginResourceId: 'monitor-1-id',
+            },
+          },
+        ],
+      },
+      {
+        originPlugin: 'Alerting',
+        type: VisLayerTypes.PointInTimeEvents,
+        pluginResource: {
+          type: 'Alerting Monitors',
+          id: 'monitor-2-id',
+          name: 'monitor-2',
+          urlPath: 'alerting#/monitors/monitor-2-id/details',
+        },
+        events: [
+          {
+            timestamp: 1234,
+            metadata: {
+              pluginResourceId: 'monitor-2-id',
+            },
+          },
+        ],
+      },
+      {
+        originPlugin: 'Alerting',
+        type: VisLayerTypes.PointInTimeEvents,
+        pluginResource: {
+          type: 'Alerting Monitors',
+          id: 'monitor-3-id',
+          name: 'monitor-3',
+          urlPath: 'alerting#/monitors/monitor-3-id/details',
+        },
+        events: [
+          {
+            timestamp: 1234,
+            metadata: {
+              pluginResourceId: 'monitor-3-id',
+            },
+          },
+        ],
+      },
+      {
+        originPlugin: 'Alerting',
+        type: VisLayerTypes.PointInTimeEvents,
+        pluginResource: {
+          type: 'Alerting Monitors',
+          id: 'monitor-4-id',
+          name: 'monitor-4',
+          urlPath: 'alerting#/monitors/monitor-4-id/details',
+        },
+        events: [
+          {
+            timestamp: 1234,
+            metadata: {
+              pluginResourceId: 'monitor-4-id',
+            },
+          },
+        ],
+      },
+    ] as Array<PointInTimeEventsVisLayer>;
+
+    this.visLayers =
+      this.input.visLayerResourceIds !== undefined
+        ? dummyVisLayers.filter((dummyVisLayer) =>
+            this.input.visLayerResourceIds?.includes(dummyVisLayer.pluginResource.id)
+          )
+        : dummyVisLayers;
+
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,

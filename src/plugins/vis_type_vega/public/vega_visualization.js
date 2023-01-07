@@ -29,6 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { get } from 'lodash';
 import { getNotifications, getData } from './services';
 
 export const createVegaVisualization = ({ getServiceSettings }) =>
@@ -83,6 +84,7 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
         const serviceSettings = await getServiceSettings();
         const { filterManager } = this.dataPlugin.query;
         const { timefilter } = this.dataPlugin.query.timefilter;
+
         const vegaViewParams = {
           parentEl: this._el,
           applyFilter: this._vis.API.events.applyFilter,
@@ -90,6 +92,9 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
           serviceSettings,
           filterManager,
           timefilter,
+          visInput: {
+            savedObjectId: get(this._vis, 'params.savedObjectId'),
+          },
         };
 
         if (vegaParser.useMap) {

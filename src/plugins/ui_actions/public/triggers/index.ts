@@ -37,3 +37,4 @@ export * from './apply_filter_trigger';
 export * from './visualize_field_trigger';
 export * from './visualize_geo_field_trigger';
 export * from './default_trigger';
+export * from './open_events_flyout_trigger';

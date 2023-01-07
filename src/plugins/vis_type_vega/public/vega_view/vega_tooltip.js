@@ -65,17 +65,18 @@ export class TooltipHandler {
     view.tooltip(this.handler.bind(this));
   }
 
-  /**
-   * The handler function.
-   */
+  // test handler
   handler(view, event, item, value) {
     this.hideTooltip();
+
+    //console.log('item: ', item);
 
     // hide tooltip for null, undefined, or empty string values
     if (value == null || value === '') {
       return;
     }
 
+    // creating element & adding id & class attributes to it so it renders in the euiToolTip styling
     const el = document.createElement('div');
     el.setAttribute('id', tooltipId);
     ['vgaVis__tooltip', 'euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`].forEach(
@@ -87,8 +88,8 @@ export class TooltipHandler {
     // Sanitized HTML is created by the tooltip library,
     // with a large number of tests, hence suppressing eslint here.
     // eslint-disable-next-line no-unsanitized/property
-    el.innerHTML = createTooltipContent(value, _.escape, 2);
-
+    // el.innerHTML = createTooltipContent(value, _.escape, 2);
+    el.innerHTML = this.createTooltipHtml(value);
     // add to DOM to calculate tooltip size
     document.body.appendChild(el);
 
@@ -115,6 +116,10 @@ export class TooltipHandler {
     );
 
     el.setAttribute('style', `top: ${pos.top}px; left: ${pos.left}px`);
+  }
+
+  createTooltipHtml(value) {
+    return '<p>some custom tooltip<p>';
   }
 
   hideTooltip() {

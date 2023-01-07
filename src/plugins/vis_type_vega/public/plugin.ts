@@ -50,6 +50,8 @@ import './index.scss';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { setUiActions } from './services';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -72,6 +74,7 @@ export interface VegaPluginSetupDependencies {
 /** @internal */
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 
 /** @internal */
@@ -108,9 +111,10 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
   }
 
-  public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
+  public start(core: CoreStart, { data, uiActions }: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
     setData(data);
+    setUiActions(uiActions);
     setInjectedMetadata(core.injectedMetadata);
   }
 }
