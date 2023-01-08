@@ -6,6 +6,7 @@
 import { VisBuilderServices } from '../../../types';
 import { createVisBuilderServicesMock } from '../mocks';
 import { loadReduxState, persistReduxState } from './redux_persistence';
+import { RootState } from './store';
 
 describe('test redux state persistence', () => {
   let mockServices: jest.Mocked<VisBuilderServices>;
@@ -21,7 +22,7 @@ describe('test redux state persistence', () => {
   });
 
   test('test load redux state when url is empty', async () => {
-    const defaultStates = {
+    const defaultStates: RootState = {
       style: 'style default states',
       visualization: {
         searchField: '',
@@ -29,7 +30,7 @@ describe('test redux state persistence', () => {
         indexPattern: 'id',
       },
       metadata: {
-        editor: { validity: {}, state: 'loading' },
+        editor: { errors: {}, state: 'loading' },
         originatingApp: undefined,
       },
     };
