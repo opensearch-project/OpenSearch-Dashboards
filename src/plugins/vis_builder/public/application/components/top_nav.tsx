@@ -6,7 +6,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
-import { PLUGIN_ID } from '../../../common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig } from '../utils/get_top_nav_config';
 import { VisBuilderServices } from '../../types';
@@ -29,6 +28,7 @@ export const TopNav = () => {
     navigation: {
       ui: { TopNavMenu },
     },
+    appName,
   } = services;
   const rootState = useTypedSelector((state) => state);
   const dispatch = useTypedDispatch();
@@ -81,7 +81,7 @@ export const TopNav = () => {
   return (
     <div className="vbTopNav">
       <TopNavMenu
-        appName={PLUGIN_ID}
+        appName={appName}
         config={config}
         setMenuMountPoint={setHeaderActionMenu}
         indexPatterns={indexPattern ? [indexPattern] : []}
