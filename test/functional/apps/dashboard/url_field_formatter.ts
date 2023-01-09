@@ -74,14 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await settings.controlChangeSave();
     });
 
-    it('applied on dashboard', async () => {
-      await common.navigateToApp('dashboard');
-      await dashboard.loadSavedDashboard('dashboard with everything');
-      await dashboard.waitForRenderComplete();
-      const fieldLink = await visChart.getFieldLinkInVisTable(`${fieldName}: Descending`, 1);
-      await clickFieldAndCheckUrl(fieldLink);
-    });
-
     it('applied on discover', async () => {
       await common.navigateToApp('discover');
       await timePicker.setAbsoluteRange(

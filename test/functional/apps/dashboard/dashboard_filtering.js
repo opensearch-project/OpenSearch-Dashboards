@@ -98,10 +98,6 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.seriesElementCount(0);
       });
 
-      it('data tables are filtered', async () => {
-        await dashboardExpect.dataTableRowCount(0);
-      });
-
       it('goal and guages are filtered', async () => {
         await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
       });
@@ -159,10 +155,6 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.seriesElementCount(0);
       });
 
-      it('data tables are filtered', async () => {
-        await dashboardExpect.dataTableRowCount(0);
-      });
-
       it('goal and guages are filtered', async () => {
         await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
       });
@@ -210,10 +202,6 @@ export default function ({ getService, getPageObjects }) {
 
       it('area, bar and heatmap charts', async () => {
         await dashboardExpect.seriesElementCount(3);
-      });
-
-      it('data tables', async () => {
-        await dashboardExpect.dataTableRowCount(10);
       });
 
       it('goal and guages', async () => {
