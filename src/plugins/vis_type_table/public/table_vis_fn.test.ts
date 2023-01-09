@@ -84,6 +84,6 @@ describe('interpreter/functions#table', () => {
   it('calls response handler with correct values', async () => {
     await fn(context, { visConfig: JSON.stringify(visConfig) }, undefined);
     expect(tableVisResponseHandler).toHaveBeenCalledTimes(1);
-    expect(tableVisResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
+    expect(tableVisResponseHandler).toHaveBeenCalledWith(context, visConfig);
   });
 });

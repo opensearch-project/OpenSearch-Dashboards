@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { SchemaConfig } from '../../visualizations/public';
+import { SchemaConfig } from 'src/plugins/visualizations/public';
+import { IFieldFormat } from 'src/plugins/data/public';
 
 export enum AggTypes {
   SUM = 'sum',
@@ -38,22 +39,46 @@ export enum AggTypes {
   COUNT = 'count',
 }
 
-export interface Dimensions {
-  buckets: SchemaConfig[];
+export interface TableVisConfig extends TableVisParams {
+  title: string;
   metrics: SchemaConfig[];
+  buckets: SchemaConfig[];
+  splitRow?: SchemaConfig[];
+  splitColumn?: SchemaConfig[];
 }
 
 export interface TableVisParams {
-  type: 'table';
   perPage: number | '';
   showPartialRows: boolean;
   showMetricsAtAllLevels: boolean;
-  sort: {
-    columnIndex: number | null;
-    direction: string | null;
-  };
   showTotal: boolean;
   totalFunc: AggTypes;
   percentageCol: string;
-  dimensions: Dimensions;
+}
+
+export interface FormattedColumn {
+  id: string;
+  title: string;
+  formatter: IFieldFormat;
+  filterable: boolean;
+  formattedTotal?: string | number;
+  sumTotal?: number;
+  total?: number;
+}
+
+export interface ColumnWidth {
+  colIndex: number;
+  width: number;
+}
+
+export interface ColumnSort {
+  colIndex?: number;
+  direction?: 'asc' | 'desc';
+}
+
+export interface TableUiState {
+  sort: ColumnSort;
+  setSort: (sort: ColumnSort) => void;
+  width: ColumnWidth[];
+  setWidth: (columnWidths: ColumnWidth[]) => void;
 }
