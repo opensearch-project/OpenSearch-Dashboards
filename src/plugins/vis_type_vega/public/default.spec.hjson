@@ -1,31 +1,31 @@
 {
-/*
+  /*
 
-Welcome to Vega visualizations.  Here you can design your own dataviz from scratch using a declarative language called Vega, or its simpler form Vega-Lite.  In Vega, you have the full control of what data is loaded, even from multiple sources, how that data is transformed, and what visual elements are used to show it.  Use help icon to view Vega examples, tutorials, and other docs.  Use the wrench icon to reformat this text, or to remove comments.
+  Welcome to Vega visualizations.  Here you can design your own dataviz from scratch using a declarative language called Vega, or its simpler form Vega-Lite.  In Vega, you have the full control of what data is loaded, even from multiple sources, how that data is transformed, and what visual elements are used to show it.  Use help icon to view Vega examples, tutorials, and other docs.  Use the wrench icon to reformat this text, or to remove comments.
 
-This example graph shows the document count in all indexes in the current time range.  You might need to adjust the time filter in the upper right corner.
-*/
+  This example graph shows the document count in all indexes in the current time range.  You might need to adjust the time filter in the upper right corner.
+  */
 
-  $schema: https://vega.github.io/schema/vega-lite/v4.json
+  $schema: https://vega.github.io/schema/vega-lite/v5.json
   title: Event counts from all indexes
 
   // Define the data source
   data: {
     url: {
-/*
-An object instead of a string for the "url" param is treated as an OpenSearch query. Anything inside this object is not part of the Vega language, but only understood by OpenSearch Dashboards and OpenSearch server. This query counts the number of documents per time interval, assuming you have a @timestamp field in your data.
+      /*
+      An object instead of a string for the "url" param is treated as an OpenSearch query. Anything inside this object is not part of the Vega language, but only understood by OpenSearch Dashboards and OpenSearch server. This query counts the number of documents per time interval, assuming you have a @timestamp field in your data.
 
-OpenSearch Dashboards has a special handling for the fields surrounded by "%".  They are processed before the the query is sent to OpenSearch. This way the query becomes context aware, and can use the time range and the dashboard filters.
-*/
+      OpenSearch Dashboards has a special handling for the fields surrounded by "%".  They are processed before the the query is sent to OpenSearch. This way the query becomes context aware, and can use the time range and the dashboard filters.
+      */
 
       // Apply dashboard context filters when set
       %context%: true
       // Filter the time picker (upper right corner) with this field
       %timefield%: @timestamp
 
-/*
-See .search() documentation for :  https://opensearch.org/docs/latest/clients/javascript/
-*/
+      /*
+      See .search() documentation for :  https://opensearch.org/docs/latest/clients/javascript/
+      */
 
       // Which index to search
       index: _all
@@ -53,29 +53,29 @@ See .search() documentation for :  https://opensearch.org/docs/latest/clients/ja
         size: 0
       }
     }
-/*
-OpenSearch will return results in this format:
+    /*
+    OpenSearch will return results in this format:
 
-aggregations: {
-  time_buckets: {
-    buckets: [
-      {
-        key_as_string: 2015-11-30T22:00:00.000Z
-        key: 1448920800000
-        doc_count: 0
-      },
-      {
-        key_as_string: 2015-11-30T23:00:00.000Z
-        key: 1448924400000
-        doc_count: 0
+    aggregations: {
+      time_buckets: {
+        buckets: [
+          {
+            key_as_string: 2015-11-30T22:00:00.000Z
+            key: 1448920800000
+            doc_count: 0
+          },
+          {
+            key_as_string: 2015-11-30T23:00:00.000Z
+            key: 1448924400000
+            doc_count: 0
+          }
+          ...
+        ]
       }
-      ...
-    ]
-  }
-}
+    }
 
-For our graph, we only need the list of bucket values.  Use the format.property to discard everything else.
-*/
+    For our graph, we only need the list of bucket values.  Use the format.property to discard everything else.
+    */
     format: {property: "aggregations.time_buckets.buckets"}
   }
 
