@@ -31,10 +31,6 @@ const jsonCode = ['{', '    "p1": "v3",', '    "p2": false', '}'].join('\n');
 const modelUri = monaco.Uri.parse('a://b/foo.json');
 const model = monaco.editor.createModel(jsonCode, 'json', modelUri);
 
-/**
- * check the diagnostics options on playground
- * https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-configure-json-defaults
- */
 export function JsonEditorWithDiagnosticsOptions() {
   const containerRef = useRef<HTMLDivElement>(null);
   useDiagnosticsOptions({
