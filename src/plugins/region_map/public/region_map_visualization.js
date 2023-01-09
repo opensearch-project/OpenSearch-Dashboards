@@ -158,7 +158,6 @@ export function createRegionMapVisualization({
       let selectedLayer;
       if (DEFAULT_MAP_CHOICE === this._params.layerChosenByUser && this._params.selectedLayer) {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);
-        this._params.selectedJoinField = selectedLayer?.fields[0];
       } else if (
         CUSTOM_MAP_CHOICE === this._params.layerChosenByUser &&
         this._params.selectedCustomLayer
