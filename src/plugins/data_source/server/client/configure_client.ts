@@ -25,7 +25,7 @@ export const configureClient = async (
   logger: Logger
 ): Promise<Client> => {
   try {
-    const { attributes: dataSource } = await getDataSource(dataSourceId, savedObjects);
+    const { attributes: dataSource } = await getDataSource(dataSourceId!, savedObjects);
     const rootClient = getRootClient(dataSource, config, openSearchClientPoolSetup);
 
     return await getQueryClient(rootClient, dataSource, cryptography);
@@ -38,7 +38,7 @@ export const configureClient = async (
 };
 
 export const configureTestClient = async (
-  { savedObjects, cryptography }: DataSourceClientParams,
+  { savedObjects, cryptography, dataSourceId }: DataSourceClientParams,
   dataSource: DataSourceAttributes,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
@@ -46,28 +46,21 @@ export const configureTestClient = async (
 ): Promise<Client> => {
   try {
     const {
-      id,
       auth: { type, credentials },
     } = dataSource;
     let requireDecryption = false;
 
     const rootClient = getRootClient(dataSource, config, openSearchClientPoolSetup);
 
-    if (type === AuthType.UsernamePasswordType && !credentials?.password && id) {
-      const { attributes: fetchedDataSource } = await getDataSource(id || '', savedObjects);
-      dataSource.auth = {
-        type,
-        credentials: {
-          username: credentials?.username || '',
-          password: fetchedDataSource.auth.credentials?.password || '',
-        },
-      };
+    if (type === AuthType.UsernamePasswordType && !credentials?.password && dataSourceId) {
+      const dataSourceSavedObject = await getDataSource(dataSourceId, savedObjects);
+      dataSource = dataSourceSavedObject.attributes;
       requireDecryption = true;
     }
 
     return getQueryClient(rootClient, dataSource, cryptography, requireDecryption);
   } catch (error: any) {
-    logger.error(`Failed to get data source client for dataSource: ${dataSource}`);
+    logger.error(`Failed to get test client for dataSource: ${dataSource}`);
     logger.error(error);
     // Re-throw as DataSourceError
     throw createDataSourceError(error);
