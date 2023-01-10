@@ -67,9 +67,11 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 * [MD] Add design documents of multiple data source feature [#2538](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2538)
 * Corrected README and help command of osd-plugin-helpers ([#2810](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2810))
+
 ### 🛠 Maintenance
 
 - Remove `github-checks-reporter`, an unused dependency ([#3126](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3126))
+- Add `vega-lite` v5 dependency aliased as `vega-lite-next` ([#3076](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3076))
 
 ### 🪛 Refactoring
 * [MD] Refactor data source error handling ([#2661](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2661))
