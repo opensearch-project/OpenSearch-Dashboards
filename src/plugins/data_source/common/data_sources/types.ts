@@ -6,7 +6,6 @@
 import { SavedObjectAttributes } from 'src/core/types';
 
 export interface DataSourceAttributes extends SavedObjectAttributes {
-  id?: string;
   title: string;
   description?: string;
   endpoint: string;

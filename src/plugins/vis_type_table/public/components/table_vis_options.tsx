@@ -132,6 +132,7 @@ function TableOptions({
         paramName="showTotal"
         value={stateParams.showTotal}
         setValue={setValue}
+        data-test-subj="showTotal"
       />
 
       <SelectOption
@@ -143,6 +144,7 @@ function TableOptions({
         paramName="totalFunc"
         value={stateParams.totalFunc}
         setValue={setValue}
+        data-test-subj="totalFunctionOptions"
       />
 
       <SelectOption
@@ -153,7 +155,7 @@ function TableOptions({
         paramName="percentageCol"
         value={stateParams.percentageCol}
         setValue={setValue}
-        id="datatableVisualizationPercentageCol"
+        data-test-subj="datatableVisualizationPercentageCol"
       />
     </EuiPanel>
   );

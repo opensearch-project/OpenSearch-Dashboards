@@ -99,10 +99,6 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await this.clickVisType('area');
     }
 
-    public async clickDataTable() {
-      await this.clickVisType('table');
-    }
-
     public async clickLineChart() {
       await this.clickVisType('line');
     }

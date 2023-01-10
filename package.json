@@ -56,6 +56,8 @@
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:ftr:runner": "node scripts/functional_test_runner",
     "checkLicenses": "node scripts/check_licenses --dev",
+    "notice:validate": "node scripts/notice --validate",
+    "notice:generate": "node scripts/notice",
     "build-platform": "node scripts/build",
     "build": "node scripts/build --all-platforms",
     "start": "node scripts/opensearch_dashboards --dev",
@@ -86,13 +88,15 @@
     "**/hoist-non-react-statics": "^3.3.2",
     "**/json-schema": "^0.4.0",
     "**/kind-of": ">=6.0.3",
-    "**/loader-utils": "^2.0.3",
+    "**/loader-utils": "^2.0.4",
     "**/node-jose": "^2.1.0",
     "**/nth-check": "^2.0.1",
     "**/qs": "^6.10.3",
     "**/trim": "^0.0.3",
     "**/typescript": "4.0.2",
-    "**/unset-value": "^2.0.1"
+    "**/unset-value": "^2.0.1",
+    "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
+    "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1"
   },
   "workspaces": {
     "packages": [
@@ -227,7 +231,6 @@
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.1.0",
     "@microsoft/api-documenter": "^7.13.78",
     "@microsoft/api-extractor": "^7.19.3",
@@ -453,7 +456,7 @@
     "ui-select": "0.19.8",
     "vega": "^5.17.3",
     "vega-interpreter": "npm:@amoo-miki/vega-forced-csp-compliant-interpreter@1.0.6",
-    "vega-lite": "^4.16.8",
+    "vega-lite": "^5.6.0",
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.24.2",
     "vinyl-fs": "^3.0.3",
@@ -462,7 +465,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "14.20.0",
+    "node": "14.20.1",
     "yarn": "^1.21.1"
   }
 }

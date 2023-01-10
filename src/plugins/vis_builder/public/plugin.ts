@@ -140,6 +140,7 @@ export class VisBuilderPlugin
 
         const services: VisBuilderServices = {
           ...coreStart,
+          appName: PLUGIN_ID,
           scopedHistory: this.currentHistory,
           history: this.currentHistory,
           osdUrlStateStorage: createOsdUrlStateStorage({

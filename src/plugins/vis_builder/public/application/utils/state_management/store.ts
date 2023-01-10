@@ -8,8 +8,8 @@ import { reducer as styleReducer } from './style_slice';
 import { reducer as visualizationReducer } from './visualization_slice';
 import { reducer as metadataReducer } from './metadata_slice';
 import { VisBuilderServices } from '../../..';
-import { getPreloadedState } from './preload';
 import { setEditorState } from './metadata_slice';
+import { loadReduxState, saveReduxState } from './redux_persistence';
 
 const rootReducer = combineReducers({
   style: styleReducer,
@@ -25,7 +25,7 @@ export const configurePreloadedStore = (preloadedState: PreloadedState<RootState
 };
 
 export const getPreloadedStore = async (services: VisBuilderServices) => {
-  const preloadedState = await getPreloadedState(services);
+  const preloadedState = await loadReduxState(services);
   const store = configurePreloadedStore(preloadedState);
 
   const { metadata: metadataState, style: styleState, visualization: vizState } = store.getState();
@@ -62,6 +62,15 @@ export const getPreloadedStore = async (services: VisBuilderServices) => {
 
     previousStore = currentStore;
     previousMetadata = currentMetadata;
+
+    saveReduxState(
+      {
+        style: store.getState().style,
+        visualization: store.getState().visualization,
+        metadata: store.getState().metadata,
+      },
+      services
+    );
   };
 
   // the store subscriber will automatically detect changes and call handleChange function
