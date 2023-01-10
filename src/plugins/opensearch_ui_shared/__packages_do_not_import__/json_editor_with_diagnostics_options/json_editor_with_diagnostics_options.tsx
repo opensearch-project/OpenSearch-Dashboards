@@ -39,7 +39,7 @@ export function JsonEditorWithDiagnosticsOptions() {
       validate: true,
       schemas: [
         {
-          uri: 'http://myserver/foo-schema.json',
+          uri: 'foo-schema.json',
           fileMatch: ['*'],
           schema: {
             type: 'object',
@@ -48,13 +48,13 @@ export function JsonEditorWithDiagnosticsOptions() {
                 enum: ['v1', 'v2'],
               },
               p2: {
-                $ref: 'http://myserver/bar-schema.json',
+                $ref: 'bar-schema.json',
               },
             },
           },
         },
         {
-          uri: 'http://myserver/bar-schema.json', // id of the second schema
+          uri: 'bar-schema.json', // id of the second schema
           schema: {
             type: 'object',
             properties: {
