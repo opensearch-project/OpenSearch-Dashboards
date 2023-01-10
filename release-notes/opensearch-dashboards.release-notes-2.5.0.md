@@ -64,4 +64,5 @@
 ### 🛠 Maintenance
 
 - Remove `github-checks-reporter`, an unused dependency ([#3126](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3126))
+- Add aliased vega-lite v5 dependency and bundle from source ([#3151](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3151))
 
