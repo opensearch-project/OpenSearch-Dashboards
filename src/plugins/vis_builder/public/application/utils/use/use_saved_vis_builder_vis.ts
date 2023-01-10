@@ -23,7 +23,7 @@ import {
 } from '../state_management';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setEditorState } from '../state_management/metadata_slice';
-import { validateVisBuilderState } from '../vis_builder_state_validation';
+import { validateVisBuilderState } from '../validations/vis_builder_state_validation';
 
 // This function can be used when instantiating a saved vis or creating a new one
 // using url parameters, embedding and destroying it in DOM
@@ -40,7 +40,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
       http: { basePath },
       toastNotifications,
     } = services;
-    const toastNotification = (message) => {
+    const toastNotification = (message: string) => {
       toastNotifications.addDanger({
         title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
           defaultMessage: 'Failed to load the visualization',
@@ -48,6 +48,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
         text: message,
       });
     };
+
     const loadSavedVisBuilderVis = async () => {
       try {
         const savedVisBuilderVis = await getSavedVisBuilderVis(services, visualizationIdFromUrl);
@@ -73,11 +74,13 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
 
           const validateResult = validateVisBuilderState({ styleState, visualizationState });
           if (!validateResult.valid) {
-            const err = validateResult.errors;
-            if (err) {
-              const errMsg = err[0].instancePath + ' ' + err[0].message;
-              throw new InvalidJSONProperty(errMsg);
-            }
+            throw new InvalidJSONProperty(
+              validateResult.errorMsg ||
+                i18n.translate('visBuilder.useSavedVisBuilderVis.genericJSONError', {
+                  defaultMessage:
+                    'Something went wrong while loading your saved object. The object may be corrupted or does not match the latest schema',
+                })
+            );
           }
 
           dispatch(setStyleState(styleState));
