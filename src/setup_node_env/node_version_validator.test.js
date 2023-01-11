@@ -33,7 +33,7 @@ var pkg = require('../../package.json');
 
 var REQUIRED_NODE_JS_VERSION = 'v' + pkg.engines.node;
 
-describe('NodeVersionValidator', function () {
+describe('NodeVersionValidator without OSD_NODE_HOME defined in the process ', function () {
   it('should run the script WITHOUT error when the version is the same', function (done) {
     testValidateNodeVersion(done, REQUIRED_NODE_JS_VERSION);
   });
@@ -80,6 +80,54 @@ describe('NodeVersionValidator', function () {
   }
 });
 
+describe('NodeVersionValidator with OSD_NODE_HOME defined in the process ', function () {
+  it('should run the script WITHOUT warning when the version is the same', function (done) {
+    testValidateNodeVersion(done, REQUIRED_NODE_JS_VERSION, false, 'v14.0.0');
+  });
+
+  it('should run the script WITHOUT warning when only the patch version is higher', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, 0, +1), false, 'v14.0.0');
+  });
+
+  it('should run the script WITH warning if the patch version is lower', function (done) {
+    var lowerPatchversion = requiredNodeVersionWithDiff(0, 0, -1);
+    testValidateNodeVersion(
+      done,
+      lowerPatchversion,
+      REQUIRED_NODE_JS_VERSION !== lowerPatchversion,
+      'v14.0.0'
+    );
+  });
+
+  it('should run the script WITH warning if the major version is higher', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(+1, 0, 0), true, 'v14.0.0');
+  });
+
+  it('should run the script WITH warning if the major version is lower', function (done) {
+    var lowerMajorVersion = requiredNodeVersionWithDiff(-1, 0, 0);
+    testValidateNodeVersion(
+      done,
+      lowerMajorVersion,
+      REQUIRED_NODE_JS_VERSION !== lowerMajorVersion,
+      'v14.0.0'
+    );
+  });
+
+  it('should run the script WITH warning if the minor version is higher', function (done) {
+    testValidateNodeVersion(done, requiredNodeVersionWithDiff(0, +1, 0), true, 'v14.0.0');
+  });
+
+  it('should run the script WITH warning if the minor version is lower', function (done) {
+    var lowerMinorVersion = requiredNodeVersionWithDiff(0, -1, 0);
+    testValidateNodeVersion(
+      done,
+      lowerMinorVersion,
+      REQUIRED_NODE_JS_VERSION !== lowerMinorVersion,
+      'v14.0.0'
+    );
+  });
+});
+
 function requiredNodeVersionWithDiff(majorDiff, minorDiff, patchDiff) {
   var matches = REQUIRED_NODE_JS_VERSION.match(/^v(\d+)\.(\d+)\.(\d+)/);
   var major = Math.max(parseInt(matches[1], 10) + majorDiff, 0);
@@ -89,20 +137,32 @@ function requiredNodeVersionWithDiff(majorDiff, minorDiff, patchDiff) {
   return `v${major}.${minor}.${patch}`;
 }
 
-function testValidateNodeVersion(done, versionToTest, expectError = false) {
-  var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${versionToTest}', writable: true });`;
-  var command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
+function testValidateNodeVersion(
+  done,
+  versionToTest,
+  expectErrorOrWarning = false,
+  osdNodeHome = ''
+) {
+  var processOverwrite = `Object.defineProperty(process, 'version', { value: '${versionToTest}', writable: true });`;
+  if (osdNodeHome) {
+    processOverwrite += `process.env.OSD_NODE_HOME = '${osdNodeHome}';`;
+  }
+  var command = `node -e "${processOverwrite}require('./node_version_validator.js')"`;
 
   exec(command, { cwd: __dirname }, function (error, _stdout, stderr) {
     expect(stderr).toBeDefined();
-    if (expectError) {
-      expect(error.code).toBe(1);
+    var specificErrorOrWarningMessage = `OpenSearch Dashboards was built with ${REQUIRED_NODE_JS_VERSION} and does not support the current Node.js version ${versionToTest}. `;
 
-      var speficicErrorMessage =
-        `OpenSearch Dashboards was built with ${REQUIRED_NODE_JS_VERSION} and does not support the current Node.js version ${versionToTest}. ` +
-        `Please use Node.js ${REQUIRED_NODE_JS_VERSION} or a higher patch version.\n`;
-
-      expect(stderr).toStrictEqual(speficicErrorMessage);
+    if (expectErrorOrWarning) {
+      if (!osdNodeHome) {
+        expect(error.code).toBe(1);
+        // Actions to apply when validation fails: error report + exit.
+        specificErrorOrWarningMessage += `Please use Node.js ${REQUIRED_NODE_JS_VERSION} or a higher patch version.\n`;
+      } else {
+        specificErrorOrWarningMessage +=
+          '\nBecause the OSD_NODE_HOME environment variable is set, any node version incompatibilities will be ignored.\n';
+      }
+      expect(stderr).toStrictEqual(specificErrorOrWarningMessage);
     } else {
       expect(error).toBeNull();
       expect(stderr).toHaveLength(0);

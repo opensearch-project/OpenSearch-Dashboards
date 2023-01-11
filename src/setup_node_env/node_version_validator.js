@@ -52,8 +52,7 @@ if (!isVersionValid) {
     process.exit(1);
   } else {
     errorMessage +=
-      '\nOpenSearch Dashboards is running as OSD_NODE_HOME environment variable is set, ' +
-      'So ignoring any incapabilities in node version.';
+      '\nBecause the OSD_NODE_HOME environment variable is set, any node version incompatibilities will be ignored.';
     console.warn(errorMessage);
   }
 }
