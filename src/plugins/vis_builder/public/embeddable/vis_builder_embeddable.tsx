@@ -27,7 +27,7 @@ import {
   TimefilterContract,
   TimeRange,
 } from '../../../data/public';
-import { validateSchemaState } from '../application/utils/validate_schema_state';
+import { validateSchemaState } from '../application/utils/validations/validate_schema_state';
 import { getExpressionLoader, getTypeService } from '../plugin_services';
 import { PersistedState } from '../../../visualizations/public';
 import { RenderState, VisualizationState } from '../application/utils/state_management';
@@ -139,7 +139,7 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     }
     const { toExpression, ui } = visualizationType;
     const schemas = ui.containerConfig.data.schemas;
-    const [valid, errorMsg] = validateSchemaState(schemas, visualizationState);
+    const { valid, errorMsg } = validateSchemaState(schemas, visualizationState);
 
     if (!valid) {
       if (errorMsg) {
