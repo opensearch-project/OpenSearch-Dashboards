@@ -50,9 +50,9 @@
 - Add config override to fix obsolete theme:version config value of v8 (beta) rendering issue ([#3045](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3045))
 - [Multi Datasource] Update dummy url in tests to follow lychee url allowlist ([#3099](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3099))
 - [CI] Update test workflow to increase network-timeout for yarn for installing dependencies ([#3118](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3118))
-- [VisBuilder] Fixes filters for table visualisation ([#3210](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3210))
-- [VisBuilder] Fixes pipeline aggs ([#3137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3137))
-- [Region Maps] Fixes bug that prevents selected join field to be used ([#3213](Fix bug that prevents selected join field to be used))
+- [VisBuilder] Fix filters for table visualisation ([#3210](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3210))
+- [VisBuilder] Fix pipeline aggs ([#3137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3137))
+- [Region Maps] Fix bug that prevents selected join field to be used ([#3213](Fix bug that prevents selected join field to be used))
 
 ### 🔩 Tests
 
@@ -61,7 +61,7 @@
 - [Tests] Bump `chromedriver` to v107 ([#3017](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3017))
 - [Tests] Skip tests inside the docs folder ([#3197](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3197))
 - Correct the linting logic for `no-restricted-path` to ignore trailing slashes ([#3020](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3020))
-- [VisBuilder] Adds field unit tests ([#3211](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3211))
+- [VisBuilder] Add field unit tests ([#3211](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3211))
 
 ### 🛠 Maintenance
 
