@@ -1,7 +1,7 @@
 # CHANGELOG
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## Unreleased
+## [Unreleased] (https://github.com/opensearch-project/OpenSearch-Dashboards/compare/2.5.0...HEAD)
 
 ### Deprecations
 
@@ -83,7 +83,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Remove `github-checks-reporter`, an unused dependency ([#3126](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3126))
 - Add aliased vega-lite v5 dependency and bundle from source ([#3151](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3151))
-- [Unreleased]: https://github.com/opensearch-project/OpenSearch-Dashboards/compare/2.5.0...HEAD
 
 ### 🔩 Tests
 
@@ -101,7 +100,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Update `leaflet-vega` and fix its usage ([#3005](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3005))
 
 ### 🔩 Tests
-
+ 
 - Correct the linting logic for `no-restricted-path` to ignore trailing slashes ([#3020](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3020))
 
 ## [2.4.0]
