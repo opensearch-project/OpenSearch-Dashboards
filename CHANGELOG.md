@@ -55,7 +55,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multi DataSource] Improve test connection ([#3110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3110))
 - [Vis Builder] Add app filter and query persistence without using state container ([#3100](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3100))
 - [Optimizer] Increase timeout waiting for the exiting of an optimizer worker ([#3193](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3193))
-- [Data] Update `createAggConfig` so that newly created configs can be added to beginning of `aggConfig` array ([#3160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3160)) -[Feature OSD_NODE_HOME] Added support for Environment variable OSD_NODE_HOME ([#2208](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2208)))
+- [Data] Update `createAggConfig` so that newly created configs can be added to beginning of `aggConfig` array ([#3160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3160))
+- [Feature OSD_NODE_HOME] Added support for Environment variable OSD_NODE_HOME ([#2208](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2208)))
 
 ### 🐛 Bug Fixes
 
