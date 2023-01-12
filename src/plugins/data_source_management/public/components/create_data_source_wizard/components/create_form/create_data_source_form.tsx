@@ -436,7 +436,7 @@ export class CreateDataSourceForm extends React.Component<
                 >
                   <FormattedMessage
                     id="dataSourcesManagement.createDataSource.testConnectionButton"
-                    defaultMessage="Test Connection"
+                    defaultMessage="Test connection"
                   />
                 </EuiButton>
               </EuiFlexItem>

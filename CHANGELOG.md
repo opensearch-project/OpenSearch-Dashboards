@@ -55,6 +55,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multi DataSource] Improve test connection ([#3110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3110))
 - [Vis Builder] Add app filter and query persistence without using state container ([#3100](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3100))
 - [Optimizer] Increase timeout waiting for the exiting of an optimizer worker ([#3193](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3193))
+- [Data] Update `createAggConfig` so that newly created configs can be added to beginning of `aggConfig` array ([#3160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3160))
+
 
 ### 🐛 Bug Fixes
 
@@ -70,6 +72,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multi DataSource] Address UX comments on index pattern management stack ([#2611](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2611))
 - [Multi DataSource] Apply get indices error handling in step index pattern ([#2652](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2652))
 - [Vis Builder] Last Updated Timestamp for visbuilder savedobject is getting Generated ([#2628](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2628))
+- [Vis Builder] fixes filters for table visualisation ([#3210](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3210))
 - Removed Leftover X Pack references ([#2638](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2638))
 - Removes Add Integration button ([#2723](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2723))
 - Change geckodriver version to make consistency ([#2772](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2772))
@@ -81,11 +84,14 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Build] Fixed "Last Access Time" not being set by `scanCopy` on Windows ([#2964](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2964))
 - [Vis Builder] Add global data persistence for vis builder #2896 ([#2896](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2896))
 - Update `leaflet-vega` and fix its usage ([#3005](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3005))
-- [Table Visualization][BUG] Fix Url content display issue in table ([#2918](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2918))
+- [Table Visualization][bug] Fix Url content display issue in table ([#2918](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2918))
 - Fixes misleading embaddable plugin error message ([#3043](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3043))
 - [MD] Update dummy url in tests to follow lychee url allowlist ([#3099](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3099))
 - Adds config override to fix obsolete theme:version config value of v8 (beta) rendering issue ([#3045](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3045))
 - [CI] Update test workflow to increase network-timeout for yarn for installing dependencies ([#3118](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3118))
+- [VisBuilder] Fixes pipeline aggs ([#3137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3137))
+- [Region Maps] Fixes bug that prevents selected join field to be used ([#3213](Fix bug that prevents selected join field to be used))
+- [Multi DataSource]Update test connection button text([#3247](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3247))
 - [Vega] Add Filter custom label for opensearchDashboardsAddFilter ([#3179](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3179))
 
 ### 🚞 Infrastructure
@@ -114,6 +120,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Adding @zhongnansu as maintainer. ([#2590](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2590))
 - Removes `minimatch` manual resolution ([#3019](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3019))
 - Remove `github-checks-reporter`, an unused dependency ([#3126](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3126))
+- Upgrade `vega-lite` dependency to ^5.6.0 ([#3076](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3076))
 
 ### 🪛 Refactoring
 
@@ -131,6 +138,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Make tests covering plugin installation on cluster snapshots work across platforms ([#2994](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2994))
 - Correct the linting logic for `no-restricted-path` to ignore trailing slashes ([#3020](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3020))
 - [Tests] Bumps `chromedriver` to v107 ([#3017](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3017))
+- [Vis Builder] Adds field unit tests ([#3211](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3211))
 
 ## [2.x]
 
@@ -149,7 +157,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2022-37601] Bump loader-utils to 2.0.3 ([#2689](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2689))
 - [CVE-2022-37599] Bump loader-utils to 2.0.4 ([#3031](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3031))
 - [CVE-2022-37603] Bump loader-utils to 2.0.4 ([#3031](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3031))
-- [WS-2021-0638][Security] bump mocha to 10.1.0 ([#2711](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2711))
+- [WS-2021-0638][security] bump mocha to 10.1.0 ([#2711](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2711))
 
 ### 📈 Features/Enhancements
 
