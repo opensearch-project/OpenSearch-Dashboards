@@ -34,9 +34,9 @@ import supertestAsPromised from 'supertest-as-promised';
 
 export function OpenSearchDashboardsSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const opensearchDashboardsServerUrl = config
-    .get('servers.opensearchDashboards')
-    .toString()
-    .slice(0, -1);
+  const originOSDServerUrl = config.get('servers.opensearchDashboards').toString();
+  const opensearchDashboardsServerUrl = originOSDServerUrl.endsWith('/')
+    ? originOSDServerUrl.slice(0, -1)
+    : originOSDServerUrl;
   return supertestAsPromised(opensearchDashboardsServerUrl);
 }
