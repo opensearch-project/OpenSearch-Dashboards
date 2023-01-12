@@ -37,8 +37,8 @@ export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
   const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
 
-  const opensearchDashboardsUrl = new URL('', httpConfig.get('servers.opensearchDashboards'));
-  const redirectPort = opensearchDashboardsUrl.port + 1234;
+  const opensearchDashboardsUrl = new URL(httpConfig.get('servers.opensearchDashboards'));
+  const redirectPort = parseInt(opensearchDashboardsUrl.port, 10) + 1234;
   opensearchDashboardsUrl.port = redirectPort;
   opensearchDashboardsUrl.protocol = 'http';
 
