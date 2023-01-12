@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyState should render normally 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <EuiButton
+      data-test-subj="createPITBtnInHeader"
+      iconType="plusInCircle"
+    >
+      <FormattedMessage
+        defaultMessage="Create PIT"
+        id="pointInTimeManagement.header.createPointInTimeButton"
+        values={Object {}}
+      />
+    </EuiButton>
+  }
+  body={
+    <p>
+      <FormattedMessage
+        defaultMessage="No PIT objects have been created."
+        id="pointInTimeManagement.pointInTimeDescription"
+        values={Object {}}
+      />
+    </p>
+  }
+/>
+`;

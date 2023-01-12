@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PageHeader should render normally 1`] = `
+<Fragment>
+  <EuiPageContentHeader>
+    <EuiPageContentHeaderSection>
+      <EuiTitle>
+        <h1>
+          <FormattedMessage
+            defaultMessage="Point in Time"
+            id="pitManagement.header.pitTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+    </EuiPageContentHeaderSection>
+    <EuiButton
+      data-test-subj="createPITBtnInHeader"
+      fill={true}
+      iconType="plusInCircle"
+    >
+      <FormattedMessage
+        defaultMessage="Create PIT"
+        id="pitManagement.header.createPitButton"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiPageContentHeader>
+  <EuiText
+    size="s"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="Create and manage point in time objects."
+        id="pitManagement.pitDescription"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
+</Fragment>
+`;
