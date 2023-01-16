@@ -319,7 +319,11 @@ export class VegaBaseView {
    */
   async addFilterHandler(query, index, alias) {
     const indexId = await this.findIndex(Utils.handleNonStringIndex(index));
-    const filter = opensearchFilters.buildQueryFilter(Utils.handleInvalidQuery(query), indexId, alias);
+    const filter = opensearchFilters.buildQueryFilter(
+      Utils.handleInvalidQuery(query),
+      indexId,
+      alias
+    );```
     this._applyFilter({ filters: [filter] });
   }
 
