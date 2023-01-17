@@ -315,7 +315,7 @@ export class VegaBaseView {
   /**
    * @param {object} query Query DSL snippet, as used in the query DSL editor
    * @param {string} [index] as defined in OpenSearch Dashboards, or default if missing
-   * @param {string} OpenSearch Query DSL's Custom label for opensearchDashboardsAddFilter, as used in '+ Add Filter'
+   * @param {string} alias OpenSearch Query DSL's Custom label for opensearchDashboardsAddFilter, as used in '+ Add Filter'
    */
   async addFilterHandler(query, index, alias) {
     const indexId = await this.findIndex(Utils.handleNonStringIndex(index));
