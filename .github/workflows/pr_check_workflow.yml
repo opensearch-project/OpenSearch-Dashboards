@@ -45,15 +45,15 @@ jobs:
         id: job_successful
         run: cat job_successful 2>/dev/null || echo 'false'
 
-      - name: Get the previous linter results
+      - name: Get the previous linter results 
         id: linter_results
         run: cat linter_results 2>/dev/null || echo 'default'
 
-      - name: Get the previous unit tests results
+      - name: Get the previous unit tests results 
         id: unit_tests_results
         run: cat unit_tests_results 2>/dev/null || echo 'default'
 
-      - name: Get the previous integration tests results
+      - name: Get the previous integration tests results 
         id: integration_tests_results
         run: cat integration_tests_results 2>/dev/null || echo 'default'
 
@@ -99,13 +99,13 @@ jobs:
       - name: Run integration tests
         if: steps.integration_tests_results.outputs.integration_tests_results != 'success'
         id: integration-tests
-        run: node scripts/jest_integration --ci --colors --max-old-space-size=5120
+        run: node scripts/jest_integration --ci --colors --max-old-space-size=5120 
 
       # Set cache if linter, unit tests, and integration tests were successful then the job will be marked successful
       # Sets individual results to empower re-runs of the same build without re-running successful steps.
-      - if: |
-          (steps.linter.outcome == 'success' || steps.linter.outcome == 'skipped') &&
-          (steps.unit-tests.outcome == 'success' || steps.unit-tests.outcome == 'skipped') &&
+      - if: | 
+          (steps.linter.outcome == 'success' || steps.linter.outcome == 'skipped') && 
+          (steps.unit-tests.outcome == 'success' || steps.unit-tests.outcome == 'skipped') && 
           (steps.integration-tests.outcome == 'success' || steps.integration-tests.outcome == 'skipped')
         run: echo "::set-output name=job_successful::true" > job_successful
       - if: steps.linter.outcome == 'success' || steps.linter.outcome == 'skipped'
@@ -118,7 +118,7 @@ jobs:
     needs: [ build-lint-test ]
     runs-on: ubuntu-latest
     name: Run functional tests
-    strategy:
+    strategy: 
       matrix:
         group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
     steps:
@@ -136,7 +136,7 @@ jobs:
           restore-keys: |
             ${{ github.run_id }}-${{ github.job }}-${{ matrix.group }}-${{ github.sha }}
 
-      - name: Get the cached tests results
+      - name: Get the cached tests results 
         id: ftr_tests_results
         run: cat ftr_tests_results 2>/dev/null || echo 'default'
 
@@ -176,7 +176,7 @@ jobs:
       # github virtual env is the latest chrome
       - name: Setup chromedriver
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
-        run: node scripts/upgrade_chromedriver.js
+        run: yarn add --dev chromedriver@106.0.0
 
       - name: Run bootstrap
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
@@ -194,6 +194,6 @@ jobs:
           CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
-
+      
       - if: steps.ftr-tests.outcome == 'success' || steps.ftr-tests.outcome == 'skipped'
         run: echo "::set-output name=ftr_tests_results::success" > ftr_tests_results

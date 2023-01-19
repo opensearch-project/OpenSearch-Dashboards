@@ -3,7 +3,6 @@
 .ackrc
 /.opensearch
 /.chromium
-/package.json.bak
 .DS_Store
 .node_binaries
 .native_modules
