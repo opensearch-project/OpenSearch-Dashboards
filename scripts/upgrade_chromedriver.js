@@ -31,7 +31,7 @@ switch (process.platform) {
 
   case 'darwin':
     versionCheckCommands.push(
-      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --version'
+      '/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --version'
     );
     break;
 
@@ -60,7 +60,7 @@ let versionCheckOutput;
 versionCheckCommands.some((cmd) => {
   try {
     console.log(cmd);
-    versionCheckOutput = execSync(cmd, { encoding: 'utf8' })?.trim?.();
+    versionCheckOutput = (execSync(cmd, { encoding: 'utf8' }) || '').trim();
     return true;
   } catch (e) {
     console.log('Failed to get version using', cmd);
@@ -68,7 +68,8 @@ versionCheckCommands.some((cmd) => {
 });
 
 // Versions 90+
-const majorVersion = versionCheckOutput?.match?.(/(?:^|\s)(9\d|\d{3})\./)?.[1];
+const versionCheckOutputTokens = (versionCheckOutput || '').match(/(?:^|\s)(9\d|\d{3})\./);
+const majorVersion = Array.isArray(versionCheckOutputTokens) && versionCheckOutputTokens[1];
 
 if (majorVersion) {
   if (process.argv.includes('--install')) {
