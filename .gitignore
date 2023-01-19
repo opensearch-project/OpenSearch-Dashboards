@@ -14,6 +14,7 @@ trash
 /built_assets
 target
 /build
+/bwc_tmp
 .jruby
 .idea
 *.iml
