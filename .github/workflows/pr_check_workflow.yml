@@ -22,7 +22,7 @@ env:
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
 
 jobs:
-  build-lint-test:
+  build-lint-test-linux:
     runs-on: ubuntu-latest
     name: Build and Verify
     steps:
@@ -59,11 +59,11 @@ jobs:
 
       - name: Checkout code
         if: steps.job_successful.outputs.job_successful != 'true'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node
         if: steps.job_successful.outputs.job_successful != 'true'
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: ".nvmrc"
           registry-url: 'https://registry.npmjs.org'
@@ -114,8 +114,63 @@ jobs:
         run: echo "::set-output name=unit_tests_results::success" > unit_tests_results
       - if: steps.integration-tests.outcome == 'success' || steps.integration-tests.outcome == 'skipped'
         run: echo "::set-output name=integration_tests_results::success" > integration_tests_results
-  functional-tests:
-    needs: [ build-lint-test ]
+
+  build-lint-test-windows:
+    runs-on: windows-latest
+    name: Build and Verify on Windows
+    steps:
+      - name: Configure git's autocrlf
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Run linter
+        id: linter
+        run: yarn lint
+
+      - name: Run unit tests with coverage
+        id: unit-tests
+        run: yarn test:jest:ci:coverage
+
+      - name: Run mocha tests with coverage
+        id: mocha-tests
+        run: yarn test:mocha:coverage
+
+      - name: Upload Code Coverage
+        id: upload-code-coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./target/opensearch-dashboards-coverage
+          flags: Windows
+
+      - name: Run integration tests
+        id: integration-tests
+        run: yarn test:jest_integration:ci
+  
+  functional-tests-linux:
+    needs: [ build-lint-test-linux ]
     runs-on: ubuntu-latest
     name: Run functional tests
     strategy:
@@ -142,11 +197,11 @@ jobs:
 
       - name: Checkout code
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node
         if: steps.ftr_tests_results.outputs.ftr_tests_results != 'success'
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: ".nvmrc"
           registry-url: 'https://registry.npmjs.org'
@@ -197,3 +252,55 @@ jobs:
 
       - if: steps.ftr-tests.outcome == 'success' || steps.ftr-tests.outcome == 'skipped'
         run: echo "::set-output name=ftr_tests_results::success" > ftr_tests_results
+
+  functional-tests-windows:
+    runs-on: windows-latest
+    name: Run functional tests on Windows
+    strategy:
+      matrix:
+        group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 ]
+    steps:
+      - run: echo Running functional tests for ciGroup${{ matrix.group }}
+
+      - name: Configure git's autocrlf
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      # image has the latest chrome v99
+      - name: Setup chromedriver
+        run: node scripts/upgrade_chromedriver.js
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - name: Run CI test group ${{ matrix.group }}
+        id: ftr-tests
+        run: node scripts/functional_tests.js --config test/functional/config.js --include ciGroup${{ matrix.group }}
+        env:
+          CI_GROUP: ciGroup${{ matrix.group }}
+          CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
+          JOB: ci${{ matrix.group }}
+          CACHE_DIR: ciGroup${{ matrix.group }}
