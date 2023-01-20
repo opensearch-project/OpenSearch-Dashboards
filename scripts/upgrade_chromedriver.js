@@ -31,7 +31,7 @@ switch (process.platform) {
 
   case 'darwin':
     versionCheckCommands.push(
-      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --version'
+      '/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --version'
     );
     break;
 
