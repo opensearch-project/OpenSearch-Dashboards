@@ -182,10 +182,10 @@ export const renderApp = (
 ```ts
 // my_plugin/public/plugin.ts
 
-import { Plugin } from '../../src/core/public';
+import { Plugin, CoreSetup } from '../../src/core/public';
 
 export class MyPlugin implements Plugin {
-  public setup(core) {
+  public setup(core: CoreSetup<MyPluginDepsStart>) {
     core.application.register({
       id: 'my-app',
       async mount(params) {
