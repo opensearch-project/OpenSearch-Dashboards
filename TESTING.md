@@ -48,7 +48,20 @@ To debug functional tests:
 Say that you would want to debug a test in CI group 1, you can run the following command in your environment:
 `node --debug-brk --inspect scripts/functional_tests.js --config test/functional/config.js --include ciGroup1 --debug`
 
-This will print of an address, to which you could open your chrome browser on your instance and navigate to `chrome://inspect/#devices` and inspect the functional test runner `scripts/functional_tests.js`.
+This will print off an address, to which you could open your chrome browser on your instance and navigate to `chrome://inspect/#devices` and inspect the functional test runner `scripts/functional_tests.js`.
+
+### Backwards Compatibility tests
+To run all the backwards compatibility tests on OpenSearch Dashboards without security:
+
+`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz]`
+
+To run all the backwards compatibility tests on OpenSearch Dashboards with security, pass the security parameter to the test:
+
+`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -s true`
+
+To run specific versions' backwards compatibility tests, pass the versions to the test:
+
+`yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -v "[test versions]"`
 
 ### Additional checks
 Make sure you run lint checker before submitting a pull request. To run lint checker:
