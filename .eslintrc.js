@@ -756,5 +756,12 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['cypress/**/*.js'],
+      rules: {
+        'import/no-unresolved': 'off',
+        'no-undef': 'off',
+      },
+    },
   ],
 };

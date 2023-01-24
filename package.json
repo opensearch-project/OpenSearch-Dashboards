@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "1.3.7",
+  "version": "1.3.8",
   "branch": "1.3",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -41,6 +41,7 @@
     "osd": "node scripts/osd",
     "opensearch": "node scripts/opensearch",
     "test": "grunt test",
+    "test:bwc": "./scripts/bwctest_osd.sh",
     "test:jest": "node scripts/jest",
     "test:jest_integration": "node scripts/jest_integration",
     "test:mocha": "node scripts/mocha",
