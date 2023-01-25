@@ -2,6 +2,9 @@
 
 set -e
 
+# TODO: Update to include all known BWC of data
+DEFAULT_VERSIONS="osd-1.1.0"
+
 function usage() {
     echo ""
     echo "This script is used to run bwc tests on a remote OpenSearch/Dashboards cluster."
@@ -9,35 +12,42 @@ function usage() {
     echo "Usage: $0 [args]"
     echo ""
     echo "Required arguments:"
-    echo "None"
+    echo -e "-d DASHBOARDS\t, Specify the url of the build/dist of OpenSearch Dashboards"
     echo ""
     echo "Optional arguments:"
-    echo -e "-a BIND_ADDRESS\t, defaults to localhost | 127.0.0.1, can be changed to any IP or domain name for the cluster location."
+    echo -e "-o OPENSEARCH\t, Specify the url of the build/dist of OpenSearch"
+    echo -e "-b BIND_ADDRESS\t, defaults to localhost | 127.0.0.1, can be changed to any IP or domain name for the cluster location."
     echo -e "-p BIND_PORT\t, defaults to 9200 or 5601 depends on OpenSearch or Dashboards, can be changed to any port for the cluster location."
-    echo -e "-b BUNDLED_OSD\t(true | false), defaults to true. Specify the usage of bundled Dashboards or not."
+    echo -e "-s SECURITY_ENABLED\t(true | false), defaults to true. Specify the OpenSearch/Dashboards have security enabled or not."
     echo -e "-c CREDENTIAL\t(usename:password), no defaults, effective when SECURITY_ENABLED=true."
     echo -e "-h\tPrint this message."
     echo "--------------------------------------------------------------------------"
 }
 
-while getopts ":ha:p:b:c:" arg; do
+while getopts ":h:b:p:s:c:o:d:" arg; do
     case $arg in
         h)
             usage
             exit 1
             ;;
-        a)
+        b)
             BIND_ADDRESS=$OPTARG
             ;;
         p)
             BIND_PORT=$OPTARG
             ;;
-        b)
-            BUNDLED_OSD=$OPTARG
+        s)
+            SECURITY_ENABLED=$OPTARG
             ;;
         c)
             CREDENTIAL=$OPTARG
             ;;
+        o)
+            OPENSEARCH=$OPTARG
+            ;;    
+        d)
+            DASHBOARDS=$OPTARG
+            ;;     
         :)
             echo "-${OPTARG} requires an argument"
             usage
@@ -50,50 +60,26 @@ while getopts ":ha:p:b:c:" arg; do
     esac
 done
 
+[ -z "$BIND_ADDRESS" ] && BIND_ADDRESS="localhost"
+[ -z "$BIND_PORT" ] && BIND_PORT="5601"
+[ -z "$SECURITY_ENABLED" ] && SECURITY_ENABLED="false"
+[ -z "$CREDENTIAL" ] && CREDENTIAL="admin:admin"
 
-if [ -z "$BIND_ADDRESS" ]
-then
-  BIND_ADDRESS="localhost"
+# If no OpenSearch build was passed then this constructs the version
+if [ -z "$OPENSEARCH" ]; then
+    IFS='/' read -ra SLASH_ARR <<< "$DASHBOARDS"
+    # Expected to be opensearch-x.y.z-platform-arch.tar.gz
+    TARBALL="${SLASH_ARR[12]}"
+    IFS='-' read -ra DASH_ARR <<< "$TARBALL"
+    # Expected to be arch.tar.gz
+    DOTS="${DASH_ARR[4]}"
+    IFS='.' read -ra DOTS_ARR <<< "$DOTS"
+    
+    VERSION="${DASH_ARR[2]}"
+    PLATFORM="${DASH_ARR[3]}"
+    ARCH="${DOTS_ARR[0]}"
+
+    OPENSEARCH="https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$VERSION/latest/$PLATFORM/$ARCH/dist/opensearch/opensearch-$VERSION-$PLATFORM-$ARCH.tar.gz"
 fi
 
-if [ -z "$BIND_PORT" ]
-then
-  BIND_PORT="5601"
-fi
-
-if [ -z "$BUNDLED_OSD" ]
-then
-  BUNDLED_OSD="true"
-fi
-
-if [ -z "$CREDENTIAL" ]
-then
-  CREDENTIAL="admin:admin"
-  USERNAME=`echo $CREDENTIAL | awk -F ':' '{print $1}'`
-  PASSWORD=`echo $CREDENTIAL | awk -F ':' '{print $2}'`
-fi
-
-cwd=$(pwd)
-dir="bwc-tmp"
-if [ -d "$dir" ]; then
-  rm -rf "$dir"
-  echo "bwc-tmp exists and needs to be removed"
-fi
-
-mkdir "$dir"
-git clone https://github.com/opensearch-project/opensearch-dashboards-functional-test "$dir"
-rm -rf "$dir/cypress"
-cp -r cypress "$dir"
-cd "$dir"
-
-npm install
-
-if [ $BUNDLED_OSD = "true" ]
-then
-   echo "run security enabled tests"
-   npx cypress run --spec "$cwd/bwc-tmp/cypress/integration/bundled-osd/*.js"
-else
-   npx cypress run --spec "$cwd/bwc-tmp/cypress/integration/osd/*.js"
-fi
-
-rm -rf "$cwd/$dir"
+./scripts/bwctest_osd.sh -b $BIND_ADDRESS -p $BIND_PORT -s $SECURITY_ENABLED -c $CREDENTIAL -o $OPENSEARCH -d $DASHBOARDS -v $DEFAULT_VERSIONS
