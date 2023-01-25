@@ -107,6 +107,11 @@
 # Logs queries sent to OpenSearch. Requires logging.verbose set to true.
 #opensearch.logQueries: false
 
+# Disables errors from the OpenSearch JS client and enables you to utilize protected words such as: 'boolean', 'proto', 'constructor'.
+# within cluster. By default, OpenSearch Dashboards and the client will protect you against prototype poisoning attacks.
+# WARNING: Index patterns are user-supplied data. Disabling this will place the expectation that you are handling the data safely.
+#opensearch.disablePrototypePoisoningProtection: false
+
 # Specifies the path where OpenSearch Dashboards creates the process ID file.
 #pid.file: /var/run/opensearchDashboards.pid
 
