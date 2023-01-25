@@ -6,6 +6,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Deprecations
 
 ### 🛡 Security
+- [CVE-2022-37601][CVE-2022-37599] Bump loader-utils to 2.0.4 ([#3318](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3318))
 
 ### 📈 Features/Enhancements
 
