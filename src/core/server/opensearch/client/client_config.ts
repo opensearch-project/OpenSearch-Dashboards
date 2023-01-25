@@ -54,6 +54,7 @@ export type OpenSearchClientConfig = Pick<
   | 'hosts'
   | 'username'
   | 'password'
+  | 'disablePrototypePoisoningProtection'
 > & {
   pingTimeout?: OpenSearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
   requestTimeout?: OpenSearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
@@ -110,6 +111,10 @@ export function parseClientOptions(config: OpenSearchClientConfig, scoped: boole
       config.ssl,
       scoped && !config.ssl.alwaysPresentCertificate
     );
+  }
+
+  if (config.disablePrototypePoisoningProtection != null) {
+    clientOptions.disablePrototypePoisoningProtection = config.disablePrototypePoisoningProtection;
   }
 
   return clientOptions;
