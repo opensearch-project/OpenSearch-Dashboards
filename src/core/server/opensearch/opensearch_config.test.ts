@@ -72,6 +72,7 @@ test('set correct defaults', () => {
     OpenSearchConfig {
       "apiVersion": "7.x",
       "customHeaders": Object {},
+      "disablePrototypePoisoningProtection": undefined,
       "healthCheckDelay": "PT2.5S",
       "hosts": Array [
         "http://localhost:9200",
