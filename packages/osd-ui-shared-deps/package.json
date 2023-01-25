@@ -43,7 +43,7 @@
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "css-loader": "^5.2.7",
     "del": "^6.1.1",
-    "loader-utils": "^1.2.3",
+    "loader-utils": "^2.0.4",
     "val-loader": "^2.1.2",
     "webpack": "^4.41.5"
   }
