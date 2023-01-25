@@ -87,8 +87,8 @@ ruleTester.run('@osd/eslint/no-restricted-paths', rule, {
       ],
     },
     {
-      code: 'import b from "testfiles/no_restricted_paths/server/deep/deeper/e.js"',
-      filename: path.join(__dirname, 'testfiles/no_restricted_paths/server/deep/d.js'),
+      code: 'import b from "files/no_restricted_paths/server/deep/deeper/e.js"',
+      filename: path.join(__dirname, 'files/no_restricted_paths/server/deep/d.js'),
       options: [
         {
           basePath: __dirname,
