@@ -56,6 +56,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Add `target` folders of `test_utils` and `core` to the `osd clean` patterns ([#1442](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1442))
 - Remove storybook package and related code ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
+- Bumps `re2` and `supertest` ([3018](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3018))
 
 ### 🪛 Refactoring
 

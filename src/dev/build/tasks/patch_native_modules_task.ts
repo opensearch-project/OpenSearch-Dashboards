@@ -49,31 +49,42 @@ interface Package {
   >;
 }
 
+// Process for updating urls and checksums after bumping the version of `re2`:
+// 1. Match `version` with the version in the yarn.lock file.
+// 2. Update the url to match the version.
+//    2a. If a Node.js update occurs, the node module version must match as
+//        well (i.e. '83'). See https://nodejs.org/en/download/releases/#ref-1.
+// 3. Generate the new checksum by executing the following commands:
+//    3a. `wget {url}`
+//    3b. `sha256sum {downloaded file name}`
+//    3c. For `linux-arm64`, the sha256 can also be found by replacing
+//        "linux-arm64-83.tar.gz" in the url with "sha256sum.txt.asc"
+//        and copying the sha256 from that file.
 const packages: Package[] = [
   {
     name: 're2',
-    version: '1.15.4',
+    version: '1.17.4',
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
       'darwin-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-64.gz',
-        sha256: '595c6653d796493ddb288fc0732a0d1df8560099796f55a1dd242357d96bb8d6',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.17.4/darwin-x64-83.gz',
+        sha256: '9112ed93c1544ecc6397f7ff20bd2b28f3b04c7fbb54024e10f9a376a132a87d',
       },
       'linux-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-64.gz',
-        sha256: 'e743587bc96314edf10c3e659c03168bc374a5cd9a6623ee99d989251e331f28',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.17.4/linux-x64-83.gz',
+        sha256: '86e03540783a18c41f81df0aec320b1f64aca6cbd3a87fc1b7a9b4109c5f5986',
       },
       'linux-arm64': {
         url:
-          'https://d1v1sj258etie.cloudfront.net/node-re2/releases/download/1.15.4/linux-arm64-64.tar.gz',
-        sha256: '24edcdf45a09e69b6329385ab3ece24b424602a2656c8a297111d7aac174723b',
+          'https://d1v1sj258etie.cloudfront.net/node-re2/releases/download/1.17.4/linux-arm64-83.tar.gz',
+        sha256: 'd86ced75b794fbf518b90908847b3c09a50f3ff5a2815aa30f53080f926a2873',
         overriddenExtractMethod: 'untar',
         overriddenDestinationPath: 'node_modules/re2/build/Release',
       },
       'win32-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-64.gz',
-        sha256: 'b33de62cda24fb02dc80a19fb79977d686468ac746e97cd211059d2d4c75d529',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.17.4/win32-x64-83.gz',
+        sha256: '2f842d9757288afd4bd5dec0e7b370a4c3e89ac98050598b17abb9e8e00e3294',
       },
     },
   },
