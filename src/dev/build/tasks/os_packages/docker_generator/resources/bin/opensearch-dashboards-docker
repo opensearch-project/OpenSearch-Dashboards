@@ -50,6 +50,7 @@ opensearch_dashboards_vars=(
     opensearch.ssl.truststore.password
     opensearch.ssl.verificationMode
     opensearch.username
+    opensearch.disablePrototypePoisoningProtection
     i18n.locale
     interpreter.enableInVisualize
     opensearchDashboards.autocompleteTerminateAfter
