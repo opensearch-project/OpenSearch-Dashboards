@@ -103,6 +103,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add automatic selection of the appropriate version of chrome driver to run functional tests ([#2990](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2990))
 - Add recording of functional test artifacts if they fail ([#3190](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3190))
 - Improve yarn's performance in workflows by caching yarn's cache folder ([#3194](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3194))
+- Fix detection of Chrome's version on Darwin during CI ([#3296](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3296))
 
 ### 📝 Documentation
 
@@ -121,6 +122,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Removes `minimatch` manual resolution ([#3019](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3019))
 - Remove `github-checks-reporter`, an unused dependency ([#3126](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3126))
 - Upgrade `vega-lite` dependency to ^5.6.0 ([#3076](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3076))
+- Bumps `re2` and `supertest` ([3018](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3018))
 
 ### 🪛 Refactoring
 
