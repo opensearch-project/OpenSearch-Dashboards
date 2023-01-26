@@ -323,7 +323,7 @@ export class VegaBaseView {
       Utils.handleInvalidQuery(query),
       indexId,
       alias
-    );```
+    );
     this._applyFilter({ filters: [filter] });
   }
 
