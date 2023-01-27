@@ -19,6 +19,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2022-37601] Bump loader-utils to 2.0.3 ([#2707](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2707))
 - [CVE-2022-37599] Bump loader-utils to 2.0.4 ([#2995](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2995))
 - [CVE-2022-25901] Bump supertest ([#3222](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3322))
+- [CVE-2022-46175] Bumps json5 version from 1.0.1 and 2.2.1 to 1.0.2 and 2.2.3 ([#3201](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3201))
 - [CVE-2022-25912] Bumps simple-git from 3.4.0 to 3.15.0 ([#3036](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3036))
 
 ### 📈 Features/Enhancements
