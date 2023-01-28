@@ -29,6 +29,7 @@
  */
 
 import { resolve } from 'path';
+import { format } from 'url';
 import { get, toPath } from 'lodash';
 import { Cluster } from '@osd/opensearch';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
@@ -134,10 +135,10 @@ export function createLegacyOpenSearchTestCluster(options = {}) {
     }
 
     getUrl() {
-      const url = opensearchTestConfig.getURL();
-      url.port = port;
+      const parts = opensearchTestConfig.getUrlParts();
+      parts.port = port;
 
-      return url.toString();
+      return format(parts);
     }
   })();
 }

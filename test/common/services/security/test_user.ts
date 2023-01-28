@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { format as formatUrl } from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 
 import { Role } from './role';
@@ -114,9 +115,11 @@ export async function createTestUserService(
 export function TestUserSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const opensearchDashboardsServerConfig = config.get('servers.opensearchDashboards');
-  const url = new URL('', opensearchDashboardsServerConfig);
-  url.username = TEST_USER_NAME;
-  url.password = TEST_USER_PASSWORD;
 
-  return supertestAsPromised(url.toString());
+  return supertestAsPromised(
+    formatUrl({
+      ...opensearchDashboardsServerConfig,
+      auth: `${TEST_USER_NAME}:${TEST_USER_PASSWORD}`,
+    })
+  );
 }

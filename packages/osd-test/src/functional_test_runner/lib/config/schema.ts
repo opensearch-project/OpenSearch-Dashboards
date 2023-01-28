@@ -38,6 +38,21 @@ const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
 const INSPECTING =
   process.execArgv.includes('--inspect') || process.execArgv.includes('--inspect-brk');
 
+const urlPartsSchema = () =>
+  Joi.object()
+    .keys({
+      protocol: Joi.string().valid('http', 'https').default('http'),
+      hostname: Joi.string().hostname().default('localhost'),
+      port: Joi.number(),
+      auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
+      username: Joi.string(),
+      password: Joi.string(),
+      pathname: Joi.string().regex(/^\//, 'start with a /'),
+      hash: Joi.string().regex(/^\//, 'start with a /'),
+      certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
+    })
+    .default();
+
 const appUrlPartsSchema = () =>
   Joi.object()
     .keys({
@@ -169,8 +184,8 @@ export const schema = Joi.object()
 
     servers: Joi.object()
       .keys({
-        opensearchDashboards: Joi.object().type(URL),
-        opensearch: Joi.object().type(URL),
+        opensearchDashboards: urlPartsSchema(),
+        opensearch: urlPartsSchema(),
       })
       .default(),
 

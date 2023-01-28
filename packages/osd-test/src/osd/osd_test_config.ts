@@ -28,30 +28,52 @@
  * under the License.
  */
 
+import url from 'url';
 import { opensearchDashboardsTestUser } from './users';
+
+interface UrlParts {
+  protocol?: string;
+  hostname?: string;
+  port?: number;
+  auth?: string;
+  username?: string;
+  password?: string;
+}
 
 export const osdTestConfig = new (class OsdTestConfig {
   getPort() {
-    return parseInt(this.getURL().port, 10);
+    return this.getUrlParts().port;
   }
 
-  getURL() {
+  getUrlParts(): UrlParts {
     // allow setting one complete TEST_OPENSEARCH_DASHBOARDS_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_DASHBOARDS_URL) {
-      return new URL('', process.env.TEST_OPENSEARCH_DASHBOARDS_URL);
+      const testOpenSearchDashboardsUrl = url.parse(process.env.TEST_OPENSEARCH_DASHBOARDS_URL);
+      return {
+        protocol: testOpenSearchDashboardsUrl.protocol?.slice(0, -1),
+        hostname: testOpenSearchDashboardsUrl.hostname ?? undefined,
+        port: testOpenSearchDashboardsUrl.port
+          ? parseInt(testOpenSearchDashboardsUrl.port, 10)
+          : undefined,
+        auth: testOpenSearchDashboardsUrl.auth ?? undefined,
+        username: testOpenSearchDashboardsUrl.auth?.split(':')[0],
+        password: testOpenSearchDashboardsUrl.auth?.split(':')[1],
+      };
     }
+
     const username =
       process.env.TEST_OPENSEARCH_DASHBOARDS_USERNAME || opensearchDashboardsTestUser.username;
     const password =
       process.env.TEST_OPENSEARCH_DASHBOARDS_PASSWORD || opensearchDashboardsTestUser.password;
-    const protocol = process.env.TEST_OPENSEARCH_DASHBOARDS_PROTOCOL || 'http';
-    const hostname = process.env.TEST_OPENSEARCH_DASHBOARDS_HOSTNAME || 'localhost';
-    const port = process.env.TEST_OPENSEARCH_DASHBOARDS_PORT
-      ? parseInt(process.env.TEST_OPENSEARCH_DASHBOARDS_PORT, 10)
-      : 5620;
-    const url = new URL(`${protocol}://${hostname}:${port}`);
-    url.username = username;
-    url.password = password;
-    return url;
+    return {
+      protocol: process.env.TEST_OPENSEARCH_DASHBOARDS_PROTOCOL || 'http',
+      hostname: process.env.TEST_OPENSEARCH_DASHBOARDS_HOSTNAME || 'localhost',
+      port: process.env.TEST_OPENSEARCH_DASHBOARDS_PORT
+        ? parseInt(process.env.TEST_OPENSEARCH_DASHBOARDS_PORT, 10)
+        : 5620,
+      auth: `${username}:${password}`,
+      username,
+      password,
+    };
   }
 })();

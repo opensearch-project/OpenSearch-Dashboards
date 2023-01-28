@@ -60,8 +60,8 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
      */
     async isOss() {
       const baseUrl = this.getOpenSearchHostPort();
-      const username = config.get('servers.opensearch').username;
-      const password = config.get('servers.opensearch').password;
+      const username = config.get('servers.opensearch.username');
+      const password = config.get('servers.opensearch.password');
       const response = await fetch(baseUrl + '/_xpack', {
         method: 'get',
         headers: {
@@ -74,8 +74,8 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
 
     async isCloud(): Promise<boolean> {
       const baseUrl = this.getHostPort();
-      const username = config.get('servers.opensearchDashboards').username;
-      const password = config.get('servers.opensearchDashboards').password;
+      const username = config.get('servers.opensearchDashboards.username');
+      const password = config.get('servers.opensearchDashboards.password');
       const response = await fetch(baseUrl + '/api/stats?extended', {
         method: 'get',
         headers: {

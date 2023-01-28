@@ -79,8 +79,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         log.debug('Found login page');
         if (config.get('security.disableTestUser')) {
           await PageObjects.login.login(
-            config.get('servers.opensearchDashboards').username,
-            config.get('servers.opensearchDashboards').password
+            config.get('servers.opensearchDashboards.username'),
+            config.get('servers.opensearchDashboards.password')
           );
         } else {
           await PageObjects.login.login('test_user', 'changeme');

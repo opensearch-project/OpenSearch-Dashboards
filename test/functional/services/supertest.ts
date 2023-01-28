@@ -29,14 +29,12 @@
  */
 
 import { FtrProviderContext } from 'test/functional/ftr_provider_context';
+import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
 export function OpenSearchDashboardsSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const originOSDServerUrl = config.get('servers.opensearchDashboards').toString();
-  const opensearchDashboardsServerUrl = originOSDServerUrl.endsWith('/')
-    ? originOSDServerUrl.slice(0, -1)
-    : originOSDServerUrl;
+  const opensearchDashboardsServerUrl = formatUrl(config.get('servers.opensearchDashboards'));
   return supertestAsPromised(opensearchDashboardsServerUrl);
 }

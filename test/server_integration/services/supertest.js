@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { format as formatUrl } from 'url';
+
 import supertestAsPromised from 'supertest-as-promised';
 
 export function createOpenSearchDashboardsSupertestProvider({
@@ -37,7 +39,7 @@ export function createOpenSearchDashboardsSupertestProvider({
   return function ({ getService }) {
     const config = getService('config');
     opensearchDashboardsUrl =
-      opensearchDashboardsUrl ?? config.get('servers.opensearchDashboards').toString();
+      opensearchDashboardsUrl ?? formatUrl(config.get('servers.opensearchDashboards'));
 
     return certificateAuthorities
       ? supertestAsPromised.agent(opensearchDashboardsUrl, { ca: certificateAuthorities })
@@ -47,14 +49,18 @@ export function createOpenSearchDashboardsSupertestProvider({
 
 export function OpenSearchDashboardsSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
-  const opensearchDashboardsServerUrl = config.get('servers.opensearchDashboards');
-  opensearchDashboardsServerUrl.username = '';
-  opensearchDashboardsServerUrl.password = '';
-  return supertestAsPromised(opensearchDashboardsServerUrl.toString());
+  const opensearchDashboardsServerConfig = config.get('servers.opensearchDashboards');
+
+  return supertestAsPromised(
+    formatUrl({
+      ...opensearchDashboardsServerConfig,
+      auth: false,
+    })
+  );
 }
 
 export function OpenSearchSupertestProvider({ getService }) {
   const config = getService('config');
-  const elasticSearchServerUrl = config.get('servers.opensearch').toString();
+  const elasticSearchServerUrl = formatUrl(config.get('servers.opensearch'));
   return supertestAsPromised(elasticSearchServerUrl);
 }

@@ -29,13 +29,14 @@
  */
 
 //import path from 'path';
+import { format as formatUrl } from 'url';
 import { opensearchTestConfig, osdTestConfig, opensearchDashboardsServerTestUser } from '@osd/test';
 import { services } from './services';
 
 export default function () {
   const servers = {
-    opensearchDashboards: osdTestConfig.getURL(),
-    opensearch: opensearchTestConfig.getURL(),
+    opensearchDashboards: osdTestConfig.getURLParts(),
+    opensearch: opensearchTestConfig.getURLParts(),
   };
 
   return {
@@ -54,7 +55,7 @@ export default function () {
         '--logging.json=false',
         `--server.port=${osdTestConfig.getPort()}`,
         '--status.allowAnonymous=true',
-        `--opensearch.hosts=${servers.opensearch.toString()}`,
+        `--opensearch.hosts=${formatUrl(servers.opensearch)}`,
         `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
         `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
         `--home.disableWelcomeScreen=false`,

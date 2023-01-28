@@ -41,8 +41,8 @@ export async function runOpenSearch({ config, options }) {
   const isSecurityEnabled = opensearchArgs.includes('xpack.security.enabled=true');
 
   const cluster = createLegacyOpenSearchTestCluster({
-    port: config.get('servers.opensearch').port,
-    password: isSecurityEnabled ? 'changethispassword' : config.get('servers.opensearch').password,
+    port: config.get('servers.opensearch.port'),
+    password: isSecurityEnabled ? 'changethispassword' : config.get('servers.opensearch.password'),
     license,
     log,
     basePath: resolve(OPENSEARCH_DASHBOARDS_ROOT, '.opensearch'),
