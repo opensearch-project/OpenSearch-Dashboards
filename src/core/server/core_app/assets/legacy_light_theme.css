@@ -931,7 +931,8 @@ table th[class*="col-"] {
 .table > thead > tr.info > th,
 .table > tbody > tr.info > th,
 .table > tfoot > tr.info > th {
-  background-color: #006BB4;
+  /* Wazuh's color palette */
+  background-color: #3595F9;
 }
 .table-hover > tbody > tr > td.info:hover,
 .table-hover > tbody > tr > th.info:hover,
@@ -1050,7 +1051,8 @@ table th[class*="col-"] {
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
 .form-control:focus {
-  border-color: #006BB4;
+  /* Wazuh's color palette */
+  border-color: #3595F9;
   outline: 0;
   -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(0, 107, 180, 0.6);
   box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(0, 107, 180, 0.6);
@@ -1493,7 +1495,8 @@ a.text-danger:focus {
   color: #e6e6e6;
 }
 .bg-info {
-  background-color: #006BB4;
+  /* Wazuh's color palette */
+  background-color: #3595F9;
 }
 a.bg-info:hover,
 a.bg-info:focus {
@@ -1609,9 +1612,10 @@ fieldset[disabled] a.btn {
   pointer-events: none;
 }
 .btn-default {
+  /* Wazuh's color palette */
   color: #FFF;
-  background-color: #006BB4;
-  border-color: #006BB4;
+  background-color: #3595F9;
+  border-color: #3595F9;
 }
 .btn-default:focus,
 .btn-default.focus {
@@ -1658,17 +1662,20 @@ fieldset[disabled] .btn-default:focus,
 .btn-default.disabled.focus,
 .btn-default[disabled].focus,
 fieldset[disabled] .btn-default.focus {
-  background-color: #006BB4;
-  border-color: #006BB4;
+  /* Wazuh's color palette */
+  background-color: #3595F9;
+  border-color: #3595F9;
 }
 .btn-default .badge {
-  color: #006BB4;
+  /* Wazuh's color palette */
+  color: #3595F9;
   background-color: #FFF;
 }
 .btn-primary {
+  /* Wazuh's color palette */
   color: #FFF;
-  background-color: #006BB4;
-  border-color: #006BB4;
+  background-color: #3595F9;
+  border-color: #3595F9;
 }
 .btn-primary:focus,
 .btn-primary.focus {
@@ -1715,11 +1722,13 @@ fieldset[disabled] .btn-primary:focus,
 .btn-primary.disabled.focus,
 .btn-primary[disabled].focus,
 fieldset[disabled] .btn-primary.focus {
-  background-color: #006BB4;
-  border-color: #006BB4;
+  /* Wazuh's color palette */
+  background-color: #3595F9;
+  border-color: #3595F9;
 }
 .btn-primary .badge {
-  color: #006BB4;
+  /* Wazuh's color palette */
+  color: #3595F9;
   background-color: #FFF;
 }
 .btn-xs {
@@ -2401,7 +2410,8 @@ button.close {
   background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 }
 .progress-bar-info {
-  background-color: #006BB4;
+  /* Wazuh's color palette */
+  background-color: #3595F9;
 }
 .progress-striped .progress-bar-info {
   background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
@@ -2539,8 +2549,9 @@ button.list-group-item-success.active:focus {
   border-color: #FFF;
 }
 .list-group-item-info {
+  /* Wazuh's color palette */
   color: #FFF;
-  background-color: #006BB4;
+  background-color: #3595F9;
 }
 a.list-group-item-info,
 button.list-group-item-info {
@@ -2665,8 +2676,9 @@ button.list-group-item-danger.active:focus {
 .nav .open > a,
 .nav .open > a:hover,
 .nav .open > a:focus {
+  /* Wazuh's color palette */
   background-color: #D3DAE6;
-  border-color: #006BB4;
+  border-color: #3595F9;
 }
 .nav .nav-divider {
   height: 1px;
@@ -2759,8 +2771,9 @@ button.list-group-item-danger.active:focus {
 .nav-pills > li.active > a,
 .nav-pills > li.active > a:hover,
 .nav-pills > li.active > a:focus {
+  /* Wazuh's color palette */
   color: #FFF;
-  background-color: #006BB4;
+  background-color: #3595F9;
 }
 .nav-stacked > li {
   float: none;
@@ -2869,7 +2882,8 @@ button.list-group-item-danger.active:focus {
   color: #e6e6e6;
 }
 .alert-info {
-  background-color: #006BB4;
+  /* Wazuh's color palette */
+  background-color: #3595F9;
   border-color: #004d81;
   color: #FFF;
 }
@@ -3503,7 +3517,8 @@ select[multiple].input-group-sm > .input-group-addon {
   padding: 5px 15px;
   line-height: 1.42857143;
   text-decoration: none;
-  color: #006BB4;
+  /* Wazuh's color palette */
+  color: #3595F9;
   background-color: transparent;
   border: 1px solid transparent;
   margin-left: -1px;
@@ -3524,7 +3539,8 @@ select[multiple].input-group-sm > .input-group-addon {
 .pagination > li > a:focus,
 .pagination > li > span:focus {
   z-index: 2;
-  color: #006BB4;
+  /* Wazuh's color palette */
+  color: #3595F9;
   background-color: rgba(0, 0, 0, 0);
   border-color: transparent;
 }
@@ -3643,7 +3659,8 @@ a.label:focus {
   display: none;
 }
 .label-default {
-  background-color: #006BB4;
+  /* Wazuh's color palette */
+  background-color: #3595F9;
 }
 .label-default[href]:hover,
 .label-default[href]:focus {
@@ -3664,7 +3681,8 @@ a.label:focus {
   background-color: #014a44;
 }
 .label-info {
-  background-color: #006BB4;
+  /* Wazuh's color palette */
+  background-color: #3595F9;
 }
 .label-info[href]:hover,
 .label-info[href]:focus {
@@ -3977,15 +3995,17 @@ a.label:focus {
   border-color: #004d81;
 }
 .panel-info > .panel-heading {
+  /* Wazuh's color palette */
   color: #FFF;
-  background-color: #006BB4;
+  background-color: #3595F9;
   border-color: #004d81;
 }
 .panel-info > .panel-heading + .panel-collapse > .panel-body {
   border-top-color: #004d81;
 }
 .panel-info > .panel-heading .badge {
-  color: #006BB4;
+  /* Wazuh's color palette */
+  color: #3595F9;
   background-color: #FFF;
 }
 .panel-info > .panel-footer + .panel-collapse > .panel-body {
@@ -4305,7 +4325,8 @@ a.label:focus {
 }
 .text-info,
 .text-info:hover {
-  color: #006BB4;
+  /* Wazuh's color palette */
+  color: #3595F9;
 }
 table .success,
 .table .success,
@@ -4428,3 +4449,71 @@ input:focus {
   -webkit-box-shadow: none;
   box-shadow: none;
 }
+
+/* -------------------------------- WAZUH  -------------------------------- */
+.wz-login {
+  background: url(./wazuh_login_bg.svg) !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-size: cover !important;
+}
+
+.login-wrapper {
+  text-align: center;
+  width: 430px!important;
+  top: 55px;
+  border-radius: 1px;
+  padding: 1em;
+}
+
+#opensearch-dashboards-body > div > div.app-wrapper.hidden-chrome > div > div.application > div > ul > div.euiText.euiText--medium > div {
+  text-align: center;
+  padding-bottom: 10px;
+  color: #ffffff !important;
+  font-size: 35px !important;
+  font-weight: 300;
+}
+
+#opensearch-dashboards-body > div > div.app-wrapper.hidden-chrome > div > div.application > div > ul > div.euiText.euiText--small > div {
+  text-align: center;
+  padding-bottom: 15px;
+  color: #ffffff !important;
+  font-size: 16px !important;
+}
+
+#opensearch-dashboards-body > div > div.app-wrapper.hidden-chrome > div > div.application > div > ul > form {
+  padding: 16px;
+  box-shadow: 0 2px 2px -1px rgba(152, 162, 179, 0.3), 0 1px 5px -2px rgba(152, 162, 179, 0.3);
+  background-color: #FFF;
+  border: 1px solid #D3DAE6;
+  border-radius: 4px;
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  margin-top: 32px;
+}
+
+.loginWelcome__logo {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  text-align: center;
+  background-color: #FFF;
+  border-radius: 100%;
+  padding: 16px;
+  box-shadow: 0 6px 12px -1px rgba(152, 162, 179, 0.2), 0 4px 4px -1px rgba(152, 162, 179, 0.2), 0 2px 2px 0 rgba(152, 162, 179, 0.2);
+  margin-bottom: 32px;
+}
+
+div.euiFormRow > div.euiFormRow__fieldWrapper > button {
+  background-color: #3595F9!important;
+  border-color: #3595F9!important;
+  color: #fff;
+}
+
+.loginWelcome__logo {
+  background: url(./wazuh_logo_circle.svg) center center no-repeat !important;
+}
+
+/* -------------------------------- WAZUH  -------------------------------- */

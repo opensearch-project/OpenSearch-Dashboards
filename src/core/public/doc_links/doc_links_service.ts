@@ -48,6 +48,12 @@ export class DocLinksService {
     const OPENSEARCH_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/opensearch/`;
     const OPENSEARCH_DASHBOARDS_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/dashboards/`;
 
+    // // - Note .- Using the getting-started link instead of the index link
+    // //           because the index link is inconsistent with older versions.
+    // // https://documentation.wazuh.com/current/getting-started/index.html
+    // const WAZUH_WEBSITE_URL = 'https://wazuh.com/';
+    // const WAZUH_WEBSITE_DOCS = `https://documentation.wazuh.com/${DOC_LINK_VERSION}/getting-started/index.html`;
+
     return deepFreeze({
       DOC_LINK_VERSION,
       OPENSEARCH_WEBSITE_URL,
@@ -553,6 +559,11 @@ export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly OPENSEARCH_WEBSITE_URL: string;
   readonly links: {
+    // readonly wazuh: {
+    //   readonly website: string;
+    //   readonly documentation: string;
+
+    // };
     readonly opensearch: {
       readonly introduction: string;
       readonly installation: {

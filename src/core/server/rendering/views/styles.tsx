@@ -103,7 +103,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           .osdWelcomeText {
             font-family:
             display: inline-block;
-            font-size: 14px;
+            font-size: 24px; /* Wazuh */
             font-family: sans-serif;
             line-height: 40px !important;
             height: 40px !important;
@@ -124,8 +124,8 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .osdLoaderWrap svg {
-            width: 64px;
-            height: 64px;
+            width: 384px;	 /* Wazuh */
+            height: 112px; /* Wazuh */
             margin: auto;
             line-height: 1;
           }
@@ -137,8 +137,8 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           .osdProgress {
             display: inline-block;
             position: relative;
-            width: 32px;
-            height: 4px;
+            width: 256px;	/* Wazuh */
+            height: 10px;
             overflow: hidden;
             background-color: ${darkMode ? '#25262E' : '#F5F7FA'};
             line-height: 1;
@@ -147,7 +147,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           .osdProgress:before {
             position: absolute;
             content: '';
-            height: 4px;
+            height: 10px; /* Wazuh */
             width: 100%;
             top: 0;
             bottom: 0;
@@ -158,7 +158,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .loadingLogoContainer {
-            height: 60px;
+            height: 150px; /* Wazuh */
             padding: 10px 10px 10px 10px;
           }
 

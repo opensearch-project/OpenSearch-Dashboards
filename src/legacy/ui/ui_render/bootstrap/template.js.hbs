@@ -15,6 +15,23 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   loadingMessage.style.display = 'flex';
 
   window.onload = function () {
+    /* ------------------------------- WAZUH ------------------------------- */
+    var interval = setInterval(() => {
+      var title = document.querySelector("#opensearch-dashboards-body > div > div.app-wrapper.hidden-chrome > div > div.application > div > ul > div.euiText.euiText--medium > div")
+      if (!!title) {
+        clearInterval(interval);
+        var content = document.querySelector("#opensearch-dashboards-body > div");
+        content.classList.add("wz-login")
+
+        // Don't force custom logo to have 100% width. It should be handled in the svg properties if needed
+        document
+          .querySelector('#opensearch-dashboards-body .wz-login figure.euiImage--fullWidth')
+          .classList.remove('euiImage--fullWidth')
+
+      }
+    })
+    /* ------------------------------- WAZUH ------------------------------- */
+
     function failure() {
       // make subsequent calls to failure() noop
       failure = function () {};

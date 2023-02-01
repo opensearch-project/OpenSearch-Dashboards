@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  aria-labelledby="i0e4112b0-8781-11ed-96c4-b9592c9b3cea"
+  class="euiIcon euiIcon--medium logoImage"
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  data-test-subj="homeIcon"
+  data-test-image-url="home"
+>
+	<path d="M8.13 1.229l5.5 4.47a1 1 0 01.37.777V14a1 1 0 01-1 1H2a1 1 0 01-1-1V6.476a1 1 0 01.37-.776l5.5-4.471a1 1 0 011.26 0zM13 6.476L7.5 2.005 2 6.475V14h11V6.476z" fill="#fff"/>
+</svg>

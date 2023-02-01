@@ -7,8 +7,8 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { ChromeBranding } from '../../chrome_service';
 
-export const DEFAULT_MARK = 'opensearch_mark_default_mode.svg';
-export const DEFAULT_DARK_MARK = 'opensearch_mark_dark_mode.svg';
+export const DEFAULT_MARK = 'home_default_mode.svg';
+export const DEFAULT_DARK_MARK = 'home_dark_mode.svg';
 
 /**
  * Use branding configurations to render the header mark on the nav bar.

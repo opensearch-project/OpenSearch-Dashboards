@@ -26,7 +26,7 @@ while [ -h "$SCRIPT" ] ; do
 done
 
 DIR="$(dirname "${SCRIPT}")/.."
-CONFIG_DIR=${OSD_PATH_CONF:-"$DIR/config"}
+CONFIG_DIR=${OSD_PATH_CONF:-"/etc/wazuh-dashboard"}
 NODE="${DIR}/node/bin/node"
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then

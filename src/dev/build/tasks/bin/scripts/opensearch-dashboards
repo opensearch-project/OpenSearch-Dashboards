@@ -26,7 +26,7 @@ while [ -h "$SCRIPT" ] ; do
 done
 
 DIR="$(dirname "${SCRIPT}")/.."
-CONFIG_DIR=${OSD_PATH_CONF:-"$DIR/config"}
+CONFIG_DIR=${OSD_PATH_CONF:-"/etc/wazuh-dashboard"}
 
 if [ -x "${DIR}/node/bin/node" ]; then
   NODE="${DIR}/node/bin/node"
@@ -43,4 +43,6 @@ if [ -f "${CONFIG_DIR}/node.options" ]; then
   OSD_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
 
-NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $OSD_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" ${@}
+# Wazuh: changed due to https://github.com/wazuh/wazuh-kibana-app/issues/3887
+NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $OSD_NODE_OPTS $NODE_OPTIONS"
+NODE_ENV=production "${NODE}" ${NODE_OPTIONS} "${DIR}/src/cli/dist" ${@}
