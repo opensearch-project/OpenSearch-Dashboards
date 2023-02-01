@@ -1,6 +1,5 @@
 # Version 1.3.8 Release Notes
 
-### Deprecations
 
 ### 🛡 Security
 
@@ -61,39 +60,10 @@
 
 - Add `target` folders of `test_utils` and `core` to the `osd clean` patterns ([#1442](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1442))
 - Remove storybook package and related code ([#2660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2660))
-- 
 
-### 🪛 Refactoring
 
 ### 🔩 Tests
 
 - Fix test failures due to them ending before their duration is captured ([#1338](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1338))
 - Add retrying flaky jest tests ([#2967](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2967))
 - Prevent `AbortError` from breaking unit tests for ExecutionContract ([#3299](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3299))
-
-## [1.x]
-### 💥 Breaking Changes
-
-### Deprecations
-
-### 🛡 Security
-
-### 📈 Features/Enhancements
-
-### 🐛 Bug Fixes
-
-- Plugin helpers fix related to fs promises module ([#2486](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2486))
-
-### 🚞 Infrastructure
-
-### 📝 Documentation
-
-### 🛠 Maintenance
-
-- [Version] Increment to 1.4 ([#1341](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1341))
-
-### 🪛 Refactoring
-
-### 🔩 Tests
-
-[1.x]: https://github.com/opensearch-project/OpenSearch-Dashboards/compare/1.3.5...1.x
