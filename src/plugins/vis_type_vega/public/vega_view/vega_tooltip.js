@@ -87,7 +87,8 @@ export class TooltipHandler {
     // Sanitized HTML is created by the tooltip library,
     // with a large number of tests, hence suppressing eslint here.
     // eslint-disable-next-line no-unsanitized/property
-    el.innerHTML = createTooltipContent(value, _.escape, 2);
+    // el.innerHTML = createTooltipContent(value, _.escape, 2);
+    el.innerHTML = this.createTooltipHtml(value);
 
     // add to DOM to calculate tooltip size
     document.body.appendChild(el);
@@ -115,6 +116,13 @@ export class TooltipHandler {
     );
 
     el.setAttribute('style', `top: ${pos.top}px; left: ${pos.left}px`);
+  }
+
+  // TODO: impelement returning different html based on the item (value) being hovered on.
+  // show custom if it's an annotation datapoint, otherwise can probably use the default
+  // way that existed before: createTooltipContent(value, _.escape, 2);
+  createTooltipHtml(value) {
+    return '<p>some custom tooltip<p>';
   }
 
   hideTooltip() {

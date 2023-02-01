@@ -281,6 +281,16 @@ export class VegaBaseView {
         this._addDestroyHandler(() => tthandler.hideTooltip());
       }
 
+      view.addEventListener('click', function (event, item) {
+        // TODO: add filtering on item. Only open flyout when item is an event/annotation datapoint.
+
+        console.log('click triggered');
+
+        // below commented lines will be added as part of the view events flyout PR
+        // const { savedObjectId } = get(view, '_opensearchDashboardsView._visInput', {});
+        // getUiActions().getTrigger(OPEN_EVENTS_FLYOUT_TRIGGER).exec({ savedObjectId });
+      });
+
       return view.runAsync(); // Allows callers to await rendering
     }
   }
