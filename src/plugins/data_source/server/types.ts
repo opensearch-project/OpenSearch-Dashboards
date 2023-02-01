@@ -19,7 +19,8 @@ export interface LegacyClientCallAPIParams {
 }
 
 export interface DataSourceClientParams {
-  dataSourceId: string;
+  // id is optional when creating test client
+  dataSourceId?: string;
   // this saved objects client is used to fetch data source on behalf of users, caller should pass scoped saved objects client
   savedObjects: SavedObjectsClientContract;
   cryptography: CryptographyServiceSetup;

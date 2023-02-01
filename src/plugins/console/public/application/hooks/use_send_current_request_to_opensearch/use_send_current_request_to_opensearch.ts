@@ -40,7 +40,7 @@ import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
 
 export const useSendCurrentRequestToOpenSearch = () => {
   const {
-    services: { history, settings, notifications, trackUiMetric },
+    services: { history, settings, notifications, trackUiMetric, http },
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
@@ -64,7 +64,7 @@ export const useSendCurrentRequestToOpenSearch = () => {
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
-      const results = await sendRequestToOpenSearch({ requests });
+      const results = await sendRequestToOpenSearch({ http, requests });
 
       results.forEach(({ request: { path, method, data } }) => {
         try {
@@ -112,5 +112,5 @@ export const useSendCurrentRequestToOpenSearch = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications, trackUiMetric]);
+  }, [dispatch, settings, history, notifications, trackUiMetric, http]);
 };

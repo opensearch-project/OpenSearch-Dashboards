@@ -142,6 +142,7 @@ export const configSchema = schema.object({
     }),
     schema.boolean({ defaultValue: false })
   ),
+  disablePrototypePoisoningProtection: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 const deprecations: ConfigDeprecationProvider = ({ renameFromRoot, renameFromRootWithoutMap }) => [
@@ -318,6 +319,12 @@ export class OpenSearchConfig {
    */
   public readonly customHeaders: OpenSearchConfigType['customHeaders'];
 
+  /**
+   * Specifies whether the client should attempt to protect against reserved words
+   * or not.
+   */
+  public readonly disablePrototypePoisoningProtection?: boolean;
+
   constructor(rawConfig: OpenSearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
@@ -338,6 +345,7 @@ export class OpenSearchConfig {
     this.username = rawConfig.username;
     this.password = rawConfig.password;
     this.customHeaders = rawConfig.customHeaders;
+    this.disablePrototypePoisoningProtection = rawConfig.disablePrototypePoisoningProtection;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
