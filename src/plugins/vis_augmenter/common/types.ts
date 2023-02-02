@@ -9,19 +9,25 @@ export enum VisLayerTypes {
   PointInTimeEvents = 'PointInTimeEvents',
 }
 
+export type PluginResourceType = string;
+
+export interface PluginResource {
+  type: PluginResourceType;
+  id: string;
+  name: string;
+  urlPath: string;
+}
+
 export interface VisLayer {
   type: keyof typeof VisLayerTypes;
-  name: string;
+  originPlugin: string;
+  pluginResource: PluginResource;
 }
 
 export type VisLayers = VisLayer[];
 
-// resourceId & resourceName are required so that the
-// events flyout can partition data based on these attributes
-// (e.g., partitioning anomalies based on the detector they came from)
 export interface EventMetadata {
-  resourceId: string;
-  resourceName: string;
+  pluginResourceId: string;
   tooltip?: string;
 }
 
