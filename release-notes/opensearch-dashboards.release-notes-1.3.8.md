@@ -27,4 +27,3 @@
 
 - [BWC] Updates to BWC tests ([#1190](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1190))
 - Automates chromedriver version selection for tests ([#2990](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2990))
-- Adds retrying flaky jest tests ([#2967](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2967))
