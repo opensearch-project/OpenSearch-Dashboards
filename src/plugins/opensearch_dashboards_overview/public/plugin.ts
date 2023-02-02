@@ -77,13 +77,14 @@ export class OpenSearchDashboardsOverviewPlugin
         return hasOpenSearchDashboardsApp;
       }),
       distinct(),
-      map((hasOpenSearchDashboardsApp) => {
+      map(() => {
         return () => {
-          if (!hasOpenSearchDashboardsApp) {
-            return { status: AppStatus.inaccessible, navLinkStatus: AppNavLinkStatus.hidden };
-          } else {
-            return { status: AppStatus.accessible, navLinkStatus: AppNavLinkStatus.default };
-          }
+          // Wazuh: Hide the OpenSearch Dashboards Overview app
+          // TODO (unknown reason: `Add your data` button ?? )
+          return {
+            status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          };
         };
       })
     );

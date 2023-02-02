@@ -273,10 +273,9 @@ export const Template: FunctionComponent<Props> = ({
               })}
             >
               {i18n('core.ui.welcomeMessage', {
-                // Wazuh: change the default message to
-                // avoid "Loading Wazuh" duplication.
+                // Wazuh: change the default message to avoid
+                // showing the "Loading Wazuh" message twice.
                 defaultMessage: 'Loading ...',
-                // defaultMessage: `Loading ${injectedMetadata.branding.applicationTitle}`
               })}
             </div>
             {renderBrandingEnabledOrDisabledLoadingBar()}

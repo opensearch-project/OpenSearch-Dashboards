@@ -45,7 +45,13 @@ function generatePluginUrl(version, plugin) {
   const platform = process.platform === 'win32' ? 'windows' : process.platform;
   const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
 
-  return `${LATEST_PLUGIN_BASE_URL}/${version}/latest/${platform}/${arch}/tar/builds/opensearch-dashboards/plugins/${plugin}-${version}.zip`;
+  // Ignore the installation of the Wazuh plugin as it isn't present in
+  // the OpenSearch Dashboards repository. Otherwise, proceed as usual.
+  // TODO replace with actual URL of the Wazuh plugin at current version
+  // https://packages.wazuh.com/pre-release/ui/dashboard/wazuh-4.4.0-1.zip
+  return plugin.includes('wazuh')
+    ? plugin
+    : `${LATEST_PLUGIN_BASE_URL}/${version}/latest/${platform}/${arch}/tar/builds/opensearch-dashboards/plugins/${plugin}-${version}.zip`;
 }
 
 export function parseMilliseconds(val) {
