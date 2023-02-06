@@ -18,7 +18,6 @@ import { SecuritySessionCookie, getSecurityCookieOptions } from './session/secur
 import { getAuthenticationHandler } from './auth/auth_handler_factory';
 import { IAuthenticationType } from './auth/types/authentication_type';
 
-
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
   private readonly logger: Logger;
 
