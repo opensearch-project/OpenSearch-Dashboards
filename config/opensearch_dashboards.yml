@@ -232,3 +232,55 @@
 #data_source.encryption.wrappingKeyName: 'changeme'
 #data_source.encryption.wrappingKeyNamespace: 'changeme'
 #data_source.encryption.wrappingKey: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+
+# timelion.ui.enabled: true
+# server.name: opensearch-dashboards
+# server.host: "0.0.0.0"
+# opensearch.hosts: http://localhost:9200
+# opensearch.ssl.verificationMode: none
+# opensearch.username: kibanaserver
+# opensearch.password: kibanaserver
+# opensearch.requestHeadersWhitelist: ["securitytenant","Authorization"]
+# # dashboards_security.multitenancy.enabled: true
+# # dashboards_security.multitenancy.tenants.preferred: ["Private", "Global"]
+# dashboards_security.readonly_mode.roles: ["kibana_read_only"]
+# # dashboards_security.auth.type: "saml"
+# server.xsrf.whitelist:  [/_plugins/_security/saml/acs,/_opendistro/_security/saml/acs,/_plugins/_security/saml/acs/idpinitiated,/_opendistro/_security/saml/acs/idpinitiated,/_plugins/_security/saml/logout,/_opendistro/_security/saml/logout]
+
+
+
+
+server.host: 0.0.0.0
+server.port: 5601
+opensearch.hosts: ["http://localhost:9200"]
+opensearch.ssl.verificationMode: none
+opensearch.username: "kibanaserver"
+opensearch.password: "kibanaserver"
+opensearch.requestHeadersWhitelist: [ authorization,securitytenant ]
+
+dashboards_security.idp.setting: {
+    "basicauth_opensearch": 
+                {
+                 "base_redirect_url": "http://localhost:5601"},
+    "oidc_okta": 
+                {
+                "base_redirect_url": "http://localhost:5601",
+                "logout_url": "http://localhost:5601/app/login",
+                "connect_url": "https://dev-16628832.okta.com/.well-known/openid-configuration", 
+                "client_id": "0oa566po99gotj46m5d7", 
+                "client_secret": "4Gy9_NxFS2Xf97t4GRzkoRlyRAsApRwFcM6Zx9WB",
+                "scope": "openid profile email",
+                "verify_hostnames": "false",
+                "refresh_tokens": "false"},
+     "oidc_google":   
+                { 
+                "base_redirect_url": "http://localhost:5601", 
+                "logout_url": "http://localhost:5601/app/login",  
+                "connect_url": "https://accounts.google.com/.well-known/openid-configuration",  
+                "client_id": "177403260062-qsvknolof1u4qfmv3qtjti45eps7k3qs.apps.googleusercontent.com",  
+                "client_secret": "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", 
+                "scope": "openid profile email",  
+                "verify_hostnames": "false",  
+                "refresh_tokens": "false"},
+}

@@ -15,6 +15,8 @@ export const API_ENDPOINT_AUTHTYPE = API_PREFIX + '/auth/type';
 export const LOGIN_PAGE_URI = '/app/' + APP_ID_LOGIN;
 export const API_AUTH_LOGIN = '/auth/login';
 export const API_AUTH_LOGOUT = '/auth/logout';
+export const OPENID_AUTH_LOGIN = '/auth/openid/login';
+export const SAML_AUTH_LOGIN = '/auth/saml/login';
 export const ANONYMOUS_AUTH_LOGIN = '/auth/anonymous';
 export const SAML_AUTH_LOGIN_WITH_FRAGMENT = '/auth/saml/captureUrlFragment?nextUrl=%2F';
 
@@ -25,6 +27,8 @@ export const ANONYMOUS_AUTH_LOGOUT = '/auth/anonymous/logout';
 export const AUTH_HEADER_NAME = 'authorization';
 export const AUTH_GRANT_TYPE = 'authorization_code';
 export const AUTH_RESPONSE_TYPE = 'code';
+
+export const jwtKey = "6aff3042-1327-4f3d-82f0-40a157ac4464"
 
 export enum AuthType {
   BASIC = 'basicauth',
