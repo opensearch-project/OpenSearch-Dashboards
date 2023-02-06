@@ -59,7 +59,7 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
     return this.definition.getIconType(context);
   }
 
-  public getDisplayName(context: Context<A>): string {
+  public getDisplayName(context: Context<A>): JSX.Element | string {
     if (!this.definition.getDisplayName) return `Action: ${this.id}`;
     return this.definition.getDisplayName(context);
   }
