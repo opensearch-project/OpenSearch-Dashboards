@@ -1,9 +1,0 @@
-{
-  "id": "securityDashboards",
-  "version": "3.0.0.0",
-  "opensearchDashboardsVersion": "3.0.0",
-  "configPath": ["dashboards_security"],
-  "requiredPlugins": [],
-  "server": true,
-  "ui": true
-}
