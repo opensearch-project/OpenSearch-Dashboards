@@ -30,25 +30,25 @@
 
 import { getFormatService } from './services';
 import { OpenSearchDashboardsDatatable } from '../../expressions/public';
-import { TableVisConfig } from './types';
+import { FormattedColumn, TableVisConfig } from './types';
+import { convertToFormattedData } from './utils/convert_to_formatted_data';
 
 export interface Table {
   columns: OpenSearchDashboardsDatatable['columns'];
   rows: OpenSearchDashboardsDatatable['rows'];
 }
 
-export interface TableGroup {
-  table: OpenSearchDashboardsDatatable;
-  tables: Table[];
-  title: string;
-  name: string;
-  key: any;
-  column: number;
-  row: number;
+export interface FormattedTableContext extends Table {
+  formattedColumns: FormattedColumn[];
 }
 
-export interface TableContext {
-  table?: Table;
+export interface TableGroup {
+  table: FormattedTableContext;
+  title: string;
+}
+
+export interface TableVisData {
+  table?: FormattedTableContext;
   tableGroups: TableGroup[];
   direction?: 'row' | 'column';
 }
@@ -56,10 +56,10 @@ export interface TableContext {
 export function tableVisResponseHandler(
   input: OpenSearchDashboardsDatatable,
   config: TableVisConfig
-): TableContext {
-  let table: Table | undefined;
+): TableVisData {
+  let table: FormattedTableContext | undefined;
   const tableGroups: TableGroup[] = [];
-  let direction: TableContext['direction'];
+  let direction: TableVisData['direction'];
 
   const split = config.splitColumn || config.splitRow;
 
@@ -78,30 +78,32 @@ export function tableVisResponseHandler(
         (splitMap as any)[splitValue] = splitIndex++;
         const tableGroup: TableGroup = {
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
-          name: splitColumn.name,
-          key: splitValue,
-          column: splitColumnIndex,
-          row: rowIndex,
-          table: input,
-          tables: [],
+          table: {
+            formattedColumns: [],
+            rows: [],
+            columns: input.columns,
+          },
         };
-
-        tableGroup.tables.push({
-          columns: input.columns,
-          rows: [],
-        });
 
         tableGroups.push(tableGroup);
       }
 
-      const tableIndex = (splitMap as any)[splitValue];
-      (tableGroups[tableIndex] as any).tables[0].rows.push(row);
+      const tableIndex = splitMap[splitValue];
+      tableGroups[tableIndex].table.rows.push(row);
+    });
+
+    // format tables
+    tableGroups.forEach((tableGroup) => {
+      tableGroup.table = convertToFormattedData(tableGroup.table, config);
     });
   } else {
-    table = {
-      columns: input.columns,
-      rows: input.rows,
-    };
+    table = convertToFormattedData(
+      {
+        columns: input.columns,
+        rows: input.rows,
+      },
+      config
+    );
   }
 
   return {
