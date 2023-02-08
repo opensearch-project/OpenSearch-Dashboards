@@ -7,12 +7,15 @@ import { ExpressionsSetup } from '../../expressions/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { visLayers } from './expressions';
+import { setSavedAugmentVisLoader } from './services';
+import { createSavedAugmentVisLoader, SavedAugmentVisLoader } from './saved_augment_vis';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface VisAugmenterStart {}
+export interface VisAugmenterStart {
+  savedAugmentVisLoader: SavedAugmentVisLoader;
+}
 
 export interface VisAugmenterSetupDeps {
   data: DataPublicPluginSetup;
@@ -37,7 +40,15 @@ export class VisAugmenterPlugin
   }
 
   public start(core: CoreStart, { data }: VisAugmenterStartDeps): VisAugmenterStart {
-    return {};
+    const savedAugmentVisLoader = createSavedAugmentVisLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+    setSavedAugmentVisLoader(savedAugmentVisLoader);
+    return { savedAugmentVisLoader };
   }
 
   public stop() {}
