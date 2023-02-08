@@ -222,6 +222,9 @@ export const getRootClient = (
   let cachedClient;
 
   if (type === AuthType.SigV4) {
+    // opensearch-js client doesn't support spawning child with aws sigv4 connection class,
+    // we are storing/getting the actual client instead of rootClient in/from aws client pool,
+    // by a key of endpoint + lastUpdatedTime
     cachedClient = getClientFromPool(endpoint + lastUpdatedTime, type);
     return cachedClient ? (cachedClient as Client) : undefined;
   } else {

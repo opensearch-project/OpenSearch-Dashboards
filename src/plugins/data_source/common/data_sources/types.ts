@@ -16,7 +16,7 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   lastUpdatedTime?: string;
 }
 
-export interface SigV4Content extends SavedObjectAttributes {
+export interface SigV4Content {
   accessKey: string;
   secretKey: string;
   region: string;

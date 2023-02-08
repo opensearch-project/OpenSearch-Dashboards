@@ -22,10 +22,13 @@ export interface OpenSearchClientPoolSetup {
  * It reuse TPC connections for each OpenSearch endpoint.
  */
 export class OpenSearchClientPool {
-  // LRU cache
+  // LRU cache of client
   //   key: data source endpoint
-  //   value: OpenSearch client object | Legacy client object
+  //   value: OpenSearch client | Legacy client
   private clientCache?: LRUCache<string, Client | LegacyClient>;
+  // LRU cache of aws clients
+  //   key: endpoint + lastUpdatedTime together to support update case.
+  //   value: OpenSearch client | Legacy client
   private awsClientCache?: LRUCache<string, Client | LegacyClient>;
   private isClosed = false;
 
@@ -34,12 +37,13 @@ export class OpenSearchClientPool {
   public setup(config: DataSourcePluginConfigType): OpenSearchClientPoolSetup {
     const logger = this.logger;
     const { size } = config.clientPool;
+    const MAX_AGE = 15 * 60 * 1000; // by default, TCP connection times out in 15 minutes
 
     this.clientCache = new LRUCache({
       max: size,
-      maxAge: 15 * 60 * 1000, // by default, TCP connection times out in 15 minutes
+      maxAge: MAX_AGE,
 
-      async dispose(endpoint, client) {
+      async dispose(key, client) {
         try {
           await client.close();
         } catch (error: any) {
@@ -55,13 +59,12 @@ export class OpenSearchClientPool {
     // aws client specific pool
     this.awsClientCache = new LRUCache({
       max: size,
-      maxAge: 15 * 60 * 1000, // by default, TCP connection times out in 15 minutes
+      maxAge: MAX_AGE,
 
-      async dispose(endpoint, client) {
+      async dispose(key, client) {
         try {
           await client.close();
         } catch (error: any) {
-          // log and do nothing since we are anyways evicting the client object from cache
           logger.warn(
             `Error closing OpenSearch client when removing from aws client pool: ${error.message}`
           );
@@ -70,16 +73,16 @@ export class OpenSearchClientPool {
     });
     this.logger.info(`Created data source aws client pool of size ${size}`);
 
-    const getClientFromPool = (endpoint: string, authType: AuthType) => {
+    const getClientFromPool = (key: string, authType: AuthType) => {
       const selectedCache = authType === AuthType.SigV4 ? this.awsClientCache : this.clientCache;
 
-      return selectedCache!.get(endpoint);
+      return selectedCache!.get(key);
     };
 
-    const addClientToPool = (endpoint: string, authType: string, client: Client | LegacyClient) => {
+    const addClientToPool = (key: string, authType: string, client: Client | LegacyClient) => {
       const selectedCache = authType === AuthType.SigV4 ? this.awsClientCache : this.clientCache;
-      if (!selectedCache?.has(endpoint)) {
-        return selectedCache!.set(endpoint, client);
+      if (!selectedCache?.has(key)) {
+        return selectedCache!.set(key, client);
       }
     };
 
