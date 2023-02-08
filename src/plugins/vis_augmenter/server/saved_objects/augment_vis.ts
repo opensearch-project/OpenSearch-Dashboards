@@ -10,12 +10,9 @@ export const augmentVisSavedObjectType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   management: {
-    // utilizing defaults for some of these fields
-    // icon: 'visualizeApp',
-    // defaultSearchField: 'id',
     importableAndExportable: true,
     getTitle(obj) {
-      return 'Augment-' + obj.attributes.visName;
+      return obj.attributes.title;
     },
     getEditUrl(obj) {
       return `/management/opensearch-dashboards/objects/savedAugmentVis/${encodeURIComponent(
@@ -25,6 +22,7 @@ export const augmentVisSavedObjectType: SavedObjectsType = {
   },
   mappings: {
     properties: {
+      title: { type: 'text' },
       description: { type: 'text' },
       pluginResourceId: { type: 'text' },
       visName: { type: 'keyword', index: false, doc_values: false },

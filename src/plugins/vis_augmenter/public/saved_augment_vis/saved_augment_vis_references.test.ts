@@ -5,6 +5,7 @@
 
 import { extractReferences, injectReferences } from './saved_augment_vis_references';
 import { AugmentVisSavedObject } from '../types';
+import { VIS_REFERENCE_NAME } from './saved_augment_vis_references';
 
 describe('extractReferences()', () => {
   test('extracts nothing if visId is null', () => {
@@ -76,11 +77,11 @@ describe('injectReferences()', () => {
       id: '1',
       pluginResourceId: 'test-resource-id',
       visLayerExpressionFn: 'test-fn',
-      visName: 'visualization_0',
+      visName: VIS_REFERENCE_NAME,
     } as unknown) as AugmentVisSavedObject;
     const references = [
       {
-        name: 'visualization_0',
+        name: VIS_REFERENCE_NAME,
         type: 'visualization',
         id: 'test-id',
       },
@@ -101,10 +102,10 @@ describe('injectReferences()', () => {
       id: '1',
       pluginResourceId: 'test-resource-id',
       visLayerExpressionFn: 'test-fn',
-      visName: 'visualization_0',
+      visName: VIS_REFERENCE_NAME,
     } as unknown) as AugmentVisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find visualization reference \\"visualization_0\\""`
+      `"Could not find visualization reference \\"${VIS_REFERENCE_NAME}\\""`
     );
   });
 });

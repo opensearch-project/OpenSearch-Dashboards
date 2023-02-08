@@ -17,6 +17,14 @@ import { AugmentVisSavedObject } from '../types';
  */
 
 /**
+ * Using a constant value for the visualization name to easily extact/inject
+ * the reference. Setting as "_0" which could be expanded and incremented upon
+ * in the future if we decide to persist multiple visualizations per
+ * AugmentVisSavedObject.
+ */
+export const VIS_REFERENCE_NAME = 'visualization_0';
+
+/**
  * Used during creation. Converting from AugmentVisSavedObject to the actual indexed saved object
  * with references.
  */
@@ -33,12 +41,13 @@ export function extractReferences({
   // Extract saved object
   if (updatedAttributes.visId) {
     updatedReferences.push({
-      name: 'visualization_0',
+      name: VIS_REFERENCE_NAME,
       type: 'visualization',
       id: String(updatedAttributes.visId),
     });
     delete updatedAttributes.visId;
-    updatedAttributes.visName = 'visualization_0';
+
+    updatedAttributes.visName = VIS_REFERENCE_NAME;
   }
   return {
     references: updatedReferences,

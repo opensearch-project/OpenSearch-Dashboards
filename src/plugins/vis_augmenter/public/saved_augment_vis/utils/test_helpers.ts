@@ -5,9 +5,9 @@
 
 import { cloneDeep } from 'lodash';
 import { VisLayerExpressionFn, ISavedAugmentVis } from '../../types';
+import { VIS_REFERENCE_NAME } from '../saved_augment_vis_references';
 
 const pluginResourceId = 'test-plugin-resource-id';
-const visName = 'visualization_0';
 const visId = 'test-vis-id';
 const version = 1;
 
@@ -16,7 +16,7 @@ export const generateAugmentVisSavedObject = (idArg: string, exprFnArg: VisLayer
     id: idArg,
     pluginResourceId,
     visLayerExpressionFn: exprFnArg,
-    visName,
+    VIS_REFERENCE_NAME,
     visId,
     version,
   } as ISavedAugmentVis;

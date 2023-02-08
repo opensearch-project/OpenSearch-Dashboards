@@ -57,7 +57,6 @@ import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { DashboardStart } from '../../../dashboard/public';
-import { VisAugmenterStart } from '../../../vis_augmenter/public';
 
 export type PureVisState = SavedVisState;
 
