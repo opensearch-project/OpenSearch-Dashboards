@@ -17,7 +17,7 @@ import {
 } from 'opensearch-dashboards/server';
 import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
-import { AuthType } from '../../common/data_sources';
+import { AuthType, SigV4Content, UsernamePasswordTypedContent } from '../../common/data_sources';
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
 
 /**
@@ -29,7 +29,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
   /**
    * Describes the factory used to create instances of Saved Objects Client Wrappers
-   * for data source spcific operations such as credntials encryption
+   * for data source specific operations such as credentials encryption
    */
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     const createWithCredentialsEncryption = async <T = unknown>(
@@ -159,13 +159,14 @@ export class DataSourceSavedObjectsClientWrapper {
         };
       case AuthType.UsernamePasswordType:
         // Signing the data source with endpoint
-        const encryptionContext = {
-          endpoint,
-        };
-
         return {
           ...attributes,
-          auth: await this.encryptCredentials(auth, encryptionContext),
+          auth: await this.encryptBasicAuthCredential(auth, { endpoint }),
+        };
+      case AuthType.SigV4:
+        return {
+          ...attributes,
+          auth: await this.encryptSigV4Credential(auth, { endpoint }),
         };
       default:
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${auth.type}'`);
@@ -205,15 +206,22 @@ export class DataSourceSavedObjectsClientWrapper {
       case AuthType.UsernamePasswordType:
         if (credentials?.password) {
           // Fetch and validate existing signature
-          const encryptionContext = await this.validateEncryptionContext(
-            wrapperOptions,
-            id,
-            options
-          );
+          const encryptionContext = await this.getEncryptionContext(wrapperOptions, id, options);
 
           return {
             ...attributes,
-            auth: await this.encryptCredentials(auth, encryptionContext),
+            auth: await this.encryptBasicAuthCredential(auth, encryptionContext),
+          };
+        } else {
+          return attributes;
+        }
+      case AuthType.SigV4:
+        // Fetch and validate existing signature
+        if (credentials?.accessKey && credentials?.secretKey) {
+          const encryptionContext = await this.getEncryptionContext(wrapperOptions, id, options);
+          return {
+            ...attributes,
+            auth: await this.encryptSigV4Credential(auth, encryptionContext),
           };
         } else {
           return attributes;
@@ -259,7 +267,7 @@ export class DataSourceSavedObjectsClientWrapper {
           );
         }
 
-        const { username, password } = credentials;
+        const { username, password } = credentials as UsernamePasswordTypedContent;
 
         if (!username) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -272,14 +280,40 @@ export class DataSourceSavedObjectsClientWrapper {
             '"auth.credentials.password" attribute is required'
           );
         }
+        break;
+      case AuthType.SigV4:
+        if (!credentials) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials" attribute is required'
+          );
+        }
 
+        const { accessKey, secretKey, region } = credentials as SigV4Content;
+
+        if (!accessKey) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials.accessKey" attribute is required'
+          );
+        }
+
+        if (!secretKey) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials.secretKey" attribute is required'
+          );
+        }
+
+        if (!region) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials.region" attribute is required'
+          );
+        }
         break;
       default:
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${type}'`);
     }
   }
 
-  private async validateEncryptionContext(
+  private async getEncryptionContext(
     wrapperOptions: SavedObjectsClientWrapperOptions,
     id: string,
     options: SavedObjectsUpdateOptions = {}
@@ -321,7 +355,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
     switch (auth.type) {
       case AuthType.NoAuth:
-        // Signing the data source with exsiting endpoint
+        // Signing the data source with existing endpoint
         return {
           endpoint,
         };
@@ -346,28 +380,37 @@ export class DataSourceSavedObjectsClientWrapper {
             'Update failed due to deprecated data source: "auth.credentials.username" missing. Please delete and create another data source.'
           );
         }
-
-        const { encryptionContext } = await this.cryptography
-          .decodeAndDecrypt(password)
-          .catch((err: any) => {
-            const errMsg = `Failed to update existing data source for dataSourceId [${id}]: unable to decrypt "auth.credentials.password"`;
-            this.logger.error(errMsg);
-            this.logger.error(err);
-            throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
-          });
-
-        if (encryptionContext.endpoint !== endpoint) {
-          throw SavedObjectsErrorHelpers.createBadRequestError(
-            'Update failed due to deprecated data source: "endpoint" contaminated. Please delete and create another data source.'
-          );
-        }
-        return encryptionContext;
+        return this.validateEncryptionContext(password, endpoint);
+      case AuthType.SigV4:
+        const { accessKey } = auth.credentials as SigV4Content;
+        return this.validateEncryptionContext(accessKey, endpoint);
       default:
-        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${type}'`);
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${auth.type}'`);
     }
   }
 
-  private async encryptCredentials<T = unknown>(auth: T, encryptionContext: EncryptionContext) {
+  private async validateEncryptionContext(input: string, reference: string) {
+    const { encryptionContext } = await this.cryptography
+      .decodeAndDecrypt(input)
+      .catch((err: any) => {
+        const errMsg = `Failed to update existing data source: unable to decrypt "auth.credentials.password"`;
+        this.logger.error(errMsg);
+        this.logger.error(err);
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
+      });
+
+    if (encryptionContext.endpoint !== reference) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Update failed due to deprecated data source: "endpoint" contaminated. Please delete and create another data source.'
+      );
+    }
+    return encryptionContext;
+  }
+
+  private async encryptBasicAuthCredential<T = unknown>(
+    auth: T,
+    encryptionContext: EncryptionContext
+  ) {
     const {
       credentials: { username, password },
     } = auth;
@@ -377,6 +420,21 @@ export class DataSourceSavedObjectsClientWrapper {
       credentials: {
         username,
         password: await this.cryptography.encryptAndEncode(password, encryptionContext),
+      },
+    };
+  }
+
+  private async encryptSigV4Credential<T = unknown>(auth: T, encryptionContext: EncryptionContext) {
+    const {
+      credentials: { accessKey, secretKey, region },
+    } = auth;
+
+    return {
+      ...auth,
+      credentials: {
+        region,
+        accessKey: await this.cryptography.encryptAndEncode(accessKey, encryptionContext),
+        secretKey: await this.cryptography.encryptAndEncode(secretKey, encryptionContext),
       },
     };
   }

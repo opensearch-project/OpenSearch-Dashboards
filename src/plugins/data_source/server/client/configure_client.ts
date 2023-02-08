@@ -4,11 +4,14 @@
  */
 
 import { Client } from '@opensearch-project/opensearch';
-import { Logger, SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server';
+import { Credentials } from 'aws-sdk';
+import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws';
+import { Logger, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
   AuthType,
   DataSourceAttributes,
+  SigV4Content,
   UsernamePasswordTypedContent,
 } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
@@ -25,10 +28,10 @@ export const configureClient = async (
   logger: Logger
 ): Promise<Client> => {
   try {
-    const { attributes: dataSource } = await getDataSource(dataSourceId!, savedObjects);
+    const dataSource = await getDataSource(dataSourceId!, savedObjects);
     const rootClient = getRootClient(dataSource, config, openSearchClientPoolSetup);
 
-    return await getQueryClient(rootClient, dataSource, cryptography);
+    return await getQueryClient(dataSource, openSearchClientPoolSetup, cryptography, rootClient);
   } catch (error: any) {
     logger.error(`Failed to get data source client for dataSourceId: [${dataSourceId}]`);
     logger.error(error);
@@ -39,7 +42,7 @@ export const configureClient = async (
 
 export const configureTestClient = async (
   { savedObjects, cryptography, dataSourceId }: DataSourceClientParams,
-  dataSource: DataSourceAttributes,
+  dataSourceAttr: DataSourceAttributes,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   logger: Logger
@@ -47,20 +50,25 @@ export const configureTestClient = async (
   try {
     const {
       auth: { type, credentials },
-    } = dataSource;
+    } = dataSourceAttr;
     let requireDecryption = false;
 
-    const rootClient = getRootClient(dataSource, config, openSearchClientPoolSetup);
+    const rootClient = getRootClient(dataSourceAttr, config, openSearchClientPoolSetup);
 
     if (type === AuthType.UsernamePasswordType && !credentials?.password && dataSourceId) {
-      const dataSourceSavedObject = await getDataSource(dataSourceId, savedObjects);
-      dataSource = dataSourceSavedObject.attributes;
+      dataSourceAttr = await getDataSource(dataSourceId, savedObjects);
       requireDecryption = true;
     }
 
-    return getQueryClient(rootClient, dataSource, cryptography, requireDecryption);
+    return getQueryClient(
+      dataSourceAttr,
+      openSearchClientPoolSetup,
+      cryptography,
+      rootClient,
+      requireDecryption
+    );
   } catch (error: any) {
-    logger.error(`Failed to get test client for dataSource: ${dataSource}`);
+    logger.error(`Failed to get test client`);
     logger.error(error);
     // Re-throw as DataSourceError
     throw createDataSourceError(error);
@@ -70,13 +78,18 @@ export const configureTestClient = async (
 export const getDataSource = async (
   dataSourceId: string,
   savedObjects: SavedObjectsClientContract
-): Promise<SavedObject<DataSourceAttributes>> => {
-  const dataSource = await savedObjects.get<DataSourceAttributes>(
+): Promise<DataSourceAttributes> => {
+  const dataSourceSavedObject = await savedObjects.get<DataSourceAttributes>(
     DATA_SOURCE_SAVED_OBJECT_TYPE,
     dataSourceId
   );
 
-  return dataSource;
+  const dataSourceAttr = {
+    ...dataSourceSavedObject.attributes,
+    lastUpdatedTime: dataSourceSavedObject.updated_at,
+  };
+
+  return dataSourceAttr;
 };
 
 export const getCredential = async (
@@ -85,14 +98,9 @@ export const getCredential = async (
 ): Promise<UsernamePasswordTypedContent> => {
   const { endpoint } = dataSource;
 
-  const { username, password } = dataSource.auth.credentials!;
+  const { username, password } = dataSource.auth.credentials as UsernamePasswordTypedContent;
 
-  const { decryptedText, encryptionContext } = await cryptography
-    .decodeAndDecrypt(password)
-    .catch((err: any) => {
-      // Re-throw as DataSourceError
-      throw createDataSourceError(err);
-    });
+  const { decryptedText, encryptionContext } = await cryptography.decodeAndDecrypt(password);
 
   if (encryptionContext!.endpoint !== endpoint) {
     throw new Error(
@@ -108,6 +116,42 @@ export const getCredential = async (
   return credential;
 };
 
+export const getAWSCredential = async (
+  dataSource: DataSourceAttributes,
+  cryptography: CryptographyServiceSetup
+): Promise<SigV4Content> => {
+  const { endpoint } = dataSource;
+  const { accessKey, secretKey, region } = dataSource.auth.credentials! as SigV4Content;
+
+  const { decryptedText: accessKeyText, encryptionContext } = await cryptography
+    .decodeAndDecrypt(accessKey)
+    .catch((err: any) => {
+      // Re-throw as DataSourceError
+      throw createDataSourceError(err);
+    });
+
+  const { decryptedText: secretKeyText } = await cryptography
+    .decodeAndDecrypt(secretKey)
+    .catch((err: any) => {
+      // Re-throw as DataSourceError
+      throw createDataSourceError(err);
+    });
+
+  if (encryptionContext!.endpoint !== endpoint) {
+    throw new Error(
+      'Data source "endpoint" contaminated. Please delete and create another data source.'
+    );
+  }
+
+  const credential = {
+    region,
+    accessKey: accessKeyText,
+    secretKey: secretKeyText,
+  };
+
+  return credential;
+};
+
 /**
  * Create a child client object with given auth info.
  *
@@ -117,25 +161,41 @@ export const getCredential = async (
  * @returns child client.
  */
 const getQueryClient = async (
-  rootClient: Client,
-  dataSource: DataSourceAttributes,
+  dataSourceAttr: DataSourceAttributes,
+  { addClientToPool }: OpenSearchClientPoolSetup,
   cryptography?: CryptographyServiceSetup,
+  rootClient?: Client,
   requireDecryption: boolean = true
 ): Promise<Client> => {
-  const authType = dataSource.auth.type;
+  const {
+    auth: { type },
+    endpoint,
+    lastUpdatedTime,
+  } = dataSourceAttr;
 
-  switch (authType) {
+  switch (type) {
     case AuthType.NoAuth:
-      return rootClient.child();
+      addClientToPool(endpoint, type, rootClient!);
+      return rootClient!.child();
 
     case AuthType.UsernamePasswordType:
+      addClientToPool(endpoint, type, rootClient!);
       const credential = requireDecryption
-        ? await getCredential(dataSource, cryptography!)
-        : (dataSource.auth.credentials as UsernamePasswordTypedContent);
-      return getBasicAuthClient(rootClient, credential);
+        ? await getCredential(dataSourceAttr, cryptography!)
+        : (dataSourceAttr.auth.credentials as UsernamePasswordTypedContent);
+      return getBasicAuthClient(rootClient!, credential);
+
+    case AuthType.SigV4:
+      const awsCredential = requireDecryption
+        ? await getAWSCredential(dataSourceAttr, cryptography!)
+        : (dataSourceAttr.auth.credentials as SigV4Content);
+
+      const awsClient = rootClient ? rootClient : getAWSClient(awsCredential, endpoint);
+      addClientToPool(endpoint + lastUpdatedTime, type, awsClient);
+      return awsClient;
 
     default:
-      throw Error(`${authType} is not a supported auth type for data source`);
+      throw Error(`${type} is not a supported auth type for data source`);
   }
 };
 
@@ -143,26 +203,30 @@ const getQueryClient = async (
  * Gets a root client object of the OpenSearch endpoint.
  * Will attempt to get from cache, if cache miss, create a new one and load into cache.
  *
- * @param dataSourceAttr data source saved objects attributes.
+ * @param dataSourceAttr data source saved objects attributes
  * @param config data source config
  * @returns OpenSearch client for the given data source endpoint.
  */
-const getRootClient = (
+export const getRootClient = (
   dataSourceAttr: DataSourceAttributes,
   config: DataSourcePluginConfigType,
-  { getClientFromPool, addClientToPool }: OpenSearchClientPoolSetup
-): Client => {
-  const endpoint = dataSourceAttr.endpoint;
-  const cachedClient = getClientFromPool(endpoint);
-  if (cachedClient) {
-    return cachedClient as Client;
+  { getClientFromPool }: OpenSearchClientPoolSetup
+): Client | undefined => {
+  const {
+    auth: { type },
+    endpoint,
+    lastUpdatedTime,
+  } = dataSourceAttr;
+
+  const clientOptions = parseClientOptions(config, endpoint);
+  let cachedClient;
+
+  if (type === AuthType.SigV4) {
+    cachedClient = getClientFromPool(endpoint + lastUpdatedTime, type);
+    return cachedClient ? (cachedClient as Client) : undefined;
   } else {
-    const clientOptions = parseClientOptions(config, endpoint);
-
-    const client = new Client(clientOptions);
-    addClientToPool(endpoint, client);
-
-    return client;
+    cachedClient = getClientFromPool(endpoint, type);
+    return cachedClient ? (cachedClient as Client) : new Client(clientOptions);
   }
 };
 
@@ -180,5 +244,23 @@ const getBasicAuthClient = (
     // so logic in child() can rebuild the auth header based on the auth input.
     // See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2182 for details
     headers: { authorization: null },
+  });
+};
+
+const getAWSClient = (credential: SigV4Content, endpoint: string): Client => {
+  const { accessKey, secretKey, region } = credential;
+
+  const credentialProvider = (): Promise<Credentials> => {
+    return new Promise((resolve) => {
+      resolve(new Credentials({ accessKeyId: accessKey, secretAccessKey: secretKey }));
+    });
+  };
+
+  return new Client({
+    ...AwsSigv4Signer({
+      region,
+      getCredentials: credentialProvider,
+    }),
+    node: endpoint,
   });
 };

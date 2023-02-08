@@ -7,11 +7,12 @@ import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
 import LRUCache from 'lru-cache';
 import { Logger } from 'src/core/server';
+import { AuthType } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 
 export interface OpenSearchClientPoolSetup {
-  getClientFromPool: (id: string) => Client | LegacyClient | undefined;
-  addClientToPool: (endpoint: string, client: Client | LegacyClient) => void;
+  getClientFromPool: (endpoint: string, authType: AuthType) => Client | LegacyClient | undefined;
+  addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void;
 }
 
 /**
@@ -24,7 +25,8 @@ export class OpenSearchClientPool {
   // LRU cache
   //   key: data source endpoint
   //   value: OpenSearch client object | Legacy client object
-  private cache?: LRUCache<string, Client | LegacyClient>;
+  private clientCache?: LRUCache<string, Client | LegacyClient>;
+  private awsClientCache?: LRUCache<string, Client | LegacyClient>;
   private isClosed = false;
 
   constructor(private logger: Logger) {}
@@ -33,7 +35,7 @@ export class OpenSearchClientPool {
     const logger = this.logger;
     const { size } = config.clientPool;
 
-    this.cache = new LRUCache({
+    this.clientCache = new LRUCache({
       max: size,
       maxAge: 15 * 60 * 1000, // by default, TCP connection times out in 15 minutes
 
@@ -50,12 +52,35 @@ export class OpenSearchClientPool {
     });
     this.logger.info(`Created data source client pool of size ${size}`);
 
-    const getClientFromPool = (endpoint: string) => {
-      return this.cache!.get(endpoint);
+    // aws client specific pool
+    this.awsClientCache = new LRUCache({
+      max: size,
+      maxAge: 15 * 60 * 1000, // by default, TCP connection times out in 15 minutes
+
+      async dispose(endpoint, client) {
+        try {
+          await client.close();
+        } catch (error: any) {
+          // log and do nothing since we are anyways evicting the client object from cache
+          logger.warn(
+            `Error closing OpenSearch client when removing from aws client pool: ${error.message}`
+          );
+        }
+      },
+    });
+    this.logger.info(`Created data source aws client pool of size ${size}`);
+
+    const getClientFromPool = (endpoint: string, authType: AuthType) => {
+      const selectedCache = authType === AuthType.SigV4 ? this.awsClientCache : this.clientCache;
+
+      return selectedCache!.get(endpoint);
     };
 
-    const addClientToPool = (endpoint: string, client: Client | LegacyClient) => {
-      this.cache!.set(endpoint, client);
+    const addClientToPool = (endpoint: string, authType: string, client: Client | LegacyClient) => {
+      const selectedCache = authType === AuthType.SigV4 ? this.awsClientCache : this.clientCache;
+      if (!selectedCache?.has(endpoint)) {
+        return selectedCache!.set(endpoint, client);
+      }
     };
 
     return {
@@ -71,7 +96,10 @@ export class OpenSearchClientPool {
     if (this.isClosed) {
       return;
     }
-    await Promise.all(this.cache!.values().map((client) => client.close()));
+    await Promise.all([
+      ...this.clientCache!.values().map((client) => client.close()),
+      ...this.awsClientCache!.values().map((client) => client.close()),
+    ]);
     this.isClosed = true;
   }
 }

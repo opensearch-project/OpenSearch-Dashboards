@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LegacyCallAPIOptions, Logger, OpenSearchClient } from '../../../../src/core/server';
+import { Client } from '@opensearch-project/opensearch';
+import { LegacyCallAPIOptions, Logger } from '../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../config';
 import { configureClient, OpenSearchClientPool } from './client';
 import { configureLegacyClient } from './legacy';
@@ -11,7 +12,7 @@ import { DataSourceClientParams } from './types';
 import { DataSourceAttributes } from '../common/data_sources';
 import { configureTestClient } from './client/configure_client';
 export interface DataSourceServiceSetup {
-  getDataSourceClient: (params: DataSourceClientParams) => Promise<OpenSearchClient>;
+  getDataSourceClient: (params: DataSourceClientParams) => Promise<Client>;
 
   getDataSourceLegacyClient: (
     params: DataSourceClientParams
@@ -26,7 +27,7 @@ export interface DataSourceServiceSetup {
   getTestingClient: (
     params: DataSourceClientParams,
     dataSource: DataSourceAttributes
-  ) => Promise<OpenSearchClient>;
+  ) => Promise<Client>;
 }
 export class DataSourceService {
   private readonly openSearchClientPool: OpenSearchClientPool;
@@ -43,16 +44,14 @@ export class DataSourceService {
     const opensearchClientPoolSetup = this.openSearchClientPool.setup(config);
     const legacyClientPoolSetup = this.legacyClientPool.setup(config);
 
-    const getDataSourceClient = async (
-      params: DataSourceClientParams
-    ): Promise<OpenSearchClient> => {
+    const getDataSourceClient = async (params: DataSourceClientParams): Promise<Client> => {
       return configureClient(params, opensearchClientPoolSetup, config, this.logger);
     };
 
-    const getTestingClient = (
+    const getTestingClient = async (
       params: DataSourceClientParams,
       dataSource: DataSourceAttributes
-    ): Promise<OpenSearchClient> => {
+    ): Promise<Client> => {
       return configureTestClient(
         params,
         dataSource,
