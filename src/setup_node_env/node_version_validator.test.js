@@ -28,10 +28,10 @@
  * under the License.
  */
 
-var exec = require('child_process').exec;
-var pkg = require('../../package.json');
+const exec = require('child_process').exec;
+const pkg = require('../../package.json');
 
-var REQUIRED_NODE_JS_VERSION = 'v' + pkg.engines.node;
+const REQUIRED_NODE_JS_VERSION = 'v' + pkg.engines.node;
 
 describe('NodeVersionValidator', function () {
   it('should run the script WITHOUT error when the version is the same', function (done) {
@@ -43,7 +43,7 @@ describe('NodeVersionValidator', function () {
   });
 
   it('should run the script WITH error if the patch version is lower', function (done) {
-    var lowerPatchversion = requiredNodeVersionWithDiff(0, 0, -1);
+    const lowerPatchversion = requiredNodeVersionWithDiff(0, 0, -1);
     testValidateNodeVersion(
       done,
       lowerPatchversion,
@@ -56,7 +56,7 @@ describe('NodeVersionValidator', function () {
   });
 
   it('should run the script WITH error if the major version is lower', function (done) {
-    var lowerMajorVersion = requiredNodeVersionWithDiff(-1, 0, 0);
+    const lowerMajorVersion = requiredNodeVersionWithDiff(-1, 0, 0);
     testValidateNodeVersion(
       done,
       lowerMajorVersion,
@@ -69,7 +69,7 @@ describe('NodeVersionValidator', function () {
   });
 
   it('should run the script WITH error if the minor version is lower', function (done) {
-    var lowerMinorVersion = requiredNodeVersionWithDiff(0, -1, 0);
+    const lowerMinorVersion = requiredNodeVersionWithDiff(0, -1, 0);
     testValidateNodeVersion(
       done,
       lowerMinorVersion,
@@ -79,24 +79,24 @@ describe('NodeVersionValidator', function () {
 });
 
 function requiredNodeVersionWithDiff(majorDiff, minorDiff, patchDiff) {
-  var matches = REQUIRED_NODE_JS_VERSION.match(/^v(\d+)\.(\d+)\.(\d+)/);
-  var major = Math.max(parseInt(matches[1], 10) + majorDiff, 0);
-  var minor = Math.max(parseInt(matches[2], 10) + minorDiff, 0);
-  var patch = Math.max(parseInt(matches[3], 10) + patchDiff, 0);
+  const matches = REQUIRED_NODE_JS_VERSION.match(/^v(\d+)\.(\d+)\.(\d+)/);
+  const major = Math.max(parseInt(matches[1], 10) + majorDiff, 0);
+  const minor = Math.max(parseInt(matches[2], 10) + minorDiff, 0);
+  const patch = Math.max(parseInt(matches[3], 10) + patchDiff, 0);
 
   return `v${major}.${minor}.${patch}`;
 }
 
 function testValidateNodeVersion(done, versionToTest, expectError = false) {
-  var processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${versionToTest}', writable: true });`;
-  var command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
+  const processVersionOverwrite = `Object.defineProperty(process, 'version', { value: '${versionToTest}', writable: true });`;
+  const command = `node -e "${processVersionOverwrite}require('./node_version_validator.js')"`;
 
   exec(command, { cwd: __dirname }, function (error, _stdout, stderr) {
     expect(stderr).toBeDefined();
     if (expectError) {
       expect(error.code).toBe(1);
 
-      var speficicErrorMessage =
+      const speficicErrorMessage =
         `OpenSearch Dashboards was built with ${REQUIRED_NODE_JS_VERSION} and does not support the current Node.js version ${versionToTest}. ` +
         `Please use Node.js ${REQUIRED_NODE_JS_VERSION} or a higher patch version.\n`;
 
