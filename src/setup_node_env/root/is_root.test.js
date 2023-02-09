@@ -28,7 +28,7 @@
  * under the License.
  */
 
-var isRoot = require('./is_root');
+const isRoot = require('./is_root');
 
 describe('isRoot', function () {
   test('0 is root', function () {
