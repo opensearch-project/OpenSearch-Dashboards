@@ -28,7 +28,7 @@
  * under the License.
  */
 
-var forceRoot = require('./force');
+const forceRoot = require('./force');
 
 describe('forceRoot', function () {
   it('with flag', function () {
@@ -40,7 +40,7 @@ describe('forceRoot', function () {
   });
 
   test('remove argument', function () {
-    var args = ['--allow-root', 'foo'];
+    const args = ['--allow-root', 'foo'];
     forceRoot(args);
     expect(args.includes('--allow-root')).toBeFalsy();
   });
