@@ -48,7 +48,7 @@ export default async function ({ readConfigFile }) {
       ...httpConfig.get('services'),
       supertest: createOpenSearchDashboardsSupertestProvider({
         certificateAuthorities,
-        opensearchDashboardsUrl: opensearchDashboardsUrl.toString(),
+        opensearchDashboardsUrl: opensearchDashboardsUrl.toString().slice(0, -1),
       }),
     },
     servers: {

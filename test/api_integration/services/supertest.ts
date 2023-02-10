@@ -36,12 +36,13 @@ export function OpenSearchDashboardsSupertestProvider({ getService }: FtrProvide
   const config = getService('config');
   const opensearchDashboardsServerUrl = config
     .get('servers.opensearchDashboards')
-    .fullURL.toString();
+    .fullURL.toString()
+    .slice(0, -1);
   return supertestAsPromised(opensearchDashboardsServerUrl);
 }
 
 export function OpenSearchSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const elasticSearchServerUrl = config.get('servers.opensearch').fullURL.toString();
+  const elasticSearchServerUrl = config.get('servers.opensearch').fullURL.toString().slice(0, -1);
   return supertestAsPromised(elasticSearchServerUrl);
 }

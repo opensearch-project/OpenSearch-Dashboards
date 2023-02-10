@@ -49,6 +49,7 @@ export const osdTestConfig = new (class OsdTestConfig {
     // allow setting one complete TEST_OPENSEARCH_DASHBOARDS_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_DASHBOARDS_URL) {
       const testOpenSearchDashboardsUrl = new URL('', process.env.TEST_OPENSEARCH_DASHBOARDS_URL);
+      testOpenSearchDashboardsUrl.pathname = '';
       return {
         protocol: testOpenSearchDashboardsUrl.protocol?.slice(0, -1),
         hostname: testOpenSearchDashboardsUrl.hostname ?? undefined,

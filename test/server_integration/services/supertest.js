@@ -37,7 +37,8 @@ export function createOpenSearchDashboardsSupertestProvider({
   return function ({ getService }) {
     const config = getService('config');
     opensearchDashboardsUrl =
-      opensearchDashboardsUrl ?? config.get('servers.opensearchDashboards.fullURL').toString();
+      opensearchDashboardsUrl ??
+      config.get('servers.opensearchDashboards.fullURL').toString().slice(0, -1);
 
     return certificateAuthorities
       ? supertestAsPromised.agent(opensearchDashboardsUrl, { ca: certificateAuthorities })
@@ -51,11 +52,11 @@ export function OpenSearchDashboardsSupertestWithoutAuthProvider({ getService })
   opensearchDashboardsServerURL.username = '';
   opensearchDashboardsServerURL.password = '';
 
-  return supertestAsPromised(opensearchDashboardsServerURL.toString());
+  return supertestAsPromised(opensearchDashboardsServerURL.toString().slice(0, -1));
 }
 
 export function OpenSearchSupertestProvider({ getService }) {
   const config = getService('config');
   const opensearchServerURL = config.get('servers.opensearch.fullURL');
-  return supertestAsPromised(opensearchServerURL.toString());
+  return supertestAsPromised(opensearchServerURL.toString().slice(0, -1));
 }

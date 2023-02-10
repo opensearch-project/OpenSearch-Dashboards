@@ -36,6 +36,7 @@ export function OpenSearchDashboardsSupertestProvider({ getService }: FtrProvide
   const config = getService('config');
   const opensearchDashboardsServerUrl = config
     .get('servers.opensearchDashboards.fullURL')
-    .toString();
+    .toString()
+    .slice(0, -1);
   return supertestAsPromised(opensearchDashboardsServerUrl);
 }

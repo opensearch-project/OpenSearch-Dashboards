@@ -119,5 +119,5 @@ export function TestUserSupertestProvider({ getService }: FtrProviderContext) {
   opensearchDashboardsServerConfig.username = TEST_USER_NAME;
   opensearchDashboardsServerConfig.password = TEST_USER_PASSWORD;
 
-  return supertestAsPromised(opensearchDashboardsServerConfig.toString());
+  return supertestAsPromised(opensearchDashboardsServerConfig.toString().slice(0, -1));
 }

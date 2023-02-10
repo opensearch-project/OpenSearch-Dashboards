@@ -41,7 +41,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
   }
 
   getUrl() {
-    return this.getUrlParts().fullURL.toString();
+    return this.getUrlParts().fullURL.toString().slice(0, -1);
   }
 
   getBuildFrom() {
@@ -56,6 +56,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
     // Allow setting one complete TEST_OPENSEARCH_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_URL) {
       const testOpenSearchUrl = new URL('', process.env.TEST_OPENSEARCH_URL);
+      testOpenSearchUrl.pathname = '';
       return {
         // have to remove the ":" off protocol
         protocol: testOpenSearchUrl.protocol.slice(0, -1),

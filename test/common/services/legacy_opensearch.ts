@@ -40,7 +40,10 @@ export function LegacyOpenSearchProvider({
 
   return new legacyOpenSearch.Client({
     apiVersion: DEFAULT_API_VERSION,
-    host: config.get('servers.opensearch.fullURL').toString(),
+    host: config
+      .get('servers.opensearch.fullURL')
+      .toString()
+      .slice(0 - 1),
     requestTimeout: config.get('timeouts.opensearchRequestTimeout'),
   });
 }

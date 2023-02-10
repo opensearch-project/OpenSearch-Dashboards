@@ -54,7 +54,7 @@ export default function () {
         '--logging.json=false',
         `--server.port=${osdTestConfig.getPort()}`,
         '--status.allowAnonymous=true',
-        `--opensearch.hosts=${servers.opensearch.fullURL.toString()}`,
+        `--opensearch.hosts=${servers.opensearch.fullURL.toString().slice(0, -1)}`,
         `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
         `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
         `--home.disableWelcomeScreen=false`,

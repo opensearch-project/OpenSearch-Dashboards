@@ -39,7 +39,7 @@ export function OpenSearchProvider({ getService }: FtrProviderContext) {
 
   if (process.env.TEST_CLOUD) {
     return new Client({
-      nodes: [config.get('servers.opensearch.fullURL').toString()],
+      nodes: [config.get('servers.opensearch.fullURL').toString().slice(0, -1)],
       requestTimeout: config.get('timeouts.opensearchRequestTimeout'),
     });
   } else {
@@ -47,7 +47,7 @@ export function OpenSearchProvider({ getService }: FtrProviderContext) {
       ssl: {
         ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
       },
-      nodes: [config.get('servers.opensearch.fullURL').toString()],
+      nodes: [config.get('servers.opensearch.fullURL').toString().slice(0, -1)],
       requestTimeout: config.get('timeouts.opensearchRequestTimeout'),
     });
   }

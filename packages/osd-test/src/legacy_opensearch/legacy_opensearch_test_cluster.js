@@ -137,7 +137,7 @@ export function createLegacyOpenSearchTestCluster(options = {}) {
       const url = new URL(opensearchTestConfig.getUrlParts().fullURL);
       url.port = port;
 
-      return url.toString();
+      return url.toString().slice(0, -1);
     }
   })();
 }
