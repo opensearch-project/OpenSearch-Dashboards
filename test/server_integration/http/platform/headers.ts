@@ -46,15 +46,15 @@ export default function ({ getService }: FtrProviderContext) {
       const agent = new Http.Agent({
         keepAlive: true,
       });
-      const { protocol, hostname, port } = config.get('servers.opensearchDashboards');
+      const { protocol, hostname, port } = config.get('servers.opensearchDashboards.fullURL');
 
       function performRequest() {
         return new Promise((resolve, reject) => {
           const req = Http.request(
             {
-              protocol: `${protocol}:`,
+              protocol,
               hostname,
-              port,
+              port: parseInt(port, 10),
               path: '/',
               method: 'GET',
               agent,
