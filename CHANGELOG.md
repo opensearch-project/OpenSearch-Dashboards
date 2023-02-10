@@ -163,6 +163,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2022-37599] Bump loader-utils to 2.0.4 ([#3031](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3031))
 - [CVE-2022-37603] Bump loader-utils to 2.0.4 ([#3031](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3031))
 - [WS-2021-0638][security] bump mocha to 10.1.0 ([#2711](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2711))
+- [CVE-2022-25881] Resolve http-cache-semantics to 4.1.1 ([#3409](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3409))
 
 ### 📈 Features/Enhancements
 
