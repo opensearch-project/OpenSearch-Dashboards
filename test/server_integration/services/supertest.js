@@ -48,7 +48,7 @@ export function createOpenSearchDashboardsSupertestProvider({
 
 export function OpenSearchDashboardsSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
-  const opensearchDashboardsServerURL = config.get('servers.opensearchDashboards.fullURL');
+  const opensearchDashboardsServerURL = new URL(config.get('servers.opensearchDashboards.fullURL'));
   opensearchDashboardsServerURL.username = '';
   opensearchDashboardsServerURL.password = '';
 
