@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         return new Promise((resolve, reject) => {
           const req = Http.request(
             {
-              protocol,
+              protocol: `${protocol}:`,
               hostname,
               port,
               path: '/',
