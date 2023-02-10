@@ -34,14 +34,10 @@ export const UpdateAwsCredentialModal = ({
 }: UpdateAwsCredentialModalProps) => {
   /* State Variables */
   const [newAccessKey, setNewAccessKey] = useState<string>('');
-  const [confirmNewAccessKey, setConfirmNewAccessKey] = useState<string>('');
   const [isNewAccessKeyValid, setIsNewAccessKeyValid] = useState<boolean>(true);
-  const [isConfirmNewAccessKeyValid, setIsConfirmNewAccessKeyValid] = useState<string[]>([]);
 
   const [newSecretKey, setNewSecretKey] = useState<string>('');
-  const [confirmNewSecretKey, setConfirmNewSecretKey] = useState<string>('');
   const [isNewSecretKeyValid, setIsNewSecretKeyValid] = useState<boolean>(true);
-  const [isConfirmNewSecretKeyValid, setIsConfirmNewSecretKeyValid] = useState<string[]>([]);
 
   const onClickUpdateAwsCredential = () => {
     if (isFormValid()) {
@@ -50,14 +46,7 @@ export const UpdateAwsCredentialModal = ({
   };
 
   const isFormValid = () => {
-    return !!(
-      newAccessKey &&
-      confirmNewAccessKey &&
-      newSecretKey &&
-      confirmNewSecretKey &&
-      confirmNewAccessKey === newAccessKey &&
-      confirmNewSecretKey === newSecretKey
-    );
+    return !!(newAccessKey && newSecretKey);
   };
 
   const validateNewAccessKey = () => {
@@ -66,34 +55,6 @@ export const UpdateAwsCredentialModal = ({
 
   const validateNewSecretKey = () => {
     setIsNewSecretKeyValid(!!newSecretKey);
-  };
-
-  const validateConfirmNewAccessKey = () => {
-    const invalidReason: string[] = [];
-    if (!confirmNewAccessKey) {
-      invalidReason.push('');
-    } else if (confirmNewAccessKey !== newAccessKey) {
-      invalidReason.push(
-        i18n.translate('dataSourcesManagement.editDataSource.accessKeyNoMatch', {
-          defaultMessage: 'Access keys do not match',
-        })
-      );
-    }
-    setIsConfirmNewAccessKeyValid(invalidReason);
-  };
-
-  const validateConfirmNewSecretKey = () => {
-    const invalidReason: string[] = [];
-    if (!confirmNewSecretKey) {
-      invalidReason.push('');
-    } else if (confirmNewSecretKey !== newSecretKey) {
-      invalidReason.push(
-        i18n.translate('dataSourcesManagement.editDataSource.secretKeyNoMatch', {
-          defaultMessage: 'Secret keys do not match',
-        })
-      );
-    }
-    setIsConfirmNewSecretKeyValid(invalidReason);
   };
 
   const renderUpdateAwsCredentialModal = () => {
@@ -150,7 +111,7 @@ export const UpdateAwsCredentialModal = ({
                 placeholder={i18n.translate(
                   'dataSourcesManagement.editDataSource.newAccessKeyPlaceHolder',
                   {
-                    defaultMessage: 'Updated access Key',
+                    defaultMessage: 'Updated access key',
                   }
                 )}
                 type={'dual'}
@@ -159,31 +120,6 @@ export const UpdateAwsCredentialModal = ({
                 spellCheck={false}
                 onChange={(e) => setNewAccessKey(e.target.value)}
                 onBlur={validateNewAccessKey}
-              />
-            </EuiFormRow>
-            {/* Access Key */}
-            <EuiFormRow
-              label={i18n.translate('dataSourcesManagement.editDataSource.confirmNewAccessKey', {
-                defaultMessage: 'Updated access key',
-              })}
-              isInvalid={!!isConfirmNewAccessKeyValid.length}
-              error={isConfirmNewAccessKeyValid}
-            >
-              <EuiFieldPassword
-                name="confirmUpdatedAccessKey"
-                data-test-subj="updateStoredAwsCredentialConfirmUpdatedAccessKeyField"
-                placeholder={i18n.translate(
-                  'dataSourcesManagement.editDataSource.confirmNewAccessKeyPlaceHolder',
-                  {
-                    defaultMessage: 'Confirm Updated Access Key',
-                  }
-                )}
-                type={'dual'}
-                value={confirmNewAccessKey}
-                isInvalid={!!isConfirmNewAccessKeyValid.length}
-                spellCheck={false}
-                onChange={(e) => setConfirmNewAccessKey(e.target.value)}
-                onBlur={validateConfirmNewAccessKey}
               />
             </EuiFormRow>
 
@@ -200,7 +136,7 @@ export const UpdateAwsCredentialModal = ({
                 placeholder={i18n.translate(
                   'dataSourcesManagement.editDataSource.newSecretKeyPlaceHolder',
                   {
-                    defaultMessage: 'Updated secret leu',
+                    defaultMessage: 'Updated secret key',
                   }
                 )}
                 type={'dual'}
@@ -209,31 +145,6 @@ export const UpdateAwsCredentialModal = ({
                 spellCheck={false}
                 onChange={(e) => setNewSecretKey(e.target.value)}
                 onBlur={validateNewSecretKey}
-              />
-            </EuiFormRow>
-            {/* Secret Key */}
-            <EuiFormRow
-              label={i18n.translate('dataSourcesManagement.editDataSource.confirmNewSecretKey', {
-                defaultMessage: 'Confirm updated secret key',
-              })}
-              isInvalid={!!isConfirmNewSecretKeyValid.length}
-              error={isConfirmNewSecretKeyValid}
-            >
-              <EuiFieldPassword
-                name="confirmUpdatedSecretKey"
-                data-test-subj="updateStoredAwsCredentialConfirmUpdatedSecretKeyField"
-                placeholder={i18n.translate(
-                  'dataSourcesManagement.editDataSource.confirmNewSecretKeyPlaceHolder',
-                  {
-                    defaultMessage: 'Confirm updated secret key ',
-                  }
-                )}
-                type={'dual'}
-                value={confirmNewSecretKey}
-                isInvalid={!!isConfirmNewSecretKeyValid.length}
-                spellCheck={false}
-                onChange={(e) => setConfirmNewSecretKey(e.target.value)}
-                onBlur={validateConfirmNewSecretKey}
               />
             </EuiFormRow>
           </EuiForm>

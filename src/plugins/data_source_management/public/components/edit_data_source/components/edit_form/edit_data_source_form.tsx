@@ -108,6 +108,12 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   setFormValuesForEditMode() {
     if (this.props.existingDataSource) {
       const { title, description, endpoint, auth } = this.props.existingDataSource;
+
+      const authTypeCheckResults = {
+        isUserNamePassword: auth.type === AuthType.UsernamePasswordType,
+        isSigV4: auth.type === AuthType.SigV4,
+      };
+
       this.setState({
         title,
         description: description || '',
@@ -115,11 +121,11 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         auth: {
           type: auth.type,
           credentials: {
-            username: auth.type === AuthType.UsernamePasswordType ? auth.credentials?.username : '',
-            password: auth.type === AuthType.UsernamePasswordType ? this.maskedPassword : '',
-            region: auth.type === AuthType.SigV4 ? auth.credentials?.region : '',
-            accessKey: auth.type === AuthType.SigV4 ? this.maskedPassword : '',
-            secretKey: auth.type === AuthType.SigV4 ? this.maskedPassword : '',
+            username: authTypeCheckResults.isUserNamePassword ? auth.credentials?.username : '',
+            password: authTypeCheckResults.isUserNamePassword ? this.maskedPassword : '',
+            region: authTypeCheckResults.isSigV4 ? auth.credentials?.region : '',
+            accessKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
+            secretKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
           },
         },
       });
@@ -157,41 +163,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   onChangeAuthType = (value: string) => {
-    const valueToSave = value as AuthType;
-
-    const formErrorsByField = {
-      ...this.state.formErrorsByField,
-      createCredential: { ...this.state.formErrorsByField.createCredential },
-      awsCredential: { ...this.state.formErrorsByField.awsCredential },
-    };
-    if (valueToSave === AuthType.NoAuth) {
-      formErrorsByField.createCredential = {
-        username: [],
-        password: [],
-      };
-      formErrorsByField.awsCredential = {
-        region: [],
-        accessKey: [],
-        secretKey: [],
-      };
-    }
-
-    if (valueToSave === AuthType.UsernamePasswordType) {
-      formErrorsByField.awsCredential = {
-        region: [],
-        accessKey: [],
-        secretKey: [],
-      };
-    }
-
-    if (valueToSave === AuthType.SigV4) {
-      formErrorsByField.createCredential = {
-        username: [],
-        password: [],
-      };
-    }
-
-    this.setState({ auth: { ...this.state.auth, type: valueToSave }, formErrorsByField }, () => {
+    this.setState({ auth: { ...this.state.auth, type: value as AuthType } }, () => {
       this.onChangeFormValues();
     });
   };

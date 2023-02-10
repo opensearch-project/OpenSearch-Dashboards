@@ -121,40 +121,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   onChangeAuthType = (value: string) => {
-    const valueToSave = value as AuthType;
-    const formErrorsByField = {
-      ...this.state.formErrorsByField,
-      createCredential: { ...this.state.formErrorsByField.createCredential },
-      awsCredential: { ...this.state.formErrorsByField.awsCredential },
-    };
-    if (valueToSave === AuthType.NoAuth) {
-      formErrorsByField.createCredential = {
-        username: [],
-        password: [],
-      };
-      formErrorsByField.awsCredential = {
-        region: [],
-        accessKey: [],
-        secretKey: [],
-      };
-    }
-
-    if (valueToSave === AuthType.UsernamePasswordType) {
-      formErrorsByField.awsCredential = {
-        region: [],
-        accessKey: [],
-        secretKey: [],
-      };
-    }
-
-    if (valueToSave === AuthType.SigV4) {
-      formErrorsByField.createCredential = {
-        username: [],
-        password: [],
-      };
-    }
-
-    this.setState({ auth: { ...this.state.auth, type: valueToSave }, formErrorsByField });
+    this.setState({ auth: { ...this.state.auth, type: value as AuthType } });
   };
 
   onChangeUsername = (e: { target: { value: any } }) => {
@@ -614,7 +581,8 @@ export class CreateDataSourceForm extends React.Component<
                 <EuiButton
                   type="submit"
                   fill={false}
-                  disabled={!this.isFormValid()}
+                  // TODO: remove the type check when working on https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3418
+                  disabled={!this.isFormValid() || this.state.auth.type === AuthType.SigV4}
                   onClick={this.onClickTestConnection}
                   data-test-subj="createDataSourceTestConnectionButton"
                 >
