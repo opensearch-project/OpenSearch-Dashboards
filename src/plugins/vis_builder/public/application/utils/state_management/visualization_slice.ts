@@ -98,6 +98,23 @@ export const slice = createSlice({
     updateAggConfigParams: (state, action: PayloadAction<CreateAggConfigParams[]>) => {
       state.activeVisualization!.aggConfigParams = action.payload;
     },
+    setAggParamValue: (
+      state,
+      action: PayloadAction<{
+        aggId: string;
+        paramName: string;
+        value: any;
+      }>
+    ) => {
+      const aggIndex = state.activeVisualization!.aggConfigParams.findIndex(
+        (agg) => agg.id === action.payload.aggId
+      );
+
+      state.activeVisualization!.aggConfigParams[aggIndex].params = {
+        ...state.activeVisualization!.aggConfigParams[aggIndex].params,
+        [action.payload.paramName]: action.payload.value,
+      };
+    },
     setState: (_state, action: PayloadAction<VisualizationState>) => {
       return action.payload;
     },
@@ -119,6 +136,7 @@ export const {
   editDraftAgg,
   saveDraftAgg,
   updateAggConfigParams,
+  setAggParamValue,
   reorderAgg,
   setState,
 } = slice.actions;

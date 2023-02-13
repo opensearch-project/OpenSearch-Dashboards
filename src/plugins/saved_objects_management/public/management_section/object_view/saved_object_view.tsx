@@ -169,7 +169,7 @@ export class SavedObjectEdition extends Component<
     );
     if (confirmed) {
       await savedObjectsClient.delete(type, id);
-      notifications.toasts.addSuccess(`Deleted '${object!.attributes.title}' ${type} object`);
+      notifications.toasts.addSuccess(`Deleted ${this.formatTitle(object)} ${type} object`);
       this.redirectToListing();
     }
   }
@@ -179,8 +179,12 @@ export class SavedObjectEdition extends Component<
     const { object, type } = this.state;
 
     await savedObjectsClient.update(object!.type, object!.id, attributes, { references });
-    notifications.toasts.addSuccess(`Updated '${attributes.title}' ${type} object`);
+    notifications.toasts.addSuccess(`Updated ${this.formatTitle(object)} ${type} object`);
     this.redirectToListing();
+  };
+
+  formatTitle = (object: SimpleSavedObject<any> | undefined) => {
+    return object?.attributes?.title ? `'${object.attributes.title}'` : '';
   };
 
   redirectToListing() {

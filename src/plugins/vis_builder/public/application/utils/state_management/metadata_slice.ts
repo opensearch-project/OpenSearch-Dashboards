@@ -15,26 +15,34 @@ type EditorState = 'loading' | 'clean' | 'dirty';
 
 export interface MetadataState {
   editor: {
-    validity: {
-      // Validity for each section in the editor
+    errors: {
+      // Errors for each section in the editor
       [key: string]: boolean;
     };
     state: EditorState;
   };
+  originatingApp?: string;
 }
 
 const initialState: MetadataState = {
   editor: {
-    validity: {},
+    errors: {},
     state: 'loading',
   },
+  originatingApp: undefined,
 };
 
 export const getPreloadedState = async ({
   types,
   data,
+  embeddable,
+  scopedHistory,
 }: VisBuilderServices): Promise<MetadataState> => {
-  const preloadedState = { ...initialState };
+  const { originatingApp } =
+    embeddable
+      .getStateTransfer(scopedHistory)
+      .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
+  const preloadedState = { ...initialState, originatingApp };
 
   return preloadedState;
 };
@@ -43,12 +51,15 @@ export const slice = createSlice({
   name: 'metadata',
   initialState,
   reducers: {
-    setValidity: (state, action: PayloadAction<{ key: string; valid: boolean }>) => {
-      const { key, valid } = action.payload;
-      state.editor.validity[key] = valid;
+    setError: (state, action: PayloadAction<{ key: string; error: boolean }>) => {
+      const { key, error } = action.payload;
+      state.editor.errors[key] = error;
     },
     setEditorState: (state, action: PayloadAction<{ state: EditorState }>) => {
       state.editor.state = action.payload.state;
+    },
+    setOriginatingApp: (state, action: PayloadAction<{ state?: string }>) => {
+      state.originatingApp = action.payload.state;
     },
     setState: (_state, action: PayloadAction<MetadataState>) => {
       return action.payload;
@@ -57,4 +68,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setValidity, setEditorState, setState } = slice.actions;
+export const { setError, setEditorState, setOriginatingApp, setState } = slice.actions;

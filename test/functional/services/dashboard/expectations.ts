@@ -241,17 +241,6 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       });
     }
 
-    async dataTableRowCount(expectedCount: number) {
-      log.debug(`DashboardExpect.dataTableRowCount(${expectedCount})`);
-      await retry.try(async () => {
-        const dataTableRows = await find.allByCssSelector(
-          '[data-test-subj="paginated-table-body"] [data-cell-content]',
-          findTimeout
-        );
-        expect(dataTableRows.length).to.be(expectedCount);
-      });
-    }
-
     async seriesElementCount(expectedCount: number) {
       log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
       await retry.try(async () => {

@@ -38,6 +38,7 @@ import { DashboardStart } from '../../dashboard/public';
 import { DiscoverStart } from '../../discover/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
+import { VisAugmenterStart } from '../../vis_augmenter/public';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
@@ -75,6 +76,7 @@ export interface StartDependencies {
   data: DataPublicPluginStart;
   dashboard?: DashboardStart;
   visualizations?: VisualizationsStart;
+  visAugmenter?: VisAugmenterStart;
   discover?: DiscoverStart;
   visBuilder?: VisBuilderStart;
 }

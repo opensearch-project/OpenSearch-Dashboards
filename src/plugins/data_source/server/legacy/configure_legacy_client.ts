@@ -33,10 +33,10 @@ export const configureLegacyClient = async (
   logger: Logger
 ) => {
   try {
-    const dataSource = await getDataSource(dataSourceId, savedObjects);
+    const dataSource = await getDataSource(dataSourceId!, savedObjects);
     const rootClient = getRootClient(dataSource.attributes, config, openSearchClientPoolSetup);
 
-    return await getQueryClient(rootClient, dataSource, cryptography, callApiParams);
+    return await getQueryClient(rootClient, dataSource.attributes, cryptography, callApiParams);
   } catch (error: any) {
     logger.error(`Failed to get data source client for dataSourceId: [${dataSourceId}]`);
     logger.error(error);
@@ -55,11 +55,11 @@ export const configureLegacyClient = async (
  */
 const getQueryClient = async (
   rootClient: Client,
-  dataSource: SavedObject<DataSourceAttributes>,
+  dataSource: DataSourceAttributes,
   cryptography: CryptographyServiceSetup,
   { endpoint, clientParams, options }: LegacyClientCallAPIParams
 ) => {
-  const authType = dataSource.attributes.auth.type;
+  const authType = dataSource.auth.type;
 
   switch (authType) {
     case AuthType.NoAuth:
