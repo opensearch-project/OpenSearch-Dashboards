@@ -33,8 +33,9 @@ import { i18n } from '@osd/i18n';
 import {
   ExpressionFunctionDefinition,
   OpenSearchDashboardsDatatable,
-} from '../../expressions/public';
-import { VegaVisualizationDependencies } from './plugin';
+  OpenSearchDashboardsDatatableColumn,
+} from '../../../expressions/public';
+import { VegaVisualizationDependencies } from '../plugin';
 
 type Input = OpenSearchDashboardsDatatable;
 type Output = Promise<string>;
@@ -46,11 +47,31 @@ interface Arguments {
 }
 
 export type VegaSpecExpressionFunctionDefinition = ExpressionFunctionDefinition<
-  'vega_spec',
+  'line_vega_spec',
   Input,
   Arguments,
   Output
 >;
+
+// Get the first xaxis field as only 1 setup of X Axis will be supported and
+// there won't be support for split series and split chart
+const getXAxisId = (dimensions: any, columns: OpenSearchDashboardsDatatableColumn[]): string => {
+  return columns.filter((column) => column.name === dimensions.x.label)[0].id;
+};
+
+const cleanString = (rawString: string): string => {
+  return rawString.replaceAll('"', '');
+};
+
+const formatDataTable = (
+  datatable: OpenSearchDashboardsDatatable
+): OpenSearchDashboardsDatatable => {
+  datatable.columns.forEach((column) => {
+    // clean quotation marks from names in columns
+    column.name = cleanString(column.name);
+  });
+  return datatable;
+};
 
 const createSpecFromDatatable = (
   datatable: OpenSearchDashboardsDatatable,
@@ -61,26 +82,15 @@ const createSpecFromDatatable = (
   // of the fields and sub-fields don't have other optional params that we want for customizing.
   // For now, we make this more loosely-typed by just specifying it as a generic object.
   const spec = {} as any;
-  const xAxis = datatable.columns[0];
 
   const parseParams = JSON.parse(visParams);
   const dimensions = JSON.parse(dimensionsString);
   const legendPosition = parseParams.legendPosition;
 
-  // Get time range for the data in case there is only data for a small range so it will show the full time range
-  const startTime = {};
-  const xAxisId = xAxis.id.toString();
-  // @ts-ignore
-  startTime[xAxisId] = new Date(dimensions.x.params.bounds.min).valueOf();
-  const endTime = {};
-  // @ts-ignore
-  endTime[xAxisId] = new Date(dimensions.x.params.bounds.max).valueOf();
-  const updatedTable = datatable.rows.concat([startTime, endTime]);
-
   // TODO: update this to v5 when available
   spec.$schema = 'https://vega.github.io/schema/vega-lite/v4.json';
   spec.data = {
-    values: updatedTable,
+    values: datatable.rows,
   };
   spec.config = {
     view: {
@@ -104,29 +114,33 @@ const createSpecFromDatatable = (
 
   // Get the valueAxes data and generate a map to easily fetch the different valueAxes data
   const valueAxis = {};
-  parseParams.valueAxes.forEach((yAxis: { id: { toString: () => string | number } }) => {
+  parseParams?.valueAxes.forEach((yAxis: { id: { toString: () => string | number } }) => {
     // @ts-ignore
     valueAxis[yAxis.id.toString()] = yAxis;
   });
 
   spec.layer = [] as any[];
 
-  if (datatable.rows.length > 0) {
+  if (datatable.rows.length > 0 && dimensions != null) {
+    const xAxisId = getXAxisId(dimensions, datatable.columns);
+    const xAxisTitle = cleanString(dimensions.x.label);
+    const startTime = new Date(dimensions.x.params.bounds.min).valueOf();
+    const endTime = new Date(dimensions.x.params.bounds.max).valueOf();
     let skip = 0;
     datatable.columns.forEach((column, index) => {
-      const currentSeriesParams = parseParams.seriesParams[index - skip];
       // Check if its not xAxis column data
       if (column.meta?.aggConfigParams?.interval != null) {
         skip++;
       } else {
+        const currentSeriesParams = parseParams.seriesParams[index - skip];
         const currentValueAxis =
           // @ts-ignore
           valueAxis[currentSeriesParams.valueAxis.toString()];
         let tooltip: Array<{ field: string; type: string; title: string }> = [];
         if (parseParams.addTooltip) {
           tooltip = [
-            { field: xAxis.id, type: 'temporal', title: xAxis.name.replaceAll('"', '') },
-            { field: column.id, type: 'quantitative', title: column.name.replaceAll('"', '') },
+            { field: xAxisId, type: 'temporal', title: xAxisTitle },
+            { field: column.id, type: 'quantitative', title: column.name },
           ];
         }
         spec.layer.push({
@@ -139,17 +153,18 @@ const createSpecFromDatatable = (
           encoding: {
             x: {
               axis: {
-                title: xAxis.name.replaceAll('"', ''),
+                title: xAxisTitle,
                 grid: parseParams.grid.categoryLines,
               },
-              field: xAxis.id,
+              field: xAxisId,
               type: 'temporal',
+              scale: {
+                domain: [startTime, endTime],
+              },
             },
             y: {
               axis: {
-                title:
-                  currentValueAxis.title.text.replaceAll('"', '') ||
-                  column.name.replaceAll('"', ''),
+                title: cleanString(currentValueAxis.title.text) || column.name,
                 grid: parseParams.grid.valueAxis !== '',
                 orient: currentValueAxis.position,
                 labels: currentValueAxis.labels.show,
@@ -160,7 +175,7 @@ const createSpecFromDatatable = (
             },
             tooltip,
             color: {
-              datum: column.name.replaceAll('"', ''),
+              datum: column.name,
             },
           },
         });
@@ -213,7 +228,7 @@ const createSpecFromDatatable = (
 export const createVegaSpecFn = (
   dependencies: VegaVisualizationDependencies
 ): VegaSpecExpressionFunctionDefinition => ({
-  name: 'vega_spec',
+  name: 'line_vega_spec',
   type: 'string',
   inputTypes: ['opensearch_dashboards_datatable'],
   help: i18n.translate('visTypeVega.function.help', {
@@ -240,7 +255,7 @@ export const createVegaSpecFn = (
     const table = cloneDeep(input);
 
     // creating initial vega spec from table
-    const spec = createSpecFromDatatable(table, args.visParams, args.dimensions);
+    const spec = createSpecFromDatatable(formatDataTable(table), args.visParams, args.dimensions);
     return JSON.stringify(spec);
   },
 });

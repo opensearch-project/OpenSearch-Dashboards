@@ -65,15 +65,18 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
   } else {
     const dimensions = await buildVislibDimensions(vis, params);
     // adding the new expr fn here that takes the datatable and converts to a vega spec
-    const vegaSpecFn = buildExpressionFunction<VegaSpecExpressionFunctionDefinition>('vega_spec', {
-      visLayers: JSON.stringify([]),
-      visParams: JSON.stringify(vis.params),
-      dimensions: JSON.stringify(dimensions),
-    });
+    const vegaSpecFn = buildExpressionFunction<VegaSpecExpressionFunctionDefinition>(
+      'line_vega_spec',
+      {
+        visLayers: JSON.stringify([]),
+        visParams: JSON.stringify(vis.params),
+        dimensions: JSON.stringify(dimensions),
+      }
+    );
     const vegaSpecFnExpressionBuilder = buildExpression([vegaSpecFn]);
 
     // build vega expr fn. use nested expression fn syntax to first construct the
-    // spec via 'vega_spec' fn, then set as the arg for the final 'vega' fn
+    // spec via 'line_vega_spec' fn, then set as the arg for the final 'vega' fn
     const vegaFn = buildExpressionFunction<VegaExpressionFunctionDefinition>('vega', {
       spec: vegaSpecFnExpressionBuilder,
     });

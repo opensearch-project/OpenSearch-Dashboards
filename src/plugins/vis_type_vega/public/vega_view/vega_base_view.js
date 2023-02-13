@@ -437,6 +437,7 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
+    // The vega inspector can now be null when rendering line charts using vega for the overlay visualization feature
     this._parser.searchAPI.inspectorAdapters?.vega?.bindInspectValues({
       view,
       spec: vlspec || spec,
