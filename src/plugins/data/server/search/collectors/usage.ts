@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import { CoreSetup, PluginInitializerContext } from 'opensearch-dashboards/server';
-import { first } from 'rxjs/operators';
+import { CoreSetup } from 'opensearch-dashboards/server';
 import { Usage } from './register';
 import { ConfigSchema } from '../../../config';
 
@@ -40,16 +39,9 @@ export interface SearchUsage {
   trackSuccess(duration: number): Promise<void>;
 }
 
-export function usageProvider(
-  core: CoreSetup,
-  initializerContext: PluginInitializerContext<ConfigSchema>
-): SearchUsage {
+export function usageProvider(core: CoreSetup, config: ConfigSchema): SearchUsage {
   const getTracker = (eventType: keyof Usage) => {
     return async (duration?: number) => {
-      const config = await initializerContext.config
-        .create<ConfigSchema>()
-        .pipe(first())
-        .toPromise();
       if (config?.search?.usageTelemetry?.enabled) {
         const repository = await core
           .getStartServices()
