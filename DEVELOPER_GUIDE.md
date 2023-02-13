@@ -21,7 +21,7 @@ This guide applies to all development within the OpenSearch Dashboards project a
   - [General](#general)
   - [HTML](#html)
   - [SASS files](#sass-files)
-  - [TypeScript/JavaScript](#typeScript/javaScript)
+  - [TypeScript/JavaScript](#typescriptjavascript)
   - [React](#react)
   - [API endpoints](#api-endpoints)
 
@@ -29,21 +29,21 @@ This guide applies to all development within the OpenSearch Dashboards project a
 
 This guide is for any developer who wants a running local development environment where you can make, see, and test changes. It's opinionated to get you running as quickly and easily as possible, but it's not the only way to set up a development environment.
 
-If you're only interested in installing and running this project, please see the [Downloads Page](https://opensearch.org/downloads.html) instead.
+If you're only interested in installing and running this project, please see the [Installing OpenSearch Dashboards](https://opensearch.org/docs/latest/install-and-configure/install-dashboards) instead.
 
 If you're planning to contribute code (features or fixes) to this repository, great! Make sure to also read the [contributing guide](CONTRIBUTING.md).
 
 ### Key technologies
 
-OpenSearch Dashboards is primarily a node.js web application built in React. To effectively contribute you should be familiar with HTML ([usage guide](#html)), SASS styling ([usage guide](#sass-files)), TypeScript and JavaScript ([usage guide](#typeScript/javaScript)), and React ([usage guide](#react)).
+OpenSearch Dashboards is primarily a node.js web application built in React. To effectively contribute you should be familiar with HTML ([usage guide](#html)), SASS styling ([usage guide](#sass-files)), TypeScript and JavaScript ([usage guide](#typescriptjavascript)), and React ([usage guide](#react)).
 
 ### Prerequisites
 
 To develop on OpenSearch Dashboards, you'll need:
 
-- A GitHub account
-- `git` for version control
-- `node`, `npm`, and `yarn` for building and running the project
+- A [GitHub account](https://docs.github.com/en/get-started/onboarding/getting-started-with-your-github-account)
+- [`git`](https://git-scm.com/) for version control
+- [`node`](https://nodejs.org/), [`npm`](https://www.npmjs.com/), and [`yarn`](https://yarnpkg.com/) for building and running the project
 - A code editor of your choice, configured for JavaScript/TypeScript. If you don't have a favorite editor, we suggest [Visual Studio Code](https://code.visualstudio.com/)
 
 If you already have these installed or have your own preferences for installing them, skip ahead to the to the [Fork and clone OpenSearch Dashboards](#fork-and-clone-opensearch-dashboards) section.
@@ -81,7 +81,7 @@ $ cd OpenSearch-Dashboards
 
 ### Bootstrap OpenSearch Dashboards
 
-This command will install `npm` dependencies, as well as building all internal packages and plugins. Bootstrapping is necessary any time you need to update packages, plugins, or dependencies, and it's recommended to run it anytime you sync with the latest upstream changes.
+This command will install `npm` dependencies and build all internal packages and plugins. Bootstrapping is necessary any time you need to update packages, plugins, or dependencies, and it's recommended to run it anytime you sync with the latest upstream changes.
 
 ```bash
 $ yarn osd bootstrap
@@ -97,7 +97,7 @@ network-timeout 1000000
 
 OpenSearch Dashboards requires a running version of OpenSearch to connect to. In a separate terminal you can run the latest snapshot built using:
 
-(Linux and Windows only - for MacOS, you'll need to [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)
+_(Linux and Windows only - for MacOS, you'll need to [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
 ```bash
 $ yarn opensearch snapshot
 ```
@@ -130,6 +130,37 @@ np bld    log   [00:45:52.375] [success][@osd/optimizer] 28 bundles compiled suc
 
 ### Next Steps
 
+Now that you have a development environment to play with, there are a number of different paths you may take next.
+
+#### Learn about the OpenSearch Dashboards architecture and plugins
+
+- [Introduction to OpenSearch Dashboards Plugins](https://opensearch.org/blog/dashboards-plugins-intro/) blog post
+- [OpenSearch Dashboards plugin user documentation](https://opensearch.org/docs/latest/install-and-configure/install-dashboards/plugins/) (install, update, and remove)
+- Much of the technical architectural information about the plugin system is located in `/src/core`
+  - [README](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/README.md)
+  - [Plugin principles](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/PRINCIPLES.md)
+  - [Plugin conventions](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/CONVENTIONS.md#technical-conventions)
+  - [Plugin testing](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/TESTING.md)
+
+#### Review user tutorials to understand the key features and workflows
+
+- The [Quickstart guide for OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/quickstart-dashboards/) will show you how to explore, inspect, and visualize sample data
+- [Running queries in the Dev Tools Console](https://opensearch.org/docs/latest/dashboards/run-queries/) provides helpful guidance on how to interact with OpenSearch
+
+#### Explore essential plugins and APIs
+
+The easiest way to understand some of the essential plugins and APIs is to run OpenSearch Dashboards with [developer examples](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/examples/) turned on:
+
+```bash
+$ yarn start --run-examples
+```
+
+#### Review code guidelines and conventions
+
+- [Project code guidelines](#code-guidelines)
+- [Project testing guidelines](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/TESTING.md)
+- [Plugin conventions](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/CONVENTIONS.md#technical-conventions)
+
 ## Alternative development installations
 
 Although the [getting started guide](#getting-started-guide) covers the recommended development environment setup, there are several alternatives worth being aware of.
@@ -140,7 +171,7 @@ By default, the snapshot command will run [a minimal distribution of OpenSearch]
 
 If you would like to run OpenSearch with a particular plugin installed on the cluster snapshot, pass the `--P` flag after `yarn opensearch snapshot`. You can use the flag multiple times to install multiple plugins. The argument value can be a URL to the plugin's zip file, maven coordinates of the plugin, or a local zip file path (use `file:` followed by the absolute or relative path, in that case). For example:
 
-(Linux and Windows only - for MacOS, you'll need to [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)
+_(Linux and Windows only - for MacOS, you'll need to [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
 ```bash
 $ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plugin/opensearch-test-plugin/2.4.0.0/opensearch-test-plugin-2.4.0.0.zip
 ```
@@ -177,7 +208,7 @@ OpenSearch does not yet create artifacts for MacOS, so you'll need to download, 
 3. Change directory: `cd opensearch-<OpenSearch-version>`
 4. Run the cluster: `./bin/opensearch`
 
-Note - OpenSearch and OpenSearch Dashboards must have matching version strings. Because the tarball is the latest _released_ version of OpenSearch, it's likely behind the version on the `main` branch of OpenSearch Dashboards, which is generally set to the next upcoming major release. So to work from main, update the OpenSearch Dashboards version in `package.json` to match the OpenSearch version running.
+Note - OpenSearch and OpenSearch Dashboards must have matching version strings. Because the tarball is the latest _released_ version of OpenSearch, it's likely behind the version on the `main` branch of OpenSearch Dashboards, which is generally set to the next upcoming major release. So to work from main, update [the OpenSearch Dashboards version in `package.json`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/package.json#L14) to match the OpenSearch version running.
 
 This method can also be used to develop against the [full distribution of OpenSearch](https://opensearch.org/downloads.html#opensearch) instead. In that case, you'll also need to [configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security).
 
@@ -194,6 +225,8 @@ opensearch.username: "admin" # Default username on the docker image
 opensearch.password: "admin" # Default password on the docker image
 opensearch.ssl.verificationMode: none
 ```
+
+For more detailed documentation, see [Configure TLS for OpenSearch Dashboards](https://opensearch.org/docs/latest/install-and-configure/install-dashboards/tls).
 
 ## Building artifacts
 
