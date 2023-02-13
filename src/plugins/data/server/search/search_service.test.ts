@@ -53,7 +53,7 @@ describe('Search service', () => {
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const setup = plugin.setup(mockCoreSetup, ({
+      const setup = await plugin.setup(mockCoreSetup, ({
         packageInfo: { version: '8' },
         registerFunction: jest.fn(),
       } as unknown) as SearchServiceSetupDependencies);
