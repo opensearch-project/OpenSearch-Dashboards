@@ -35,6 +35,7 @@ import { WorkerProxyService } from './worker_proxy_service';
 import { registerLexerRules } from './lexer_rules';
 import { ID } from './constants';
 // @ts-ignore
+import { registerWorker } from '../worker_store';
 import workerSrc from '!!raw-loader!../../target/public/xjson.editor.worker.js';
 // @ts-ignore
 import jsonWorkerSrc from '!!raw-loader!../../target/public/json.editor.worker.js';
@@ -48,18 +49,7 @@ registerLexerRules(monaco);
 // that get passed in. Also this should not live inside the "xjson" dir directly. We can update this
 // once we have another worker.
 // @ts-ignore
-window.MonacoEnvironment = {
-  getWorker: (module: string, languageId: string) => {
-    // In OpenSearch Dashboards we will probably build this once and then load with raw-loader
-    if (languageId === 'json') {
-      const blob = new Blob([jsonWorkerSrc], { type: 'application/javascript' });
-      return new Worker(URL.createObjectURL(blob));
-    } else if (languageId === ID) {
-      const blob = new Blob([workerSrc], { type: 'application/javascript' });
-      return new Worker(URL.createObjectURL(blob));
-    }
-  },
-};
+registerWorker(ID, workerSrc);
 
 monaco.languages.onLanguage(ID, async () => {
   return wps.setup();

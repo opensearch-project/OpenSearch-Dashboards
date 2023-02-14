@@ -54,6 +54,7 @@ exports.externals = {
   'react-router-dom': '__osdSharedDeps__.ReactRouterDom',
   'styled-components': '__osdSharedDeps__.StyledComponents',
   '@osd/monaco': '__osdSharedDeps__.OsdMonaco',
+  '@osd/monaco-next': '__osdSharedDeps__.OsdMonacoNext',
   '@osd/ui-shared-deps/theme': '__osdSharedDeps__.Theme',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__osdSharedDeps__.MonacoBarePluginApi',
