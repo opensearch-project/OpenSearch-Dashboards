@@ -93,7 +93,9 @@ export class InputControlVisPlugin implements Plugin<void, void> {
     };
 
     expressions.registerFunction(createInputControlVisFn);
-    visualizations.createBaseVisualization(createInputControlVisTypeDefinition(visualizationDependencies));
+    visualizations.createBaseVisualization(
+      createInputControlVisTypeDefinition(visualizationDependencies)
+    );
   }
 
   public start(core: CoreStart, deps: InputControlVisPluginStartDependencies) {
