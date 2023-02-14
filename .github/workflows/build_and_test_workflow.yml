@@ -451,7 +451,7 @@ jobs:
         working-directory: ./artifacts
     strategy:
       matrix:
-        version: [ osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0 ]
+        version: [ osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0 ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
