@@ -34,11 +34,9 @@ import { monaco } from '../monaco';
 import { WorkerProxyService } from './worker_proxy_service';
 import { registerLexerRules } from './lexer_rules';
 import { ID } from './constants';
-// @ts-ignore
 import { registerWorker } from '../worker_store';
-import workerSrc from '!!raw-loader!../../target/public/xjson.editor.worker.js';
 // @ts-ignore
-import jsonWorkerSrc from '!!raw-loader!../../target/public/json.editor.worker.js';
+import workerSrc from '!!raw-loader!../../target/public/xjson.editor.worker.js';
 
 const wps = new WorkerProxyService();
 

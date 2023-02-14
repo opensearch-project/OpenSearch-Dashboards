@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useRef, useEffect } from 'react';
-import { monaco } from '@osd/monaco';
+import { monaco } from '@osd/monaco-next';
 
 export function useDiagnosticsOptions(props: {
   monaco?: typeof monaco;
