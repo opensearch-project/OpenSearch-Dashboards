@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Client } from 'elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
+import { Client as LegacyClient } from 'elasticsearch';
 import { Credentials } from 'aws-sdk';
 import { get } from 'lodash';
 import HttpAmazonESConnector from 'http-aws-es';
@@ -38,13 +39,17 @@ export const configureLegacyClient = async (
 ) => {
   try {
     const dataSourceAttr = await getDataSource(dataSourceId!, savedObjects);
-    const rootClient = getRootClient(dataSourceAttr, config, openSearchClientPoolSetup);
+    const rootClient = getRootClient(
+      dataSourceAttr,
+      config,
+      openSearchClientPoolSetup.getClientFromPool
+    );
 
     return await getQueryClient(
       dataSourceAttr,
       cryptography,
       callApiParams,
-      openSearchClientPoolSetup,
+      openSearchClientPoolSetup.addClientToPool,
       rootClient
     );
   } catch (error: any) {
@@ -67,8 +72,8 @@ const getQueryClient = async (
   dataSourceAttr: DataSourceAttributes,
   cryptography: CryptographyServiceSetup,
   { endpoint, clientParams, options }: LegacyClientCallAPIParams,
-  { addClientToPool }: OpenSearchClientPoolSetup,
-  rootClient?: Client
+  addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void,
+  rootClient?: LegacyClient
 ) => {
   const {
     auth: { type },
@@ -119,8 +124,8 @@ const getQueryClient = async (
 const getRootClient = (
   dataSource: DataSourceAttributes,
   config: DataSourcePluginConfigType,
-  { getClientFromPool }: OpenSearchClientPoolSetup
-): Client | undefined => {
+  getClientFromPool: (endpoint: string, authType: AuthType) => Client | LegacyClient | undefined
+): LegacyClient | undefined => {
   const {
     endpoint,
     auth: { type },
@@ -132,10 +137,10 @@ const getRootClient = (
 
   if (type === AuthType.SigV4) {
     cachedClient = getClientFromPool(endpoint + lastUpdatedTime, type);
-    return cachedClient ? (cachedClient as Client) : undefined;
+    return cachedClient ? (cachedClient as LegacyClient) : undefined;
   } else {
     cachedClient = getClientFromPool(endpoint, type);
-    return cachedClient ? (cachedClient as Client) : new Client(clientOptions);
+    return cachedClient ? (cachedClient as LegacyClient) : new LegacyClient(clientOptions);
   }
 };
 
@@ -149,7 +154,7 @@ const getRootClient = (
  * make wrap401Errors default to false, because we don't want login pop-up from browser
  */
 const callAPI = async (
-  client: Client,
+  client: LegacyClient,
   endpoint: string,
   clientParams: Record<string, any> = {},
   options: LegacyCallAPIOptions = { wrap401Errors: false }
@@ -189,7 +194,7 @@ const callAPI = async (
  * @param options - Options that affect the way we call the API and process the result.
  */
 const getBasicAuthClient = async (
-  rootClient: Client,
+  rootClient: LegacyClient,
   { endpoint, clientParams = {}, options }: LegacyClientCallAPIParams,
   { username, password }: UsernamePasswordTypedContent
 ) => {
@@ -201,9 +206,9 @@ const getBasicAuthClient = async (
   return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(endpoint, clientParams, options);
 };
 
-const getAWSClient = (credential: SigV4Content, endpoint: string): Client => {
+const getAWSClient = (credential: SigV4Content, endpoint: string): LegacyClient => {
   const { accessKey, secretKey, region } = credential;
-  const client = new Client({
+  const client = new LegacyClient({
     connectionClass: HttpAmazonESConnector,
     awsConfig: new Config({
       region,

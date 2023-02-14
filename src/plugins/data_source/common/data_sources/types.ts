@@ -16,7 +16,12 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   lastUpdatedTime?: string;
 }
 
-export interface SigV4Content {
+/**
+ * Multiple datasource supports authenticating as IAM user, it doesn't support IAM role.
+ * Because IAM role session requires temporary security credentials through assuming role,
+ * which makes no sense to store the credentials.
+ */
+export interface SigV4Content extends SavedObjectAttributes {
   accessKey: string;
   secretKey: string;
   region: string;

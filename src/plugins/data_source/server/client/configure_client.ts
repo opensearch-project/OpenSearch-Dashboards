@@ -4,6 +4,7 @@
  */
 
 import { Client } from '@opensearch-project/opensearch';
+import { Client as LegacyClient } from 'elasticsearch';
 import { Credentials } from 'aws-sdk';
 import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws';
 import { Logger, SavedObjectsClientContract } from '../../../../../src/core/server';
@@ -29,9 +30,18 @@ export const configureClient = async (
 ): Promise<Client> => {
   try {
     const dataSource = await getDataSource(dataSourceId!, savedObjects);
-    const rootClient = getRootClient(dataSource, config, openSearchClientPoolSetup);
+    const rootClient = getRootClient(
+      dataSource,
+      config,
+      openSearchClientPoolSetup.getClientFromPool
+    );
 
-    return await getQueryClient(dataSource, openSearchClientPoolSetup, cryptography, rootClient);
+    return await getQueryClient(
+      dataSource,
+      openSearchClientPoolSetup.addClientToPool,
+      cryptography,
+      rootClient
+    );
   } catch (error: any) {
     logger.error(`Failed to get data source client for dataSourceId: [${dataSourceId}]`);
     logger.error(error);
@@ -53,7 +63,11 @@ export const configureTestClient = async (
     } = dataSourceAttr;
     let requireDecryption = false;
 
-    const rootClient = getRootClient(dataSourceAttr, config, openSearchClientPoolSetup);
+    const rootClient = getRootClient(
+      dataSourceAttr,
+      config,
+      openSearchClientPoolSetup.getClientFromPool
+    );
 
     if (type === AuthType.UsernamePasswordType && !credentials?.password && dataSourceId) {
       dataSourceAttr = await getDataSource(dataSourceId, savedObjects);
@@ -62,7 +76,7 @@ export const configureTestClient = async (
 
     return getQueryClient(
       dataSourceAttr,
-      openSearchClientPoolSetup,
+      openSearchClientPoolSetup.addClientToPool,
       cryptography,
       rootClient,
       requireDecryption
@@ -162,7 +176,7 @@ export const getAWSCredential = async (
  */
 const getQueryClient = async (
   dataSourceAttr: DataSourceAttributes,
-  { addClientToPool }: OpenSearchClientPoolSetup,
+  addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void,
   cryptography?: CryptographyServiceSetup,
   rootClient?: Client,
   requireDecryption: boolean = true
@@ -210,7 +224,7 @@ const getQueryClient = async (
 export const getRootClient = (
   dataSourceAttr: DataSourceAttributes,
   config: DataSourcePluginConfigType,
-  { getClientFromPool }: OpenSearchClientPoolSetup
+  getClientFromPool: (endpoint: string, authType: AuthType) => Client | LegacyClient | undefined
 ): Client | undefined => {
   const {
     auth: { type },

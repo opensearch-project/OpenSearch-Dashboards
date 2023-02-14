@@ -72,12 +72,12 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   };
 }
 
-export interface UsernamePasswordTypedContent {
+export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
   username: string;
   password?: string;
 }
 
-export interface SigV4Content {
+export interface SigV4Content extends SavedObjectAttributes {
   accessKey: string;
   secretKey: string;
   region: string;
