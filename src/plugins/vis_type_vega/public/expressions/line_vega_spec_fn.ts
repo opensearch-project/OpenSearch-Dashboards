@@ -118,9 +118,14 @@ const createSpecFromDatatable = (
         }
         spec.layer.push({
           mark: {
+            // Possible types are: line, area, histogram. The eligibility checker will
+            // prevent area and histogram (though area works in vega-lite)
             type: currentSeriesParams.type,
+            // Possible types: linear, cardinal, step-after. All of these types work in vega-lite
             interpolate: currentSeriesParams.interpolate,
+            // The possible values is any number, which matches what vega-lite supports
             strokeWidth: currentSeriesParams.lineWidth,
+            // this corresponds to showing the dots in the visbuilder for each data point
             point: currentSeriesParams.showCircles,
           },
           encoding: {
