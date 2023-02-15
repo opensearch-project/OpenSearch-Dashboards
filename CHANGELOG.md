@@ -177,7 +177,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multi DataSource] UX enhacement on index pattern management stack ([#2505](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2505))
 - [Multi DataSource] UX enhancement on Data source management stack ([#2521](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2521))
 - [Multi DataSource] UX enhancement on Update stored password modal for Data source management stack ([#2532](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2532))
-- [Monaco editor] add json worker and language implementation ([#3424](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3424))
+- [Monaco editor] add json worker ([#3424](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3424))
 
 ### 🐛 Bug Fixes
 
