@@ -133,14 +133,14 @@ export class ApmConfiguration {
     try {
       const filename = join(dataPath, 'uuid');
       return readFileSync(filename, 'utf-8');
-    } catch (e) {} // eslint-disable-line no-empty
+    } catch (e: any) {} // eslint-disable-line no-empty
   }
 
   private getDevConfig(): ApmAgentConfig {
     try {
       const apmDevConfigPath = join(this.rootDir, 'config', 'apm.dev.js');
       return require(apmDevConfigPath);
-    } catch (e) {
+    } catch (e: any) {
       return {};
     }
   }
@@ -167,7 +167,7 @@ export class ApmConfiguration {
         encoding: 'utf-8' as BufferEncoding,
         stdio: ['ignore', 'pipe', 'ignore'],
       }).trim();
-    } catch (e) {
+    } catch (e: any) {
       return null;
     }
   }

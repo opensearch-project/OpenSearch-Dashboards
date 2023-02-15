@@ -55,7 +55,7 @@ async function settlePromise<T>(promise: Promise<T>) {
       isResolved: true,
       result: await promise,
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       isRejected: true,
       error,

@@ -81,7 +81,7 @@ export class UiSettingsApi {
           if (error) {
             reject(error);
           } else {
-            resolve(resp);
+            resolve(resp!);
           }
         },
       };
@@ -140,7 +140,7 @@ export class UiSettingsApi {
           changes: changes.values,
         })
       );
-    } catch (error) {
+    } catch (error: any) {
       changes.callback(error);
     } finally {
       this.sendInProgress = false;
@@ -162,7 +162,7 @@ export class UiSettingsApi {
           accept: 'application/json',
         },
       });
-    } catch (err) {
+    } catch (err: any) {
       if (err.response) {
         if (err.response.status === 400) {
           throw new Error(err.body.message);

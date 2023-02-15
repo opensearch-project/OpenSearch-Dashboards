@@ -45,7 +45,7 @@ export function readLimits(): Limits {
   let yaml;
   try {
     yaml = Fs.readFileSync(LIMITS_PATH, 'utf8');
-  } catch (error) {
+  } catch (error: any) {
     if (error.code !== 'ENOENT') {
       throw error;
     }

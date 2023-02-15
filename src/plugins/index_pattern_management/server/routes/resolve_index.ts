@@ -71,7 +71,7 @@ export function registerResolveIndexRoute(router: IRouter): void {
           }`,
         });
         return res.ok({ body: result });
-      } catch (err) {
+      } catch (err: any) {
         return res.customError({
           statusCode: err.statusCode || 500,
           body: {

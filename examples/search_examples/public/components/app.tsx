@@ -206,7 +206,7 @@ export const SearchExamplesApp = ({
       });
 
       notifications.toasts.addSuccess(`Server returned ${JSON.stringify(response)}`);
-    } catch (e) {
+    } catch (e: any) {
       notifications.toasts.addDanger('Failed to run search');
     }
   };

@@ -131,7 +131,7 @@ export function runTelemetryCheck() {
       try {
         const context = createTaskContext();
         await list.run(context);
-      } catch (error) {
+      } catch (error: any) {
         process.exitCode = 1;
         if (error instanceof ErrorReporter) {
           error.errors.forEach((e: string | Error) => log.error(e));

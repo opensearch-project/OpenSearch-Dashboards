@@ -98,7 +98,7 @@ export async function yarnWorkspacesInfo(directory: string): Promise<WorkspacesI
 
   try {
     return JSON.parse(JSON.parse(stdout).data);
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(`'yarn workspaces info --json' produced unexpected output: \n${stdout}`);
   }
 }

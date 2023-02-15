@@ -51,7 +51,7 @@ export class JsonParamType extends BaseParamType {
         // handle invalid Json input
         try {
           paramJson = JSON.parse(param);
-        } catch (err) {
+        } catch (err: any) {
           return;
         }
 

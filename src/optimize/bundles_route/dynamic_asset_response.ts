@@ -50,7 +50,7 @@ const asyncFstat = promisify(Fs.fstat);
 async function tryToOpenFile(filePath: string) {
   try {
     return await asyncOpen(filePath, 'r');
-  } catch (e) {
+  } catch (e: any) {
     if (e.code === 'ENOENT') {
       return undefined;
     } else {
@@ -160,7 +160,7 @@ export async function createDynamicAssetResponse({
     }
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     if (fd) {
       try {
         await asyncClose(fd);

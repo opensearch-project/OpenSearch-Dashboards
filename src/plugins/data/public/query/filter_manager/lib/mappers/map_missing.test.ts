@@ -49,7 +49,7 @@ describe('filter manager utilities', () => {
 
       try {
         mapMissing(filter);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBe(filter);
         done();
       }

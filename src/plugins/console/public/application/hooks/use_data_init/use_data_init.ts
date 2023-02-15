@@ -69,7 +69,7 @@ export const useDataInit = () => {
             payload: results.sort((a, b) => a.createdAt - b.createdAt)[0],
           });
         }
-      } catch (e) {
+      } catch (e: any) {
         setError(e);
       } finally {
         setDone(true);

@@ -304,7 +304,7 @@ export async function getDataTelemetry(opensearchClient: OpenSearchClient) {
       return baseIndexInfo;
     });
     return buildDataTelemetryPayload(indices);
-  } catch (e) {
+  } catch (e: any) {
     return [];
   }
 }

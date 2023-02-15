@@ -73,7 +73,7 @@ export function createIndexDocRecordsStream(
         await indexDocs([record.value]);
         progress.addToComplete(1);
         callback(null);
-      } catch (err) {
+      } catch (err: any) {
         callback(err);
       }
     },
@@ -83,7 +83,7 @@ export function createIndexDocRecordsStream(
         await indexDocs(chunks.map(({ chunk: record }) => record.value));
         progress.addToComplete(chunks.length);
         callback(null);
-      } catch (err) {
+      } catch (err: any) {
         callback(err);
       }
     },

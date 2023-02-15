@@ -33,7 +33,7 @@ export const useIndexPatterns = () => {
         const ids = await data.indexPatterns.getIds(true);
         const patterns = await Promise.all(ids.map((id) => data.indexPatterns.get(id)));
         setIndexPatterns(patterns);
-      } catch (e) {
+      } catch (e: any) {
         setError(e as Error);
       } finally {
         setLoading(false);

@@ -192,7 +192,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
         })) || [];
 
       return [...suggestions, ...recentSearchSuggestions];
-    } catch (e) {
+    } catch (e: any) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
       // Ignore aborted requests
       if (e.message === 'The user aborted a request.') return;

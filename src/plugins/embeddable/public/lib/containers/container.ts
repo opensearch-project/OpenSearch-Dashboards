@@ -186,7 +186,7 @@ export abstract class Container<
         // If we hit this, the panel was removed before the embeddable finished loading.
         if (this.input.panels[id] === undefined) {
           subscription.unsubscribe();
-          resolve(undefined);
+          resolve((undefined as unknown) as TEmbeddable);
         }
       });
     });
@@ -311,7 +311,7 @@ export abstract class Container<
       embeddable = isSavedObjectEmbeddableInput(inputForChild)
         ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
-    } catch (e) {
+    } catch (e: any) {
       embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
     }
 

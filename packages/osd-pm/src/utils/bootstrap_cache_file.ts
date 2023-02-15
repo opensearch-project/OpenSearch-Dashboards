@@ -73,7 +73,7 @@ export class BootstrapCacheFile {
 
     try {
       return Fs.readFileSync(this.path, 'utf8') === this.expectedValue;
-    } catch (error) {
+    } catch (error: any) {
       if (error.code === 'ENOENT') {
         return false;
       }
@@ -85,7 +85,7 @@ export class BootstrapCacheFile {
   delete() {
     try {
       Fs.unlinkSync(this.path);
-    } catch (error) {
+    } catch (error: any) {
       if (error.code !== 'ENOENT') {
         throw error;
       }

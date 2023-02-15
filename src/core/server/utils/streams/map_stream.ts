@@ -39,7 +39,7 @@ export function createMapStream<T>(fn: (value: T, i: number) => void) {
       try {
         this.push(await fn(value, i++));
         done();
-      } catch (err) {
+      } catch (err: any) {
         done(err);
       }
     },

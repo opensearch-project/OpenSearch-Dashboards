@@ -93,14 +93,14 @@ export async function parseManifest(
   let manifestContent;
   try {
     manifestContent = await fsReadFileAsync(manifestPath);
-  } catch (err) {
+  } catch (err: any) {
     throw PluginDiscoveryError.missingManifest(manifestPath, err);
   }
 
   let manifest: Partial<PluginManifest>;
   try {
     manifest = JSON.parse(manifestContent.toString());
-  } catch (err) {
+  } catch (err: any) {
     throw PluginDiscoveryError.invalidManifest(manifestPath, err);
   }
 
@@ -220,7 +220,7 @@ export async function parseManifest(
 export async function isNewPlatformPlugin(pluginPath: string) {
   try {
     return (await fsStatAsync(resolve(pluginPath, MANIFEST_FILE_NAME))).isFile();
-  } catch (err) {
+  } catch (err: any) {
     return false;
   }
 }

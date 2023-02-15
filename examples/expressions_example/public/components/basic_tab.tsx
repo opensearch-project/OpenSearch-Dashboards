@@ -50,7 +50,7 @@ export function BasicTab() {
         setLoading(false);
         setResult(String(value));
       });
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
       setResult(String(error));
     }

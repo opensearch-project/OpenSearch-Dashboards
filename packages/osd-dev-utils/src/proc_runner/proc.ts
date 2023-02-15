@@ -65,7 +65,7 @@ async function withTimeout(
       attempt(),
       new Promise((_, reject) => setTimeout(() => reject(TIMEOUT), ms)),
     ]);
-  } catch (error) {
+  } catch (error: any) {
     if (error === TIMEOUT) {
       await onTimeout();
     } else {
@@ -88,7 +88,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     if (!statSync(cwd).isDirectory()) {
       throw new Error(`cwd "${cwd}" exists but is not a directory`);
     }
-  } catch (err) {
+  } catch (err: any) {
     if (err.code === 'ENOENT') {
       throw new Error(`cwd "${cwd}" does not exist`);
     }
@@ -169,7 +169,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
       async () => {
         try {
           await outcomePromise;
-        } catch (error) {
+        } catch (error: any) {
           // ignore
         }
       },

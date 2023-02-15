@@ -70,7 +70,7 @@ export function verifyICUMessage(message: string) {
         verifySelectFormatNode(node.format);
       }
     }
-  } catch (error) {
+  } catch (error: any) {
     if (error.name === 'SyntaxError') {
       const errorWithContext = createParserErrorMessage(message, {
         loc: {

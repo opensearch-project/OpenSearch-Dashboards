@@ -106,7 +106,7 @@ export const createOsdUrlStateStorage = (
       return url.updateAsync((currentUrl) => {
         try {
           return setStateToOsdUrl(key, state, { useHash }, currentUrl);
-        } catch (error) {
+        } catch (error: any) {
           if (onSetError) onSetError(error);
         }
       }, replace);
@@ -116,7 +116,7 @@ export const createOsdUrlStateStorage = (
       // otherwise current url will be used to retrieve state from
       try {
         return getStateFromOsdUrl(key, url.getPendingUrl());
-      } catch (e) {
+      } catch (e: any) {
         if (onGetError) onGetError(e);
         return null;
       }

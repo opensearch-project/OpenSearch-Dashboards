@@ -61,7 +61,7 @@ export class BundleCache {
         if (this.path) {
           json = Fs.readFileSync(this.path, 'utf8');
         }
-      } catch (error) {
+      } catch (error: any) {
         if (error.code !== 'ENOENT') {
           throw error;
         }
@@ -70,7 +70,7 @@ export class BundleCache {
       let partialCache: Partial<State>;
       try {
         partialCache = JSON.parse(json || DEFAULT_STATE_JSON);
-      } catch (error) {
+      } catch (error: any) {
         partialCache = {};
       }
 
@@ -122,7 +122,7 @@ export class BundleCache {
     if (this.path) {
       try {
         Fs.unlinkSync(this.path);
-      } catch (error) {
+      } catch (error: any) {
         if (error.code !== 'ENOENT') {
           throw error;
         }

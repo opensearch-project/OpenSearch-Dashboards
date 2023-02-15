@@ -64,7 +64,7 @@ export function createSplitStream(splitChunk: string) {
 
         unsplitBuffer = toSplit;
         callback(undefined);
-      } catch (err) {
+      } catch (err: any) {
         callback(err);
       }
     },
@@ -74,7 +74,7 @@ export function createSplitStream(splitChunk: string) {
         this.push(unsplitBuffer.toString('utf8'));
 
         callback(undefined);
-      } catch (err) {
+      } catch (err: any) {
         callback(err);
       }
     },

@@ -197,7 +197,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           this.resolveImportErrors();
         }
       });
-    } catch (e) {
+    } catch (e: any) {
       this.setState({
         status: 'error',
         error: getErrorMessage(e),
@@ -253,7 +253,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         getConflictResolutions: this.getConflictResolutions,
       });
       this.setState(updatedState);
-    } catch (e) {
+    } catch (e: any) {
       this.setState({
         status: 'error',
         error: getErrorMessage(e),
@@ -273,7 +273,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     let contents;
     try {
       contents = await importLegacyFile(file!);
-    } catch (e) {
+    } catch (e: any) {
       this.setState({
         status: 'error',
         error: i18n.translate(
@@ -447,7 +447,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           failedImports!.map(({ obj }) => obj) as any[],
           importMode.overwrite
         );
-      } catch (e) {
+      } catch (e: any) {
         this.setState({
           status: 'error',
           error: getErrorMessage(e),

@@ -129,7 +129,7 @@ export async function saveSavedObject(
     savedObject.isSaving = false;
     savedObject.lastSavedTitle = savedObject.title;
     return savedObject.id;
-  } catch (err) {
+  } catch (err: any) {
     savedObject.isSaving = false;
     savedObject.id = originalId;
     if (isErrorNonFatal(err)) {

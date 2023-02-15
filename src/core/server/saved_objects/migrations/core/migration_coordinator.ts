@@ -85,7 +85,7 @@ interface Opts {
 export async function coordinateMigration(opts: Opts): Promise<MigrationResult> {
   try {
     return await opts.runMigration();
-  } catch (error) {
+  } catch (error: any) {
     if (handleIndexExists(error, opts.log)) {
       await waitForMigration(opts.isMigrated, opts.pollInterval);
       return { status: 'skipped' };

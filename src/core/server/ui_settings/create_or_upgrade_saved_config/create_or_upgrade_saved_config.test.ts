@@ -176,7 +176,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       try {
         await run();
         throw new Error('Expected run() to throw an error');
-      } catch (error) {
+      } catch (error: any) {
         expect(error.message).toBe('foo');
       }
 

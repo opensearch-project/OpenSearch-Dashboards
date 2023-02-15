@@ -225,7 +225,7 @@ export const createParser = () => {
       try {
         value();
         white();
-      } catch (e) {
+      } catch (e: any) {
         errored = true;
         annos.push({ type: AnnoTypes.error, at: e.at - 1, text: e.message });
       }

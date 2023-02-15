@@ -27,7 +27,7 @@ const mockGetDetailsByField = jest.fn(() => ({
   total: 150,
 }));
 
-const getFields = (name) => {
+const getFields = (name: any) => {
   return new IndexPatternField(
     {
       name,

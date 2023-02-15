@@ -85,12 +85,12 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
     );
   };
 
-  const onChangeDefaultChecked = (e) => {
+  const onChangeDefaultChecked = (e: any) => {
     setDefaultChecked(e.target.checked);
     setDataSourceChecked(!e.target.checked);
   };
 
-  const onChangeDataSourceChecked = (e) => {
+  const onChangeDataSourceChecked = (e: any) => {
     setDataSourceChecked(e.target.checked);
     setDefaultChecked(!e.target.checked);
   };

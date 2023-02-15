@@ -67,7 +67,7 @@ export class ExecutionContract<
   getData = async () => {
     try {
       return await this.execution.result;
-    } catch (e) {
+    } catch (e: any) {
       return {
         type: 'error',
         error: {

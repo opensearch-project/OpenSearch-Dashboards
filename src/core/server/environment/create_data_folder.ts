@@ -44,7 +44,7 @@ export async function createDataFolder({
     // Create the data directory (recursively, if the a parent dir doesn't exist).
     // If it already exists, does nothing.
     await mkdir(dataFolder, { recursive: true });
-  } catch (e) {
+  } catch (e: any) {
     logger.error(`Error trying to create data folder at ${dataFolder}: ${e}`);
     throw e;
   }

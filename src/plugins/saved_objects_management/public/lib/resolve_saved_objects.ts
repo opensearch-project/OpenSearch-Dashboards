@@ -64,7 +64,7 @@ function addJsonFieldToIndexPattern(
   if (sourceString) {
     try {
       target[fieldName] = JSON.parse(sourceString);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(
         i18n.translate('savedObjectsManagement.parsingFieldErrorMessage', {
           defaultMessage:
@@ -110,7 +110,7 @@ async function importIndexPattern(
   addJsonFieldToIndexPattern(indexPatternSpec, typeMeta, 'typeMeta', title);
   try {
     emptyPattern = await indexPatterns.createAndSave(indexPatternSpec, overwriteAll, true);
-  } catch (err) {
+  } catch (err: any) {
     if (err instanceof DuplicateIndexPatternError) {
       // We can override and we want to prompt for confirmation
       const isConfirmed = await openConfirm(
@@ -304,7 +304,7 @@ export async function resolveSavedObjects(
       if (importedIndexPatternId) {
         importedObjectCount++;
       }
-    } catch (error) {
+    } catch (error: any) {
       failedImports.push({ obj: indexPatternDoc as any, error });
     }
   }
@@ -331,7 +331,7 @@ export async function resolveSavedObjects(
       if (await importDocument(obj, searchDoc, overwriteAll)) {
         importedObjectCount++;
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error.constructor.name === 'SavedObjectNotFound') {
         if (error.savedObjectType === 'index-pattern') {
           conflictedIndexPatterns.push({ obj, doc: searchDoc });
@@ -351,7 +351,7 @@ export async function resolveSavedObjects(
       if (await importDocument(obj, otherDoc, overwriteAll)) {
         importedObjectCount++;
       }
-    } catch (error) {
+    } catch (error: any) {
       const isIndexPatternNotFound =
         error.constructor.name === 'SavedObjectNotFound' &&
         error.savedObjectType === 'index-pattern';

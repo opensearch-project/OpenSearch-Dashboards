@@ -72,7 +72,7 @@ describe('RepositoryOpenSearchClient', () => {
     client.bulk = jest.fn().mockRejectedValue(new Error('reason'));
     try {
       await repositoryClient.bulk({ body: [] });
-    } catch (e) {
+    } catch (e: any) {
       expect(SavedObjectsErrorHelpers.isSavedObjectsClientError(e)).toBe(true);
     }
   });

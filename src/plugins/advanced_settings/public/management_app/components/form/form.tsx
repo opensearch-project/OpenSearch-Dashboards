@@ -189,7 +189,7 @@ export class Form extends PureComponent<FormProps> {
       if (requiresReload) {
         this.renderPageReloadToast();
       }
-    } catch (e) {
+    } catch (e: any) {
       this.props.toasts.addDanger(
         i18n.translate('advancedSettings.form.saveErrorMessage', {
           defaultMessage: 'Unable to save',

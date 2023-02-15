@@ -79,7 +79,7 @@ export function createReplaceStream(toReplace: string, replacement: string) {
         }
 
         done();
-      } catch (err) {
+      } catch (err: any) {
         done(err);
       }
     },

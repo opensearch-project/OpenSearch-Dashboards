@@ -31,7 +31,7 @@
 export function versionSatisfies(cleanActual: string, cleanExpected: string) {
   try {
     return cleanActual === cleanExpected;
-  } catch (err) {
+  } catch (err: any) {
     return false;
   }
 }

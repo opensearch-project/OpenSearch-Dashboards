@@ -109,7 +109,7 @@ export class RangeControl extends Control<RangeFilterManager> {
     let resp;
     try {
       resp = await searchSource.fetch({ abortSignal });
-    } catch (error) {
+    } catch (error: any) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;
       this.disable(

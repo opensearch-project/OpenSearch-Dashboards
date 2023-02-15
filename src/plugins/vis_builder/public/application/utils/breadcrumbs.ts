@@ -10,7 +10,7 @@ const defaultEditText = i18n.translate('visBuilder.editor.defaultEditBreadcrumbT
   defaultMessage: 'Edit',
 });
 
-export function getVisualizeLandingBreadcrumbs(navigateToApp) {
+export function getVisualizeLandingBreadcrumbs(navigateToApp: any) {
   return [
     {
       text: i18n.translate('visBuilder.listing.breadcrumb', {
@@ -21,7 +21,7 @@ export function getVisualizeLandingBreadcrumbs(navigateToApp) {
   ];
 }
 
-export function getCreateBreadcrumbs(navigateToApp) {
+export function getCreateBreadcrumbs(navigateToApp: any) {
   return [
     ...getVisualizeLandingBreadcrumbs(navigateToApp),
     {
@@ -32,7 +32,7 @@ export function getCreateBreadcrumbs(navigateToApp) {
   ];
 }
 
-export function getEditBreadcrumbs(text: string = defaultEditText, navigateToApp) {
+export function getEditBreadcrumbs(text: string = defaultEditText, navigateToApp: any) {
   return [
     ...getVisualizeLandingBreadcrumbs(navigateToApp),
     {

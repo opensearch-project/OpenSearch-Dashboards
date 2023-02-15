@@ -65,7 +65,7 @@ describe('opensearchdsl', () => {
       let errorMessage;
       try {
         await fn();
-      } catch (error) {
+      } catch (error: any) {
         errorMessage = error.message;
       }
       expect(errorMessage).toEqual('Unexpected token i in JSON at position 0');

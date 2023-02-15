@@ -211,7 +211,7 @@ export class BfetchServerPlugin
             try {
               const result = await handlerInstance.onBatchItem(batchItem);
               subject.next({ id, result });
-            } catch (err) {
+            } catch (err: any) {
               const error = normalizeError<E>(err);
               subject.next({ id, error });
             } finally {

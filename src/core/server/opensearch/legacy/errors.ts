@@ -82,7 +82,7 @@ function decorate(
  * ```js
  * try {
  *   await client.asScoped(request).callAsCurrentUser(...);
- * } catch (err) {
+ * } catch (err: any) {
  *   if (OpenSearchErrorHelpers.isNotAuthorizedError(err)) {
  *     const authHeader = err.output.headers['WWW-Authenticate'];
  *   }

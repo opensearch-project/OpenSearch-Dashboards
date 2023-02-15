@@ -59,7 +59,7 @@ describe('parseOpenSearchInterval', () => {
     intervals.forEach((interval) => {
       try {
         parseOpenSearchInterval(interval);
-      } catch (error) {
+      } catch (error: any) {
         expect(error instanceof InvalidOpenSearchCalendarIntervalError).toBe(true);
       }
     });
@@ -72,7 +72,7 @@ describe('parseOpenSearchInterval', () => {
     intervals.forEach((interval) => {
       try {
         parseOpenSearchInterval(interval);
-      } catch (error) {
+      } catch (error: any) {
         expect(error instanceof InvalidOpenSearchIntervalFormatError).toBe(true);
       }
     });

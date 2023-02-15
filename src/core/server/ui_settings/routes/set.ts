@@ -60,7 +60,7 @@ export function registerSetRoute(router: IRouter) {
             settings: await uiSettingsClient.getUserProvided(),
           },
         });
-      } catch (error) {
+      } catch (error: any) {
         if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
           return response.customError({
             body: error,

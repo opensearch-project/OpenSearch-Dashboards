@@ -98,7 +98,7 @@ export function createGenerateDocRecordsStream({
         }
 
         callback(undefined);
-      } catch (err) {
+      } catch (err: any) {
         callback(err);
       }
     },

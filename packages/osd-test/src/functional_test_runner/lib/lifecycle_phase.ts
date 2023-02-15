@@ -87,7 +87,7 @@ export class LifecyclePhase<Args extends readonly any[]> {
           await fn(...args);
         } catch (_error) {
           if (!error) {
-            error = _error;
+            error = _error || undefined;
           }
         }
       })

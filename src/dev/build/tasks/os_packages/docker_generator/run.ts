@@ -93,7 +93,7 @@ export async function runDockerGenerator(
     await accessAsync(resolve(artifactsDir, artifactTarball));
     await mkdirp(dockerBuildDir);
     await unlinkAsync(resolve(dockerBuildDir, artifactTarball));
-  } catch (e) {
+  } catch (e: any) {
     if (e && e.code === 'ENOENT' && e.syscall === 'access') {
       throw new Error(
         `OpenSearch Dashboards linux target (${artifactTarball}) is needed in order to build ${''}the docker image. None was found at ${artifactsDir}`

@@ -74,7 +74,7 @@ function watchFileUntil(path: string, matcher: RegExp, timeout: number) {
           Fs.unwatchFile(path);
           resolve(contents);
         }
-      } catch (e) {
+      } catch (e: any) {
         // noop
       }
     });
@@ -133,7 +133,7 @@ describe('Server logging configuration', function () {
           '--verbose',
         ]);
 
-        const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+        const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
 
@@ -204,7 +204,7 @@ describe('Server logging configuration', function () {
           configFilePath,
         ]);
 
-        const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
+        const message$ = Rx.fromEvent(child.stdout!, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
 

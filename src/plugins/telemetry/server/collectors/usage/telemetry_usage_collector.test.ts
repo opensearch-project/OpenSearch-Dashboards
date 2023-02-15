@@ -90,7 +90,7 @@ describe('telemetry_usage_collector', () => {
     allFiles.forEach((path) => {
       try {
         unlinkSync(path);
-      } catch (err) {
+      } catch (err: any) {
         // ignored
       }
     });

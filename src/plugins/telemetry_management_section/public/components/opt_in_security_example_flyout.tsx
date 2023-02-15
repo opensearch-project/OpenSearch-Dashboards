@@ -71,7 +71,7 @@ export class OptInSecurityExampleFlyout extends React.PureComponent<Props, State
         isLoading: false,
         hasPrivilegeToRead: true,
       });
-    } catch (err) {
+    } catch (err: any) {
       this.setState({
         isLoading: false,
         hasPrivilegeToRead: err.status !== 403,

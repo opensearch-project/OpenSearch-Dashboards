@@ -64,7 +64,7 @@ export async function createOrUpgradeSavedConfig(
   try {
     // create the new SavedConfig
     await savedObjectsClient.create('config', attributes, { id: version });
-  } catch (error) {
+  } catch (error: any) {
     if (handleWriteErrors) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
         return;

@@ -74,7 +74,7 @@ export function createVerboseInstance(
           result = {
             returned: value.apply(this, args),
           };
-        } catch (error) {
+        } catch (error: any) {
           result = {
             returned: undefined,
             thrown: error,

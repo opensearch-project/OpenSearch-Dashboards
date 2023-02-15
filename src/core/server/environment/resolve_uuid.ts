@@ -97,7 +97,7 @@ async function readUuidFromFile(filepath: string, logger: Logger): Promise<strin
     } else {
       return decoded;
     }
-  } catch (e) {
+  } catch (e: any) {
     if (e.code === 'ENOENT') {
       // non-existent uuid file is ok, we will create it.
       return undefined;
@@ -113,7 +113,7 @@ async function readUuidFromFile(filepath: string, logger: Logger): Promise<strin
 async function writeUuidToFile(filepath: string, uuidValue: string) {
   try {
     return await writeFile(filepath, uuidValue, { encoding: FILE_ENCODING });
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(
       'Unable to write OpenSearch Dashboards UUID file, please check the uuid.server configuration ' +
         'value in opensearch_dashboards.yml and ensure OpenSearch Dashboards has sufficient permissions to read / write to this file. ' +

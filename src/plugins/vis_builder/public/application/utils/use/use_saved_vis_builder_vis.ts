@@ -89,7 +89,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
 
         setSavedVisState(savedVisBuilderVis);
         dispatch(setEditorState({ state: 'clean' }));
-      } catch (error) {
+      } catch (error: any) {
         const managementRedirectTarget = {
           [PLUGIN_ID]: {
             app: 'management',
@@ -110,7 +110,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
           if (error instanceof InvalidJSONProperty) {
             toastNotification(error.message);
           }
-        } catch (e) {
+        } catch (e: any) {
           const message = e instanceof Error ? e.message : '';
           toastNotification(message);
           history.replace(EDIT_PATH);

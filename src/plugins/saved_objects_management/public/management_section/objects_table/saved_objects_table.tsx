@@ -291,7 +291,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           isSearching: false,
         };
       });
-    } catch (error) {
+    } catch (error: any) {
       if (this._isMounted) {
         this.setState({
           isSearching: false,
@@ -325,7 +325,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           isSearching: false,
         };
       });
-    } catch (error) {
+    } catch (error: any) {
       if (this._isMounted) {
         this.setState({
           isSearching: false,
@@ -404,7 +404,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     let blob;
     try {
       blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
-    } catch (e) {
+    } catch (e: any) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',
@@ -439,7 +439,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         queryText ? `${queryText}*` : undefined,
         isIncludeReferencesDeepChecked
       );
-    } catch (e) {
+    } catch (e: any) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',

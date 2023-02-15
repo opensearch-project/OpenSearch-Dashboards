@@ -80,7 +80,7 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
           stat: cpuStat,
         },
       };
-    } catch (err) {
+    } catch (err: any) {
       this.noCgroupPresent = true;
 
       if (err.code !== 'ENOENT') {
@@ -204,7 +204,7 @@ async function readCPUStat(controlGroup: string) {
 
         return acc;
       }, stat);
-  } catch (err) {
+  } catch (err: any) {
     if (err.code === 'ENOENT') {
       return stat;
     }

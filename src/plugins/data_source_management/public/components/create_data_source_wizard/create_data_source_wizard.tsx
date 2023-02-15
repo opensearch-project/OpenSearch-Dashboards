@@ -53,7 +53,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
           listOfDataSources.map((datasource) => datasource.title?.toLowerCase())
         );
       }
-    } catch (e) {
+    } catch (e: any) {
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.createDataSource.existingDatasourceNames',
         defaultMessage: 'Unable to fetch some resources.',
@@ -70,7 +70,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     try {
       await createSingleDataSource(savedObjects.client, attributes);
       props.history.push('');
-    } catch (e) {
+    } catch (e: any) {
       setIsLoading(false);
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.createDataSource.createDataSourceFailMsg',

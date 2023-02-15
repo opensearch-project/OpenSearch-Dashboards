@@ -77,7 +77,7 @@ describe('createDataFolder', () => {
     mkdirMock.mockRejectedValue('some-error');
     try {
       await createDataFolder({ pathConfig, logger });
-    } catch (e) {
+    } catch (e: any) {
       /* trap */
     }
     expect(logger.error).toHaveBeenCalledTimes(1);

@@ -31,7 +31,7 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { PanelState, EmbeddableStart } from '../../../embeddable_plugin';
-import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
+import { DashboardContainer } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../../opensearch_dashboards_react/public';
 
@@ -54,7 +54,6 @@ interface State {
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
 
-  public readonly context!: DashboardReactContextValue;
   private subscription?: Subscription;
   private mounted: boolean = false;
   constructor(props: DashboardViewportProps) {

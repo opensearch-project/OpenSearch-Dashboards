@@ -71,7 +71,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
           listOfDataSources.map((datasource) => datasource.title?.toLowerCase())
         );
       }
-    } catch (e) {
+    } catch (e: any) {
       setDataSource(defaultDataSource);
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.editDataSource.fetchDataSourceFailMsg',
@@ -103,7 +103,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     try {
       await deleteDataSourceById(props.match.params.id, savedObjects.client);
       props.history.push('');
-    } catch (e) {
+    } catch (e: any) {
       setIsLoading(false);
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.editDataSource.deleteDataSourceFailMsg',

@@ -76,6 +76,7 @@ const setup = async () => {
       linux: false,
       linuxArm: false,
       darwin: false,
+      windows: false,
     },
   });
 

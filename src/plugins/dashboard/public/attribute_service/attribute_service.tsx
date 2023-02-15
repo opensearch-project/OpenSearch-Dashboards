@@ -121,7 +121,7 @@ export class AttributeService<
         return { ...originalInput, savedObjectId: savedItem.id } as RefType;
       }
       return { ...originalInput } as RefType;
-    } catch (error) {
+    } catch (error: any) {
       this.toasts.addDanger({
         title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
           defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
@@ -179,7 +179,7 @@ export class AttributeService<
           // Combine input and wrapped input to preserve any passed in explicit Input.
           resolve({ ...input, ...wrappedInput });
           return { id: wrappedInput.savedObjectId };
-        } catch (error) {
+        } catch (error: any) {
           reject(error);
           return { error };
         }

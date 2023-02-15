@@ -51,7 +51,7 @@ export const convertSampleInput = (
         output: converter(input),
       };
     });
-  } catch (e) {
+  } catch (e: any) {
     error = i18n.translate('indexPatternManagement.defaultErrorMessage', {
       defaultMessage: 'An error occurred while trying to use this format configuration: {message}',
       values: { message: e.message },

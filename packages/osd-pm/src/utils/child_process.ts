@@ -82,8 +82,8 @@ export function spawnStreaming(
   const prefixedStdout = logTransformer({ tag: color.bold(prefix) });
   const prefixedStderr = logTransformer({ mergeMultiline: true, tag: color.bold(prefix) });
 
-  spawned.stdout.pipe(prefixedStdout).pipe(streamToLog(debug));
-  spawned.stderr.pipe(prefixedStderr).pipe(streamToLog(debug));
+  spawned.stdout?.pipe(prefixedStdout).pipe(streamToLog(debug));
+  spawned.stderr?.pipe(prefixedStderr).pipe(streamToLog(debug));
 
   return spawned;
 }

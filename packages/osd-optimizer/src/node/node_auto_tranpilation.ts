@@ -128,7 +128,7 @@ function compile(cache: Cache, source: string, path: string) {
     });
 
     return result.code;
-  } catch (error) {
+  } catch (error: any) {
     throw error;
   }
 }

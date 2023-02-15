@@ -93,7 +93,7 @@ export const WatchCommand: ICommand = {
       const completionHint = await waitUntilWatchIsReady(
         pkg.runScriptStreaming(watchScriptName, {
           debug: false,
-        }).stdout
+        }).stdout!
       );
 
       log.success(`[${pkg.name}] Initial build completed (${completionHint}).`);

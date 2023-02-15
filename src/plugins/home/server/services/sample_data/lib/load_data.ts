@@ -48,7 +48,7 @@ export function loadData(path: any, bulkInsert: (docs: any[]) => Promise<void>) 
       if (docs.length > 0) {
         try {
           await bulkInsert(docs);
-        } catch (err) {
+        } catch (err: any) {
           reject(err);
           return;
         }
@@ -71,7 +71,7 @@ export function loadData(path: any, bulkInsert: (docs: any[]) => Promise<void>) 
       let doc;
       try {
         doc = JSON.parse(line);
-      } catch (err) {
+      } catch (err: any) {
         closeWithError(
           new Error(
             `Unable to parse line as JSON document, line: """${line}""", Error: ${err.message}`
@@ -93,7 +93,7 @@ export function loadData(path: any, bulkInsert: (docs: any[]) => Promise<void>) 
         try {
           await bulkInsert(docstmp);
           lineStream.resume();
-        } catch (err) {
+        } catch (err: any) {
           closeWithError(err);
         }
       }

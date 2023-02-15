@@ -89,7 +89,7 @@ const callAPI = async (
       }
       return request.then(resolve, reject);
     });
-  } catch (err) {
+  } catch (err: any) {
     if (!options.wrap401Errors || err.statusCode !== 401) {
       throw err;
     }

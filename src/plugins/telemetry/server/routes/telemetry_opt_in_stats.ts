@@ -92,7 +92,7 @@ export function registerTelemetryOptInStatsRoutes(
           statsGetterConfig
         );
         return res.ok({ body: optInStatus });
-      } catch (err) {
+      } catch (err: any) {
         return res.ok({ body: [] });
       }
     }

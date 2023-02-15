@@ -114,7 +114,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
     let indexPatternTitle;
     try {
       indexPatternTitle = await getTitle(this.props.savedObjectsClient, indexPatternId);
-    } catch (err) {
+    } catch (err: any) {
       // index pattern no longer exists
       return;
     }
@@ -147,7 +147,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
           return indexPatternFields.some((field: any) => {
             return fieldTypes?.includes(field.type);
           });
-        } catch (err) {
+        } catch (err: any) {
           // Unable to parse fields JSON, invalid index pattern
           return false;
         }

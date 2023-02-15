@@ -54,7 +54,7 @@ describe('filter_manager/lib', () => {
 
         try {
           mapMatchAll(filter);
-        } catch (e) {
+        } catch (e: any) {
           expect(e).toBe(filter);
           done();
         }

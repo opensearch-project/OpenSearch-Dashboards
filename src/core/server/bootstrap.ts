@@ -110,7 +110,7 @@ export async function bootstrap({
 
     try {
       rawConfigService.reloadConfig();
-    } catch (err) {
+    } catch (err: any) {
       return shutdown(err);
     }
 
@@ -128,7 +128,7 @@ export async function bootstrap({
   try {
     await root.setup();
     await root.start();
-  } catch (err) {
+  } catch (err: any) {
     await shutdown(err);
   }
 }

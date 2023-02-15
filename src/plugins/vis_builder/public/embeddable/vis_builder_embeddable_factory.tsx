@@ -104,7 +104,7 @@ export class VisBuilderEmbeddableFactoryDefinition
           parent,
         }
       );
-    } catch (e) {
+    } catch (e: any) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e as Error, input, parent);
     }

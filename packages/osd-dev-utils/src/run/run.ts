@@ -89,7 +89,7 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
         addCleanupTask: cleanup.add.bind(cleanup),
       });
     });
-  } catch (error) {
+  } catch (error: any) {
     cleanup.execute(error);
     // process.exitCode is set by `cleanup` when necessary
     process.exit();

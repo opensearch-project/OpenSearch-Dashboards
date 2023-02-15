@@ -110,7 +110,7 @@ export class StringFormat extends FieldFormat {
   private base64Decode(val: string) {
     try {
       return Buffer.from(val, 'base64').toString('utf8');
-    } catch (e) {
+    } catch (e: any) {
       return asPrettyString(val);
     }
   }

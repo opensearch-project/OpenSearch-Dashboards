@@ -130,7 +130,7 @@ export class OsdClientRequester {
         });
 
         return response;
-      } catch (error) {
+      } catch (error: any) {
         const conflictOnGet = isConcliftOnGetError(error);
         const requestedRetries = options.retries !== undefined;
         const failedToGetResponse = isAxiosRequestError(error);

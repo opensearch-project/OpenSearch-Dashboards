@@ -296,7 +296,7 @@ function DefaultEditorAgg({
         {SchemaComponent && (
           <SchemaComponent
             agg={agg}
-            editorStateParams={state.params}
+            editorStateParams={state.params || {}}
             setAggParamValue={setAggParamValue}
             setStateParamValue={setStateParamValue}
           />

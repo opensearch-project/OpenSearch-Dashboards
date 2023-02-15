@@ -38,7 +38,7 @@ function parseWithBase(value: string, baseInterval: string) {
   try {
     const interval = leastCommonInterval(baseInterval, value);
     return interval === value.replace(/\s/g, '');
-  } catch (e) {
+  } catch (e: any) {
     return false;
   }
 }

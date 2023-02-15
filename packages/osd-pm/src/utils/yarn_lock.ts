@@ -66,7 +66,7 @@ export async function readYarnLock(osd: OpenSearchDashboards): Promise<YarnLock>
     }
 
     throw new Error('unable to read yarn.lock file, please run `yarn osd bootstrap`');
-  } catch (error) {
+  } catch (error: any) {
     if (error.code !== 'ENOENT') {
       throw error;
     }

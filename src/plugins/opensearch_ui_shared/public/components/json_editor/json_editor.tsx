@@ -78,7 +78,7 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
             try {
               JSON.parse(updated);
               return true;
-            } catch (e) {
+            } catch (e: any) {
               return false;
             }
           },

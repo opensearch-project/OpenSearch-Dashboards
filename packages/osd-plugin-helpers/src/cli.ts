@@ -159,21 +159,21 @@ export function runCli() {
         let dashboardsPackage;
         try {
           dashboardsPackage = await import(Path.join(PROCESS_WORKING_DIR, '../../package.json'));
-        } catch (ex) {
+        } catch (ex: any) {
           throw createFailError(`Unable to parse the OpenSearch Dashboards' package.json file`);
         }
 
         let pluginPackage;
         try {
           pluginPackage = await import(Path.join(PROCESS_WORKING_DIR, 'package.json'));
-        } catch (ex) {
+        } catch (ex: any) {
           throw createFailError(`Unable to parse the plugin's package.json file`);
         }
 
         let manifestFile;
         try {
           manifestFile = await import(Path.join(PROCESS_WORKING_DIR, 'opensearch_dashboards.json'));
-        } catch (ex) {
+        } catch (ex: any) {
           throw createFailError(`Unable to parse the plugin's opensearch_dashboards.json file`);
         }
 

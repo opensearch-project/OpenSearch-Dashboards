@@ -207,7 +207,7 @@ export const opensearchdsl = (): OpenSearchdslExpressionFunctionDefinition => ({
         type: 'opensearch_raw_response',
         body: resp,
       };
-    } catch (e) {
+    } catch (e: any) {
       request.error({ json: e });
       throw e;
     }

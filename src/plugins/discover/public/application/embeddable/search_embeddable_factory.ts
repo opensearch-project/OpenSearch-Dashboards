@@ -119,7 +119,7 @@ export class SearchEmbeddableFactory
         executeTriggerActions,
         parent
       );
-    } catch (e) {
+    } catch (e: any) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
     }

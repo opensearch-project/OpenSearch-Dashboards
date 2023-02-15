@@ -67,7 +67,7 @@ const getDefaultVegaVisualizations = (home: UsageCollectorDependencies['home']) 
             titles.push(visState.title);
           }
         }
-      } catch (e) {
+      } catch (e: any) {
         // Let it go, visState is invalid and we'll don't need to handle it
       }
     })
@@ -127,7 +127,7 @@ const getStats = async (
               telemetry.vega_use_map_total++;
             }
           }
-        } catch (e) {
+        } catch (e: any) {
           // Let it go, the data is invalid and we'll don't need to handle it
         }
 

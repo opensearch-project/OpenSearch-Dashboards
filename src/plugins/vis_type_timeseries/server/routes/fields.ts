@@ -44,7 +44,7 @@ export const fieldsRoutes = (framework: Framework) => {
     async (context, req, res) => {
       try {
         return res.ok({ body: await getFields(context, req, framework, req.query.index) });
-      } catch (err) {
+      } catch (err: any) {
         if (isBoom(err) && err.output.statusCode === 401) {
           return res.customError({
             body: err.output.payload,

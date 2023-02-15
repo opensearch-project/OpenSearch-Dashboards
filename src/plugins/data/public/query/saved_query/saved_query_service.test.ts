@@ -161,7 +161,7 @@ describe('saved query service', () => {
       let error = null;
       try {
         await saveQuery(savedQueryAttributes);
-      } catch (e) {
+      } catch (e: any) {
         error = e;
       }
       expect(error).not.toBe(null);
@@ -171,7 +171,7 @@ describe('saved query service', () => {
       let error = null;
       try {
         await saveQuery({ ...savedQueryAttributes, title: '' });
-      } catch (e) {
+      } catch (e: any) {
         error = e;
       }
       expect(error).not.toBe(null);

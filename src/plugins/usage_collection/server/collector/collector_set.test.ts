@@ -123,7 +123,7 @@ describe('CollectorSet', () => {
       let result;
       try {
         result = await collectors.bulkFetch(mockCallCluster, mockOpenSearchClient);
-      } catch (err) {
+      } catch (err: any) {
         // Do nothing
       }
       // This must return an empty object instead of null/undefined

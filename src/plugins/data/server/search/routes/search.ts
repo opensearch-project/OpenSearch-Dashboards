@@ -77,7 +77,7 @@ export function registerSearchRoute(
             },
           },
         });
-      } catch (err) {
+      } catch (err: any) {
         return res.customError({
           statusCode: err.statusCode || 500,
           body: {
@@ -113,7 +113,7 @@ export function registerSearchRoute(
       try {
         await searchStrategy.cancel(context, id);
         return res.ok();
-      } catch (err) {
+      } catch (err: any) {
         return res.customError({
           statusCode: err.statusCode,
           body: {

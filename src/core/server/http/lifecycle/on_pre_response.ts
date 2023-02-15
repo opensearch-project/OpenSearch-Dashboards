@@ -184,7 +184,7 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
           );
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       log.error(error);
       const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
       return hapiResponseAdapter.toInternalError();

@@ -60,7 +60,7 @@ run(
       await writeFileAsync(installPath, SCRIPT_SOURCE);
       await chmodAsync(installPath, 0o755);
       log.success(`OpenSearch Dashboards pre-commit git hook was installed successfully.`);
-    } catch (e) {
+    } catch (e: any) {
       if (isFailError(e)) {
         return;
       }

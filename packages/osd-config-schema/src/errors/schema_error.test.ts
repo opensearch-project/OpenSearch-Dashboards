@@ -57,7 +57,7 @@ export const cleanStack = (stack: string) =>
 it('includes stack', () => {
   try {
     throw new SchemaError('test');
-  } catch (e) {
+  } catch (e: any) {
     expect(cleanStack(e.stack)).toMatchSnapshot();
   }
 });

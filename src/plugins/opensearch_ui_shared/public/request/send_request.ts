@@ -54,7 +54,7 @@ export const sendRequest = async <D = any, E = any>(
       data: response.data ? response.data : response,
       error: null,
     };
-  } catch (e) {
+  } catch (e: any) {
     return {
       data: null,
       error: e.response?.data ?? e.body,

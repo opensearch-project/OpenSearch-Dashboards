@@ -123,7 +123,7 @@ run(
       const messages: Map<string, { message: string }> = new Map();
       await list.run({ messages, reporter });
       process.exitCode = 0;
-    } catch (error) {
+    } catch (error: any) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
         error.errors.forEach((e: string | Error) => log.error(e));

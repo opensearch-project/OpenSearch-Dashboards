@@ -61,7 +61,7 @@ export function checkCompatibleTypeDescriptor(
           key = key.replace(/'/g, '');
           try {
             acc[key] = kindToDescriptorName(type);
-          } catch (err) {
+          } catch (err: any) {
             throw Error(`Unrecognized type (${key}: ${type}) in ${collectorPath}`);
           }
           return acc;
@@ -76,7 +76,7 @@ export function checkCompatibleTypeDescriptor(
           key = key.replace(/'/g, '');
           try {
             acc[key.replace(/.type$/, '.kind')] = compatibleSchemaTypes(type as any);
-          } catch (err) {
+          } catch (err: any) {
             throw Error(`Unrecognized type (${key}: ${type}) in ${collectorPath}`);
           }
           return acc;
@@ -100,7 +100,7 @@ export function checkCompatibleTypeDescriptor(
             const expectedDescriptorType = JSON.stringify(transformedMappingKinds[key], null, 2);
             const actualDescriptorType = JSON.stringify(typeDescriptorKinds[key], null, 2);
             return `incompatible Type key (${collectorDetails.fetch.typeName}.${interfaceKey}): expected (${expectedDescriptorType}) got (${actualDescriptorType}).`;
-          } catch (err) {
+          } catch (err: any) {
             throw Error(`Error converting ${key} in ${collectorPath}.\n${err}`);
           }
         }),

@@ -92,7 +92,7 @@
     "**/node-jose": "^2.1.0",
     "**/nth-check": "^2.0.1",
     "**/trim": "^0.0.3",
-    "**/typescript": "4.0.2",
+    "**/typescript": "4.1.6",
     "**/unset-value": "^2.0.1",
     "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
     "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1"
@@ -451,7 +451,7 @@
     "topojson-client": "3.0.0",
     "tough-cookie": "^4.0.0",
     "tree-kill": "^1.2.2",
-    "typescript": "4.0.2",
+    "typescript": "4.1.6",
     "ui-select": "0.19.8",
     "vega": "^5.17.3",
     "vega-interpreter": "npm:@amoo-miki/vega-forced-csp-compliant-interpreter@1.0.6",

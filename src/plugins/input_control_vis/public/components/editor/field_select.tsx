@@ -99,7 +99,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     let indexPattern: IIndexPattern;
     try {
       indexPattern = await this.props.getIndexPattern(indexPatternId);
-    } catch (err) {
+    } catch (err: any) {
       // index pattern no longer exists
       return;
     }

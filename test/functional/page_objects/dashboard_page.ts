@@ -542,7 +542,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
           'embeddablePanelNotification-ACTION_PANEL_NOTIFICATIONS'
         );
         return Number.parseInt(await count.getVisibleText(), 10);
-      } catch (e) {
+      } catch (e: any) {
         // if not found then this is 0 (we don't show badge with 0)
         return 0;
       }

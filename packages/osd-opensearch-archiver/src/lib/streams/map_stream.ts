@@ -39,7 +39,7 @@ export function createMapStream<T = any>(fn: (chunk: any, i: number) => T | Prom
       try {
         this.push(await fn(value, i++));
         done();
-      } catch (err) {
+      } catch (err: any) {
         done(err);
       }
     },

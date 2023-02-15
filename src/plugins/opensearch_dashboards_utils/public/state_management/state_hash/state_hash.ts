@@ -83,7 +83,7 @@ export function retrieveState<State>(stateHash: string): State {
   }
   try {
     return JSON.parse(json);
-  } catch (e) {
+  } catch (e: any) {
     return throwUnableToRestoreUrlError();
   }
 }

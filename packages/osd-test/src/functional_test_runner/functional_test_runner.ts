@@ -164,7 +164,7 @@ export class FunctionalTestRunner {
     } finally {
       try {
         await this.close();
-      } catch (closeError) {
+      } catch (closeError: any) {
         if (runErrorOccurred) {
           this.log.error('failed to close functional_test_runner');
           this.log.error(closeError);

@@ -161,8 +161,8 @@ describe('DefaultEditorAgg component', () => {
     });
 
     expect(reorderAggs).toHaveBeenCalledWith(
-      defaultProps.state.data.aggs!.aggs[0],
-      defaultProps.state.data.aggs!.aggs[1]
+      defaultProps.state.data?.aggs!.aggs[0],
+      defaultProps.state.data?.aggs!.aggs[1]
     );
   });
 

@@ -89,7 +89,7 @@ export async function SnapshotsProvider({ getService }: FtrProviderContext) {
       try {
         await mkdirAsync(dirname(path), { recursive: true });
         await writeFileAsync(path, JSON.stringify(snapshot), 'utf8');
-      } catch (err) {
+      } catch (err: any) {
         log.error('SNAPSHOT FAILED');
         log.error(err);
       }

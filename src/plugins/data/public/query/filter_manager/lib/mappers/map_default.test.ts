@@ -46,7 +46,7 @@ describe('filter manager utilities', () => {
 
       try {
         mapDefault(filter);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBe(filter);
       }
     });

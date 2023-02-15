@@ -70,7 +70,7 @@ export function validateParams(params: any, type: string) {
         return params.includes('/')
           ? Boolean(new CidrMask(params))
           : Boolean(new Ipv4Address(params));
-      } catch (e) {
+      } catch (e: any) {
         return false;
       }
     default:

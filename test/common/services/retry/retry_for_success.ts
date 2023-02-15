@@ -48,7 +48,7 @@ async function runAttempt<T>(block: () => Promise<T>): Promise<{ result: T } | {
     return {
       result: await block(),
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       // we rely on error being truthy and throwing falsy values is *allowed*
       // so we cast falsy values to errors

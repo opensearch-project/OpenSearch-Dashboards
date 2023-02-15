@@ -62,7 +62,7 @@ describe('readConfigFile()', () => {
     try {
       await readConfigFile(log, require.resolve('./fixtures/config.invalid'));
       throw new Error('expected readConfigFile() to fail');
-    } catch (err) {
+    } catch (err: any) {
       const { message } = err as Error;
       expect(message).to.match(/"foo"/);
     }

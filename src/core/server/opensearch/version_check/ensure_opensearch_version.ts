@@ -108,7 +108,7 @@ export const getNodeId = async (
 
     // When all nodes share the same cluster_id, return _local
     return '_local';
-  } catch (e) {
+  } catch (e: any) {
     return null;
   }
 };

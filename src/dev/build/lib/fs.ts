@@ -67,7 +67,7 @@ export function isFileAccessible(path: string) {
   try {
     fs.accessSync(path);
     return true;
-  } catch (e) {
+  } catch (e: any) {
     return false;
   }
 }
@@ -145,7 +145,7 @@ export async function deleteEmptyFolders(
     dryRun: true,
   });
 
-  const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
+  const foldersToDelete = emptyFoldersList.filter((folderToDelete: string) => {
     return !foldersToKeep.some((folderToKeep) => folderToDelete.includes(folderToKeep));
   });
   const deletedEmptyFolders = await del(foldersToDelete, {

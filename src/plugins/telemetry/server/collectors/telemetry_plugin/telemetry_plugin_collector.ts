@@ -67,7 +67,7 @@ export function createCollectorFetch({
       telemetrySavedObject = await getTelemetrySavedObject(
         new SavedObjectsClient(internalRepository)
       );
-    } catch (err) {
+    } catch (err: any) {
       // no-op
     }
 

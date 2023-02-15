@@ -158,7 +158,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
           showLimitError: response.total > this.props.listingLimit,
         });
       }
-    } catch (fetchError) {
+    } catch (fetchError: any) {
       this.setState({
         hasInitialFetchReturned: true,
         isFetchingItems: false,
@@ -190,7 +190,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     try {
       const itemsById = keyBy(this.state.items, 'id');
       await this.props.deleteItems(this.state.selectedIds.map((id) => itemsById[id]));
-    } catch (error) {
+    } catch (error: any) {
       this.props.toastNotifications.addDanger({
         title: toMountPoint(
           <FormattedMessage

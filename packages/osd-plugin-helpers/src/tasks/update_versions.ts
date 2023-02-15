@@ -57,7 +57,7 @@ async function updateFile({ log, file, updates }: FileUpdateContext) {
 
   try {
     json = JSON.parse(await readFile(file, 'utf8'));
-  } catch (ex) {
+  } catch (ex: any) {
     log.error(ex);
     throw createFailError(`Failed to parse ${file}`);
   }
@@ -70,7 +70,7 @@ async function updateFile({ log, file, updates }: FileUpdateContext) {
 
   try {
     await writeFile(file, JSON.stringify(json, null, 2), 'utf8');
-  } catch (ex) {
+  } catch (ex: any) {
     log.error(ex);
     throw createFailError(`Failed to update ${file}`);
   }

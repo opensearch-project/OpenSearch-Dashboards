@@ -87,7 +87,7 @@ export function registerValueSuggestionsRoute(
           get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
 
         return response.ok({ body: map(buckets || [], 'key') });
-      } catch (error) {
+      } catch (error: any) {
         return response.internalError({ body: error });
       }
     }

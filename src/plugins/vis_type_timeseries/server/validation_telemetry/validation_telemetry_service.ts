@@ -76,7 +76,7 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
                 failed_validations:
                   response?._source?.['tsvb-validation-telemetry']?.failedRequests || 0,
               };
-            } catch (err) {
+            } catch (err: any) {
               return {
                 failed_validations: 0,
               };
@@ -101,7 +101,7 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
             'tsvb-validation-telemetry',
             'failedRequests'
           );
-        } catch (e) {
+        } catch (e: any) {
           // swallow error, validation telemetry shouldn't fail anything else
         }
       },

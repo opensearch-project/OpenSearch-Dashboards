@@ -94,7 +94,7 @@ function transformNonBlocking(
       setImmediate(() => {
         try {
           resolve(transform(doc));
-        } catch (e) {
+        } catch (e: any) {
           reject(e);
         }
       });

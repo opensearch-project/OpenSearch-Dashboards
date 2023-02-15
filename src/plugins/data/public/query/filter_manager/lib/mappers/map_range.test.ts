@@ -56,7 +56,7 @@ describe('filter manager utilities', () => {
 
       try {
         mapRange(filter);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBe(filter);
 
         done();

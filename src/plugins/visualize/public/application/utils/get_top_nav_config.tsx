@@ -157,7 +157,7 @@ export const getTopNavConfig = (
       }
 
       return { id };
-    } catch (error) {
+    } catch (error: any) {
       // eslint-disable-next-line
       console.error(error);
       toastNotifications.addDanger({

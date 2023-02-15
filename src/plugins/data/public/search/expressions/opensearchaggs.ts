@@ -171,7 +171,7 @@ const handleCourierRequest = async ({
     request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
 
     (searchSource as any).rawResponse = response;
-  } catch (e) {
+  } catch (e: any) {
     // Log any error during request to the inspector
     request.error({ json: e });
     throw e;

@@ -67,7 +67,7 @@ export function createIntersperseStream(intersperseChunk: string | Buffer) {
 
         this.push(chunk);
         callback();
-      } catch (err) {
+      } catch (err: any) {
         callback(err);
       }
     },

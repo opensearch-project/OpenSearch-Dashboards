@@ -90,7 +90,7 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
           distro: distro.dist,
           distroRelease: `${distro.dist}-${distro.release}`,
         };
-      } catch (e) {
+      } catch (e: any) {
         // ignore errors
       }
     }

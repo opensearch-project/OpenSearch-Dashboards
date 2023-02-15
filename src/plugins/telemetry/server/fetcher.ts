@@ -119,7 +119,7 @@ export class FetcherTask {
 
     try {
       telemetryConfig = await this.getCurrentConfigs();
-    } catch (err) {
+    } catch (err: any) {
       this.logger.warn(`Error getting telemetry configs. (${err})`);
       return;
     }
@@ -137,7 +137,7 @@ export class FetcherTask {
         throw new Error('Not all collectors are ready.');
       }
       clusters = await this.fetchTelemetry();
-    } catch (err) {
+    } catch (err: any) {
       this.logger.warn(`Error fetching usage. (${err})`);
       this.isSending = false;
       return;
@@ -150,7 +150,7 @@ export class FetcherTask {
       }
 
       await this.updateLastReported();
-    } catch (err) {
+    } catch (err: any) {
       await this.updateReportFailure(telemetryConfig);
 
       this.logger.warn(`Error sending telemetry usage data. (${err})`);

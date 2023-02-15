@@ -30,7 +30,6 @@
 
 import './empty_state.scss';
 import React from 'react';
-import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DocLinksStart, ApplicationStart } from 'opensearch-dashboards/public';
 import {

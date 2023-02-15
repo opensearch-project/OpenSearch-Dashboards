@@ -49,7 +49,7 @@ export function preventParallelCalls<C extends void, A, R>(
     public async exec() {
       try {
         this.resolve(await fn.call(this.context, this.arg));
-      } catch (error) {
+      } catch (error: any) {
         this.reject(error);
       } finally {
         execQueue.shift();

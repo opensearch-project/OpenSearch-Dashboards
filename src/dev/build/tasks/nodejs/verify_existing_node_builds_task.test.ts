@@ -74,6 +74,7 @@ async function setup(actualShaSums?: Record<string, string>) {
       linux: false,
       linuxArm: false,
       darwin: false,
+      windows: false,
     },
   });
 

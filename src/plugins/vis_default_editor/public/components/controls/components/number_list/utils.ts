@@ -48,7 +48,7 @@ function parse(value: string) {
 function getRange(range?: string): NumberListRange {
   try {
     return range ? parseRange(range) : defaultRange;
-  } catch (e) {
+  } catch (e: any) {
     throw new TypeError('Unable to parse range: ' + e.message);
   }
 }

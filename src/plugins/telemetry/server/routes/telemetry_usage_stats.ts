@@ -77,7 +77,7 @@ export function registerTelemetryUsageStatsRoutes(
         };
         const stats = await telemetryCollectionManager.getStats(statsConfig);
         return res.ok({ body: stats });
-      } catch (err) {
+      } catch (err: any) {
         if (isDev) {
           // don't ignore errors when running in dev mode
           throw err;

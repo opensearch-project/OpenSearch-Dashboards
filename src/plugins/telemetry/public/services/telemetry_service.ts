@@ -166,7 +166,7 @@ export class TelemetryService {
         await this.reportOptInStatus(optInPayload);
       }
       this.isOptedIn = optedIn;
-    } catch (err) {
+    } catch (err: any) {
       this.notifications.toasts.addError(err, {
         title: i18n.translate('telemetry.optInErrorToastTitle', {
           defaultMessage: 'Error',
@@ -186,7 +186,7 @@ export class TelemetryService {
     try {
       await this.http.put('/api/telemetry/v2/userHasSeenNotice');
       this.userHasSeenOptedInNotice = true;
-    } catch (error) {
+    } catch (error: any) {
       this.notifications.toasts.addError(error, {
         title: i18n.translate('telemetry.optInNoticeSeenErrorTitle', {
           defaultMessage: 'Error',
@@ -214,7 +214,7 @@ export class TelemetryService {
         },
         body: JSON.stringify(optInPayload),
       });
-    } catch (err) {
+    } catch (err: any) {
       // Sending the ping is best-effort. Telemetry tries to send the ping once and discards it immediately if sending fails.
       // swallow any errors
     }

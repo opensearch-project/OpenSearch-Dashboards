@@ -39,7 +39,7 @@ export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void 
     try {
       JSON.parse(value);
       return true;
-    } catch (e) {
+    } catch (e: any) {
       return false;
     }
   })();

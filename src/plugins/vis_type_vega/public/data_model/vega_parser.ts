@@ -114,7 +114,7 @@ export class VegaParser {
   async parseAsync() {
     try {
       await this._parseAsync();
-    } catch (err) {
+    } catch (err: any) {
       // if we reject current promise, it will use the standard OpenSearch Dashboards error handling
       this.error = Utils.formatErrorToStr(err);
     }

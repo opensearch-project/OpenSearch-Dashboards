@@ -137,7 +137,7 @@ export async function interceptResponse(
             }
 
             return { ...next, request, fetchOptions };
-          } catch (err) {
+          } catch (err: any) {
             checkHalt(controller, err);
             throw err;
           }

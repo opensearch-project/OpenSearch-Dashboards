@@ -98,7 +98,7 @@ export class DockerServersService {
       const res = await execa('docker', dockerArgs);
 
       return res.stdout.trim();
-    } catch (error) {
+    } catch (error: any) {
       if (error?.exitCode === 125 && error?.message.includes('port is already allocated')) {
         throw new Error(`
           [docker:${server.name}] Another process is already listening on port ${server.port}.
@@ -140,7 +140,7 @@ export class DockerServersService {
         if (!process.env.CI) {
           execa.sync('docker', ['rm', containerId]);
         }
-      } catch (error) {
+      } catch (error: any) {
         if (
           error.message.includes(`Container ${containerId} is not running`) ||
           error.message.includes(`No such container: ${containerId}`)

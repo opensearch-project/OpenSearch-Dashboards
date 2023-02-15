@@ -75,7 +75,7 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
         }
 
         callback();
-      } catch (err) {
+      } catch (err: any) {
         callback(err);
       }
     },

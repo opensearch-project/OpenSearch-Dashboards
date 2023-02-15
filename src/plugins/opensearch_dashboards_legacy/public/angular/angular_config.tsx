@@ -277,7 +277,7 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart, isLocalAngular: bool
 
     try {
       newPlatform.chrome.setBreadcrumbs($injector.invoke(k7BreadcrumbsProvider));
-    } catch (error) {
+    } catch (error: any) {
       if (isAngularHttpError(error)) {
         error = formatAngularHttpError(error);
       }
@@ -322,7 +322,7 @@ const $setupBadgeAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) =
 
     try {
       newPlatform.chrome.setBadge($injector.invoke(badgeProvider));
-    } catch (error) {
+    } catch (error: any) {
       if (isAngularHttpError(error)) {
         error = formatAngularHttpError(error);
       }

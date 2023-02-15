@@ -326,7 +326,7 @@ export class SearchEmbeddable
         this.searchScope!.hits = resp.hits.hits;
         this.searchScope!.totalHitCount = resp.hits.total;
       });
-    } catch (error) {
+    } catch (error: any) {
       this.updateOutput({ loading: false, error });
     }
   };

@@ -62,7 +62,7 @@ export class Root {
       await this.setupLogging();
       this.log.debug('setting up root');
       return await this.server.setup();
-    } catch (e) {
+    } catch (e: any) {
       await this.shutdown(e);
       throw e;
     }
@@ -72,7 +72,7 @@ export class Root {
     this.log.debug('starting root');
     try {
       return await this.server.start();
-    } catch (e) {
+    } catch (e: any) {
       await this.shutdown(e);
       throw e;
     }

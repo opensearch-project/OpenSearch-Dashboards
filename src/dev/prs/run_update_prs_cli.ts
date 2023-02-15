@@ -83,7 +83,7 @@ run(
 
       await Promise.all([
         proc.then(() => log.debug(` - ${cmd} exited with 0`)),
-        Rx.merge(getLine$(proc.stdout), getLine$(proc.stderr))
+        Rx.merge(getLine$(proc.stdout!), getLine$(proc.stderr!))
           .pipe(tap((line) => log.debug(line)))
           .toPromise(),
       ]);
@@ -96,7 +96,7 @@ run(
       try {
         // attempt to init upstream remote
         await execInDir('git', ['remote', 'add', 'upstream', UPSTREAM_URL]);
-      } catch (error) {
+      } catch (error: any) {
         if (error.exitCode !== 128) {
           throw error;
         }
@@ -123,7 +123,7 @@ run(
       try {
         log.info('Pulling in changes from opensearch:%s', pr.targetRef);
         await execInDir('git', ['pull', 'upstream', pr.targetRef, '--no-edit']);
-      } catch (error) {
+      } catch (error: any) {
         if (!error.stdout.includes('Automatic merge failed;')) {
           throw error;
         }

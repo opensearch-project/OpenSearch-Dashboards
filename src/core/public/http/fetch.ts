@@ -116,7 +116,7 @@ export class Fetch {
         } else {
           resolve(interceptedResponse.body);
         }
-      } catch (error) {
+      } catch (error: any) {
         if (!(error instanceof HttpInterceptHaltError)) {
           reject(error);
         }
@@ -168,7 +168,7 @@ export class Fetch {
 
     try {
       response = await window.fetch(request);
-    } catch (err) {
+    } catch (err: any) {
       throw new HttpFetchError(err.message, err.name ?? 'Error', request);
     }
 
@@ -184,11 +184,11 @@ export class Fetch {
 
         try {
           body = JSON.parse(text);
-        } catch (err) {
+        } catch (err: any) {
           body = text;
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       throw new HttpFetchError(err.message, err.name ?? 'Error', request, response, body);
     }
 

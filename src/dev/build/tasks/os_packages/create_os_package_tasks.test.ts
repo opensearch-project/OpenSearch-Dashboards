@@ -32,6 +32,7 @@ async function setup() {
       linux: false,
       linuxArm: false,
       darwin: false,
+      windows: false,
     },
   });
 

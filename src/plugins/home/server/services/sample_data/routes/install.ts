@@ -127,7 +127,7 @@ export function createInstallRoute(
           await context.core.opensearch.legacy.client.callAsCurrentUser('indices.delete', {
             index,
           });
-        } catch (err) {
+        } catch (err: any) {
           // ignore delete errors
         }
 
@@ -143,7 +143,7 @@ export function createInstallRoute(
             'indices.create',
             createIndexParams
           );
-        } catch (err) {
+        } catch (err: any) {
           const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
           logger.warn(errMsg);
           return res.customError({ body: errMsg, statusCode: err.status });
@@ -158,7 +158,7 @@ export function createInstallRoute(
             logger
           );
           (counts as any)[index] = count;
-        } catch (err) {
+        } catch (err: any) {
           const errMsg = `sample_data install errors while loading data. Error: ${err}`;
           logger.warn(errMsg);
           return res.internalError({ body: errMsg });
@@ -171,7 +171,7 @@ export function createInstallRoute(
           sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }
         );
-      } catch (err) {
+      } catch (err: any) {
         const errMsg = `bulkCreate failed, error: ${err.message}`;
         logger.warn(errMsg);
         return res.internalError({ body: errMsg });

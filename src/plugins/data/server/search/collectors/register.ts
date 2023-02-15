@@ -54,7 +54,7 @@ export async function registerUsageCollector(
       },
     });
     usageCollection.registerCollector(collector);
-  } catch (err) {
+  } catch (err: any) {
     return; // OpenSearch Dashboards plugin is not enabled (test environment)
   }
 }

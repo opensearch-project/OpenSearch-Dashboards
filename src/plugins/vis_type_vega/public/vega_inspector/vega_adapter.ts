@@ -70,7 +70,7 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
     try {
       const cell = item[column];
       row[column] = typeof cell === 'object' ? JSON.stringify(cell) : `${cell}`;
-    } catch (e) {
+    } catch (e: any) {
       row[column] = nonSerializableFieldLabel;
     }
     return row;

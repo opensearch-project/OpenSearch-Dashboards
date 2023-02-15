@@ -159,7 +159,7 @@ export async function suggest(
       functionList,
       argValueSuggestions
     );
-  } catch (err) {
+  } catch (err: any) {
     let message: any;
     try {
       // The grammar will throw an error containing a message if the expression is formatted
@@ -167,7 +167,7 @@ export async function suggest(
       // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
       // attempt will throw an error.
       message = JSON.parse(err.message);
-    } catch (e) {
+    } catch (e: any) {
       // The expression isn't correctly formatted, so JSON.parse threw an error.
       return;
     }

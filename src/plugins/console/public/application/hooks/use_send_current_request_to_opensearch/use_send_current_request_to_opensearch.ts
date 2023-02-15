@@ -69,7 +69,7 @@ export const useSendCurrentRequestToOpenSearch = () => {
       results.forEach(({ request: { path, method, data } }) => {
         try {
           history.addToHistory(path, method, data);
-        } catch (e) {
+        } catch (e: any) {
           // Best effort, but notify the user.
           notifications.toasts.addError(e, {
             title: i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
@@ -94,7 +94,7 @@ export const useSendCurrentRequestToOpenSearch = () => {
           data: results,
         },
       });
-    } catch (e) {
+    } catch (e: any) {
       if (e?.response) {
         dispatch({
           type: 'requestFail',

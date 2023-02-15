@@ -319,7 +319,7 @@ function wrapWithTry(
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       const failedTransform = `${type}:${version}`;
       const failedDoc = JSON.stringify(doc);
       log.warn(

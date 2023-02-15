@@ -44,7 +44,7 @@ describe('Cross Platform', () => {
             // If leftover artifacts were found, get rid of them
             await access(tmpTestFolder);
             await rmdir(tmpTestFolder, { recursive: true });
-          } catch (ex) {
+          } catch (ex: any) {
             // Do nothing; if `rmdir` failed, let the `mkdir` below throw the error
           }
 
@@ -61,7 +61,7 @@ describe('Cross Platform', () => {
         afterAll(async () => {
           try {
             await rmdir(tmpTestFolder, { recursive: true });
-          } catch (ex) {
+          } catch (ex: any) {
             // Do nothing
           }
         });

@@ -103,7 +103,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
       savedVisualizationsLoader,
       parent
     );
-  } catch (e) {
+  } catch (e: any) {
     console.error(e); // eslint-disable-line no-console
     return new ErrorEmbeddable(e, input, parent);
   }

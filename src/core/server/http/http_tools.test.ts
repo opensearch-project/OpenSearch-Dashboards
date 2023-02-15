@@ -89,7 +89,7 @@ describe('defaultValidationErrorHandler', () => {
 
     try {
       defaultValidationErrorHandler({} as Request, {} as ResponseToolkit, error);
-    } catch (err) {
+    } catch (err: any) {
       // Verify the empty string gets corrected to 'value'
       expect(err.output.payload.validation.keys).toEqual(['0.type', 'value']);
     }

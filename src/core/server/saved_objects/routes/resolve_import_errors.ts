@@ -92,7 +92,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
       let readStream: Readable;
       try {
         readStream = await createSavedObjectsStreamFromNdJson(file);
-      } catch (e) {
+      } catch (e: any) {
         return res.badRequest({
           body: e,
         });

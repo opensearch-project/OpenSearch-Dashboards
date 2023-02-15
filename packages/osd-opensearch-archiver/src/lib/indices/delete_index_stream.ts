@@ -64,7 +64,7 @@ export function createDeleteIndexStream(
           this.push(record);
         }
         callback();
-      } catch (err) {
+      } catch (err: any) {
         callback(err);
       }
     },

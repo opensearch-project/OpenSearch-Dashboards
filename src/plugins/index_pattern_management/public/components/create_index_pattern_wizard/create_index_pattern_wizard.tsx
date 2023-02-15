@@ -127,7 +127,7 @@ export class CreateIndexPatternWizard extends Component<
   ) => {
     try {
       return await asyncFn;
-    } catch (errors) {
+    } catch (errors: any) {
       this.setState((prevState) => ({
         toasts: prevState.toasts.concat([
           {
@@ -135,7 +135,7 @@ export class CreateIndexPatternWizard extends Component<
             id: errorMsg.props.id,
             color: 'warning',
             iconType: 'alert',
-            text: errors.body.message,
+            text: errors?.body?.message,
           },
         ]),
       }));
@@ -202,7 +202,7 @@ export class CreateIndexPatternWizard extends Component<
         dataSourceRef,
         ...this.state.indexPatternCreationType.getIndexPatternMappings(),
       });
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof DuplicateIndexPatternError) {
         const confirmMessage = i18n.translate(
           'indexPatternManagement.indexPattern.titleExistsLabel',

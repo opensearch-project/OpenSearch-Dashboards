@@ -105,7 +105,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       this.setState({
         title,
         description: description || '',
-        endpoint,
+        endpoint: endpoint || '',
         auth: {
           type: auth.type,
           credentials: {
@@ -235,7 +235,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         await this.props.handleSubmit(formValues);
         this.setState({ showUpdateOptions: false });
         this.setFormValuesForEditMode();
-      } catch (e) {
+      } catch (e: any) {
         this.props.displayToastMessage({
           id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
           defaultMessage: 'Updating the Data Source failed with some errors.',
@@ -327,7 +327,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         defaultMessage: 'Password updated successfully.',
         success: true,
       });
-    } catch (e) {
+    } catch (e: any) {
       this.props.displayToastMessage({
         id: 'dataSourcesManagement.editDataSource.updatePasswordFailMsg',
         defaultMessage: 'Updating the stored password failed with some errors.',

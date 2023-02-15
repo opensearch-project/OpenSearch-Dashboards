@@ -175,7 +175,7 @@ describe('IndexPatterns', () => {
     let result;
     try {
       await indexPatterns.updateSavedObject(samePattern);
-    } catch (err) {
+    } catch (err: any) {
       result = err;
     }
 

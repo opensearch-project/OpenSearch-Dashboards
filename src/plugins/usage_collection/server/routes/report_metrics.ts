@@ -55,7 +55,7 @@ export function registerUiMetricRoute(
         }
         await storeReport(internalRepository, report);
         return res.ok({ body: { status: 'ok' } });
-      } catch (error) {
+      } catch (error: any) {
         return res.ok({ body: { status: 'fail' } });
       }
     }

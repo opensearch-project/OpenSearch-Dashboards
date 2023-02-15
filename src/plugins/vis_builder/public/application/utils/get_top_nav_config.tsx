@@ -153,11 +153,11 @@ export const getTopNavConfig = (
 };
 
 export const getOnSave = (
-  savedVisBuilderVis,
-  originatingApp,
-  visualizationIdFromUrl,
-  dispatch,
-  services
+  savedVisBuilderVis: any,
+  originatingApp: any,
+  visualizationIdFromUrl: any,
+  dispatch: any,
+  services: any
 ) => {
   const onSave = async ({
     newTitle,

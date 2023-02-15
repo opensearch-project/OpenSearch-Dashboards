@@ -43,7 +43,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
   let searchSource;
   try {
     searchSource = JSON.parse(searchSourceJSON);
-  } catch (e) {
+  } catch (e: any) {
     // Let it go, the data is invalid and we'll leave it as is
     return;
   }
@@ -87,7 +87,7 @@ const migrations700: SavedObjectMigrationFn<any, any> = (doc): DashboardDoc700To
   let panels;
   try {
     panels = JSON.parse(panelsJSON);
-  } catch (e) {
+  } catch (e: any) {
     // Let it go, the data is invalid and we'll leave it as is
     return doc as DashboardDoc700To720;
   }

@@ -134,7 +134,7 @@ export async function loadStatus({
 
   try {
     response = await http.get('/api/status');
-  } catch (e) {
+  } catch (e: any) {
     if ((e.response?.status ?? 0) >= 400) {
       notifications.toasts.addDanger(
         i18n.translate('core.statusPage.loadStatus.serverStatusCodeErrorMessage', {

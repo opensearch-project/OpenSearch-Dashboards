@@ -57,7 +57,7 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
       }
       changed = changed || newDoc !== curDoc;
       formattedData.push(newDoc);
-    } catch (e) {
+    } catch (e: any) {
       // eslint-disable-next-line no-console
       console.log(e);
       formattedData.push(curDoc);

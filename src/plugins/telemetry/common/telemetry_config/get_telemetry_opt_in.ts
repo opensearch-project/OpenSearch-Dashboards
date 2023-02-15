@@ -95,7 +95,7 @@ function parseSemver(version: string): semver.SemVer | null {
   // semver functions both return nulls AND throw exceptions: "it depends!"
   try {
     return semver.parse(version);
-  } catch (err) {
+  } catch (err: any) {
     return null;
   }
 }

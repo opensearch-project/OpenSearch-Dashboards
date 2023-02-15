@@ -250,7 +250,7 @@ export class LegacyCoreEditor implements CoreEditor {
 
   private forceRetokenize() {
     const session = this.editor.getSession();
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       // force update of tokens, but not on this thread to allow for ace rendering.
       setTimeout(function () {
         let i;

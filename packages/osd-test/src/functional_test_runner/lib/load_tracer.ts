@@ -68,7 +68,7 @@ export function loadTracer(ident: any, description: string, load: () => Promise<
   try {
     globalLoadPath.unshift({ ident, description });
     return load();
-  } catch (err) {
+  } catch (err: any) {
     if (errorsFromLoadTracer.has(err)) {
       throw err;
     }

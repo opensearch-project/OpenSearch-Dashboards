@@ -167,7 +167,7 @@ export class Cache {
       const value = db.get(key);
       this.debug(value === undefined ? 'MISS' : 'HIT', db, key);
       return value;
-    } catch (error) {
+    } catch (error: any) {
       this.logError('GET', db, key, error);
     }
   }
@@ -176,7 +176,7 @@ export class Cache {
     try {
       await db.put(key, value);
       this.debug('PUT', db, key);
-    } catch (error) {
+    } catch (error: any) {
       this.logError('PUT', db, key, error);
     }
   }

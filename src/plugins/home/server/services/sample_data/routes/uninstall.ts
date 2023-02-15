@@ -73,7 +73,7 @@ export function createUninstallRoute(
 
         try {
           await callAsCurrentUser('indices.delete', { index });
-        } catch (err) {
+        } catch (err: any) {
           return response.customError({
             statusCode: err.status,
             body: {
@@ -89,7 +89,7 @@ export function createUninstallRoute(
 
       try {
         await Promise.all(deletePromises);
-      } catch (err) {
+      } catch (err: any) {
         // ignore 404s since users could have deleted some of the saved objects via the UI
         if (_.get(err, 'output.statusCode') !== 404) {
           return response.customError({

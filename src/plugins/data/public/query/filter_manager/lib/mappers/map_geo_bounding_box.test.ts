@@ -98,7 +98,7 @@ describe('filter manager utilities', () => {
 
       try {
         mapGeoBoundingBox(filter);
-      } catch (e) {
+      } catch (e: any) {
         expect(e).toBe(filter);
         done();
       }

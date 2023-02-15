@@ -66,7 +66,7 @@ export function parseInterval(interval: string): moment.Duration | null {
     }
 
     return moment.duration(duration.as(selectedUnit), selectedUnit);
-  } catch (e) {
+  } catch (e: any) {
     return null;
   }
 }

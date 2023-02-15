@@ -184,7 +184,7 @@ export class UiSettingsClient implements IUiSettingsClient {
         filteredValues[key] = {
           userValue: userValue as T,
         };
-      } catch (error) {
+      } catch (error: any) {
         this.log.warn(`Ignore invalid UiSettings value. ${error}.`);
       }
     }
@@ -202,7 +202,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     changes = this.translateChanges(changes, 'timeline', 'timelion');
     try {
       await this.savedObjectsClient.update(this.type, this.id, changes);
-    } catch (error) {
+    } catch (error: any) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
         throw error;
       }
@@ -229,7 +229,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     try {
       const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
       return this.translateChanges(resp.attributes, 'timelion', 'timeline');
-    } catch (error) {
+    } catch (error: any) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
         const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
           savedObjectsClient: this.savedObjectsClient,

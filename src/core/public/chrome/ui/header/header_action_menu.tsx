@@ -63,7 +63,7 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => 
     if (mounter.mount && elementRef.current) {
       try {
         unmountRef.current = mounter.mount(elementRef.current);
-      } catch (e) {
+      } catch (e: any) {
         // TODO: use client-side logger when feature is implemented
         // eslint-disable-next-line no-console
         console.error(e);

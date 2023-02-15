@@ -40,7 +40,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   let searchSource;
   try {
     searchSource = JSON.parse(searchSourceJSON);
-  } catch (e) {
+  } catch (e: any) {
     // Let it go, the data is invalid and we'll leave it as is
     return doc;
   }
@@ -82,7 +82,7 @@ const migratePercentileRankAggregation: SavedObjectMigrationFn<any, any> = (doc)
   if (visStateJSON) {
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
     if (visState && visState.type === 'metrics') {
@@ -118,7 +118,7 @@ const migrateFilterRatioQuery: SavedObjectMigrationFn<any, any> = (doc) => {
   if (visStateJSON) {
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
     if (visState && visState.type === 'metrics') {
@@ -157,7 +157,7 @@ const migrateOperatorKeyTypo: SavedObjectMigrationFn<any, any> = (doc) => {
   if (visStateJSON) {
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
     if (visState && visState.type === 'metrics') {
@@ -193,7 +193,7 @@ const migrateSplitByChartRow: SavedObjectMigrationFn<any, any> = (doc) => {
   if (visStateJSON) {
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
 
@@ -233,7 +233,7 @@ const migrateDateHistogramAggregation: SavedObjectMigrationFn<any, any> = (doc) 
   if (visStateJSON) {
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
 
@@ -274,7 +274,7 @@ const removeDateHistogramTimeZones: SavedObjectMigrationFn<any, any> = (doc) => 
     let visState;
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
     if (visState && visState.aggs) {
@@ -319,7 +319,7 @@ const migrateGaugeVerticalSplitToAlignment: SavedObjectMigrationFn<any, any> = (
           },
         };
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.log.warn(`Exception @ migrateGaugeVerticalSplitToAlignment! ${e}`);
       logger.log.warn(`Exception @ migrateGaugeVerticalSplitToAlignment! Payload: ${visStateJSON}`);
     }
@@ -344,7 +344,7 @@ const transformFilterStringToQueryObject: SavedObjectMigrationFn<any, any> = (do
     let visState;
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // let it go, the data is invalid and we'll leave it as is
     }
     if (visState) {
@@ -428,7 +428,7 @@ const transformSplitFiltersStringToQueryObject: SavedObjectMigrationFn<any, any>
     let visState;
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // let it go, the data is invalid and we'll leave it as is
     }
     if (visState) {
@@ -489,7 +489,7 @@ const migrateFiltersAggQuery: SavedObjectMigrationFn<any, any> = (doc) => {
           },
         };
       }
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
   }
@@ -535,7 +535,7 @@ const replaceMovAvgToMovFn: SavedObjectMigrationFn<any, any> = (doc, logger) => 
           },
         };
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.log.warn(`Exception @ replaceMovAvgToMovFn! ${e}`);
       logger.log.warn(`Exception @ replaceMovAvgToMovFn! Payload: ${visStateJSON}`);
     }
@@ -570,7 +570,7 @@ const migrateFiltersAggQueryStringQueries: SavedObjectMigrationFn<any, any> = (d
           },
         };
       }
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
   }
@@ -606,7 +606,7 @@ const migrateControls: SavedObjectMigrationFn<any, any> = (doc) => {
     let visState;
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
     if (visState) {
@@ -661,7 +661,7 @@ const migrateTableSplits: SavedObjectMigrationFn<any, any> = (doc) => {
     newDoc.attributes.visState = JSON.stringify(visState);
 
     return newDoc;
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`Failure attempting to migrate saved object '${doc.attributes.title}' - ${e}`);
   }
 };
@@ -680,7 +680,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
 
     try {
       searchSource = JSON.parse(searchSourceJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
       return doc;
     }
@@ -714,7 +714,7 @@ const migrateTsvbDefaultColorPalettes: SavedObjectMigrationFn<any, any> = (doc) 
   if (visStateJSON) {
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
     if (visState && visState.type === 'metrics') {
@@ -749,7 +749,7 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   if (visStateJSON) {
     try {
       visState = JSON.parse(visStateJSON);
-    } catch (e) {
+    } catch (e: any) {
       // Let it go, the data is invalid and we'll leave it as is
     }
     if (visState && visState.type === 'metrics' && searchSourceJSON !== '{}') {

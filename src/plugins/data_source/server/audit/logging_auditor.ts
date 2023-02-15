@@ -3,13 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuditableEvent, Auditor, Logger, OpenSearchDashboardsRequest } from 'src/core/server';
+import { AuditableEvent, Auditor, Logger } from 'src/core/server';
 
 export class LoggingAuditor implements Auditor {
-  constructor(
-    private readonly request: OpenSearchDashboardsRequest,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly logger: Logger) {}
 
   public withAuditScope(name: string) {}
 
