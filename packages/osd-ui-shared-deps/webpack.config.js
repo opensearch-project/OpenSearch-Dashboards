@@ -78,10 +78,6 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        test: /\.ttf$/,
-        use: ['file-loader'],
-      },
-      {
         include: [require.resolve('./theme.ts')],
         use: [
           {
