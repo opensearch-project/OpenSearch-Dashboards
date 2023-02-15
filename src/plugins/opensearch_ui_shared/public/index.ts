@@ -77,5 +77,3 @@ export function plugin() {
     start() {}
   })();
 }
-
-export { JsonEditorWithDiagnosticsOptions } from './components/json_editor_with_diagnostics_options';

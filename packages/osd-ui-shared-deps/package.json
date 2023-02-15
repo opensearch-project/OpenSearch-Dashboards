@@ -14,7 +14,6 @@
     "@elastic/numeral": "^2.5.0",
     "@osd/i18n": "1.0.0",
     "@osd/monaco": "1.0.0",
-    "@osd/monaco-next": "1.0.0",
     "abortcontroller-polyfill": "^1.4.0",
     "angular": "^1.8.2",
     "axios": "^0.27.2",

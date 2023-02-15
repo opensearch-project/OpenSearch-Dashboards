@@ -36,3 +36,4 @@ import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
 export { BarePluginApi };
 import './monaco_environment';
 export * from './worker_store';
+import './json';

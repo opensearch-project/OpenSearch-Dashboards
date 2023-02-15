@@ -43,7 +43,6 @@ export const Angular = require('angular');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 export const OsdMonaco = require('@osd/monaco');
-export const OsdMonacoNext = require('@osd/monaco-next');
 export const MonacoBarePluginApi = require('@osd/monaco').BarePluginApi;
 export const React = require('react');
 export const ReactDom = require('react-dom');
