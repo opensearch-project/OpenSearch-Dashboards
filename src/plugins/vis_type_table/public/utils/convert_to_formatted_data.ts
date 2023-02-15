@@ -28,53 +28,13 @@
  * under the License.
  */
 
-import { i18n } from '@osd/i18n';
 import { chain } from 'lodash';
 import { OpenSearchDashboardsDatatableRow } from 'src/plugins/expressions';
 import { Table } from '../table_vis_response_handler';
 import { AggTypes, TableVisConfig } from '../types';
 import { getFormatService } from '../services';
 import { FormattedColumn } from '../types';
-
-function insert(arr: FormattedColumn[], index: number, col: FormattedColumn) {
-  const newArray = [...arr];
-  newArray.splice(index + 1, 0, col);
-  return newArray;
-}
-
-/**
- * @param columns - the formatted columns that will be displayed
- * @param title - the title of the column to add to
- * @param rows - the row data for the columns
- * @param insertAtIndex - the index to insert the percentage column at
- * @returns cols and rows for the table to render now included percentage column(s)
- */
-function addPercentageCol(
-  columns: FormattedColumn[],
-  title: string,
-  rows: Table['rows'],
-  insertAtIndex: number
-) {
-  const { id, sumTotal } = columns[insertAtIndex];
-  const newId = `${id}-percents`;
-  const formatter = getFormatService().deserialize({ id: 'percent' });
-  const i18nTitle = i18n.translate('visTypeTable.params.percentageTableColumnName', {
-    defaultMessage: '{title} percentages',
-    values: { title },
-  });
-  const newCols = insert(columns, insertAtIndex, {
-    title: i18nTitle,
-    id: newId,
-    formatter,
-    filterable: false,
-  });
-  const newRows = rows.map((row) => ({
-    [newId]: (row[id] as number) / (sumTotal as number),
-    ...row,
-  }));
-
-  return { cols: newCols, rows: newRows };
-}
+import { addPercentageCol } from './add_percentage_col';
 
 export interface FormattedDataProps {
   formattedRows: OpenSearchDashboardsDatatableRow[];
