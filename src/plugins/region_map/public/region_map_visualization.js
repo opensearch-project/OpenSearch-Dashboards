@@ -230,7 +230,8 @@ export function createRegionMapVisualization({
           await getServiceSettings(),
           (await lazyLoadMapsLegacyModules()).L,
           this._params.layerChosenByUser,
-          http
+          http,
+          uiSettings
         );
       } else {
         const { ChoroplethLayer } = await import('./choropleth_layer');
@@ -244,7 +245,8 @@ export function createRegionMapVisualization({
           await getServiceSettings(),
           (await lazyLoadMapsLegacyModules()).L,
           this._params.layerChosenByUser,
-          http
+          http,
+          uiSettings
         );
       }
       this._choroplethLayer.setLayerChosenByUser(this._params.layerChosenByUser);
