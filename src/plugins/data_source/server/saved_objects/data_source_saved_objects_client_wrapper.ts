@@ -17,7 +17,12 @@ import {
 } from 'opensearch-dashboards/server';
 import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
-import { AuthType, SigV4Content, UsernamePasswordTypedContent } from '../../common/data_sources';
+import {
+  AuthType,
+  DataSourceAttributes,
+  SigV4Content,
+  UsernamePasswordTypedContent,
+} from '../../common/data_sources';
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
 
 /**
@@ -192,6 +197,8 @@ export class DataSourceSavedObjectsClientWrapper {
     }
 
     const { type, credentials } = auth;
+    const existingDataSourceAttr = await this.getDataSourceAttributes(wrapperOptions, id, options);
+    const encryptionContext = await this.getEncryptionContext(existingDataSourceAttr);
 
     switch (type) {
       case AuthType.NoAuth:
@@ -205,13 +212,7 @@ export class DataSourceSavedObjectsClientWrapper {
         };
       case AuthType.UsernamePasswordType:
         if (credentials?.password) {
-          // Fetch existing signature
-          const encryptionContext = await this.validateEncryptionContext(
-            wrapperOptions,
-            id,
-            options
-          );
-
+          this.validateEncryptionContext(encryptionContext, existingDataSourceAttr);
           return {
             ...attributes,
             auth: await this.encryptBasicAuthCredential(auth, encryptionContext),
@@ -220,18 +221,24 @@ export class DataSourceSavedObjectsClientWrapper {
           return attributes;
         }
       case AuthType.SigV4:
-        // Fetch and validate existing signature
+        this.validateEncryptionContext(encryptionContext, existingDataSourceAttr);
         if (credentials?.accessKey && credentials?.secretKey) {
-          const encryptionContext = await this.validateEncryptionContext(
-            wrapperOptions,
-            id,
-            options
-          );
           return {
             ...attributes,
             auth: await this.encryptSigV4Credential(auth, encryptionContext),
           };
         } else {
+          if (credentials?.accessKey) {
+            throw SavedObjectsErrorHelpers.createBadRequestError(
+              `Failed to update existing data source with auth type ${type}: "credentials.secretKey" missing.`
+            );
+          }
+
+          if (credentials?.secretKey) {
+            throw SavedObjectsErrorHelpers.createBadRequestError(
+              `Failed to update existing data source with auth type ${type}: "credentials.accessKey" missing.`
+            );
+          }
           return attributes;
         }
       default:
@@ -321,26 +328,8 @@ export class DataSourceSavedObjectsClientWrapper {
     }
   }
 
-  private async validateEncryptionContext(
-    wrapperOptions: SavedObjectsClientWrapperOptions,
-    id: string,
-    options: SavedObjectsUpdateOptions = {}
-  ) {
-    let attributes;
+  private async getEncryptionContext(attributes: DataSourceAttributes) {
     let encryptionContext: EncryptionContext;
-
-    try {
-      // Fetch existing data source by id
-      const savedObject = await wrapperOptions.client.get(DATA_SOURCE_SAVED_OBJECT_TYPE, id, {
-        namespace: options.namespace,
-      });
-      attributes = savedObject.attributes;
-    } catch (err: any) {
-      const errMsg = `Failed to fetch existing data source for dataSourceId [${id}]`;
-      this.logger.error(errMsg);
-      this.logger.error(err);
-      throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
-    }
 
     if (!attributes) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -375,7 +364,7 @@ export class DataSourceSavedObjectsClientWrapper {
           );
         }
 
-        const { username, password } = credentials;
+        const { username, password } = credentials as UsernamePasswordTypedContent;
 
         if (!username) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -385,34 +374,66 @@ export class DataSourceSavedObjectsClientWrapper {
 
         if (!password) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
-            'Failed to update existing data source: "auth.credentials.username" missing. Please delete and create another data source.'
+            'Failed to update existing data source: "auth.credentials.password" missing. Please delete and create another data source.'
           );
         }
-        encryptionContext = await this.getEncryptionContext(password);
+        encryptionContext = await this.getEncryptionContextFromCipher(password);
         break;
       case AuthType.SigV4:
-        const { accessKey } = auth.credentials as SigV4Content;
-        encryptionContext = await this.getEncryptionContext(accessKey);
+        const { accessKey, secretKey } = auth.credentials as SigV4Content;
+        const accessKeyEncryptionContext = await this.getEncryptionContextFromCipher(accessKey);
+        const secretKeyEncryptionContext = await this.getEncryptionContextFromCipher(secretKey);
+
+        if (accessKeyEncryptionContext.endpoint !== secretKeyEncryptionContext.endpoint) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            'Failed to update existing data source: encryption contexts for "auth.credentials.accessKey" and "auth.credentials.secretKey" must be same. Please delete and create another data source.'
+          );
+        }
+        encryptionContext = accessKeyEncryptionContext;
         break;
       default:
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${auth.type}'`);
     }
 
+    return encryptionContext;
+  }
+
+  private async getDataSourceAttributes(
+    wrapperOptions: SavedObjectsClientWrapperOptions,
+    id: string,
+    options: SavedObjectsUpdateOptions = {}
+  ): Promise<DataSourceAttributes> {
+    try {
+      // Fetch existing data source by id
+      const savedObject = await wrapperOptions.client.get(DATA_SOURCE_SAVED_OBJECT_TYPE, id, {
+        namespace: options.namespace,
+      });
+      return savedObject.attributes as DataSourceAttributes;
+    } catch (err: any) {
+      const errMsg = `Failed to fetch existing data source for dataSourceId [${id}]`;
+      this.logger.error(`${errMsg}: ${err} ${err.stack}`);
+      throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
+    }
+  }
+
+  private validateEncryptionContext = (
+    encryptionContext: EncryptionContext,
+    dataSource: DataSourceAttributes
+  ) => {
     // validate encryption context
-    if (encryptionContext.endpoint !== endpoint) {
+    if (encryptionContext.endpoint !== dataSource.endpoint) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'Failed to update existing data source: "endpoint" contaminated. Please delete and create another data source.'
       );
     }
-    return encryptionContext;
-  }
+  };
 
-  private async getEncryptionContext(input: string) {
+  private async getEncryptionContextFromCipher(cipher: string) {
     const { encryptionContext } = await this.cryptography
-      .decodeAndDecrypt(input)
+      .decodeAndDecrypt(cipher)
       .catch((err: any) => {
         const errMsg = `Failed to update existing data source: unable to decrypt auth content`;
-        this.logger.error(`errMsg: ${err}, ${err.stack}`);
+        this.logger.error(`${errMsg}: ${err} ${err.stack}`);
         throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
       });
 

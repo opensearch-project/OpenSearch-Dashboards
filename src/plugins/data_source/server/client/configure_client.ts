@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Client } from '@opensearch-project/opensearch';
+import { Client, ClientOptions } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
 import { Credentials } from 'aws-sdk';
 import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws';
@@ -25,6 +25,7 @@ import {
   getAWSCredential,
   getCredential,
   getDataSource,
+  generateCacheKey,
 } from './configure_client_utils';
 
 export const configureClient = async (
@@ -122,14 +123,14 @@ const getQueryClient = async (
   const {
     auth: { type },
     endpoint,
-    lastUpdatedTime,
   } = dataSourceAttr;
   const clientOptions = parseClientOptions(config, endpoint);
+  const cacheKey = generateCacheKey(dataSourceAttr, dataSourceId);
 
   switch (type) {
     case AuthType.NoAuth:
       if (!rootClient) rootClient = new Client(clientOptions);
-      addClientToPool(endpoint, type, rootClient);
+      addClientToPool(cacheKey, type, rootClient);
 
       return rootClient.child();
 
@@ -139,7 +140,7 @@ const getQueryClient = async (
         : (dataSourceAttr.auth.credentials as UsernamePasswordTypedContent);
 
       if (!rootClient) rootClient = new Client(clientOptions);
-      addClientToPool(endpoint, type, rootClient);
+      addClientToPool(cacheKey, type, rootClient);
 
       return getBasicAuthClient(rootClient, credential);
 
@@ -148,8 +149,8 @@ const getQueryClient = async (
         ? await getAWSCredential(dataSourceAttr, cryptography!)
         : (dataSourceAttr.auth.credentials as SigV4Content);
 
-      const awsClient = rootClient ? rootClient : getAWSClient(awsCredential, endpoint);
-      addClientToPool(endpoint + dataSourceId + lastUpdatedTime, type, awsClient);
+      const awsClient = rootClient ? rootClient : getAWSClient(awsCredential, clientOptions);
+      addClientToPool(cacheKey, type, awsClient);
 
       return awsClient;
 
@@ -175,7 +176,7 @@ const getBasicAuthClient = (
   });
 };
 
-const getAWSClient = (credential: SigV4Content, endpoint: string): Client => {
+const getAWSClient = (credential: SigV4Content, clientOptions: ClientOptions): Client => {
   const { accessKey, secretKey, region } = credential;
 
   const credentialProvider = (): Promise<Credentials> => {
@@ -189,6 +190,6 @@ const getAWSClient = (credential: SigV4Content, endpoint: string): Client => {
       region,
       getCredentials: credentialProvider,
     }),
-    node: endpoint,
+    ...clientOptions,
   });
 };

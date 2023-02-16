@@ -32,20 +32,10 @@ export const getRootClient = (
 ): Client | LegacyClient | undefined => {
   const {
     auth: { type },
-    endpoint,
-    lastUpdatedTime,
   } = dataSourceAttr;
+  const cacheKey = generateCacheKey(dataSourceAttr, dataSourceId);
+  const cachedClient = getClientFromPool(cacheKey, type);
 
-  let cachedClient;
-
-  if (type === AuthType.SigV4) {
-    // opensearch-js client doesn't support spawning child with aws sigv4 connection class,
-    // we are storing/getting the actual client instead of rootClient in/from aws client pool,
-    // by a key of endpoint + dataSourceId + lastUpdatedTime
-    cachedClient = getClientFromPool(endpoint + dataSourceId + lastUpdatedTime, type);
-  } else {
-    cachedClient = getClientFromPool(endpoint, type);
-  }
   return cachedClient;
 };
 
@@ -122,4 +112,22 @@ export const getAWSCredential = async (
   };
 
   return credential;
+};
+
+export const generateCacheKey = (dataSourceAttr: DataSourceAttributes, dataSourceId?: string) => {
+  const CACHE_KEY_DELIMITER = ',';
+  const {
+    auth: { type },
+    endpoint,
+    lastUpdatedTime,
+  } = dataSourceAttr;
+  // opensearch-js client doesn't support spawning child with aws sigv4 connection class,
+  // we are storing/getting the actual client instead of rootClient in/from aws client pool,
+  // by a key of "<endpoint>,<dataSourceId>,<lastUpdatedTime>"
+  const key =
+    type === AuthType.SigV4
+      ? endpoint + CACHE_KEY_DELIMITER + dataSourceId + CACHE_KEY_DELIMITER + lastUpdatedTime
+      : endpoint;
+
+  return key;
 };
