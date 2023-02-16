@@ -25,10 +25,15 @@ import {
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
-import { OpenSearchClientPoolSetup, getCredential, getDataSource } from '../client';
+import { OpenSearchClientPoolSetup } from '../client';
 import { parseClientOptions } from './client_config';
 import { createDataSourceError, DataSourceError } from '../lib/error';
-import { getAWSCredential } from '../client/configure_client';
+import {
+  getRootClient,
+  getAWSCredential,
+  getCredential,
+  getDataSource,
+} from '../client/configure_client_utils';
 
 export const configureLegacyClient = async (
   { dataSourceId, savedObjects, cryptography }: DataSourceClientParams,
@@ -41,20 +46,23 @@ export const configureLegacyClient = async (
     const dataSourceAttr = await getDataSource(dataSourceId!, savedObjects);
     const rootClient = getRootClient(
       dataSourceAttr,
-      config,
-      openSearchClientPoolSetup.getClientFromPool
-    );
+      openSearchClientPoolSetup.getClientFromPool,
+      dataSourceId
+    ) as LegacyClient;
 
     return await getQueryClient(
       dataSourceAttr,
       cryptography,
       callApiParams,
       openSearchClientPoolSetup.addClientToPool,
-      rootClient
+      config,
+      rootClient,
+      dataSourceId
     );
   } catch (error: any) {
-    logger.error(`Failed to get data source client for dataSourceId: [${dataSourceId}]`);
-    logger.error(error);
+    logger.error(
+      `Failed to get data source client for dataSourceId: [${dataSourceId}]. ${error}: ${error.stack}`
+    );
     // Re-throw as DataSourceError
     throw createDataSourceError(error);
   }
@@ -64,8 +72,11 @@ export const configureLegacyClient = async (
  * With given auth info, wrap the rootClient and return
  *
  * @param rootClient root client for the connection with given data source endpoint.
- * @param dataSource data source saved object
+ * @param dataSourceAttr data source saved object attributes
  * @param cryptography cryptography service for password encryption / decryption
+ * @param config data source config
+ * @param addClientToPool function to add client to client pool
+ * @param dataSourceId id of data source saved Object
  * @returns child client.
  */
 const getQueryClient = async (
@@ -73,34 +84,41 @@ const getQueryClient = async (
   cryptography: CryptographyServiceSetup,
   { endpoint, clientParams, options }: LegacyClientCallAPIParams,
   addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void,
-  rootClient?: LegacyClient
+  config: DataSourcePluginConfigType,
+  rootClient?: LegacyClient,
+  dataSourceId?: string
 ) => {
   const {
     auth: { type },
     endpoint: nodeUrl,
     lastUpdatedTime,
   } = dataSourceAttr;
+  const clientOptions = parseClientOptions(config, nodeUrl);
 
   switch (type) {
     case AuthType.NoAuth:
-      addClientToPool(nodeUrl, type, rootClient!);
+      if (!rootClient) rootClient = new LegacyClient(clientOptions);
+      addClientToPool(nodeUrl, type, rootClient);
 
-      return await (callAPI.bind(null, rootClient!) as LegacyAPICaller)(
+      return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(
         endpoint,
         clientParams,
         options
       );
 
     case AuthType.UsernamePasswordType:
-      addClientToPool(nodeUrl, type, rootClient!);
-
       const credential = await getCredential(dataSourceAttr, cryptography);
-      return getBasicAuthClient(rootClient!, { endpoint, clientParams, options }, credential);
+
+      if (!rootClient) rootClient = new LegacyClient(clientOptions);
+      addClientToPool(nodeUrl, type, rootClient);
+
+      return getBasicAuthClient(rootClient, { endpoint, clientParams, options }, credential);
 
     case AuthType.SigV4:
       const awsCredential = await getAWSCredential(dataSourceAttr, cryptography);
+
       const awsClient = rootClient ? rootClient : getAWSClient(awsCredential, nodeUrl);
-      addClientToPool(nodeUrl + lastUpdatedTime, type, awsClient);
+      addClientToPool(nodeUrl + dataSourceId + lastUpdatedTime, type, awsClient);
 
       return await (callAPI.bind(null, awsClient) as LegacyAPICaller)(
         endpoint,
@@ -110,37 +128,6 @@ const getQueryClient = async (
 
     default:
       throw Error(`${type} is not a supported auth type for data source`);
-  }
-};
-
-/**
- * Gets a root client object of the OpenSearch endpoint.
- * Will attempt to get from cache, if cache miss, create a new one and load into cache.
- *
- * @param dataSourceAttr data source saved objects attributes.
- * @param config data source config
- * @returns Legacy client for the given data source endpoint.
- */
-const getRootClient = (
-  dataSource: DataSourceAttributes,
-  config: DataSourcePluginConfigType,
-  getClientFromPool: (endpoint: string, authType: AuthType) => Client | LegacyClient | undefined
-): LegacyClient | undefined => {
-  const {
-    endpoint,
-    auth: { type },
-    lastUpdatedTime,
-  } = dataSource;
-
-  const clientOptions = parseClientOptions(config, endpoint);
-  let cachedClient;
-
-  if (type === AuthType.SigV4) {
-    cachedClient = getClientFromPool(endpoint + lastUpdatedTime, type);
-    return cachedClient ? (cachedClient as LegacyClient) : undefined;
-  } else {
-    cachedClient = getClientFromPool(endpoint, type);
-    return cachedClient ? (cachedClient as LegacyClient) : new LegacyClient(clientOptions);
   }
 };
 

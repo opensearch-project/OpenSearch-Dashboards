@@ -27,7 +27,7 @@ export class OpenSearchClientPool {
   //   value: OpenSearch client | Legacy client
   private clientCache?: LRUCache<string, Client | LegacyClient>;
   // LRU cache of aws clients
-  //   key: endpoint + lastUpdatedTime together to support update case.
+  //   key: endpoint + dataSourceId + lastUpdatedTime together to support update case.
   //   value: OpenSearch client | Legacy client
   private awsClientCache?: LRUCache<string, Client | LegacyClient>;
   private isClosed = false;
@@ -99,10 +99,15 @@ export class OpenSearchClientPool {
     if (this.isClosed) {
       return;
     }
-    await Promise.all([
-      ...this.clientCache!.values().map((client) => client.close()),
-      ...this.awsClientCache!.values().map((client) => client.close()),
-    ]);
-    this.isClosed = true;
+
+    try {
+      await Promise.all([
+        ...this.clientCache!.values().map((client) => client.close()),
+        ...this.awsClientCache!.values().map((client) => client.close()),
+      ]);
+      this.isClosed = true;
+    } catch (error) {
+      this.logger.error(`Error closing clients in pool. ${error}`);
+    }
   }
 }

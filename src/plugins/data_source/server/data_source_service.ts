@@ -3,16 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Client } from '@opensearch-project/opensearch';
-import { LegacyCallAPIOptions, Logger } from '../../../../src/core/server';
+import { LegacyCallAPIOptions, Logger, OpenSearchClient } from '../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../config';
-import { configureClient, OpenSearchClientPool } from './client';
+import { OpenSearchClientPool } from './client';
 import { configureLegacyClient } from './legacy';
 import { DataSourceClientParams } from './types';
 import { DataSourceAttributes } from '../common/data_sources';
-import { configureTestClient } from './client/configure_client';
+import { configureTestClient, configureClient } from './client/configure_client';
 export interface DataSourceServiceSetup {
-  getDataSourceClient: (params: DataSourceClientParams) => Promise<Client>;
+  getDataSourceClient: (params: DataSourceClientParams) => Promise<OpenSearchClient>;
 
   getDataSourceLegacyClient: (
     params: DataSourceClientParams
@@ -27,7 +26,7 @@ export interface DataSourceServiceSetup {
   getTestingClient: (
     params: DataSourceClientParams,
     dataSource: DataSourceAttributes
-  ) => Promise<Client>;
+  ) => Promise<OpenSearchClient>;
 }
 export class DataSourceService {
   private readonly openSearchClientPool: OpenSearchClientPool;
@@ -44,14 +43,16 @@ export class DataSourceService {
     const opensearchClientPoolSetup = this.openSearchClientPool.setup(config);
     const legacyClientPoolSetup = this.legacyClientPool.setup(config);
 
-    const getDataSourceClient = async (params: DataSourceClientParams): Promise<Client> => {
+    const getDataSourceClient = async (
+      params: DataSourceClientParams
+    ): Promise<OpenSearchClient> => {
       return configureClient(params, opensearchClientPoolSetup, config, this.logger);
     };
 
     const getTestingClient = async (
       params: DataSourceClientParams,
       dataSource: DataSourceAttributes
-    ): Promise<Client> => {
+    ): Promise<OpenSearchClient> => {
       return configureTestClient(
         params,
         dataSource,

@@ -205,8 +205,12 @@ export class DataSourceSavedObjectsClientWrapper {
         };
       case AuthType.UsernamePasswordType:
         if (credentials?.password) {
-          // Fetch and validate existing signature
-          const encryptionContext = await this.getEncryptionContext(wrapperOptions, id, options);
+          // Fetch existing signature
+          const encryptionContext = await this.validateEncryptionContext(
+            wrapperOptions,
+            id,
+            options
+          );
 
           return {
             ...attributes,
@@ -218,7 +222,11 @@ export class DataSourceSavedObjectsClientWrapper {
       case AuthType.SigV4:
         // Fetch and validate existing signature
         if (credentials?.accessKey && credentials?.secretKey) {
-          const encryptionContext = await this.getEncryptionContext(wrapperOptions, id, options);
+          const encryptionContext = await this.validateEncryptionContext(
+            wrapperOptions,
+            id,
+            options
+          );
           return {
             ...attributes,
             auth: await this.encryptSigV4Credential(auth, encryptionContext),
@@ -313,12 +321,13 @@ export class DataSourceSavedObjectsClientWrapper {
     }
   }
 
-  private async getEncryptionContext(
+  private async validateEncryptionContext(
     wrapperOptions: SavedObjectsClientWrapperOptions,
     id: string,
     options: SavedObjectsUpdateOptions = {}
   ) {
     let attributes;
+    let encryptionContext: EncryptionContext;
 
     try {
       // Fetch existing data source by id
@@ -335,7 +344,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
     if (!attributes) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'Update failed due to deprecated data source: "attributes" missing. Please delete and create another data source.'
+        'Failed to update existing data source: "attributes" missing. Please delete and create another data source.'
       );
     }
 
@@ -343,27 +352,26 @@ export class DataSourceSavedObjectsClientWrapper {
 
     if (!endpoint) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'Update failed due to deprecated data source: "endpoint" missing. Please delete and create another data source.'
+        'Failed to update existing data source: "endpoint" missing. Please delete and create another data source.'
       );
     }
 
     if (!auth) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        'Update failed due to deprecated data source: "auth" missing. Please delete and create another data source.'
+        'Failed to update existing data source: "auth" missing. Please delete and create another data source.'
       );
     }
 
     switch (auth.type) {
       case AuthType.NoAuth:
         // Signing the data source with existing endpoint
-        return {
-          endpoint,
-        };
+        encryptionContext = { endpoint };
+        break;
       case AuthType.UsernamePasswordType:
         const { credentials } = auth;
         if (!credentials) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
-            'Update failed due to deprecated data source: "credentials" missing. Please delete and create another data source.'
+            'Failed to update existing data source: "credentials" missing. Please delete and create another data source.'
           );
         }
 
@@ -371,39 +379,43 @@ export class DataSourceSavedObjectsClientWrapper {
 
         if (!username) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
-            'Update failed due to deprecated data source: "auth.credentials.username" missing. Please delete and create another data source.'
+            'Failed to update existing data source: "auth.credentials.username" missing. Please delete and create another data source.'
           );
         }
 
         if (!password) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
-            'Update failed due to deprecated data source: "auth.credentials.username" missing. Please delete and create another data source.'
+            'Failed to update existing data source: "auth.credentials.username" missing. Please delete and create another data source.'
           );
         }
-        return this.validateEncryptionContext(password, endpoint);
+        encryptionContext = await this.getEncryptionContext(password);
+        break;
       case AuthType.SigV4:
         const { accessKey } = auth.credentials as SigV4Content;
-        return this.validateEncryptionContext(accessKey, endpoint);
+        encryptionContext = await this.getEncryptionContext(accessKey);
+        break;
       default:
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${auth.type}'`);
     }
+
+    // validate encryption context
+    if (encryptionContext.endpoint !== endpoint) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Failed to update existing data source: "endpoint" contaminated. Please delete and create another data source.'
+      );
+    }
+    return encryptionContext;
   }
 
-  private async validateEncryptionContext(input: string, reference: string) {
+  private async getEncryptionContext(input: string) {
     const { encryptionContext } = await this.cryptography
       .decodeAndDecrypt(input)
       .catch((err: any) => {
-        const errMsg = `Failed to update existing data source: unable to decrypt "auth.credentials.password"`;
-        this.logger.error(errMsg);
-        this.logger.error(err);
+        const errMsg = `Failed to update existing data source: unable to decrypt auth content`;
+        this.logger.error(`errMsg: ${err}, ${err.stack}`);
         throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
       });
 
-    if (encryptionContext.endpoint !== reference) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'Update failed due to deprecated data source: "endpoint" contaminated. Please delete and create another data source.'
-      );
-    }
     return encryptionContext;
   }
 
