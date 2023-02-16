@@ -35,11 +35,11 @@ const getXAxisId = (dimensions: any, columns: OpenSearchDashboardsDatatableColum
   return columns.filter((column) => column.name === dimensions.x.label)[0].id;
 };
 
-const cleanString = (rawString: string): string => {
+export const cleanString = (rawString: string): string => {
   return rawString.replaceAll('"', '');
 };
 
-const formatDataTable = (
+export const formatDataTable = (
   datatable: OpenSearchDashboardsDatatable
 ): OpenSearchDashboardsDatatable => {
   datatable.columns.forEach((column) => {
@@ -49,7 +49,7 @@ const formatDataTable = (
   return datatable;
 };
 
-const createSpecFromDatatable = (
+export const createSpecFromDatatable = (
   datatable: OpenSearchDashboardsDatatable,
   visParams: VisParams,
   dimensions: VislibDimensions
