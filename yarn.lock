@@ -17769,12 +17769,12 @@ vega-time@^2.0.3, vega-time@^2.1.0, vega-time@~2.1.0:
     d3-time "^3.0.0"
     vega-util "^1.15.2"
 
-vega-tooltip@^0.24.2:
-  version "0.24.2"
-  resolved "https://registry.yarnpkg.com/vega-tooltip/-/vega-tooltip-0.24.2.tgz#da55a171a96ea48a8ff135a728622e1cbb1152af"
-  integrity sha512-b7IeYQl/piNVsMmTliOgTnwSOhBs67KqoZ9UzP1I3XpH7TKbSuc3YHA7b1CSxkRR0hHKdradby4UI8c9rdH74w==
+vega-tooltip@^0.30.0:
+  version "0.30.0"
+  resolved "https://registry.yarnpkg.com/vega-tooltip/-/vega-tooltip-0.30.0.tgz#b8a48a0d1be717b7410cf75021aaaff75818b212"
+  integrity sha512-dBuqp1HgNvxrc3MU4KAE3gU7AiD0AvCiyu7IMwubI6TQa0l9A5c+B+ZLjDZP2Ool0J9eAaGgVhqjXWaUjUAfAQ==
   dependencies:
-    vega-util "^1.15.2"
+    vega-util "^1.17.0"
 
 vega-transforms@~4.10.0:
   version "4.10.0"
