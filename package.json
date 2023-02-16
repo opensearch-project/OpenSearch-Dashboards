@@ -456,7 +456,7 @@
     "vega-lite": "^4.16.8",
     "vega-lite-next": "npm:vega-lite@^5.6.0",
     "vega-schema-url-parser": "^2.1.0",
-    "vega-tooltip": "^0.24.2",
+    "vega-tooltip": "^0.30.0",
     "vinyl-fs": "^3.0.3",
     "xml2js": "^0.4.22",
     "xmlbuilder": "13.0.2",
