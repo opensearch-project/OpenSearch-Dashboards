@@ -85,21 +85,26 @@ export const getAWSCredential = async (
   const { endpoint } = dataSource;
   const { accessKey, secretKey, region } = dataSource.auth.credentials! as SigV4Content;
 
-  const { decryptedText: accessKeyText, encryptionContext } = await cryptography
-    .decodeAndDecrypt(accessKey)
-    .catch((err: any) => {
-      // Re-throw as DataSourceError
-      throw createDataSourceError(err);
-    });
+  const {
+    decryptedText: accessKeyText,
+    encryptionContext: accessKeyEncryptionContext,
+  } = await cryptography.decodeAndDecrypt(accessKey).catch((err: any) => {
+    // Re-throw as DataSourceError
+    throw createDataSourceError(err);
+  });
 
-  const { decryptedText: secretKeyText } = await cryptography
-    .decodeAndDecrypt(secretKey)
-    .catch((err: any) => {
-      // Re-throw as DataSourceError
-      throw createDataSourceError(err);
-    });
+  const {
+    decryptedText: secretKeyText,
+    encryptionContext: secretKeyEncryptionContext,
+  } = await cryptography.decodeAndDecrypt(secretKey).catch((err: any) => {
+    // Re-throw as DataSourceError
+    throw createDataSourceError(err);
+  });
 
-  if (encryptionContext!.endpoint !== endpoint) {
+  if (
+    accessKeyEncryptionContext.endpoint !== endpoint ||
+    secretKeyEncryptionContext.endpoint !== endpoint
+  ) {
     throw new Error(
       'Data source "endpoint" contaminated. Please delete and create another data source.'
     );
