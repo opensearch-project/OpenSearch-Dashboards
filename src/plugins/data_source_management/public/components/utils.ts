@@ -90,7 +90,7 @@ export async function testConnection(
       endpoint,
       auth: {
         type,
-        credentials: type === AuthType.NoAuth ? null : { ...credentials },
+        credentials,
       },
     },
   };
