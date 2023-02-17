@@ -99,6 +99,7 @@
     "**/lodash": "^4.17.21",
     "**/merge": "^2.1.1",
     "**/minimist": "^1.2.5",
+    "**/node-jose": "^2.2.0",
     "**/node-jose/node-forge": "^0.10.0",
     "**/normalize-url": "^4.5.1",
     "**/prismjs": "^1.23.0",
