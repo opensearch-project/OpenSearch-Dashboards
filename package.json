@@ -89,7 +89,7 @@
     "**/json-schema": "^0.4.0",
     "**/kind-of": ">=6.0.3",
     "**/loader-utils": "^2.0.4",
-    "**/node-jose": "^2.1.0",
+    "**/node-jose": "^2.2.0",
     "**/nth-check": "^2.0.1",
     "**/trim": "^0.0.3",
     "**/typescript": "4.0.2",
