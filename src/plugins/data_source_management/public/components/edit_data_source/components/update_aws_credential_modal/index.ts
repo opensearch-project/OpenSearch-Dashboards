@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { OpenSearchClientPool, OpenSearchClientPoolSetup } from './client_pool';
+export { UpdateAwsCredentialModal } from './update_aws_credential_modal';

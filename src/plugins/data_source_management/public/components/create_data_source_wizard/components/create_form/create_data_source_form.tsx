@@ -25,6 +25,7 @@ import {
   DataSourceAttributes,
   DataSourceManagementContextValue,
   UsernamePasswordTypedContent,
+  SigV4Content,
 } from '../../../../types';
 import { Header } from '../header';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
@@ -50,7 +51,7 @@ export interface CreateDataSourceState {
   endpoint: string;
   auth: {
     type: AuthType;
-    credentials: UsernamePasswordTypedContent;
+    credentials: UsernamePasswordTypedContent | SigV4Content;
   };
 }
 
@@ -120,20 +121,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   onChangeAuthType = (value: string) => {
-    const valueToSave =
-      value === AuthType.UsernamePasswordType ? AuthType.UsernamePasswordType : AuthType.NoAuth;
-
-    const formErrorsByField = {
-      ...this.state.formErrorsByField,
-      createCredential: { ...this.state.formErrorsByField.createCredential },
-    };
-    if (valueToSave === AuthType.NoAuth) {
-      formErrorsByField.createCredential = {
-        username: [],
-        password: [],
-      };
-    }
-    this.setState({ auth: { ...this.state.auth, type: valueToSave }, formErrorsByField });
+    this.setState({ auth: { ...this.state.auth, type: value as AuthType } });
   };
 
   onChangeUsername = (e: { target: { value: any } }) => {
@@ -180,6 +168,72 @@ export class CreateDataSourceForm extends React.Component<
     });
   };
 
+  onChangeRegion = (e: { target: { value: any } }) => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: { ...this.state.auth.credentials, region: e.target.value },
+      },
+    });
+  };
+
+  validateRegion = () => {
+    const isValid = !!this.state.auth.credentials.region?.trim().length;
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        awsCredential: {
+          ...this.state.formErrorsByField.awsCredential,
+          region: isValid ? [] : [''],
+        },
+      },
+    });
+  };
+
+  onChangeAccessKey = (e: { target: { value: any } }) => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: { ...this.state.auth.credentials, accessKey: e.target.value },
+      },
+    });
+  };
+
+  validateAccessKey = () => {
+    const isValid = !!this.state.auth.credentials.accessKey;
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        awsCredential: {
+          ...this.state.formErrorsByField.awsCredential,
+          accessKey: isValid ? [] : [''],
+        },
+      },
+    });
+  };
+
+  onChangeSecretKey = (e: { target: { value: any } }) => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: { ...this.state.auth.credentials, secretKey: e.target.value },
+      },
+    });
+  };
+
+  validateSecretKey = () => {
+    const isValid = !!this.state.auth.credentials.secretKey;
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        awsCredential: {
+          ...this.state.formErrorsByField.awsCredential,
+          secretKey: isValid ? [] : [''],
+        },
+      },
+    });
+  };
+
   onClickCreateNewDataSource = () => {
     if (this.isFormValid()) {
       const formValues: DataSourceAttributes = this.getFormValues();
@@ -201,11 +255,26 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   getFormValues = (): DataSourceAttributes => {
+    let credentials = this.state.auth.credentials;
+    if (this.state.auth.type === AuthType.UsernamePasswordType) {
+      credentials = {
+        username: this.state.auth.credentials.username,
+        password: this.state.auth.credentials.password,
+      } as UsernamePasswordTypedContent;
+    }
+    if (this.state.auth.type === AuthType.SigV4) {
+      credentials = {
+        region: this.state.auth.credentials.region,
+        accessKey: this.state.auth.credentials.accessKey,
+        secretKey: this.state.auth.credentials.secretKey,
+      } as SigV4Content;
+    }
+
     return {
       title: this.state.title,
       description: this.state.description,
       endpoint: this.state.endpoint,
-      auth: { ...this.state.auth, credentials: { ...this.state.auth.credentials } },
+      auth: { ...this.state.auth, credentials },
     };
   };
 
@@ -247,55 +316,133 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   /* Render create new credentials*/
-  renderCreateNewCredentialsForm = () => {
-    return (
-      <>
-        <EuiFormRow
-          label={i18n.translate('dataSourcesManagement.createDataSource.username', {
-            defaultMessage: 'Username',
-          })}
-          isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
-          error={this.state.formErrorsByField.createCredential.username}
-        >
-          <EuiFieldText
-            placeholder={i18n.translate(
-              'dataSourcesManagement.createDataSource.usernamePlaceholder',
-              {
-                defaultMessage: 'Username to connect to data source',
-              }
-            )}
-            isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
-            value={this.state.auth.credentials.username || ''}
-            onChange={this.onChangeUsername}
-            onBlur={this.validateUsername}
-            data-test-subj="createDataSourceFormUsernameField"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('dataSourcesManagement.createDataSource.password', {
-            defaultMessage: 'Password',
-          })}
-          isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
-          error={this.state.formErrorsByField.createCredential.password}
-        >
-          <EuiFieldPassword
-            isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
-            placeholder={i18n.translate(
-              'dataSourcesManagement.createDataSource.passwordPlaceholder',
-              {
-                defaultMessage: 'Password to connect to data source',
-              }
-            )}
-            type={'dual'}
-            value={this.state.auth.credentials.password || ''}
-            onChange={this.onChangePassword}
-            onBlur={this.validatePassword}
-            spellCheck={false}
-            data-test-subj="createDataSourceFormPasswordField"
-          />
-        </EuiFormRow>
-      </>
-    );
+  renderCreateNewCredentialsForm = (type: AuthType) => {
+    switch (type) {
+      case AuthType.UsernamePasswordType:
+        return (
+          <>
+            <EuiFormRow
+              label={i18n.translate('dataSourcesManagement.createDataSource.username', {
+                defaultMessage: 'Username',
+              })}
+              isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
+              error={this.state.formErrorsByField.createCredential.username}
+            >
+              <EuiFieldText
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.createDataSource.usernamePlaceholder',
+                  {
+                    defaultMessage: 'Username to connect to data source',
+                  }
+                )}
+                isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
+                value={this.state.auth.credentials.username || ''}
+                onChange={this.onChangeUsername}
+                onBlur={this.validateUsername}
+                data-test-subj="createDataSourceFormUsernameField"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('dataSourcesManagement.createDataSource.password', {
+                defaultMessage: 'Password',
+              })}
+              isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
+              error={this.state.formErrorsByField.createCredential.password}
+            >
+              <EuiFieldPassword
+                isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.createDataSource.passwordPlaceholder',
+                  {
+                    defaultMessage: 'Password to connect to data source',
+                  }
+                )}
+                type={'dual'}
+                value={this.state.auth.credentials.password || ''}
+                onChange={this.onChangePassword}
+                onBlur={this.validatePassword}
+                spellCheck={false}
+                data-test-subj="createDataSourceFormPasswordField"
+              />
+            </EuiFormRow>
+          </>
+        );
+      case AuthType.SigV4:
+        return (
+          <>
+            <EuiFormRow
+              label={i18n.translate('dataSourcesManagement.createDataSource.region', {
+                defaultMessage: 'Region',
+              })}
+              isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
+              error={this.state.formErrorsByField.awsCredential.region}
+            >
+              <EuiFieldText
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.createDataSource.regionPlaceholder',
+                  {
+                    defaultMessage: 'AWS Region, e.g. us-west-2',
+                  }
+                )}
+                isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
+                value={this.state.auth.credentials.region || ''}
+                onChange={this.onChangeRegion}
+                onBlur={this.validateRegion}
+                data-test-subj="createDataSourceFormRegionField"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('dataSourcesManagement.createDataSource.accessKey', {
+                defaultMessage: 'Access Key',
+              })}
+              isInvalid={!!this.state.formErrorsByField.awsCredential.accessKey.length}
+              error={this.state.formErrorsByField.awsCredential.accessKey}
+            >
+              <EuiFieldPassword
+                isInvalid={!!this.state.formErrorsByField.awsCredential.accessKey.length}
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.createDataSource.accessKeyPlaceholder',
+                  {
+                    defaultMessage: 'AWS access key',
+                  }
+                )}
+                type={'dual'}
+                value={this.state.auth.credentials.accessKey || ''}
+                onChange={this.onChangeAccessKey}
+                onBlur={this.validateAccessKey}
+                spellCheck={false}
+                data-test-subj="createDataSourceFormAccessKeyField"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('dataSourcesManagement.createDataSource.secretKey', {
+                defaultMessage: 'Secret Key',
+              })}
+              isInvalid={!!this.state.formErrorsByField.awsCredential.secretKey.length}
+              error={this.state.formErrorsByField.awsCredential.secretKey}
+            >
+              <EuiFieldPassword
+                isInvalid={!!this.state.formErrorsByField.awsCredential.secretKey.length}
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.createDataSource.secretKeyPlaceholder',
+                  {
+                    defaultMessage: 'AWS secret key',
+                  }
+                )}
+                type={'dual'}
+                value={this.state.auth.credentials.secretKey || ''}
+                onChange={this.onChangeSecretKey}
+                onBlur={this.validateSecretKey}
+                spellCheck={false}
+                data-test-subj="createDataSourceFormSecretKeyField"
+              />
+            </EuiFormRow>
+          </>
+        );
+
+      default:
+        break;
+    }
   };
 
   renderContent = () => {
@@ -419,7 +566,11 @@ export class CreateDataSourceForm extends React.Component<
 
           {/* Create New credentials */}
           {this.state.auth.type === AuthType.UsernamePasswordType
-            ? this.renderCreateNewCredentialsForm()
+            ? this.renderCreateNewCredentialsForm(this.state.auth.type)
+            : null}
+
+          {this.state.auth.type === AuthType.SigV4
+            ? this.renderCreateNewCredentialsForm(this.state.auth.type)
             : null}
 
           <EuiSpacer size="xl" />
@@ -430,7 +581,8 @@ export class CreateDataSourceForm extends React.Component<
                 <EuiButton
                   type="submit"
                   fill={false}
-                  disabled={!this.isFormValid()}
+                  // TODO: remove the type check when working on https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3418
+                  disabled={!this.isFormValid() || this.state.auth.type === AuthType.SigV4}
                   onClick={this.onClickTestConnection}
                   data-test-subj="createDataSourceTestConnectionButton"
                 >
