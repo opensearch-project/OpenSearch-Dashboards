@@ -8,7 +8,7 @@ import { buildExpression, buildExpressionFunction } from '../../expressions/publ
 import { OpenSearchaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
 import {
   VegaExpressionFunctionDefinition,
-  VegaSpecExpressionFunctionDefinition,
+  LineVegaSpecExpressionFunctionDefinition,
 } from '../../vis_type_vega/public';
 
 export const toExpressionAst = async (vis: Vis, params: any) => {
@@ -39,7 +39,7 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
   } else {
     const dimensions = await buildVislibDimensions(vis, params);
     // adding the new expr fn here that takes the datatable and converts to a vega spec
-    const vegaSpecFn = buildExpressionFunction<VegaSpecExpressionFunctionDefinition>(
+    const vegaSpecFn = buildExpressionFunction<LineVegaSpecExpressionFunctionDefinition>(
       'line_vega_spec',
       {
         visLayers: JSON.stringify([]),

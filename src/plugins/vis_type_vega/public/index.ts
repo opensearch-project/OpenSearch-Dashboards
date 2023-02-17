@@ -37,4 +37,4 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 }
 
 export { VegaExpressionFunctionDefinition } from './expressions/vega_fn';
-export { VegaSpecExpressionFunctionDefinition } from './expressions/line_vega_spec_fn';
+export { LineVegaSpecExpressionFunctionDefinition } from './expressions/line_vega_spec_fn';

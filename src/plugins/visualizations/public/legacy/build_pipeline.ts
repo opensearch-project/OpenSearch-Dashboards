@@ -334,11 +334,11 @@ const buildVisConfig: BuildVisConfigFunction = {
 export interface VislibDimensions {
   x: any;
   y: SchemaConfig[];
-  z: any[] | undefined;
-  width: any[] | undefined;
-  series: any[] | undefined;
-  splitRow: any[] | undefined;
-  splitColumn: any[] | undefined;
+  z?: any[];
+  width?: any[];
+  series?: any[];
+  splitRow?: any[];
+  splitColumn?: any[];
 }
 
 export const buildVislibDimensions = async (
