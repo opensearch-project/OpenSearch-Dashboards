@@ -228,15 +228,12 @@ export async function buildContextMenuForActions({
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
   for (const panel of Object.values(panels)) {
-    // If we panel is a root-level panel, such as a group-based panel,
+    // If the panel is a root-level panel, such as a group-based panel,
     // then create mainMenu item for this panel
     if (panel._level === 0) {
       // Add separator with unique key if needed
       if (panels.mainMenu.items.length) {
-        panels.mainMenu.items.push({
-          isSeparator: true,
-          key: `${panel.id}separator`,
-        });
+        panels.mainMenu.items.push({ isSeparator: true, key: `${panel.id}separator` });
       }
 
       // If a panel has more than one child, then allow item's to be grouped
