@@ -137,7 +137,7 @@ describe('configureClient', () => {
       configureClient(dataSourceClientParams, clientPoolSetup, config, logger)
     ).rejects.toThrowError();
 
-    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
   });
@@ -152,7 +152,7 @@ describe('configureClient', () => {
       configureClient(dataSourceClientParams, clientPoolSetup, config, logger)
     ).rejects.toThrowError();
 
-    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
   });
