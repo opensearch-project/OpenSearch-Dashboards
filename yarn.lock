@@ -2861,7 +2861,7 @@
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.1.0.tgz#ab8109208106b5e764e5a6c92b2ba1c625b73020"
   integrity sha512-DCg+Ka+uDQ31lJ/UtEXVlaeV3d6t81gifaVWKJy4MYVVgvJttyX/viREy+If7fz+tK/gVxTGMtyrFPnm4gjrVA==
 
-"@types/elasticsearch@^5.0.33":
+"@types/elasticsearch@*", "@types/elasticsearch@^5.0.33":
   version "5.0.40"
   resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.40.tgz#811f6954088c264173e0a9876b97933250a4da10"
   integrity sha512-lhnbkC0XorAD7Dt7X+94cXUSHEdDNnEVk/DgFLHgIZQNhixV631Lj4+KpXunTT5rCHyj9RqK3TfO7QrOiwEeUQ==
@@ -3071,6 +3071,15 @@
   dependencies:
     "@types/react" "*"
     hoist-non-react-statics "^3.3.0"
+
+"@types/http-aws-es@6.0.2":
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/@types/http-aws-es/-/http-aws-es-6.0.2.tgz#3c608f7da83382bb5a1a35c4f9704296b979ca26"
+  integrity sha512-VfQ/h+xxdeWP2Sf3BDf2feyzC8duBH5rFPJw2RW5m800fJLkZof/oojn1Atw1jCh4XerjiXRTIyqd5gUQ2iWNw==
+  dependencies:
+    "@types/elasticsearch" "*"
+    "@types/node" "*"
+    aws-sdk "^2.814.0"
 
 "@types/http-cache-semantics@*":
   version "4.0.1"
@@ -4745,6 +4754,22 @@ aws-sdk@^2.650.0:
   version "2.1214.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1214.0.tgz#6a57945b5bc9db79f8ee5ed99128a06110a88f83"
   integrity sha512-50WxqYgEDB5UxwPJ0IDFWXe3ipAHhHmqfRnMNaQaZhb2aJpprbT7c0zic8AH9E1xJ9s+6QkhYrwQf/vXEHnLwg==
+  dependencies:
+    buffer "4.9.2"
+    events "1.1.1"
+    ieee754 "1.1.13"
+    jmespath "0.16.0"
+    querystring "0.2.0"
+    sax "1.2.1"
+    url "0.10.3"
+    util "^0.12.4"
+    uuid "8.0.0"
+    xml2js "0.4.19"
+
+aws-sdk@^2.814.0:
+  version "2.1319.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1319.0.tgz#be1d91fcac13262fa106f0f0a15ee07c023972fd"
+  integrity sha512-/gPCVsCARitph9FmBTXZmzjX0Br8LwBfu2MTNPGjVCiZkEUSoUWAAigIWkvrjTWOXCI7TSElRwtCzlsVHdv5VA==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -9866,6 +9891,11 @@ htmlparser2@^7.0:
     domhandler "^4.2.2"
     domutils "^2.8.0"
     entities "^3.0.1"
+
+http-aws-es@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/http-aws-es/-/http-aws-es-6.0.0.tgz#1528978d2bee718b8732dcdced0856efa747aeff"
+  integrity sha512-g+qp7J110/m4aHrR3iit4akAlnW0UljZ6oTq/rCcbsI8KP9x+95vqUtx49M2XQ2JMpwJio3B6gDYx+E8WDxqiA==
 
 http-cache-semantics@^4.0.0, http-cache-semantics@^4.1.0:
   version "4.1.1"
