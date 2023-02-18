@@ -11,6 +11,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2022-25860] Bump simple-git from 3.15.1 to 3.16.0 ([#3345](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3345))
 - [CVE-2020-36632] [REQUIRES PLUGIN VALIDATION] Bump flat from 4.1.1 to 5.0.2 ([#3419](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3419)). To the best of our knowledge, this is a non-breaking change, but if your plugin relies on `mocha` tests, validate that they still work correctly (and plan to migrate them to `jest` [in preparation for `mocha` deprecation](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1572).
 - [CVE-2023-25166] Bump formula from 3.0.0 to 3.0.1 ([#3416](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3416))
+- [CVE-2022-25758][CVE-2020-24025] Bump node-sass to 7.0.3 and sass-loader to 10.4.1 in 2.x ([#3455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3455))
 - [CVE-2022-24999] Resolve qs from 6.5.3 to 6.11.0 ([#3450](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3450))
 
 ### 📈 Features/Enhancements
