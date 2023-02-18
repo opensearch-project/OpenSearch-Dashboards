@@ -88,6 +88,7 @@
     "**/loader-utils": "^2.0.4",
     "**/node-jose": "^2.2.0",
     "**/nth-check": "^2.0.1",
+    "**/sass-loader": "^10.4.1",
     "**/trim": "^0.0.3",
     "**/typescript": "4.0.2",
     "**/unset-value": "^2.0.1",
