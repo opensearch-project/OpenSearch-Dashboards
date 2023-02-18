@@ -6,9 +6,12 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Deprecations
 
 ### 🛡 Security
-- [CVE-2022-37601][CVE-2022-37599] Bump loader-utils to 2.0.4 ([#3318](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3318))
-- [CVE-2022-25860] Bumps simple-git from 3.15.1 to 3.16.0 ([#3345](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3345))
-- [CVE-2020-36632] [REQUIRES PLUGIN VALIDATION] Bumps flat from 4.1.1 to 5.0.2 ([#3419](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3419)). To the best of our knowledge, this is a non-breaking change, but if your plugin relies on `mocha` tests, validate that they still work correctly (and plan to migrate them to `jest` [in preparation for `mocha` deprecation](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1572). 
+
+- [CVE-2022-37601] [CVE-2022-37599] Bump loader-utils from 2.0.3 to 2.0.4 ([#3318](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3318))
+- [CVE-2022-25860] Bump simple-git from 3.15.1 to 3.16.0 ([#3345](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3345))
+- [CVE-2020-36632] [REQUIRES PLUGIN VALIDATION] Bump flat from 4.1.1 to 5.0.2 ([#3419](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3419)). To the best of our knowledge, this is a non-breaking change, but if your plugin relies on `mocha` tests, validate that they still work correctly (and plan to migrate them to `jest` [in preparation for `mocha` deprecation](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/1572).
+- [CVE-2023-25166] Bump formula from 3.0.0 to 3.0.1 ([#3416](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3416))
+- [CVE-2022-25758][CVE-2020-24025] Bump node-sass to 7.0.3 and sass-loader to 10.4.1 in 2.x ([#3455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3455))
 
 ### 📈 Features/Enhancements
 
@@ -19,6 +22,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 📝 Documentation
 
 ### 🛠 Maintenance
+
 - Bumps `re2` and `supertest` ([3018](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3018))
 
 ### 🪛 Refactoring
@@ -97,6 +101,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CI] Disable the execution of the Build and Test workflow when the changes are limited to the docs folder ([#3197](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3197))
 - Correct the linting logic for `no-restricted-path` to ignore trailing slashes ([#3020](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3020))
 - [VisBuilder] Create unit tests for field utilities ([#3211](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3211))
+- [BWC Tests] Add BWC tests for 2.6.0 ([#3356](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3356))
 
 ## [2.4.1]
 
