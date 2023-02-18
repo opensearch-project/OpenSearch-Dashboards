@@ -43,10 +43,7 @@ const wps = new WorkerProxyService();
 // Register rules against shared monaco instance.
 registerLexerRules(monaco);
 
-// In future we will need to make this map languages to workers using "id" and/or "label" values
-// that get passed in. Also this should not live inside the "xjson" dir directly. We can update this
-// once we have another worker.
-// @ts-ignore
+// register xjson worker to the worker map.
 registerWorker(ID, workerSrc);
 
 monaco.languages.onLanguage(ID, async () => {
