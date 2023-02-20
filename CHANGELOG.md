@@ -19,6 +19,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🐛 Bug Fixes
 
 ### 🚞 Infrastructure
+- Upgrade yarn version to be compatible with @openearch-project/opensearch ([#3443](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3443))
 
 ### 📝 Documentation
 
