@@ -7,12 +7,11 @@ import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
 import LRUCache from 'lru-cache';
 import { Logger } from 'src/core/server';
-import { AuthType } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 
 export interface OpenSearchClientPoolSetup {
-  getClientFromPool: (endpoint: string, authType: AuthType) => Client | LegacyClient | undefined;
-  addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void;
+  getClientFromPool: (id: string) => Client | LegacyClient | undefined;
+  addClientToPool: (endpoint: string, client: Client | LegacyClient) => void;
 }
 
 /**
@@ -22,14 +21,10 @@ export interface OpenSearchClientPoolSetup {
  * It reuse TPC connections for each OpenSearch endpoint.
  */
 export class OpenSearchClientPool {
-  // LRU cache of client
+  // LRU cache
   //   key: data source endpoint
-  //   value: OpenSearch client | Legacy client
-  private clientCache?: LRUCache<string, Client | LegacyClient>;
-  // LRU cache of aws clients
-  //   key: endpoint + dataSourceId + lastUpdatedTime together to support update case.
-  //   value: OpenSearch client | Legacy client
-  private awsClientCache?: LRUCache<string, Client | LegacyClient>;
+  //   value: OpenSearch client object | Legacy client object
+  private cache?: LRUCache<string, Client | LegacyClient>;
   private isClosed = false;
 
   constructor(private logger: Logger) {}
@@ -37,13 +32,12 @@ export class OpenSearchClientPool {
   public setup(config: DataSourcePluginConfigType): OpenSearchClientPoolSetup {
     const logger = this.logger;
     const { size } = config.clientPool;
-    const MAX_AGE = 15 * 60 * 1000; // by default, TCP connection times out in 15 minutes
 
-    this.clientCache = new LRUCache({
+    this.cache = new LRUCache({
       max: size,
-      maxAge: MAX_AGE,
+      maxAge: 15 * 60 * 1000, // by default, TCP connection times out in 15 minutes
 
-      async dispose(key, client) {
+      async dispose(endpoint, client) {
         try {
           await client.close();
         } catch (error: any) {
@@ -56,34 +50,12 @@ export class OpenSearchClientPool {
     });
     this.logger.info(`Created data source client pool of size ${size}`);
 
-    // aws client specific pool
-    this.awsClientCache = new LRUCache({
-      max: size,
-      maxAge: MAX_AGE,
-
-      async dispose(key, client) {
-        try {
-          await client.close();
-        } catch (error: any) {
-          logger.warn(
-            `Error closing OpenSearch client when removing from aws client pool: ${error.message}`
-          );
-        }
-      },
-    });
-    this.logger.info(`Created data source aws client pool of size ${size}`);
-
-    const getClientFromPool = (key: string, authType: AuthType) => {
-      const selectedCache = authType === AuthType.SigV4 ? this.awsClientCache : this.clientCache;
-
-      return selectedCache!.get(key);
+    const getClientFromPool = (endpoint: string) => {
+      return this.cache!.get(endpoint);
     };
 
-    const addClientToPool = (key: string, authType: string, client: Client | LegacyClient) => {
-      const selectedCache = authType === AuthType.SigV4 ? this.awsClientCache : this.clientCache;
-      if (!selectedCache?.has(key)) {
-        return selectedCache!.set(key, client);
-      }
+    const addClientToPool = (endpoint: string, client: Client | LegacyClient) => {
+      this.cache!.set(endpoint, client);
     };
 
     return {
@@ -99,15 +71,7 @@ export class OpenSearchClientPool {
     if (this.isClosed) {
       return;
     }
-
-    try {
-      await Promise.all([
-        ...this.clientCache!.values().map((client) => client.close()),
-        ...this.awsClientCache!.values().map((client) => client.close()),
-      ]);
-      this.isClosed = true;
-    } catch (error) {
-      this.logger.error(`Error closing clients in pool. ${error}`);
-    }
+    await Promise.all(this.cache!.values().map((client) => client.close()));
+    this.isClosed = true;
   }
 }

@@ -53,13 +53,11 @@ export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextV
 export enum AuthType {
   NoAuth = 'no_auth',
   UsernamePasswordType = 'username_password',
-  SigV4 = 'sigv4',
 }
 
 export const credentialSourceOptions = [
   { id: AuthType.NoAuth, label: 'No authentication' },
   { id: AuthType.UsernamePasswordType, label: 'Username & Password' },
-  { id: AuthType.SigV4, label: 'AWS SigV4' },
 ];
 
 export interface DataSourceAttributes extends SavedObjectAttributes {
@@ -68,17 +66,11 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   endpoint?: string;
   auth: {
     type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content | undefined;
+    credentials: UsernamePasswordTypedContent | undefined;
   };
 }
 
 export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
   username: string;
   password?: string;
-}
-
-export interface SigV4Content extends SavedObjectAttributes {
-  accessKey: string;
-  secretKey: string;
-  region: string;
 }
