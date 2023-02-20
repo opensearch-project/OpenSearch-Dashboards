@@ -110,6 +110,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add recording of functional test artifacts if they fail ([#3190](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3190))
 - Improve yarn's performance in workflows by caching yarn's cache folder ([#3194](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3194))
 - Fix detection of Chrome's version on Darwin during CI ([#3296](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3296))
+- Upgrade yarn version to be compatible with @openearch-project/opensearch ([#3443](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3443))
 
 ### 📝 Documentation
 
