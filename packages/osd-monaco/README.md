@@ -4,4 +4,4 @@ A customized version of monaco that is automatically configured the way we want 
 
 Includes custom xjson language support. The `opensearch_ui_shared` plugin has an example of how to use it, in the future we will likely expose helpers from this package to make using it everywhere a little more seamless.
 
-Add json language worker export.
+Includes json language worker support.
