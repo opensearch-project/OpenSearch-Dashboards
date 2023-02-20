@@ -104,7 +104,7 @@ describe('buildXAxis()', function () {
 });
 
 describe('buildYAxis()', function () {
-  it('build different XAxis', function () {
+  it('build different YAxis', function () {
     const valueAxis = {
       id: 'someId',
       labels: {
