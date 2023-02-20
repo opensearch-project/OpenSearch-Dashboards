@@ -1,6 +1,6 @@
 # README
 
-This folder contains the language definitions for XJSON used by the Monaco editor.
+This folder contains the language definitions for XJSON and language worker of JSON used by the Monaco editor.
 
 ## Summary of contents
 
