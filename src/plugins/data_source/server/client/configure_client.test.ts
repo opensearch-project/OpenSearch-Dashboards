@@ -6,7 +6,12 @@
 import { SavedObjectsClientContract } from '../../../../core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/server/mocks';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
-import { DataSourceAttributes, AuthType } from '../../common/data_sources/types';
+import {
+  DataSourceAttributes,
+  AuthType,
+  UsernamePasswordTypedContent,
+  SigV4Content,
+} from '../../common/data_sources/types';
 import { DataSourcePluginConfigType } from '../../config';
 import { ClientMock, parseClientOptionsMock } from './configure_client.test.mocks';
 import { OpenSearchClientPoolSetup } from './client_pool';
@@ -31,6 +36,8 @@ describe('configureClient', () => {
   let dataSourceAttr: DataSourceAttributes;
   let dsClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
   let dataSourceClientParams: DataSourceClientParams;
+  let usernamePasswordAuthContent: UsernamePasswordTypedContent;
+  let sigV4AuthContent: SigV4Content;
 
   beforeEach(() => {
     dsClient = opensearchClientMock.createInternalClient();
@@ -51,15 +58,24 @@ describe('configureClient', () => {
         rejectUnauthorized: true,
       },
     } as ClientOptions;
+
+    usernamePasswordAuthContent = {
+      username: 'username',
+      password: 'password',
+    };
+
+    sigV4AuthContent = {
+      region: 'us-east-1',
+      accessKey: 'accessKey',
+      secretKey: 'secretKey',
+    };
+
     dataSourceAttr = {
       title: 'title',
       endpoint: 'http://localhost',
       auth: {
         type: AuthType.UsernamePasswordType,
-        credentials: {
-          username: 'username',
-          password: 'password',
-        },
+        credentials: usernamePasswordAuthContent,
       },
     } as DataSourceAttributes;
 
@@ -124,6 +140,48 @@ describe('configureClient', () => {
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
+  });
+
+  test('configure client with auth.type == sigv4, will first call decodeAndDecrypt()', async () => {
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: sigV4AuthContent,
+        },
+      },
+      references: [],
+    });
+
+    const decodeAndDecryptSpy = jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+      decryptedText: 'accessKey',
+      encryptionContext: { endpoint: 'http://localhost' },
+    });
+    await configureClient(dataSourceClientParams, clientPoolSetup, config, logger);
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test('configure test client for non-exist datasource should not call saved object api, nor decode any credential', async () => {
+    const decodeAndDecryptSpy = jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+      decryptedText: 'password',
+      encryptionContext: { endpoint: 'http://localhost' },
+    });
+    const testClientParams: DataSourceClientParams = {
+      ...dataSourceClientParams,
+      testClientDataSourceAttr: dataSourceAttr,
+      dataSourceId: undefined,
+    };
+    await configureClient(testClientParams, clientPoolSetup, config, logger);
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectsMock.get).not.toHaveBeenCalled();
+    expect(decodeAndDecryptSpy).not.toHaveBeenCalled();
   });
 
   test('configure client with auth.type == username_password and password contaminated', async () => {

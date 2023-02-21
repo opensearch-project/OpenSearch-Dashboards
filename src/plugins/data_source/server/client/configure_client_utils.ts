@@ -32,9 +32,17 @@ export const getRootClient = (
 ): Client | LegacyClient | undefined => {
   const {
     auth: { type },
+    lastUpdatedTime,
   } = dataSourceAttr;
+  let cachedClient;
   const cacheKey = generateCacheKey(dataSourceAttr, dataSourceId);
-  const cachedClient = getClientFromPool(cacheKey, type);
+
+  // return undefined when building SigV4 test client with new credentials
+  if (type === AuthType.SigV4) {
+    cachedClient = dataSourceId && lastUpdatedTime ? getClientFromPool(cacheKey, type) : undefined;
+  } else {
+    cachedClient = getClientFromPool(cacheKey, type);
+  }
 
   return cachedClient;
 };

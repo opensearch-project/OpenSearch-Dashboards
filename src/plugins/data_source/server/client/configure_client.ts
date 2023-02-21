@@ -29,13 +29,35 @@ import {
 } from './configure_client_utils';
 
 export const configureClient = async (
-  { dataSourceId, savedObjects, cryptography }: DataSourceClientParams,
+  { dataSourceId, savedObjects, cryptography, testClientDataSourceAttr }: DataSourceClientParams,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   logger: Logger
 ): Promise<Client> => {
+  let dataSource;
+  let requireDecryption = true;
+
   try {
-    const dataSource = await getDataSource(dataSourceId!, savedObjects);
+    // configure test client
+    if (testClientDataSourceAttr) {
+      const {
+        auth: { type, credentials },
+      } = testClientDataSourceAttr;
+      // handle test connection case when changing non-credential field of existing data source
+      if (
+        dataSourceId &&
+        ((type === AuthType.UsernamePasswordType && !credentials?.password) ||
+          (type === AuthType.SigV4 && !credentials?.accessKey && !credentials?.secretKey))
+      ) {
+        dataSource = await getDataSource(dataSourceId, savedObjects);
+      } else {
+        dataSource = testClientDataSourceAttr;
+        requireDecryption = false;
+      }
+    } else {
+      dataSource = await getDataSource(dataSourceId!, savedObjects);
+    }
+
     const rootClient = getRootClient(
       dataSource,
       openSearchClientPoolSetup.getClientFromPool,
@@ -48,52 +70,13 @@ export const configureClient = async (
       config,
       cryptography,
       rootClient,
-      dataSourceId
+      dataSourceId,
+      requireDecryption
     );
   } catch (error: any) {
     logger.error(
       `Failed to get data source client for dataSourceId: [${dataSourceId}]. ${error}: ${error.stack}`
     );
-    // Re-throw as DataSourceError
-    throw createDataSourceError(error);
-  }
-};
-
-export const configureTestClient = async (
-  { savedObjects, cryptography, dataSourceId }: DataSourceClientParams,
-  dataSourceAttr: DataSourceAttributes,
-  openSearchClientPoolSetup: OpenSearchClientPoolSetup,
-  config: DataSourcePluginConfigType,
-  logger: Logger
-): Promise<Client> => {
-  try {
-    const {
-      auth: { type, credentials },
-    } = dataSourceAttr;
-    let requireDecryption = false;
-
-    const rootClient = getRootClient(
-      dataSourceAttr,
-      openSearchClientPoolSetup.getClientFromPool,
-      dataSourceId
-    ) as Client;
-
-    if (type === AuthType.UsernamePasswordType && !credentials?.password && dataSourceId) {
-      dataSourceAttr = await getDataSource(dataSourceId, savedObjects);
-      requireDecryption = true;
-    }
-
-    return getQueryClient(
-      dataSourceAttr,
-      openSearchClientPoolSetup.addClientToPool,
-      config,
-      cryptography,
-      rootClient,
-      dataSourceId,
-      requireDecryption
-    );
-  } catch (error: any) {
-    logger.error(`Failed to get test client. ${error}: ${error.stack}`);
     // Re-throw as DataSourceError
     throw createDataSourceError(error);
   }
@@ -108,7 +91,7 @@ export const configureTestClient = async (
  * @param config data source config
  * @param addClientToPool function to add client to client pool
  * @param dataSourceId id of data source saved Object
- * @param requireDecryption boolean
+ * @param requireDecryption false when creating test client before data source exists
  * @returns Promise of query client
  */
 const getQueryClient = async (
