@@ -134,6 +134,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Bumps `re2` and `supertest` ([3018](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3018))
 - Bump `vega-tooltip` version from ^0.24.2 to ^0.30.0 ([#3358](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3358))
 - Allow relaxing the Node.js runtime version requirement ([3402](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3402))
+- Relax the Node.js requirement to `^14.20.1` ([3463](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3463))
+- Bump the version of Node.js installed by `nvm` to `14.21.3` ([3463](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3463))
 
 ### 🪛 Refactoring
 
