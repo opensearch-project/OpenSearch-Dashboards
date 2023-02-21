@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ApiResponse } from '@opensearch-project/opensearch';
+import { ApiResponse } from '@opensearch-project/opensearc-next';
 import {
   ConnectionError,
   NoLivingConnectionsError,

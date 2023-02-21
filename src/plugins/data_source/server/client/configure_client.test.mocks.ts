@@ -4,8 +4,8 @@
  */
 
 export const ClientMock = jest.fn();
-jest.doMock('@opensearch-project/opensearch', () => {
-  const actual = jest.requireActual('@opensearch-project/opensearch');
+jest.doMock('@opensearch-project/opensearch-next', () => {
+  const actual = jest.requireActual('@opensearch-project/opensearch-next');
   return {
     ...actual,
     Client: ClientMock,
