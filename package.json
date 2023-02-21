@@ -133,7 +133,7 @@
     "@hapi/podium": "^4.1.3",
     "@hapi/vision": "^6.1.0",
     "@hapi/wreck": "^17.1.0",
-    "@opensearch-project/opensearch": "^2.1.0",
+    "@opensearch-project/opensearch": "^1.1.0",
     "@osd/ace": "1.0.0",
     "@osd/analytics": "1.0.0",
     "@osd/apm-config-loader": "1.0.0",
@@ -218,7 +218,8 @@
     "type-detect": "^4.0.8",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "aws-opensearch-connector": "^1.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.5",
@@ -467,6 +468,6 @@
   },
   "engines": {
     "node": "14.20.1",
-    "yarn": "^1.22.10"
+    "yarn": "^1.21.1"
   }
 }

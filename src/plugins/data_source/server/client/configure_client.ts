@@ -5,8 +5,8 @@
 
 import { Client, ClientOptions } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
-import { Credentials } from 'aws-sdk';
-import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws';
+import { Credentials, Config } from 'aws-sdk';
+import createAwsOpensearchConnector from 'aws-opensearch-connector';
 import { Logger } from '../../../../../src/core/server';
 import {
   AuthType,
@@ -179,17 +179,13 @@ const getBasicAuthClient = (
 const getAWSClient = (credential: SigV4Content, clientOptions: ClientOptions): Client => {
   const { accessKey, secretKey, region } = credential;
 
-  const credentialProvider = (): Promise<Credentials> => {
-    return new Promise((resolve) => {
-      resolve(new Credentials({ accessKeyId: accessKey, secretAccessKey: secretKey }));
-    });
-  };
-
   return new Client({
-    ...AwsSigv4Signer({
-      region,
-      getCredentials: credentialProvider,
-    }),
+    ...createAwsOpensearchConnector(
+      new Config({
+        region,
+        credentials: new Credentials({ accessKeyId: accessKey, secretAccessKey: secretKey }),
+      })
+    ),
     ...clientOptions,
   });
 };
