@@ -156,7 +156,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           Array [
             "/internal/data-source-management/validate",
             Object {
-              "body": "{\\"dataSourceAttr\\":{\\"endpoint\\":\\"https://test.com\\",\\"auth\\":{\\"type\\":\\"no_auth\\",\\"credentials\\":null}}}",
+              "body": "{\\"dataSourceAttr\\":{\\"endpoint\\":\\"https://test.com\\",\\"auth\\":{\\"type\\":\\"no_auth\\"}}}",
             },
           ],
         ]
@@ -170,7 +170,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           Array [
             "/internal/data-source-management/validate",
             Object {
-              "body": "{\\"id\\":\\"test1234\\",\\"dataSourceAttr\\":{\\"endpoint\\":\\"https://test.com\\",\\"auth\\":{\\"type\\":\\"no_auth\\",\\"credentials\\":null}}}",
+              "body": "{\\"id\\":\\"test1234\\",\\"dataSourceAttr\\":{\\"endpoint\\":\\"https://test.com\\",\\"auth\\":{\\"type\\":\\"no_auth\\"}}}",
             },
           ],
         ]
