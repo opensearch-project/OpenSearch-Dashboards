@@ -581,8 +581,7 @@ export class CreateDataSourceForm extends React.Component<
                 <EuiButton
                   type="submit"
                   fill={false}
-                  // TODO: remove the type check when working on https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3418
-                  disabled={!this.isFormValid() || this.state.auth.type === AuthType.SigV4}
+                  disabled={!this.isFormValid()}
                   onClick={this.onClickTestConnection}
                   data-test-subj="createDataSourceTestConnectionButton"
                 >

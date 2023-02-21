@@ -8,6 +8,7 @@ import {
   OpenSearchClient,
   SavedObjectsClientContract,
 } from 'src/core/server';
+import { DataSourceAttributes } from '../common/data_sources';
 
 import { CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceError } from './lib/error';
@@ -19,11 +20,13 @@ export interface LegacyClientCallAPIParams {
 }
 
 export interface DataSourceClientParams {
-  // id is optional when creating test client
-  dataSourceId?: string;
-  // this saved objects client is used to fetch data source on behalf of users, caller should pass scoped saved objects client
+  // to fetch data source on behalf of users, caller should pass scoped saved objects client
   savedObjects: SavedObjectsClientContract;
   cryptography: CryptographyServiceSetup;
+  // optional when creating test client, required for normal client
+  dataSourceId?: string;
+  // required when creating test client
+  testClientDataSourceAttr?: DataSourceAttributes;
 }
 
 export interface DataSourcePluginRequestContext {
