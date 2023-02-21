@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, OpenSearchClient } from 'opensearch-dashboards/server';
-import { DataSourceAttributes } from '../../common/data_sources';
+import { AuthType, DataSourceAttributes } from '../../common/data_sources';
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
 import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
@@ -26,13 +26,19 @@ export const registerTestConnectionRoute = (
             auth: schema.maybe(
               schema.object({
                 type: schema.oneOf([
-                  schema.literal('username_password'),
-                  schema.literal('no_auth'),
+                  schema.literal(AuthType.UsernamePasswordType),
+                  schema.literal(AuthType.NoAuth),
+                  schema.literal(AuthType.SigV4),
                 ]),
                 credentials: schema.oneOf([
                   schema.object({
                     username: schema.string(),
                     password: schema.string(),
+                  }),
+                  schema.object({
+                    region: schema.string(),
+                    accessKey: schema.string(),
+                    secretKey: schema.string(),
                   }),
                   schema.literal(null),
                 ]),
@@ -46,13 +52,13 @@ export const registerTestConnectionRoute = (
       const { dataSourceAttr, id: dataSourceId } = request.body;
 
       try {
-        const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getTestingClient(
+        const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getDataSourceClient(
           {
-            dataSourceId,
             savedObjects: context.core.savedObjects.client,
             cryptography,
-          },
-          dataSourceAttr as DataSourceAttributes
+            dataSourceId,
+            testClientDataSourceAttr: dataSourceAttr as DataSourceAttributes,
+          }
         );
         const dsValidator = new DataSourceConnectionValidator(dataSourceClient);
 
