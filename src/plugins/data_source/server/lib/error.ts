@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
+import { ResponseError } from '@opensearch-project/opensearch-next/lib/errors';
 import { errors as LegacyErrors } from 'elasticsearch';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { OsdError } from '../../../opensearch_dashboards_utils/common';

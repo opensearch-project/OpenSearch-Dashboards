@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Client, ClientOptions } from '@opensearch-project/opensearch';
+import { Client, ClientOptions } from '@opensearch-project/opensearch-next';
 import { Client as LegacyClient } from 'elasticsearch';
 import { Credentials } from 'aws-sdk';
-import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws';
+import { AwsSigv4Signer } from '@opensearch-project/opensearch-next/aws';
 import { Logger } from '../../../../../src/core/server';
 import {
   AuthType,

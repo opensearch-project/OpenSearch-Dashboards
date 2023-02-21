@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Client } from '@opensearch-project/opensearch';
+import { Client } from '@opensearch-project/opensearch-next';
 import { Client as LegacyClient } from 'elasticsearch';
 import LRUCache from 'lru-cache';
 import { Logger } from 'src/core/server';
