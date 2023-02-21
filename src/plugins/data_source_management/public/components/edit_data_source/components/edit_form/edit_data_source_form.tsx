@@ -346,25 +346,40 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
   onClickTestConnection = async () => {
     this.setState({ isLoading: true });
-    const existingAuthType = this.props.existingDataSource.auth.type;
+    const isNewCredential = !!(this.state.auth.type !== this.props.existingDataSource.auth.type);
+
+    let credentials = this.state.auth.credentials;
+
+    switch (this.state.auth.type) {
+      case AuthType.UsernamePasswordType:
+        credentials = {
+          username: this.state.auth.credentials?.username,
+          password: isNewCredential ? this.state.auth.credentials?.password : '',
+        } as UsernamePasswordTypedContent;
+        break;
+      case AuthType.SigV4:
+        credentials = {
+          region: this.state.auth.credentials?.region,
+          accessKey: isNewCredential ? this.state.auth.credentials?.accessKey : '',
+          secretKey: isNewCredential ? this.state.auth.credentials?.secretKey : '',
+        } as SigV4Content;
+        break;
+      case AuthType.NoAuth:
+        credentials = undefined;
+        break;
+
+      default:
+        break;
+    }
+
+    const formValues: DataSourceAttributes = {
+      title: this.state.title,
+      description: this.state.description,
+      endpoint: this.state.endpoint,
+      auth: { ...this.state.auth, credentials },
+    };
 
     try {
-      const isNewCredential = !!(
-        existingAuthType === AuthType.NoAuth && this.state.auth.type !== existingAuthType
-      );
-      const formValues: DataSourceAttributes = {
-        title: this.state.title,
-        description: this.state.description,
-        endpoint: this.props.existingDataSource.endpoint,
-        auth: {
-          ...this.state.auth,
-          credentials: {
-            ...this.state.auth.credentials,
-            password: isNewCredential ? this.state.auth.credentials.password : '',
-          },
-        },
-      };
-
       await this.props.handleTestConnection(formValues);
 
       this.props.displayToastMessage({
@@ -532,9 +547,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <Header
         showDeleteIcon={true}
-        isFormValid={
-          !!this.state.auth?.credentials?.username || this.state.auth.type === AuthType.NoAuth
-        }
+        isFormValid={this.isFormValid()}
         onClickDeleteIcon={this.onClickDeleteDataSource}
         dataSourceName={this.props.existingDataSource.title}
         onClickTestConnection={this.onClickTestConnection}
