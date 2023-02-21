@@ -37,7 +37,7 @@ export const ExtractNodeBuilds: GlobalTask = {
   async run(config) {
     await Promise.all(
       config.getTargetPlatforms().map(async (platform) => {
-        const { downloadPath, extractDir } = getNodeDownloadInfo(config, platform);
+        const { downloadPath, extractDir } = await getNodeDownloadInfo(config, platform);
         if (platform.isWindows()) {
           await unzip(downloadPath, extractDir, { strip: 1 });
         } else {
