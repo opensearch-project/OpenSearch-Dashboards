@@ -25,6 +25,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🛠 Maintenance
 
 - Bumps `re2` and `supertest` ([3018](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3018))
+- Introduce @opensearch-project/opensearch@^2.1.0, aliased as @opensearch-project/opensearch-next ([#3469](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3469))
 
 ### 🪛 Refactoring
 
