@@ -26,6 +26,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Bumps `re2` and `supertest` ([3018](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3018))
 - Introduce @opensearch-project/opensearch@^2.1.0, aliased as @opensearch-project/opensearch-next ([#3469](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3469))
+- Relax the Node.js requirement to `^14.20.1` ([3463](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3463))
+- Bump the version of Node.js installed by `nvm` to `14.21.3` ([3463](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3463))
 
 ### 🪛 Refactoring
 
