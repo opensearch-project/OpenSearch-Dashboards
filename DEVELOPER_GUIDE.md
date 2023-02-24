@@ -35,7 +35,7 @@ If you're planning to contribute code (features or fixes) to this repository, gr
 
 ### Key technologies
 
-OpenSearch Dashboards is primarily a node.js web application built in React. To effectively contribute you should be familiar with HTML ([usage guide](#html)), SASS styling ([usage guide](#sass-files)), TypeScript and JavaScript ([usage guide](#typescriptjavascript)), and React ([usage guide](#react)).
+OpenSearch Dashboards is primarily a Node.js web application built using React. To effectively contribute you should be familiar with HTML ([usage guide](#html)), SASS styling ([usage guide](#sass-files)), TypeScript and JavaScript ([usage guide](#typescriptjavascript)), and React ([usage guide](#react)).
 
 ### Prerequisites
 
@@ -43,10 +43,10 @@ To develop on OpenSearch Dashboards, you'll need:
 
 - A [GitHub account](https://docs.github.com/en/get-started/onboarding/getting-started-with-your-github-account)
 - [`git`](https://git-scm.com/) for version control
-- [`node`](https://nodejs.org/), [`npm`](https://www.npmjs.com/), and [`yarn`](https://yarnpkg.com/) for building and running the project
+- [`Node.js`](https://nodejs.org/), [`npm`](https://www.npmjs.com/), and [`Yarn`](https://yarnpkg.com/) for building and running the project
 - A code editor of your choice, configured for JavaScript/TypeScript. If you don't have a favorite editor, we suggest [Visual Studio Code](https://code.visualstudio.com/)
 
-If you already have these installed or have your own preferences for installing them, skip ahead to the to the [Fork and clone OpenSearch Dashboards](#fork-and-clone-opensearch-dashboards) section.
+If you already have these installed or have your own preferences for installing them, skip ahead to the [Fork and clone OpenSearch Dashboards](#fork-and-clone-opensearch-dashboards) section.
 
 #### Install `git`
 
@@ -72,7 +72,7 @@ $ npm install -g yarn
 All local development should be done in a [forked repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
 Fork OpenSearch Dashboards by clicking the "Fork" button at the top of the [GitHub repository](https://github.com/opensearch-project/OpenSearch-Dashboards).
 
-Clone your forked version of OpenSearch Dashboards to your local repository (replace `opensearch-project` in the command below with your GitHub username):
+Clone your forked version of OpenSearch Dashboards to your local machine (replace `opensearch-project` in the command below with your GitHub username):
 
 ```bash
 $ git clone git@github.com:opensearch-project/OpenSearch-Dashboards.git
@@ -81,7 +81,7 @@ $ cd OpenSearch-Dashboards
 
 ### Bootstrap OpenSearch Dashboards
 
-This command will install `npm` dependencies and build all internal packages and plugins. Bootstrapping is necessary any time you need to update packages, plugins, or dependencies, and it's recommended to run it anytime you sync with the latest upstream changes.
+This command will install the project's dependencies and build all internal packages and plugins. Bootstrapping is necessary any time you need to update packages, plugins, or dependencies, and it's recommended to run it anytime you sync with the latest upstream changes.
 
 ```bash
 $ yarn osd bootstrap
@@ -115,8 +115,8 @@ $ yarn start
 When the server is up and ready (the console messages will look something like this),
 
 ```
-server    log   [19:09:44.865] [info][listening] Server running at http://localhost:5603/pgt
-server    log   [19:09:44.899] [info][server][OpenSearchDashboards][http] http server running at http://localhost:5603/pgt
+[info][listening] Server running at http://localhost:5603/pgt
+[info][server][OpenSearchDashboards][http] http server running at http://localhost:5603/pgt
 ```
 
 click on the link displayed in your terminal to
@@ -125,7 +125,7 @@ access it.
 Note - it may take a couple minutes to generate all the necessary bundles. If the Dashboards link is not yet accessible, wait for a log message like
 
 ```
-np bld    log   [00:45:52.375] [success][@osd/optimizer] 28 bundles compiled successfully after 145.9 sec, watching for changes
+[success][@osd/optimizer] 28 bundles compiled successfully after 145.9 sec, watching for changes
 ```
 
 ### Next Steps
@@ -169,7 +169,7 @@ Although the [getting started guide](#getting-started-guide) covers the recommen
 
 By default, the snapshot command will run [a minimal distribution of OpenSearch](https://opensearch.org/downloads.html#minimal), with no plugins installed.
 
-If you would like to run OpenSearch with a particular plugin installed on the cluster snapshot, pass the `--P` flag after `yarn opensearch snapshot`. You can use the flag multiple times to install multiple plugins. The argument value can be a URL to the plugin's zip file, maven coordinates of the plugin, or a local zip file path (use `file:` followed by the absolute or relative path, in that case). For example:
+If you would like to run OpenSearch with a particular plugin installed on the cluster snapshot, pass the `--P` flag after `yarn opensearch snapshot`. You can use the flag multiple times to install multiple plugins. The argument value can be a URL to the plugin's zip file, maven coordinates of the plugin, or a local zip file path (use `file://` followed by the absolute or relative path, in that case). For example:
 
 _(Linux and Windows only - for MacOS, you'll need to [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
 ```bash
