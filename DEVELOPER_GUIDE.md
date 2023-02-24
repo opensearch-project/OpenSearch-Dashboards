@@ -57,15 +57,17 @@ If you don't already have it installed (check with `git --version`) we recommend
 We recommend using [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm) to install and manage different node versions, which may differ between release branches.
 
 1. Install nvm (as specified by the [`nvm` README](https://github.com/nvm-sh/nvm#installing-and-updating)): `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash`
-2. Install the version of node defined in [`package.json`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/package.json#L467) (currently `14.20.1`): `nvm install v14.20.1`
+2. Install the version of the Node.js runtime defined in [`.nvmrc`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.nvmrc): `nvm install`
 
 If it's the only version of node installed, it will automatically be set to the `default` alias. Otherwise, use `nvm list` to see all installed `node` versions, and `nvm use` to select the node version required by OpenSearch Dashboards.
 
 #### Install `yarn`
 
 ```bash
-$ npm install -g yarn
+$ npm i -g corepack
 ```
+
+(See the [Yarn installation documentation](https://yarnpkg.com/getting-started/install) for more information.)
 
 ### Fork and clone OpenSearch Dashboards
 
@@ -76,12 +78,17 @@ Clone your forked version of OpenSearch Dashboards to your local machine (replac
 
 ```bash
 $ git clone git@github.com:opensearch-project/OpenSearch-Dashboards.git
-$ cd OpenSearch-Dashboards
 ```
 
 ### Bootstrap OpenSearch Dashboards
 
-This command will install the project's dependencies and build all internal packages and plugins. Bootstrapping is necessary any time you need to update packages, plugins, or dependencies, and it's recommended to run it anytime you sync with the latest upstream changes.
+If you haven't already, change directories to your cloned repository directory:
+
+```bash
+$ cd OpenSearch-Dashboards
+```
+
+The `osd bootstrap` command will install the project's dependencies and build all internal packages and plugins. Bootstrapping is necessary any time you need to update packages, plugins, or dependencies, and it's recommended to run it anytime you sync with the latest upstream changes.
 
 ```bash
 $ yarn osd bootstrap
@@ -91,6 +98,12 @@ Note: If you experience a network timeout while bootstrapping, you can update th
 
 ```
 network-timeout 1000000
+```
+
+If you've previously bootstrapped the project and need to start fresh, first run:
+
+```bash
+$ yarn osd clean
 ```
 
 ### Run OpenSearch
@@ -248,6 +261,7 @@ Currently, the supported flags for this script are:
 * `darwin` (builds Darwin x64)
 * `linux` (builds Linux x64)
 * `linux-arm` (builds Linux ARM64).
+* `windows` (builds Windows x64)
 
 If you would like to build only a DEB x64 artifact, run the following:
 
