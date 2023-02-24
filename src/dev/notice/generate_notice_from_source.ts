@@ -37,7 +37,7 @@ const NOTICE_TEXT = `Copyright OpenSearch Contributors
 
 This product includes software, including Kibana source code,
 developed by Elasticsearch (http://www.elastic.co).
-Copyright 2009-2018 Elasticsearch B.V.
+Copyright 2009-2021 Elasticsearch B.V.
 
 This product includes software developed by The Apache Software
 Foundation (http://www.apache.org/)

@@ -31,6 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { UiSettingsParams } from 'opensearch-dashboards/server';
 import { schema } from '@osd/config-schema';
+import { CUSTOM_VECTOR_MAP_MAX_SIZE_SETTING } from '../common';
 
 export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {
@@ -47,6 +48,21 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         }
       ),
       schema: schema.boolean(),
+      category: ['visualization'],
+    },
+    [CUSTOM_VECTOR_MAP_MAX_SIZE_SETTING]: {
+      name: i18n.translate('regionMap.advancedSettings.visualization.customVectorMapDefaultSize', {
+        defaultMessage: 'Custom vector map size',
+      }),
+      value: 1000,
+      description: i18n.translate(
+        'regionMap.advancedSettings.visualization.customVectorMapDefaultSizeText',
+        {
+          defaultMessage:
+            'The maximum number of features to load from custom vector map. A higher number might have negative impact on browser rendering performance.',
+        }
+      ),
+      schema: schema.number(),
       category: ['visualization'],
     },
   };
