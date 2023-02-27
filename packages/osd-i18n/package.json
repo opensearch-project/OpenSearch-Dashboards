@@ -7,9 +7,9 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/build",
-    "osd:bootstrap": "node scripts/build --source-maps",
-    "osd:watch": "node scripts/build --watch --source-maps"
+    "build": "../../scripts/use_node scripts/build",
+    "osd:bootstrap": "../../scripts/use_node scripts/build --source-maps",
+    "osd:watch": "../../scripts/use_node scripts/build --watch --source-maps"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
