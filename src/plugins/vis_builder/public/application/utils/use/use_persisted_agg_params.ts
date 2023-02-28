@@ -17,14 +17,13 @@ export const usePersistedAggParams = (
     const oldVisualizationType = types.get(oldVisType)?.ui.containerConfig.data.schemas.all;
     const newVisualizationType = types.get(newVisType)?.ui.containerConfig.data.schemas.all;
     const aggMapping = getSchemaMapping(oldVisualizationType, newVisualizationType);
-    return oldAggParams.map((newAggParam: CreateAggConfigParams) =>
+    const newAggParams = oldAggParams.map((newAggParam: CreateAggConfigParams) =>
       updateAggParams(newAggParam, aggMapping)
     );
+    return newAggParams;
   }
   return [];
 };
-
-// may need to update the value to include a max count, currently all values are adding
 
 // Map metric fields to metric fields, bucket fields to bucket fields
 export const getSchemaMapping = (
@@ -43,6 +42,7 @@ export const getSchemaMapping = (
 export interface AggMapping {
   name: string;
   maxCount: integer;
+  currentCount: integer;
 }
 
 export const mapAggParamsSchema = (
@@ -54,13 +54,12 @@ export const mapAggParamsSchema = (
   const oldSchemas = oldVisualizationType.filter((type) => type.group === aggGroup);
   const newSchemas = newVisualizationType.filter((type) => type.group === aggGroup);
 
-  // console.log("newNames", newNames)
   oldSchemas.forEach((oldSchema, index) => {
-    // what if first array is longer than the second one?
     if (newSchemas[index]) {
       const mappedNewSchema = {
         name: newSchemas[index].name,
         maxCount: newSchemas[index].max,
+        currentCount: 0,
       };
       map.set(oldSchema.name, mappedNewSchema);
     }
@@ -79,9 +78,21 @@ export const updateAggParams = (
     schema: oldAggParam.schema,
   };
   if (oldAggParam.schema) {
-    newAggParam.schema = aggMap.has(oldAggParam.schema)
-      ? aggMap.get(oldAggParam.schema)?.name
-      : undefined;
+    const newSchema = aggMap.get(oldAggParam.schema);
+    if (newSchema) {
+      if (newSchema.currentCount < newSchema.maxCount) {
+        newAggParam.schema = aggMap.get(oldAggParam.schema)?.name;
+        aggMap.set(oldAggParam.schema, {
+          name: newSchema.name,
+          maxCount: newSchema.maxCount,
+          currentCount: newSchema.currentCount + 1,
+        });
+      } else {
+        newAggParam.schema = undefined;
+      }
+    } else {
+      newAggParam.schema = undefined;
+    }
   }
   return newAggParam;
 };
