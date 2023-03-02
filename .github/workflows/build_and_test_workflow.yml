@@ -28,7 +28,7 @@ env:
 
 jobs:
   build-lint-test:
-    name: Build and Verify on {{ matrix.name }}
+    name: Build and Verify on ${{ matrix.name }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
