@@ -123,7 +123,7 @@ export const slice = createSlice({
     builder.addCase(setActiveVisualization, (state, action) => {
       state.activeVisualization = {
         name: action.payload.name,
-        aggConfigParams: action.payload.aggParams,
+        aggConfigParams: action.payload.aggConfigParams,
       };
     });
   },

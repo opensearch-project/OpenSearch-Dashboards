@@ -34,8 +34,13 @@ export const RightNav = () => {
   const StyleSection = ui.containerConfig.style.render;
 
   const { activeVisualization } = useTypedSelector((state) => state.visualization);
-  const oldAggParams = activeVisualization?.aggConfigParams ?? [];
-  const persistedAggParams = usePersistedAggParams(types, oldAggParams, activeVisName, newVisType);
+  const aggConfigParams = activeVisualization?.aggConfigParams ?? [];
+  const persistedAggParams = usePersistedAggParams(
+    types,
+    aggConfigParams,
+    activeVisName,
+    newVisType
+  );
 
   const options: Array<EuiSuperSelectOption<string>> = types.all().map(({ name, icon, title }) => ({
     value: name,
@@ -77,7 +82,7 @@ export const RightNav = () => {
               setActiveVisualization({
                 name: newVisType,
                 style: types.get(newVisType)?.ui.containerConfig.style.defaults,
-                aggParams: persistedAggParams,
+                aggConfigParams: persistedAggParams,
               })
             );
 

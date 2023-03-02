@@ -10,7 +10,7 @@ import { VisualizationType } from '../../../services/type_service/visualization_
 interface ActiveVisPayload {
   name: VisualizationType['name'];
   style: VisualizationType['ui']['containerConfig']['style']['defaults'];
-  aggParams: CreateAggConfigParams[];
+  aggConfigParams: CreateAggConfigParams[];
 }
 
 export const setActiveVisualization = createAction<ActiveVisPayload>('setActiveVisualzation');
