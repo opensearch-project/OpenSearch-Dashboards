@@ -120,7 +120,7 @@ jobs:
         run: yarn test:jest_integration:ci
 
   functional-tests:
-    name: Run functional tests on ${{ matrix.name }}
+    name: Run functional tests on ${{ matrix.name }} (ciGroup${{ matrix.group }})
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -214,7 +214,6 @@ jobs:
     name: Build min release artifacts on ${{ matrix.name }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
             name: Linux x64
