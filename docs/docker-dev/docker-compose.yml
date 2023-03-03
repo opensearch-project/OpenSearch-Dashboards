@@ -54,3 +54,4 @@ volumes:
   osd-dev:
 networks:
   opensearch-net: 
+  
