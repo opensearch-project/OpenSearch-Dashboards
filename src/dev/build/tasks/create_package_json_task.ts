@@ -54,7 +54,7 @@ export const CreatePackageJson: Task = {
         log.info(`Updating package.branch to ${branch}`);
       } else {
         const validDocPathsPattern = /^\d+\.\d+$/;
-        if (validDocPathsPattern.test(pkg.branch)) {
+        if (validDocPathsPattern.test(pkg.branch as string)) {
           branch = pkg.branch;
         } else {
           // package version was not parsable and branch is unusable
