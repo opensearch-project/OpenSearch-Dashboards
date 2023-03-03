@@ -54,6 +54,16 @@ export const createVisBuilderServicesMock = () => {
             },
           },
         },
+        {
+          name: 'viz',
+          ui: {
+            containerConfig: {
+              style: {
+                defaults: 'style default states',
+              },
+            },
+          },
+        },
       ],
     },
   };
