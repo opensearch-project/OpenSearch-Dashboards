@@ -67,7 +67,7 @@ jobs:
           yarn config set network-timeout 1000000 -g
 
       - name: Configure Yarn Cache (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Configure Yarn Cache (Windows)
@@ -85,7 +85,7 @@ jobs:
             yarn-
 
       - name: Run bootstrap (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os != 'windows-latest'
         run: yarn osd bootstrap
 
       - name: Run bootstrap (Windows)
@@ -162,7 +162,7 @@ jobs:
           yarn config set network-timeout 1000000 -g
 
       - name: Configure Yarn Cache (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Configure Yarn Cache (Windows)
@@ -183,7 +183,7 @@ jobs:
         run: node scripts/upgrade_chromedriver.js
 
       - name: Run bootstrap (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os != 'windows-latest'
         run: yarn osd bootstrap
 
       - name: Run bootstrap (Windows)
@@ -259,7 +259,7 @@ jobs:
           yarn config set network-timeout 1000000 -g
 
       - name: Configure Yarn Cache (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Configure Yarn Cache (Windows)
@@ -277,12 +277,12 @@ jobs:
             yarn-
 
       - name: Get package version (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os != 'windows-latest'
         run: |
           echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
 
       - name: Get artifact build name (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os != 'windows-latest'
         run: |
           echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $GITHUB_ENV
 
