@@ -59,7 +59,6 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
   'data-test-subj': dataTestSubj,
 }: SelectOptionProps<ParamName, ValidParamValues>) {
   const availableOptions = useMemo(() => [emptyValue, ...options], [options]);
-
   return (
     <EuiFormRow
       display={'rowCompressed'}
@@ -74,7 +73,12 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
         disabled={disabled}
         options={availableOptions}
         value={value === undefined ? emptyValue.value : value}
-        onChange={(ev) => setValue(paramName, ev.target.value as ValidParamValues)}
+        onClick={(ev) =>
+          setValue(paramName, (ev.target as HTMLSelectElement).value as ValidParamValues)
+        }
+        onChange={(ev) => {
+          ev.stopPropagation();
+        }}
         fullWidth={true}
         data-test-subj={dataTestSubj}
       />
