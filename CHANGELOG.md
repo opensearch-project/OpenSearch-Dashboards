@@ -13,6 +13,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2023-25166] Bump formula from 3.0.0 to 3.0.1 ([#3416](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3416))
 - [CVE-2022-25758][CVE-2020-24025] Bump node-sass to 7.0.3 and sass-loader to 10.4.1 in 2.x ([#3455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3455))
 - [CVE-2022-24999] Resolve qs from 6.5.3 to 6.11.0 ([#3450](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3450))
+- [CVE-2023-26486][CVE-2023-26487] Bump vega from 5.22.1 to 5.23.0 ([#3533](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3533))
 
 ### 📈 Features/Enhancements
 
