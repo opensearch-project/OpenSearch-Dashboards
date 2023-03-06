@@ -110,7 +110,7 @@ $ yarn osd clean
 
 OpenSearch Dashboards requires a running version of OpenSearch to connect to. In a separate terminal you can run the latest snapshot built using:
 
-_(Linux, Windows, Darwin (MacOS) only - for others, you'll need to [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
+_(Linux, Windows, Darwin (MacOS) only - for others, you'll need to [set up using Docker](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/docs/docker-dev/docker-dev-setup-manual.md) or [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
 ```bash
 $ yarn opensearch snapshot
 ```
