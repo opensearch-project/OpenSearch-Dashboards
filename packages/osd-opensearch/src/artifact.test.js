@@ -163,17 +163,17 @@ describe('Artifact', () => {
         });
       });
 
-      it('should throw when on a non-Linux or non-Windows platform', async () => {
+      it('should throw when on a non-Linux, non-Windows, non-Darwin platform', async () => {
         Object.defineProperties(process, {
           platform: {
-            value: 'darwin',
+            value: 'android',
           },
           arch: {
             value: ORIGINAL_ARCHITECTURE,
           },
         });
         await expect(Artifact.getSnapshot('default', 'INVALID_PLATFORM', log)).rejects.toThrow(
-          'Snapshots are only available for Linux'
+          'Snapshots are only available for Linux, Windows, and Darwin'
         );
       });
 
@@ -187,6 +187,42 @@ describe('Artifact', () => {
           },
         });
         mockFetch(MOCKS.multipleArch[0]);
+        artifactTest();
+      });
+
+      it('should not throw when on a Linux platform', async () => {
+        Object.defineProperties(process, {
+          platform: {
+            value: 'linux',
+          },
+          arch: {
+            value: 'x64',
+          },
+        });
+        artifactTest();
+      });
+
+      it('should not throw when on a Windows platform', async () => {
+        Object.defineProperties(process, {
+          platform: {
+            value: 'win32',
+          },
+          arch: {
+            value: 'x64',
+          },
+        });
+        artifactTest();
+      });
+
+      it('should not throw when on a Darwin platform', async () => {
+        Object.defineProperties(process, {
+          platform: {
+            value: 'darwin',
+          },
+          arch: {
+            value: 'x64',
+          },
+        });
         artifactTest();
       });
     });
