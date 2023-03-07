@@ -1,7 +1,7 @@
 # Docker Development Environment Setup
 The following instructions demonstrate how to set up a development environment for OpenSearch Dashboards using Docker. It utilizes tools such as `Docker` and `VS Code`, and users should be familiar with the basic usages of them. Users will be able to develop and run the application inside VS Code without additional configurations.
 
-1. Install [Docker](https://docs.docker.com/get-docker/) if not already installed.
+1. Install [Docker](https://docs.docker.com/get-docker/) if not already installed. Make sure that Docker daemon is running. (For windows and macos，you need to have [Docker Desktop](https://docs.docker.com/desktop/), or its alternatives, such as [Finch](https://github.com/runfinch/finch))
 2. In the terminal, run the command `curl -o- https://raw.githubusercontent.com/opensearch-project/OpenSearch-Dashboards/main/dev-tools/install-docker-dev.sh | bash`. This should create a folder named `opensearch-dashboards-docker-dev` and it should contain two files: `docker-compose.yml` and `entrypoint.sh`. Here is the link to the installer script: `https://raw.githubusercontent.com/opensearch-project/OpenSearch-Dashboards/main/dev-tools/install-docker-dev.sh`.
 3. Open VS Code or [install it](https://code.visualstudio.com/download), if it's not already installed. Make sure VS Code has the extensions `Dev Containers` and `Docker` installed. If not, go to `Extensions` tab, search and install them.
 4. Under the Discover tab, click `Open Folder`, and open the `opensearch-dashboards-docker-dev` folder that we just created.
