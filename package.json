@@ -118,7 +118,8 @@
     "**/unset-value": "^2.0.1",
     "**/jest-config": "npm:@amoo-miki/jest-config@26.4.2-rc.1",
     "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@26.4.2-rc.1",
-    "**/minimatch": "^3.0.5"
+    "**/minimatch": "^3.0.5",
+    "**/jsonpointer": "^5.0.0"
   },
   "workspaces": {
     "packages": [
