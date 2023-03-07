@@ -5,3 +5,4 @@
 
 export * from './saved_augment_vis';
 export * from './utils';
+export * from './types';

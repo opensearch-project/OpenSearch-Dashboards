@@ -417,7 +417,7 @@ export class VisualizeEmbeddable
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
-      visLayers: !isEmpty(exprVisLayers) ? exprVisLayers.layers : ([] as VisLayers),
+      visLayers: isEmpty(exprVisLayers) ? ([] as VisLayers) : exprVisLayers.layers,
     });
 
     if (this.handler && !abortController.signal.aborted) {

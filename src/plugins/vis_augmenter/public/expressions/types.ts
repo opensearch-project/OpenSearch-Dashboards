@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExpressionTypeDefinition } from '../../../expressions';
-import { VisLayers } from '../';
+import { ExpressionTypeDefinition, ExpressionFunctionDefinition } from '../../../expressions';
+import { VisLayers, VisLayerTypes } from '../';
 
 const name = 'vis_layers';
 
@@ -31,3 +31,17 @@ export const visLayers: ExpressionTypeDefinition<typeof name, ExprVisLayers> = {
     },
   },
 };
+
+export type VisLayerFunctionDefinition = ExpressionFunctionDefinition<
+  string,
+  ExprVisLayers,
+  any,
+  Promise<ExprVisLayers>
+>;
+
+export interface VisLayerExpressionFn {
+  type: keyof typeof VisLayerTypes;
+  name: string;
+  // plugin expression fns can freely set custom arguments
+  args: { [key: string]: any };
+}

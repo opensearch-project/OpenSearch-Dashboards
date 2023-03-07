@@ -3,9 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObject } from '../../saved_objects/public';
-import { ExpressionFunctionDefinition } from '../../expressions';
-
 export enum VisLayerTypes {
   PointInTimeEvents = 'PointInTimeEvents',
 }
@@ -48,34 +45,3 @@ export const isPointInTimeEventsVisLayer = (obj: any) => {
 export const isValidVisLayer = (obj: any) => {
   return obj?.type in VisLayerTypes;
 };
-
-export interface ISavedAugmentVis {
-  id?: string;
-  title: string;
-  description?: string;
-  pluginResourceId: string;
-  visName?: string;
-  visId?: string;
-  visLayerExpressionFn: VisLayerExpressionFn;
-  version?: number;
-}
-
-export interface VisLayerExpressionFn {
-  type: keyof typeof VisLayerTypes;
-  name: string;
-  // plugin expression fns can freely set custom arguments
-  args: { [key: string]: any };
-}
-
-export interface AugmentVisSavedObject extends SavedObject, ISavedAugmentVis {}
-
-export interface VisLayerResponseValue {
-  visLayers: object;
-}
-
-export type VisLayerFunctionDefinition = ExpressionFunctionDefinition<
-  string,
-  VisLayerResponseValue,
-  any,
-  Promise<VisLayerResponseValue>
->;
