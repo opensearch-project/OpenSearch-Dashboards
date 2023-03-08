@@ -48,6 +48,8 @@ import {
 
 import { allValuesFrom } from '../common';
 
+import '../__mocks__/lmdb';
+
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');

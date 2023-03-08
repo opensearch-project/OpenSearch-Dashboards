@@ -29,7 +29,7 @@
     "jest-diff": "^27.5.1",
     "js-yaml": "^4.1.0",
     "json-stable-stringify": "^1.0.1",
-    "lmdb-store": "^1.6.11",
+    "lmdb": "^2.8.0",
     "normalize-path": "^3.0.0",
     "pirates": "^4.0.1",
     "postcss": "^8.4.5",
