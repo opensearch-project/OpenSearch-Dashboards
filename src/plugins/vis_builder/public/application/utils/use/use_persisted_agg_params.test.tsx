@@ -16,91 +16,15 @@ import {
 } from './use_persisted_agg_params';
 
 describe('new usePersistedAggParams', () => {
-  beforeEach(() => {});
-
-  test('return the correct metric to metric, bucket to bucket mapping', () => {});
-
-  test('drop the aggregations if it exceeds the max count', () => {});
-
-  test('drop the aggregation when there is no schema', () => {});
-});
-
-describe('updateAggParams', () => {
-  let oldAggParam: CreateAggConfigParams;
-  let aggMap: Map<string, AggMapping>;
-  let assignNewSchemaType: any;
-
-  beforeEach(() => {
-    oldAggParam = {
-      type: '',
-      enabled: true,
-      schema: '',
-    };
-    aggMap = new Map<string, AggMapping>();
-    aggMap.set('old metric', {
-      currentCount: 0,
-      maxCount: 1,
-      name: 'new metric',
-    });
-    aggMap.set('old bucket', {
-      currentCount: 0,
-      maxCount: 1,
-      name: 'new bucket',
-    });
-    assignNewSchemaType = jest.fn();
-  });
-
-  test('return with the undefined schema if the old schema title does not get a mapping', () => {
-    const newAgg = updateAggParams(oldAggParam, aggMap);
-    expect(newAgg).toEqual(oldAggParam);
-  });
-
-  test('return the original aggregation with undefined schema', () => {
-    oldAggParam.schema = 'noMappingSchema';
-    const newAgg = updateAggParams(oldAggParam, aggMap);
-    expect(newAgg).toEqual({
-      type: '',
-      enabled: true,
-      schema: undefined,
-    });
-  });
-
-  test('return with the updated schema for metric', () => {
-    oldAggParam.schema = 'old metric';
-    const newAgg = updateAggParams(oldAggParam, aggMap);
-    expect(newAgg).toEqual({
-      type: '',
-      enabled: true,
-      schema: 'new metric',
-    });
-    expect(aggMap.get('old metric')).toEqual({
-      currentCount: 1,
-      maxCount: 1,
-      name: 'new metric',
-    });
-  });
-
-  test('return with the undefined schema if the mapped schema fields already reach max count', () => {
-    oldAggParam.schema = 'old metric';
-    aggMap.set('old metric', {
-      currentCount: 1,
-      maxCount: 1,
-      name: 'new metric',
-    });
-    const newAgg = updateAggParams(oldAggParam, aggMap);
-    expect(newAgg).toEqual({
-      type: '',
-      enabled: true,
-      schema: undefined,
-    });
-  });
-});
-
-describe('getSchemaMapping', () => {
-  let oldVisualizationType: Schema[];
-  let newVisualizationType: Schema[];
+  const types = {
+    get: jest.fn(),
+  };
   let schemaMetricTemplate: Schema;
   let schemaBucketTemplate: Schema;
+  let oldVisualizationType: Schema[];
+  let newVisualizationType: Schema[];
+  let aggConfigParam: CreateAggConfigParams;
+  let aggConfigParams: CreateAggConfigParams[];
 
   beforeEach(() => {
     schemaMetricTemplate = {
@@ -125,26 +49,59 @@ describe('getSchemaMapping', () => {
       title: '',
       defaults: '',
     };
+    aggConfigParam = {
+      type: '',
+      schema: '',
+    };
   });
 
-  test('map metric schema to metric schema, bucket schema to bucket schema according to order', async () => {
+  test('return the correct metric-to-metric, bucket-to-bucket mapping and correct persisted aggregations', () => {
     oldVisualizationType = [
       { ...schemaMetricTemplate, name: 'old metric 1' },
       { ...schemaBucketTemplate, name: 'old bucket 1' },
       { ...schemaMetricTemplate, name: 'old metric 2' },
       { ...schemaBucketTemplate, name: 'old bucket 2' },
       { ...schemaBucketTemplate, name: 'old bucket 3' },
-      { ...schemaBucketTemplate, name: 'old bucket 4' },
-      { ...schemaBucketTemplate, group: AggGroupNames.None, name: 'none' },
     ];
     newVisualizationType = [
       { ...schemaMetricTemplate, name: 'new metric 1', max: 1 },
       { ...schemaMetricTemplate, name: 'new metric 2', max: 2 },
-      { ...schemaMetricTemplate, name: 'new metric 3', max: 3 },
       { ...schemaBucketTemplate, name: 'new bucket 1', max: 4 },
       { ...schemaBucketTemplate, name: 'new bucket 2', max: 5 },
       { ...schemaBucketTemplate, name: 'new bucket 3', max: 6 },
     ];
+    types.get
+      .mockReturnValueOnce({
+        ui: {
+          containerConfig: {
+            data: {
+              schemas: {
+                all: oldVisualizationType,
+              },
+            },
+          },
+        },
+      })
+      .mockReturnValueOnce({
+        ui: {
+          containerConfig: {
+            data: {
+              schemas: {
+                all: newVisualizationType,
+              },
+            },
+          },
+        },
+      });
+    aggConfigParams = [
+      { ...aggConfigParam, schema: 'old metric 1' },
+      { ...aggConfigParam, schema: 'old bucket 1' },
+      { ...aggConfigParam, schema: 'old metric 2' },
+      { ...aggConfigParam, schema: 'old bucket 2' },
+      { ...aggConfigParam, schema: 'old bucket 3' },
+      { ...aggConfigParam, schema: 'old metric 2' },
+    ];
+
     const mappingResult = getSchemaMapping(oldVisualizationType, newVisualizationType);
     expect(mappingResult).toMatchInlineSnapshot(`
       Map {
@@ -175,27 +132,221 @@ describe('getSchemaMapping', () => {
         },
       }
     `);
+    const persistResult = usePersistedAggParams(
+      types,
+      aggConfigParams,
+      'old vis type',
+      'new vis type'
+    );
+    expect(persistResult).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "schema": "new metric 1",
+          "type": "",
+        },
+        Object {
+          "schema": "new bucket 1",
+          "type": "",
+        },
+        Object {
+          "schema": "new metric 2",
+          "type": "",
+        },
+        Object {
+          "schema": "new bucket 2",
+          "type": "",
+        },
+        Object {
+          "schema": "new bucket 3",
+          "type": "",
+        },
+        Object {
+          "schema": "new metric 2",
+          "type": "",
+        },
+      ]
+    `);
   });
-});
 
-describe('usePersistedAggParams', () => {
-  let mockServices: jest.Mocked<VisBuilderServices>;
-  let types: any;
-  let aggConfigParams: CreateAggConfigParams[];
-  let oldVisType: string | undefined;
-  let newVisType: string | undefined;
+  test('drop the schema fields when it can not be mapped or do not belong to either metric or bucket group', () => {
+    oldVisualizationType = [
+      { ...schemaMetricTemplate, name: 'old metric 1' },
+      { ...schemaMetricTemplate, name: 'old metric 2' },
+      { ...schemaBucketTemplate, name: 'old bucket 1' },
+      { ...schemaMetricTemplate, name: 'undefined group', group: AggGroupNames.None },
+    ];
+    newVisualizationType = [
+      { ...schemaMetricTemplate, name: 'new metric 1', max: 1 },
+      { ...schemaBucketTemplate, name: 'new bucket 2', max: 1 },
+    ];
+    types.get
+      .mockReturnValueOnce({
+        ui: {
+          containerConfig: {
+            data: {
+              schemas: {
+                all: oldVisualizationType,
+              },
+            },
+          },
+        },
+      })
+      .mockReturnValueOnce({
+        ui: {
+          containerConfig: {
+            data: {
+              schemas: {
+                all: newVisualizationType,
+              },
+            },
+          },
+        },
+      });
+    aggConfigParams = [
+      { ...aggConfigParam, schema: 'old metric 1' },
+      { ...aggConfigParam, schema: 'old bucket 1' },
+    ];
 
-  beforeEach(() => {
-    mockServices = createVisBuilderServicesMock();
-    types = mockServices.types;
+    const mappingResult = getSchemaMapping(oldVisualizationType, newVisualizationType);
+    expect(mappingResult).toMatchInlineSnapshot(`
+      Map {
+        "old metric 1" => Object {
+          "currentCount": 0,
+          "maxCount": 1,
+          "name": "new metric 1",
+        },
+        "old bucket 1" => Object {
+          "currentCount": 0,
+          "maxCount": 1,
+          "name": "new bucket 2",
+        },
+      }
+    `);
+    const persistResult = usePersistedAggParams(
+      types,
+      aggConfigParams,
+      'old vis type',
+      'new vis type'
+    );
+    expect(persistResult).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "schema": "new metric 1",
+          "type": "",
+        },
+        Object {
+          "schema": "new bucket 2",
+          "type": "",
+        },
+      ]
+    `);
+  });
+
+  test('aggregations with undefined schema remain undefined; schema will be set to undefined if aggregations that exceeds the max amount', () => {
+    oldVisualizationType = [{ ...schemaMetricTemplate, name: 'old metric 1' }];
+    newVisualizationType = [{ ...schemaMetricTemplate, name: 'new metric 1', max: 1 }];
+    types.get
+      .mockReturnValueOnce({
+        ui: {
+          containerConfig: {
+            data: {
+              schemas: {
+                all: oldVisualizationType,
+              },
+            },
+          },
+        },
+      })
+      .mockReturnValueOnce({
+        ui: {
+          containerConfig: {
+            data: {
+              schemas: {
+                all: newVisualizationType,
+              },
+            },
+          },
+        },
+      });
+    aggConfigParams = [
+      { ...aggConfigParam, schema: undefined },
+      { ...aggConfigParam, schema: 'old metric 1' },
+      { ...aggConfigParam, schema: 'old metric 1' },
+    ];
+
+    const mappingResult = getSchemaMapping(oldVisualizationType, newVisualizationType);
+    expect(mappingResult).toMatchInlineSnapshot(`
+      Map {
+        "old metric 1" => Object {
+          "currentCount": 0,
+          "maxCount": 1,
+          "name": "new metric 1",
+        },
+      }
+    `);
+    const persistResult = usePersistedAggParams(
+      types,
+      aggConfigParams,
+      'old vis type',
+      'new vis type'
+    );
+    expect(persistResult).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "schema": undefined,
+          "type": "",
+        },
+        Object {
+          "schema": "new metric 1",
+          "type": "",
+        },
+        Object {
+          "schema": undefined,
+          "type": "",
+        },
+      ]
+    `);
+  });
+
+  test('return an empty array when there are no aggregations for persistence', () => {
+    oldVisualizationType = [{ ...schemaMetricTemplate, name: 'old metric 1' }];
+    newVisualizationType = [{ ...schemaMetricTemplate, name: 'new metric 1', max: 1 }];
+    types.get
+      .mockReturnValueOnce({
+        ui: {
+          containerConfig: {
+            data: {
+              schemas: {
+                all: oldVisualizationType,
+              },
+            },
+          },
+        },
+      })
+      .mockReturnValueOnce({
+        ui: {
+          containerConfig: {
+            data: {
+              schemas: {
+                all: newVisualizationType,
+              },
+            },
+          },
+        },
+      });
+
     aggConfigParams = [];
-    oldVisType = 'oldVisType';
-    newVisType = 'newVisType';
+    const persistResult = usePersistedAggParams(
+      types,
+      aggConfigParams,
+      'old vis type',
+      'new vis type'
+    );
+    expect(persistResult).toMatchInlineSnapshot(`Array []`);
   });
 
-  test('return an empty array when there is no old vis type or new vis type', async () => {
-    oldVisType = '';
-    const persistResult = usePersistedAggParams(types, aggConfigParams, oldVisType, newVisType);
-    expect(persistResult).toEqual([]);
+  test('return an empty array when there are no new vis type or old vis type', () => {
+    const persistResult = usePersistedAggParams(types, aggConfigParams);
+    expect(persistResult).toMatchInlineSnapshot(`Array []`);
   });
 });
