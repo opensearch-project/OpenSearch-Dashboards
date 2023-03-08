@@ -33,7 +33,7 @@ import moment from 'moment';
 import { formatExpression, SerializedFieldFormat } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
-import { VisLayers } from '../../../vis_augmenter/public';
+import { VisLayers } from '../../../../plugins/vis_augmenter/public';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
 

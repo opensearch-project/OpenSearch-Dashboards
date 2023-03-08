@@ -404,20 +404,13 @@ export class VisualizeEmbeddable
     this.abortController = new AbortController();
     const abortController = this.abortController;
 
-    let exprVisLayers = {} as ExprVisLayers;
-    // TODO: final eligibility will be defined as part of a separate effort.
-    // This includes not fetching any layers / not showing any layers, when in the
-    // edit context of the vis
-    // See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
-    if (isEligibleForVisLayers(this.vis)) {
-      exprVisLayers = await this.fetchVisLayers(expressionParams, abortController);
-    }
+    const visLayers = await this.fetchVisLayers(expressionParams, abortController);
 
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
-      visLayers: isEmpty(exprVisLayers) ? ([] as VisLayers) : exprVisLayers.layers,
+      visLayers: visLayers,
     });
 
     if (this.handler && !abortController.signal.aborted) {
@@ -490,18 +483,26 @@ export class VisualizeEmbeddable
   /**
    * Collects any VisLayers from plugin expressions functions
    * by fetching all AugmentVisSavedObjects that match the vis
-   * saved object ID
+   * saved object ID.
+   *
+   * TODO: final eligibility will be defined as part of a separate effort.
+   * Right now we have a placeholder function isEligibleForVisLayers() which
+   * is used below. For more details, see
+   * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
    */
   fetchVisLayers = async (
     expressionParams: IExpressionLoaderParams,
     abortController: AbortController
-  ): Promise<ExprVisLayers> => {
-    let exprVisLayers = {} as ExprVisLayers;
+  ): Promise<VisLayers> => {
     const augmentVisSavedObjs = await getAugmentVisSavedObjs(
       this.vis.id,
       this.savedAugmentVisLoader
     );
-    if (!isEmpty(augmentVisSavedObjs) && !abortController.signal.aborted) {
+    if (
+      !isEmpty(augmentVisSavedObjs) &&
+      !abortController.signal.aborted &&
+      isEligibleForVisLayers(this.vis)
+    ) {
       const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
       // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
       // expression functions are ran, they will incrementally append their generated VisLayers to it.
@@ -511,12 +512,13 @@ export class VisualizeEmbeddable
       };
       // We cannot use this.handler in this case, since it does not support the run() cmd
       // we need here. So, we consume the expressions service to run this instead.
-      exprVisLayers = (await getExpressions().run(
+      const exprVisLayers = (await getExpressions().run(
         visLayersPipeline,
         visLayersPipelineInput,
         expressionParams as Record<string, unknown>
       )) as ExprVisLayers;
+      return exprVisLayers.layers;
     }
-    return exprVisLayers;
+    return [] as VisLayers;
   };
 }

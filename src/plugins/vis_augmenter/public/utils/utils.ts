@@ -4,7 +4,7 @@
  */
 
 import { get } from 'lodash';
-import { Vis } from '../../../visualizations/public';
+import { Vis } from '../../../../plugins/visualizations/public';
 import {
   formatExpression,
   buildExpressionFunction,
@@ -45,19 +45,13 @@ export const getAugmentVisSavedObjs = async (
  * contains the results from each expression function that was ran.
  */
 export const buildPipelineFromAugmentVisSavedObjs = (objs: ISavedAugmentVis[]): string => {
-  const visLayerExpressionFns = [] as Array<
-    ExpressionAstFunctionBuilder<VisLayerFunctionDefinition>
-  >;
-
   try {
-    objs.forEach((obj: ISavedAugmentVis) => {
-      visLayerExpressionFns.push(
-        buildExpressionFunction<VisLayerFunctionDefinition>(
-          obj.visLayerExpressionFn.name,
-          obj.visLayerExpressionFn.args
-        )
-      );
-    });
+    const visLayerExpressionFns = objs.map((obj: ISavedAugmentVis) =>
+      buildExpressionFunction<VisLayerFunctionDefinition>(
+        obj.visLayerExpressionFn.name,
+        obj.visLayerExpressionFn.args
+      )
+    ) as Array<ExpressionAstFunctionBuilder<VisLayerFunctionDefinition>>;
     const ast = buildExpression(visLayerExpressionFns).toAst();
     return formatExpression(ast);
   } catch (e) {
