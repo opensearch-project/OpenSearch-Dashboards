@@ -167,7 +167,7 @@
     "deep-freeze-strict": "^1.1.1",
     "del": "^6.1.1",
     "dns-sync": "^0.2.1",
-    "elastic-apm-node": "^3.7.0",
+    "elastic-apm-node": "^3.43.0",
     "elasticsearch": "^16.7.0",
     "http-aws-es": "npm:@zhongnansu/http-aws-es@6.0.1",
     "execa": "^4.0.2",
