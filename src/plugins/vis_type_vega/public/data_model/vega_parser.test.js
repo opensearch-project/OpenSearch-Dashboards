@@ -37,7 +37,7 @@ jest.mock('../services');
 
 jest.mock('../lib/vega', () => ({
   vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
+  vegaLite: jest.requireActual('vega-lite/src'),
 }));
 
 describe(`VegaParser.parseAsync`, () => {
@@ -245,11 +245,15 @@ describe('VegaParser.parseSchema', () => {
 
   test(
     'should not warn on current vega-lite version',
+    check('https://vega.github.io/schema/vega-lite/v5.json', true, 0)
+  );
+  test(
+    'should not warn on older vega-lite version',
     check('https://vega.github.io/schema/vega-lite/v4.json', true, 0)
   );
   test(
     'should warn on vega-lite version too new to be supported',
-    check('https://vega.github.io/schema/vega-lite/v5.json', true, 1)
+    check('https://vega.github.io/schema/vega-lite/v6.json', true, 1)
   );
 });
 

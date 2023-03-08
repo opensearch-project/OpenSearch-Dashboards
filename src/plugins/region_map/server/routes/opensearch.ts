@@ -57,14 +57,15 @@ export function registerGeospatialRoutes(router: IRouter) {
       validate: {
         body: schema.object({
           index: schema.string(),
+          size: schema.number(),
         }),
       },
     },
     async (context, req, res) => {
       const client = context.core.opensearch.client.asCurrentUser;
       try {
-        const { index } = req.body;
-        const params = { index, body: {} };
+        const { index, size } = req.body;
+        const params = { index, body: {}, size };
         const results = await client.search(params);
         return res.ok({
           body: {

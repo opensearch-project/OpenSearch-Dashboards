@@ -110,26 +110,26 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
   }, [gridData, pagination]);
 
   // Resize
-  const [columnsWidth, setColumnsWidth] = useState<Record<string, number>>({});
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
 
   const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
     ({ columnId, width }) => {
-      setColumnsWidth({
-        ...columnsWidth,
+      setColumnWidths({
+        ...columnWidths,
         [columnId]: width,
       });
     },
-    [columnsWidth]
+    [columnWidths]
   );
 
   return (
     <EuiDataGrid
       aria-label={dataGridAriaLabel}
       columns={columns.map((column) => {
-        if (columnsWidth[column.id]) {
+        if (columnWidths[column.id]) {
           return {
             ...column,
-            initialWidth: columnsWidth[column.id],
+            initialWidth: columnWidths[column.id],
           };
         }
         return column;

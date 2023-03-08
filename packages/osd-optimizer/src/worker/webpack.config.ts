@@ -89,7 +89,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       // already bundled with all its necessary depedencies
       noParse: [
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
+        /[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/,
       ],
 
       rules: [
@@ -205,7 +205,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.(js|tsx?)$/,
-          exclude: /node_modules/,
+          // vega-lite and some of its dependencies don't have es5 builds
+          // so we need to build from source and transpile for webpack v4
+          exclude: /[\/\\]node_modules[\/\\](?!vega-(lite|label|functions)[\/\\])/,
           use: {
             loader: 'babel-loader',
             options: {

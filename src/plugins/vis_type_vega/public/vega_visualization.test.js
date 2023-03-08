@@ -53,7 +53,7 @@ jest.mock('./default_spec', () => ({
 
 jest.mock('./lib/vega', () => ({
   vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
+  vegaLite: jest.requireActual('vega-lite/src'),
 }));
 
 // FLAKY: https://github.com/elastic/kibana/issues/71713
