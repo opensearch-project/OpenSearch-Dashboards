@@ -437,7 +437,11 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
-    this._parser.searchAPI.inspectorAdapters?.vega.bindInspectValues({
+    // The vega inspector can now be null when rendering line charts using vega for the overlay visualization feature.
+    // This is because the inspectors get added at bootstrap to the different chart types and visualize embeddable
+    // thinks the line chart is vislib line chart and uses that inspector adapter and has no way of knowing it's
+    // actually a vega-lite chart and needs to use the vega inspector adapter without hacky code.
+    this._parser.searchAPI.inspectorAdapters?.vega?.bindInspectValues({
       view,
       spec: vlspec || spec,
     });

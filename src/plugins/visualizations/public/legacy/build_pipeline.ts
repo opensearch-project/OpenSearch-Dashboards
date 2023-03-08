@@ -334,7 +334,20 @@ const buildVisConfig: BuildVisConfigFunction = {
   },
 };
 
-export const buildVislibDimensions = async (vis: any, params: BuildPipelineParams) => {
+export interface VislibDimensions {
+  x: any;
+  y: SchemaConfig[];
+  z?: any[];
+  width?: any[];
+  series?: any[];
+  splitRow?: any[];
+  splitColumn?: any[];
+}
+
+export const buildVislibDimensions = async (
+  vis: any,
+  params: BuildPipelineParams
+): Promise<VislibDimensions> => {
   const schemas = getSchemas(vis, {
     timeRange: params.timeRange,
     timefilter: params.timefilter,

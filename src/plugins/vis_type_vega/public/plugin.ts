@@ -43,13 +43,14 @@ import {
   setInjectedMetadata,
 } from './services';
 
-import { createVegaFn } from './vega_fn';
+import { createVegaFn } from './expressions/vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import { IServiceSettings } from '../../maps_legacy/public';
 import './index.scss';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
+import { createLineVegaSpecFn } from './expressions/line_vega_spec_fn';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -104,6 +105,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+    expressions.registerFunction(() => createLineVegaSpecFn(visualizationDependencies));
 
     visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
   }
