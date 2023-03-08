@@ -410,7 +410,7 @@ export class VisualizeEmbeddable
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
-      visLayers: visLayers,
+      visLayers,
     });
 
     if (this.handler && !abortController.signal.aborted) {
