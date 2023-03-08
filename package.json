@@ -81,7 +81,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
-    "**/@types/node": "^14.17.32",
+    "**/@types/node": "~18.7.0",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
     "**/d3-color": "^3.1.0",
@@ -177,7 +177,7 @@
     "getos": "^3.2.1",
     "glob": "^7.1.7",
     "glob-all": "^3.2.1",
-    "globby": "^8.0.1",
+    "globby": "^11.1.0",
     "handlebars": "4.7.7",
     "hjson": "3.2.1",
     "http-proxy-agent": "^2.1.0",
@@ -301,7 +301,7 @@
     "@types/mock-fs": "^4.10.0",
     "@types/moment-timezone": "^0.5.12",
     "@types/mustache": "^0.8.31",
-    "@types/node": "^14.17.32",
+    "@types/node": "~18.7.0",
     "@types/node-forge": "^1.0.1",
     "@types/normalize-path": "^3.0.0",
     "@types/pegjs": "^0.10.1",
