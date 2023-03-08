@@ -624,6 +624,29 @@ describe('ui settings', () => {
       expect(await uiSettings.get('dateFormat')).toBe('foo');
     });
 
+    it('returns the overridden value for key theme:version', async () => {
+      const opensearchDocSource = { 'theme:version': 'v8 (beta)' };
+      const overrides = { 'theme:version': 'v7' };
+      const { uiSettings } = setup({ opensearchDocSource, overrides });
+
+      expect(await uiSettings.get('theme:version')).toBe('v7');
+    });
+
+    it('returns the overridden value for key theme:version when doc source is empty', async () => {
+      const opensearchDocSource = {};
+      const overrides = { 'theme:version': 'v7' };
+      const { uiSettings } = setup({ opensearchDocSource, overrides });
+
+      expect(await uiSettings.get('theme:version')).toBe('v7');
+    });
+
+    it('rewrites the key theme:version value without override', async () => {
+      const opensearchDocSource = { 'theme:version': 'v8 (beta)' };
+      const { uiSettings } = setup({ opensearchDocSource });
+
+      expect(await uiSettings.get('theme:version')).toBe('v8 (beta)');
+    });
+
     it('returns the default value for an override with value null', async () => {
       const opensearchDocSource = { dateFormat: 'YYYY-MM-DD' };
       const overrides = { dateFormat: null };

@@ -130,10 +130,10 @@ export class AggConfigs {
 
   createAggConfig = <T extends AggConfig = AggConfig>(
     params: CreateAggConfigParams,
-    { addToAggConfigs = true } = {}
+    { addToAggConfigs = true, mustBeFirst = false } = {}
   ) => {
     const { type } = params;
-    let aggConfig;
+    let aggConfig: AggConfig;
 
     if (params instanceof AggConfig) {
       aggConfig = params;
@@ -145,8 +145,12 @@ export class AggConfigs {
       });
     }
 
+    const addAggConfig = () => {
+      return mustBeFirst ? this.aggs.unshift(aggConfig) : this.aggs.push(aggConfig);
+    };
+
     if (addToAggConfigs) {
-      this.aggs.push(aggConfig);
+      addAggConfig();
     }
 
     return aggConfig as T;

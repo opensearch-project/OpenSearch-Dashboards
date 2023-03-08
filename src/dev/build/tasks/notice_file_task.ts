@@ -57,7 +57,7 @@ export const CreateNoticeFile: Task = {
 
     log.info('Generating build notice');
 
-    const { extractDir: nodeDir, version: nodeVersion } = getNodeDownloadInfo(
+    const { extractDir: nodeDir, version: nodeVersion } = await getNodeDownloadInfo(
       config,
       config.hasSpecifiedPlatform()
         ? config.getPlatform(

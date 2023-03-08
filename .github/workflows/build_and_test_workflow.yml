@@ -9,10 +9,12 @@ on:
     branches: [ '**', '!backport/**' ]
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
   pull_request:
     branches: [ '**' ]
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
 
 env:
   TEST_BROWSER_HEADLESS: 1
@@ -45,6 +47,18 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Run bootstrap
         run: yarn osd bootstrap
@@ -103,9 +117,23 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Run bootstrap
-        run: yarn osd bootstrap
+        run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Run linter
         id: linter
@@ -159,6 +187,18 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
@@ -177,6 +217,14 @@ jobs:
           CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: failure-artifacts
+          path: |
+            test/*/failure_debug/
+            test/*/screenshots/
 
   functional-tests-windows:
     runs-on: windows-latest
@@ -210,12 +258,26 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
 
       - name: Run bootstrap
-        run: yarn osd bootstrap
+        run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
@@ -228,6 +290,14 @@ jobs:
           CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: failure-artifacts-ci${{ matrix.group }}
+          path: |
+            test/*/failure_debug/
+            test/*/screenshots/
 
   build-min-artifact-tests-linux:
     runs-on: ubuntu-latest
@@ -265,6 +335,18 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Get package version
         run: |
@@ -321,6 +403,20 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Get package version
         run: |
@@ -355,7 +451,7 @@ jobs:
         working-directory: ./artifacts
     strategy:
       matrix:
-        version: [ osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0 ]
+        version: [ osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0 ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -375,6 +471,18 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Get package version
         run: |

@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, OpenSearchClient } from 'opensearch-dashboards/server';
-import { DataSourceAttributes } from '../../common/data_sources';
+import { AuthType, DataSourceAttributes } from '../../common/data_sources';
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
 import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
@@ -20,36 +20,46 @@ export const registerTestConnectionRoute = (
       path: '/internal/data-source-management/validate',
       validate: {
         body: schema.object({
-          id: schema.string(),
-          endpoint: schema.string(),
-          auth: schema.maybe(
-            schema.object({
-              type: schema.oneOf([schema.literal('username_password'), schema.literal('no_auth')]),
-              credentials: schema.oneOf([
-                schema.object({
-                  username: schema.string(),
-                  password: schema.string(),
-                }),
-                schema.literal(null),
-              ]),
-            })
-          ),
+          id: schema.maybe(schema.string()),
+          dataSourceAttr: schema.object({
+            endpoint: schema.string(),
+            auth: schema.maybe(
+              schema.object({
+                type: schema.oneOf([
+                  schema.literal(AuthType.UsernamePasswordType),
+                  schema.literal(AuthType.NoAuth),
+                  schema.literal(AuthType.SigV4),
+                ]),
+                credentials: schema.oneOf([
+                  schema.object({
+                    username: schema.string(),
+                    password: schema.string(),
+                  }),
+                  schema.object({
+                    region: schema.string(),
+                    accessKey: schema.string(),
+                    secretKey: schema.string(),
+                  }),
+                  schema.literal(null),
+                ]),
+              })
+            ),
+          }),
         }),
       },
     },
     async (context, request, response) => {
-      const dataSource: DataSourceAttributes = request.body as DataSourceAttributes;
-
-      const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getTestingClient(
-        {
-          dataSourceId: dataSource.id || '',
-          savedObjects: context.core.savedObjects.client,
-          cryptography,
-        },
-        dataSource
-      );
+      const { dataSourceAttr, id: dataSourceId } = request.body;
 
       try {
+        const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getDataSourceClient(
+          {
+            savedObjects: context.core.savedObjects.client,
+            cryptography,
+            dataSourceId,
+            testClientDataSourceAttr: dataSourceAttr as DataSourceAttributes,
+          }
+        );
         const dsValidator = new DataSourceConnectionValidator(dataSourceClient);
 
         await dsValidator.validate();

@@ -19,7 +19,7 @@ import { configureLegacyClient } from './configure_legacy_client';
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
 // TODO: improve UT
-describe.skip('configureLegacyClient', () => {
+describe('configureLegacyClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let config: DataSourcePluginConfigType;
   let savedObjectsMock: jest.Mocked<SavedObjectsClientContract>;
@@ -168,7 +168,7 @@ describe.skip('configureLegacyClient', () => {
       configureLegacyClient(dataSourceClientParams, callApiParams, clientPoolSetup, config, logger)
     ).rejects.toThrowError();
 
-    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
   });
@@ -183,7 +183,7 @@ describe.skip('configureLegacyClient', () => {
       configureLegacyClient(dataSourceClientParams, callApiParams, clientPoolSetup, config, logger)
     ).rejects.toThrowError();
 
-    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
   });

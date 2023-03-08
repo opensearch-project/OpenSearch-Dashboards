@@ -9,6 +9,7 @@ import { dataPluginMock } from '../../../../data/public/mocks';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../../expressions/public/mocks';
 import { navigationPluginMock } from '../../../../navigation/public/mocks';
+import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { VisBuilderServices } from '../../types';
 
 export const createVisBuilderServicesMock = () => {
@@ -16,10 +17,11 @@ export const createVisBuilderServicesMock = () => {
   const toastNotifications = coreStartMock.notifications.toasts;
   const applicationMock = coreStartMock.application;
   const i18nContextMock = coreStartMock.i18n.Context;
-  const indexPatternMock = dataPluginMock.createStartContract().indexPatterns;
+  const indexPatternMock = dataPluginMock.createStartContract();
   const embeddableMock = embeddablePluginMock.createStartContract();
   const navigationMock = navigationPluginMock.createStartContract();
   const expressionMock = expressionsPluginMock.createStartContract();
+  const osdUrlStateStorageMock = createOsdUrlStateStorage({ useHash: false });
 
   const visBuilderServicesMock = {
     ...coreStartMock,
@@ -39,6 +41,21 @@ export const createVisBuilderServicesMock = () => {
     data: indexPatternMock,
     embeddable: embeddableMock,
     scopedHistory: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    osdUrlStateStorage: osdUrlStateStorageMock,
+    types: {
+      all: () => [
+        {
+          name: 'viz',
+          ui: {
+            containerConfig: {
+              style: {
+                defaults: 'style default states',
+              },
+            },
+          },
+        },
+      ],
+    },
   };
 
   return (visBuilderServicesMock as unknown) as jest.Mocked<VisBuilderServices>;

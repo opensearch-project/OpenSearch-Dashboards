@@ -6,7 +6,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
-import { PLUGIN_ID } from '../../../common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig } from '../utils/get_top_nav_config';
 import { VisBuilderServices } from '../../types';
@@ -18,6 +17,7 @@ import { setEditorState } from '../utils/state_management/metadata_slice';
 import { useCanSave } from '../utils/use/use_can_save';
 import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
 import { TopNavMenuData } from '../../../../navigation/public';
+import { opensearchFilters, connectStorageToQueryState } from '../../../../data/public';
 
 export const TopNav = () => {
   // id will only be set for the edit route
@@ -28,12 +28,17 @@ export const TopNav = () => {
     navigation: {
       ui: { TopNavMenu },
     },
+    appName,
   } = services;
   const rootState = useTypedSelector((state) => state);
   const dispatch = useTypedDispatch();
 
   const saveDisabledReason = useCanSave();
   const savedVisBuilderVis = useSavedVisBuilderVis(visualizationIdFromUrl);
+  connectStorageToQueryState(services.data.query, services.osdUrlStateStorage, {
+    filters: opensearchFilters.FilterStateStore.APP_STATE,
+    query: true,
+  });
   const { selected: indexPattern } = useIndexPatterns();
   const [config, setConfig] = useState<TopNavMenuData[] | undefined>();
   const originatingApp = useTypedSelector((state) => {
@@ -76,7 +81,7 @@ export const TopNav = () => {
   return (
     <div className="vbTopNav">
       <TopNavMenu
-        appName={PLUGIN_ID}
+        appName={appName}
         config={config}
         setMenuMountPoint={setHeaderActionMenu}
         indexPatterns={indexPattern ? [indexPattern] : []}
