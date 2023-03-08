@@ -52,17 +52,16 @@ interface Package {
   >;
 }
 
-// Process for updating urls and checksums after bumping the version of `re2`:
-// 1. Match `version` with the version in the yarn.lock file.
-// 2. Update the url to match the version.
-//    2a. If a Node.js update occurs, the node module version must match as
-//        well (i.e. '83'). See https://nodejs.org/en/download/releases/#ref-1.
-// 3. Generate the new checksum by executing the following commands:
-//    3a. `wget {url}`
-//    3b. `sha256sum {downloaded file name}`
-//    3c. For `linux-arm64`, the sha256 can also be found by replacing
-//        "linux-arm64-83.tar.gz" in the url with "sha256sum.txt.asc"
-//        and copying the sha256 from that file.
+/* Process for updating URLs and checksums after bumping the version of `re2` or NodeJS:
+ *   1. Match the `version` with the version in the yarn.lock file.
+ *   2. Match the module version, the digits at the end of the filename, with the output of
+ *      `node -p process.versions.modules`.
+ *   3. Confirm that the URLs exist for each platform-architecture combo on
+ *      https://github.com/uhop/node-re2/releases/tag/[VERSION]; reach out to maintainers for ARM
+ *      releases of `re2` as they currently don't have an official ARM release.
+ *   4. Generate new checksums for each artifact by downloading each one and calling
+ *      `shasum -a 256` or `sha256sum` on the downloaded file.
+ */
 const packages: Package[] = [
   {
     name: 're2',

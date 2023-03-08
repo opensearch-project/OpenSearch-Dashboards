@@ -86,7 +86,7 @@ export class Config {
     private readonly targetAllPlatforms: boolean,
     private readonly targetPlatforms: TargetPlatforms,
     private readonly pkg: Package,
-    private readonly nodeVersion: string,
+    private readonly nodeRange: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
     public readonly isRelease: boolean
@@ -102,8 +102,8 @@ export class Config {
   /**
    * Get the node version required by OpenSearch Dashboards
    */
-  getNodeVersion() {
-    return this.nodeVersion;
+  getNodeRange() {
+    return this.nodeRange;
   }
 
   /**
