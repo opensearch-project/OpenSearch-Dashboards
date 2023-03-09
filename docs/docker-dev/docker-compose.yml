@@ -27,7 +27,7 @@ services:
     networks:
       - opensearch-net # All of the containers will join the same Docker bridge network
   dev-env:
-    image: docker.io/library/opensearch-dashboards-dev:latest
+    image: abbyhu/opensearch-dashboards-dev:latest
     container_name: dev-env
     ports:
       - 5601:5601
