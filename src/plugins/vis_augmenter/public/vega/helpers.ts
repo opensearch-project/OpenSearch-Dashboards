@@ -14,12 +14,12 @@ import {
   PointInTimeEventsVisLayer,
   VIS_LAYER_COLUMN_TYPE,
   EVENT_COLOR,
+  EVENT_MARK_SIZE,
+  EVENT_MARK_SIZE_ENLARGED,
+  EVENT_MARK_SHAPE,
+  EVENT_TIMELINE_HEIGHT,
+  HOVER_PARAM,
 } from '../';
-
-const EVENT_MARK_SIZE = 100;
-const EVENT_MARK_SIZE_ENLARGED = 140;
-const EVENT_MARK_SHAPE = 'triangle-up';
-const EVENT_TIMELINE_HEIGHT = 25;
 
 export const enableEventsInConfig = (config: { kibana: {} }) => {
   return {
@@ -138,7 +138,7 @@ export const addMissingRowsToTableBounds = (
 /**
  * Adding events into the correct x-axis key (the time bucket)
  * based on the table. As of now only results from
- * PoinInTimeEventsVisLayers are supported
+ * PointInTimeEventsVisLayers are supported
  */
 export const addPointInTimeEventsLayersToTable = (
   datatable: OpenSearchDashboardsDatatable,
@@ -160,13 +160,11 @@ export const addPointInTimeEventsLayersToTable = (
         },
       });
 
-      // special case: no rows
       if (augmentedTable.rows.length === 0) {
         return false;
       }
 
-      // special case: only one row - put all timestamps for this annotation
-      // in the one bucket and move on to the next layer
+      // if only one row / one datapoint, put all events into this bucket
       if (augmentedTable.rows.length === 1) {
         augmentedTable.rows[0] = {
           ...augmentedTable.rows[0],
@@ -177,8 +175,7 @@ export const addPointInTimeEventsLayersToTable = (
 
       // Bin the timestamps to the closest x-axis key, adding
       // an entry for this vis layer ID. Sorting the timestamps first
-      // so that we will only search a particular row value once, giving us
-      // O(n) time complexity where n = number of rows
+      // so that we will only search a particular row value once.
       // There could be some optimizations, such as binary search + dynamically
       // changing the bounds, but performance benefits would be very minimal
       // if any, given the upper bounds limit on n already due to chart constraints.
@@ -198,7 +195,7 @@ export const addPointInTimeEventsLayersToTable = (
             if (timestamp <= smallerVal) {
               rowIndexToInsert = rowIndex;
 
-              // timestamp is in between the right 2 buckets. now need to determine which one it is closer to
+              // timestamp is in between the right 2 buckets. determine which one it is closer to
             } else if (timestamp <= higherVal) {
               const smallerValDiff = Math.abs(timestamp - smallerVal);
               const higherValDiff = Math.abs(timestamp - higherVal);
@@ -250,7 +247,6 @@ export const addPointInTimeEventsLayersToSpec = (
     isVisLayerColumn(column)
   );
   const visLayerColumnIds = visLayerColumns.map((column) => column.id);
-  const hoverParamName = 'hover';
 
   // Hide x axes text on existing chart so they are only visible on the event chart
   newSpec.layer.forEach((dataSeries: any) => {
@@ -278,7 +274,7 @@ export const addPointInTimeEventsLayersToSpec = (
       },
       opacity: {
         value: 0,
-        condition: { empty: false, param: hoverParamName, value: 1 },
+        condition: { empty: false, param: HOVER_PARAM, value: 1 },
       },
     },
   });
@@ -301,7 +297,7 @@ export const addPointInTimeEventsLayersToSpec = (
       opacity: 1,
     },
     transform: [{ filter: generateVisLayerFilterString(visLayerColumnIds) }],
-    params: [{ name: hoverParamName, select: { type: 'point', on: 'mouseover' } }],
+    params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
     encoding: {
       x: {
         axis: {
@@ -318,7 +314,7 @@ export const addPointInTimeEventsLayersToSpec = (
         },
       },
       size: {
-        condition: { empty: false, param: hoverParamName, value: EVENT_MARK_SIZE_ENLARGED },
+        condition: { empty: false, param: HOVER_PARAM, value: EVENT_MARK_SIZE_ENLARGED },
         value: EVENT_MARK_SIZE,
       },
     },
