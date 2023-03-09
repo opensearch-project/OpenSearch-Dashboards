@@ -8,16 +8,21 @@ import { VisLayerExpressionFn, ISavedAugmentVis } from '../../types';
 import { VIS_REFERENCE_NAME } from '../saved_augment_vis_references';
 
 const pluginResourceId = 'test-plugin-resource-id';
-const visId = 'test-vis-id';
+const title = 'test-title';
 const version = 1;
 
-export const generateAugmentVisSavedObject = (idArg: string, exprFnArg: VisLayerExpressionFn) => {
+export const generateAugmentVisSavedObject = (
+  idArg: string,
+  exprFnArg: VisLayerExpressionFn,
+  visIdArg: string
+) => {
   return {
     id: idArg,
+    title,
     pluginResourceId,
     visLayerExpressionFn: exprFnArg,
     VIS_REFERENCE_NAME,
-    visId,
+    visId: visIdArg,
     version,
   } as ISavedAugmentVis;
 };

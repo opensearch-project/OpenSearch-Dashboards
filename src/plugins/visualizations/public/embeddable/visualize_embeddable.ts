@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import _, { get } from 'lodash';
+import _, { get, isEmpty } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { i18n } from '@osd/i18n';
@@ -64,6 +64,14 @@ import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { AttributeService } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
+import {
+  SavedAugmentVisLoader,
+  ExprVisLayers,
+  VisLayers,
+  isEligibleForVisLayers,
+  getAugmentVisSavedObjs,
+  buildPipelineFromAugmentVisSavedObjs,
+} from '../../../vis_augmenter/public';
 import { VisSavedObject } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -127,6 +135,7 @@ export class VisualizeEmbeddable
     VisualizeByReferenceInput
   >;
   private savedVisualizationsLoader?: SavedVisualizationsLoader;
+  private savedAugmentVisLoader?: SavedAugmentVisLoader;
 
   constructor(
     timefilter: TimefilterContract,
@@ -138,6 +147,7 @@ export class VisualizeEmbeddable
       VisualizeByReferenceInput
     >,
     savedVisualizationsLoader?: SavedVisualizationsLoader,
+    savedAugmentVisLoader?: SavedAugmentVisLoader,
     parent?: IContainer
   ) {
     super(
@@ -160,7 +170,7 @@ export class VisualizeEmbeddable
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
-
+    this.savedAugmentVisLoader = savedAugmentVisLoader;
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
       .subscribe(this.updateHandler.bind(this));
@@ -393,10 +403,14 @@ export class VisualizeEmbeddable
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
+
+    const visLayers = await this.fetchVisLayers(expressionParams, abortController);
+
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
+      visLayers,
     });
 
     if (this.handler && !abortController.signal.aborted) {
@@ -464,5 +478,47 @@ export class VisualizeEmbeddable
       },
       { showSaveModal: true, saveModalTitle }
     );
+  };
+
+  /**
+   * Collects any VisLayers from plugin expressions functions
+   * by fetching all AugmentVisSavedObjects that match the vis
+   * saved object ID.
+   *
+   * TODO: final eligibility will be defined as part of a separate effort.
+   * Right now we have a placeholder function isEligibleForVisLayers() which
+   * is used below. For more details, see
+   * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
+   */
+  fetchVisLayers = async (
+    expressionParams: IExpressionLoaderParams,
+    abortController: AbortController
+  ): Promise<VisLayers> => {
+    const augmentVisSavedObjs = await getAugmentVisSavedObjs(
+      this.vis.id,
+      this.savedAugmentVisLoader
+    );
+    if (
+      !isEmpty(augmentVisSavedObjs) &&
+      !abortController.signal.aborted &&
+      isEligibleForVisLayers(this.vis)
+    ) {
+      const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
+      // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
+      // expression functions are ran, they will incrementally append their generated VisLayers to it.
+      const visLayersPipelineInput = {
+        type: 'vis_layers',
+        layers: [] as VisLayers,
+      };
+      // We cannot use this.handler in this case, since it does not support the run() cmd
+      // we need here. So, we consume the expressions service to run this instead.
+      const exprVisLayers = (await getExpressions().run(
+        visLayersPipeline,
+        visLayersPipelineInput,
+        expressionParams as Record<string, unknown>
+      )) as ExprVisLayers;
+      return exprVisLayers.layers;
+    }
+    return [] as VisLayers;
   };
 }

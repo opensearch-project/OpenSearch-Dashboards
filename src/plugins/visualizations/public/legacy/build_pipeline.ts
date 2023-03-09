@@ -33,6 +33,8 @@ import moment from 'moment';
 import { formatExpression, SerializedFieldFormat } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
+import { VisLayers } from '../../../../plugins/vis_augmenter/public';
+
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
 interface SchemaConfigParams {
@@ -85,6 +87,7 @@ export interface BuildPipelineParams {
   timefilter: TimefilterContract;
   timeRange?: any;
   abortSignal?: AbortSignal;
+  visLayers?: VisLayers;
 }
 
 const vislibCharts: string[] = [

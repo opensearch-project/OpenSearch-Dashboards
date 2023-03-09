@@ -52,6 +52,7 @@ import { UiActionsStart } from '../../ui_actions/public';
 import { SavedVisualizationsLoader } from './saved_visualizations';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
+import { SavedAugmentVisLoader } from '../../vis_augmenter/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -106,3 +107,7 @@ export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 export const [getSavedSearchLoader, setSavedSearchLoader] = createGetterSetter<SavedObjectLoader>(
   'savedSearchLoader'
 );
+
+export const [getSavedAugmentVisLoader, setSavedAugmentVisLoader] = createGetterSetter<
+  SavedAugmentVisLoader
+>('SavedAugmentVisLoader');
