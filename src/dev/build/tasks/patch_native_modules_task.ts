@@ -49,6 +49,16 @@ interface Package {
   >;
 }
 
+/* Process for updating URLs and checksums after bumping the version of `re2` or NodeJS:
+ *   1. Match the `version` with the version in the yarn.lock file.
+ *   2. Match the module version, the digits at the end of the filename, with the output of
+ *      `node -p process.versions.modules`.
+ *   3. Confirm that the URLs exist for each platform-architecture combo on
+ *      https://github.com/uhop/node-re2/releases/tag/[VERSION]; reach out to maintainers for ARM
+ *      releases of `re2` as they currently don't have an official ARM release.
+ *   4. Generate new checksums for each artifact by downloading each one and calling
+ *      `shasum -a 256` or `sha256sum` on the downloaded file.
+ */
 const packages: Package[] = [
   {
     name: 're2',
