@@ -35,7 +35,11 @@ docker compose up -d --build
     ```
 
 8. Right-click `abbyhu/opensearch-dashboards-dev:latest`, and select `Attach Visual Studio Code`. 
-    * This should ssh into the container in another VsCode window.
+    * This will ssh into the container and you will be able to view and edit the files using VS Code as the code editor. 
+    * If you do not wish to use VS Code as the code editor, the alternative way of ssh into the container is by using the command below: 
+    ```bash
+    docker exec -it dev-env /bin/bash
+    ```
 
 9. For the new VS Code window, if it is not showing the repository code, then select `Open Folder`. Then open `/workspace-docker/OpenSearch-Dashboards`.
 
@@ -51,5 +55,5 @@ yarn start:docker
 
 13. Then paste the link into a chrome browser and view dashboard running in browser, but change ‘0.0.0.0’ to ‘localhost’. So here the link should be `http://localhost:5603/dog`.
     * Files are constantly watched, so when you make code changes, OpenSearch Dashboards will rebuild and restart automatically. Refresh the link in the browser and the new changes should be applied.
-    
+
 14. `Git` is already configured in the `entrypoint.sh` file, and the remote is already tracking the fork repository. You can start contributing by creating your branch off the main, and commit your first PR!
