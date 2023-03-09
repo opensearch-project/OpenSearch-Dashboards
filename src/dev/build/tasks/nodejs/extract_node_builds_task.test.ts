@@ -28,10 +28,6 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
-import Path from 'path';
-
-import { REPO_ROOT } from '@osd/utils';
 import {
   ToolingLog,
   ToolingLogCollectingWriter,
@@ -41,6 +37,7 @@ import {
 
 import { Config } from '../../lib';
 import { ExtractNodeBuilds } from './extract_node_builds_task';
+import { getLatestNodeVersion } from './node_download_info';
 
 jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
@@ -53,14 +50,6 @@ log.setWriters([testWriter]);
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-const nodeVersion = readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
-expect.addSnapshotSerializer(
-  createRecursiveSerializer(
-    (s) => typeof s === 'string' && s.includes(nodeVersion),
-    (s) => s.split(nodeVersion).join('<node version>')
-  )
-);
-
 async function setup() {
   const config = await Config.create({
     isRelease: true,
@@ -72,6 +61,16 @@ async function setup() {
       windows: false,
     },
   });
+
+  const realNodeVersion = await getLatestNodeVersion(config);
+  if (realNodeVersion) {
+    expect.addSnapshotSerializer(
+      createRecursiveSerializer(
+        (s) => typeof s === 'string' && s.includes(realNodeVersion),
+        (s) => s.split(realNodeVersion).join('<node version>')
+      )
+    );
+  }
 
   return { config };
 }
