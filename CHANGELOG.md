@@ -15,7 +15,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🐛 Bug Fixes
 
-- Plugin helpers fix related to fs promises module ([#2486](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2486))
+- Fix a problem that prevented plugin-helpers from building plugins ([#2486](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2486))
 
 ### 🚞 Infrastructure
 
@@ -56,11 +56,11 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🐛 Bug Fixes
 
-- [TSVB] Fixes undefined serial diff aggregation documentation link ([#3503](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3503))
+- [TSVB] Fix the link to "serial differencing aggregation" documentation ([#3503](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3503))
 
 ### 📝 Documentation
 
-- Fixes typo in TSVB README ([#3518](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3518))
+- [TSVB] Fix a spelling error in the README file ([#3518](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3518))
 - Simplify the in-code instructions for upgrading `re2` ([#3328](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3328))
 - [Doc] Improve DEVELOPER_GUIDE to make first time setup quicker and easier ([#3421](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3421))
 
