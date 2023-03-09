@@ -54,6 +54,7 @@ import {
   setExpressions,
   setUiActions,
   setSavedVisualizationsLoader,
+  setSavedAugmentVisLoader,
   setTimeFilter,
   setAggs,
   setChrome,
@@ -219,6 +220,14 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
+    const savedAugmentVisLoader = createSavedAugmentVisLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+    setSavedAugmentVisLoader(savedAugmentVisLoader);
     setSavedSearchLoader(savedSearchLoader);
     return {
       ...types,
