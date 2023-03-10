@@ -4,7 +4,7 @@
  */
 
 import { OpenSearchDashboardsDatatable } from '../../expressions/public';
-import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes } from './';
+import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, HOVER_PARAM } from './';
 
 const TEST_X_AXIS_ID = 'test-x-axis-id';
 const TEST_VALUE_AXIS_ID = 'test-value-axis-id';
@@ -336,7 +336,7 @@ const TEST_RULE_LAYER_SINGLE_VIS_LAYER = {
   transform: [{ filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` }],
   encoding: {
     x: { field: TEST_X_AXIS_ID, type: 'temporal' },
-    opacity: { value: 0, condition: { empty: false, param: 'hover', value: 1 } },
+    opacity: { value: 0, condition: { empty: false, param: HOVER_PARAM, value: 1 } },
   },
 };
 
@@ -359,7 +359,7 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
     opacity: 1,
   },
   transform: [{ filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` }],
-  params: [{ name: 'hover', select: { type: 'point', on: 'mouseover' } }],
+  params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
   encoding: {
     x: {
       axis: {
@@ -394,7 +394,7 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
         ],
       },
     },
-    size: { condition: { empty: false, param: 'hover', value: 140 }, value: 100 },
+    size: { condition: { empty: false, param: HOVER_PARAM, value: 140 }, value: 100 },
   },
 };
 
