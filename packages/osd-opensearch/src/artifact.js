@@ -39,6 +39,7 @@ const { createHash } = require('crypto');
 const path = require('path');
 
 const asyncPipeline = promisify(pipeline);
+const SUPPORTED_PLATFORMS = ['linux', 'windows', 'darwin'];
 const DAILY_SNAPSHOTS_BASE_URL = 'https://artifacts.opensearch.org/snapshots/core/opensearch';
 // TODO: [RENAMEME] currently do not have an existing replacement
 // issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/475
@@ -184,8 +185,8 @@ async function getArtifactSpecForSnapshotFromUrl(urlVersion, log) {
   const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
   const extension = process.platform === 'win32' ? 'zip' : 'tar.gz';
 
-  if (platform !== 'linux' && platform !== 'windows') {
-    throw createCliError(`Snapshots are only available for Linux and Windows`);
+  if (!SUPPORTED_PLATFORMS.includes(platform)) {
+    throw createCliError(`Snapshots are only available for Linux, Windows, and Darwin`);
   }
 
   const latestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}-SNAPSHOT`;
