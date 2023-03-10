@@ -77,13 +77,13 @@ export const createLineVegaSpecFn = (
       isPointInTimeEventsVisLayer(visLayer)
     ) as PointInTimeEventsVisLayer[];
 
-    if (!isEmpty(pointInTimeEventsVisLayers)) {
+    if (!isEmpty(pointInTimeEventsVisLayers) && dimensions.x !== null) {
       table = addPointInTimeEventsLayersToTable(table, dimensions, pointInTimeEventsVisLayers);
     }
 
     let spec = createSpecFromDatatable(table, visParams, dimensions);
 
-    if (!isEmpty(pointInTimeEventsVisLayers)) {
+    if (!isEmpty(pointInTimeEventsVisLayers) && dimensions.x !== null) {
       spec = addPointInTimeEventsLayersToSpec(table, dimensions, spec);
     }
     return JSON.stringify(spec);
