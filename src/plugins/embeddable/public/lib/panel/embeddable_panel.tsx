@@ -84,6 +84,7 @@ interface Props {
   stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
   isRetained?: boolean;
+  isBorderless?: boolean;
 }
 
 interface State {
@@ -238,6 +239,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
+        hasBorder={!this.props.isBorderless}
+        hasShadow={!this.props.isBorderless}
       >
         {!this.props.hideHeader && (
           <PanelHeader
