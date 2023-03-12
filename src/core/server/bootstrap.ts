@@ -29,10 +29,12 @@
  */
 
 import chalk from 'chalk';
-import { isMaster as isClusterManager } from 'cluster';
+import cluster from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
+
+const isClusterManager = cluster.isMaster;
 
 interface OpenSearchDashboardsFeatures {
   // Indicates whether we can run OpenSearch Dashboards in a so called cluster mode in which
@@ -97,7 +99,7 @@ export async function bootstrap({
   // in order to be able to reload the log configuration
   // under the cluster mode
   process.on('message', (msg) => {
-    if (!msg || msg.reloadLoggingConfig !== true) {
+    if (!msg || (msg as any).reloadLoggingConfig !== true) {
       return;
     }
 

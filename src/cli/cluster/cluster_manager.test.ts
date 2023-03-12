@@ -29,7 +29,6 @@
  */
 
 import * as Rx from 'rxjs';
-
 import { mockCluster } from './cluster_manager.test.mocks';
 
 jest.mock('readline', () => ({
@@ -39,6 +38,19 @@ jest.mock('readline', () => ({
     setPrompt: jest.fn(),
   })),
 }));
+
+jest.mock('lmdb', () => {
+  const mockedLmdb = {
+    open: jest.fn(() => ({
+      openDB: jest.fn(() => ({
+        get: jest.fn(),
+        putSync: jest.fn(),
+        remove: jest.fn(),
+      })),
+    })),
+  };
+  return mockedLmdb;
+});
 
 const mockConfig: any = {};
 
@@ -81,6 +93,7 @@ describe('CLI cluster manager', () => {
     const manager = new ClusterManager(CLI_ARGS, mockConfig);
 
     expect(manager.workers).toHaveLength(1);
+
     for (const worker of manager.workers) {
       expect(worker).toBeInstanceOf(Worker);
     }

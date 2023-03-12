@@ -30,6 +30,7 @@
 
 import Path from 'path';
 import Os from 'os';
+import { existsSync } from 'fs';
 
 import {
   Bundle,
@@ -175,11 +176,22 @@ export class OptimizerConfig {
      * `src/core/server/config/env.ts` which determines which paths
      * should be searched for plugins to load
      */
-    const pluginScanDirs = options.pluginScanDirs || [
+    const defaultPluginScanDirs = [
       Path.resolve(repoRoot, 'src/plugins'),
       Path.resolve(repoRoot, 'plugins'),
-      ...(examples ? [Path.resolve('examples')] : []),
-      Path.resolve(repoRoot, 'opensearch-dashboards-extra'),
+    ];
+
+    const examplePluginsDir = examples ? [Path.resolve('examples')] : [];
+
+    const opensearchDashboardsExtraPath = Path.resolve(repoRoot, 'opensearch-dashboards-extra');
+    const opensearchDashboardsExtraDir = existsSync(opensearchDashboardsExtraPath)
+      ? [opensearchDashboardsExtraPath]
+      : [];
+
+    const pluginScanDirs = options.pluginScanDirs || [
+      ...defaultPluginScanDirs,
+      ...examplePluginsDir,
+      ...opensearchDashboardsExtraDir,
     ];
 
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {

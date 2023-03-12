@@ -27233,7 +27233,6 @@ function getProjectPaths({
     projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*/packages/*'));
     projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*/plugins/*'));
   }
-
   return projectPaths;
 }
 

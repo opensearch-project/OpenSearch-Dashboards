@@ -30,6 +30,18 @@
 
 jest.mock('../../../legacy/server/osd_server');
 jest.mock('./cluster_manager');
+jest.mock('lmdb', () => {
+  const mockedLmdb = {
+    open: jest.fn(() => ({
+      openDB: jest.fn(() => ({
+        get: jest.fn(),
+        putSync: jest.fn(),
+        remove: jest.fn(),
+      })),
+    })),
+  };
+  return mockedLmdb;
+});
 
 import { BehaviorSubject, throwError } from 'rxjs';
 import { REPO_ROOT } from '@osd/dev-utils';

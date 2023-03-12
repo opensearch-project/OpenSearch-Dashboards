@@ -39,7 +39,7 @@ import { PluginManifest } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
 
-const fsReadFileAsync = promisify(readFile);
+export const fsReadFileAsync = promisify(readFile);
 const fsStatAsync = promisify(stat);
 
 /**
@@ -86,13 +86,14 @@ const KNOWN_MANIFEST_FIELDS = (() => {
 export async function parseManifest(
   pluginPath: string,
   packageInfo: PackageInfo,
-  log: Logger
+  log: Logger,
+  fsReadFileAsyncFn: (path: string) => Promise<Buffer> = fsReadFileAsync // Default to fsReadFileAsync
 ): Promise<PluginManifest> {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;
   try {
-    manifestContent = await fsReadFileAsync(manifestPath);
+    manifestContent = await fsReadFileAsyncFn(manifestPath);
   } catch (err) {
     throw PluginDiscoveryError.missingManifest(manifestPath, err);
   }

@@ -52,6 +52,19 @@ const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
+jest.mock('lmdb', () => {
+  const mockedLmdb = {
+    open: jest.fn(() => ({
+      openDB: jest.fn(() => ({
+        get: jest.fn(),
+        putSync: jest.fn(),
+        remove: jest.fn(),
+      })),
+    })),
+  };
+  return mockedLmdb;
+});
+
 expect.addSnapshotSerializer({
   serialize: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
   test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),

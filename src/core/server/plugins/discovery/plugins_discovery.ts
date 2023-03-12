@@ -38,7 +38,7 @@ import { PluginWrapper } from '../plugin';
 import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
-import { parseManifest } from './plugin_manifest_parser';
+import { parseManifest, fsReadFileAsync } from './plugin_manifest_parser';
 
 const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);
 const fsStat$ = bindNodeCallback(stat);
@@ -63,7 +63,8 @@ interface PluginSearchPathEntry {
 export function discover(
   config: PluginsConfig,
   coreContext: CoreContext,
-  instanceInfo: InstanceInfo
+  instanceInfo: InstanceInfo,
+  fsReadFileAsyncFn: (path: string) => Promise<Buffer> = fsReadFileAsync // Default to fsReadFileAsync
 ) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
@@ -80,7 +81,7 @@ export function discover(
   ).pipe(
     mergeMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo)
+        ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo, fsReadFileAsyncFn)
         : [pluginPathOrError];
     }),
     shareReplay()
@@ -199,9 +200,10 @@ function createPlugin$(
   path: string,
   log: Logger,
   coreContext: CoreContext,
-  instanceInfo: InstanceInfo
+  instanceInfo: InstanceInfo,
+  fsReadFileAsyncFn: (path: string) => Promise<Buffer> = fsReadFileAsync // Default to fsReadFileAsync
 ) {
-  return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
+  return from(parseManifest(path, coreContext.env.packageInfo, log, fsReadFileAsyncFn)).pipe(
     map((manifest) => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);

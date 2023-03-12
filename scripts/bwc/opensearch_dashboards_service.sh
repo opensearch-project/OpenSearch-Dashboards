@@ -12,6 +12,7 @@ function setup_dashboards() {
   [ $SECURITY_ENABLED == "false" ] && echo "server.host: 0.0.0.0" >> config/opensearch_dashboards.yml
   echo "csp.warnLegacyBrowsers: false" >> config/opensearch_dashboards.yml
   echo "--max-old-space-size=5120" >> config/node.options
+  echo "--openssl-legacy-provider" >> config/node.options
 }
 
 # Starts OpenSearch Dashboards
@@ -29,4 +30,4 @@ function check_dashboards_status {
   cd "$DIR"
   check_status $DASHBOARDS_PATH "$DASHBOARDS_MSG" $DASHBOARDS_URL "$OPENSEARCH_ARGS" >> /dev/null 2>&1
   echo "OpenSearch Dashboards is up!"
-} 
+}

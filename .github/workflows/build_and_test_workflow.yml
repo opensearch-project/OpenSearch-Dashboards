@@ -102,6 +102,8 @@ jobs:
 
       - name: Run unit tests with coverage
         id: unit-tests
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
         run: yarn test:jest:ci:coverage
 
       - name: Run mocha tests with coverage
