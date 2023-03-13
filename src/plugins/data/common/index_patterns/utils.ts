@@ -83,7 +83,7 @@ export const getIndexPatternTitle = async (
   indexPatternTitle: string,
   references: SavedObjectReference[],
   getDataSource: (id: string) => Promise<SavedObject<DataSourceAttributes>>
-) => {
+): Promise<string> => {
   const DELIMITER = '.';
   // If an index-pattern references datasource, prepend data source name with index pattern name for display purpose
   if (Array.isArray(references) && references[0] && references[0].type === 'data-source') {

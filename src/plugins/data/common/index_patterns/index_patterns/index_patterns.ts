@@ -29,7 +29,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import { SavedObjectsClientCommon } from '../..';
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -54,7 +53,7 @@ import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
-import { findByTitle, getIndexPatternTitle } from '../utils';
+import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
 
 const indexPatternCache = createIndexPatternCache();
@@ -119,27 +118,7 @@ export class IndexPatternsService {
       fields: ['title'],
       perPage: 10000,
     });
-
-    this.savedObjectsCache = await Promise.all(
-      this.savedObjectsCache.map(async (obj) => {
-        if (obj.type === 'index-pattern') {
-          const result = { ...obj };
-          result.attributes.title = await getIndexPatternTitle(
-            obj.attributes.title,
-            obj.references,
-            this.getDataSource
-          );
-          return result;
-        } else {
-          return obj;
-        }
-      })
-    );
   }
-
-  getDataSource = async (id: string) => {
-    return await this.savedObjectsClient.get<DataSourceAttributes>('data-source', id);
-  };
 
   /**
    * Get list of index pattern ids
@@ -578,11 +557,7 @@ export class IndexPatternsService {
    */
 
   async createSavedObject(indexPattern: IndexPattern, override = false) {
-    const dupe = await findByTitle(
-      this.savedObjectsClient,
-      indexPattern.title,
-      indexPattern.dataSourceRef?.id
-    );
+    const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);

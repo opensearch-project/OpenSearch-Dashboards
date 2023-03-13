@@ -88,7 +88,6 @@ export interface SavedObjectsClientCommonFindArgs {
   perPage?: number;
   search?: string;
   searchFields?: string[];
-  hasReference?: { type: string; id: string };
 }
 
 export interface SavedObjectsClientCommon {

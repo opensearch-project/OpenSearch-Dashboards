@@ -61,7 +61,7 @@ import {
 } from 'src/core/public';
 
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
-import { getIndexPatternTitle } from '../../../data/common';
+import { getIndexPatternTitle } from '../../../data/common/index_patterns/utils';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
