@@ -36,6 +36,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add verification workflow for release builds ([#1502](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/1502))
 - Record functional test artifacts in case of failure ([#3190](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3190))
 - Improve yarn's performance in workflows by caching yarn's cache folder ([#3194](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3194))
+- [CI] Reduce redundancy by using matrix strategy on Windows and Linux workflows ([#3514](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3514))
 
 ### 📝 Documentation
 
