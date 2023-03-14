@@ -23,6 +23,7 @@ import {
 import { DisabledEmbeddable } from './disabled_embeddable';
 import {
   VisBuilderEmbeddable,
+  VisBuilderInput,
   VisBuilderOutput,
   VISBUILDER_EMBEDDABLE,
 } from './vis_builder_embeddable';
@@ -76,7 +77,7 @@ export class VisBuilderEmbeddableFactoryDefinition
 
   public async createFromSavedObject(
     savedObjectId: string,
-    input: Partial<SavedObjectEmbeddableInput> & { id: string },
+    input: VisBuilderInput,
     parent?: IContainer
   ): Promise<VisBuilderEmbeddable | ErrorEmbeddable | DisabledEmbeddable> {
     try {

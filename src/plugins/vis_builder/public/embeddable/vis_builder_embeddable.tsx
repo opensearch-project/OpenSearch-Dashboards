@@ -50,6 +50,8 @@ export interface VisBuilderEmbeddableConfiguration {
   editable: boolean;
 }
 
+export type VisBuilderInput = SavedObjectEmbeddableInput;
+
 export interface VisBuilderOutput extends EmbeddableOutput {
   /**
    * Will contain the saved object attributes of the VisBuilder Saved Object that matches
