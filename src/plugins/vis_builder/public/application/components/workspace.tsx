@@ -46,15 +46,17 @@ export const WorkspaceUI = () => {
     async function loadExpression() {
       const schemas = ui.containerConfig.data.schemas;
 
-      const noAggs = aggConfigs?.aggs?.length === 0;
+      const noAggs = (aggConfigs?.aggs?.length ?? 0) === 0;
       const schemaValidation = validateSchemaState(schemas, rootState.visualization);
       const aggValidation = validateAggregations(aggConfigs?.aggs || []);
 
-      if (noAggs || !aggValidation.valid || !schemaValidation.valid) {
+      if (!aggValidation.valid || !schemaValidation.valid) {
+        setExpression(undefined);
+        if (noAggs) return; // don't show error when there are no active aggregations
+
         const err = schemaValidation.errorMsg || aggValidation.errorMsg;
 
         if (err) toasts.addWarning(err);
-        setExpression(undefined);
 
         return;
       }

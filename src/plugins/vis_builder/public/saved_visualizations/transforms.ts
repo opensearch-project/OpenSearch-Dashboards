@@ -43,6 +43,7 @@ export const getStateFromSavedObject = (
   const styleState = JSON.parse(obj.styleState || '');
   const vizStateWithoutIndex = JSON.parse(obj.visualizationState || '');
   const visualizationState: VisualizationState = {
+    searchField: '',
     ...vizStateWithoutIndex,
     indexPattern: obj.searchSourceFields?.index,
   };
