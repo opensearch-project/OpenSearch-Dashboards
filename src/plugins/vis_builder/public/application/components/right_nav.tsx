@@ -24,7 +24,7 @@ import {
 } from '../utils/state_management';
 import { usePersistedAggParams } from '../utils/use/use_persisted_agg_params';
 
-export const RightNav = () => {
+const RightNavUI = () => {
   const [newVisType, setNewVisType] = useState<string>();
   const {
     services: { types },
@@ -109,3 +109,5 @@ const OptionItem = ({ icon, title }: { icon: IconType; title: string }) => (
     <span>{title}</span>
   </>
 );
+
+export const RightNav = React.memo(RightNavUI);
