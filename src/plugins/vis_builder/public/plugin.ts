@@ -46,6 +46,7 @@ import {
   setTypeService,
   setReactExpressionRenderer,
   setQueryService,
+  setUIActions,
 } from './plugin_services';
 import { createSavedVisBuilderLoader } from './saved_visualizations';
 import { registerDefaultTypes } from './visualizations';
@@ -158,6 +159,7 @@ export class VisBuilderPlugin
           savedVisBuilderLoader: selfStart.savedVisBuilderLoader,
           embeddable: pluginsStart.embeddable,
           dashboard: pluginsStart.dashboard,
+          uiActions: pluginsStart.uiActions,
         };
 
         // Instantiate the store
@@ -217,7 +219,7 @@ export class VisBuilderPlugin
 
   public start(
     core: CoreStart,
-    { expressions, data }: VisBuilderPluginStartDependencies
+    { expressions, data, uiActions }: VisBuilderPluginStartDependencies
   ): VisBuilderStart {
     const typeService = this.typeService.start();
 
@@ -239,6 +241,7 @@ export class VisBuilderPlugin
     setTimeFilter(data.query.timefilter.timefilter);
     setTypeService(typeService);
     setUISettings(core.uiSettings);
+    setUIActions(uiActions);
     setQueryService(data.query);
 
     return {

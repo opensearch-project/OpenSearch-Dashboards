@@ -9,6 +9,7 @@ import { SavedVisBuilderLoader } from './saved_visualizations';
 import { HttpStart, IUiSettingsClient } from '../../../core/public';
 import { ExpressionsStart } from '../../expressions/public';
 import { TypeServiceStart } from './services/type_service';
+import { UiActionsStart } from '../../ui_actions/public';
 
 export const [getSearchService, setSearchService] = createGetterSetter<
   DataPublicPluginStart['search']
@@ -37,6 +38,7 @@ export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContr
 export const [getTypeService, setTypeService] = createGetterSetter<TypeServiceStart>('TypeService');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+export const [getUIActions, setUIActions] = createGetterSetter<UiActionsStart>('UIActions');
 
 export const [getQueryService, setQueryService] = createGetterSetter<
   DataPublicPluginStart['query']
