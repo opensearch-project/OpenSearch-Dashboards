@@ -67,12 +67,12 @@ function getProxyHeaders(req: OpenSearchDashboardsRequest) {
 }
 
 function toUrlPath(path: string) {
-  const urlPath = `/${trimStart(path, '/')}`;
+  let urlPath = `/${trimStart(path, '/')}`;
   // Appending pretty here to have OpenSearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
   // measurement precision)
   if (!urlPath.includes('?pretty')) {
-    urlPath.concat('?pretty=true');
+    urlPath += '?pretty=true';
   }
   return urlPath;
 }

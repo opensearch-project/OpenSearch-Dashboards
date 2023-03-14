@@ -64,21 +64,21 @@ describe('Console Proxy Route', () => {
         it('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
           const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
-          expect(args.path).toBe('http://evil.com/test?pretty=true');
+          expect(args.path).toBe('/http://evil.com/test?pretty=true');
         });
       });
       describe('starts with a slash', () => {
-        it('combines well with the base url', async () => {
+        it('keeps as it is', async () => {
           await request('GET', '/index/id');
           const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
           expect(args.path).toBe('/index/id?pretty=true');
         });
       });
       describe(`doesn't start with a slash`, () => {
-        it('combines well with the base url', async () => {
+        it('adds slash to path before sending request', async () => {
           await request('GET', 'index/id');
           const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
-          expect(args.path).toBe('index/id?pretty=true');
+          expect(args.path).toBe('/index/id?pretty=true');
         });
       });
     });
