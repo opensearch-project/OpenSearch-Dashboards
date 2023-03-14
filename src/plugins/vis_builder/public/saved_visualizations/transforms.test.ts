@@ -92,10 +92,10 @@ describe('transforms', () => {
       const mockVBSaveObj = {
         ...defaultVBSaveObj,
       };
-      mockVBSaveObj.visualizationState = '{}';
+      delete mockVBSaveObj.visualizationState;
 
       expect(() => getStateFromSavedObject(mockVBSaveObj)).toThrowErrorMatchingInlineSnapshot(
-        `"/visualizationState must have required property 'searchField'"`
+        `"Unexpected end of JSON input"`
       );
     });
 
