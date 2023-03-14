@@ -1,0 +1,69 @@
+name: Setting up Node.js
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: The operating system to run on
+        required: true
+        type: string
+      working-directory:
+        description: The working directory
+        required: false
+        type: string
+        default: '.'
+
+jobs:
+  setup-node:
+    runs-on: ${{ inputs.os }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+        working-directory: '.'
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          path: ${{ inputs.working-directory }}
+
+      - name: Setup JDK (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ${{ inputs.working-directory }}/.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Configure Yarn Cache (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-

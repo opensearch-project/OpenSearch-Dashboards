@@ -3,7 +3,7 @@ name: Run cypress tests
 # trigger on every PR for all branches
 on:
   pull_request:
-    branches: [ '**' ]
+    branches: ['**']
     paths-ignore:
       - '**/*.md'
 
@@ -27,19 +27,9 @@ jobs:
       TERM: xterm
     name: Run cypress tests
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Setup Node
-        uses: actions/setup-node@v2
+      - uses: ./.github/workflows/setup_node_template.yml
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
+          os: ubuntu-latest
 
       - name: Run bootstrap
         run: yarn osd bootstrap
@@ -85,7 +75,7 @@ jobs:
           name: ftr-cypress-screenshots
           path: ${{ env.FTR_PATH }}/cypress/screenshots
           retention-days: 1
-      
+
       - uses: actions/upload-artifact@v3
         if: always()
         with:
