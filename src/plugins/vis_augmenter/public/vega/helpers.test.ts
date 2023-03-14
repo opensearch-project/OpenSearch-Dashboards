@@ -25,6 +25,7 @@ import {
   TEST_DATATABLE_SINGLE_ROW_SINGLE_VIS_LAYER,
   TEST_DATATABLE_SINGLE_VIS_LAYER,
   TEST_DATATABLE_SINGLE_VIS_LAYER_EMPTY,
+  TEST_DATATABLE_SINGLE_VIS_LAYER_ON_BOUNDS,
   TEST_DIMENSIONS,
   TEST_DIMENSIONS_INVALID_BOUNDS,
   TEST_DIMENSIONS_SINGLE_ROW,
@@ -36,6 +37,8 @@ import {
   TEST_SPEC_SINGLE_VIS_LAYER,
   TEST_VIS_LAYERS_MULTIPLE,
   TEST_VIS_LAYERS_SINGLE,
+  TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS,
+  TEST_VIS_LAYERS_SINGLE_ON_BOUNDS,
 } from '../test_constants';
 
 describe('helpers', function () {
@@ -314,6 +317,24 @@ describe('helpers', function () {
           TEST_VIS_LAYERS_SINGLE
         )
       ).toStrictEqual(TEST_DATATABLE_ONLY_VIS_LAYERS);
+    });
+    it('vis layer with out-of-bounds timestamps are not added', function () {
+      expect(
+        addPointInTimeEventsLayersToTable(
+          TEST_DATATABLE_NO_VIS_LAYERS,
+          TEST_DIMENSIONS,
+          TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS
+        )
+      ).toStrictEqual(TEST_DATATABLE_SINGLE_VIS_LAYER_EMPTY);
+    });
+    it('vis layer with events on edge of bounds are added', function () {
+      expect(
+        addPointInTimeEventsLayersToTable(
+          TEST_DATATABLE_NO_VIS_LAYERS,
+          TEST_DIMENSIONS,
+          TEST_VIS_LAYERS_SINGLE_ON_BOUNDS
+        )
+      ).toStrictEqual(TEST_DATATABLE_SINGLE_VIS_LAYER_ON_BOUNDS);
     });
   });
 

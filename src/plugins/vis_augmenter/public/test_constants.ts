@@ -67,6 +67,20 @@ const TEST_VALUES_SINGLE_VIS_LAYER = [
   { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5 },
 ];
 
+const TEST_VALUES_SINGLE_VIS_LAYER_ON_BOUNDS = [
+  { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_RESOURCE_ID]: 2 },
+  { [TEST_X_AXIS_ID]: 5, [TEST_VALUE_AXIS_ID]: 10 },
+  { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6 },
+  { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4 },
+  { [TEST_X_AXIS_ID]: 20, [TEST_VALUE_AXIS_ID]: 5 },
+  { [TEST_X_AXIS_ID]: 25 },
+  { [TEST_X_AXIS_ID]: 30 },
+  { [TEST_X_AXIS_ID]: 35 },
+  { [TEST_X_AXIS_ID]: 40 },
+  { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3 },
+  { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_RESOURCE_ID]: 1 },
+];
+
 const TEST_VALUES_MULTIPLE_VIS_LAYERS = [
   { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5 },
   {
@@ -152,6 +166,12 @@ export const TEST_DATATABLE_SINGLE_VIS_LAYER = {
   type: 'opensearch_dashboards_datatable',
   columns: TEST_COLUMNS_SINGLE_VIS_LAYER,
   rows: TEST_VALUES_SINGLE_VIS_LAYER,
+} as OpenSearchDashboardsDatatable;
+
+export const TEST_DATATABLE_SINGLE_VIS_LAYER_ON_BOUNDS = {
+  type: 'opensearch_dashboards_datatable',
+  columns: TEST_COLUMNS_SINGLE_VIS_LAYER,
+  rows: TEST_VALUES_SINGLE_VIS_LAYER_ON_BOUNDS,
 } as OpenSearchDashboardsDatatable;
 
 export const TEST_DATATABLE_MULTIPLE_VIS_LAYERS = {
@@ -283,6 +303,72 @@ export const TEST_VIS_LAYERS_SINGLE = [
       },
       {
         timestamp: 35,
+        metadata: {
+          pluginResourceId: TEST_PLUGIN_RESOURCE_ID,
+        },
+      },
+    ],
+  },
+];
+
+export const TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS = [
+  {
+    originPlugin: TEST_PLUGIN,
+    type: VisLayerTypes.PointInTimeEvents,
+    pluginResource: {
+      type: TEST_PLUGIN_RESOURCE_TYPE,
+      id: TEST_PLUGIN_RESOURCE_ID,
+      name: TEST_PLUGIN_RESOURCE_NAME,
+      urlPath: TEST_PLUGIN_RESOURCE_PATH,
+    },
+    events: [
+      {
+        timestamp: -5,
+        metadata: {
+          pluginResourceId: TEST_PLUGIN_RESOURCE_ID,
+        },
+      },
+      {
+        timestamp: -100,
+        metadata: {
+          pluginResourceId: TEST_PLUGIN_RESOURCE_ID,
+        },
+      },
+      {
+        timestamp: 75,
+        metadata: {
+          pluginResourceId: TEST_PLUGIN_RESOURCE_ID,
+        },
+      },
+    ],
+  },
+];
+
+export const TEST_VIS_LAYERS_SINGLE_ON_BOUNDS = [
+  {
+    originPlugin: TEST_PLUGIN,
+    type: VisLayerTypes.PointInTimeEvents,
+    pluginResource: {
+      type: TEST_PLUGIN_RESOURCE_TYPE,
+      id: TEST_PLUGIN_RESOURCE_ID,
+      name: TEST_PLUGIN_RESOURCE_NAME,
+      urlPath: TEST_PLUGIN_RESOURCE_PATH,
+    },
+    events: [
+      {
+        timestamp: 0,
+        metadata: {
+          pluginResourceId: TEST_PLUGIN_RESOURCE_ID,
+        },
+      },
+      {
+        timestamp: 2,
+        metadata: {
+          pluginResourceId: TEST_PLUGIN_RESOURCE_ID,
+        },
+      },
+      {
+        timestamp: 55,
         metadata: {
           pluginResourceId: TEST_PLUGIN_RESOURCE_ID,
         },

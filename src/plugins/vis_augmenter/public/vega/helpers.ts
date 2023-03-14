@@ -180,8 +180,13 @@ export const addPointInTimeEventsLayersToTable = (
       // changing the bounds, but performance benefits would be very minimal
       // if any, given the upper bounds limit on n already due to chart constraints.
       let rowIndex = 0;
+      const minVal = augmentedTable.rows[0][xAxisId] as number;
+      const maxVal =
+        (augmentedTable.rows[augmentedTable.rows.length - 1][xAxisId] as number) +
+        moment.duration(dimensions.x.params.interval).asMilliseconds();
       const sortedTimestamps = visLayer.events
         .map((event: PointInTimeEvent) => event.timestamp)
+        .filter((timestamp: number) => timestamp >= minVal && timestamp <= maxVal)
         .sort((n1: number, n2: number) => n1 - n2) as number[];
 
       if (sortedTimestamps.length > 0) {
@@ -192,7 +197,7 @@ export const addPointInTimeEventsLayersToTable = (
             let rowIndexToInsert: number;
 
             // timestamp is on the left bounds of the chart
-            if (timestamp <= smallerVal) {
+            if (timestamp === smallerVal) {
               rowIndexToInsert = rowIndex;
 
               // timestamp is in between the right 2 buckets. determine which one it is closer to
