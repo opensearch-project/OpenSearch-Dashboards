@@ -28,10 +28,13 @@ describe('check timeline visualization', () => {
         .find('[data-test-subj="newItemButton"]')
         .click();
       cy.get('[data-test-subj="visType-timelion"]').click();
+      cy.get('[class="view-line"]').type(
+        '{selectAll}{backspace}{backspace}{backspace}{backspace}{backspace}'
+      );
     });
 
     it('.es(*, kibana1=true) should report search error', () => {
-      cy.get('[class="view-line"]').type('{selectall}{backspace}, kibana1=true)');
+      cy.get('[class="view-line"]').type('.es(*, kibana1=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
@@ -39,7 +42,7 @@ describe('check timeline visualization', () => {
     });
 
     it('.es(*, kibana=true) should not report search error', () => {
-      cy.get('[class="view-line"]').type('{selectall}{backspace}, kibana=true)');
+      cy.get('[class="view-line"]').type('.es(*, kibana=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
@@ -47,7 +50,7 @@ describe('check timeline visualization', () => {
     });
 
     it('.es(*, opensearchDashboards=true) should not report search error', () => {
-      cy.get('[class="view-line"]').type('{selectall}{backspace}, opensearchDashboards=true)');
+      cy.get('[class="view-line"]').type('.es(*, opensearchDashboards=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
@@ -55,9 +58,7 @@ describe('check timeline visualization', () => {
     });
 
     it('.elasticsearch(*, kibana1=true) should report search error', () => {
-      cy.get('[class="view-line"]').type(
-        '{selectall}{backspace}{backspace}{backspace}{backspace}{backspace}elasticsearch(*, kibana1=true)'
-      );
+      cy.get('[class="view-line"]').type('.elasticsearch(*, kibana1=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
@@ -65,9 +66,7 @@ describe('check timeline visualization', () => {
     });
 
     it('.elasticsearch(*, kibana=true) should not report search error', () => {
-      cy.get('[class="view-line"]').type(
-        '{selectall}{backspace}{backspace}{backspace}{backspace}{backspace}elasticsearch(*, kibana=true)'
-      );
+      cy.get('[class="view-line"]').type('.elasticsearch(*, kibana=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
@@ -75,9 +74,7 @@ describe('check timeline visualization', () => {
     });
 
     it('.elasticsearch(*, opensearchDashboards=true) should not report search error', () => {
-      cy.get('[class="view-line"]').type(
-        '{selectall}{backspace}{backspace}{backspace}{backspace}{backspace}elasticsearch(*, opensearchDashboards=true)'
-      );
+      cy.get('[class="view-line"]').type('.elasticsearch(*, opensearchDashboards=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
@@ -85,9 +82,7 @@ describe('check timeline visualization', () => {
     });
 
     it('.opensearch(*, kibana1=true) should report search error', () => {
-      cy.get('[class="view-line"]').type(
-        '{selectall}{backspace}{backspace}{backspace}{backspace}{backspace}opensearch(*, kibana1=true)'
-      );
+      cy.get('[class="view-line"]').type('.opensearch(*, kibana1=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
@@ -95,9 +90,7 @@ describe('check timeline visualization', () => {
     });
 
     it('.opensearch(*, kibana=true) should not report search error', () => {
-      cy.get('[class="view-line"]').type(
-        '{selectall}{backspace}{backspace}{backspace}{backspace}{backspace}opensearch(*, kibana=true)'
-      );
+      cy.get('[class="view-line"]').type('.opensearch(*, kibana=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
@@ -105,9 +98,7 @@ describe('check timeline visualization', () => {
     });
 
     it('.opensearch(*, opensearchDashboards=true) should not report search error', () => {
-      cy.get('[class="view-line"]').type(
-        '{selectall}{backspace}{backspace}{backspace}{backspace}{backspace}opensearch(*, opensearchDashboards=true)'
-      );
+      cy.get('[class="view-line"]').type('.opensearch(*, opensearchDashboards=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
