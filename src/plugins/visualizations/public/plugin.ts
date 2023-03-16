@@ -30,6 +30,7 @@
 
 import './index.scss';
 
+import { VisAugmenterStart } from 'src/plugins/vis_augmenter/public';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -60,6 +61,7 @@ import {
   setOverlays,
   setSavedSearchLoader,
   setEmbeddable,
+  setSavedAugmentVisLoader,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -128,6 +130,7 @@ export interface VisualizationsStartDeps {
   dashboard: DashboardStart;
   getAttributeService: DashboardStart['getAttributeService'];
   savedObjectsClient: SavedObjectsClientContract;
+  visAugmenter: VisAugmenterStart;
 }
 
 /**
@@ -174,7 +177,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, dashboard }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable, dashboard, visAugmenter }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
@@ -193,6 +196,7 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
+    setSavedAugmentVisLoader(visAugmenter.savedAugmentVisLoader);
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
