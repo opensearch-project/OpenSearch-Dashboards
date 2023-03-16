@@ -148,12 +148,14 @@ Mac users are advised to set up OpenSearch and OpenSearch Dashboards using [Dock
 ### Run OpenSearch Dashboards for Mac Users
 
 1. After setting up OpenSearch using Docker, make sure that the OpenSearch server instance is up and running. You can validate this by running curl localhost:9200 in another console tab or window ([see OpenSearch developer guide]((https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md#run-opensearch))).
-2. Configure environment variables for OpenSearch Dashboards:
+2. Inside docker shell run:
+```$ yarn opensearch snapshot``` 
+3. Open new terminal, inside folder ```Opensearch-Dashboards```, configure environment variables for OpenSearch Dashboards:
 ```
 export SERVER_HOST="localhost"
 export OPENSEARCH_HOSTS="http://localhost:9200"
 ```
-3. Start the OpenSearch Dashboards development server using the start:docker command:
+4. Start the OpenSearch Dashboards development server using the start:docker command:
 ```
 yarn start:docker
 ```
