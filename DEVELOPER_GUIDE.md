@@ -141,6 +141,25 @@ Note - it may take a couple minutes to generate all the necessary bundles. If th
 [success][@osd/optimizer] 28 bundles compiled successfully after 145.9 sec, watching for changes
 ```
 
+### Run OpenSearch using Docker (Recommended for Mac users)
+
+Mac users are advised to set up OpenSearch and OpenSearch Dashboards using [Docker]((https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/docs/docker-dev/docker-dev-setup-manual.md)). Follow the instructions in the Docker Developer Guide to set up OpenSearch using Docker.
+
+### Run OpenSearch Dashboards for Mac Users
+
+1. After setting up OpenSearch using Docker, make sure that the OpenSearch server instance is up and running. You can validate this by running curl localhost:9200 in another console tab or window ([see OpenSearch developer guide]((https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md#run-opensearch))).
+2. Configure environment variables for OpenSearch Dashboards:
+```
+export SERVER_HOST="localhost"
+export OPENSEARCH_HOSTS="http://localhost:9200"
+```
+3. Start the OpenSearch Dashboards development server using the start:docker command:
+```
+yarn start:docker
+```
+
+After following the previous instructions, OpenSearch Dashboards should be running on ```http://127.0.0.1:5603/fux```. To access the OpenSearch Dashboards web interface, use the URL ```http://127.0.0.1:5603/fux``` in your browser instead of ```localhost:5603/fux```. Changing the URL to use ```127.0.0.1``` instead of ```localhost``` can help avoid potential issues.
+
 ### Next Steps
 
 Now that you have a development environment to play with, there are a number of different paths you may take next.
