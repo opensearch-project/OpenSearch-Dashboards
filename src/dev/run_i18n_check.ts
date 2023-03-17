@@ -41,9 +41,14 @@ import {
   mergeConfigs,
 } from './i18n/tasks';
 
-const skipOnNoTranslations = ({ config }: { config: I18nConfig }) =>
-  !config.translations.length && 'No translations found.';
+export interface ListrContext {
+  config?: I18nConfig;
+  reporter: ErrorReporter;
+  messages: Map<string, { message: string }>;
+}
 
+const skipOnNoTranslations = (context: ListrContext) =>
+  !context.config?.translations?.length && 'No translations found.';
 run(
   async ({
     flags: {
@@ -105,16 +110,17 @@ run(
         {
           title: 'Validating Default Messages',
           skip: skipOnNoTranslations,
-          task: ({ config }) =>
-            new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
+          task: ({ config }) => {
+            return new Listr(extractDefaultMessages(config!, srcPaths), { exitOnError: true });
+          },
         },
         {
           title: 'Compatibility Checks',
           skip: skipOnNoTranslations,
-          task: ({ config }) =>
+          task: ({ config }) => {
             new Listr(
               checkCompatibility(
-                config,
+                config!,
                 {
                   ignoreMalformed: !!ignoreMalformed,
                   ignoreIncompatible: !!ignoreIncompatible,
@@ -125,7 +131,8 @@ run(
                 log
               ),
               { exitOnError: true }
-            ),
+            );
+          },
         },
       ],
       {
@@ -138,7 +145,7 @@ run(
       const reporter = new ErrorReporter();
       const messages: Map<string, { message: string }> = new Map();
       await list.run({ messages, reporter });
-    } catch (error) {
+    } catch (error: ErrorReporter | Error) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
         error.errors.forEach((e: string | Error) => log.error(e));

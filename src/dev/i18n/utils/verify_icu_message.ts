@@ -70,16 +70,20 @@ export function verifyICUMessage(message: string) {
         verifySelectFormatNode(node.format);
       }
     }
-  } catch (error) {
-    if (error.name === 'SyntaxError') {
-      const errorWithContext = createParserErrorMessage(message, {
-        loc: {
-          line: error.location.start.line,
-          column: error.location.start.column - 1,
-        },
-        message: error.message,
-      });
-      throw errorWithContext;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error instanceof parser.SyntaxError) {
+        if (error.name === 'SyntaxError') {
+          const errorWithContext = createParserErrorMessage(message, {
+            loc: {
+              line: error.location.start.line,
+              column: error.location.start.column - 1,
+            },
+            message: error.message,
+          });
+          throw errorWithContext;
+        }
+      }
     }
   }
 }
