@@ -40,6 +40,9 @@ export interface I18nFlags {
 }
 
 export function checkCompatibility(config: I18nConfig, flags: I18nFlags, log: ToolingLog) {
+  if (!config) {
+    throw new Error('Config is missing');
+  }
   const { fix, ignoreIncompatible, ignoreUnused, ignoreMalformed, ignoreMissing } = flags;
   return config.translations.map((translationsPath) => ({
     task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
