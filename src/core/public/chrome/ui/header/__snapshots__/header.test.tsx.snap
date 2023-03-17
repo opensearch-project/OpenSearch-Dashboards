@@ -2798,6 +2798,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                 >
                                   <span
                                     data-euiicon-type="menu"
+                                    title="Menu"
                                   />
                                 </span>
                               </span>
@@ -2842,11 +2843,13 @@ exports[`Header handles visibility and lock changes 1`] = `
                               >
                                 <EuiIcon
                                   size="m"
+                                  title="Menu"
                                   type="menu"
                                 >
                                   <span
                                     data-euiicon-type="menu"
                                     size="m"
+                                    title="Menu"
                                   />
                                 </EuiIcon>
                               </span>
@@ -5507,7 +5510,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                         >
                                           <EuiIcon
                                             size="m"
-                                            type="questionInCircle"
+                                            title="questionInCircle"
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
@@ -8117,6 +8120,7 @@ exports[`Header renders condensed header 1`] = `
                                 >
                                   <span
                                     data-euiicon-type="menu"
+                                    title="Menu"
                                   />
                                 </span>
                               </span>
@@ -8161,11 +8165,13 @@ exports[`Header renders condensed header 1`] = `
                               >
                                 <EuiIcon
                                   size="m"
+                                  title="Menu"
                                   type="menu"
                                 >
                                   <span
                                     data-euiicon-type="menu"
                                     size="m"
+                                    title="Menu"
                                   />
                                 </EuiIcon>
                               </span>
