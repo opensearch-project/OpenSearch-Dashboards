@@ -2,6 +2,7 @@
 .signing-config.json
 .ackrc
 /.opensearch
+
 /.chromium
 /package.json.bak
 .DS_Store
@@ -26,6 +27,7 @@ target
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
 /html_docs
+opensearch-dashboards-docker-dev
 .eslintcache
 /data
 disabledPlugins

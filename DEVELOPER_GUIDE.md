@@ -43,7 +43,7 @@ To develop on OpenSearch Dashboards, you'll need:
 
 - A [GitHub account](https://docs.github.com/en/get-started/onboarding/getting-started-with-your-github-account)
 - [`git`](https://git-scm.com/) for version control
-- [`Node.js`](https://nodejs.org/), [`npm`](https://www.npmjs.com/), and [`Yarn`](https://yarnpkg.com/) for building and running the project
+- [`Node.js`](https://nodejs.org/), [`npm`](https://www.npmjs.com/)( Note that, for Darwin (MacOS) only, it is important to have the latest version of Node.js in your machine, in other case you will have an issue with [`grunt`]plugin ), and [`Yarn`](https://yarnpkg.com/) for building and running the project
 - A code editor of your choice, configured for JavaScript/TypeScript. If you don't have a favorite editor, we suggest [Visual Studio Code](https://code.visualstudio.com/)
 
 If you already have these installed or have your own preferences for installing them, skip ahead to the [Fork and clone OpenSearch Dashboards](#fork-and-clone-opensearch-dashboards) section.
