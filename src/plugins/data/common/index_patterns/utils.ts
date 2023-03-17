@@ -69,9 +69,7 @@ export const validateDataSourceReference = (
 ) => {
   const references = indexPattern.references;
   if (dataSourceId) {
-    return (
-      references[0] && references[0].id === dataSourceId && references[0].type === 'data-source'
-    );
+    return references.some((ref) => ref.id === dataSourceId && ref.type === 'data-source');
   } else {
     // No datasource id passed as input meaning we are getting index pattern from default cluster,
     // and it's supposed to be an empty array
