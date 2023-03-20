@@ -83,10 +83,9 @@ export const createHandler = ({
 }: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
   const { body, query } = request;
   const { path, method } = query;
+  const client = ctx.core.opensearch.client.asCurrentUser;
 
   let opensearchResponse: ApiResponse;
-
-  const client = ctx.core.opensearch.client.asCurrentUser;
 
   if (!pathFilters.some((re) => re.test(path))) {
     return response.forbidden({
