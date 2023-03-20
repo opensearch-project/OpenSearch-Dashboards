@@ -147,6 +147,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Relax the Node.js requirement to `^14.20.1` ([3463](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3463))
 - Bump the version of Node.js installed by `nvm` to `14.21.3` ([3463](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3463))
 - Remove the unused `renovate.json5` file ([3489](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3489))
+- Allow selecting the Node.js binary using `NODE_HOME` and `OSD_NODE_HOME` ([3508](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3508))
 
 ### 🪛 Refactoring
 
