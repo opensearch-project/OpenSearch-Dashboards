@@ -189,40 +189,39 @@ export const addPointInTimeEventsLayersToTable = (
         .filter((timestamp: number) => timestamp >= minVal && timestamp <= maxVal)
         .sort((n1: number, n2: number) => n1 - n2) as number[];
 
-      if (sortedTimestamps.length > 0) {
-        sortedTimestamps.forEach((timestamp) => {
-          while (rowIndex < augmentedTable.rows.length - 1) {
-            const smallerVal = augmentedTable.rows[rowIndex][xAxisId] as number;
-            const higherVal = augmentedTable.rows[rowIndex + 1][xAxisId] as number;
-            let rowIndexToInsert: number;
+      sortedTimestamps.forEach((timestamp) => {
+        while (rowIndex < augmentedTable.rows.length - 1) {
+          const smallerVal = augmentedTable.rows[rowIndex][xAxisId] as number;
+          const higherVal = augmentedTable.rows[rowIndex + 1][xAxisId] as number;
+          let rowIndexToInsert: number;
 
-            // timestamp is on the left bounds of the chart
-            if (timestamp === smallerVal) {
-              rowIndexToInsert = rowIndex;
+          // timestamp is on the left bounds of the chart
+          if (timestamp === smallerVal) {
+            rowIndexToInsert = rowIndex;
 
-              // timestamp is in between the right 2 buckets. determine which one it is closer to
-            } else if (timestamp <= higherVal) {
-              const smallerValDiff = Math.abs(timestamp - smallerVal);
-              const higherValDiff = Math.abs(timestamp - higherVal);
-              rowIndexToInsert = smallerValDiff <= higherValDiff ? rowIndex : rowIndex + 1;
-            }
-
-            // timestamp is on the right bounds of the chart
-            else if (rowIndex + 1 === augmentedTable.rows.length - 1) {
-              rowIndexToInsert = rowIndex + 1;
-              // timestamp is still too small; traverse to next bucket
-            } else {
-              rowIndex += 1;
-              continue;
-            }
-
-            // inserting the value. increment if the mapping/property already exists
-            augmentedTable.rows[rowIndexToInsert][visLayerColumnId] =
-              (get(augmentedTable.rows[rowIndexToInsert], visLayerColumnId, 0) as number) + 1;
-            break;
+            // timestamp is in between the right 2 buckets. determine which one it is closer to
+          } else if (timestamp <= higherVal) {
+            const smallerValDiff = Math.abs(timestamp - smallerVal);
+            const higherValDiff = Math.abs(timestamp - higherVal);
+            rowIndexToInsert = smallerValDiff <= higherValDiff ? rowIndex : rowIndex + 1;
           }
-        });
-      }
+
+          // timestamp is on the right bounds of the chart
+          else if (rowIndex + 1 === augmentedTable.rows.length - 1) {
+            rowIndexToInsert = rowIndex + 1;
+            // timestamp is still too small; traverse to next bucket
+          } else {
+            rowIndex += 1;
+            continue;
+          }
+
+          // inserting the value. increment if the mapping/property already exists
+          augmentedTable.rows[rowIndexToInsert][visLayerColumnId] =
+            (get(augmentedTable.rows[rowIndexToInsert], visLayerColumnId, 0) as number) + 1;
+          break;
+        }
+      });
+
       return true;
     });
   }
