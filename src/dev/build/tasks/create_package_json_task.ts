@@ -29,7 +29,6 @@
  */
 
 import { copyWorkspacePackages } from '@osd/pm';
-import { parse } from 'semver';
 
 import { read, write, Task } from '../lib';
 
@@ -38,16 +37,6 @@ export const CreatePackageJson: Task = {
 
   async run(config, log, build) {
     const pkg = config.getOpenSearchDashboardsPkg();
-    /**
-     * OpenSearch server has a logic that if the pkg.branch is "main",
-     * set the docVersion to latest. So here we exclude main.
-     */
-    const semverResult = parse(pkg.version);
-    const shouldPatch = semverResult && pkg.branch !== 'main';
-    const branch = shouldPatch ? `${semverResult.major}.${semverResult.minor}` : pkg.branch;
-    if (shouldPatch) {
-      log.info(`Patch branch property: ${branch}`);
-    }
 
     const newPkg = {
       name: pkg.name,
@@ -55,7 +44,7 @@ export const CreatePackageJson: Task = {
       description: pkg.description,
       keywords: pkg.keywords,
       version: config.getBuildVersion(),
-      branch,
+      branch: pkg.branch,
       build: {
         number: config.getBuildNumber(),
         sha: config.getBuildSha(),
