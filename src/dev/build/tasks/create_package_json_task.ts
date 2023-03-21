@@ -42,7 +42,7 @@ export const CreatePackageJson: Task = {
      * OpenSearch server has a logic that if the pkg.branch is "main",
      * set the docVersion to latest. So here we exclude main.
      */
-    const semverResult = parse(config.getBuildVersion());
+    const semverResult = parse(pkg.version);
     const shouldPatch = semverResult && pkg.branch !== 'main';
     const branch = shouldPatch ? `${semverResult.major}.${semverResult.minor}` : pkg.branch;
     if (shouldPatch) {
