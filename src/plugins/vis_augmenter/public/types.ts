@@ -7,6 +7,16 @@ export enum VisLayerTypes {
   PointInTimeEvents = 'PointInTimeEvents',
 }
 
+export enum VisLayerErrorTypes {
+  PERMISSIONS_FAILURE = 'PERMISSIONS_FAILURE',
+  FETCH_FAILURE = 'FETCH_FAILURE',
+}
+
+export interface VisLayerError {
+  type: keyof typeof VisLayerErrorTypes;
+  message?: string;
+}
+
 export type PluginResourceType = string;
 
 export interface PluginResource {
@@ -20,6 +30,7 @@ export interface VisLayer {
   type: keyof typeof VisLayerTypes;
   originPlugin: string;
   pluginResource: PluginResource;
+  error?: VisLayerError;
 }
 
 export type VisLayers = VisLayer[];
