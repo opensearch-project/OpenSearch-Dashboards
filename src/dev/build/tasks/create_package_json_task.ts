@@ -39,30 +39,14 @@ export const CreatePackageJson: Task = {
   async run(config, log, build) {
     const pkg = config.getOpenSearchDashboardsPkg();
     /**
-     * OpenSearch server uses the `branch` property from `package.json` to
-     * build links to the documentation. If set to `main`, it would use `/latest`
-     * and if not, it would use the `version` to construct URLs.
+     * OpenSearch server has a logic that if the pkg.branch is "main",
+     * set the docVersion to latest. So here we exclude main.
      */
-    const buildVersion = config.getBuildVersion();
-    let branch;
-    if (pkg.branch === 'main') {
-      branch = pkg.branch;
-    } else {
-      const parsedBuildVersion = parse(buildVersion);
-      if (parsedBuildVersion) {
-        branch = `${parsedBuildVersion.major}.${parsedBuildVersion.minor}`;
-        log.info(`Updating package.branch to ${branch}`);
-      } else {
-        const validDocPathsPattern = /^\d+\.\d+$/;
-        if (validDocPathsPattern.test(pkg.branch)) {
-          branch = pkg.branch;
-        } else {
-          // package version was not parsable and branch is unusable
-          throw new Error(
-            `Failed to identify documentation path while generating package.json: encountered invalid build version (${buildVersion}) and branch property (${pkg.branch}).`
-          );
-        }
-      }
+    const semverResult = parse(config.getBuildVersion());
+    const shouldPatch = semverResult && pkg.branch !== 'main';
+    const branch = shouldPatch ? `${semverResult.major}.${semverResult.minor}` : pkg.branch;
+    if (shouldPatch) {
+      log.info(`Patch branch property: ${branch}`);
     }
 
     const newPkg = {
@@ -70,7 +54,7 @@ export const CreatePackageJson: Task = {
       private: true,
       description: pkg.description,
       keywords: pkg.keywords,
-      version: buildVersion,
+      version: config.getBuildVersion(),
       branch,
       build: {
         number: config.getBuildNumber(),
