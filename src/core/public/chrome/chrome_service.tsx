@@ -210,7 +210,7 @@ export class ChromeService {
         title: mountReactNode(
           <FormattedMessage
             id="core.chrome.browserDeprecationWarning"
-            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
+            defaultMessage="Internet Explorer is no longer supported. Please use a modern browser. More information can be found at {link}."
             values={{
               link: (
                 <EuiLink
@@ -220,7 +220,7 @@ export class ChromeService {
                 >
                   <FormattedMessage
                     id="core.chrome.browserDeprecationLink"
-                    defaultMessage="the support matrix on our website"
+                    defaultMessage="our supported browsers list on our website"
                   />
                 </EuiLink>
               ),
