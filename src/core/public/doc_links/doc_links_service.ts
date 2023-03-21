@@ -29,6 +29,7 @@
  */
 
 import { deepFreeze } from '@osd/std';
+import { parse } from 'semver';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 interface StartDeps {
@@ -39,10 +40,33 @@ interface StartDeps {
 export class DocLinksService {
   public setup() {}
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
-    const DOC_LINK_VERSION =
-      injectedMetadata.getOpenSearchDashboardsBranch() === 'main'
-        ? 'latest'
-        : injectedMetadata.getOpenSearchDashboardsBranch();
+    const buildVersion = injectedMetadata.getOpenSearchDashboardsVersion();
+    const pkgBranch = injectedMetadata.getOpenSearchDashboardsBranch();
+    /**
+     * OpenSearch server uses the `branch` property from `package.json` to
+     * build links to the documentation. If set to `main`, it would use `/latest`
+     * and if not, it would use the `version` to construct URLs.
+     */
+    let branch;
+    if (pkgBranch === 'main') {
+      branch = 'latest';
+    } else {
+      const parsedBuildVersion = parse(buildVersion);
+      if (parsedBuildVersion) {
+        branch = `${parsedBuildVersion.major}.${parsedBuildVersion.minor}`;
+      } else {
+        const validDocPathsPattern = /^\d+\.\d+$/;
+        if (validDocPathsPattern.test(pkgBranch)) {
+          branch = pkgBranch;
+        } else {
+          // package version was not parsable and branch is unusable
+          throw new Error(
+            `Failed to identify documentation path while parsing package.json: encountered invalid build version (${buildVersion}) and branch property (${pkgBranch}).`
+          );
+        }
+      }
+    }
+    const DOC_LINK_VERSION = branch;
     const OPENSEARCH_WEBSITE_URL = 'https://opensearch.org/';
     const OPENSEARCH_WEBSITE_DOCS = `${OPENSEARCH_WEBSITE_URL}docs/${DOC_LINK_VERSION}`;
     const OPENSEARCH_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/opensearch/`;
