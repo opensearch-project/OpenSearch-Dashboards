@@ -41,7 +41,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
   }
 
   getUrl() {
-    return this.getUrlParts().fullURL.toString().slice(0, -1);
+    return this.getUrlParts().serverUrl;
   }
 
   getBuildFrom() {
@@ -66,6 +66,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
         password: testOpenSearchUrl.password,
         auth: `${testOpenSearchUrl.username}:${testOpenSearchUrl.password}`,
         fullURL: testOpenSearchUrl,
+        serverUrl: testOpenSearchUrl.toString().slice(0, -1),
       };
     }
 
@@ -86,6 +87,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
       username: username,
       password: password,
       fullURL,
+      serverUrl: fullURL.toString().slice(0, -1),
     };
   }
 })();

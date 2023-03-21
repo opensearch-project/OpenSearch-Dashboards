@@ -54,10 +54,7 @@ export function OpenSearchArchiverProvider({
     client,
     dataDir,
     log,
-    opensearchDashboardsUrl: config
-      .get('servers.opensearchDashboards.fullURL')
-      .toString()
-      .slice(0, -1),
+    opensearchDashboardsUrl: config.get('servers.opensearchDashboards.serverUrl'),
   });
 
   if (hasService('opensearchDashboardsServer')) {

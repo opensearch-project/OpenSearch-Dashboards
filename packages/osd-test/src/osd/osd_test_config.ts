@@ -38,6 +38,7 @@ interface UrlParts {
   username?: string;
   password?: string;
   fullURL: URL;
+  serverUrl: string;
 }
 
 export const osdTestConfig = new (class OsdTestConfig {
@@ -63,6 +64,7 @@ export const osdTestConfig = new (class OsdTestConfig {
         username: testOpenSearchDashboardsUrl.username ?? undefined,
         password: testOpenSearchDashboardsUrl.password ?? undefined,
         fullURL: testOpenSearchDashboardsUrl,
+        serverUrl: testOpenSearchDashboardsUrl.toString().slice(0, -1),
       };
     }
 
@@ -85,6 +87,7 @@ export const osdTestConfig = new (class OsdTestConfig {
       username,
       password,
       fullURL,
+      serverUrl: fullURL.toString().slice(0, -1),
     };
   }
 })();

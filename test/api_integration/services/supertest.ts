@@ -34,15 +34,12 @@ import supertestAsPromised from 'supertest-as-promised';
 
 export function OpenSearchDashboardsSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const opensearchDashboardsServerUrl = config
-    .get('servers.opensearchDashboards')
-    .fullURL.toString()
-    .slice(0, -1);
+  const opensearchDashboardsServerUrl = config.get('servers.opensearchDashboards.serverUrl');
   return supertestAsPromised(opensearchDashboardsServerUrl);
 }
 
 export function OpenSearchSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const elasticSearchServerUrl = config.get('servers.opensearch').fullURL.toString().slice(0, -1);
+  const elasticSearchServerUrl = config.get('servers.opensearch.serverUrl');
   return supertestAsPromised(elasticSearchServerUrl);
 }

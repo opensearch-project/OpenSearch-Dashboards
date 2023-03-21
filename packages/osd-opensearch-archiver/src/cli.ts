@@ -71,7 +71,7 @@ export function runCli() {
         throw createFlagError('--opensearch-url must be a string');
       }
       if (!opensearchUrl && config) {
-        opensearchUrl = config.get('servers.opensearch').fullURL.toString().slice(0, -1);
+        opensearchUrl = config.get('servers.opensearch.serverUrl');
       }
       if (!opensearchUrl) {
         throw createFlagError('--opensearch-url or --config must be defined');
@@ -82,10 +82,7 @@ export function runCli() {
         throw createFlagError('--opensearch-dashboards-url must be a string');
       }
       if (!opensearchDashboardsUrl && config) {
-        opensearchDashboardsUrl = config
-          .get('servers.opensearchDashboards')
-          .fullURL.toString()
-          .slice(0, -1) as string;
+        opensearchDashboardsUrl = config.get('servers.opensearchDashboards.serverUrl') as string;
       }
       if (!opensearchDashboardsUrl) {
         throw createFlagError('---url or --config must be defined');
