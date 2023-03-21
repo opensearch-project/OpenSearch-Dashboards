@@ -63,11 +63,11 @@ If it's the only version of node installed, it will automatically be set to the 
 
 #### Install `yarn`
 
-```bash
-$ npm i -g corepack
-```
+Take a look at the [latest Yarn release](https://github.com/yarnpkg/berry/releases/latest), note the version number, and run:
 
 ```bash
+$ npm i -g corepack
+
 $ corepack prepare yarn@<version> --activate
 ```
 
@@ -239,9 +239,9 @@ Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
 changes to the default [`opensearch_dashboards.yml`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/config/opensearch_dashboards.yml#L25-L72) in order to connect to OpenSearch.
 
 ```yml
-opensearch.hosts: ['https://localhost:9200']
-opensearch.username: 'admin' # Default username on the docker image
-opensearch.password: 'admin' # Default password on the docker image
+opensearch.hosts: ["https://localhost:9200"]
+opensearch.username: "admin" # Default username on the docker image
+opensearch.password: "admin" # Default password on the docker image
 opensearch.ssl.verificationMode: none
 ```
 
