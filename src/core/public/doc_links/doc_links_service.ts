@@ -51,19 +51,14 @@ export class DocLinksService {
     if (pkgBranch === 'main') {
       branch = 'latest';
     } else {
+      const validDocPathsPattern = /^\d+\.\d+$/;
       const parsedBuildVersion = parse(buildVersion);
-      if (parsedBuildVersion) {
+      if (validDocPathsPattern.test(pkgBranch)) {
+        branch = pkgBranch;
+      } else if (parsedBuildVersion) {
         branch = `${parsedBuildVersion.major}.${parsedBuildVersion.minor}`;
       } else {
-        const validDocPathsPattern = /^\d+\.\d+$/;
-        if (validDocPathsPattern.test(pkgBranch)) {
-          branch = pkgBranch;
-        } else {
-          // package version was not parsable and branch is unusable
-          throw new Error(
-            `Failed to identify documentation path while parsing package.json: encountered invalid build version (${buildVersion}) and branch property (${pkgBranch}).`
-          );
-        }
+        branch = pkgBranch;
       }
     }
     const DOC_LINK_VERSION = branch;
