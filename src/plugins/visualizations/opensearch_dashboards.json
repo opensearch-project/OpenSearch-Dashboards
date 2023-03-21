@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "expressions", "uiActions", "embeddable", "inspector", "dashboard", "visAugmenter"],
+  "requiredPlugins": ["data", "expressions", "uiActions", "embeddable", "inspector", "dashboard"],
   "optionalPlugins": ["usageCollection"],
   "requiredBundles": ["opensearchDashboardsUtils", "discover", "savedObjects", "visAugmenter"]
 }
