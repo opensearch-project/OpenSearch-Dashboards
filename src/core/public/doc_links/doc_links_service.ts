@@ -47,7 +47,7 @@ export class DocLinksService {
      * build links to the documentation. If set to `main`, it would use `/latest`
      * and if not, it would use the `version` to construct URLs.
      */
-    let branch;
+    let branch = pkgBranch;
     if (pkgBranch === 'main') {
       branch = 'latest';
     } else {
