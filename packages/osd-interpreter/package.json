@@ -4,9 +4,9 @@
   "license": "Apache-2.0",
   "scripts": {
     "interpreter:peg": "pegjs src/common/lib/grammar.peg",
-    "build": "node scripts/build",
-    "osd:bootstrap": "node scripts/build --dev",
-    "osd:watch": "node scripts/build --dev --watch"
+    "build": "../../scripts/use_node scripts/build",
+    "osd:bootstrap": "../../scripts/use_node scripts/build --dev",
+    "osd:watch": "../../scripts/use_node scripts/build --dev --watch"
   },
   "dependencies": {
     "@babel/runtime": "^7.16.5",
