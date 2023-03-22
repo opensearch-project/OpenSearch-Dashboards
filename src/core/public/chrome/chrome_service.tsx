@@ -220,7 +220,7 @@ export class ChromeService {
                 >
                   <FormattedMessage
                     id="core.chrome.browserDeprecationLink"
-                    defaultMessage="our supported browsers list on our website"
+                    defaultMessage="the supported browsers list on our website"
                   />
                 </EuiLink>
               ),
