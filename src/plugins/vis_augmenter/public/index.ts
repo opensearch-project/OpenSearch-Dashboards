@@ -18,7 +18,7 @@ export {
   SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
 } from './saved_augment_vis';
 
-export { VisLayer, VisLayers, VisLayerTypes } from './types';
+export { VisLayer, VisLayers, VisLayerTypes, VisLayerErrorTypes, VisLayerError } from './types';
 
 export * from './expressions';
 export * from './utils';
