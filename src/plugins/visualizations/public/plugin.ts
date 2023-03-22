@@ -60,6 +60,7 @@ import {
   setOverlays,
   setSavedSearchLoader,
   setEmbeddable,
+  setSavedAugmentVisLoader,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -92,6 +93,7 @@ import {
 } from './saved_visualizations/_saved_vis';
 import { createSavedSearchesLoader } from '../../discover/public';
 import { DashboardStart } from '../../dashboard/public';
+import { createSavedAugmentVisLoader } from '../../vis_augmenter/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -193,6 +195,14 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
+    const savedAugmentVisLoader = createSavedAugmentVisLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+    setSavedAugmentVisLoader(savedAugmentVisLoader);
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
