@@ -31,11 +31,12 @@
 import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';
 import { trimStart } from 'lodash';
 
-import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { ApiResponse } from '@opensearch-project/opensearch/';
 
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { isResponseError } from '../../../../../../../core/server/opensearch/client/errors';
 
 import { RouteDependencies } from '../../../';
 
@@ -134,8 +135,4 @@ export const createHandler = ({
       body: isResponseErrorFlag ? JSON.stringify(e.meta.body) : `502.${e.statusCode || 0}`,
     });
   }
-};
-
-const isResponseError = (error: any): error is ResponseError => {
-  return Boolean(error && error.body && error.statusCode && error.header);
 };
