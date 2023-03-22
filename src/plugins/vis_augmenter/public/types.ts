@@ -56,3 +56,5 @@ export const isPointInTimeEventsVisLayer = (obj: any) => {
 export const isValidVisLayer = (obj: any) => {
   return obj?.type in VisLayerTypes;
 };
+
+export const isVisLayerWithError = (visLayer: VisLayer): boolean => visLayer.error !== undefined;

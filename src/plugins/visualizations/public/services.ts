@@ -37,6 +37,7 @@ import {
   IUiSettingsClient,
   OverlayStart,
   SavedObjectsStart,
+  NotificationsStart,
 } from '../../../core/public';
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/common';
@@ -111,3 +112,7 @@ export const [getSavedSearchLoader, setSavedSearchLoader] = createGetterSetter<S
 export const [getSavedAugmentVisLoader, setSavedAugmentVisLoader] = createGetterSetter<
   SavedAugmentVisLoader
 >('SavedAugmentVisLoader');
+
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);

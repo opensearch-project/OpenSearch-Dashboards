@@ -12,6 +12,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { VisAugmenterSetup, VisAugmenterStart };
 
 export {
+  createSavedAugmentVisLoader,
+  createAugmentVisSavedObject,
+  SavedAugmentVisLoader,
+  SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
+} from './saved_augment_vis';
+
+export {
   VisLayer,
   VisLayers,
   VisLayerTypes,
@@ -22,6 +29,8 @@ export {
   PointInTimeEventsVisLayer,
   isPointInTimeEventsVisLayer,
 } from './types';
+
+export { generateVisLayer } from './test_helpers';
 
 export * from './expressions';
 export * from './utils';

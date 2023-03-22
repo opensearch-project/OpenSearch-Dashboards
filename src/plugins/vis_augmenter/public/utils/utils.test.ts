@@ -7,15 +7,19 @@ import { Vis } from '../../../visualizations/public';
 import {
   buildPipelineFromAugmentVisSavedObjs,
   getAugmentVisSavedObjs,
+  getAnyErrors,
   isEligibleForVisLayers,
 } from './utils';
-import { VisLayerTypes, ISavedAugmentVis, VisLayerExpressionFn } from '../types';
 import {
   createSavedAugmentVisLoader,
   SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
   getMockAugmentVisSavedObjectClient,
   generateAugmentVisSavedObject,
-} from '../saved_augment_vis';
+  generateVisLayer,
+  ISavedAugmentVis,
+  VisLayerExpressionFn,
+  VisLayerTypes,
+} from '../';
 
 describe('utils', () => {
   // TODO: redo / update this test suite when eligibility is finalized.
@@ -127,6 +131,38 @@ describe('utils', () => {
     it('builds with multiple saved objs', async () => {
       const str = buildPipelineFromAugmentVisSavedObjs([obj1, obj2]);
       expect(str).toEqual(`fn-1 arg1="value-1"\n| fn-2 arg2="value-2"`);
+    });
+  });
+
+  describe('getAnyErrors', () => {
+    const noErrorLayer1 = generateVisLayer(VisLayerTypes.PointInTimeEvents);
+    const noErrorLayer2 = generateVisLayer(VisLayerTypes.PointInTimeEvents);
+    const errorLayer1 = generateVisLayer(VisLayerTypes.PointInTimeEvents, true);
+    const errorLayer2 = generateVisLayer(VisLayerTypes.PointInTimeEvents, true);
+
+    it('empty array - returns undefined', async () => {
+      const err = getAnyErrors([noErrorLayer1]);
+      expect(err).toEqual(undefined);
+    });
+    it('single VisLayer no errors - returns undefined', async () => {
+      const err = getAnyErrors([noErrorLayer1]);
+      expect(err).toEqual(undefined);
+    });
+    it('multiple VisLayers no errors - returns undefined', async () => {
+      const err = getAnyErrors([noErrorLayer1, noErrorLayer2]);
+      expect(err).toEqual(undefined);
+    });
+    it('single VisLayer with error - returns error', async () => {
+      const err = getAnyErrors([errorLayer1]);
+      expect(err).not.toEqual(undefined);
+    });
+    it('multiple VisLayers with errors - returns error', async () => {
+      const err = getAnyErrors([errorLayer1, errorLayer2]);
+      expect(err).not.toEqual(undefined);
+    });
+    it('VisLayers with and without error - returns error', async () => {
+      const err = getAnyErrors([noErrorLayer1, errorLayer1]);
+      expect(err).not.toEqual(undefined);
     });
   });
 });

@@ -57,7 +57,7 @@ import {
 } from '../../../expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getUiActions } from '../services';
+import { getExpressions, getNotifications, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
@@ -71,6 +71,7 @@ import {
   isEligibleForVisLayers,
   getAugmentVisSavedObjs,
   buildPipelineFromAugmentVisSavedObjs,
+  getAnyErrors,
 } from '../../../vis_augmenter/public';
 import { VisSavedObject } from '../types';
 
@@ -404,6 +405,18 @@ export class VisualizeEmbeddable
     this.abortController = new AbortController();
     const abortController = this.abortController;
 
+    // TODO: remove toast code after testing
+    const { toasts } = getNotifications();
+    toasts.addError(
+      new Error(
+        'The following plugin resources failed to load: <plugin-resource-1>, <plugin-resource-2>'
+      ),
+      {
+        title: `Some of the plugin resources failed to load for ${this.vis.title} chart`,
+        toastMessage: ' ',
+      }
+    );
+
     const visLayers = await this.fetchVisLayers(expressionParams, abortController);
 
     this.expression = await buildPipeline(this.vis, {
@@ -517,7 +530,20 @@ export class VisualizeEmbeddable
         visLayersPipelineInput,
         expressionParams as Record<string, unknown>
       )) as ExprVisLayers;
-      return exprVisLayers.layers;
+      const visLayers = exprVisLayers.layers;
+      const visLayerError = getAnyErrors(visLayers);
+
+      if (visLayerError !== undefined) {
+        // TODO: clean up and test different formatting once how error is supposed to look is defined
+        const { toasts } = getNotifications();
+        toasts.addError(visLayerError, {
+          title: i18n.translate('visualizations.renderVisTitle', {
+            defaultMessage: 'Some test error',
+          }),
+        });
+      }
+
+      return visLayers;
     }
     return [] as VisLayers;
   };
