@@ -210,7 +210,7 @@ export class ChromeService {
         title: mountReactNode(
           <FormattedMessage
             id="core.chrome.browserDeprecationWarning"
-            defaultMessage="Internet Explorer is no longer supported. Please, use a modern browser. More information can be found at {link}."
+            defaultMessage="Internet Explorer lacks features required for OpenSearch Dashboards to function correctly; please use one of {link}."
             values={{
               link: (
                 <EuiLink
@@ -220,7 +220,7 @@ export class ChromeService {
                 >
                   <FormattedMessage
                     id="core.chrome.browserDeprecationLink"
-                    defaultMessage="the supported browsers list on our website"
+                    defaultMessage="the supported browsers listed on our website"
                   />
                 </EuiLink>
               ),
