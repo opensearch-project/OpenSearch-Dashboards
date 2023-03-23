@@ -30,6 +30,7 @@
 
 import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';
 import { trimStart } from 'lodash';
+import { Readable } from 'stream';
 
 import { ApiResponse } from '@opensearch-project/opensearch/';
 
@@ -130,9 +131,23 @@ export const createHandler = ({
   } catch (e: any) {
     log.error(e);
     const isResponseErrorFlag = isResponseError(e);
+
+    const errorMessage = isResponseErrorFlag
+      ? JSON.stringify(e.meta.body)
+      : `502.${e.statusCode || 0}`;
+    // core http route handler has special logic that asks for stream readable input to pass error opaquely
+    const errorResponseBody = new Readable({
+      read() {
+        this.push(errorMessage);
+        this.push(null);
+      },
+    });
     return response.customError({
       statusCode: isResponseErrorFlag ? e.statusCode : 502,
-      body: isResponseErrorFlag ? JSON.stringify(e.meta.body) : `502.${e.statusCode || 0}`,
+      body: errorResponseBody,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
   }
 };
