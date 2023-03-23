@@ -71,19 +71,15 @@ export function verifyICUMessage(message: string) {
       }
     }
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      if (error instanceof parser.SyntaxError) {
-        if (error.name === 'SyntaxError') {
-          const errorWithContext = createParserErrorMessage(message, {
-            loc: {
-              line: error.location.start.line,
-              column: error.location.start.column - 1,
-            },
-            message: error.message,
-          });
-          throw errorWithContext;
-        }
-      }
+    if (error instanceof parser.SyntaxError && error.name === 'SyntaxError') {
+      const errorWithContext = createParserErrorMessage(message, {
+        loc: {
+          line: error.location.start.line,
+          column: error.location.start.column - 1,
+        },
+        message: error.message,
+      });
+      throw errorWithContext;
     }
   }
 }

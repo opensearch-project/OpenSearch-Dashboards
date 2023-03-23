@@ -90,7 +90,7 @@ run(
 
     const srcPaths = Array().concat(path || ['./src', './packages']);
 
-    const list = new Listr(
+    const list = new Listr<ListrContext>(
       [
         {
           title: 'Checking .i18nrc.json files',
@@ -111,16 +111,16 @@ run(
           title: 'Validating Default Messages',
           skip: skipOnNoTranslations,
           task: ({ config }) => {
-            return new Listr(extractDefaultMessages(config!, srcPaths), { exitOnError: true });
+            return new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true });
           },
         },
         {
           title: 'Compatibility Checks',
           skip: skipOnNoTranslations,
           task: ({ config }) => {
-            new Listr(
+            return new Listr<ListrContext>(
               checkCompatibility(
-                config!,
+                config,
                 {
                   ignoreMalformed: !!ignoreMalformed,
                   ignoreIncompatible: !!ignoreIncompatible,

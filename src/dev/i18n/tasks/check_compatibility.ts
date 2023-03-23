@@ -39,7 +39,11 @@ export interface I18nFlags {
   ignoreMissing: boolean;
 }
 
-export function checkCompatibility(config: I18nConfig, flags: I18nFlags, log: ToolingLog) {
+export function checkCompatibility(
+  config: I18nConfig | undefined,
+  flags: I18nFlags,
+  log: ToolingLog
+) {
   if (!config) {
     throw new Error('Config is missing');
   }

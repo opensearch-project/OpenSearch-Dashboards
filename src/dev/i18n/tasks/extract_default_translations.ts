@@ -32,7 +32,7 @@ import chalk from 'chalk';
 import { createFailError } from '@osd/dev-utils';
 import { ErrorReporter, extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
 
-export function extractDefaultMessages(config: I18nConfig, inputPaths: string[]) {
+export function extractDefaultMessages(config: I18nConfig | undefined, inputPaths: string[]) {
   if (!config) {
     throw new Error('Config is missing');
   }

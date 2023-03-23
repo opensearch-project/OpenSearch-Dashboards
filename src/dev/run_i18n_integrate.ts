@@ -99,7 +99,7 @@ run(
       {
         title: 'Extracting Default Messages',
         task: ({ config }) =>
-          new Listr(extractDefaultMessages(config!, srcPaths), { exitOnError: true }),
+          new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
       },
       {
         title: 'Integrating Locale File',
