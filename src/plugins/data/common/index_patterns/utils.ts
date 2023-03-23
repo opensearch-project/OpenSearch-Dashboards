@@ -83,11 +83,20 @@ export const getIndexPatternTitle = async (
   getDataSource: (id: string) => Promise<SavedObject<DataSourceAttributes>>
 ): Promise<string> => {
   const DELIMITER = '.';
+  let dataSourceTitle;
   // If an index-pattern references datasource, prepend data source name with index pattern name for display purpose
   if (Array.isArray(references) && references[0] && references[0].type === 'data-source') {
-    const {
-      attributes: { title: dataSourceTitle },
-    } = await getDataSource(references[0].id);
+    const dataSourceId = references[0].id;
+    try {
+      const {
+        attributes: { title },
+        error,
+      } = await getDataSource(dataSourceId);
+      dataSourceTitle = error ? dataSourceId : title;
+    } catch (e) {
+      dataSourceTitle = dataSourceId;
+    }
+
     return dataSourceTitle.concat(DELIMITER).concat(indexPatternTitle);
   } else {
     // if index pattern doesn't reference datasource, return as it is.
