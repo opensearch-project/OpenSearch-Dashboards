@@ -132,9 +132,7 @@ export const createHandler = ({
     log.error(e);
     const isResponseErrorFlag = isResponseError(e);
 
-    const errorMessage = isResponseErrorFlag
-      ? JSON.stringify(e.meta.body)
-      : `502.${e.statusCode || 0}`;
+    const errorMessage = isResponseErrorFlag ? JSON.stringify(e.meta.body) : e.message;
     // core http route handler has special logic that asks for stream readable input to pass error opaquely
     const errorResponseBody = new Readable({
       read() {
