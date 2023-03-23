@@ -53,12 +53,8 @@ export class DocLinksService {
     } else {
       const validDocPathsPattern = /^\d+\.\d+$/;
       const parsedBuildVersion = parse(buildVersion);
-      if (validDocPathsPattern.test(pkgBranch)) {
-        branch = pkgBranch;
-      } else if (parsedBuildVersion) {
+      if (!validDocPathsPattern.test(pkgBranch) && parsedBuildVersion) {
         branch = `${parsedBuildVersion.major}.${parsedBuildVersion.minor}`;
-      } else {
-        branch = pkgBranch;
       }
     }
     const DOC_LINK_VERSION = branch;
