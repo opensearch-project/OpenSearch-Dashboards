@@ -3,6 +3,7 @@
 If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/) or directly via email to aws-security@amazon.com. Please do **not** create a public GitHub issue.
 
 ## Fixing a Vulnerability
+
 - For direct dependencies (listed explicitly in `package.json`) - After identifying a version of the package that is both compatible with OpenSearch Dashboards and includes a fix for the vulnerability, update the dependency in `package.json` and run `yarn osd bootstrap` to build the project and update the `yarn.lock` file.
 
 - For nested dependencies (sub-dependencies)
