@@ -36,6 +36,38 @@ import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
+interface CustomIndexPattern {
+  formatHit: (hit: Record<string, any>) => Record<string, any>;
+}
+
+function formatTimestamp(value: string): string {
+  const timestamp = new Date(value);
+  const month = timestamp.toLocaleString('en-us', { month: 'short' });
+  const day = String(timestamp.getDate()).padStart(2, '0');
+  const year = timestamp.getFullYear();
+  const hours = String(timestamp.getHours()).padStart(2, '0');
+  const minutes = String(timestamp.getMinutes()).padStart(2, '0');
+  const seconds = String(timestamp.getSeconds()).padStart(2, '0');
+  const milliseconds = value.split('.')[1].substring(0, 9).padEnd(9, '0');
+
+  return `${month} ${day}, ${year} @ ${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
+
+function customFormatHit(
+  hit: Record<string, any>,
+  indexPattern: CustomIndexPattern
+): Record<string, any> {
+  const formatted = indexPattern.formatHit(hit);
+
+  if (hit._source && hit._source.timestamp) {
+    formatted.timestamp = formatTimestamp(hit._source.timestamp);
+  } else if (hit.fields && hit.fields.timestamp && hit.fields.timestamp[0]) {
+    formatted.timestamp = formatTimestamp(hit.fields.timestamp[0]);
+  }
+
+  return formatted;
+}
+
 export function DocViewTable({
   hit,
   indexPattern,
@@ -46,7 +78,7 @@ export function DocViewTable({
 }: DocViewRenderProps) {
   const mapping = indexPattern.fields.getByName;
   const flattened = indexPattern.flattenHit(hit);
-  const formatted = indexPattern.formatHit(hit, 'html');
+  const formatted = customFormatHit(hit, indexPattern);
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
 
   function toggleValueCollapse(field: string) {
