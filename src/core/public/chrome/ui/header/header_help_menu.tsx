@@ -50,7 +50,11 @@ import { ExclusiveUnion } from '@elastic/eui';
 import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { GITHUB_CREATE_ISSUE_LINK, OPENSEARCH_DASHBOARDS_FEEDBACK_LINK } from '../../constants';
+import {
+  GITHUB_CREATE_ISSUE_LINK,
+  OPENSEARCH_DASHBOARDS_FEEDBACK_LINK,
+  SATISFACTION_SURVEY_LINK,
+} from '../../constants';
 
 /** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
@@ -216,6 +220,15 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
             defaultMessage="Ask OpenSearch"
+          />
+        </EuiButtonEmpty>
+
+        <EuiSpacer size="xs" />
+
+        <EuiButtonEmpty href={SATISFACTION_SURVEY_LINK} target="_blank" size="xs" flush="left">
+          <FormattedMessage
+            id="core.ui.chrome.headerGlobalNav.helpMenuSatisfactionSurveyTitle"
+            defaultMessage="Satisfaction Survey"
           />
         </EuiButtonEmpty>
 

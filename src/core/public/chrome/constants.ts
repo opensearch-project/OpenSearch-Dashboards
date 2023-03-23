@@ -32,3 +32,5 @@ export const OPENSEARCH_DASHBOARDS_FEEDBACK_LINK = 'https://github.com/opensearc
 export const OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK = 'https://github.com/opensearch-project';
 export const GITHUB_CREATE_ISSUE_LINK =
   'https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose';
+export const SATISFACTION_SURVEY_LINK =
+  'https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW';
