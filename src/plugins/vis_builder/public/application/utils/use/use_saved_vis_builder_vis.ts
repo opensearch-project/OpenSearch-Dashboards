@@ -50,17 +50,17 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
           savedVisBuilderLoader,
           visualizationIdFromUrl
         );
-        const { id, title, state } = getStateFromSavedObject(savedVisBuilderVis);
 
-        if (id && title) {
+        if (savedVisBuilderVis.id) {
+          const { title, state } = getStateFromSavedObject(savedVisBuilderVis);
           chrome.setBreadcrumbs(getEditBreadcrumbs(title, navigateToApp));
           chrome.docTitle.change(title);
+
+          dispatch(setStyleState(state.style));
+          dispatch(setVisualizationState(state.visualization));
         } else {
           chrome.setBreadcrumbs(getCreateBreadcrumbs(navigateToApp));
         }
-
-        dispatch(setStyleState(state.style));
-        dispatch(setVisualizationState(state.visualization));
 
         setSavedVisState(savedVisBuilderVis);
         dispatch(setEditorState({ state: 'clean' }));
