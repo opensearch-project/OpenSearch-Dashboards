@@ -45,6 +45,7 @@ const createSetupContractMock = () => {
     getInjectedVars: jest.fn(),
     getOpenSearchDashboardsBuildNumber: jest.fn(),
     getBranding: jest.fn(),
+    getIsSurveyAllowed: jest.fn(),
   };
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getOpenSearchDashboardsVersion.mockReturnValue('opensearchDashboardsVersion');

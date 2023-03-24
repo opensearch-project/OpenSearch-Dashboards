@@ -85,6 +85,9 @@ export const config = {
         defaultValue: true,
       }),
     }),
+    isSurveyAllowed: schema.boolean({
+      defaultValue: true,
+    }),
   }),
   deprecations,
 };

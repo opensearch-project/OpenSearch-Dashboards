@@ -52,6 +52,7 @@ function mockProps() {
         },
       },
       branding: injectedMetadata.getBranding(),
+      isSurveyAllowed: injectedMetadata.getIsSurveyAllowed(),
     },
   };
 }

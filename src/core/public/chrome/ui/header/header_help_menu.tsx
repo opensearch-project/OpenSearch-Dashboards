@@ -126,6 +126,7 @@ interface Props {
   opensearchDashboardsVersion: string;
   useDefaultContent?: boolean;
   opensearchDashboardsDocLink: string;
+  isSurveyAllowed: boolean;
 }
 
 interface State {
@@ -202,8 +203,21 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       opensearchDashboardsVersion,
       useDefaultContent,
       opensearchDashboardsDocLink,
+      isSurveyAllowed,
     } = this.props;
     const { helpExtension, helpSupportUrl } = this.state;
+    const opensearchSurvey = isSurveyAllowed ? (
+      <div>
+        <EuiButtonEmpty href={SATISFACTION_SURVEY_LINK} target="_blank" size="xs" flush="left">
+          <FormattedMessage
+            id="core.ui.chrome.headerGlobalNav.helpMenuSatisfactionSurveyTitle"
+            defaultMessage="Satisfaction Survey"
+          />
+        </EuiButtonEmpty>
+
+        <EuiSpacer size="xs" />
+      </div>
+    ) : null;
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
@@ -225,14 +239,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={SATISFACTION_SURVEY_LINK} target="_blank" size="xs" flush="left">
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuSatisfactionSurveyTitle"
-            defaultMessage="Satisfaction Survey"
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
+        {opensearchSurvey}
 
         <EuiButtonEmpty
           href={OPENSEARCH_DASHBOARDS_FEEDBACK_LINK}
