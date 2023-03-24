@@ -28,9 +28,7 @@ describe('check timeline visualization', () => {
         .find('[data-test-subj="newItemButton"]')
         .click();
       cy.get('[data-test-subj="visType-timelion"]').click();
-      cy.get('[class="view-line"]').type(
-        '{selectAll}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}'
-      );
+      cy.get('[class="view-line"]').clear();
     });
 
     it('.es(*, kibana1=true) should report search error', () => {
