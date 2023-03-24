@@ -89,7 +89,7 @@ describe('transforms', () => {
         }
       `);
 
-      expect(uiState).toMatchInlineSnapshot();
+      expect(uiState).toMatchInlineSnapshot(`"{}"`);
     });
 
     test('should throw error if state is invalid', () => {
