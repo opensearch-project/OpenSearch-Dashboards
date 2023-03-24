@@ -148,12 +148,14 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, bran
         addBasePath={addBasePath}
         hideToolbar={isNewOpenSearchDashboardsInstance}
         iconType="inputOutput"
-        title={branding.applicationTitle || (
-          <FormattedMessage
-            defaultMessage="OpenSearch Dashboards"
-            id="opensearchDashboardsOverview.header.title"
-          />
-        )}
+        title={
+          branding.applicationTitle || (
+            <FormattedMessage
+              defaultMessage="OpenSearch Dashboards"
+              id="opensearchDashboardsOverview.header.title"
+            />
+          )
+        }
         branding={branding}
       />
 
