@@ -1302,6 +1302,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  isSurveyAllowed={true}
   isVisible$={
     BehaviorSubject {
       "_isScalar": false,
@@ -4591,6 +4592,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                         "thrownError": null,
                       }
                     }
+                    isSurveyAllowed={true}
                     opensearchDashboardsDocLink="/docs"
                     opensearchDashboardsVersion="1.0.0"
                     useDefaultContent={true}
@@ -5396,6 +5398,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                           "timeZone": null,
                         }
                       }
+                      isSurveyAllowed={true}
                       opensearchDashboardsDocLink="/docs"
                       opensearchDashboardsVersion="1.0.0"
                       useDefaultContent={true}
@@ -7608,6 +7611,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  isSurveyAllowed={true}
   isVisible$={
     BehaviorSubject {
       "_isScalar": false,
@@ -9824,6 +9828,7 @@ exports[`Header renders condensed header 1`] = `
                         "thrownError": null,
                       }
                     }
+                    isSurveyAllowed={true}
                     opensearchDashboardsDocLink="/docs"
                     opensearchDashboardsVersion="1.0.0"
                     useDefaultContent={true}
@@ -10629,6 +10634,7 @@ exports[`Header renders condensed header 1`] = `
                           "timeZone": null,
                         }
                       }
+                      isSurveyAllowed={true}
                       opensearchDashboardsDocLink="/docs"
                       opensearchDashboardsVersion="1.0.0"
                       useDefaultContent={true}

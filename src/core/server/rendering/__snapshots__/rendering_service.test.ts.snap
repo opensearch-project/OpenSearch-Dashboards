@@ -35,6 +35,7 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
+  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -87,6 +88,7 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
+  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -139,6 +141,7 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
+  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -195,6 +198,7 @@ Object {
   "i18n": Object {
     "translationsUrl": "/translations/en.json",
   },
+  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -247,6 +251,7 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
+  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
