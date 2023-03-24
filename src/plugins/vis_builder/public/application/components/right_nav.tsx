@@ -22,7 +22,7 @@ import {
   useTypedDispatch,
   useTypedSelector,
 } from '../utils/state_management';
-import { getPersistedAggParams } from '../utils/use/use_persisted_agg_params';
+import { getPersistedAggParams } from '../utils/get_persisted_agg_params';
 
 export const RightNav = () => {
   const { ui, name: activeVisName } = useVisualizationType();

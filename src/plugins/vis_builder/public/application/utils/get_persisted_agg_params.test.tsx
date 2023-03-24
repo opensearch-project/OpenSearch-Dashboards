@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AggGroupName, AggGroupNames, CreateAggConfigParams } from '../../../../../data/common';
-import { Schema } from '../../../../../vis_default_editor/public';
-import { getPersistedAggParams } from './use_persisted_agg_params';
+import { AggGroupName, AggGroupNames, CreateAggConfigParams } from '../../../../data/common';
+import { Schema } from '../../../../vis_default_editor/public';
+import { getPersistedAggParams } from './get_persisted_agg_params';
 
 describe('getPersistedAggParams', () => {
   const getSchema = (

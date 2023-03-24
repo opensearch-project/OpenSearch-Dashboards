@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CreateAggConfigParams, propFilter } from '../../../../../data/common';
-import { Schema } from '../../../../../vis_default_editor/public';
+import { CreateAggConfigParams, propFilter } from '../../../../data/common';
+import { Schema } from '../../../../vis_default_editor/public';
 
 const filterByType = propFilter('type');
 
