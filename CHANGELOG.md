@@ -69,6 +69,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Vis Builder] Add metric to metric, bucket to bucket aggregation persistence ([#3495](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3495))
 - Use mirrors to download Node.js binaries to escape sporadic 404 errors ([#3619](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3619))
 - [Multiple DataSource] Refactor dev tool console to use opensearch-js client to send requests ([#3544](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3544))
+- [Data] Add geo shape filter field ([#3605](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3605))
 
 ### 🐛 Bug Fixes
 
@@ -151,6 +152,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Bump the version of Node.js installed by `nvm` to `14.21.3` ([3463](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3463))
 - Remove the unused `renovate.json5` file ([3489](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3489))
 - Allow selecting the Node.js binary using `NODE_HOME` and `OSD_NODE_HOME` ([3508](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3508))
+- Bump `styled-components` from 5.3.5 to 5.3.9 ([#3678](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3678))
 
 ### 🪛 Refactoring
 
