@@ -7,7 +7,7 @@ import { i18n } from '@osd/i18n';
 import produce from 'immer';
 import { IndexPattern } from '../../../data/public';
 import { InvalidJSONProperty } from '../../../opensearch_dashboards_utils/public';
-import { RenderState, RootState, VisualizationState } from '../application/utils/state_management';
+import { RootState, VisualizationState, RenderState } from '../application/utils/state_management';
 import { validateVisBuilderState } from '../application/utils/validations';
 import { VisBuilderSavedObject } from '../types';
 import { VisBuilderSavedObjectAttributes } from '../../common';
@@ -27,6 +27,7 @@ export const saveStateToSavedObject = (
   );
   obj.styleState = JSON.stringify(state.style);
   obj.searchSourceFields = { index: indexPattern };
+  obj.uiState = JSON.stringify(state.metadata.uiState);
 
   return obj;
 };
@@ -34,13 +35,15 @@ export const saveStateToSavedObject = (
 export interface VisBuilderSavedVis
   extends Pick<VisBuilderSavedObjectAttributes, 'id' | 'title' | 'description'> {
   state: RenderState;
+  uiState: any;
 }
 
 export const getStateFromSavedObject = (
   obj: VisBuilderSavedObjectAttributes
 ): VisBuilderSavedVis => {
   const { id, title, description } = obj;
-  const styleState = JSON.parse(obj.styleState || '');
+  const styleState = JSON.parse(obj.styleState || '{}');
+  const uiState = JSON.parse(obj.uiState || '{}');
   const vizStateWithoutIndex = JSON.parse(obj.visualizationState || '');
   const visualizationState: VisualizationState = {
     searchField: '',
@@ -76,5 +79,6 @@ export const getStateFromSavedObject = (
       visualization: visualizationState,
       style: styleState,
     },
+    uiState,
   };
 };

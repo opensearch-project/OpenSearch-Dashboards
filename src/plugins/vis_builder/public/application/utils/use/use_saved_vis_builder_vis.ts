@@ -16,7 +16,7 @@ import { VisBuilderServices } from '../../../types';
 import { getCreateBreadcrumbs, getEditBreadcrumbs } from '../breadcrumbs';
 import { useTypedDispatch, setStyleState, setVisualizationState } from '../state_management';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { setEditorState } from '../state_management/metadata_slice';
+import { setEditorState, setUiState } from '../state_management/metadata_slice';
 import { getStateFromSavedObject } from '../../../saved_visualizations/transforms';
 
 // This function can be used when instantiating a saved vis or creating a new one
@@ -46,16 +46,18 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
 
     const loadSavedVisBuilderVis = async () => {
       try {
+        dispatch(setEditorState({ state: 'loading' }));
         const savedVisBuilderVis = await getSavedVisBuilderVis(
           savedVisBuilderLoader,
           visualizationIdFromUrl
         );
 
         if (savedVisBuilderVis.id) {
-          const { title, state } = getStateFromSavedObject(savedVisBuilderVis);
+          const { title, state, uiState } = getStateFromSavedObject(savedVisBuilderVis);
           chrome.setBreadcrumbs(getEditBreadcrumbs(title, navigateToApp));
           chrome.docTitle.change(title);
 
+          dispatch(setUiState({ state: uiState, editorState: 'loaded' }));
           dispatch(setStyleState(state.style));
           dispatch(setVisualizationState(state.visualization));
         } else {

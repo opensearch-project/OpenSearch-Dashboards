@@ -60,3 +60,4 @@ export type AppDispatch = Store['dispatch'];
 
 export { setState as setStyleState, StyleState } from './style_slice';
 export { setState as setVisualizationState, VisualizationState } from './visualization_slice';
+export { MetadataState } from './metadata_slice';

@@ -24,8 +24,8 @@ describe('transforms', () => {
       TEST_INDEX_PATTERN_ID = 'test-pattern';
       savedObject = {} as VisBuilderSavedObject;
       rootState = {
-        metadata: { editor: { state: 'loading', errors: {} } },
-        style: '',
+        metadata: { editor: { state: 'loading', errors: {} }, uiState: {} },
+        style: {},
         visualization: {
           searchField: '',
           indexPattern: TEST_INDEX_PATTERN_ID,
@@ -49,6 +49,7 @@ describe('transforms', () => {
 
       expect(savedObject.visualizationState).not.toContain(TEST_INDEX_PATTERN_ID);
       expect(savedObject.styleState).toEqual(JSON.stringify(rootState.style));
+      expect(savedObject.uiState).toEqual(JSON.stringify(rootState.metadata.uiState));
       expect(savedObject.searchSourceFields?.index?.id).toEqual(TEST_INDEX_PATTERN_ID);
     });
 
@@ -69,13 +70,14 @@ describe('transforms', () => {
       visualizationState: JSON.stringify({
         searchField: '',
       }),
+      uiState: JSON.stringify('{}'),
       searchSourceFields: {
         index: 'test-index',
       },
     } as VisBuilderSavedObjectAttributes;
 
     test('should return saved object with state', () => {
-      const { state } = getStateFromSavedObject(defaultVBSaveObj);
+      const { state, uiState } = getStateFromSavedObject(defaultVBSaveObj);
 
       expect(state).toMatchInlineSnapshot(`
         Object {
@@ -86,6 +88,8 @@ describe('transforms', () => {
           },
         }
       `);
+
+      expect(uiState).toMatchInlineSnapshot();
     });
 
     test('should throw error if state is invalid', () => {
