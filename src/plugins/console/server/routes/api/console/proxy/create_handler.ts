@@ -129,7 +129,6 @@ export const createHandler = ({
       },
     });
   } catch (e: any) {
-    log.error(e);
     const isResponseErrorFlag = isResponseError(e);
 
     const errorMessage = isResponseErrorFlag ? JSON.stringify(e.meta.body) : e.message;
