@@ -4,7 +4,7 @@
  */
 
 import { get } from 'lodash';
-import { Vis } from '../../../../plugins/visualizations/public';
+import { Vis, VislibDimensions } from '../../../../plugins/visualizations/public';
 import {
   formatExpression,
   buildExpressionFunction,
@@ -13,10 +13,15 @@ import {
 } from '../../../../plugins/expressions/public';
 import { ISavedAugmentVis, SavedAugmentVisLoader, VisLayerFunctionDefinition } from '../';
 
-// TODO: provide a deeper eligibility check.
-// Tracked in https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
-export const isEligibleForVisLayers = (vis: Vis): boolean => {
-  return vis.params.type === 'line';
+export const isEligibleForVisLayers = (vis: Vis, dimensions: VislibDimensions): boolean => {
+  const isDateHistogram =
+    vis.data.aggs?.byTypeName('date_histogram').length === 1 && vis.data.aggs?.aggs.length === 2;
+  let isOnlyLine = vis.params.type === 'line';
+  vis.params.seriesParams.forEach((seriesParam: { type: string }) => {
+    isOnlyLine = isOnlyLine && seriesParam.type === 'line';
+  });
+  const isValidDimensions = dimensions.x !== null;
+  return isDateHistogram && isOnlyLine && isValidDimensions;
 };
 
 /**

@@ -9,6 +9,7 @@ import {
   ExpressionFunctionDefinition,
   OpenSearchDashboardsDatatable,
   OpenSearchDashboardsDatatableColumn,
+  OpenSearchDashboardsDatatableRow,
 } from '../../../expressions/public';
 import { VegaVisualizationDependencies } from '../plugin';
 import { VislibDimensions, VisParams } from '../../../visualizations/public';
@@ -68,7 +69,22 @@ export const formatDataTable = (
   datatable.columns.forEach((column) => {
     // clean quotation marks from names in columns
     column.name = cleanString(column.name);
+    // clean ids to remove "." as that will cause vega to not process it correctly.
+    // This happens for different metric types
+    column.id = column.id.replaceAll('.', '-');
   });
+
+  // clean row keys to remove "." as that will cause vega to not process it correctly
+  const updatedRows: OpenSearchDashboardsDatatableRow[] = [];
+  datatable.rows.forEach((row) => {
+    const newRow = {};
+    for (const [key, value] of Object.entries(row)) {
+      const cleanKey = key.replaceAll('.', '-');
+      Object.assign(newRow, { [cleanKey]: value });
+    }
+    updatedRows.push(newRow);
+  });
+  datatable.rows = updatedRows;
   return datatable;
 };
 
@@ -133,14 +149,16 @@ export const buildYAxis = (
   valueAxis: ValueAxis,
   visParams: VisParams
 ) => {
+  const subAxis = {
+    title: cleanString(valueAxis.title.text) || column.name,
+    grid: visParams.grid.valueAxis !== undefined,
+    orient: valueAxis.position,
+    labels: valueAxis.labels.show,
+    labelAngle: valueAxis.labels.rotate,
+  };
+  if (column.meta?.type === 'percentile_ranks') Object.assign(subAxis, { format: '.0%' });
   return {
-    axis: {
-      title: cleanString(valueAxis.title.text) || column.name,
-      grid: visParams.grid.valueAxis,
-      orient: valueAxis.position,
-      labels: valueAxis.labels.show,
-      labelAngle: valueAxis.labels.rotate,
-    },
+    axis: subAxis,
     field: column.id,
     type: 'quantitative',
   };
