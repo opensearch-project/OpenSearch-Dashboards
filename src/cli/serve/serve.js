@@ -32,7 +32,6 @@ import { set as lodashSet } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
-import url from 'url';
 
 import { getConfigPath } from '@osd/utils';
 import { IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE } from '../../legacy/utils';
@@ -110,7 +109,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       const opensearchHosts = (
         (customOpenSearchHosts.length > 0 && customOpenSearchHosts) || ['https://localhost:9200']
       ).map((hostUrl) => {
-        const parsedUrl = url.parse(hostUrl);
+        const parsedUrl = new URL('', hostUrl);
         if (parsedUrl.hostname !== 'localhost') {
           throw new Error(
             `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
