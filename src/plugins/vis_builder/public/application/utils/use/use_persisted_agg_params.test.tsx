@@ -3,350 +3,143 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CreateAggConfigParams } from '../../../../../data/common';
-import { AggGroupNames } from '../../../../../data/common';
+import { AggGroupName, AggGroupNames, CreateAggConfigParams } from '../../../../../data/common';
 import { Schema } from '../../../../../vis_default_editor/public';
-import { VisBuilderServices } from '../../../types';
-import { createVisBuilderServicesMock } from '../mocks';
-import {
-  AggMapping,
-  getSchemaMapping,
-  updateAggParams,
-  usePersistedAggParams,
-} from './use_persisted_agg_params';
+import { getPersistedAggParams } from './use_persisted_agg_params';
 
-describe('new usePersistedAggParams', () => {
-  const types = {
-    get: jest.fn(),
-  };
-  let schemaMetricTemplate: Schema;
-  let schemaBucketTemplate: Schema;
-  let oldVisualizationType: Schema[];
-  let newVisualizationType: Schema[];
-  let aggConfigParam: CreateAggConfigParams;
-  let aggConfigParams: CreateAggConfigParams[];
-
-  beforeEach(() => {
-    schemaMetricTemplate = {
-      aggFilter: [],
-      editor: '',
-      group: AggGroupNames.Metrics,
-      max: 1,
-      min: 1,
-      name: '',
-      params: [],
-      title: '',
-      defaults: '',
-    };
-    schemaBucketTemplate = {
-      aggFilter: [],
-      editor: '',
-      group: AggGroupNames.Buckets,
-      max: 1,
-      min: 1,
-      name: '',
-      params: [],
-      title: '',
-      defaults: '',
-    };
-    aggConfigParam = {
-      type: '',
-      schema: '',
-    };
+describe('getPersistedAggParams', () => {
+  const getSchema = (
+    name: string,
+    group: AggGroupName,
+    aggFilter: string[] = ['*'],
+    max: number = Infinity
+  ): Schema => ({
+    name,
+    group,
+    max,
+    min: 0,
+    aggFilter,
+    defaults: [],
+    editor: true,
+    params: [],
+    title: name,
   });
 
-  test('return the correct metric-to-metric, bucket-to-bucket mapping and correct persisted aggregations', () => {
-    oldVisualizationType = [
-      { ...schemaMetricTemplate, name: 'old metric 1' },
-      { ...schemaBucketTemplate, name: 'old bucket 1' },
-      { ...schemaMetricTemplate, name: 'old metric 2' },
-      { ...schemaBucketTemplate, name: 'old bucket 2' },
-      { ...schemaBucketTemplate, name: 'old bucket 3' },
-    ];
-    newVisualizationType = [
-      { ...schemaMetricTemplate, name: 'new metric 1', max: 1 },
-      { ...schemaMetricTemplate, name: 'new metric 2', max: 2 },
-      { ...schemaBucketTemplate, name: 'new bucket 1', max: 4 },
-      { ...schemaBucketTemplate, name: 'new bucket 2', max: 5 },
-      { ...schemaBucketTemplate, name: 'new bucket 3', max: 6 },
-    ];
-    types.get
-      .mockReturnValueOnce({
-        ui: {
-          containerConfig: {
-            data: {
-              schemas: {
-                all: oldVisualizationType,
-              },
-            },
-          },
-        },
-      })
-      .mockReturnValueOnce({
-        ui: {
-          containerConfig: {
-            data: {
-              schemas: {
-                all: newVisualizationType,
-              },
-            },
-          },
-        },
-      });
-    aggConfigParams = [
-      { ...aggConfigParam, schema: 'old metric 1' },
-      { ...aggConfigParam, schema: 'old bucket 1' },
-      { ...aggConfigParam, schema: 'old metric 2' },
-      { ...aggConfigParam, schema: 'old bucket 2' },
-      { ...aggConfigParam, schema: 'old bucket 3' },
-      { ...aggConfigParam, schema: 'old metric 2' },
+  test('Should return the same aggConfigParams when the new vis type schemas have the same schemas as the existing schemas', () => {
+    const aggConfigParams: CreateAggConfigParams[] = [
+      { type: 'avg', schema: 'm1' },
+      { type: 'avg', schema: 'm2' },
+      { type: 'avg', schema: 'b2' },
+      { type: 'avg', schema: 'b2' },
     ];
 
-    const mappingResult = getSchemaMapping(oldVisualizationType, newVisualizationType);
-    expect(mappingResult).toMatchInlineSnapshot(`
-      Map {
-        "old metric 1" => Object {
-          "currentCount": 0,
-          "maxCount": 1,
-          "name": "new metric 1",
-        },
-        "old metric 2" => Object {
-          "currentCount": 0,
-          "maxCount": 2,
-          "name": "new metric 2",
-        },
-        "old bucket 1" => Object {
-          "currentCount": 0,
-          "maxCount": 4,
-          "name": "new bucket 1",
-        },
-        "old bucket 2" => Object {
-          "currentCount": 0,
-          "maxCount": 5,
-          "name": "new bucket 2",
-        },
-        "old bucket 3" => Object {
-          "currentCount": 0,
-          "maxCount": 6,
-          "name": "new bucket 3",
-        },
-      }
-    `);
-    const persistResult = usePersistedAggParams(
-      types,
-      aggConfigParams,
-      'old vis type',
-      'new vis type'
-    );
-    expect(persistResult).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "schema": "new metric 1",
-          "type": "",
-        },
-        Object {
-          "schema": "new bucket 1",
-          "type": "",
-        },
-        Object {
-          "schema": "new metric 2",
-          "type": "",
-        },
-        Object {
-          "schema": "new bucket 2",
-          "type": "",
-        },
-        Object {
-          "schema": "new bucket 3",
-          "type": "",
-        },
-        Object {
-          "schema": "new metric 2",
-          "type": "",
-        },
-      ]
-    `);
+    const schemas = [
+      getSchema('m1', AggGroupNames.Metrics),
+      getSchema('m2', AggGroupNames.Metrics),
+      getSchema('b2', AggGroupNames.Buckets),
+    ];
+
+    const persistResult = getPersistedAggParams(aggConfigParams, schemas, schemas);
+
+    expect(persistResult).toEqual(aggConfigParams);
   });
 
-  test('drop the schema fields when it can not be mapped or do not belong to either metric or bucket group', () => {
-    oldVisualizationType = [
-      { ...schemaMetricTemplate, name: 'old metric 1' },
-      { ...schemaMetricTemplate, name: 'old metric 2' },
-      { ...schemaBucketTemplate, name: 'old bucket 1' },
-      { ...schemaMetricTemplate, name: 'undefined group', group: AggGroupNames.None },
-    ];
-    newVisualizationType = [
-      { ...schemaMetricTemplate, name: 'new metric 1', max: 1 },
-      { ...schemaBucketTemplate, name: 'new bucket 2', max: 1 },
-    ];
-    types.get
-      .mockReturnValueOnce({
-        ui: {
-          containerConfig: {
-            data: {
-              schemas: {
-                all: oldVisualizationType,
-              },
-            },
-          },
-        },
-      })
-      .mockReturnValueOnce({
-        ui: {
-          containerConfig: {
-            data: {
-              schemas: {
-                all: newVisualizationType,
-              },
-            },
-          },
-        },
-      });
-    aggConfigParams = [
-      { ...aggConfigParam, schema: 'old metric 1' },
-      { ...aggConfigParam, schema: 'old bucket 1' },
+  test('Should select the next compatible schema when aggConfigParam schema exists but exceeds the max count of the schema', () => {
+    const aggConfigParams: CreateAggConfigParams[] = [
+      { type: 'avg', schema: 'm1' },
+      { type: 'avg', schema: 'm1' },
+      { type: 'avg', schema: 'b2' },
+      { type: 'avg', schema: 'b2' },
     ];
 
-    const mappingResult = getSchemaMapping(oldVisualizationType, newVisualizationType);
-    expect(mappingResult).toMatchInlineSnapshot(`
-      Map {
-        "old metric 1" => Object {
-          "currentCount": 0,
-          "maxCount": 1,
-          "name": "new metric 1",
-        },
-        "old bucket 1" => Object {
-          "currentCount": 0,
-          "maxCount": 1,
-          "name": "new bucket 2",
-        },
-      }
-    `);
-    const persistResult = usePersistedAggParams(
-      types,
-      aggConfigParams,
-      'old vis type',
-      'new vis type'
-    );
-    expect(persistResult).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "schema": "new metric 1",
-          "type": "",
-        },
-        Object {
-          "schema": "new bucket 2",
-          "type": "",
-        },
-      ]
-    `);
+    const schemas = [
+      getSchema('m1', AggGroupNames.Metrics, ['avg'], 1),
+      getSchema('m2', AggGroupNames.Metrics),
+      getSchema('b2', AggGroupNames.Buckets),
+    ];
+
+    const persistResult = getPersistedAggParams(aggConfigParams, schemas, schemas);
+
+    const expected: CreateAggConfigParams[] = [...aggConfigParams];
+    expected[1].schema = 'm2';
+    expect(persistResult).toEqual(expected);
   });
 
-  test('aggregations with undefined schema remain undefined; schema will be set to undefined if aggregations that exceeds the max amount', () => {
-    oldVisualizationType = [{ ...schemaMetricTemplate, name: 'old metric 1' }];
-    newVisualizationType = [{ ...schemaMetricTemplate, name: 'new metric 1', max: 1 }];
-    types.get
-      .mockReturnValueOnce({
-        ui: {
-          containerConfig: {
-            data: {
-              schemas: {
-                all: oldVisualizationType,
-              },
-            },
-          },
-        },
-      })
-      .mockReturnValueOnce({
-        ui: {
-          containerConfig: {
-            data: {
-              schemas: {
-                all: newVisualizationType,
-              },
-            },
-          },
-        },
-      });
-    aggConfigParams = [
-      { ...aggConfigParam, schema: undefined },
-      { ...aggConfigParam, schema: 'old metric 1' },
-      { ...aggConfigParam, schema: 'old metric 1' },
+  test('Should select the next compatible schema when aggConfigParam schema exists but does not match the group in the new schema', () => {
+    const aggConfigParams: CreateAggConfigParams[] = [
+      { type: 'avg', schema: 'm1' },
+      { type: 'avg', schema: 'm1' },
+      { type: 'avg', schema: 'b1' },
+      { type: 'avg', schema: 'b1' },
     ];
 
-    const mappingResult = getSchemaMapping(oldVisualizationType, newVisualizationType);
-    expect(mappingResult).toMatchInlineSnapshot(`
-      Map {
-        "old metric 1" => Object {
-          "currentCount": 0,
-          "maxCount": 1,
-          "name": "new metric 1",
-        },
-      }
-    `);
-    const persistResult = usePersistedAggParams(
-      types,
-      aggConfigParams,
-      'old vis type',
-      'new vis type'
-    );
-    expect(persistResult).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "schema": undefined,
-          "type": "",
-        },
-        Object {
-          "schema": "new metric 1",
-          "type": "",
-        },
-        Object {
-          "schema": undefined,
-          "type": "",
-        },
-      ]
-    `);
+    const oldSchemas = [
+      getSchema('m1', AggGroupNames.Metrics),
+      getSchema('b1', AggGroupNames.Buckets),
+    ];
+
+    const newSchemas = [
+      getSchema('m1', AggGroupNames.Buckets),
+      getSchema('m2', AggGroupNames.Metrics),
+      getSchema('b1', AggGroupNames.Buckets),
+    ];
+
+    const persistResult = getPersistedAggParams(aggConfigParams, oldSchemas, newSchemas);
+
+    const expected: CreateAggConfigParams[] = [...aggConfigParams];
+    expected[0].schema = 'm2';
+    expected[1].schema = 'm2';
+    expect(persistResult).toEqual(expected);
   });
 
-  test('return an empty array when there are no aggregations for persistence', () => {
-    oldVisualizationType = [{ ...schemaMetricTemplate, name: 'old metric 1' }];
-    newVisualizationType = [{ ...schemaMetricTemplate, name: 'new metric 1', max: 1 }];
-    types.get
-      .mockReturnValueOnce({
-        ui: {
-          containerConfig: {
-            data: {
-              schemas: {
-                all: oldVisualizationType,
-              },
-            },
-          },
-        },
-      })
-      .mockReturnValueOnce({
-        ui: {
-          containerConfig: {
-            data: {
-              schemas: {
-                all: newVisualizationType,
-              },
-            },
-          },
-        },
-      });
+  test('Should select the next compatible schema with the correct aggfilters', () => {
+    const aggConfigParams: CreateAggConfigParams[] = [
+      { type: 'count', schema: 'm1' },
+      { type: 'avg', schema: 'm1' },
+      { type: 'avg', schema: 'b1' },
+      { type: 'avg', schema: 'b1' },
+    ];
 
-    aggConfigParams = [];
-    const persistResult = usePersistedAggParams(
-      types,
-      aggConfigParams,
-      'old vis type',
-      'new vis type'
-    );
-    expect(persistResult).toMatchInlineSnapshot(`Array []`);
+    const oldSchemas = [
+      getSchema('m1', AggGroupNames.Metrics),
+      getSchema('b1', AggGroupNames.Buckets),
+    ];
+
+    const newSchemas = [
+      getSchema('m2', AggGroupNames.Metrics, ['count']),
+      getSchema('m3', AggGroupNames.Metrics, ['!count']),
+      getSchema('b1', AggGroupNames.Buckets),
+    ];
+
+    const persistResult = getPersistedAggParams(aggConfigParams, oldSchemas, newSchemas);
+
+    const expected: CreateAggConfigParams[] = [...aggConfigParams];
+    expected[0].schema = 'm2';
+    expected[1].schema = 'm3';
+    expect(persistResult).toEqual(expected);
   });
 
-  test('return an empty array when there are no new vis type or old vis type', () => {
-    const persistResult = usePersistedAggParams(types, aggConfigParams);
-    expect(persistResult).toMatchInlineSnapshot(`Array []`);
+  test('Should drop aggConfigParam when no compatible schema is found', () => {
+    const aggConfigParams: CreateAggConfigParams[] = [
+      { type: 'avg', schema: 'm1' },
+      { type: 'avg', schema: 'm1' },
+      { type: 'avg', schema: 'b1' },
+      { type: 'avg', schema: 'b1' },
+    ];
+
+    const oldSchemas = [
+      getSchema('m1', AggGroupNames.Metrics),
+      getSchema('b1', AggGroupNames.Buckets),
+    ];
+
+    const newSchemas = [
+      getSchema('m2', AggGroupNames.Metrics, ['count']),
+      getSchema('m3', AggGroupNames.Metrics, ['!count'], 1),
+      getSchema('b1', AggGroupNames.Buckets),
+    ];
+
+    const persistResult = getPersistedAggParams(aggConfigParams, oldSchemas, newSchemas);
+
+    expect(persistResult.length).toBe(3);
   });
 });

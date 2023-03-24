@@ -3,93 +3,76 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AggGroupNames, CreateAggConfigParams } from '../../../../../data/common';
+import { CreateAggConfigParams, propFilter } from '../../../../../data/common';
 import { Schema } from '../../../../../vis_default_editor/public';
 
-export const usePersistedAggParams = (
-  types,
+const filterByType = propFilter('type');
+
+export const getPersistedAggParams = (
   aggConfigParams: CreateAggConfigParams[],
-  oldVisType?: string,
-  newVisType?: string
+  oldVisSchemas: Schema[] = [],
+  newVisSchemas: Schema[] = []
 ): CreateAggConfigParams[] => {
-  if (oldVisType && newVisType) {
-    const oldVisualizationType = types.get(oldVisType)?.ui.containerConfig.data.schemas.all;
-    const newVisualizationType = types.get(newVisType)?.ui.containerConfig.data.schemas.all;
-    const aggMapping = getSchemaMapping(oldVisualizationType, newVisualizationType);
-    const updatedAggConfigParams = aggConfigParams.map((aggConfigParam: CreateAggConfigParams) =>
-      updateAggParams(aggConfigParam, aggMapping)
-    );
-    return updatedAggConfigParams;
-  }
-  return [];
-};
+  const updatedAggConfigParams: CreateAggConfigParams[] = [];
+  const newVisSchemaCounts: Record<string, number> = newVisSchemas.reduce((acc, schema: Schema) => {
+    acc[schema.name] = schema.max;
+    return acc;
+  }, {});
 
-// Map metric fields to metric fields, bucket fields to bucket fields
-export const getSchemaMapping = (
-  oldVisualizationType: Schema[],
-  newVisualizationType: Schema[]
-): Map<string, AggMapping> => {
-  const aggMap = new Map<string, AggMapping>();
+  // For each aggConfigParam, check if a compatible schema exists in the new visualization type
+  aggConfigParams.forEach((aggConfigParam) => {
+    const currentSchema = oldVisSchemas.find((schema: Schema) => {
+      return schema.name === aggConfigParam.schema;
+    });
 
-  // currently Metrics, Buckets, and None are the three groups. We simply drop the aggregations that belongs to the None group
-  mapAggParamsSchema(oldVisualizationType, newVisualizationType, AggGroupNames.Metrics, aggMap);
-  mapAggParamsSchema(oldVisualizationType, newVisualizationType, AggGroupNames.Buckets, aggMap);
+    // see if a matching schma exists in the new visualization type
+    const matchingSchema = newVisSchemas.find((schema: Schema) => {
+      return schema.name === aggConfigParam.schema;
+    });
 
-  return aggMap;
-};
+    // if the matching schema is same as the current schema, add the aggConfigParam to the updatedAggConfigParams
+    if (
+      isSchemaEqual(matchingSchema, currentSchema) &&
+      newVisSchemaCounts[matchingSchema!.name] > 0
+    ) {
+      updatedAggConfigParams.push(aggConfigParam);
+      newVisSchemaCounts[matchingSchema!.name] -= 1;
+      return;
+    }
 
-export interface AggMapping {
-  name: string;
-  maxCount: number;
-  currentCount: number;
-}
+    // if a matching schema does not exist, check if a compatible schema exists
+    for (const schema of newVisSchemas) {
+      // Check if the schema group is the same
+      if (schema.group !== currentSchema!.group) continue;
 
-export const mapAggParamsSchema = (
-  oldVisualizationType: Schema[],
-  newVisualizationType: Schema[],
-  aggGroup: string,
-  map: Map<string, AggMapping>
-) => {
-  const oldSchemas = oldVisualizationType.filter((type) => type.group === aggGroup);
-  const newSchemas = newVisualizationType.filter((type) => type.group === aggGroup);
+      const compatibleSchema = filterByType([aggConfigParam], schema.aggFilter).length !== 0;
 
-  oldSchemas.forEach((oldSchema, index) => {
-    if (newSchemas[index]) {
-      const mappedNewSchema = {
-        name: newSchemas[index].name,
-        maxCount: newSchemas[index].max,
-        currentCount: 0,
-      };
-      map.set(oldSchema.name, mappedNewSchema);
+      if (compatibleSchema && newVisSchemaCounts[schema.name] > 0) {
+        updatedAggConfigParams.push({
+          ...aggConfigParam,
+          schema: schema.name,
+        });
+        newVisSchemaCounts[schema.name] -= 1;
+        break;
+      }
     }
   });
+
+  return updatedAggConfigParams;
 };
 
-export const updateAggParams = (
-  oldAggParam: CreateAggConfigParams,
-  aggMap: Map<string, AggMapping>
-) => {
-  const newAggParam = { ...oldAggParam };
-  if (oldAggParam.schema) {
-    const newSchema = aggMap.get(oldAggParam.schema);
-    newAggParam.schema = newSchema
-      ? newSchema.currentCount < newSchema.maxCount
-        ? assignNewSchemaType(oldAggParam, aggMap, newSchema)
-        : undefined
-      : undefined;
+function isSchemaEqual(schema1?: Schema, schema2?: Schema) {
+  // Check if schema1 and schema2 exist
+  if (!schema1 || !schema2) return false;
+
+  if (schema1.name !== schema2.name) return false;
+  if (schema1.group !== schema2.group) return false;
+
+  // Check if aggFilter is the same
+  if (schema1.aggFilter.length !== schema2.aggFilter.length) return false;
+  for (let i = 0; i < schema1.aggFilter.length; i++) {
+    if (schema1.aggFilter[i] !== schema2.aggFilter[i]) return false;
   }
-  return newAggParam;
-};
 
-export const assignNewSchemaType = (
-  oldAggParam: any,
-  aggMap: Map<string, AggMapping>,
-  newSchema: AggMapping
-) => {
-  aggMap.set(oldAggParam.schema, {
-    name: newSchema.name,
-    maxCount: newSchema.maxCount,
-    currentCount: newSchema.currentCount + 1,
-  });
-  return aggMap.get(oldAggParam.schema)?.name;
-};
+  return true;
+}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiSuperSelect,
   EuiSuperSelectOption,
@@ -22,25 +22,28 @@ import {
   useTypedDispatch,
   useTypedSelector,
 } from '../utils/state_management';
-import { usePersistedAggParams } from '../utils/use/use_persisted_agg_params';
+import { getPersistedAggParams } from '../utils/use/use_persisted_agg_params';
 
 export const RightNav = () => {
+  const { ui, name: activeVisName } = useVisualizationType();
   const [newVisType, setNewVisType] = useState<string>();
   const {
     services: { types },
   } = useOpenSearchDashboards<VisBuilderServices>();
-  const { ui, name: activeVisName } = useVisualizationType();
   const dispatch = useTypedDispatch();
   const StyleSection = ui.containerConfig.style.render;
 
   const { activeVisualization } = useTypedSelector((state) => state.visualization);
-  const aggConfigParams = activeVisualization?.aggConfigParams ?? [];
-  const persistedAggParams = usePersistedAggParams(
-    types,
-    aggConfigParams,
-    activeVisName,
-    newVisType
-  );
+  const aggConfigParams = useMemo(() => activeVisualization?.aggConfigParams ?? [], [
+    activeVisualization,
+  ]);
+  const persistedAggParams = useMemo(() => {
+    if (!newVisType) return aggConfigParams;
+
+    const currentVisSchemas = types.get(activeVisName)?.ui.containerConfig.data.schemas.all ?? [];
+    const newVisSchemas = types.get(newVisType)?.ui.containerConfig.data.schemas.all ?? [];
+    return getPersistedAggParams(aggConfigParams, newVisSchemas, currentVisSchemas);
+  }, [aggConfigParams, activeVisName, newVisType, types]);
 
   const options: Array<EuiSuperSelectOption<string>> = types.all().map(({ name, icon, title }) => ({
     value: name,
