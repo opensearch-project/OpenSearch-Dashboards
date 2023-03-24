@@ -44,7 +44,12 @@ describe('check timeline visualization', () => {
         .find('[data-test-subj="newItemButton"]')
         .click();
       cy.get('[data-test-subj="visType-timelion"]').click();
-      cy.get('[class="view-line"]').clear();
+      // Because monaco editor doesn't use a contenteditable, input, or textarea, .clear() or .type('{selectall}') won't work. To clear, we just backspace for each character instead.
+      cy.get('[class="view-line"]')
+        .invoke('text')
+        .then((expressionText) => {
+          cy.get('[class="view-line"]').type('{backspace}'.repeat(expressionText.length));
+        });
     });
 
     it('.es(*, kibana1=true) should report search error', () => {
