@@ -27,24 +27,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { EventBus } from './active_cursor';
 
-// TODO: Remove bus when action/triggers are available with LegacyPluginApi or metric is converted to Embeddable
-const EventEmitter = require('events');
+test('EventBus functionality', () => {
+  const eventBus = new EventBus();
+  let testPassed = false;
 
-module.exports.ACTIVE_CURSOR = 'ACTIVE_CURSOR';
+  const listener = (eventDetail) => {
+    testPassed = eventDetail;
+  };
 
-class EventBus extends EventEmitter {
-  on(eventName, listener) {
-    this.addListener(eventName, listener);
-  }
+  eventBus.on('testEvent', listener);
+  eventBus.trigger('testEvent', true);
+  eventBus.off('testEvent', listener);
 
-  off(eventName, listener) {
-    this.removeListener(eventName, listener);
-  }
-
-  trigger(eventName, detail) {
-    this.emit(eventName, detail);
-  }
-}
-
-module.exports.EventBus = EventBus;
+  expect(testPassed).toBe(true);
+});

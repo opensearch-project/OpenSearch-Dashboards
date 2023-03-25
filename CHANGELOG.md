@@ -161,6 +161,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Refactor and improve Discover field summaries ([#2391](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2391))
 - [Vis Builder] Removed Hard Coded Strings and Used i18n to transalte([#2867](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2867))
 - [Console] Replace jQuery.ajax with core.http when calling OSD APIs in console ([#3080]https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3080))
+- [TSVB] Replace jquery usage in vis_type_timeseries plugin with native methods ([#3682]https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3682))
 
 ### 🔩 Tests
 
