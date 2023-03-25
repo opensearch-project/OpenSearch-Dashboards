@@ -27,6 +27,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { EventBus } from './active_cursor';
 
 test('EventBus functionality', () => {

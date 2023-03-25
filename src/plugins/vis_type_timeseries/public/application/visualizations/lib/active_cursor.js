@@ -29,6 +29,7 @@
  */
 
 // TODO: Remove bus when action/triggers are available with LegacyPluginApi or metric is converted to Embeddable
+
 const EventEmitter = require('events');
 
 module.exports.ACTIVE_CURSOR = 'ACTIVE_CURSOR';
