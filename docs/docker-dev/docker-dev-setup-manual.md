@@ -41,12 +41,16 @@ docker compose up -d --build
     docker exec -it dev-env /bin/bash
     ```
 
+If you user of MacOS (M1, M2 chip) [Jump to For MacOS section manual](#for-macos-m1-m2-chip-users)
+
 9. For the new VS Code window, if it is not showing the repository code, then select `Open Folder`. Then open `/workspace-docker/OpenSearch-Dashboards`.
+
 
 10. In the terminal, start the OpenSearch Dashboards application by typing:
 ```bash
 yarn start:docker
 ```
+
 
 11. Now that OpenSearch Dashboards is running, you should be able to see a log line similar to `[info][server][OpenSearchDashboards][http] http server running at http://0.0.0.0:5603/dog`. 
     * The last three letters `dog` are randomly generated every time we start dashboards.
@@ -57,3 +61,25 @@ yarn start:docker
     * Files are constantly watched, so when you make code changes, OpenSearch Dashboards will rebuild and restart automatically. Refresh the link in the browser and the new changes should be applied.
 
 14. `Git` is already configured in the `entrypoint.sh` file, and the remote is already tracking the fork repository. You can start contributing by creating your branch off the main, and commit your first PR!
+
+
+## For MacOS (M1, M2 chip) users
+9. After setting up OpenSearch using Docker, make sure that you run the docker and the OpenSearch server instance is up and running. Inside docker shell run:
+```bash
+$ yarn opensearch snapshot
+``` 
+
+10. Open new terminal (not docker shell), inside folder ```Opensearch-Dashboards```, configure environment variables for OpenSearch Dashboards:
+```bash
+export SERVER_HOST="localhost"
+export OPENSEARCH_HOSTS="http://localhost:9200"
+```
+
+11. Start the OpenSearch Dashboards development server using the start:docker command:
+```bash
+yarn start:docker
+```
+
+12. After following the previous instructions, OpenSearch Dashboards should be running on ```http://127.0.0.1:5603/fux```. To access the OpenSearch Dashboards web interface, use the URL ```http://127.0.0.1:5603/fux``` in your browser instead of ```localhost:5603/fux```. Changing the URL to use ```127.0.0.1``` instead of ```localhost``` can help avoid potential issues.
+
+13. Git is already configured in the entrypoint.sh file, and the remote is already tracking the fork repository. You can start contributing by creating your branch off the main, and commit your first PR!

@@ -51,6 +51,7 @@ npm-debug.log*
 .ci/runbld
 .ci/bash_standard_lib.sh
 .gradle
+opensearch-dashboards-docker-dev
 
 # apm plugin
 apm.tsconfig.json
