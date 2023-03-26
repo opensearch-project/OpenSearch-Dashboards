@@ -8,8 +8,8 @@
     "devOnly": true
   },
   "scripts": {
-    "osd:bootstrap": "node scripts/build",
-    "osd:watch": "node scripts/build --watch"
+    "osd:bootstrap": "../../scripts/use_node scripts/build",
+    "osd:watch": "../../scripts/use_node scripts/build --watch"
   },
   "dependencies": {
     "@opensearch-project/opensearch": "^2.1.0",

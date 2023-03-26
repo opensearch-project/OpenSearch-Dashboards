@@ -155,7 +155,7 @@ const checkNodeVersionValidation = async (nodeVersion, requiredRange) => {
      *   Note: src/dev/jest/config.js should be checked for any other config that we would like to pass to nyc
      */
     await exec(
-      `node -e "${mockedProcessVersion}${mockedRequire}require('./node_version_validator.js')"`,
+      `"${process.execPath}" -e "${mockedProcessVersion}${mockedRequire}require('./node_version_validator.js')"`,
       { cwd: __dirname }
     );
   } catch (ex) {

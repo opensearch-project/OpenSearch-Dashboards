@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
 import { OpenSearchArchiver } from '@osd/opensearch-archiver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -55,7 +54,7 @@ export function OpenSearchArchiverProvider({
     client,
     dataDir,
     log,
-    opensearchDashboardsUrl: formatUrl(config.get('servers.opensearchDashboards')),
+    opensearchDashboardsUrl: config.get('servers.opensearchDashboards.serverUrl'),
   });
 
   if (hasService('opensearchDashboardsServer')) {
