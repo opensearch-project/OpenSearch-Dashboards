@@ -56,10 +56,16 @@ export enum AuthType {
   SigV4 = 'sigv4',
 }
 
+// export const credentialSourceOptions = [
+//   { id: AuthType.NoAuth, label: 'No authentication' },
+//   { id: AuthType.UsernamePasswordType, label: 'Username & Password' },
+//   { id: AuthType.SigV4, label: 'AWS SigV4' },
+// ];
+
 export const credentialSourceOptions = [
-  { id: AuthType.NoAuth, label: 'No authentication' },
-  { id: AuthType.UsernamePasswordType, label: 'Username & Password' },
-  { id: AuthType.SigV4, label: 'AWS SigV4' },
+  { value: AuthType.NoAuth, text: 'No authentication' },
+  { value: AuthType.UsernamePasswordType, text: 'Username & Password' },
+  { value: AuthType.SigV4, text: 'AWS SigV4' },
 ];
 
 export interface DataSourceAttributes extends SavedObjectAttributes {
