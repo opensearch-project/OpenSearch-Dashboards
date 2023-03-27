@@ -111,7 +111,7 @@ export class Plugin {
         value: '@timestamp',
         description: i18n.translate('timeline.uiSettings.timeFieldDescription', {
           defaultMessage: 'Default field containing a timestamp when using {opensearchParam}',
-          values: { opensearchParam: '.es()' },
+          values: { opensearchParam: '.opensearch()' },
         }),
         category: ['timeline'],
         schema: schema.string(),
@@ -123,7 +123,7 @@ export class Plugin {
         value: '_all',
         description: i18n.translate('timeline.uiSettings.defaultIndexDescription', {
           defaultMessage: 'Default opensearch index to search with {opensearchParam}',
-          values: { opensearchParam: '.es()' },
+          values: { opensearchParam: '.opensearch()' },
         }),
         category: ['timeline'],
         schema: schema.string(),
