@@ -30,12 +30,14 @@
 
 import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';
 import { trimStart } from 'lodash';
+import { Readable } from 'stream';
 
-import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { ApiResponse } from '@opensearch-project/opensearch/';
 
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { isResponseError } from '../../../../../../../core/server/opensearch/client/errors';
 
 import { RouteDependencies } from '../../../';
 
@@ -127,15 +129,22 @@ export const createHandler = ({
       },
     });
   } catch (e: any) {
-    log.error(e);
     const isResponseErrorFlag = isResponseError(e);
+
+    const errorMessage = isResponseErrorFlag ? JSON.stringify(e.meta.body) : e.message;
+    // core http route handler has special logic that asks for stream readable input to pass error opaquely
+    const errorResponseBody = new Readable({
+      read() {
+        this.push(errorMessage);
+        this.push(null);
+      },
+    });
     return response.customError({
       statusCode: isResponseErrorFlag ? e.statusCode : 502,
-      body: isResponseErrorFlag ? JSON.stringify(e.meta.body) : `502.${e.statusCode || 0}`,
+      body: errorResponseBody,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
   }
-};
-
-const isResponseError = (error: any): error is ResponseError => {
-  return Boolean(error && error.body && error.statusCode && error.header);
 };
