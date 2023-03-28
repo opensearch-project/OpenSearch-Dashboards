@@ -17,6 +17,7 @@ export {
   VisLayerTypes,
   VisLayerErrorTypes,
   VisLayerError,
+  PluginResource,
   PointInTimeEvent,
   PointInTimeEventsVisLayer,
   isPointInTimeEventsVisLayer,
