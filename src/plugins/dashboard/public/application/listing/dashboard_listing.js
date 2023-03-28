@@ -171,11 +171,6 @@ export class DashboardListing extends React.Component {
   getTableColumns() {
     const dateFormat = this.props.core.uiSettings.get('dateFormat');
 
-    const urlLinkProps = (record) =>
-      this.props.getUrl
-        ? { href: () => this.props.getUrl(record) }
-        : { onClick: () => this.props.viewItem(record) };
-
     return [
       {
         field: 'title',
@@ -185,7 +180,7 @@ export class DashboardListing extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            {...urlLinkProps(record)}
+            href={record.viewUrl}
             data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}

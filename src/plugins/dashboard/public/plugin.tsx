@@ -346,7 +346,7 @@ export class DashboardPlugin
       savedObjectsName: 'Dashboard',
       appId: 'dashboards',
       viewUrlPathFn: (obj) => `#/view/${obj.id}`,
-      editUrlPathFn: (obj) => `#/view/${obj.id}?_a=(viewMode:edit)`,
+      editUrlPathFn: (obj) => `/view/${obj.id}?_a=(viewMode:edit)`,
       createUrl: core.http.basePath.prepend('/app/dashboards#/create'),
       createSortText: 'Dashboard',
       createLinkText: (

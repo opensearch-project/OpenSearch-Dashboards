@@ -164,11 +164,11 @@ export function initDashboardApp(app, deps) {
             };
           };
 
-          $scope.editItem = ({ appId, editUrl }) => {
-            deps.core.application.navigateToApp(appId, { path: editUrl });
+          $scope.editItem = ({ editUrl }) => {
+            history.push(deps.addBasePath(editUrl));
           };
-          $scope.viewItem = ({ appId, viewUrl }) => {
-            deps.core.application.navigateToApp(appId, { path: viewUrl });
+          $scope.viewItem = ({ viewUrl }) => {
+            history.push(deps.addBasePath(viewUrl));
           };
           $scope.delete = (dashboards) => {
             return service.delete(dashboards.map((d) => d.id));
