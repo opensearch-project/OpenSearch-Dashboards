@@ -27,8 +27,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ListrContext } from 'src/dev/run_i18n_check';
 import { resolve, join } from 'path';
+import { ListrContext } from '.';
 import { I18N_RC } from '../constants';
 import { checkConfigNamespacePrefix, arrayify } from '..';
 

@@ -29,7 +29,7 @@
  */
 
 import { createFailError } from '@osd/dev-utils';
-import { ListrContext } from 'src/dev/run_i18n_check';
+import { ListrContext } from '.';
 import { I18nConfig, matchEntriesWithExctractors, normalizePath, readFileAsync } from '..';
 
 function filterEntries(entries: string[], exclude: string[]) {
