@@ -33,8 +33,7 @@ import Listr from 'listr';
 
 import { createFailError, run } from '@osd/dev-utils';
 import { ErrorReporter, integrateLocaleFiles } from './i18n';
-import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
-import { ListrContext } from './run_i18n_check';
+import { extractDefaultMessages, mergeConfigs, ListrContext } from './i18n/tasks';
 
 run(
   async ({
@@ -104,7 +103,9 @@ run(
       {
         title: 'Integrating Locale File',
         task: async ({ messages, config }) => {
-          if (config) {
+          if (!config) {
+            throw new Error('Config is missing');
+          } else {
             await integrateLocaleFiles(messages, {
               sourceFileName: source,
               targetFileName: target,

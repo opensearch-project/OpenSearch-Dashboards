@@ -32,20 +32,15 @@ import chalk from 'chalk';
 import Listr from 'listr';
 
 import { createFailError, run } from '@osd/dev-utils';
-import { ErrorReporter, I18nConfig } from './i18n';
+import { ErrorReporter } from './i18n';
 import {
   extractDefaultMessages,
   extractUntrackedMessages,
   checkCompatibility,
   checkConfigs,
   mergeConfigs,
+  ListrContext,
 } from './i18n/tasks';
-
-export interface ListrContext {
-  config?: I18nConfig;
-  reporter: ErrorReporter;
-  messages: Map<string, { message: string }>;
-}
 
 const skipOnNoTranslations = (context: ListrContext) =>
   !context.config?.translations?.length && 'No translations found.';

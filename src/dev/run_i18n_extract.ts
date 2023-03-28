@@ -34,8 +34,8 @@ import { resolve } from 'path';
 
 import { createFailError, run } from '@osd/dev-utils';
 import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
-import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
-import { ListrContext } from './run_i18n_check';
+import { extractDefaultMessages, mergeConfigs, ListrContext } from './i18n/tasks';
+
 run(
   async ({
     flags: {
@@ -67,7 +67,7 @@ run(
       {
         title: 'Extracting Default Messages',
         task: ({ config }) =>
-          new Listr(extractDefaultMessages(config!, srcPaths), { exitOnError: true }),
+          new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
       },
       {
         title: 'Writing to file',
