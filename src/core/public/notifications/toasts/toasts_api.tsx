@@ -42,12 +42,10 @@ import { I18nStart } from '../../i18n';
 /**
  * Allowed fields for {@link ToastInput}.
  *
- * @remarks
- * `id` cannot be specified.
- *
  * @public
  */
 export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
+  id?: string;
   title?: string | MountPoint;
   text?: string | MountPoint;
 };
@@ -143,6 +141,15 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public add(toastOrTitle: ToastInput) {
+    if (typeof toastOrTitle !== 'string') {
+      const list = this.toasts$.getValue();
+      const existingToast = list.find((toast) => toast.id === toastOrTitle.id);
+
+      if (existingToast) {
+        return existingToast;
+      }
+    }
+
     const toast: Toast = {
       id: String(this.idCounter++),
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:info'),

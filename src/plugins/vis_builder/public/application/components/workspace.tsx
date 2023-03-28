@@ -51,7 +51,12 @@ export const Workspace: FC = ({ children }) => {
       if (noAggs || !aggValidation.valid || !schemaValidation.valid) {
         const err = schemaValidation.errorMsg || aggValidation.errorMsg;
 
-        if (err) toasts.addWarning(err);
+        if (err)
+          toasts.addWarning({
+            id: 'vb_expression_validation',
+            title: err,
+          });
+
         setExpression(undefined);
 
         return;
