@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSuperSelect,
   EuiSuperSelectOption,
@@ -18,6 +18,7 @@ import './side_nav.scss';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { VisBuilderServices } from '../../types';
 import {
+  ActiveVisPayload,
   setActiveVisualization,
   useTypedDispatch,
   useTypedSelector,
@@ -26,7 +27,7 @@ import { getPersistedAggParams } from '../utils/get_persisted_agg_params';
 
 export const RightNav = () => {
   const { ui, name: activeVisName } = useVisualizationType();
-  const [newVisType, setNewVisType] = useState<string>();
+  const [confirmAggs, setConfirmAggs] = useState<ActiveVisPayload | undefined>();
   const {
     services: { types },
   } = useOpenSearchDashboards<VisBuilderServices>();
@@ -37,13 +38,29 @@ export const RightNav = () => {
   const aggConfigParams = useMemo(() => activeVisualization?.aggConfigParams ?? [], [
     activeVisualization,
   ]);
-  const persistedAggParams = useMemo(() => {
-    if (!newVisType) return aggConfigParams;
 
-    const currentVisSchemas = types.get(activeVisName)?.ui.containerConfig.data.schemas.all ?? [];
-    const newVisSchemas = types.get(newVisType)?.ui.containerConfig.data.schemas.all ?? [];
-    return getPersistedAggParams(aggConfigParams, newVisSchemas, currentVisSchemas);
-  }, [aggConfigParams, activeVisName, newVisType, types]);
+  const handleVisTypeChange = useCallback(
+    (newVisName) => {
+      const currentVisSchemas = types.get(activeVisName)?.ui.containerConfig.data.schemas.all ?? [];
+      const newVisSchemas = types.get(newVisName)?.ui.containerConfig.data.schemas.all ?? [];
+      const persistedAggParams = getPersistedAggParams(
+        aggConfigParams,
+        currentVisSchemas,
+        newVisSchemas
+      );
+
+      const newVis = {
+        name: newVisName,
+        aggConfigParams: persistedAggParams,
+        style: types.get(newVisName)?.ui.containerConfig.style.defaults,
+      };
+
+      if (persistedAggParams.length !== aggConfigParams.length) return setConfirmAggs(newVis);
+
+      dispatch(setActiveVisualization(newVis));
+    },
+    [activeVisName, aggConfigParams, dispatch, types]
+  );
 
   const options: Array<EuiSuperSelectOption<string>> = types.all().map(({ name, icon, title }) => ({
     value: name,
@@ -58,9 +75,7 @@ export const RightNav = () => {
         <EuiSuperSelect
           options={options}
           valueOfSelected={activeVisName}
-          onChange={(name) => {
-            setNewVisType(name);
-          }}
+          onChange={handleVisTypeChange}
           fullWidth
           data-test-subj="chartPicker"
         />
@@ -68,7 +83,7 @@ export const RightNav = () => {
       <div className="vbSidenav__style">
         <StyleSection />
       </div>
-      {newVisType && (
+      {confirmAggs && (
         <EuiConfirmModal
           title={i18n.translate('visBuilder.rightNav.changeVisType.modalTitle', {
             defaultMessage: 'Change visualization type',
@@ -79,17 +94,11 @@ export const RightNav = () => {
           cancelButtonText={i18n.translate('visBuilder.rightNav.changeVisType.cancelText', {
             defaultMessage: 'Cancel',
           })}
-          onCancel={() => setNewVisType(undefined)}
+          onCancel={() => setConfirmAggs(undefined)}
           onConfirm={() => {
-            dispatch(
-              setActiveVisualization({
-                name: newVisType,
-                style: types.get(newVisType)?.ui.containerConfig.style.defaults,
-                aggConfigParams: persistedAggParams,
-              })
-            );
+            dispatch(setActiveVisualization(confirmAggs));
 
-            setNewVisType(undefined);
+            setConfirmAggs(undefined);
           }}
           maxWidth="300px"
           data-test-subj="confirmVisChangeModal"
@@ -97,7 +106,7 @@ export const RightNav = () => {
           <p>
             <FormattedMessage
               id="visBuilder.rightNav.changeVisType.modalDescription"
-              defaultMessage="Changing the visualization type will reset all field selections. Do you want to continue?"
+              defaultMessage="Switching to this visualization type will result in the loss of some selected fields. Do you want to continue?"
             />
           </p>
         </EuiConfirmModal>
