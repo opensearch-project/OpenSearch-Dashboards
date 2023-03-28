@@ -22,6 +22,7 @@ import {
 } from '../../../expressions/public';
 import {
   Filter,
+  IIndexPattern,
   opensearchFilters,
   Query,
   TimefilterContract,
@@ -37,17 +38,18 @@ import {
 import { PersistedState } from '../../../visualizations/public';
 import { VisBuilderSavedVis } from '../saved_visualizations/transforms';
 import { handleVisEvent } from '../application/utils/handle_vis_event';
+import { VisBuilderEmbeddableFactoryDeps } from './vis_builder_embeddable_factory';
 
 // Apparently this needs to match the saved object type for the clone and replace panel actions to work
 export const VISBUILDER_EMBEDDABLE = VISBUILDER_SAVED_OBJECT;
 
 export interface VisBuilderEmbeddableConfiguration {
   savedVis: VisBuilderSavedVis;
-  // TODO: add indexPatterns as part of configuration
-  // indexPatterns?: IIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   editPath: string;
   editUrl: string;
   editable: boolean;
+  deps: VisBuilderEmbeddableFactoryDeps;
 }
 
 export interface VisBuilderInput extends SavedObjectEmbeddableInput {
@@ -60,6 +62,7 @@ export interface VisBuilderOutput extends EmbeddableOutput {
    * `input.savedObjectId`. If the id is invalid, this may be undefined.
    */
   savedVis?: VisBuilderSavedVis;
+  indexPatterns?: IIndexPattern[];
 }
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
@@ -78,10 +81,18 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
   private savedVis?: VisBuilderSavedVis;
   private serializedState?: string;
   private uiState: PersistedState;
+  private readonly deps: VisBuilderEmbeddableFactoryDeps;
 
   constructor(
     timefilter: TimefilterContract,
-    { savedVis, editPath, editUrl, editable }: VisBuilderEmbeddableConfiguration,
+    {
+      savedVis,
+      editPath,
+      editUrl,
+      editable,
+      deps,
+      indexPatterns,
+    }: VisBuilderEmbeddableConfiguration,
     initialInput: SavedObjectEmbeddableInput,
     {
       parent,
@@ -98,10 +109,12 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
         editUrl,
         editable,
         savedVis,
+        indexPatterns,
       },
       parent
     );
 
+    this.deps = deps;
     this.savedVis = savedVis;
     this.uiState = new PersistedState(savedVis.uiState);
     this.uiState.on('change', this.uiStateChangeHandler);
