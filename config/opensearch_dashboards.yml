@@ -239,3 +239,15 @@
 #data_source.encryption.wrappingKey: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 #opensearchDashboards.isSurveyAllowed: true
+
+# opensearchDashboards.link:
+#   community:
+#     text: "Community"
+#     url: "https://forum.opensearch.org/"
+#   giveFeedback:
+#     text: "Give feedback"
+#     url: "https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW"
+#   openAnIssue: ""
+#     text: "Open an issue in GitHub"
+#     url: "https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose"
+
