@@ -20,7 +20,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Security] Bumps hapi/statehood to 7.0.4 ([#3411](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3411))
 - [CVE-2023-25166] Bump formula to 3.0.1 ([#3416](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3416))
 - [CVE-2023-25653] Bump node-jose to 2.2.0 ([#3445](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3445))
-- [CVE-2023-26486][CVE-2023-26487] Bump vega from 5.22.1 to 5.23.0 ([#3533](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3533))
+- [CVE-2023-26486][cve-2023-26487] Bump vega from 5.22.1 to 5.23.0 ([#3533](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3533))
 
 ### 📈 Features/Enhancements
 
@@ -104,6 +104,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multi DataSource]Update test connection button text([#3247](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3247))
 - [Region Maps] Add ui setting to configure custom vector map's size parameter([#3399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3399))
 - [Search Telemetry] Fixes search telemetry's observable object that won't be GC-ed([#3390](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3390))
+- Ability to provide a comma separated list of values in "Add filter" on the Dashboards Discover page ([#2850](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3686))
 
 ### 🚞 Infrastructure
 
