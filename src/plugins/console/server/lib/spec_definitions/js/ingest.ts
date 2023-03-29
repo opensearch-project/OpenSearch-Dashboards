@@ -39,7 +39,7 @@ const commonPipelineParams = {
   tag: '',
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/append-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const appendProcessorDefinition = {
   append: {
     __template: {
@@ -52,7 +52,7 @@ const appendProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/bytes-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const bytesProcessorDefinition = {
   bytes: {
     __template: {
@@ -67,7 +67,7 @@ const bytesProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/ingest-circle-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const circleProcessorDefinition = {
   circle: {
     __template: {
@@ -110,7 +110,7 @@ const csvProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/convert-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const convertProcessorDefinition = {
   convert: {
     __template: {
@@ -145,7 +145,7 @@ const dateProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/date-index-name-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const dateIndexNameProcessorDefinition = {
   date_index_name: {
     __template: {
@@ -164,7 +164,7 @@ const dateIndexNameProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/dissect-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const dissectProcessorDefinition = {
   dissect: {
     __template: {
@@ -181,7 +181,7 @@ const dissectProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/dot-expand-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const dotExpanderProcessorDefinition = {
   dot_expander: {
     __template: {
@@ -193,7 +193,7 @@ const dotExpanderProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/drop-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const dropProcessorDefinition = {
   drop: {
     __template: {},
@@ -201,7 +201,7 @@ const dropProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/fail-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const failProcessorDefinition = {
   fail: {
     __template: {
@@ -212,7 +212,7 @@ const failProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/foreach-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const foreachProcessorDefinition = {
   foreach: {
     __template: {
@@ -227,7 +227,7 @@ const foreachProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/geoip-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const geoipProcessorDefinition = {
   geoip: {
     __template: {
@@ -266,7 +266,7 @@ const grokProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/gsub-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const gsubProcessorDefinition = {
   gsub: {
     __template: {
@@ -281,7 +281,7 @@ const gsubProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/htmlstrip-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const htmlStripProcessorDefinition = {
   html_strip: {
     __template: {
@@ -296,7 +296,7 @@ const htmlStripProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/inference-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const inferenceProcessorDefinition = {
   inference: {
     __template: {
@@ -312,7 +312,7 @@ const inferenceProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/join-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const joinProcessorDefinition = {
   join: {
     __template: {
@@ -340,7 +340,7 @@ const jsonProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/kv-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const kvProcessorDefinition = {
   kv: {
     __template: {
@@ -374,7 +374,7 @@ const lowercaseProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/pipeline-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const pipelineProcessorDefinition = {
   pipeline: {
     __template: {
@@ -385,7 +385,7 @@ const pipelineProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/remove-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const removeProcessorDefinition = {
   remove: {
     __template: {
@@ -396,7 +396,7 @@ const removeProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/rename-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const renameProcessorDefinition = {
   rename: {
     __template: {
@@ -412,7 +412,7 @@ const renameProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/script-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const scriptProcessorDefinition = {
   script: {
     __template: {},
@@ -425,7 +425,7 @@ const scriptProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/set-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const setProcessorDefinition = {
   set: {
     __template: {
@@ -441,7 +441,7 @@ const setProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/ingest-node-set-security-user-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const setSecurityUserProcessorDefinition = {
   set_security_user: {
     __template: {
@@ -469,7 +469,7 @@ const splitProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/sort-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const sortProcessorDefinition = {
   sort: {
     __template: {
@@ -509,7 +509,7 @@ const uppercaseProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/urldecode-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const urlDecodeProcessorDefinition = {
   urldecode: {
     __template: {
@@ -524,7 +524,7 @@ const urlDecodeProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/user-agent-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/processors/
 const userAgentProcessorDefinition = {
   user_agent: {
     __template: {
