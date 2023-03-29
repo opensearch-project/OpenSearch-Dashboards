@@ -31,12 +31,11 @@
 import _ from 'lodash';
 import http from 'http';
 import https from 'https';
-import url from 'url';
 
 import { OpenSearchConfigForProxy } from '../types';
 
 const createAgent = (legacyConfig: OpenSearchConfigForProxy): http.Agent | https.Agent => {
-  const target = url.parse(_.head(legacyConfig.hosts) as any);
+  const target = new URL('', _.head(legacyConfig.hosts)!);
   if (!/^https/.test(target.protocol || '')) return new http.Agent();
 
   const agentOptions: https.AgentOptions = {};

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 
 import apm from 'elastic-apm-node';
@@ -173,16 +172,18 @@ export class BasePathProxyServer {
           agent: this.httpsAgent,
           passThrough: true,
           xforward: true,
-          mapUri: async (request: Request) => ({
-            uri: Url.format({
-              hostname: request.server.info.host,
-              port: this.devConfig.basePathProxyTargetPort,
-              protocol: request.server.info.protocol,
-              pathname: `${this.httpConfig.basePath}/${request.params.osdPath}`,
-              query: request.query,
-            }),
-            headers: request.headers,
-          }),
+          mapUri: async (request: Request) => {
+            const uri = new URL(
+              `${this.httpConfig.basePath}/${request.params.osdPath}`,
+              `${request.server.info.protocol}://${request.server.info.host}:${this.devConfig.basePathProxyTargetPort}`
+            );
+            uri.search = new URLSearchParams(request.query).toString();
+
+            return {
+              uri: uri.toString(),
+              headers: request.headers,
+            };
+          },
         },
       },
       method: '*',

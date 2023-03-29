@@ -63,8 +63,12 @@ If it's the only version of node installed, it will automatically be set to the 
 
 #### Install `yarn`
 
+Take a look at the [latest Yarn release](https://github.com/yarnpkg/berry/releases/latest), note the version number, and run:
+
 ```bash
 $ npm i -g corepack
+
+$ corepack prepare yarn@<version> --activate
 ```
 
 (See the [Yarn installation documentation](https://yarnpkg.com/getting-started/install) for more information.)
@@ -110,7 +114,8 @@ $ yarn osd clean
 
 OpenSearch Dashboards requires a running version of OpenSearch to connect to. In a separate terminal you can run the latest snapshot built using:
 
-_(Linux and Windows only - for MacOS, you'll need to [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
+_(Linux, Windows, Darwin (MacOS) only - for others, you'll need to [set up using Docker](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/docs/docker-dev/docker-dev-setup-manual.md) or [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
+
 ```bash
 $ yarn opensearch snapshot
 ```
@@ -184,7 +189,8 @@ By default, the snapshot command will run [a minimal distribution of OpenSearch]
 
 If you would like to run OpenSearch with a particular plugin installed on the cluster snapshot, pass the `--P` flag after `yarn opensearch snapshot`. You can use the flag multiple times to install multiple plugins. The argument value can be a URL to the plugin's zip file, maven coordinates of the plugin, or a local zip file path (use `file://` followed by the absolute or relative path, in that case). For example:
 
-_(Linux and Windows only - for MacOS, you'll need to [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
+_(Linux, Windows, Darwin (MacOS) only - for others, you'll need to [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
+
 ```bash
 $ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plugin/opensearch-test-plugin/2.4.0.0/opensearch-test-plugin-2.4.0.0.zip
 ```
@@ -214,7 +220,7 @@ $ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tm
 
 ### Alternative - Run OpenSearch from tarball
 
-OpenSearch does not yet create artifacts for MacOS, so you'll need to download, install, and run the tarball instead. (You'll also need Java installed and the `JAVA_HOME` environmental variable set - see [OpenSearch developer guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md#install-prerequisites) for details).
+If you would like to run OpenSearch from the tarball, you'll need to download the minimal distribution, install it, and then run the executable. (You'll also need Java installed and the `JAVA_HOME` environmental variable set - see [OpenSearch developer guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md#install-prerequisites) for details).
 
 1. Download the latest minimal distribution of OpenSearch from [the downloads page](https://opensearch.org/downloads.html#minimal). Note the version and replace in commands below.
 2. Unzip the `tar.gz` file: `tar -xvf opensearch-<OpenSearch-version>-linux-x64.tar.gz`
@@ -227,7 +233,7 @@ This method can also be used to develop against the [full distribution of OpenSe
 
 ### Configure OpenSearch Dashboards for security
 
-*This step is only mandatory if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled.*
+_This step is only mandatory if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
 
 Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
 changes to the default [`opensearch_dashboards.yml`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/config/opensearch_dashboards.yml#L25-L72) in order to connect to OpenSearch.
@@ -258,10 +264,11 @@ yarn build-platform --darwin
 You could pass one or multiple flags. If you don't pass any flag, `yarn build-platform` will build an artifact based on your local environment.
 
 Currently, the supported flags for this script are:
-* `darwin` (builds Darwin x64)
-* `linux` (builds Linux x64)
-* `linux-arm` (builds Linux ARM64).
-* `windows` (builds Windows x64)
+
+- `darwin` (builds Darwin x64)
+- `linux` (builds Linux x64)
+- `linux-arm` (builds Linux ARM64).
+- `windows` (builds Windows x64)
 
 If you would like to build only a DEB x64 artifact, run the following:
 
@@ -334,9 +341,7 @@ This part contains developer guide rules around general (framework agnostic) HTM
 Use camel case for the values of attributes such as `id` and `data-test-subj` selectors.
 
 ```html
-<button id="veryImportantButton" data-test-subj="clickMeButton">
-  Click me
-</button>
+<button id="veryImportantButton" data-test-subj="clickMeButton">Click me</button>
 ```
 
 The only exception is in cases where you're dynamically creating the value, and you need to use
@@ -432,10 +437,8 @@ import './component.scss';
 // All other imports below the SASS import
 
 export const Component = () => {
-  return (
-    <div className="plgComponent" />
-  );
-}
+  return <div className="plgComponent" />;
+};
 ```
 
 ```scss
@@ -445,7 +448,6 @@ export const Component = () => {
 ```
 
 Do not use the underscore `_` SASS file naming pattern when importing directly into a javascript file.
-
 
 ### TypeScript/JavaScript
 

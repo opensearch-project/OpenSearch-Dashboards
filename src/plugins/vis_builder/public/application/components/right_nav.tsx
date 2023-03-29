@@ -17,7 +17,12 @@ import { useVisualizationType } from '../utils/use';
 import './side_nav.scss';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { VisBuilderServices } from '../../types';
-import { setActiveVisualization, useTypedDispatch } from '../utils/state_management';
+import {
+  setActiveVisualization,
+  useTypedDispatch,
+  useTypedSelector,
+} from '../utils/state_management';
+import { usePersistedAggParams } from '../utils/use/use_persisted_agg_params';
 
 export const RightNav = () => {
   const [newVisType, setNewVisType] = useState<string>();
@@ -27,6 +32,15 @@ export const RightNav = () => {
   const { ui, name: activeVisName } = useVisualizationType();
   const dispatch = useTypedDispatch();
   const StyleSection = ui.containerConfig.style.render;
+
+  const { activeVisualization } = useTypedSelector((state) => state.visualization);
+  const aggConfigParams = activeVisualization?.aggConfigParams ?? [];
+  const persistedAggParams = usePersistedAggParams(
+    types,
+    aggConfigParams,
+    activeVisName,
+    newVisType
+  );
 
   const options: Array<EuiSuperSelectOption<string>> = types.all().map(({ name, icon, title }) => ({
     value: name,
@@ -68,6 +82,7 @@ export const RightNav = () => {
               setActiveVisualization({
                 name: newVisType,
                 style: types.get(newVisType)?.ui.containerConfig.style.defaults,
+                aggConfigParams: persistedAggParams,
               })
             );
 

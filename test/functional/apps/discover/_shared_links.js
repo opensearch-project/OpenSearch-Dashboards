@@ -123,9 +123,9 @@ export default function ({ getService, getPageObjects }) {
             baseUrl +
             '/app/discover#' +
             '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
-            '?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)' +
-            "%2Ctime%3A(from%3A'2015-09-19T06%3A31%3A44.000Z'%2C" +
-            "to%3A'2015-09-23T18%3A31%3A44.000Z'))";
+            '?_g=%28filters%3A%21%28%29%2CrefreshInterval%3A%28pause%3A%21t%2Cvalue%3A0%29%' +
+            '2Ctime%3A%28from%3A%272015-09-19T06%3A31%3A44.000Z%27%2C' +
+            'to%3A%272015-09-23T18%3A31%3A44.000Z%27%29%29';
           await PageObjects.discover.loadSavedSearch('A Saved Search');
           await PageObjects.share.clickShareTopNavButton();
           await PageObjects.share.exportAsSavedObject();
