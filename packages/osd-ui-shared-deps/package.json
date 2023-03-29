@@ -4,9 +4,9 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "build": "node scripts/build",
-    "osd:bootstrap": "node scripts/build --dev",
-    "osd:watch": "node scripts/build --dev --watch"
+    "build": "../../scripts/use_node scripts/build",
+    "osd:bootstrap": "../../scripts/use_node scripts/build --dev",
+    "osd:watch": "../../scripts/use_node scripts/build --dev --watch"
   },
   "dependencies": {
     "@elastic/charts": "31.1.0",
@@ -32,7 +32,7 @@
     "react-router-dom": "^5.3.0",
     "regenerator-runtime": "^0.13.3",
     "rxjs": "^6.5.5",
-    "styled-components": "^5.3.3",
+    "styled-components": "^5.3.9",
     "symbol-observable": "^1.2.0",
     "tslib": "^2.0.0",
     "whatwg-fetch": "^3.0.0"
