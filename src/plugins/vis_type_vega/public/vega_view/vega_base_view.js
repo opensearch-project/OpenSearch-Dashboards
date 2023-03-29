@@ -259,13 +259,15 @@ export class VegaBaseView {
     return false;
   }
 
-  // This is only used when the vega parser has showEvents flag set to true.
+  // This is only used when the vega parser has showEvents flag set to true,
+  // and is currently just intended for time series charts. It may be updated
+  // in the future to expand to other chart type use cases.
   // Because there is no clean way to use autosize for concatenated views,
   // we manually set the value of the top view (the base vis) to fill in
   // space and leave enough space to show the bottom view (the events vis).
   // Ref: https://vega.github.io/vega-lite/docs/size.html#limitations
   updateBaseVisHeight(view) {
-    // 100 is enough padding for now. May need to adjust once the current scrolling/overflow
+    // TODO: 100 is enough padding for now. May need to adjust once the current scrolling/overflow
     // issue is handled. See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3501
     const eventVisHeight = 100;
     const height = Math.max(0, this._$container.height()) - eventVisHeight;
