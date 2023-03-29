@@ -12,6 +12,7 @@ import {
 import {
   PointInTimeEvent,
   PointInTimeEventsVisLayer,
+  isPointInTimeEventsVisLayer,
   VIS_LAYER_COLUMN_TYPE,
   EVENT_COLOR,
   EVENT_MARK_SIZE,
@@ -19,14 +20,28 @@ import {
   EVENT_MARK_SHAPE,
   EVENT_TIMELINE_HEIGHT,
   HOVER_PARAM,
+  VisLayer,
+  VisLayers,
+  VisLayerTypes,
 } from '../';
 
-export const enableEventsInConfig = (config: { kibana: {} }) => {
+export const enableVisLayersInSpecConfig = (spec: object, visLayers: VisLayers): {} => {
+  const config = get(spec, 'config', { kibana: {} });
+  const visibleVisLayers = new Map<VisLayerTypes, boolean>();
+
+  // Currently only support PointInTimeEventsVisLayers. Set the flag to true
+  // if there are any
+  const pointInTimeEventsVisLayers = visLayers.filter((visLayer: VisLayer) =>
+    isPointInTimeEventsVisLayer(visLayer)
+  ) as PointInTimeEventsVisLayer[];
+  if (!isEmpty(pointInTimeEventsVisLayers)) {
+    visibleVisLayers.set(VisLayerTypes.PointInTimeEvents, true);
+  }
   return {
     ...config,
     kibana: {
       ...config.kibana,
-      showEvents: true,
+      visibleVisLayers,
     },
   };
 };
@@ -239,7 +254,6 @@ export const addPointInTimeEventsLayersToSpec = (
   spec: object
 ): object => {
   const newSpec = cloneDeep(spec) as any;
-  newSpec.config = enableEventsInConfig(newSpec.config);
 
   const xAxisId = getXAxisId(dimensions, datatable.columns);
   const xAxisTitle = dimensions.x.label.replaceAll('"', '');

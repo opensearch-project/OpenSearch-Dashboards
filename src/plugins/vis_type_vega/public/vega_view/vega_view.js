@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { VisLayerTypes } from '../../../vis_augmenter/public';
 import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 
@@ -44,8 +45,8 @@ export class VegaView extends VegaBaseView {
     view.warn = this.onWarn.bind(this);
     view.error = this.onError.bind(this);
     if (this._parser.useResize) this.updateVegaSize(view);
-    if (this._parser.showEvents) {
-      this.updateBaseVisHeight(view);
+    if (this._parser.visibleVisLayers?.get(VisLayerTypes.PointInTimeEvents) === true) {
+      this.addPointInTimeEventPadding(view);
     }
     view.initialize(this._$container.get(0), this._$controls.get(0));
 

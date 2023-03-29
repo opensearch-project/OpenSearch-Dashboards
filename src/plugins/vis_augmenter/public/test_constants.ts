@@ -498,13 +498,7 @@ export const TEST_RESULT_SPEC_SINGLE_VIS_LAYER = {
   data: {
     values: TEST_VALUES_SINGLE_VIS_LAYER,
   },
-  config: {
-    ...TEST_BASE_CONFIG,
-    kibana: {
-      ...TEST_BASE_CONFIG.kibana,
-      showEvents: true,
-    },
-  },
+  config: TEST_BASE_CONFIG,
   vconcat: [
     {
       layer: [
@@ -541,13 +535,7 @@ export const TEST_RESULT_SPEC_MULTIPLE_VIS_LAYERS = {
   data: {
     values: TEST_VALUES_MULTIPLE_VIS_LAYERS,
   },
-  config: {
-    ...TEST_BASE_CONFIG,
-    kibana: {
-      ...TEST_BASE_CONFIG.kibana,
-      showEvents: true,
-    },
-  },
+  config: TEST_BASE_CONFIG,
   vconcat: [
     {
       layer: [

@@ -9,14 +9,14 @@ import {
   OpenSearchDashboardsDatatableColumn,
 } from '../../../expressions/public';
 import {
-  enableEventsInConfig,
+  enableVisLayersInSpecConfig,
   isVisLayerColumn,
   generateVisLayerFilterString,
   addMissingRowsToTableBounds,
   addPointInTimeEventsLayersToTable,
   addPointInTimeEventsLayersToSpec,
 } from './helpers';
-import { VIS_LAYER_COLUMN_TYPE } from '../';
+import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, PointInTimeEventsVisLayer, VisLayer } from '../';
 import {
   TEST_DATATABLE_MULTIPLE_VIS_LAYERS,
   TEST_DATATABLE_NO_VIS_LAYERS,
@@ -42,27 +42,89 @@ import {
 } from '../test_constants';
 
 describe('helpers', function () {
-  describe('enableEventsInConfig()', function () {
-    it('updates config with undefined showEvents field', function () {
+  describe('enableVisLayersInSpecConfig()', function () {
+    const pointInTimeEventsVisLayer = {
+      type: VisLayerTypes.PointInTimeEvents,
+      originPlugin: 'test-plugin',
+      pluginResource: {
+        type: 'test-resource-type',
+        id: 'test-resource-id',
+        name: 'test-resource-name',
+        urlPath: 'test-resource-url-path',
+      },
+      events: [
+        {
+          timestamp: 1234,
+          metadata: {
+            pluginResourceId: 'test-resource-id',
+          },
+        },
+      ],
+    } as PointInTimeEventsVisLayer;
+    const invalidVisLayer = ({
+      type: 'something-invalid',
+      originPlugin: 'test-plugin',
+      pluginResource: {
+        type: 'test-resource-type',
+        id: 'test-resource-id',
+        name: 'test-resource-name',
+        urlPath: 'test-resource-url-path',
+      },
+    } as unknown) as VisLayer;
+
+    it('updates config with just a valid Vislayer', function () {
       const baseConfig = {
         kibana: {
           hideWarnings: true,
         },
       };
-      const updatedConfig = enableEventsInConfig(baseConfig);
+      const updatedConfig = enableVisLayersInSpecConfig({ config: baseConfig }, [
+        pointInTimeEventsVisLayer,
+      ]);
+      const expectedMap = new Map<VisLayerTypes, boolean>([
+        [VisLayerTypes.PointInTimeEvents, true],
+      ]);
       // @ts-ignore
-      baseConfig.kibana.showEvents = true;
+      baseConfig.kibana.visibleVisLayers = expectedMap;
       expect(updatedConfig).toStrictEqual(baseConfig);
     });
-    it('updates config with false showEvents field', function () {
+    it('updates config with a valid and invalid VisLayer', function () {
       const baseConfig = {
         kibana: {
           hideWarnings: true,
-          showEvents: false,
         },
       };
-      const updatedConfig = enableEventsInConfig(baseConfig);
-      baseConfig.kibana.showEvents = true;
+      const updatedConfig = enableVisLayersInSpecConfig({ config: baseConfig }, [
+        pointInTimeEventsVisLayer,
+        invalidVisLayer,
+      ]);
+      const expectedMap = new Map<VisLayerTypes, boolean>([
+        [VisLayerTypes.PointInTimeEvents, true],
+      ]);
+      // @ts-ignore
+      baseConfig.kibana.visibleVisLayers = expectedMap;
+      expect(updatedConfig).toStrictEqual(baseConfig);
+    });
+    it('does not update config if no valid VisLayer', function () {
+      const baseConfig = {
+        kibana: {
+          hideWarnings: true,
+        },
+      };
+      const updatedConfig = enableVisLayersInSpecConfig({ config: baseConfig }, [invalidVisLayer]);
+      // @ts-ignore
+      baseConfig.kibana.visibleVisLayers = new Map<VisLayerTypes, boolean>();
+      expect(updatedConfig).toStrictEqual(baseConfig);
+    });
+    it('does not update config if empty VisLayer list', function () {
+      const baseConfig = {
+        kibana: {
+          hideWarnings: true,
+        },
+      };
+      const updatedConfig = enableVisLayersInSpecConfig({ config: baseConfig }, []);
+      // @ts-ignore
+      baseConfig.kibana.visibleVisLayers = new Map<VisLayerTypes, boolean>();
       expect(updatedConfig).toStrictEqual(baseConfig);
     });
   });
