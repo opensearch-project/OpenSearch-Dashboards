@@ -69,9 +69,7 @@ export const createLineVegaSpecFn = (
 
     const visParams = JSON.parse(args.visParams) as VisParams;
     const dimensions = JSON.parse(args.dimensions) as VislibDimensions;
-    const allVisLayers = (args.visLayers
-      ? (JSON.parse(args.visLayers) as VisLayers)
-      : []) as VisLayers;
+    const allVisLayers = (args.visLayers ? JSON.parse(args.visLayers) : []) as VisLayers;
 
     // currently only supporting PointInTimeEventsVisLayer type
     const pointInTimeEventsVisLayers = allVisLayers.filter((visLayer: VisLayer) =>

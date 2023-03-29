@@ -4,6 +4,7 @@
  */
 
 export const VIS_LAYER_COLUMN_TYPE = 'vis_layer';
+// TODO: replace with a value imported from OUI
 export const EVENT_COLOR = 'red';
 export const HOVER_PARAM = 'HOVER';
 export const EVENT_MARK_SIZE = 100;
