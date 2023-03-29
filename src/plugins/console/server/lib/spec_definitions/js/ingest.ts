@@ -88,7 +88,7 @@ const circleProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/csv-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/csv/
 const csvProcessorDefinition = {
   csv: {
     __template: {
@@ -129,7 +129,7 @@ const convertProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/date-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/date/
 const dateProcessorDefinition = {
   date: {
     __template: {
