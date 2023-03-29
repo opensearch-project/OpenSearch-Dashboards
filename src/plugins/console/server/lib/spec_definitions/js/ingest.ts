@@ -246,7 +246,7 @@ const geoipProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/grok-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/grok/
 const grokProcessorDefinition = {
   grok: {
     __template: {
@@ -325,7 +325,7 @@ const joinProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/json-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/parse-json/
 const jsonProcessorDefinition = {
   json: {
     __template: {
@@ -360,7 +360,7 @@ const kvProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/lowercase-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/lowercase-string/
 const lowercaseProcessorDefinition = {
   lowercase: {
     __template: {
@@ -453,7 +453,7 @@ const setSecurityUserProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/split-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/split-string/
 const splitProcessorDefinition = {
   split: {
     __template: {
@@ -481,7 +481,7 @@ const sortProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/trim-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/trim-string/
 const trimProcessorDefinition = {
   trim: {
     __template: {
@@ -495,7 +495,7 @@ const trimProcessorDefinition = {
   },
 };
 
-// Based on https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/uppercase-processor.html
+// Based on https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/uppercase-string/
 const uppercaseProcessorDefinition = {
   uppercase: {
     __template: {
