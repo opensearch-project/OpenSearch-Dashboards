@@ -61,7 +61,6 @@ import {
   setOverlays,
   setSavedSearchLoader,
   setEmbeddable,
-  setSavedAugmentVisLoader,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -196,14 +195,6 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
-    const savedAugmentVisLoader = createSavedAugmentVisLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome: core.chrome,
-      overlays: core.overlays,
-    });
-    setSavedAugmentVisLoader(savedAugmentVisLoader);
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
