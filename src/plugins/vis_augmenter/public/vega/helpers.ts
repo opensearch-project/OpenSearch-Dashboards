@@ -163,83 +163,83 @@ export const addPointInTimeEventsLayersToTable = (
   const augmentedTable = addMissingRowsToTableBounds(datatable, dimensions);
   const xAxisId = getXAxisId(dimensions, augmentedTable.columns);
 
-  if (!isEmpty(visLayers)) {
-    visLayers.every((visLayer: PointInTimeEventsVisLayer) => {
-      const visLayerColumnId = `${visLayer.pluginResource.id}`;
-      const visLayerColumnName = `${visLayer.pluginResource.name}`;
-      augmentedTable.columns.push({
-        id: visLayerColumnId,
-        name: visLayerColumnName,
-        meta: {
-          type: VIS_LAYER_COLUMN_TYPE,
-        },
-      });
+  if (isEmpty(visLayers)) return augmentedTable;
 
-      if (augmentedTable.rows.length === 0) {
-        return false;
-      }
-
-      // if only one row / one datapoint, put all events into this bucket
-      if (augmentedTable.rows.length === 1) {
-        augmentedTable.rows[0] = {
-          ...augmentedTable.rows[0],
-          [visLayerColumnId]: visLayer.events.length,
-        };
-        return false;
-      }
-
-      // Bin the timestamps to the closest x-axis key, adding
-      // an entry for this vis layer ID. Sorting the timestamps first
-      // so that we will only search a particular row value once.
-      // There could be some optimizations, such as binary search + dynamically
-      // changing the bounds, but performance benefits would be very minimal
-      // if any, given the upper bounds limit on n already due to chart constraints.
-      let rowIndex = 0;
-      const minVal = augmentedTable.rows[0][xAxisId] as number;
-      const maxVal =
-        (augmentedTable.rows[augmentedTable.rows.length - 1][xAxisId] as number) +
-        moment.duration(dimensions.x.params.interval).asMilliseconds();
-      const sortedTimestamps = visLayer.events
-        .map((event: PointInTimeEvent) => event.timestamp)
-        .filter((timestamp: number) => timestamp >= minVal && timestamp <= maxVal)
-        .sort((n1: number, n2: number) => n1 - n2) as number[];
-
-      sortedTimestamps.forEach((timestamp) => {
-        while (rowIndex < augmentedTable.rows.length - 1) {
-          const smallerVal = augmentedTable.rows[rowIndex][xAxisId] as number;
-          const higherVal = augmentedTable.rows[rowIndex + 1][xAxisId] as number;
-          let rowIndexToInsert: number;
-
-          // timestamp is on the left bounds of the chart
-          if (timestamp === smallerVal) {
-            rowIndexToInsert = rowIndex;
-
-            // timestamp is in between the right 2 buckets. determine which one it is closer to
-          } else if (timestamp <= higherVal) {
-            const smallerValDiff = Math.abs(timestamp - smallerVal);
-            const higherValDiff = Math.abs(timestamp - higherVal);
-            rowIndexToInsert = smallerValDiff <= higherValDiff ? rowIndex : rowIndex + 1;
-          }
-
-          // timestamp is on the right bounds of the chart
-          else if (rowIndex + 1 === augmentedTable.rows.length - 1) {
-            rowIndexToInsert = rowIndex + 1;
-            // timestamp is still too small; traverse to next bucket
-          } else {
-            rowIndex += 1;
-            continue;
-          }
-
-          // inserting the value. increment if the mapping/property already exists
-          augmentedTable.rows[rowIndexToInsert][visLayerColumnId] =
-            (get(augmentedTable.rows[rowIndexToInsert], visLayerColumnId, 0) as number) + 1;
-          break;
-        }
-      });
-
-      return true;
+  visLayers.every((visLayer: PointInTimeEventsVisLayer) => {
+    const visLayerColumnId = `${visLayer.pluginResource.id}`;
+    const visLayerColumnName = `${visLayer.pluginResource.name}`;
+    augmentedTable.columns.push({
+      id: visLayerColumnId,
+      name: visLayerColumnName,
+      meta: {
+        type: VIS_LAYER_COLUMN_TYPE,
+      },
     });
-  }
+
+    if (augmentedTable.rows.length === 0) {
+      return false;
+    }
+
+    // if only one row / one datapoint, put all events into this bucket
+    if (augmentedTable.rows.length === 1) {
+      augmentedTable.rows[0] = {
+        ...augmentedTable.rows[0],
+        [visLayerColumnId]: visLayer.events.length,
+      };
+      return false;
+    }
+
+    // Bin the timestamps to the closest x-axis key, adding
+    // an entry for this vis layer ID. Sorting the timestamps first
+    // so that we will only search a particular row value once.
+    // There could be some optimizations, such as binary search + dynamically
+    // changing the bounds, but performance benefits would be very minimal
+    // if any, given the upper bounds limit on n already due to chart constraints.
+    let rowIndex = 0;
+    const minVal = augmentedTable.rows[0][xAxisId] as number;
+    const maxVal =
+      (augmentedTable.rows[augmentedTable.rows.length - 1][xAxisId] as number) +
+      moment.duration(dimensions.x.params.interval).asMilliseconds();
+    const sortedTimestamps = visLayer.events
+      .map((event: PointInTimeEvent) => event.timestamp)
+      .filter((timestamp: number) => timestamp >= minVal && timestamp <= maxVal)
+      .sort((n1: number, n2: number) => n1 - n2) as number[];
+
+    sortedTimestamps.forEach((timestamp) => {
+      while (rowIndex < augmentedTable.rows.length - 1) {
+        const smallerVal = augmentedTable.rows[rowIndex][xAxisId] as number;
+        const higherVal = augmentedTable.rows[rowIndex + 1][xAxisId] as number;
+        let rowIndexToInsert: number;
+
+        // timestamp is on the left bounds of the chart
+        if (timestamp === smallerVal) {
+          rowIndexToInsert = rowIndex;
+
+          // timestamp is in between the right 2 buckets. determine which one it is closer to
+        } else if (timestamp <= higherVal) {
+          const smallerValDiff = Math.abs(timestamp - smallerVal);
+          const higherValDiff = Math.abs(timestamp - higherVal);
+          rowIndexToInsert = smallerValDiff <= higherValDiff ? rowIndex : rowIndex + 1;
+        }
+
+        // timestamp is on the right bounds of the chart
+        else if (rowIndex + 1 === augmentedTable.rows.length - 1) {
+          rowIndexToInsert = rowIndex + 1;
+          // timestamp is still too small; traverse to next bucket
+        } else {
+          rowIndex += 1;
+          continue;
+        }
+
+        // inserting the value. increment if the mapping/property already exists
+        augmentedTable.rows[rowIndexToInsert][visLayerColumnId] =
+          (get(augmentedTable.rows[rowIndexToInsert], visLayerColumnId, 0) as number) + 1;
+        break;
+      }
+    });
+
+    return true;
+  });
   return augmentedTable;
 };
 
