@@ -196,7 +196,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {boolean} insertTimestamp Optional
      * @return {Promise<void>}
      */
-    public async get(url: string, insertTimestamp: boolean = false) {
+    public async get(url: string, insertTimestamp: boolean = true) {
       if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, (parsed) => {
           (parsed.query as any)._t = Date.now();
