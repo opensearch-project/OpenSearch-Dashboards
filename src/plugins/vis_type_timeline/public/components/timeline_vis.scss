@@ -7,7 +7,8 @@
   // Custom Jquery FLOT / schema selectors
   // Cannot change at the moment
 
-  .chart-top-title, .axisLabels {
+  .chart-top-title,
+  .axisLabels {
     @include euiFontSizeXS;
 
     font-weight: $euiFontWeightBold;
