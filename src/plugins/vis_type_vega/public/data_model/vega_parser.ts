@@ -44,6 +44,7 @@ import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
 import { IServiceSettings } from '../../../maps_legacy/public';
+import { VisLayerTypes } from '../../../vis_augmenter/public';
 import {
   Bool,
   Data,
@@ -92,6 +93,7 @@ export class VegaParser {
   getServiceSettings: () => Promise<IServiceSettings>;
   filters: Bool;
   timeCache: TimeCache;
+  visibleVisLayers: Map<VisLayerTypes, boolean>;
 
   constructor(
     spec: VegaSpec | string,
@@ -102,6 +104,7 @@ export class VegaParser {
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
+    this.visibleVisLayers = new Map<VisLayerTypes, boolean>();
 
     this.error = undefined;
     this.warnings = [];
@@ -158,6 +161,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
 
     this._config = this._parseConfig();
     this.hideWarnings = !!this._config.hideWarnings;
+    this.visibleVisLayers = this._config.visibleVisLayers;
     this.useMap = this._config.type === 'map';
     this.renderer = this._config.renderer === 'svg' ? 'svg' : 'canvas';
     this.tooltips = this._parseTooltips();
@@ -187,6 +191,17 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
   private _compileWithAutosize() {
     const defaultAutosize = {
       type: 'fit',
+      contains: 'padding',
+    };
+
+    // If we are showing PointInTimeEventsVisLayers, it means we are showing a base vis + event vis.
+    // Because this will be using a vconcat spec, we can autosize the width
+    // via fit-x. Note the regular 'fit' (to autosize width + height) does not work here.
+    // See limitations: https://vega.github.io/vega-lite/docs/size.html#limitations
+    const showPointInTimeEvents =
+      this.visibleVisLayers.get(VisLayerTypes.PointInTimeEvents) === true;
+    const showPointInTimeEventsAutosize = {
+      type: 'fit-x',
       contains: 'padding',
     };
 
@@ -224,6 +239,10 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       autosize = defaultAutosize;
     }
 
+    if (showPointInTimeEvents) {
+      autosize = showPointInTimeEventsAutosize;
+    }
+
     if (
       useResize &&
       ((this.spec.width && this.spec.width !== 'container') ||
@@ -243,7 +262,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       );
     }
 
-    if (useResize) {
+    if (useResize && !showPointInTimeEvents) {
       this.spec.width = 'container';
       this.spec.height = 'container';
     }

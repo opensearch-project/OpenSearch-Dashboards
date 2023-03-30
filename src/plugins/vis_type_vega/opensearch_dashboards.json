@@ -4,6 +4,11 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "visualizations", "mapsLegacy", "expressions", "inspector"],
-  "optionalPlugins": ["home","usageCollection"],
-  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "visDefaultEditor"]
+  "optionalPlugins": ["home", "usageCollection"],
+  "requiredBundles": [
+    "opensearchDashboardsUtils",
+    "opensearchDashboardsReact",
+    "visDefaultEditor",
+    "visAugmenter"
+  ]
 }
