@@ -9,6 +9,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
+- [CVE-2021-23490] Bump parse-link-header from `1.0.1` to `2.0.0` ([#3738](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3738))
+
 ### 📈 Features/Enhancements
 
 - [Optimizer] Increase timeout waiting for the exiting of an optimizer worker ([#3193](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3193))
