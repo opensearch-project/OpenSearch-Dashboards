@@ -102,6 +102,7 @@
     "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@26.4.2-rc.1",
     "**/jsonpointer": "^5.0.0",
     "**/json-schema": "^0.4.0",
+    "**/jszip": "^3.8.0",
     "**/kind-of": ">=6.0.3",
     "**/loader-utils": "^2.0.4",
     "**/lodash": "^4.17.21",
