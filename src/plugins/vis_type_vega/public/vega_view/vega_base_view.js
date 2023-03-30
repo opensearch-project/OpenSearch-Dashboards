@@ -41,7 +41,7 @@ import { opensearchFilters } from '../../../data/public';
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
-vega.scheme('elastic', euiPaletteColorBlind());
+vega.scheme('euiPaletteColorBlind', euiPaletteColorBlind());
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
