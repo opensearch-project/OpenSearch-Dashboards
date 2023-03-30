@@ -1,46 +1,48 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+const { EventBus } = require('./active_cursor');
 
-import { EventBus } from './active_cursor';
+describe('EventBus', () => {
+  let eventBus;
+  let listener;
 
-test('EventBus functionality', () => {
-  const eventBus = new EventBus();
-  let testPassed = false;
+  beforeEach(() => {
+    eventBus = new EventBus();
 
-  const listener = (eventDetail) => {
-    testPassed = eventDetail;
-  };
+    listener = jest.fn((eventDetail) => eventDetail);
+  });
 
-  eventBus.on('testEvent', listener);
-  eventBus.trigger('testEvent', true);
-  eventBus.off('testEvent', listener);
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-  expect(testPassed).toBe(true);
+  test('on() should add a listener', () => {
+    eventBus.on('testEvent', listener);
+
+    eventBus.trigger('testEvent', true);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledWith(true);
+  });
+
+  test('off() should remove a listener', () => {
+    eventBus.on('testEvent', listener);
+    eventBus.off('testEvent', listener);
+
+    eventBus.trigger('testEvent', true);
+
+    expect(listener).toHaveBeenCalledTimes(0);
+  });
+
+  test('trigger() should emit an event with detail', () => {
+    eventBus.on('testEvent', listener);
+
+    eventBus.trigger('testEvent', { message: 'test' });
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledWith({ message: 'test' });
+  });
 });
