@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import $ from 'jquery';
 import _ from 'lodash';
 import * as opensearch from '../opensearch/opensearch';
 
@@ -54,7 +53,7 @@ export function expandAliases(indicesOrAliases) {
   if (typeof indicesOrAliases === 'string') {
     indicesOrAliases = [indicesOrAliases];
   }
-  indicesOrAliases = $.map(indicesOrAliases, function (iOrA) {
+  indicesOrAliases = indicesOrAliases.map(function (iOrA) {
     if (perAliasIndexes[iOrA]) {
       return perAliasIndexes[iOrA];
     }
@@ -63,7 +62,7 @@ export function expandAliases(indicesOrAliases) {
   let ret = [].concat.apply([], indicesOrAliases);
   ret.sort();
   let last;
-  ret = $.map(ret, function (v) {
+  ret = ret.map(function (v) {
     const r = last === v ? null : v;
     last = v;
     return r;
@@ -91,8 +90,8 @@ export function getFields(indices, types) {
       ret = f ? f : [];
     } else {
       // filter what we need
-      $.each(typeDict, function (type, fields) {
-        if (!types || types.length === 0 || $.inArray(type, types) !== -1) {
+      typeDict.forEach(function (fields, type) {
+        if (!types || types.length === 0 || types.indexOf(type) !== -1) {
           ret.push(fields);
         }
       });
@@ -101,8 +100,8 @@ export function getFields(indices, types) {
     }
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function (index) {
-      if (!indices || indices.length === 0 || $.inArray(index, indices) !== -1) {
+    perIndexTypes.forEach(function (el, index) {
+      if (!indices || indices.length === 0 || indices.indexOf(index) !== -1) {
         ret.push(getFields(index, types));
       }
     });
@@ -124,13 +123,13 @@ export function getTypes(indices) {
     }
 
     // filter what we need
-    $.each(typeDict, function (type) {
+    typeDict.forEach(function (el, type) {
       ret.push(type);
     });
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function (index) {
-      if (!indices || $.inArray(index, indices) !== -1) {
+    perIndexTypes.forEach(function (el, index) {
+      if (!indices || indices.indexOf(index) !== -1) {
         ret.push(getTypes(index));
       }
     });
@@ -142,11 +141,11 @@ export function getTypes(indices) {
 
 export function getIndices(includeAliases) {
   const ret = [];
-  $.each(perIndexTypes, function (index) {
+  perIndexTypes.forEach(function (el, index) {
     ret.push(index);
   });
   if (typeof includeAliases === 'undefined' ? true : includeAliases) {
-    $.each(perAliasIndexes, function (alias) {
+    perAliasIndexes.forEach(function (el, alias) {
       ret.push(alias);
     });
   }
@@ -162,7 +161,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   function applyPathSettings(nestedFieldNames) {
     const pathType = fieldMapping.path || 'full';
     if (pathType === 'full') {
-      return $.map(nestedFieldNames, function (f) {
+      return nestedFieldNames.map(function (f) {
         f.name = fieldName + '.' + f.name;
         return f;
       });
@@ -185,7 +184,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   }
 
   if (fieldMapping.fields) {
-    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
+    nestedFields = fieldMapping.fields.map(function (fieldMapping, fieldName) {
       return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
     nestedFields = applyPathSettings(nestedFields);
@@ -197,7 +196,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 }
 
 function getFieldNamesFromProperties(properties = {}) {
-  const fieldList = $.map(properties, function (fieldMapping, fieldName) {
+  const fieldList = properties.map(function (fieldMapping, fieldName) {
     return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
   });
 
@@ -214,15 +213,14 @@ function loadTemplates(templatesObject = {}) {
 export function loadMappings(mappings) {
   perIndexTypes = {};
 
-  $.each(mappings, function (index, indexMapping) {
+  mappings.forEach(function (indexMapping, index) {
     const normalizedIndexMappings = {};
 
     // Migrate 1.0.0 mappings. This format has changed, so we need to extract the underlying mapping.
     if (indexMapping.mappings && _.keys(indexMapping).length === 1) {
       indexMapping = indexMapping.mappings;
     }
-
-    $.each(indexMapping, function (typeName, typeMapping) {
+    indexMapping.forEach(function (typeMapping, typeName) {
       if (typeName === 'properties') {
         const fieldList = getFieldNamesFromProperties(typeMapping);
         normalizedIndexMappings[typeName] = fieldList;
@@ -237,11 +235,11 @@ export function loadMappings(mappings) {
 
 export function loadAliases(aliases) {
   perAliasIndexes = {};
-  $.each(aliases || {}, function (index, omdexAliases) {
+  (aliases || {}).forEach(function (omdexAliases, index) {
     // verify we have an index defined. useful when mapping loading is disabled
     perIndexTypes[index] = perIndexTypes[index] || {};
 
-    $.each(omdexAliases.aliases || {}, function (alias) {
+    (omdexAliases.aliases || {}).forEach(function (el, alias) {
       if (alias === index) {
         return;
       } // alias which is identical to index means no index.
@@ -274,14 +272,15 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
   if (settingsToRetrieve[settingsKey] === true) {
     return opensearch.send('GET', settingKeyToPathMap[settingsKey], null);
   } else {
-    const settingsPromise = new $.Deferred();
-    if (settingsToRetrieve[settingsKey] === false) {
-      // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
-    } else {
-      // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return settingsPromise.resolve();
-    }
+    return new Promise((resolve) => {
+      if (settingsToRetrieve[settingsKey] === false) {
+        // If the user doesn't want autocomplete suggestions, then clear any that exist
+        resolve([JSON.stringify({})]);
+      } else {
+        // If the user doesn't want autocomplete suggestions, then clear any that exist
+        resolve();
+      }
+    });
   }
 }
 
@@ -314,41 +313,44 @@ export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
   const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
 
-  $.when(mappingPromise, aliasesPromise, templatesPromise).done((mappings, aliases, templates) => {
-    let mappingsResponse;
-    if (mappings) {
-      const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
-      if (maxMappingSize) {
-        console.warn(
-          `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
-        );
-        mappingsResponse = '[{}]';
-      } else {
-        mappingsResponse = mappings[0];
+  Promise.all([mappingPromise, aliasesPromise, templatesPromise]).then(
+    ([mappings, aliases, templates]) => {
+      let mappingsResponse;
+      if (mappings) {
+        const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
+        if (maxMappingSize) {
+          console.warn(
+            `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
+          );
+          mappingsResponse = '[{}]';
+        } else {
+          mappingsResponse = mappings[0];
+        }
+        loadMappings(JSON.parse(mappingsResponse));
       }
-      loadMappings(JSON.parse(mappingsResponse));
-    }
 
-    if (aliases) {
-      loadAliases(JSON.parse(aliases[0]));
-    }
-
-    if (templates) {
-      loadTemplates(JSON.parse(templates[0]));
-    }
-
-    if (mappings && aliases) {
-      // Trigger an update event with the mappings, aliases
-      $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
-    }
-
-    // Schedule next request.
-    pollTimeoutId = setTimeout(() => {
-      // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
-      // a scheduled request if the user turns off polling.
-      if (settings.getPolling()) {
-        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+      if (aliases) {
+        loadAliases(JSON.parse(aliases[0]));
       }
-    }, POLL_INTERVAL);
-  });
+
+      if (templates) {
+        loadTemplates(JSON.parse(templates[0]));
+      }
+
+      if (mappings && aliases) {
+        // Trigger an update event with the mappings, aliases
+        const updateEvent = new CustomEvent('update', { detail: [mappingsResponse, aliases[0]] });
+        mappingObj.dispatchEvent(updateEvent);
+      }
+
+      // Schedule next request.
+      pollTimeoutId = setTimeout(() => {
+        // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
+        // a scheduled request if the user turns off polling.
+        if (settings.getPolling()) {
+          retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+        }
+      }, POLL_INTERVAL);
+    }
+  );
 }
