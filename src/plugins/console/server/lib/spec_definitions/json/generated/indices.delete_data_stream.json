@@ -6,6 +6,6 @@
     "patterns": [
       "_data_stream/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/im-plugin/data-streams/"
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/data-streams/#step-7-delete-a-data-stream"
   }
 }

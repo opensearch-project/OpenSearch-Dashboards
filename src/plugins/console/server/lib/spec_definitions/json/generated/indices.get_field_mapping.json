@@ -20,6 +20,6 @@
       "_mapping/field/{fields}",
       "{indices}/_mapping/field/{fields}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/field-types/mappings/"
+    "documentation": "https://opensearch.org/docs/latest/field-types/mappings/#get-a-mapping"
   }
 }
