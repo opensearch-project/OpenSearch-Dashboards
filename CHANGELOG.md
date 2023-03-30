@@ -10,6 +10,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🛡 Security
 
 - [CVE-2022-25851] Bump jpeg-js from `0.4.1` to `0.4.4` ([#3741](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3741))
+- [CVE-2021-3803] Bump nth-check from `1.0.2` to `2.0.1` ([#3729](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3729))
 
 ### 📈 Features/Enhancements
 
