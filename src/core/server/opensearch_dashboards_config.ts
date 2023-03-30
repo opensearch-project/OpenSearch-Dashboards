@@ -85,8 +85,10 @@ export const config = {
         defaultValue: true,
       }),
     }),
-    isSurveyAllowed: schema.boolean({
-      defaultValue: true,
+    survey: schema.object({
+      url: schema.string({
+        defaultValue: 'https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW',
+      }),
     }),
   }),
   deprecations,

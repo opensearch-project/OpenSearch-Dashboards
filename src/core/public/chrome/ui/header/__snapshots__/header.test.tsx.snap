@@ -1302,7 +1302,6 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
-  isSurveyAllowed={true}
   isVisible$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1871,6 +1870,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  survey="/"
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -4592,9 +4592,9 @@ exports[`Header handles visibility and lock changes 1`] = `
                         "thrownError": null,
                       }
                     }
-                    isSurveyAllowed={true}
                     opensearchDashboardsDocLink="/docs"
                     opensearchDashboardsVersion="1.0.0"
+                    surveyLink="/"
                     useDefaultContent={true}
                   >
                     <HeaderHelpMenuUI
@@ -5398,9 +5398,9 @@ exports[`Header handles visibility and lock changes 1`] = `
                           "timeZone": null,
                         }
                       }
-                      isSurveyAllowed={true}
                       opensearchDashboardsDocLink="/docs"
                       opensearchDashboardsVersion="1.0.0"
+                      surveyLink="/"
                       useDefaultContent={true}
                     >
                       <EuiPopover
@@ -5413,8 +5413,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                             onClick={[Function]}
                           >
                             <EuiIcon
-                              size="m"
-                              type="help"
+                              size="l"
+                              type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
                         }
@@ -5465,7 +5465,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                             class="euiHeaderSectionItemButton__content"
                                           >
                                             <span
-                                              data-euiicon-type="help"
+                                              data-euiicon-type="questionInCircle"
                                             />
                                           </span>
                                         </span>
@@ -5506,12 +5506,12 @@ exports[`Header handles visibility and lock changes 1`] = `
                                           className="euiHeaderSectionItemButton__content"
                                         >
                                           <EuiIcon
-                                            size="m"
-                                            type="help"
+                                            size="l"
+                                            type="questionInCircle"
                                           >
                                             <span
-                                              data-euiicon-type="help"
-                                              size="m"
+                                              data-euiicon-type="questionInCircle"
+                                              size="l"
                                             />
                                           </EuiIcon>
                                         </span>
@@ -7611,7 +7611,6 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
-  isSurveyAllowed={true}
   isVisible$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8054,6 +8053,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  survey="/"
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -9828,9 +9828,9 @@ exports[`Header renders condensed header 1`] = `
                         "thrownError": null,
                       }
                     }
-                    isSurveyAllowed={true}
                     opensearchDashboardsDocLink="/docs"
                     opensearchDashboardsVersion="1.0.0"
+                    surveyLink="/"
                     useDefaultContent={true}
                   >
                     <HeaderHelpMenuUI
@@ -10634,9 +10634,9 @@ exports[`Header renders condensed header 1`] = `
                           "timeZone": null,
                         }
                       }
-                      isSurveyAllowed={true}
                       opensearchDashboardsDocLink="/docs"
                       opensearchDashboardsVersion="1.0.0"
+                      surveyLink="/"
                       useDefaultContent={true}
                     >
                       <EuiPopover
@@ -10649,8 +10649,8 @@ exports[`Header renders condensed header 1`] = `
                             onClick={[Function]}
                           >
                             <EuiIcon
-                              size="m"
-                              type="help"
+                              size="l"
+                              type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
                         }
@@ -10701,7 +10701,7 @@ exports[`Header renders condensed header 1`] = `
                                             class="euiHeaderSectionItemButton__content"
                                           >
                                             <span
-                                              data-euiicon-type="help"
+                                              data-euiicon-type="questionInCircle"
                                             />
                                           </span>
                                         </span>
@@ -10742,12 +10742,12 @@ exports[`Header renders condensed header 1`] = `
                                           className="euiHeaderSectionItemButton__content"
                                         >
                                           <EuiIcon
-                                            size="m"
-                                            type="help"
+                                            size="l"
+                                            type="questionInCircle"
                                           >
                                             <span
-                                              data-euiicon-type="help"
-                                              size="m"
+                                              data-euiicon-type="questionInCircle"
+                                              size="l"
                                             />
                                           </EuiIcon>
                                         </span>

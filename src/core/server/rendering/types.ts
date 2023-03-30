@@ -74,7 +74,7 @@ export interface RenderingMetadata {
       };
     };
     branding: Branding;
-    isSurveyAllowed: boolean;
+    survey?: string;
   };
 }
 

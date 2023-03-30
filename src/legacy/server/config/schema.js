@@ -247,7 +247,9 @@ export default () =>
         applicationTitle: Joi.any().default(''),
         useExpandedHeader: Joi.boolean().default(true),
       }),
-      isSurveyAllowed: Joi.boolean().default(true),
+      survey: Joi.object({
+        url: Joi.any().default('/'),
+      }),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,

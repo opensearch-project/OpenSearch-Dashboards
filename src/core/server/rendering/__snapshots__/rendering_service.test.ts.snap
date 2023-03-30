@@ -35,7 +35,6 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
-  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -47,6 +46,7 @@ Object {
     },
   },
   "serverBasePath": "/mock-server-basepath",
+  "survey": "https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW",
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -88,7 +88,6 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
-  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -100,6 +99,7 @@ Object {
     },
   },
   "serverBasePath": "/mock-server-basepath",
+  "survey": "https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW",
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -141,7 +141,6 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
-  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -157,6 +156,7 @@ Object {
     },
   },
   "serverBasePath": "/mock-server-basepath",
+  "survey": "https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW",
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -198,7 +198,6 @@ Object {
   "i18n": Object {
     "translationsUrl": "/translations/en.json",
   },
-  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -210,6 +209,7 @@ Object {
     },
   },
   "serverBasePath": "/mock-server-basepath",
+  "survey": "https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW",
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -251,7 +251,6 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
-  "isSurveyAllowed": true,
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -263,6 +262,7 @@ Object {
     },
   },
   "serverBasePath": "/mock-server-basepath",
+  "survey": "https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW",
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,

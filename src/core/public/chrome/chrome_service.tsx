@@ -261,7 +261,7 @@ export class ChromeService {
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
-          isSurveyAllowed={injectedMetadata.getIsSurveyAllowed()}
+          survey={injectedMetadata.getSurvey()}
         />
       ),
 

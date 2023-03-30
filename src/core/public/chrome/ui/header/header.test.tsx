@@ -75,7 +75,7 @@ function mockProps() {
       mark: { defaultUrl: '/' },
       applicationTitle: 'OpenSearch Dashboards',
     },
-    isSurveyAllowed: true,
+    survey: '/',
   };
 }
 

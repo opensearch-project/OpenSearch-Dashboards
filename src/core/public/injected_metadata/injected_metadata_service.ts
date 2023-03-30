@@ -75,7 +75,7 @@ export interface InjectedMetadataParams {
       };
     };
     branding: Branding;
-    isSurveyAllowed: boolean;
+    survey?: string;
   };
 }
 
@@ -148,8 +148,8 @@ export class InjectedMetadataService {
         return this.state.branding;
       },
 
-      getIsSurveyAllowed: () => {
-        return this.state.isSurveyAllowed;
+      getSurvey: () => {
+        return this.state.survey;
       },
     };
   }
@@ -185,7 +185,7 @@ export interface InjectedMetadataSetup {
     [key: string]: unknown;
   };
   getBranding: () => Branding;
-  getIsSurveyAllowed: () => boolean;
+  getSurvey: () => string | undefined;
 }
 
 /** @internal */

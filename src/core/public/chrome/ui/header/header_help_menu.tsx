@@ -50,11 +50,7 @@ import { ExclusiveUnion } from '@elastic/eui';
 import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
-import {
-  GITHUB_CREATE_ISSUE_LINK,
-  OPENSEARCH_DASHBOARDS_FEEDBACK_LINK,
-  SATISFACTION_SURVEY_LINK,
-} from '../../constants';
+import { GITHUB_CREATE_ISSUE_LINK } from '../../constants';
 
 /** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
@@ -126,7 +122,7 @@ interface Props {
   opensearchDashboardsVersion: string;
   useDefaultContent?: boolean;
   opensearchDashboardsDocLink: string;
-  isSurveyAllowed: boolean;
+  surveyLink?: string;
 }
 
 interface State {
@@ -203,15 +199,15 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       opensearchDashboardsVersion,
       useDefaultContent,
       opensearchDashboardsDocLink,
-      isSurveyAllowed,
+      surveyLink,
     } = this.props;
     const { helpExtension, helpSupportUrl } = this.state;
-    const opensearchSurvey = isSurveyAllowed ? (
+    const opensearchSurvey = surveyLink ? (
       <div>
-        <EuiButtonEmpty href={SATISFACTION_SURVEY_LINK} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty href={surveyLink} target="_blank" size="xs" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuSatisfactionSurveyTitle"
-            defaultMessage="Satisfaction Survey"
+            defaultMessage="Give feedback"
           />
         </EuiButtonEmpty>
 
@@ -224,7 +220,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         <EuiButtonEmpty href={opensearchDashboardsDocLink} target="_blank" size="xs" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuOpenSearchDashboardsDocumentationTitle"
-            defaultMessage="OpenSearch Dashboards documentation"
+            defaultMessage="Documentation"
           />
         </EuiButtonEmpty>
 
@@ -233,25 +229,13 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="xs" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
-            defaultMessage="Ask OpenSearch"
+            defaultMessage="Community"
           />
         </EuiButtonEmpty>
 
         <EuiSpacer size="xs" />
 
         {opensearchSurvey}
-
-        <EuiButtonEmpty
-          href={OPENSEARCH_DASHBOARDS_FEEDBACK_LINK}
-          target="_blank"
-          size="xs"
-          flush="left"
-        >
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
-            defaultMessage="Give feedback"
-          />
-        </EuiButtonEmpty>
 
         <EuiSpacer size="xs" />
 
@@ -348,7 +332,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         })}
         onClick={this.onMenuButtonClick}
       >
-        <EuiIcon type="help" size="m" />
+        <EuiIcon type="questionInCircle" size="l" />
       </EuiHeaderSectionItemButton>
     );
 

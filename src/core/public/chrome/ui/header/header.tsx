@@ -89,7 +89,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   branding: ChromeBranding;
-  isSurveyAllowed: boolean;
+  survey: string | undefined;
 }
 
 export function Header({
@@ -100,7 +100,7 @@ export function Header({
   onIsLockedUpdate,
   homeHref,
   branding,
-  isSurveyAllowed,
+  survey,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -222,7 +222,7 @@ export function Header({
                   helpSupportUrl$={observables.helpSupportUrl$}
                   opensearchDashboardsDocLink={opensearchDashboardsDocLink}
                   opensearchDashboardsVersion={opensearchDashboardsVersion}
-                  isSurveyAllowed={isSurveyAllowed}
+                  surveyLink={survey}
                 />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
