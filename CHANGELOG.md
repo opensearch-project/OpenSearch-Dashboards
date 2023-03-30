@@ -9,6 +9,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
+- [CVE-2021-23382] Bump postcss from `8.2.10` to `8.2.13` ([#3739](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3739))
+
 ### 📈 Features/Enhancements
 
 - [Optimizer] Increase timeout waiting for the exiting of an optimizer worker ([#3193](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3193))
