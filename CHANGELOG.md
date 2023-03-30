@@ -9,6 +9,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
+- [CVE-2021-3803] Bump nth-check from `1.0.2` to `2.0.1` ([#3729](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3729))
+
 ### 📈 Features/Enhancements
 
 - [Optimizer] Increase timeout waiting for the exiting of an optimizer worker ([#3193](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3193))
