@@ -41,7 +41,7 @@ import { opensearchFilters } from '../../../data/public';
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
-vega.scheme('elastic', euiPaletteColorBlind());
+vega.scheme('euiPaletteColorBlind', euiPaletteColorBlind());
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -315,10 +315,15 @@ export class VegaBaseView {
   /**
    * @param {object} query Query DSL snippet, as used in the query DSL editor
    * @param {string} [index] as defined in OpenSearch Dashboards, or default if missing
+   * @param {string} alias OpenSearch Query DSL's custom label for `opensearchDashboardsAddFilter`, as used in '+ Add Filter'
    */
-  async addFilterHandler(query, index) {
+  async addFilterHandler(query, index, alias) {
     const indexId = await this.findIndex(Utils.handleNonStringIndex(index));
-    const filter = opensearchFilters.buildQueryFilter(Utils.handleInvalidQuery(query), indexId);
+    const filter = opensearchFilters.buildQueryFilter(
+      Utils.handleInvalidQuery(query),
+      indexId,
+      alias
+    );
     this._applyFilter({ filters: [filter] });
   }
 

@@ -169,7 +169,7 @@ export function initTimelineApp(app, deps) {
     const savedVisualizations = deps.plugins.visualizations.savedVisualizationsLoader;
     const timezone = getTimezone(deps.core.uiSettings);
 
-    const defaultExpression = '.es(*)';
+    const defaultExpression = '.opensearch(*)';
 
     $scope.topNavMenu = getTopNavMenu();
 
