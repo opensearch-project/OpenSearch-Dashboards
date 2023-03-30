@@ -11,6 +11,6 @@
       "_recovery",
       "{indices}/_recovery"
     ],
-    "documentation": "https://opensearch.org/docs/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/index/"
   }
 }

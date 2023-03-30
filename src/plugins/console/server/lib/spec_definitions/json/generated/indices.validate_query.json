@@ -31,6 +31,6 @@
       "_validate/query",
       "{indices}/_validate/query"
     ],
-    "documentation": "https://opensearch.org/docs/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/index/"
   }
 }

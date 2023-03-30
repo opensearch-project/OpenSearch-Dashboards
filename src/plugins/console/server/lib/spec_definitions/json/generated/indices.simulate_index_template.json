@@ -11,6 +11,6 @@
     "patterns": [
       "_index_template/_simulate_index/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/index/"
   }
 }
