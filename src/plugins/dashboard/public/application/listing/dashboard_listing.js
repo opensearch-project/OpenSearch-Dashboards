@@ -37,6 +37,7 @@ import { i18n } from '@osd/i18n';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { TableListView } from '../../../../opensearch_dashboards_react/public';
+import { CreateButton } from './create_button';
 
 export const EMPTY_FILTER = '';
 
@@ -56,9 +57,15 @@ export class DashboardListing extends React.Component {
         <TableListView
           headingId="dashboardListingHeading"
           createItem={this.props.hideWriteControls ? null : this.props.createItem}
+          createButton={
+            this.props.hideWriteControls ? null : (
+              <CreateButton dashboardProviders={this.props.dashboardProviders} />
+            )
+          }
           findItems={this.props.findItems}
           deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
           editItem={this.props.hideWriteControls ? null : this.props.editItem}
+          viewItem={this.props.hideWriteControls ? null : this.props.viewItem}
           tableColumns={this.getTableColumns()}
           listingLimit={this.props.listingLimit}
           initialFilter={this.props.initialFilter}
@@ -163,7 +170,8 @@ export class DashboardListing extends React.Component {
 
   getTableColumns() {
     const dateFormat = this.props.core.uiSettings.get('dateFormat');
-    const tableColumns = [
+
+    return [
       {
         field: 'title',
         name: i18n.translate('dashboard.listing.table.titleColumnName', {
@@ -172,12 +180,20 @@ export class DashboardListing extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            href={this.props.getViewUrl(record)}
+            href={record.viewUrl}
             data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
           </EuiLink>
         ),
+      },
+      {
+        field: 'type',
+        name: i18n.translate('dashboard.listing.table.typeColumnName', {
+          defaultMessage: 'Type',
+        }),
+        dataType: 'string',
+        sortable: true,
       },
       {
         field: 'description',
@@ -201,16 +217,18 @@ export class DashboardListing extends React.Component {
         render: (updatedAt) => updatedAt && moment(updatedAt).format(dateFormat),
       },
     ];
-    return tableColumns;
   }
 }
 
 DashboardListing.propTypes = {
-  createItem: PropTypes.func.isRequired,
+  createItem: PropTypes.func,
+  dashboardProviders: PropTypes.object,
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,
-  getViewUrl: PropTypes.func.isRequired,
+  getViewUrl: PropTypes.func,
+  editItemAvailable: PropTypes.func,
+  viewItem: PropTypes.func,
   listingLimit: PropTypes.number.isRequired,
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,
