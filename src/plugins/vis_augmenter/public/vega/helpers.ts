@@ -25,6 +25,8 @@ import {
   VisLayerTypes,
 } from '../';
 
+// Given any visLayers, create a map to indicate which VisLayer types are present.
+// Serialize to an array since ES6 Maps cannot be stringified.
 export const enableVisLayersInSpecConfig = (spec: object, visLayers: VisLayers): {} => {
   const config = get(spec, 'config', { kibana: {} });
   const visibleVisLayers = new Map<VisLayerTypes, boolean>();
@@ -41,7 +43,7 @@ export const enableVisLayersInSpecConfig = (spec: object, visLayers: VisLayers):
     ...config,
     kibana: {
       ...config.kibana,
-      visibleVisLayers,
+      visibleVisLayers: [...visibleVisLayers],
     },
   };
 };
@@ -176,9 +178,7 @@ export const addPointInTimeEventsLayersToTable = (
       },
     });
 
-    if (augmentedTable.rows.length === 0) {
-      return false;
-    }
+    if (augmentedTable.rows.length === 0 || isEmpty(visLayer.events)) return false;
 
     // if only one row / one datapoint, put all events into this bucket
     if (augmentedTable.rows.length === 1) {

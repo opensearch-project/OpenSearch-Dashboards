@@ -344,6 +344,19 @@ export const TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS = [
   },
 ];
 
+export const TEST_VIS_LAYERS_SINGLE_EMPTY_EVENTS = [
+  {
+    originPlugin: TEST_PLUGIN,
+    type: VisLayerTypes.PointInTimeEvents,
+    pluginResource: {
+      type: TEST_PLUGIN_RESOURCE_TYPE,
+      id: TEST_PLUGIN_RESOURCE_ID,
+      name: TEST_PLUGIN_RESOURCE_NAME,
+      urlPath: TEST_PLUGIN_RESOURCE_PATH,
+    },
+  },
+];
+
 export const TEST_VIS_LAYERS_SINGLE_ON_BOUNDS = [
   {
     originPlugin: TEST_PLUGIN,

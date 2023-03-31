@@ -405,6 +405,10 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
             )
           );
         }
+        // deserializing the visibleVisLayers array -> map
+        if (result.visibleVisLayers !== undefined && Array.isArray(result.visibleVisLayers)) {
+          result.visibleVisLayers = new Map<VisLayerTypes, boolean>(result.visibleVisLayers);
+        }
       }
     }
     return result || {};

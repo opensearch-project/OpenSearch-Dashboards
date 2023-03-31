@@ -37,6 +37,7 @@ import {
   TEST_SPEC_SINGLE_VIS_LAYER,
   TEST_VIS_LAYERS_MULTIPLE,
   TEST_VIS_LAYERS_SINGLE,
+  TEST_VIS_LAYERS_SINGLE_EMPTY_EVENTS,
   TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS,
   TEST_VIS_LAYERS_SINGLE_ON_BOUNDS,
 } from '../test_constants';
@@ -81,11 +82,11 @@ describe('helpers', function () {
       const updatedConfig = enableVisLayersInSpecConfig({ config: baseConfig }, [
         pointInTimeEventsVisLayer,
       ]);
-      const expectedMap = new Map<VisLayerTypes, boolean>([
-        [VisLayerTypes.PointInTimeEvents, true],
-      ]);
+      const expectedArr = [
+        ...new Map<VisLayerTypes, boolean>([[VisLayerTypes.PointInTimeEvents, true]]),
+      ];
       // @ts-ignore
-      baseConfig.kibana.visibleVisLayers = expectedMap;
+      baseConfig.kibana.visibleVisLayers = expectedArr;
       expect(updatedConfig).toStrictEqual(baseConfig);
     });
     it('updates config with a valid and invalid VisLayer', function () {
@@ -98,11 +99,11 @@ describe('helpers', function () {
         pointInTimeEventsVisLayer,
         invalidVisLayer,
       ]);
-      const expectedMap = new Map<VisLayerTypes, boolean>([
-        [VisLayerTypes.PointInTimeEvents, true],
-      ]);
+      const expectedArr = [
+        ...new Map<VisLayerTypes, boolean>([[VisLayerTypes.PointInTimeEvents, true]]),
+      ];
       // @ts-ignore
-      baseConfig.kibana.visibleVisLayers = expectedMap;
+      baseConfig.kibana.visibleVisLayers = expectedArr;
       expect(updatedConfig).toStrictEqual(baseConfig);
     });
     it('does not update config if no valid VisLayer', function () {
@@ -113,7 +114,7 @@ describe('helpers', function () {
       };
       const updatedConfig = enableVisLayersInSpecConfig({ config: baseConfig }, [invalidVisLayer]);
       // @ts-ignore
-      baseConfig.kibana.visibleVisLayers = new Map<VisLayerTypes, boolean>();
+      baseConfig.kibana.visibleVisLayers = [...new Map<VisLayerTypes, boolean>()];
       expect(updatedConfig).toStrictEqual(baseConfig);
     });
     it('does not update config if empty VisLayer list', function () {
@@ -124,7 +125,7 @@ describe('helpers', function () {
       };
       const updatedConfig = enableVisLayersInSpecConfig({ config: baseConfig }, []);
       // @ts-ignore
-      baseConfig.kibana.visibleVisLayers = new Map<VisLayerTypes, boolean>();
+      baseConfig.kibana.visibleVisLayers = [...new Map<VisLayerTypes, boolean>()];
       expect(updatedConfig).toStrictEqual(baseConfig);
     });
   });
@@ -386,6 +387,19 @@ describe('helpers', function () {
           TEST_DATATABLE_NO_VIS_LAYERS,
           TEST_DIMENSIONS,
           TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS
+        )
+      ).toStrictEqual(TEST_DATATABLE_SINGLE_VIS_LAYER_EMPTY);
+    });
+    // below case should not happen since only VisLayers with a populated
+    // set of events should be passed from the plugins. but, if it does
+    // happen, we can handle it more gracefully instead of throwing an error
+    it('vis layer with empty events adds nothing to datatable', function () {
+      expect(
+        addPointInTimeEventsLayersToTable(
+          TEST_DATATABLE_NO_VIS_LAYERS,
+          TEST_DIMENSIONS,
+          // @ts-ignore
+          TEST_VIS_LAYERS_SINGLE_EMPTY_EVENTS
         )
       ).toStrictEqual(TEST_DATATABLE_SINGLE_VIS_LAYER_EMPTY);
     });
