@@ -33,7 +33,7 @@
     "node-sass": "sass/node-sass#v5",
     "normalize-path": "^3.0.0",
     "pirates": "^4.0.1",
-    "postcss": "^8.2.10",
+    "postcss": "^8.2.13",
     "rxjs": "^6.5.5",
     "source-map-support": "^0.5.19",
     "terser-webpack-plugin": "^2.1.2",
