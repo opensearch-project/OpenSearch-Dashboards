@@ -55,7 +55,7 @@ export const RightNav = () => {
         style: types.get(newVisName)?.ui.containerConfig.style.defaults,
       };
 
-      if (persistedAggParams.length <= aggConfigParams.length) return setConfirmAggs(newVis);
+      if (persistedAggParams.length < aggConfigParams.length) return setConfirmAggs(newVis);
 
       dispatch(setActiveVisualization(newVis));
     },
