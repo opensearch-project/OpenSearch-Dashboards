@@ -26,7 +26,7 @@ import {
 } from '../';
 
 // Given any visLayers, create a map to indicate which VisLayer types are present.
-// Serialize to an array since ES6 Maps cannot be stringified.
+// Convert to an array since ES6 Maps cannot be stringified.
 export const enableVisLayersInSpecConfig = (spec: object, visLayers: VisLayers): {} => {
   const config = get(spec, 'config', { kibana: {} });
   const visibleVisLayers = new Map<VisLayerTypes, boolean>();
