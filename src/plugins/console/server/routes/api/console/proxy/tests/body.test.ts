@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { getProxyRouteHandlerDeps } from './mocks';
+import { buildBufferedBodyMock, getProxyRouteHandlerDeps } from './mocks';
 
 import expect from '@osd/expect';
 
@@ -47,7 +47,6 @@ describe('Console Proxy Route', () => {
   beforeEach(() => {
     request = (method: string, path: string, response: string) => {
       const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise(response);
-
       const requestHandlerContextMock = coreMock.createRequestHandlerContext();
       opensearchClient = requestHandlerContextMock.opensearch.client;
 

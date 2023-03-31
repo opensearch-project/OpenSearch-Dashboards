@@ -4,6 +4,11 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["devTools"],
-  "optionalPlugins": ["usageCollection", "home"],
-  "requiredBundles": ["opensearchUiShared", "opensearchDashboardsReact", "opensearchDashboardsUtils", "home"]
+  "optionalPlugins": ["usageCollection", "home", "dataSource"],
+  "requiredBundles": [
+    "opensearchUiShared",
+    "opensearchDashboardsReact",
+    "opensearchDashboardsUtils",
+    "home"
+  ]
 }

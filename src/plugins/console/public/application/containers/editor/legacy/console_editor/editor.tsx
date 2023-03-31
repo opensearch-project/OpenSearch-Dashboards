@@ -37,7 +37,11 @@ import { ace } from '../../../../../../../opensearch_ui_shared/public';
 // @ts-ignore
 import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
-import { useEditorReadContext, useServicesContext } from '../../../../contexts';
+import {
+  useEditorReadContext,
+  useRequestActionContext,
+  useServicesContext,
+} from '../../../../contexts';
 import {
   useSaveCurrentTextObject,
   useSendCurrentRequestToOpenSearch,
@@ -53,6 +57,7 @@ const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
+  dataSourceId?: string;
 }
 
 interface QueryParams {
@@ -76,7 +81,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
 
 const inputId = 'ConAppInputTextarea';
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
   const {
     services: { history, notifications, settings: settingsService, opensearchHostService, http },
     docLinkVersion,
@@ -84,7 +89,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToOpenSearch = useSendCurrentRequestToOpenSearch();
+  const sendCurrentRequestToOpenSearch = useSendCurrentRequestToOpenSearch(dataSourceId);
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -197,7 +202,15 @@ function EditorUI({ initialTextValue }: EditorProps) {
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService, http]);
+  }, [
+    saveCurrentTextObject,
+    initialTextValue,
+    history,
+    setInputEditor,
+    settingsService,
+    http,
+    dataSourceId,
+  ]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;

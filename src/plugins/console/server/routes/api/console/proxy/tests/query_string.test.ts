@@ -32,7 +32,7 @@ import {
   IScopedClusterClient,
   opensearchDashboardsResponseFactory,
 } from '../../../../../../../../core/server';
-import { getProxyRouteHandlerDeps } from './mocks';
+import { getProxyRouteHandlerDeps, buildBufferedBodyMock } from './mocks';
 import { createHandler } from '../create_handler';
 import { coreMock } from '../../../../../../../../core/server/mocks';
 
@@ -42,13 +42,14 @@ describe('Console Proxy Route', () => {
   beforeEach(() => {
     const requestHandlerContextMock = coreMock.createRequestHandlerContext();
     opensearchClient = requestHandlerContextMock.opensearch.client;
+    // buildBufferedBodyMock.mockResolvedValue(Buffer.from('body'));
 
     request = async (method: string, path: string) => {
       const handler = createHandler(getProxyRouteHandlerDeps({}));
 
       return handler(
         { core: requestHandlerContextMock, dataSource: {} as any },
-        { headers: {}, query: { method, path } } as any,
+        { headers: {}, query: { method, path }, body: jest.fn() } as any,
         opensearchDashboardsResponseFactory
       );
     };
@@ -63,7 +64,10 @@ describe('Console Proxy Route', () => {
       describe('contains full url', () => {
         it('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
+          // const res = opensearchClient.asCurrentUser.transport.request.mock.calls;
+          // console.log(res);
           const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
+
           expect(args.path).toBe('/http://evil.com/test?pretty=true');
         });
       });
