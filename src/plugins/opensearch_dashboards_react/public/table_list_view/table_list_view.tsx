@@ -61,6 +61,7 @@ interface Item {
 }
 
 export interface TableListViewProps {
+  createButton?: JSX.Element;
   createItem?(): void;
   deleteItems?(items: object[]): Promise<void>;
   editItem?(item: object): void;
@@ -93,6 +94,7 @@ export interface TableListViewState {
   filter: string;
   selectedIds: string[];
   totalItems: number;
+  isCreatePopoverOpen: boolean;
 }
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
@@ -122,6 +124,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       showLimitError: false,
       filter: props.initialFilter,
       selectedIds: [],
+      isCreatePopoverOpen: false,
     };
   }
 
@@ -230,11 +233,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   hasNoItems() {
-    if (!this.state.isFetchingItems && this.state.items.length === 0 && !this.state.filter) {
-      return true;
-    }
-
-    return false;
+    return !this.state.isFetchingItems && this.state.items.length === 0 && !this.state.filter;
   }
 
   renderConfirmDeleteModal() {
@@ -498,25 +497,25 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderListing() {
-    let createButton;
-    if (this.props.createItem) {
-      createButton = (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={this.props.createItem}
-            data-test-subj="newItemButton"
-            iconType="plusInCircle"
-            fill
-          >
-            <FormattedMessage
-              id="opensearch-dashboards-react.tableListView.listing.createNewItemButtonLabel"
-              defaultMessage="Create {entityName}"
-              values={{ entityName: this.props.entityName }}
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      );
-    }
+    const defaultCreateButton = this.props.createItem ? (
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          onClick={this.props.createItem}
+          data-test-subj="newItemButton"
+          iconType="plusInCircle"
+          fill
+        >
+          <FormattedMessage
+            id="opensearch-dashboards-react.tableListView.listing.createNewItemButtonLabel"
+            defaultMessage="Create {entityName}"
+            values={{ entityName: this.props.entityName }}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    ) : (
+      false
+    );
+
     return (
       <div>
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
@@ -528,7 +527,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
             </EuiTitle>
           </EuiFlexItem>
 
-          {createButton}
+          {this.props.createButton || defaultCreateButton}
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
