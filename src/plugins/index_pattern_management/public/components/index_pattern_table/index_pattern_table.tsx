@@ -58,7 +58,6 @@ import { EmptyState } from './empty_state';
 import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { getIndices } from '../create_index_pattern_wizard/lib';
-import { ExperimentalCallout } from '../experimental_callout';
 
 const pagination = {
   initialPageSize: 10,
@@ -263,7 +262,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
 
   return (
     <>
-      {dataSourceEnabled ? <ExperimentalCallout /> : null}
       <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
