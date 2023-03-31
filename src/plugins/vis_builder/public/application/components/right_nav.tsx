@@ -55,7 +55,7 @@ export const RightNav = () => {
         style: types.get(newVisName)?.ui.containerConfig.style.defaults,
       };
 
-      if (persistedAggParams.length !== aggConfigParams.length) return setConfirmAggs(newVis);
+      if (persistedAggParams.length <= aggConfigParams.length) return setConfirmAggs(newVis);
 
       dispatch(setActiveVisualization(newVis));
     },
@@ -106,7 +106,7 @@ export const RightNav = () => {
           <p>
             <FormattedMessage
               id="visBuilder.rightNav.changeVisType.modalDescription"
-              defaultMessage="Switching to this visualization type will result in the loss of some selected fields. Do you want to continue?"
+              defaultMessage="Certain field configurations may be lost when changing visualization types and you may need to reconfigure those fields. Do you want to continue?"
             />
           </p>
         </EuiConfirmModal>
