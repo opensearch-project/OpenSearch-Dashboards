@@ -39,50 +39,9 @@ jobs:
             name: Windows
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Configure git's autocrlf (Windows only)
-        if: matrix.os == 'windows-latest'
-        run: |
-          git config --global core.autocrlf false
-
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup JDK (Windows only)
-        if: matrix.os == 'windows-latest'
-        uses: actions/setup-java@v3
+      - uses: ./.github/workflows/setup_node_template.yml
         with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
-        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
-
-      - name: Configure Yarn Cache (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
-          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
-
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-
+          os: ${{ matrix.os }}
 
       - name: Run bootstrap (Linux)
         if: matrix.os != 'windows-latest'
@@ -134,50 +93,9 @@ jobs:
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
 
-      - name: Configure git's autocrlf (Windows only)
-        if: matrix.os == 'windows-latest'
-        run: |
-          git config --global core.autocrlf false
-
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup JDK (Windows only)
-        if: matrix.os == 'windows-latest'
-        uses: actions/setup-java@v3
+      - uses: ./.github/workflows/setup_node_template.yml
         with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
-        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
-
-      - name: Configure Yarn Cache (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
-          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
-
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-
+          os: ${{ matrix.os }}
 
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
@@ -235,46 +153,10 @@ jobs:
       run:
         working-directory: ./artifacts
     steps:
-      - name: Configure git's autocrlf (Windows only)
-        if: matrix.os == 'windows-latest'
-        run: |
-          git config --global core.autocrlf false
-        working-directory: .
-
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: ./.github/workflows/setup_node_template.yml
         with:
-          path: ./artifacts
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: './artifacts/.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
-        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
-
-      - name: Configure Yarn Cache (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
-          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
-
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-
+          os: ${{ matrix.os }}
+          working-directory: ./artifacts
 
       - name: Get package version (Linux)
         if: matrix.os != 'windows-latest'
@@ -323,36 +205,13 @@ jobs:
       matrix:
         version: [osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          path: ./artifacts
-
       - run: echo Running backwards compatibility tests for version ${{ matrix.version }}
       - run: echo [NOTE] These tests will be ran using Linux x64 release builds without security
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - uses: ./.github/workflows/setup_node_template.yml
         with:
-          node-version-file: './artifacts/.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Configure Yarn Cache
-        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
-
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-
+          os: ${{ matrix.os }}
+          working-directory: ./artifacts
 
       - name: Get package version
         run: |
