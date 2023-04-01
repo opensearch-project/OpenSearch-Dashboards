@@ -32,18 +32,18 @@ import chalk from 'chalk';
 import Listr from 'listr';
 
 import { createFailError, run } from '@osd/dev-utils';
-import { ErrorReporter, I18nConfig } from './i18n';
+import { ErrorReporter } from './i18n';
 import {
   extractDefaultMessages,
   extractUntrackedMessages,
   checkCompatibility,
   checkConfigs,
   mergeConfigs,
+  ListrContext,
 } from './i18n/tasks';
 
-const skipOnNoTranslations = ({ config }: { config: I18nConfig }) =>
-  !config.translations.length && 'No translations found.';
-
+const skipOnNoTranslations = (context: ListrContext) =>
+  !context.config?.translations?.length && 'No translations found.';
 run(
   async ({
     flags: {
@@ -85,7 +85,7 @@ run(
 
     const srcPaths = Array().concat(path || ['./src', './packages']);
 
-    const list = new Listr(
+    const list = new Listr<ListrContext>(
       [
         {
           title: 'Checking .i18nrc.json files',
@@ -105,14 +105,15 @@ run(
         {
           title: 'Validating Default Messages',
           skip: skipOnNoTranslations,
-          task: ({ config }) =>
-            new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
+          task: ({ config }) => {
+            return new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true });
+          },
         },
         {
           title: 'Compatibility Checks',
           skip: skipOnNoTranslations,
-          task: ({ config }) =>
-            new Listr(
+          task: ({ config }) => {
+            return new Listr<ListrContext>(
               checkCompatibility(
                 config,
                 {
@@ -125,7 +126,8 @@ run(
                 log
               ),
               { exitOnError: true }
-            ),
+            );
+          },
         },
       ],
       {
@@ -138,7 +140,7 @@ run(
       const reporter = new ErrorReporter();
       const messages: Map<string, { message: string }> = new Map();
       await list.run({ messages, reporter });
-    } catch (error) {
+    } catch (error: ErrorReporter | Error) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
         error.errors.forEach((e: string | Error) => log.error(e));
