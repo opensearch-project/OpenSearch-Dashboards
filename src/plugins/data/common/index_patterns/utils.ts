@@ -64,7 +64,7 @@ export async function findByTitle(
 
 // This is used to validate datasource reference of index pattern
 export const validateDataSourceReference = (
-  indexPattern: SavedObject<any>,
+  indexPattern: SavedObject<IndexPatternSavedObjectAttrs>,
   dataSourceId?: string
 ) => {
   const references = indexPattern.references;
@@ -82,11 +82,13 @@ export const getIndexPatternTitle = async (
   references: SavedObjectReference[],
   getDataSource: (id: string) => Promise<SavedObject<DataSourceAttributes>>
 ): Promise<string> => {
-  const DELIMITER = '.';
+  const DATA_SOURCE_INDEX_PATTERN_DELIMITER = '.';
   let dataSourceTitle;
+  const dataSourceReference = references.find((ref) => ref.type === 'data-source');
+
   // If an index-pattern references datasource, prepend data source name with index pattern name for display purpose
-  if (Array.isArray(references) && references[0] && references[0].type === 'data-source') {
-    const dataSourceId = references[0].id;
+  if (dataSourceReference) {
+    const dataSourceId = dataSourceReference.id;
     try {
       const {
         attributes: { title },
@@ -94,10 +96,11 @@ export const getIndexPatternTitle = async (
       } = await getDataSource(dataSourceId);
       dataSourceTitle = error ? dataSourceId : title;
     } catch (e) {
+      // use datasource id as title when failing to fetch datasource
       dataSourceTitle = dataSourceId;
     }
 
-    return dataSourceTitle.concat(DELIMITER).concat(indexPatternTitle);
+    return dataSourceTitle.concat(DATA_SOURCE_INDEX_PATTERN_DELIMITER).concat(indexPatternTitle);
   } else {
     // if index pattern doesn't reference datasource, return as it is.
     return indexPatternTitle;
