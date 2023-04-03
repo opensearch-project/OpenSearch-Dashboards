@@ -65,7 +65,7 @@ export interface TriggerContextMapping {
   [VISUALIZE_GEO_FIELD_TRIGGER]: VisualizeFieldContext;
 }
 
-export const DEFAULT_ACTION = '';
+const DEFAULT_ACTION = '';
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
 export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
 export const ACTION_VISUALIZE_LENS_FIELD = 'ACTION_VISUALIZE_LENS_FIELD';

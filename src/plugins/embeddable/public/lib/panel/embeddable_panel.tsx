@@ -83,7 +83,11 @@ interface Props {
   SavedObjectFinder: React.ComponentType<any>;
   stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
-  isRetained?: boolean;
+  // By default, embeddable.destroy() is called when this component unmounts.
+  // To prevent this default behavior, set this prop to true.
+  isDestroyPrevented?: boolean;
+  // Toggle off the border and shadow applied around the embeddable.
+  // By default, the embeddable will have a shadow and border around it.
   isBorderless?: boolean;
 }
 
@@ -203,7 +207,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       this.state.errorEmbeddable.destroy();
     }
 
-    if (!this.props.isRetained) {
+    if (!this.props.isDestroyPrevented) {
       this.props.embeddable.destroy();
     }
   }
