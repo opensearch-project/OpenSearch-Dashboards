@@ -70,8 +70,8 @@ export function verifyICUMessage(message: string) {
         verifySelectFormatNode(node.format);
       }
     }
-  } catch (error) {
-    if (error.name === 'SyntaxError') {
+  } catch (error: unknown) {
+    if (error instanceof parser.SyntaxError && error.name === 'SyntaxError') {
       const errorWithContext = createParserErrorMessage(message, {
         loc: {
           line: error.location.start.line,
