@@ -27,7 +27,7 @@
     "execa": "^4.0.2",
     "fibers": "^5.0.3",
     "jest-diff": "^27.5.1",
-    "js-yaml": "^3.14.0",
+    "js-yaml": "^4.1.0",
     "json-stable-stringify": "^1.0.1",
     "lmdb-store": "^1.6.11",
     "normalize-path": "^3.0.0",
