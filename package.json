@@ -111,6 +111,7 @@
     "**/node-jose": "^2.2.0",
     "**/node-jose/node-forge": "^0.10.0",
     "**/normalize-url": "^4.5.1",
+    "**/nth-check": "^2.0.1",
     "**/prismjs": "^1.23.0",
     "**/qs": "^6.11.0",
     "**/react-syntax-highlighter": "^15.3.1",
