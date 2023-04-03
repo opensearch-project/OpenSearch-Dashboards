@@ -57,7 +57,7 @@ set -euo pipefail
 trap "exit 130" INT
 
 has_node() {
-  command -v node >/dev/null 2>&1
+  command -v scripts/use_node >/dev/null 2>&1
 }
 
 has_nvm() {
@@ -109,7 +109,7 @@ has_node || {
 }
 
 execute_precommit_hook() {
-  node scripts/precommit_hook || return 1
+  scripts/use_node scripts/precommit_hook || return 1
 
   PRECOMMIT_FILE="./.git/hooks/pre-commit.local"
   if [ -x "\${PRECOMMIT_FILE}" ]; then

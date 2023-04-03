@@ -62,6 +62,14 @@ describe('Generating BWC test data without security', () => {
       .find('[data-test-subj="newItemButton"]')
       .click();
     cy.get('[data-test-subj="visType-timelion"]').click();
+    // Because monaco editor doesn't use a contenteditable, input, or textarea, .clear() or .type('{selectall}') won't work. To clear, we just backspace for each character instead.
+    cy.get('[class="view-line"]')
+      .invoke('text')
+      .then((expressionText) => {
+        cy.get('[class="view-line"]').type('{backspace}'.repeat(expressionText.length));
+      });
+    // update default expression to use `.es(*)` instead of `.opensearch(*)` for bwc
+    cy.get('[class="view-line"]').type('.es(*)');
     cy.get('[data-test-subj="visualizeSaveButton"]').click();
     cy.get('[data-test-subj="savedObjectTitle"]').type('test-timeline');
     cy.get('[data-test-subj="confirmSaveSavedObjectButton"]').click();

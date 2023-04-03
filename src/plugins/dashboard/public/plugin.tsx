@@ -32,6 +32,7 @@ import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import {
   App,
@@ -45,6 +46,7 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { isEmpty } from 'lodash';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -119,6 +121,7 @@ import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
+import { DashboardProvider } from './types';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -156,7 +159,11 @@ interface StartDependencies {
   savedObjects: SavedObjectsStart;
 }
 
-export type DashboardSetup = void;
+export type RegisterDashboardProviderFn = (provider: DashboardProvider) => void;
+
+export interface DashboardSetup {
+  registerDashboardProvider: RegisterDashboardProviderFn;
+}
 
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
@@ -200,6 +207,7 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
+  private dashboardProviders: { [key: string]: DashboardProvider } = {};
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
   public setup(
@@ -308,6 +316,48 @@ export class DashboardPlugin
       stopUrlTracker();
     };
 
+    const registerDashboardProvider: RegisterDashboardProviderFn = (
+      provider: DashboardProvider
+    ) => {
+      const found = this.dashboardProviders[provider.savedObjectsType];
+      if (found) {
+        throw new Error(`DashboardProvider ${provider.savedObjectsType} is registered twice`);
+      }
+      if (
+        isEmpty(provider.createSortText) ||
+        isEmpty(provider.createUrl) ||
+        isEmpty(provider.createLinkText)
+      ) {
+        throw new Error(
+          `DashboardProvider ${provider.savedObjectsType} requires 'createSortText', 'createLinkText', and 'createUrl'`
+        );
+      }
+      if (isEmpty(provider.savedObjectsType || isEmpty(provider.savedObjectsName))) {
+        throw new Error(
+          `DashboardProvider ${provider.savedObjectsType} requires 'savedObjectsId', and 'savedObjectsType'`
+        );
+      }
+
+      this.dashboardProviders[provider.savedObjectsType] = provider;
+    };
+
+    registerDashboardProvider({
+      savedObjectsType: 'dashboard',
+      savedObjectsName: 'Dashboard',
+      appId: 'dashboards',
+      viewUrlPathFn: (obj) => `#/view/${obj.id}`,
+      editUrlPathFn: (obj) => `/view/${obj.id}?_a=(viewMode:edit)`,
+      createUrl: core.http.basePath.prepend('/app/dashboards#/create'),
+      createSortText: 'Dashboard',
+      createLinkText: (
+        <FormattedMessage
+          id="opensearch-dashboards-react.tableListView.listing.createNewItemButtonLabel"
+          defaultMessage="{entityName}"
+          values={{ entityName: 'Dashboard' }}
+        />
+      ),
+    });
+
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
@@ -341,6 +391,7 @@ export class DashboardPlugin
           data: dataStart,
           savedObjectsClient: coreStart.savedObjects.client,
           savedDashboards: dashboardStart.getSavedDashboardLoader(),
+          dashboardProviders: () => this.dashboardProviders,
           chrome: coreStart.chrome,
           addBasePath: coreStart.http.basePath.prepend,
           uiSettings: coreStart.uiSettings,
@@ -420,6 +471,10 @@ export class DashboardPlugin
         order: 100,
       });
     }
+
+    return {
+      registerDashboardProvider,
+    };
   }
 
   private addEmbeddableToDashboard(
