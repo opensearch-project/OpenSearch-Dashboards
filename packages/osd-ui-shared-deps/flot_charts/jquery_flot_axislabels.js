@@ -159,6 +159,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                       'Label" " class="axisLabels" style="position:absolute;">'
                       + this.opts.axisLabel + '</div>');
         this.plot.getPlaceholder().append(this.elem);
+        if (this.opts.axisLabelColour) {
+            this.elem.css('color', this.opts.axisLabelColour);
+        }
         if (this.position == 'top') {
             this.elem.css('left', box.left + box.width/2 - this.labelWidth/2 +
                           'px');
@@ -261,6 +264,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                       'Label" style="position:absolute; ' +
                       this.transforms(offsets.degrees, offsets.x, offsets.y) +
                       '">' + this.opts.axisLabel + '</div>');
+        if (this.opts.axisLabelColour) {
+            this.elem.css('color', this.opts.axisLabelColour);
+        }
         this.plot.getPlaceholder().append(this.elem);
     };
 

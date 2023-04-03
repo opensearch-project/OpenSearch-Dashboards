@@ -3,6 +3,7 @@
 exports[`after fetch hideWriteControls 1`] = `
 <I18nProvider>
   <TableListView
+    createButton={null}
     createItem={null}
     deleteItems={null}
     editItem={null}
@@ -41,6 +42,12 @@ exports[`after fetch hideWriteControls 1`] = `
         },
         Object {
           "dataType": "string",
+          "field": "type",
+          "name": "Type",
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
           "field": "description",
           "name": "Description",
           "sortable": true,
@@ -75,6 +82,7 @@ exports[`after fetch hideWriteControls 1`] = `
         },
       }
     }
+    viewItem={null}
   />
 </I18nProvider>
 `;
@@ -82,6 +90,7 @@ exports[`after fetch hideWriteControls 1`] = `
 exports[`after fetch initialFilter 1`] = `
 <I18nProvider>
   <TableListView
+    createButton={<CreateButton />}
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -164,6 +173,12 @@ exports[`after fetch initialFilter 1`] = `
         },
         Object {
           "dataType": "string",
+          "field": "type",
+          "name": "Type",
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
           "field": "description",
           "name": "Description",
           "sortable": true,
@@ -198,6 +213,7 @@ exports[`after fetch initialFilter 1`] = `
         },
       }
     }
+    viewItem={[Function]}
   />
 </I18nProvider>
 `;
@@ -205,6 +221,7 @@ exports[`after fetch initialFilter 1`] = `
 exports[`after fetch renders call to action when no dashboards exist 1`] = `
 <I18nProvider>
   <TableListView
+    createButton={<CreateButton />}
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -287,6 +304,12 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         },
         Object {
           "dataType": "string",
+          "field": "type",
+          "name": "Type",
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
           "field": "description",
           "name": "Description",
           "sortable": true,
@@ -321,6 +344,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         },
       }
     }
+    viewItem={[Function]}
   />
 </I18nProvider>
 `;
@@ -328,6 +352,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
 exports[`after fetch renders table rows 1`] = `
 <I18nProvider>
   <TableListView
+    createButton={<CreateButton />}
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -410,6 +435,12 @@ exports[`after fetch renders table rows 1`] = `
         },
         Object {
           "dataType": "string",
+          "field": "type",
+          "name": "Type",
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
           "field": "description",
           "name": "Description",
           "sortable": true,
@@ -444,6 +475,7 @@ exports[`after fetch renders table rows 1`] = `
         },
       }
     }
+    viewItem={[Function]}
   />
 </I18nProvider>
 `;
@@ -451,6 +483,7 @@ exports[`after fetch renders table rows 1`] = `
 exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 <I18nProvider>
   <TableListView
+    createButton={<CreateButton />}
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -533,6 +566,12 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         },
         Object {
           "dataType": "string",
+          "field": "type",
+          "name": "Type",
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
           "field": "description",
           "name": "Description",
           "sortable": true,
@@ -567,6 +606,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         },
       }
     }
+    viewItem={[Function]}
   />
 </I18nProvider>
 `;
@@ -574,6 +614,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
 <I18nProvider>
   <TableListView
+    createButton={<CreateButton />}
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -582,6 +623,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
+    initialPageSize={10}
     listingLimit={1000}
     noItemsFragment={
       <div>
@@ -655,6 +697,12 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
         },
         Object {
           "dataType": "string",
+          "field": "type",
+          "name": "Type",
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
           "field": "description",
           "name": "Description",
           "sortable": true,
@@ -689,6 +737,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
         },
       }
     }
+    viewItem={[Function]}
   />
 </I18nProvider>
 `;

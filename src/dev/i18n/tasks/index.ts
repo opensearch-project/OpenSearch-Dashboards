@@ -28,8 +28,16 @@
  * under the License.
  */
 
+import { ErrorReporter, I18nConfig } from '..';
+
 export { extractDefaultMessages } from './extract_default_translations';
 export { extractUntrackedMessages } from './extract_untracked_translations';
 export { checkCompatibility } from './check_compatibility';
 export { mergeConfigs } from './merge_configs';
 export { checkConfigs } from './check_configs';
+
+export interface ListrContext {
+  config?: I18nConfig;
+  reporter: ErrorReporter;
+  messages: Map<string, { message: string }>;
+}
