@@ -94,7 +94,7 @@ export class VegaParser {
   filters: Bool;
   timeCache: TimeCache;
   visibleVisLayers: Map<VisLayerTypes, boolean>;
-  visInteractions?: { event: string; handlerName: string }[];
+  visInteractions?: Array<{ event: string; handlerName: string }>;
 
   constructor(
     spec: VegaSpec | string,

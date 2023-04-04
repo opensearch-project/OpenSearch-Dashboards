@@ -5,6 +5,7 @@
 
 import moment from 'moment';
 import { cloneDeep, isEmpty, get } from 'lodash';
+import { Item, ScenegraphEvent } from 'vega';
 import {
   OpenSearchDashboardsDatatable,
   OpenSearchDashboardsDatatableColumn,
@@ -25,7 +26,6 @@ import {
   VisLayerTypes,
 } from '../';
 import { VisInteractionHandler, VisInteration } from './constants';
-import { Item, ScenegraphEvent } from 'vega';
 
 // Given any visLayers, create a map to indicate which VisLayer types are present.
 // Convert to an array since ES6 Maps cannot be stringified.
@@ -318,7 +318,7 @@ export const addPointInTimeEventsLayersToSpec = (
     },
     transform: [
       { filter: generateVisLayerFilterString(visLayerColumnIds) },
-      { calculate: `'${VisInteration.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' }
+      { calculate: `'${VisInteration.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
     ],
     params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
     encoding: {
@@ -350,10 +350,12 @@ export const addPointInTimeEventsLayersToSpec = (
  * Interaction handling functions mapped by their action names.
  */
 export const interactionHandlersByAction = {
-  [VisInteractionHandler.HANDLE_POINT_IN_TIME_CLICK]: (_event: ScenegraphEvent, item?: Item | null) => {
+  [VisInteractionHandler.HANDLE_POINT_IN_TIME_CLICK]: (
+    _event: ScenegraphEvent,
+    item?: Item | null
+  ) => {
     if (isPointInTimeAnnotation(item)) {
       // TODO: Show the events flyout
-      console.log('sjhsf')
     }
   },
 };
@@ -370,15 +372,15 @@ export const addPointInTimeInteractionsConfig = (config: object) => {
     ...kibana,
     visInteractions: [
       ...(kibana.visInteractions || []),
-      { event: 'click', handlerName: VisInteractionHandler.HANDLE_POINT_IN_TIME_CLICK }
-    ]
+      { event: 'click', handlerName: VisInteractionHandler.HANDLE_POINT_IN_TIME_CLICK },
+    ],
   };
 
   return {
     ...config,
-    kibana: withInteractionsConfig
-  }
-}
+    kibana: withInteractionsConfig,
+  };
+};
 
 export const isPointInTimeAnnotation = (item?: Item | null) => {
   return item?.datum?.userAction === VisInteration.VIEW_EVENTS_FLYOUT;
