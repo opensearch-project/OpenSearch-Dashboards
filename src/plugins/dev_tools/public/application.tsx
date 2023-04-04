@@ -154,7 +154,7 @@ function DevToolsWrapper({
 
   return (
     <main className="devApp">
-      <div className="tabNav">
+      <div>
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
             <EuiTabs>
@@ -178,8 +178,15 @@ function DevToolsWrapper({
           {dataSourceEnabled ? (
             <EuiFlexItem grow={false} className="dataSourceSelector">
               <EuiComboBox
-                aria-label="Select a Data Source"
-                placeholder="Select a Data Source"
+                aria-label={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxAriaLabel', {
+                  defaultMessage: 'Select a Data Source',
+                })}
+                placeholder={i18n.translate(
+                  'devTool.devToolWrapper.DataSourceComboBoxPlaceholder',
+                  {
+                    defaultMessage: 'Select a Data Source',
+                  }
+                )}
                 singleSelection={{ asPlainText: true }}
                 options={dataSources}
                 selectedOptions={selectedOptions}
