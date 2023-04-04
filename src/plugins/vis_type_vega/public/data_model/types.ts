@@ -115,6 +115,7 @@ export interface OpenSearchDashboards {
   type: string;
   renderer: Renderer;
   visibleVisLayers?: Map<VisLayerTypes, boolean>;
+  visInteractions?: { event: string; handlerName: string }[];
 }
 
 export interface VegaSpec {

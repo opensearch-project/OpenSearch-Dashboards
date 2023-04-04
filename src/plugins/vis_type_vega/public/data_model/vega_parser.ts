@@ -94,6 +94,7 @@ export class VegaParser {
   filters: Bool;
   timeCache: TimeCache;
   visibleVisLayers: Map<VisLayerTypes, boolean>;
+  visInteractions?: { event: string; handlerName: string }[];
 
   constructor(
     spec: VegaSpec | string,
@@ -408,6 +409,9 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         // Converting the visibleVisLayers array back to a map
         if (result.visibleVisLayers !== undefined && Array.isArray(result.visibleVisLayers)) {
           result.visibleVisLayers = new Map<VisLayerTypes, boolean>(result.visibleVisLayers);
+        }
+        if (result.visInteractions) {
+          this.visInteractions = result.visInteractions;
         }
       }
     }
