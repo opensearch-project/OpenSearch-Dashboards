@@ -12,7 +12,7 @@ OpenSearch Dashboards is an open-source data visualization tool designed to work
 
 We aim to be an exceptional community-driven platform and to foster open participation and collective contribution with all contributors. Stay up to date on the what's happening with the OpenSearch Project by tracking GitHub [issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues) and [pull requests](https://github.com/opensearch-project/OpenSearch-Dashboards/pulls). 
 
-You can [contribute to this project](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/CONTRIBUTING.md) by [opening issues] to give feedback, share ideas, identify bugs, and contribute code.
+You can [contribute to this project](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/CONTRIBUTING.md) by [opening issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose) to give feedback, share ideas, identify bugs, and contribute code.
 
 Set up your [OpenSearch Dashboards development environment](ttps://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/DEVELOPER_GUIDE.md#getting-started-guide) today! The project team looks forward to your contributions.
 
