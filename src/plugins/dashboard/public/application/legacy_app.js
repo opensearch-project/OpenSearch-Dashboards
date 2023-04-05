@@ -70,11 +70,11 @@ export function initDashboardApp(app, deps) {
     $scope.visitVisualizeAppLinkText = i18n.translate('dashboard.visitVisualizeAppLinkText', {
       defaultMessage: 'visit the Visualize app',
     });
-    addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
+    addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks); //added before rendering <DashboardApp>
   }
 
-  app.factory('history', () => createHashHistory());
-  app.factory('osdUrlStateStorage', (history) =>
+  app.factory('history', () => createHashHistory()); //created in services plugin.ts before renderApp()
+  app.factory('osdUrlStateStorage', (history) => //created in the services
     createOsdUrlStateStorage({
       history,
       useHash: deps.uiSettings.get('state:storeInSessionStorage'),
@@ -200,7 +200,7 @@ export function initDashboardApp(app, deps) {
               }),
             },
           ]);
-          addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
+          addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks); //added before rendering the <DashboardApp>
           $scope.core = deps.core;
 
           $scope.$on('$destroy', () => {

@@ -50,21 +50,15 @@ import { DashboardProvider } from 'src/plugins/dashboard/public/types';
 import { Storage } from '../../../opensearch_dashboards_utils/public';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
-import { EmbeddableStart } from '../../../embeddable/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../navigation/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { SharePluginStart } from '../../../share/public';
 import {
-  OpenSearchDashboardsLegacyStart,
   configureAppAngularModule,
 } from '../../../opensearch_dashboards_legacy/public';
-import { UrlForwardingStart } from '../../../url_forwarding/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
 
 // required for i18nIdDirective
 import 'angular-sanitize';
 // required for ngRoute
 import 'angular-route';
+import { DashboardServices } from './types';
 
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
@@ -99,7 +93,7 @@ export interface RenderDeps {
 
 let angularModuleInstance: IModule | null = null;
 
-export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
+export const renderApp = (element: HTMLElement, appBasePath: string, deps: DashboardServices) => {
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule();
     // global routing stuff

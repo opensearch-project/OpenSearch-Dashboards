@@ -93,7 +93,6 @@ import {
   DashboardContainerFactoryDefinition,
   ExpandPanelAction,
   ExpandPanelActionContext,
-  RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
   ACTION_UNLINK_FROM_LIBRARY,
@@ -122,6 +121,8 @@ import {
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
 import { DashboardProvider } from './types';
+import { DashboardServices } from './application/types';
+import { createHashHistory } from 'history';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -357,7 +358,7 @@ export class DashboardPlugin
         />
       ),
     });
-
+    
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
@@ -380,8 +381,16 @@ export class DashboardPlugin
           savedObjects,
         } = pluginsStart;
 
-        const deps: RenderDeps = {
+        const history = createHashHistory(); //need more research
+        const services: DashboardServices = {
+          ...coreStart,
           pluginInitializerContext: this.initializerContext,
+          history, 
+          osdUrlStateStorage: createOsdUrlStateStorage({
+            history,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          }),
           core: coreStart,
           dashboardConfig,
           navigateToDefaultApp,
@@ -406,14 +415,14 @@ export class DashboardPlugin
           usageCollection,
           scopedHistory: () => this.currentHistory!,
           setHeaderActionMenu: params.setHeaderActionMenu,
-          savedObjects,
+          savedObjectsPublic: savedObjects,
           restorePreviousUrl,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
         params.element.classList.add('dshAppContainer');
-        const unmount = renderApp(params.element, params.appBasePath, deps);
+        const { renderApp } = await import('./application/application');
+        const unmount = renderApp(params, services);
         return () => {
           unmount();
           appUnMounted();
