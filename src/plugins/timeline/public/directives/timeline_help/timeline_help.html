@@ -164,7 +164,7 @@
                               datasource, you can start submitting queries. For starters,
                               enter {opensearchPattern} in the input bar and hit enter."
         i18n-values="{
-          html_opensearchPattern: '<code>.es(*)</code>',
+          html_opensearchPattern: '<code>.opensearch(*)</code>',
         }"
       ></p>
       <p>
@@ -176,8 +176,8 @@
           i18n-values="{
             html_opensearchAsteriskQueryDescription: '<em>' + translations.opensearchAsteriskQueryDescription + '</em>',
             html_html: '<em>html</em>',
-            html_htmlQuery: '<code>.es(html)</code>',
-            html_bobQuery: '<code>.es(\'user:bob AND bytes:>100\')</code>',
+            html_htmlQuery: '<code>.opensearch(html)</code>',
+            html_bobQuery: '<code>.opensearch(\'user:bob AND bytes:>100\')</code>',
             html_bob: '<em>bob</em>',
             html_user: '<code>user</code>',
             html_bytes: '<code>bytes</code>',
@@ -193,7 +193,7 @@
                             timeline.help.querying.paragraph2Part2"></a>
         <span i18n-id="timeline.help.querying.paragraph2Part2"
           i18n-default-message="as the first argument to the {opensearchQuery} function." i18n-values="{
-            html_opensearchQuery: '<code>.es()</code>',
+            html_opensearchQuery: '<code>.opensearch()</code>',
           }" i18n-description="Part of composite text
                             timeline.help.querying.paragraph2Part1 +
                             timeline.help.querying.luceneQueryLinkText +
@@ -208,9 +208,9 @@
                               For example, you can enter {opensearchLogstashQuery} to tell the OpenSearch datasource
                               {opensearchIndexQueryDescription}."
         i18n-values="{
-          html_opensearchEmptyQuery: '<code>.es()</code>',
-          html_opensearchStarQuery: '<code>.es(*)</code>',
-          html_opensearchLogstashQuery: '<code>.es(index=\'logstash-*\', q=\'*\')</code>',
+          html_opensearchEmptyQuery: '<code>.opensearch()</code>',
+          html_opensearchStarQuery: '<code>.opensearch(*)</code>',
+          html_opensearchLogstashQuery: '<code>.opensearch(index=\'logstash-*\', q=\'*\')</code>',
           html_opensearchIndexQueryDescription: '<em>' + translations.opensearchIndexQueryDescription + '</em>',
         }"></p>
       <h4 i18n-id="timeline.help.querying.countTitle" i18n-default-message="Beyond count"></h4>
@@ -240,8 +240,8 @@
             html_cardinality: '<code>cardinality</code>',
             html_bytes: '<code>bytes</code>',
             html_srcIp: '<code>src_ip</code>',
-            html_opensearchCardinalityQuery: '<code>.es(*, metric=\'cardinality:src_ip\')</code>',
-            html_opensearchAvgQuery: '<code>.es(metric=\'avg:bytes\')</code>',
+            html_opensearchCardinalityQuery: '<code>.opensearch(*, metric=\'cardinality:src_ip\')</code>',
+            html_opensearchAvgQuery: '<code>.opensearch(metric=\'avg:bytes\')</code>',
           }" i18n-description="Part of composite text
                             timeline.help.querying.countTextPart1 +
                             timeline.help.querying.countMetricAggregationLinkText +
@@ -275,7 +275,7 @@
       ></p>
       <table class="table table-condensed table-striped">
         <tr>
-          <td><code>.es(*), .es(US)</code></td>
+          <td><code>.opensearch(*), .opensearch(US)</code></td>
           <td i18n-id="timeline.help.expressions.examples.twoExpressionsDescription"
             i18n-default-message="{descriptionTitle} Two expressions on the same chart."
             i18n-values="{
@@ -284,7 +284,7 @@
           ></td>
         </tr>
         <tr>
-          <td><code>.es(*).color(#f66), .es(US).bars(1)</code></td>
+          <td><code>.opensearch(*).color(#f66), .opensearch(US).bars(1)</code></td>
           <td
             i18n-id="timeline.help.expressions.examples.customStylingDescription"
             i18n-default-message="{descriptionTitle} Colorizes the first series red and
@@ -297,7 +297,7 @@
         <tr>
           <td>
             <code
-              >.es(*).color(#f66).lines(fill=3), .es(US).bars(1).points(radius=3,
+              >.opensearch(*).color(#f66).lines(fill=3), .opensearch(US).bars(1).points(radius=3,
               weight=1)</code
             >
           </td>
@@ -310,7 +310,7 @@
           ></td>
         </tr>
         <tr>
-          <td><code>(.es(*), .es(GB)).points()</code></td>
+          <td><code>(.opensearch(*), .opensearch(GB)).points()</code></td>
           <td i18n-id="timeline.help.expressions.examples.groupedExpressionsDescription" i18n-default-message="{descriptionTitle} You can also chain groups of expressions to
                                   functions. Here, both series are shown as points instead of lines." i18n-values="{
               html_descriptionTitle: '<strong>' + translations.groupedExpressionsDescriptionTitle + '</strong>',
@@ -350,18 +350,18 @@
                               our web traffic comes from the US?"></p>
       <p i18n-id="timeline.help.dataTransforming.paragraph2"
         i18n-default-message="First, we need to find all events that contain US: {opensearchUsQuery}."
-        i18n-values="{ html_opensearchUsQuery: '<code>.es(\'US\')</code>' }"></p>
+        i18n-values="{ html_opensearchUsQuery: '<code>.opensearch(\'US\')</code>' }"></p>
       <p i18n-id="timeline.help.dataTransforming.paragraph3" i18n-default-message="Next, we want to calculate the ratio of US events to the whole.
                               To divide {us} by everything, we can use the {divide} function:
                               {divideDataQuery}."
         i18n-values="{
           html_us: '<code>\'US\'</code>',
           html_divide: '<code>divide</code>',
-          html_divideDataQuery: '<code>.es(\'US\').divide(.es())</code>',
+          html_divideDataQuery: '<code>.opensearch(\'US\').divide(.opensearch())</code>',
         }"></p>
       <p i18n-id="timeline.help.dataTransforming.paragraph4" i18n-default-message="Not bad, but this gives us a number between 0 and 1. To convert it
                               to a percentage, simply multiply by 100: {multiplyDataQuery}."
-        i18n-values="{ html_multiplyDataQuery: '<code>.es(\'US\').divide(.es()).multiply(100)</code>' }">
+        i18n-values="{ html_multiplyDataQuery: '<code>.opensearch(\'US\').divide(.opensearch()).multiply(100)</code>' }">
       </p>
       <p i18n-id="timeline.help.dataTransforming.paragraph5" i18n-default-message="Now we know what percentage of our traffic comes from the US, and
                               can see how it has changed over time! Timeline has a number of

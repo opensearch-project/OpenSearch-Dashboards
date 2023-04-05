@@ -29,6 +29,7 @@
  */
 
 import { deepFreeze } from '@osd/std';
+import { parse } from 'semver';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 interface StartDeps {
@@ -39,10 +40,24 @@ interface StartDeps {
 export class DocLinksService {
   public setup() {}
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
-    const DOC_LINK_VERSION =
-      injectedMetadata.getOpenSearchDashboardsBranch() === 'main'
-        ? 'latest'
-        : injectedMetadata.getOpenSearchDashboardsBranch();
+    const buildVersion = injectedMetadata.getOpenSearchDashboardsVersion();
+    const pkgBranch = injectedMetadata.getOpenSearchDashboardsBranch();
+    /**
+     * OpenSearch server uses the `branch` property from `package.json` to
+     * build links to the documentation. If set to `main`, it would use `/latest`
+     * and if not, it would use the `version` to construct URLs.
+     */
+    let branch = pkgBranch;
+    if (pkgBranch === 'main') {
+      branch = 'latest';
+    } else {
+      const validDocPathsPattern = /^\d+\.\d+$/;
+      const parsedBuildVersion = parse(buildVersion);
+      if (!validDocPathsPattern.test(pkgBranch) && parsedBuildVersion) {
+        branch = `${parsedBuildVersion.major}.${parsedBuildVersion.minor}`;
+      }
+    }
+    const DOC_LINK_VERSION = branch;
     const OPENSEARCH_WEBSITE_URL = 'https://opensearch.org/';
     const OPENSEARCH_WEBSITE_DOCS = `${OPENSEARCH_WEBSITE_URL}docs/${DOC_LINK_VERSION}`;
     const OPENSEARCH_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/opensearch/`;

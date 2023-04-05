@@ -70,7 +70,10 @@ test('renders empty page in before initial fetch to avoid flickering', () => {
       deleteItems={() => {}}
       createItem={() => {}}
       editItem={() => {}}
-      getViewUrl={() => {}}
+      viewItem={() => {}}
+      dashboardItemCreatorClickHandler={() => {}}
+      dashboardItemCreators={() => []}
+      initialPageSize={10}
       listingLimit={1000}
       hideWriteControls={false}
       core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
@@ -87,7 +90,9 @@ describe('after fetch', () => {
         deleteItems={() => {}}
         createItem={() => {}}
         editItem={() => {}}
-        getViewUrl={() => {}}
+        viewItem={() => {}}
+        dashboardItemCreatorClickHandler={() => {}}
+        dashboardItemCreators={() => []}
         listingLimit={1000}
         hideWriteControls={false}
         initialPageSize={10}
@@ -111,7 +116,9 @@ describe('after fetch', () => {
         deleteItems={() => {}}
         createItem={() => {}}
         editItem={() => {}}
-        getViewUrl={() => {}}
+        viewItem={() => {}}
+        dashboardItemCreatorClickHandler={() => {}}
+        dashboardItemCreators={() => []}
         listingLimit={1000}
         initialPageSize={10}
         hideWriteControls={false}
@@ -134,7 +141,9 @@ describe('after fetch', () => {
         deleteItems={() => {}}
         createItem={() => {}}
         editItem={() => {}}
-        getViewUrl={() => {}}
+        viewItem={() => {}}
+        dashboardItemCreatorClickHandler={() => {}}
+        dashboardItemCreators={() => []}
         listingLimit={1}
         initialPageSize={10}
         hideWriteControls={false}
@@ -157,7 +166,9 @@ describe('after fetch', () => {
         deleteItems={() => {}}
         createItem={() => {}}
         editItem={() => {}}
-        getViewUrl={() => {}}
+        viewItem={() => {}}
+        dashboardItemCreatorClickHandler={() => {}}
+        dashboardItemCreators={() => []}
         listingLimit={1}
         initialPageSize={10}
         hideWriteControls={true}
@@ -180,7 +191,9 @@ describe('after fetch', () => {
         deleteItems={() => {}}
         createItem={() => {}}
         editItem={() => {}}
-        getViewUrl={() => {}}
+        viewItem={() => {}}
+        dashboardItemCreatorClickHandler={() => {}}
+        dashboardItemCreators={() => []}
         listingLimit={1}
         initialPageSize={10}
         hideWriteControls={false}

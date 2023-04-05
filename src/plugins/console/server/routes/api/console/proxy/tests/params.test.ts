@@ -28,16 +28,24 @@
  * under the License.
  */
 
-import { opensearchDashboardsResponseFactory } from '../../../../../../../../core/server';
+import {
+  IScopedClusterClient,
+  opensearchDashboardsResponseFactory,
+} from '../../../../../../../../core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
-import { createResponseStub } from './stubs';
-import * as requestModule from '../../../../../lib/proxy_request';
 import expect from '@osd/expect';
 
 import { createHandler } from '../create_handler';
+import { coreMock, opensearchServiceMock } from '../../../../../../../../core/server/mocks';
 
 describe('Console Proxy Route', () => {
   let handler: ReturnType<typeof createHandler>;
+  let requestHandlerContextMock: any;
+  let opensearchClient: DeeplyMockedKeys<IScopedClusterClient>;
+  beforeEach(() => {
+    requestHandlerContextMock = coreMock.createRequestHandlerContext();
+    opensearchClient = requestHandlerContextMock.opensearch.client;
+  });
 
   afterEach(() => {
     jest.resetAllMocks();
@@ -52,7 +60,7 @@ describe('Console Proxy Route', () => {
           );
 
           const { status } = await handler(
-            {} as any,
+            { core: requestHandlerContextMock, dataSource: {} as any },
             { query: { method: 'POST', path: '/baz/id' } } as any,
             opensearchDashboardsResponseFactory
           );
@@ -66,16 +74,16 @@ describe('Console Proxy Route', () => {
             getProxyRouteHandlerDeps({ proxy: { pathFilters: [/^\/foo\//, /^\/bar\//] } })
           );
 
-          (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub('foo'));
+          const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise('foo');
+          opensearchClient.asCurrentUser.transport.request.mockResolvedValueOnce(mockResponse);
 
           const { status } = await handler(
-            {} as any,
+            { core: requestHandlerContextMock, dataSource: {} as any },
             { headers: {}, query: { method: 'POST', path: '/foo/id' } } as any,
             opensearchDashboardsResponseFactory
           );
 
           expect(status).to.be(200);
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
         });
       });
       describe('all match', () => {
@@ -84,16 +92,16 @@ describe('Console Proxy Route', () => {
             getProxyRouteHandlerDeps({ proxy: { pathFilters: [/^\/foo\//] } })
           );
 
-          (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub('foo'));
+          const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise('foo');
+          opensearchClient.asCurrentUser.transport.request.mockResolvedValueOnce(mockResponse);
 
           const { status } = await handler(
-            {} as any,
+            { core: requestHandlerContextMock, dataSource: {} as any },
             { headers: {}, query: { method: 'GET', path: '/foo/id' } } as any,
             opensearchDashboardsResponseFactory
           );
 
           expect(status).to.be(200);
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
         });
       });
     });
