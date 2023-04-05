@@ -25,7 +25,7 @@ import {
   VisLayers,
   VisLayerTypes,
 } from '../';
-import { VisInteractionHandler, VisInteration } from './constants';
+import { VisInteractionHandler, VisInteraction } from './constants';
 
 // Given any visLayers, create a map to indicate which VisLayer types are present.
 // Convert to an array since ES6 Maps cannot be stringified.
@@ -318,7 +318,7 @@ export const addPointInTimeEventsLayersToSpec = (
     },
     transform: [
       { filter: generateVisLayerFilterString(visLayerColumnIds) },
-      { calculate: `'${VisInteration.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
+      { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
     ],
     params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
     encoding: {
@@ -383,5 +383,5 @@ export const addPointInTimeInteractionsConfig = (config: object) => {
 };
 
 export const isPointInTimeAnnotation = (item?: Item | null) => {
-  return item?.datum?.userAction === VisInteration.VIEW_EVENTS_FLYOUT;
+  return item?.datum?.userAction === VisInteraction.VIEW_EVENTS_FLYOUT;
 };

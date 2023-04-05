@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export enum VisInteration {
+export enum VisInteraction {
   VIEW_EVENTS_FLYOUT = 'viewEventsFlyout',
 }
 

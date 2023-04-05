@@ -5,6 +5,7 @@
 
 import { OpenSearchDashboardsDatatable } from '../../expressions/public';
 import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, HOVER_PARAM } from './';
+import { VisInteraction } from './vega/constants';
 
 const TEST_X_AXIS_ID = 'test-x-axis-id';
 const TEST_VALUE_AXIS_ID = 'test-value-axis-id';
@@ -432,7 +433,10 @@ export const TEST_VIS_LAYERS_MULTIPLE = [
 
 const TEST_RULE_LAYER_SINGLE_VIS_LAYER = {
   mark: { type: 'rule', color: 'red', opacity: 1 },
-  transform: [{ filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` }],
+  transform: [
+    { filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` },
+    { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
+  ],
   encoding: {
     x: { field: TEST_X_AXIS_ID, type: 'temporal' },
     opacity: { value: 0, condition: { empty: false, param: HOVER_PARAM, value: 1 } },
@@ -445,6 +449,7 @@ const TEST_RULE_LAYER_MULTIPLE_VIS_LAYERS = {
     {
       filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0 || datum['${TEST_PLUGIN_RESOURCE_ID_2}'] > 0`,
     },
+    { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
   ],
 };
 
