@@ -7,8 +7,6 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Maintainer                | GitHub ID                                           | Affiliation |
 | ------------------------- | --------------------------------------------------- | ----------- |
 | Anan Zhuang               | [ananzh](https://github.com/ananzh)                 | Amazon      |
-| Bishoy Boktor             | [boktorbb](https://github.com/boktorbb)             | Amazon      |
-| Mihir Soni                | [mihirsoni](https://github.com/mihirsoni)           | Amazon      |
 | Kawika (Rocky) Avilla     | [kavilla](https://github.com/kavilla)               | Amazon      |
 | Sean Neumann              | [seanneumann](https://github.com/seanneumann)       | Amazon      |
 | Miki Barahmand            | [AMoo-Miki](https://github.com/AMoo-Miki)           | Amazon      |
@@ -25,3 +23,5 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Maintainer    | GitHub ID                               | Affiliation |
 | ------------- | --------------------------------------- | ----------- |
 | Tommy Markley | [tmarkley](https://github.com/tmarkley) | Amazon      |
+| Mihir Soni    | [mihirsoni](https://github.com/mihirsoni) | Amazon      |
+| Bishoy Boktor | [boktorbb](https://github.com/boktorbb) | Amazon      |
