@@ -12,30 +12,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
+import { AppMountParameters } from 'opensearch-dashboards/public';
 import { DashboardServices } from './types';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
-import { AppMountParameters } from 'opensearch-dashboards/public';
-
+import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
+import { DashboardApp } from './app';
 export * from './embeddable';
 export * from './actions';
 
 export const renderApp = (
-    { element, appBasePath, onAppLeave }: AppMountParameters,
-    services: DashboardServices
+  { element, appBasePath, onAppLeave }: AppMountParameters,
+  services: DashboardServices
 ) => {
-    addHelpMenuToAppChrome(services.chrome, services.docLinks);
-    
-    const app = (
-        <Router history={services.history}>
-         <OpenSearchDashboardsContextProvider services={services}>
-          <services.i18n.Context>
-            <DashboardApp onAppLeave={onAppLeave} />
-          </services.i18n.Context>
-         </OpenSearchDashboardsContextProvider>
-        </Router>
-    )
+  addHelpMenuToAppChrome(services.chrome, services.docLinks);
 
-    ReactDOM.render(app, element);
+  const app = (
+    <Router history={services.history}>
+      <OpenSearchDashboardsContextProvider services={services}>
+        <services.i18n.Context>
+          <DashboardApp onAppLeave={onAppLeave} />
+        </services.i18n.Context>
+      </OpenSearchDashboardsContextProvider>
+    </Router>
+  );
 
-    return () => ReactDOM.unmountComponentAtNode(element)
-}
+  ReactDOM.render(app, element);
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};

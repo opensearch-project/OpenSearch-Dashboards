@@ -47,6 +47,7 @@ import {
 } from 'src/core/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { isEmpty } from 'lodash';
+import { createHashHistory } from 'history';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -72,7 +73,12 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../opensearch_dashboards_react/public';
-import { createOsdUrlTracker, Storage } from '../../opensearch_dashboards_utils/public';
+import {
+  createOsdUrlTracker,
+  Storage,
+  createOsdUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../opensearch_dashboards_utils/public';
 import {
   initAngularBootstrap,
   OpenSearchDashboardsLegacySetup,
@@ -122,7 +128,6 @@ import {
 } from './attribute_service/attribute_service';
 import { DashboardProvider } from './types';
 import { DashboardServices } from './application/types';
-import { createHashHistory } from 'history';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -358,7 +363,7 @@ export class DashboardPlugin
         />
       ),
     });
-    
+
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
@@ -381,11 +386,11 @@ export class DashboardPlugin
           savedObjects,
         } = pluginsStart;
 
-        const history = createHashHistory(); //need more research
+        const history = createHashHistory(); // need more research
         const services: DashboardServices = {
           ...coreStart,
           pluginInitializerContext: this.initializerContext,
-          history, 
+          history,
           osdUrlStateStorage: createOsdUrlStateStorage({
             history,
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
@@ -421,7 +426,7 @@ export class DashboardPlugin
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
         params.element.classList.add('dshAppContainer');
-        const { renderApp } = await import('./application/application');
+        const { renderApp } = await import('./application');
         const unmount = renderApp(params, services);
         return () => {
           unmount();

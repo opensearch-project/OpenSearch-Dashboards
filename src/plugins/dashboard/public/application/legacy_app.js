@@ -74,12 +74,14 @@ export function initDashboardApp(app, deps) {
   }
 
   app.factory('history', () => createHashHistory()); //created in services plugin.ts before renderApp()
-  app.factory('osdUrlStateStorage', (history) => //created in the services
-    createOsdUrlStateStorage({
-      history,
-      useHash: deps.uiSettings.get('state:storeInSessionStorage'),
-      ...withNotifyOnErrors(deps.core.notifications.toasts),
-    })
+  app.factory(
+    'osdUrlStateStorage',
+    (history) =>
+      createOsdUrlStateStorage({
+        history,
+        useHash: deps.uiSettings.get('state:storeInSessionStorage'),
+        ...withNotifyOnErrors(deps.core.notifications.toasts),
+      }) //created in the services
   );
 
   app.config(function ($routeProvider) {
@@ -111,22 +113,24 @@ export function initDashboardApp(app, deps) {
         ...defaults,
         template: dashboardListingTemplate,
         controller: function ($scope, osdUrlStateStorage, history) {
+          // history here is services.history
           deps.core.chrome.docTitle.change(
             i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
-          );
+          ); // in useMount() for dashboard listing
+          const service = deps.savedDashboards;
           const dashboardConfig = deps.dashboardConfig;
 
           // syncs `_g` portion of url with query services
           const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
             deps.data.query,
             osdUrlStateStorage
-          );
+          ); // did in app.tsx
 
-          $scope.listingLimit = deps.savedObjects.settings.getListingLimit();
-          $scope.initialPageSize = deps.savedObjects.settings.getPerPage();
+          $scope.listingLimit = deps.savedObjects.settings.getListingLimit(); // passed in table listing
+          $scope.initialPageSize = deps.savedObjects.settings.getPerPage(); // passed in table listing
           $scope.create = () => {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
-          };
+          }; //added
           $scope.dashboardProviders = deps.dashboardProviders() || [];
           $scope.dashboardListTypes = Object.keys($scope.dashboardProviders);
 
@@ -170,6 +174,7 @@ export function initDashboardApp(app, deps) {
               deps.core.application.navigateToUrl(editUrl);
             }
           };
+<<<<<<< HEAD
           $scope.viewItem = ({ appId, viewUrl }) => {
             if (appId === 'dashboard') {
               history.push(viewUrl);
@@ -177,6 +182,11 @@ export function initDashboardApp(app, deps) {
               deps.core.application.navigateToUrl(viewUrl);
             }
           };
+=======
+          $scope.viewItem = ({ viewUrl }) => {
+            history.push(deps.addBasePath(viewUrl));
+          }; //added
+>>>>>>> add changes
           $scope.delete = (dashboards) => {
             const ids = dashboards.map((d) => ({ id: d.id, appId: d.appId }));
             return Promise.all(
@@ -199,7 +209,7 @@ export function initDashboardApp(app, deps) {
                 defaultMessage: 'Dashboards',
               }),
             },
-          ]);
+          ]); // did before rendering <TableList>
           addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks); //added before rendering the <DashboardApp>
           $scope.core = deps.core;
 

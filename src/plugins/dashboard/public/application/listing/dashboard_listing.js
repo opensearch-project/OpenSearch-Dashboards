@@ -37,7 +37,6 @@ import { i18n } from '@osd/i18n';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { TableListView } from '../../../../opensearch_dashboards_react/public';
-import { CreateButton } from './create_button';
 
 export const EMPTY_FILTER = '';
 
