@@ -202,18 +202,6 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       surveyLink,
     } = this.props;
     const { helpExtension, helpSupportUrl } = this.state;
-    const opensearchSurvey = surveyLink ? (
-      <div>
-        <EuiButtonEmpty href={surveyLink} target="_blank" size="xs" flush="left">
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuSatisfactionSurveyTitle"
-            defaultMessage="Give feedback"
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-      </div>
-    ) : null;
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
@@ -228,14 +216,24 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="xs" flush="left">
           <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
+            id="core.ui.chrome.headerGlobalNav.helpMenuAskOpenSearchTitle"
             defaultMessage="Community"
           />
         </EuiButtonEmpty>
 
         <EuiSpacer size="xs" />
 
-        {opensearchSurvey}
+        {surveyLink && (
+          <div>
+            <EuiButtonEmpty href={surveyLink} target="_blank" size="xs" flush="left">
+              <FormattedMessage
+                id="core.ui.chrome.headerGlobalNav.helpMenuSatisfactionSurveyTitle"
+                defaultMessage="Give feedback"
+              />
+            </EuiButtonEmpty>
+            <EuiSpacer size="xs" />
+          </div>
+        )}
 
         <EuiSpacer size="xs" />
 
@@ -332,7 +330,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         })}
         onClick={this.onMenuButtonClick}
       >
-        <EuiIcon type="questionInCircle" size="l" />
+        <EuiIcon type="questionInCircle" size="m" />
       </EuiHeaderSectionItemButton>
     );
 

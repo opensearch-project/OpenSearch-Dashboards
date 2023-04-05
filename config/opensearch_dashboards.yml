@@ -238,4 +238,5 @@
 #data_source.encryption.wrappingKeyNamespace: 'changeme'
 #data_source.encryption.wrappingKey: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
-#opensearchDashboards.survey.url: "https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW"
+# Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
+# opensearchDashboards.survey.url: "https://amazonmr.au1.qualtrics.com/jfe/form/SV_1BxJNrtCo4LbweW"
