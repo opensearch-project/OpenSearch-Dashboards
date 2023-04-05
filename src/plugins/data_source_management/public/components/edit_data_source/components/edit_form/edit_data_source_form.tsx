@@ -741,7 +741,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           <EuiSelect
             options={credentialSourceOptions}
             value={this.state.auth.type}
-            onChange={(e) => this.onChangeAuthType(e)}
+            onChange={this.onChangeAuthType}
             name="Credential"
             data-test-subj="editDataSourceSelectAuthType"
           />
