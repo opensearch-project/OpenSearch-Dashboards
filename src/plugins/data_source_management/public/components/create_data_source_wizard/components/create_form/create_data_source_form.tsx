@@ -120,7 +120,7 @@ export class CreateDataSourceForm extends React.Component<
     });
   };
 
-  onChangeAuthType = (e: { target: { value: any } }) => {
+  onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
     this.setState({ auth: { ...this.state.auth, type: e.target.value as AuthType } });
   };
 

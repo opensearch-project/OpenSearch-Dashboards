@@ -168,6 +168,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Console] Replace jQuery.ajax with core.http when calling OSD APIs in console ([#3080](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3080))
 - [I18n] Fix Listr type errors and error handlers ([#3629](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3629))
 - [Multiple DataSource]Refactor authentication type selection in create and edit data source forms to use EuiSelect ([#3693](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3693))
+
 ### 🔩 Tests
 
 - [Multi DataSource] Add unit test coverage for Update Data source management stack ([#2567](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2567))

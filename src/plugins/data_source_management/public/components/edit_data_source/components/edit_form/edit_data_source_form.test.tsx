@@ -290,7 +290,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
     });
 
     /* Save Changes */
-    test('should update the form with NoAUth on click save chan ges', async () => {
+    test('should update the form with NoAuth on click save changes', async () => {
       await new Promise((resolve) =>
         setTimeout(() => {
           updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');

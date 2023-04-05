@@ -162,7 +162,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
-  onChangeAuthType = (e: { target: { value: any } }) => {
+  onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
     this.setState({ auth: { ...this.state.auth, type: e.target.value as AuthType } }, () => {
       this.onChangeFormValues();
     });
@@ -738,13 +738,6 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             defaultMessage: 'Credential',
           })}
         >
-          {/* <EuiRadioGroup
-            options={credentialSourceOptions}
-            idSelected={this.state.auth.type}
-            onChange={(id) => this.onChangeAuthType(id)}
-            name="Credential"
-            data-test-subj="editDataSourceSelectAuthType"
-          /> */}
           <EuiSelect
             options={credentialSourceOptions}
             value={this.state.auth.type}

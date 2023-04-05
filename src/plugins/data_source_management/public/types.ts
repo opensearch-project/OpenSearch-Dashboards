@@ -56,12 +56,6 @@ export enum AuthType {
   SigV4 = 'sigv4',
 }
 
-// export const credentialSourceOptions = [
-//   { id: AuthType.NoAuth, label: 'No authentication' },
-//   { id: AuthType.UsernamePasswordType, label: 'Username & Password' },
-//   { id: AuthType.SigV4, label: 'AWS SigV4' },
-// ];
-
 export const credentialSourceOptions = [
   { value: AuthType.NoAuth, text: 'No authentication' },
   { value: AuthType.UsernamePasswordType, text: 'Username & Password' },
