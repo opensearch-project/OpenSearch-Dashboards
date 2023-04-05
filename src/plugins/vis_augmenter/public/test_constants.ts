@@ -433,10 +433,7 @@ export const TEST_VIS_LAYERS_MULTIPLE = [
 
 const TEST_RULE_LAYER_SINGLE_VIS_LAYER = {
   mark: { type: 'rule', color: 'red', opacity: 1 },
-  transform: [
-    { filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` },
-    { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
-  ],
+  transform: [{ filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` }],
   encoding: {
     x: { field: TEST_X_AXIS_ID, type: 'temporal' },
     opacity: { value: 0, condition: { empty: false, param: HOVER_PARAM, value: 1 } },
@@ -449,7 +446,6 @@ const TEST_RULE_LAYER_MULTIPLE_VIS_LAYERS = {
     {
       filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0 || datum['${TEST_PLUGIN_RESOURCE_ID_2}'] > 0`,
     },
-    { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
   ],
 };
 
@@ -462,7 +458,10 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
     filled: true,
     opacity: 1,
   },
-  transform: [{ filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` }],
+  transform: [
+    { filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` },
+    { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
+  ],
   params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
   encoding: {
     x: {
@@ -508,6 +507,7 @@ const TEST_EVENTS_LAYER_MULTIPLE_VIS_LAYERS = {
     {
       filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0 || datum['${TEST_PLUGIN_RESOURCE_ID_2}'] > 0`,
     },
+    { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
   ],
 };
 
