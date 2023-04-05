@@ -165,7 +165,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Vis Builder] Adds field unit tests ([#3211](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3211))
 - [BWC Tests] Add BWC tests for 2.6.0 ([#3356](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3356))
 - Prevent primitive linting limitations from being applied to unit tests found under `src/setup_node_env` ([#3403](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3403))
-
+- Removed functions which are no longer in use([#3766](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3766))
 ## [2.x]
 
 ### 💥 Breaking Changes
@@ -233,6 +233,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Update caniuse to fix failed integration tests ([#2322](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2322))
 - Update caniuse to 1.0.30001460 to fix failed integration tests ([#3538](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3538))
-
+- Removed functions which are no longer in use([#3766](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3766))
 [unreleased]: https://github.com/opensearch-project/OpenSearch-Dashboards/compare/2.3.0...HEAD
 [2.x]: https://github.com/opensearch-project/OpenSearch-Dashboards/compare/2.3.0...2.x
