@@ -13,7 +13,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPageContent,
-  EuiRadioGroup,
+  EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -120,8 +120,8 @@ export class CreateDataSourceForm extends React.Component<
     });
   };
 
-  onChangeAuthType = (value: string) => {
-    this.setState({ auth: { ...this.state.auth, type: value as AuthType } });
+  onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    this.setState({ auth: { ...this.state.auth, type: e.target.value as AuthType } });
   };
 
   onChangeUsername = (e: { target: { value: any } }) => {
@@ -555,10 +555,10 @@ export class CreateDataSourceForm extends React.Component<
           {/* Credential source */}
           <EuiSpacer size="l" />
           <EuiFormRow>
-            <EuiRadioGroup
+            <EuiSelect
               options={credentialSourceOptions}
-              idSelected={this.state.auth.type}
-              onChange={(id) => this.onChangeAuthType(id)}
+              value={this.state.auth.type}
+              onChange={(e) => this.onChangeAuthType(e)}
               name="Credential"
               data-test-subj="createDataSourceFormAuthTypeSelect"
             />
