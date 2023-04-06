@@ -37,11 +37,7 @@ import { ace } from '../../../../../../../opensearch_ui_shared/public';
 // @ts-ignore
 import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
-import {
-  useEditorReadContext,
-  useRequestActionContext,
-  useServicesContext,
-} from '../../../../contexts';
+import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
   useSaveCurrentTextObject,
   useSendCurrentRequestToOpenSearch,
@@ -189,7 +185,12 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(http, settingsService, settingsService.getAutocomplete());
+    retrieveAutoCompleteInfo(
+      http,
+      settingsService,
+      settingsService.getAutocomplete(),
+      dataSourceId
+    );
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();

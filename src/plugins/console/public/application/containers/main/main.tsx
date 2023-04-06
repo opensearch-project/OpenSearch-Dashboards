@@ -147,7 +147,9 @@ export function Main({ dataSourceId }: MainProps) {
         />
       ) : null}
 
-      {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
+      {showSettings ? (
+        <Settings onClose={() => setShowSettings(false)} dataSourceId={dataSourceId} />
+      ) : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
     </div>

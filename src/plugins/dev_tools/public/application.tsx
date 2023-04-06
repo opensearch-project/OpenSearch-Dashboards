@@ -88,7 +88,7 @@ function DevToolsWrapper({
 }: DevToolsWrapperProps) {
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
   const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
-  const [selectedOptions, setSelected] = useState<DataSourceOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<DataSourceOption[]>([]);
 
   useEffect(
     () => () => {
@@ -125,7 +125,7 @@ function DevToolsWrapper({
 
   const onChange = async (e: Array<EuiComboBoxOptionOption<any>>) => {
     const dataSourceId = e[0] ? e[0].id : undefined;
-    setSelected(e);
+    setSelectedOptions(e);
     await remount(mountedTool.current!.mountpoint, dataSourceId);
   };
 

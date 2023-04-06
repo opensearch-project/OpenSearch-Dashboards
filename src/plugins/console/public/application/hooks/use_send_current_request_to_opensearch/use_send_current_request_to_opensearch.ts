@@ -85,7 +85,7 @@ export const useSendCurrentRequestToOpenSearch = (dataSourceId?: string) => {
         // or templates may have changed, so we'll need to update this data. Assume that if
         // the user disables polling they're trying to optimize performance or otherwise
         // preserve resources, so they won't want this request sent either.
-        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
+        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete(), dataSourceId);
       }
 
       dispatch({
