@@ -14,6 +14,8 @@
 
 OpenSearch is a community project that is built and maintained by people just like you. We're glad you're interested in helping out. There are several different ways you can do it, but before we talk about that, let's talk about how to get started.
 
+Before you read this markdown and start contributing, we advise you to read [ONBOARDING.md](https://github.com/opensearch-project/.github/blob/main/ONBOARDING.md)
+
 ## First Things First
 
 **When in doubt, open an issue** - For almost any type of contribution the first step is opening an issue. Even if you think you already know what the solution is, writing down a description of the problem you're trying to solve will help everyone get context when they review your pull request. If it's truly a trivial change (e.g. spelling error), you can skip this step -- but as the subject says, when it doubt, [open an issue](https://github.com/opensearch-project/OpenSearch-Dashboards/issues).
