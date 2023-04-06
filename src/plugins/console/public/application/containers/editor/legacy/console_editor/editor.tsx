@@ -78,7 +78,7 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, opensearchHostService },
+    services: { history, notifications, settings: settingsService, opensearchHostService, http },
     docLinkVersion,
   } = useServicesContext();
 
@@ -184,7 +184,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
+    retrieveAutoCompleteInfo(http, settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
@@ -197,7 +197,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
+  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService, http]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;

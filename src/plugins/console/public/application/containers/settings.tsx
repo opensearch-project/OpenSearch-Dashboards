@@ -30,6 +30,7 @@
 
 import React from 'react';
 
+import { HttpSetup } from 'opensearch-dashboards/public';
 import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
 // @ts-ignore
@@ -44,11 +45,16 @@ const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToo
   });
 };
 
-const refreshAutocompleteSettings = (settings: SettingsService, selectedSettings: any) => {
-  retrieveAutoCompleteInfo(settings, selectedSettings);
+const refreshAutocompleteSettings = (
+  http: HttpSetup,
+  settings: SettingsService,
+  selectedSettings: any
+) => {
+  retrieveAutoCompleteInfo(http, settings, selectedSettings);
 };
 
 const fetchAutocompleteSettingsIfNeeded = (
+  http: HttpSetup,
   settings: SettingsService,
   newSettings: DevToolsSettings,
   prevSettings: DevToolsSettings
@@ -73,10 +79,10 @@ const fetchAutocompleteSettingsIfNeeded = (
         },
         {}
       );
-      retrieveAutoCompleteInfo(settings, changedSettings);
+      retrieveAutoCompleteInfo(http, settings, changedSettings);
     } else if (isPollingChanged && newSettings.polling) {
       // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
-      retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+      retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
     }
   }
 };
@@ -87,14 +93,14 @@ export interface Props {
 
 export function Settings({ onClose }: Props) {
   const {
-    services: { settings },
+    services: { settings, http },
   } = useServicesContext();
 
   const dispatch = useEditorActionContext();
 
   const onSaveSettings = (newSettings: DevToolsSettings) => {
     const prevSettings = settings.toJSON();
-    fetchAutocompleteSettingsIfNeeded(settings, newSettings, prevSettings);
+    fetchAutocompleteSettingsIfNeeded(http, settings, newSettings, prevSettings);
 
     // Update the new settings in localStorage
     settings.updateSettings(newSettings);
@@ -112,7 +118,7 @@ export function Settings({ onClose }: Props) {
       onClose={onClose}
       onSaveSettings={onSaveSettings}
       refreshAutocompleteSettings={(selectedSettings: any) =>
-        refreshAutocompleteSettings(settings, selectedSettings)
+        refreshAutocompleteSettings(http, settings, selectedSettings)
       }
       settings={settings.toJSON()}
     />
