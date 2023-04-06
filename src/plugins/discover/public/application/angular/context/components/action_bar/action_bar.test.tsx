@@ -31,7 +31,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ActionBar, ActionBarProps } from './action_bar';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../query_parameters/constants';
 
 describe('Test Discover Context ActionBar for successor | predecessor records', () => {

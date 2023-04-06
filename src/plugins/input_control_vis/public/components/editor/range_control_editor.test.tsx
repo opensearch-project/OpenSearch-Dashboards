@@ -33,7 +33,7 @@ import { shallow } from 'enzyme';
 import { SinonSpy, spy, assert } from 'sinon';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
 
 import { RangeControlEditor } from './range_control_editor';
 import { ControlParams } from '../../editor_utils';

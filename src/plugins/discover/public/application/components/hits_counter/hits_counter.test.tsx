@@ -32,7 +32,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { HitsCounter, HitsCounterProps } from './hits_counter';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
 
 describe('hits counter', function () {
   let props: HitsCounterProps;

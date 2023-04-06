@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
 import React from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';

@@ -31,7 +31,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TableHeader } from './table_header';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
 import { SortOrder } from './helpers';
 import { IndexPattern, IFieldType } from '../../../../../opensearch_dashboards_services';
 

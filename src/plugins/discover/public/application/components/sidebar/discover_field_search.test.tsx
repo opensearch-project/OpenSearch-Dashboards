@@ -31,7 +31,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
 import { DiscoverFieldSearch, Props } from './discover_field_search';
 import { EuiButtonGroupProps, EuiPopover } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';

@@ -36,7 +36,7 @@ import { FieldSetting } from '../../types';
 import { UiSettingsType, StringValidation } from '../../../../../../core/public';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
 import { Field, getEditableValue } from './field';
 
 jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
