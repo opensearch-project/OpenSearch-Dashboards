@@ -53,6 +53,7 @@ const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
+  dataSourceId?: string;
 }
 
 interface QueryParams {
@@ -76,7 +77,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
 
 const inputId = 'ConAppInputTextarea';
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
   const {
     services: { history, notifications, settings: settingsService, opensearchHostService, http },
     docLinkVersion,
@@ -84,7 +85,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToOpenSearch = useSendCurrentRequestToOpenSearch();
+  const sendCurrentRequestToOpenSearch = useSendCurrentRequestToOpenSearch(dataSourceId);
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -184,7 +185,12 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(http, settingsService, settingsService.getAutocomplete());
+    retrieveAutoCompleteInfo(
+      http,
+      settingsService,
+      settingsService.getAutocomplete(),
+      dataSourceId
+    );
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
@@ -197,7 +203,15 @@ function EditorUI({ initialTextValue }: EditorProps) {
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService, http]);
+  }, [
+    saveCurrentTextObject,
+    initialTextValue,
+    history,
+    setInputEditor,
+    settingsService,
+    http,
+    dataSourceId,
+  ]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
