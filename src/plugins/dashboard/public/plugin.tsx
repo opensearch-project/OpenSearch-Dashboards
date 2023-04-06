@@ -344,7 +344,7 @@ export class DashboardPlugin
     registerDashboardProvider({
       savedObjectsType: 'dashboard',
       savedObjectsName: 'Dashboard',
-      appId: 'dashboards',
+      appId: 'dashboard',
       viewUrlPathFn: (obj) => `#/view/${obj.id}`,
       editUrlPathFn: (obj) => `/view/${obj.id}?_a=(viewMode:edit)`,
       createUrl: core.http.basePath.prepend('/app/dashboards#/create'),
