@@ -70,8 +70,10 @@ export function DiscoverIndexPattern({
   });
   useEffect(() => {
     const { id, title } = selectedIndexPattern;
-    setSelected({ id, title });
-  }, [selectedIndexPattern]);
+    const indexPattern = indexPatternList.find((pattern) => pattern.id === id);
+    const titleToDisplay = indexPattern ? indexPattern.attributes!.title : title;
+    setSelected({ id, title: titleToDisplay });
+  }, [indexPatternList, selectedIndexPattern]);
   if (!selectedId) {
     return null;
   }

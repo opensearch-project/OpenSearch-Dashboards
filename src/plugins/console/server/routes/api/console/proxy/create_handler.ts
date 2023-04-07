@@ -42,6 +42,7 @@ import { isResponseError } from '../../../../../../../core/server/opensearch/cli
 import { RouteDependencies } from '../../../';
 
 import { Body, Query } from './validation_config';
+import { buildBufferedBody } from './utils';
 
 function getProxyHeaders(req: OpenSearchDashboardsRequest) {
   const headers = Object.create(null);
@@ -84,9 +85,10 @@ export const createHandler = ({
   proxy: { readLegacyOpenSearchConfig, pathFilters, proxyConfigCollection },
 }: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
   const { body, query } = request;
-  const { path, method } = query;
-  const client = ctx.core.opensearch.client.asCurrentUser;
-
+  const { path, method, dataSourceId } = query;
+  const client = dataSourceId
+    ? await ctx.dataSource.opensearch.getClient(dataSourceId)
+    : ctx.core.opensearch.client.asCurrentUser;
   let opensearchResponse: ApiResponse;
 
   if (!pathFilters.some((re) => re.test(path))) {
@@ -99,12 +101,16 @@ export const createHandler = ({
   }
 
   try {
-    const requestHeaders = {
-      ...getProxyHeaders(request),
-    };
+    // TODO: proxy header will fail sigv4 auth type in data source, need create issue in opensearch-js repo to track
+    const requestHeaders = dataSourceId
+      ? {}
+      : {
+          ...getProxyHeaders(request),
+        };
 
+    const bufferedBody = await buildBufferedBody(body);
     opensearchResponse = await client.transport.request(
-      { path: toUrlPath(path), method, body },
+      { path: toUrlPath(path), method, body: bufferedBody },
       { headers: requestHeaders }
     );
 
@@ -130,7 +136,7 @@ export const createHandler = ({
     });
   } catch (e: any) {
     const isResponseErrorFlag = isResponseError(e);
-
+    if (!isResponseError) log.error(e);
     const errorMessage = isResponseErrorFlag ? JSON.stringify(e.meta.body) : e.message;
     // core http route handler has special logic that asks for stream readable input to pass error opaquely
     const errorResponseBody = new Readable({

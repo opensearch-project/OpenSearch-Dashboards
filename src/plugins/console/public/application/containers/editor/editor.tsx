@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useEffect } from 'react';
 import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
 
@@ -36,27 +36,41 @@ import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '../../../../../opensearch_dashboards_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
-import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
+import {
+  useEditorReadContext,
+  useServicesContext,
+  useRequestReadContext,
+  useRequestActionContext,
+} from '../../contexts';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
 interface Props {
   loading: boolean;
+  dataSourceId?: string;
 }
 
-export const Editor = memo(({ loading }: Props) => {
+export const Editor = memo(({ loading, dataSourceId }: Props) => {
   const {
     services: { storage },
   } = useServicesContext();
 
   const { currentTextObject } = useEditorReadContext();
   const { requestInFlight } = useRequestReadContext();
+  const dispatch = useRequestActionContext();
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
     INITIAL_PANEL_WIDTH,
   ]);
+
+  useEffect(() => {
+    dispatch({
+      type: 'resetLastResult',
+      payload: undefined,
+    });
+  }, [dispatch, dataSourceId]);
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const onPanelWidthChange = useCallback(
@@ -83,7 +97,7 @@ export const Editor = memo(({ loading }: Props) => {
           {loading ? (
             <EditorContentSpinner />
           ) : (
-            <EditorUI initialTextValue={currentTextObject.text} />
+            <EditorUI initialTextValue={currentTextObject.text} dataSourceId={dataSourceId} />
           )}
         </Panel>
         <Panel
