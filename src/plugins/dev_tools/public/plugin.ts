@@ -34,12 +34,16 @@ import { AppUpdater } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 
+import { DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
 
+export interface DevToolsSetupDependencies {
+  dataSource?: DataSourcePluginStart;
+}
 export interface DevToolsSetup {
   /**
    * Register a developer tool. It will be available
@@ -62,7 +66,10 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
-  public setup(coreSetup: CoreSetup, { urlForwarding }: { urlForwarding: UrlForwardingSetup }) {
+  public setup(
+    coreSetup: CoreSetup<DevToolsSetupDependencies>,
+    { urlForwarding }: { urlForwarding: UrlForwardingSetup }
+  ) {
     const { application: applicationSetup, getStartServices } = coreSetup;
 
     applicationSetup.register({
@@ -78,11 +85,10 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         const { element, history } = params;
         element.classList.add('devAppWrapper');
 
-        const [core] = await getStartServices();
-        const { application, chrome } = core;
+        const [core, devSetup] = await getStartServices();
 
         const { renderApp } = await import('./application');
-        return renderApp(element, application, chrome, history, this.getSortedDevTools());
+        return renderApp(core, element, history, this.getSortedDevTools(), devSetup);
       },
     });
 

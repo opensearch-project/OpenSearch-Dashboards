@@ -48,9 +48,10 @@ const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToo
 const refreshAutocompleteSettings = (
   http: HttpSetup,
   settings: SettingsService,
-  selectedSettings: any
+  selectedSettings: any,
+  dataSourceId?: string
 ) => {
-  retrieveAutoCompleteInfo(http, settings, selectedSettings);
+  retrieveAutoCompleteInfo(http, settings, selectedSettings, dataSourceId);
 };
 
 const fetchAutocompleteSettingsIfNeeded = (
@@ -79,19 +80,20 @@ const fetchAutocompleteSettingsIfNeeded = (
         },
         {}
       );
-      retrieveAutoCompleteInfo(http, settings, changedSettings);
+      retrieveAutoCompleteInfo(http, settings, changedSettings, dataSourceId);
     } else if (isPollingChanged && newSettings.polling) {
       // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
-      retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
+      retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete(), dataSourceId);
     }
   }
 };
 
 export interface Props {
   onClose: () => void;
+  dataSourceId?: string;
 }
 
-export function Settings({ onClose }: Props) {
+export function Settings({ onClose, dataSourceId }: Props) {
   const {
     services: { settings, http },
   } = useServicesContext();
@@ -118,7 +120,7 @@ export function Settings({ onClose }: Props) {
       onClose={onClose}
       onSaveSettings={onSaveSettings}
       refreshAutocompleteSettings={(selectedSettings: any) =>
-        refreshAutocompleteSettings(http, settings, selectedSettings)
+        refreshAutocompleteSettings(http, settings, selectedSettings, dataSourceId)
       }
       settings={settings.toJSON()}
     />

@@ -269,7 +269,7 @@ export function clear() {
   templates = [];
 }
 
-function retrieveSettings(http, settingsKey, settingsToRetrieve) {
+function retrieveSettings(http, settingsKey, settingsToRetrieve, dataSourceId) {
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
@@ -278,7 +278,7 @@ function retrieveSettings(http, settingsKey, settingsToRetrieve) {
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
-    return opensearch.send(http, 'GET', settingKeyToPathMap[settingsKey], null);
+    return opensearch.send(http, 'GET', settingKeyToPathMap[settingsKey], null, dataSourceId);
   } else {
     if (settingsToRetrieve[settingsKey] === false) {
       // If the user doesn't want autocomplete suggestions, then clear any that exist
@@ -307,8 +307,13 @@ export function clearSubscriptions() {
   }
 }
 
-const retrieveMappings = async (http, settingsToRetrieve) => {
-  const { body: mappings } = await retrieveSettings(http, 'fields', settingsToRetrieve);
+const retrieveMappings = async (http, settingsToRetrieve, dataSourceId) => {
+  const { body: mappings } = await retrieveSettings(
+    http,
+    'fields',
+    settingsToRetrieve,
+    dataSourceId
+  );
   if (mappings) {
     const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
     let mappingsResponse;
@@ -326,16 +331,26 @@ const retrieveMappings = async (http, settingsToRetrieve) => {
   }
 };
 
-const retrieveAliases = async (http, settingsToRetrieve) => {
-  const { body: aliases } = await retrieveSettings(http, 'indices', settingsToRetrieve);
+const retrieveAliases = async (http, settingsToRetrieve, dataSourceId) => {
+  const { body: aliases } = await retrieveSettings(
+    http,
+    'indices',
+    settingsToRetrieve,
+    dataSourceId
+  );
 
   if (aliases) {
     loadAliases(aliases);
   }
 };
 
-const retrieveTemplates = async (http, settingsToRetrieve) => {
-  const { body: templates } = await retrieveSettings(http, 'templates', settingsToRetrieve);
+const retrieveTemplates = async (http, settingsToRetrieve, dataSourceId) => {
+  const { body: templates } = await retrieveSettings(
+    http,
+    'templates',
+    settingsToRetrieve,
+    dataSourceId
+  );
 
   if (templates) {
     loadTemplates(templates);
@@ -347,20 +362,20 @@ const retrieveTemplates = async (http, settingsToRetrieve) => {
  * @param settings Settings A way to retrieve the current settings
  * @param settingsToRetrieve any
  */
-export function retrieveAutoCompleteInfo(http, settings, settingsToRetrieve) {
+export function retrieveAutoCompleteInfo(http, settings, settingsToRetrieve, dataSourceId) {
   clearSubscriptions();
 
   Promise.allSettled([
-    retrieveMappings(http, settingsToRetrieve),
-    retrieveAliases(http, settingsToRetrieve),
-    retrieveTemplates(http, settingsToRetrieve),
+    retrieveMappings(http, settingsToRetrieve, dataSourceId),
+    retrieveAliases(http, settingsToRetrieve, dataSourceId),
+    retrieveTemplates(http, settingsToRetrieve, dataSourceId),
   ]).then(() => {
     // Schedule next request.
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
       // a scheduled request if the user turns off polling.
       if (settings.getPolling()) {
-        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
+        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete(), dataSourceId);
       }
     }, POLL_INTERVAL);
   });
