@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
+import { findTestSubject } from 'test_utils/helpers';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
 import { ControlsTab, ControlsTabUiProps } from './controls_tab';
 import { Vis } from '../../../../visualizations/public';

@@ -32,7 +32,7 @@ import React from 'react';
 import { HelloWorldEmbeddable } from '../../../../../../examples/embeddable_examples/public';
 import { EmbeddableRoot } from './embeddable_root';
 import { mount } from 'enzyme';
-import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
+import { findTestSubject } from 'test_utils/helpers';
 
 test('EmbeddableRoot renders an embeddable', async () => {
   const embeddable = new HelloWorldEmbeddable({ id: 'hello' });

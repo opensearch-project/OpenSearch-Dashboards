@@ -33,7 +33,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
+import { findTestSubject } from 'test_utils/helpers';
 import { Doc, DocProps } from './doc';
 
 const mockSearchApi = jest.fn();

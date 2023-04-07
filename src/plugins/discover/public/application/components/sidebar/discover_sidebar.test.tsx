@@ -30,7 +30,7 @@
 
 import _ from 'lodash';
 import { ReactWrapper } from 'enzyme';
-import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
+import { findTestSubject } from 'test_utils/helpers';
 // @ts-ignore
 import realHits from 'fixtures/real_hits.js';
 // @ts-ignore

@@ -31,7 +31,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
-import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
+import { findTestSubject } from 'test_utils/helpers';
 import { coreMock } from '../../../../core/public/mocks';
 
 describe('DashboardEmptyScreen', () => {

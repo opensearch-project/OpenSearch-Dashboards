@@ -33,7 +33,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { TimechartHeader, TimechartHeaderProps } from './timechart_header';
 import { EuiIconTip } from '@elastic/eui';
-import { findTestSubject } from '@opensearch-project/oui/lib/test/find_test_subject';
+import { findTestSubject } from 'test_utils/helpers';
 
 describe('timechart header', function () {
   let props: TimechartHeaderProps;
