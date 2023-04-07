@@ -80,3 +80,7 @@
 .osdBody--mgtAdvancedSettingsHasBottomBar .mgtPage__body {
   padding-bottom: $euiSizeXL * 2;
 }
+
+.euiBody--hasFlyout .euiBottomBar {
+  left: 320px !important;
+}
