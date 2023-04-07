@@ -17,7 +17,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
-  EuiRadioGroup,
+  EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -162,8 +162,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
-  onChangeAuthType = (value: string) => {
-    this.setState({ auth: { ...this.state.auth, type: value as AuthType } }, () => {
+  onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    this.setState({ auth: { ...this.state.auth, type: e.target.value as AuthType } }, () => {
       this.onChangeFormValues();
     });
   };
@@ -738,10 +738,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             defaultMessage: 'Credential',
           })}
         >
-          <EuiRadioGroup
+          <EuiSelect
             options={credentialSourceOptions}
-            idSelected={this.state.auth.type}
-            onChange={(id) => this.onChangeAuthType(id)}
+            value={this.state.auth.type}
+            onChange={this.onChangeAuthType}
             name="Credential"
             data-test-subj="editDataSourceSelectAuthType"
           />
