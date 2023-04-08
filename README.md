@@ -50,3 +50,9 @@ Copyright OpenSearch Contributors. See [NOTICE](NOTICE.txt) for details.
 [codecov-link]: https://app.codecov.io/gh/opensearch-project/OpenSearch-Dashboards
 [link-checker-badge]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/links_checker.yml/badge.svg
 [link-checker-link]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/links_checker.yml
+
+## Useful Links
+
+[Core is a set of systems (frontend, backend etc.) that OpenSearch Dashboards and its plugins are built on top of]: https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/README.md
+[This package can be used to generate an OpenSearch Dashboards plugin from the OpenSearch Dashboards repo]: 
+https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator
