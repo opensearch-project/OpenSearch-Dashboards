@@ -43,6 +43,7 @@ import {
   HelpPanel,
   SomethingWentWrongCallout,
   NetworkRequestStatusBar,
+  ImportFlyout,
 } from '../../components';
 
 import { useServicesContext, useEditorReadContext, useRequestReadContext } from '../../contexts';
@@ -73,6 +74,7 @@ export function Main({ dataSourceId }: MainProps) {
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showImportFlyout, setShowImportFlyout] = useState(false);
 
   const onExport = async () => {
     const results = await objectStorageClient.text.findAll();
@@ -121,6 +123,7 @@ export function Main({ dataSourceId }: MainProps) {
                   onClickSettings: () => setShowSettings(true),
                   onClickHelp: () => setShowHelp(!showHelp),
                   onClickExport: () => onExport(),
+                  onClickImport: () => setShowImportFlyout(!showImportFlyout),
                 })}
               />
             </EuiFlexItem>
@@ -162,6 +165,10 @@ export function Main({ dataSourceId }: MainProps) {
       ) : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
+
+      {showImportFlyout ? (
+        <ImportFlyout refresh={retry} close={() => setShowImportFlyout(false)} />
+      ) : null}
     </div>
   );
 }

@@ -1,0 +1,313 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiCallOut,
+  EuiSpacer,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiButton,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import moment from 'moment';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import React, { Fragment, useState } from 'react';
+import { ImportMode, ImportModeControl } from './import_mode_control';
+import { useEditorReadContext, useServicesContext } from '../contexts';
+import { TextObject } from '../../../common/text_object';
+import { OverwriteModal } from './overwrite_modal';
+
+const OVERWRITE_ALL_DEFAULT = false;
+
+interface ImportFlyoutProps {
+  close: () => void;
+  refresh: () => void;
+}
+
+const getErrorMessage = () => {
+  return i18n.translate('console.ImpoerFlyout.importFileErrorMessage', {
+    defaultMessage: 'The file could not be processed due to error.',
+  });
+};
+
+export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
+  const [error, setError] = useState<string>();
+  const [status, setStatus] = useState('idle');
+  const [loadingMessage, setLoadingMessage] = useState<string>();
+  const [file, setFile] = useState<File>();
+  const [jsonData, setJsonData] = useState<TextObject>();
+  const [showOverwriteModal, setShowOverwriteModal] = useState(false);
+  const [importMode, setImportMode] = useState<ImportMode>({
+    overwrite: OVERWRITE_ALL_DEFAULT,
+  });
+
+  const {
+    services: {
+      objectStorageClient,
+      uiSettings,
+      notifications: { toasts },
+    },
+  } = useServicesContext();
+  const { currentTextObject } = useEditorReadContext();
+
+  const dateFormat = uiSettings.get<string>('dateFormat');
+
+  const setImportFile = (files: FileList | null) => {
+    if (!files || !files[0]) {
+      setFile(undefined);
+      return;
+    }
+    const fileContent = files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const fileData = event.target?.result;
+      if (typeof fileData === 'string') {
+        const parsedData = JSON.parse(fileData);
+        setJsonData(parsedData);
+      }
+    };
+
+    reader.readAsText(fileContent);
+    setFile(fileContent);
+    setStatus('idle');
+  };
+
+  const renderError = () => {
+    if (status !== 'error') {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="console.importFlyout.errorCalloutTitle"
+              defaultMessage="Sorry, there was an error"
+            />
+          }
+          color="danger"
+        >
+          <p data-test-subj="importSenseObjectsErrorText">{error}</p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  };
+
+  const renderBody = () => {
+    if (status === 'loading') {
+      return (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+            <EuiSpacer size="m" />
+            <EuiText>
+              <p>{loadingMessage}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return (
+      <EuiForm>
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="console.ImportFlyout.selectFileToImportFormRowLabel"
+              defaultMessage="Select a file to import"
+            />
+          }
+        >
+          <EuiFilePicker
+            accept=".ndjson, .json"
+            fullWidth
+            initialPromptText={
+              <FormattedMessage
+                id="console.ImportFlyout.importPromptText"
+                defaultMessage="Import"
+              />
+            }
+            onChange={setImportFile}
+          />
+        </EuiFormRow>
+        <EuiFormRow fullWidth>
+          <ImportModeControl
+            initialValues={importMode}
+            isLegacyFile={false}
+            updateSelection={(newValues: ImportMode) => setImportMode(newValues)}
+          />
+        </EuiFormRow>
+      </EuiForm>
+    );
+  };
+
+  const importFile = async (isOverwriteConfirmed?: boolean) => {
+    setStatus('loading');
+    setError(undefined);
+    try {
+      if (jsonData && jsonData.text) {
+        if (importMode.overwrite) {
+          if (!isOverwriteConfirmed) {
+            setShowOverwriteModal(true);
+            return;
+          } else {
+            setLoadingMessage('Importing queries and overwriting existing ones...');
+            const newObject = {
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              text: jsonData.text,
+            };
+            if (currentTextObject) {
+              await objectStorageClient.text.update({
+                ...currentTextObject,
+                ...newObject,
+              });
+            } else {
+              await objectStorageClient.text.create({
+                ...newObject,
+              });
+            }
+          }
+          toasts.addSuccess('Queries overwritten.');
+        } else {
+          setLoadingMessage('Importing queries and merging with existing ones...');
+          if (currentTextObject) {
+            await objectStorageClient.text.update({
+              ...currentTextObject,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              text: currentTextObject.text.concat(
+                `\n#Imported on ${moment(Date.now()).format(dateFormat)}\n\n${jsonData.text}`
+              ),
+            });
+            toasts.addSuccess('Queries merged.');
+          }
+        }
+      } else {
+        setStatus('error');
+        setError(
+          i18n.translate('console.ImpoerFlyout.importFileErrorMessage', {
+            defaultMessage: 'The selected file is not valid. Please select a valid JSON file.',
+          })
+        );
+      }
+      refresh();
+      setLoadingMessage(undefined);
+      setStatus('idle');
+      close();
+    } catch (e) {
+      setStatus('error');
+      setError(getErrorMessage(e));
+      return;
+    }
+  };
+
+  const onConfirm = () => {
+    setShowOverwriteModal(false);
+    importFile(true);
+  };
+
+  const onSkip = () => {
+    setShowOverwriteModal(false);
+    setStatus('idle');
+  };
+
+  const renderFooter = () => {
+    return (
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={close}
+            size="s"
+            disabled={status === 'loading' || status === 'success'}
+            data-test-subj="importQueriesCancelBtn"
+          >
+            <FormattedMessage
+              id="console.importFlyout.import.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            isDisabled={!file}
+            onClick={() => importFile(false)}
+            size="s"
+            fill
+            isLoading={status === 'loading'}
+          >
+            <FormattedMessage
+              id="console.importFlyout.import.confirmButtonLabel"
+              defaultMessage="Import"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  return (
+    <EuiFlyout onClose={close} size="s">
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>
+            <FormattedMessage
+              id="console.ImportFlyout.importQueriesTitle"
+              defaultMessage="Import queries"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        {renderError()}
+        {renderBody()}
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
+      {showOverwriteModal && <OverwriteModal onSkip={onSkip} onConfirm={onConfirm} />}
+    </EuiFlyout>
+  );
+};

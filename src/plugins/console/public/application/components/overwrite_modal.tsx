@@ -1,0 +1,66 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React from 'react';
+import { i18n } from '@osd/i18n';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
+
+export interface OverwriteModalProps {
+  onSkip: () => void;
+  onConfirm: () => void;
+}
+export const OverwriteModal = ({ onSkip, onConfirm }: OverwriteModalProps) => {
+  return (
+    <EuiConfirmModal
+      title={i18n.translate('console.overwriteModal.title', {
+        defaultMessage: 'Confirm Overwrite',
+      })}
+      cancelButtonText={i18n.translate('console.overwriteModal.cancelButtonText', {
+        defaultMessage: 'Skip',
+      })}
+      confirmButtonText={i18n.translate('console.overwriteModal.overwriteButtonText', {
+        defaultMessage: 'Overwrite',
+      })}
+      buttonColor="danger"
+      onCancel={onSkip}
+      onConfirm={onConfirm}
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      maxWidth="500px"
+    >
+      <p>
+        {i18n.translate('console.overwriteModal.body.conflict', {
+          defaultMessage:
+            'Are you sure you want to overwrite the existing queries? This action cannot be undone. All existing queries will be deleted and replaced with the imported queries. If you are unsure, please choose the "{option}" option instead',
+          values: { option: 'Merge with existing queries' },
+        })}
+      </p>
+    </EuiConfirmModal>
+  );
+};
