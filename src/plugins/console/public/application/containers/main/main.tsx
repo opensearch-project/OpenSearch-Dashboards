@@ -28,8 +28,10 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
+// @ts-expect-error
+import { saveAs } from '@elastic/filesaver';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eui';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
@@ -54,7 +56,7 @@ interface MainProps {
 
 export function Main({ dataSourceId }: MainProps) {
   const {
-    services: { storage },
+    services: { storage, objectStorageClient },
   } = useServicesContext();
 
   const { ready: editorsReady } = useEditorReadContext();
@@ -71,6 +73,13 @@ export function Main({ dataSourceId }: MainProps) {
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+
+  const onExport = async () => {
+    const results = await objectStorageClient.text.findAll();
+    const senseData = results.sort((a, b) => a.createdAt - b.createdAt)[0];
+    const blob = new Blob([JSON.stringify(senseData || {})], { type: 'application/json' });
+    saveAs(blob, 'sense.json');
+  };
 
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
@@ -111,6 +120,7 @@ export function Main({ dataSourceId }: MainProps) {
                   onClickHistory: () => setShowHistory(!showingHistory),
                   onClickSettings: () => setShowSettings(true),
                   onClickHelp: () => setShowHelp(!showHelp),
+                  onClickExport: () => onExport(),
                 })}
               />
             </EuiFlexItem>
