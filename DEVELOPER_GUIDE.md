@@ -98,7 +98,19 @@ The `osd bootstrap` command will install the project's dependencies and build al
 $ yarn osd bootstrap
 ```
 
-Note: If you experience a network timeout while bootstrapping, you can update the timeout by configuring it in the [`.yarnrc`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.yarnrc). For example:
+Note: If you experience a network timeout while bootstrapping:
+
+```
+| There appears to be trouble with your network connection. Retrying...
+```
+
+You can run command with —network-timeout flag:
+
+```
+$ yarn osd bootstrap —network-timeout 1000000
+```
+
+Or use the timeout by configuring it in the [`.yarnrc`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.yarnrc). For example:
 
 ```
 network-timeout 1000000
@@ -146,6 +158,24 @@ Note - it may take a couple minutes to generate all the necessary bundles. If th
 [success][@osd/optimizer] 28 bundles compiled successfully after 145.9 sec, watching for changes
 ```
 
+Note: If you run a docker image, an error may occur:
+
+```
+Error: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+```
+
+This error is because there is not enough memory so more memory must be allowed to be used:
+
+```
+$ sudo sysctl -w vm.max_map_count=262144
+```
+
+For windows:
+
+```
+$ wsl -d docker-desktop
+$ sysctl -w vm.max_map_count=262144
+```
 ### Next Steps
 
 Now that you have a development environment to play with, there are a number of different paths you may take next.
