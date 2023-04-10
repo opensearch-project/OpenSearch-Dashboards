@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import Url from 'url';
-
 import Axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
 import parseLinkHeader from 'parse-link-header';
 import { ToolingLog, isAxiosResponseError, isAxiosRequestError } from '@osd/dev-utils';
@@ -98,7 +96,7 @@ export class GithubApi {
     nextRequest: {
       safeForDryRun: true,
       method: 'GET',
-      url: Url.resolve(BASE_URL, 'issues'),
+      url: new URL('issues', BASE_URL).toString(),
       params: {
         state: 'all',
         per_page: '100',
@@ -158,7 +156,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'PATCH',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}`),
+        url: new URL(`issues/${encodeURIComponent(issueNumber)}`, BASE_URL).toString(),
         data: {
           state: 'open', // Reopen issue if it was closed.
           body: newBody,
@@ -172,7 +170,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'POST',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}/comments`),
+        url: new URL(`issues/${encodeURIComponent(issueNumber)}/comments`, BASE_URL).toString(),
         data: {
           body: commentBody,
         },
@@ -185,7 +183,7 @@ export class GithubApi {
     const resp = await this.request<GithubIssueMini>(
       {
         method: 'POST',
-        url: Url.resolve(BASE_URL, 'issues'),
+        url: new URL('issues', BASE_URL).toString(),
         data: {
           title,
           body,

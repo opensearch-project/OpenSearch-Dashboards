@@ -29,7 +29,6 @@
  */
 
 import { getUrlOrigin } from '@osd/std';
-import { resolve } from 'url';
 import { IBasePath } from '../../http';
 import { App, ParsedAppUrl } from '../types';
 
@@ -57,7 +56,6 @@ export const parseAppUrl = (
   if (!currentOrigin) {
     throw new Error('when manually provided, currentUrl must be valid url with an origin');
   }
-  const currentPath = currentUrl.substring(currentOrigin.length);
 
   // remove the origin from the given url
   if (url.startsWith(currentOrigin)) {
@@ -66,7 +64,7 @@ export const parseAppUrl = (
 
   // if the path is relative (i.e `../../to/somewhere`), we convert it to absolute
   if (!url.startsWith('/')) {
-    url = resolve(currentPath, url);
+    url = new URL(url, currentUrl).toString().substring(currentOrigin.length);
   }
 
   // if using a basePath and the absolute path does not starts with it, it can't be a match
