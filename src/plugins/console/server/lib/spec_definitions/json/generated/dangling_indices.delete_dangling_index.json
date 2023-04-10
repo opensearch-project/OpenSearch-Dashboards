@@ -1,0 +1,16 @@
+{
+  "dangling_indices.delete_dangling_index": {
+    "url_params": {
+      "accept_data_loss": "__flag__",
+      "timeout": "",
+      "cluster_manager_timeout": ""
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_dangling/{index_uuid}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/dangling-index/"
+  }
+}

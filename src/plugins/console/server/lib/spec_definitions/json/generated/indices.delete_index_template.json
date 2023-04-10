@@ -1,0 +1,15 @@
+{
+  "indices.delete_index_template": {
+    "url_params": {
+      "timeout": "",
+      "cluster_manager_timeout": ""
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_index_template/{name}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/index-templates/#delete-a-template"
+  }
+}

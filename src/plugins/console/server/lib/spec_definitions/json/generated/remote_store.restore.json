@@ -1,0 +1,15 @@
+{
+  "remote_store.restore": {
+    "url_params": {
+      "cluster_manager_timeout": "",
+      "wait_for_completion": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_remotestore/_restore"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/remote/#restoring-from-a-backup"
+  }
+}
