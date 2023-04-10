@@ -5,7 +5,7 @@
   "main": "./target/index.js",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "node ./scripts/build.js",
+    "build": "../../scripts/use_node ./scripts/build.js",
     "osd:bootstrap": "yarn build --dev"
   },
   "dependencies": {

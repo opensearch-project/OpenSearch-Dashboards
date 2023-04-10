@@ -54,6 +54,7 @@ import {
   setExpressions,
   setUiActions,
   setSavedVisualizationsLoader,
+  setSavedAugmentVisLoader,
   setTimeFilter,
   setAggs,
   setChrome,
@@ -92,6 +93,7 @@ import {
 } from './saved_visualizations/_saved_vis';
 import { createSavedSearchesLoader } from '../../discover/public';
 import { DashboardStart } from '../../dashboard/public';
+import { createSavedAugmentVisLoader } from '../../vis_augmenter/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -209,6 +211,14 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
+    const savedAugmentVisLoader = createSavedAugmentVisLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+    setSavedAugmentVisLoader(savedAugmentVisLoader);
     setSavedSearchLoader(savedSearchLoader);
     return {
       ...types,

@@ -41,7 +41,7 @@ import { opensearchFilters } from '../../../data/public';
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
-vega.scheme('elastic', euiPaletteColorBlind());
+vega.scheme('euiPaletteColorBlind', euiPaletteColorBlind());
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -259,6 +259,22 @@ export class VegaBaseView {
     return false;
   }
 
+  // This is only used when the PointInTimeEventsVisLayer type in vega parser's
+  // visibleVisLayers is true. This VisLayer type is currently only supported
+  // for time series chart types. It may be updated
+  // in the future to expand to other chart type use cases.
+  // Because there is no clean way to use autosize for concatenated views,
+  // we manually set the value of the top view (the base vis) to fill in
+  // space and leave enough space to show the bottom view (the events vis).
+  // Ref: https://vega.github.io/vega-lite/docs/size.html#limitations
+  addPointInTimeEventPadding(view) {
+    // TODO: 100 is enough padding for now. May need to adjust once the current scrolling/overflow
+    // issue is handled. See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3501
+    const eventVisHeight = 100;
+    const height = Math.max(0, this._$container.height()) - eventVisHeight;
+    view._signals.concat_0_height.value = height;
+  }
+
   setView(view) {
     if (this._view === view) return;
 
@@ -315,10 +331,15 @@ export class VegaBaseView {
   /**
    * @param {object} query Query DSL snippet, as used in the query DSL editor
    * @param {string} [index] as defined in OpenSearch Dashboards, or default if missing
+   * @param {string} alias OpenSearch Query DSL's custom label for `opensearchDashboardsAddFilter`, as used in '+ Add Filter'
    */
-  async addFilterHandler(query, index) {
+  async addFilterHandler(query, index, alias) {
     const indexId = await this.findIndex(Utils.handleNonStringIndex(index));
-    const filter = opensearchFilters.buildQueryFilter(Utils.handleInvalidQuery(query), indexId);
+    const filter = opensearchFilters.buildQueryFilter(
+      Utils.handleInvalidQuery(query),
+      indexId,
+      alias
+    );
     this._applyFilter({ filters: [filter] });
   }
 

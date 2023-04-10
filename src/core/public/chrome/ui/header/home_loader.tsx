@@ -34,7 +34,6 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import Url from 'url';
 import { EuiHeaderSectionItemButton } from '@elastic/eui';
 import { ChromeNavLink } from '../..';
 import { ChromeBranding } from '../../chrome_service';
@@ -78,11 +77,11 @@ function onClick(
   }
 
   if (forceNavigation) {
-    const toParsed = Url.parse(anchor.href);
-    const fromParsed = Url.parse(document.location.href);
+    const toParsed = new URL(anchor.href);
+    const fromParsed = new URL(document.location.href);
     const sameProto = toParsed.protocol === fromParsed.protocol;
     const sameHost = toParsed.host === fromParsed.host;
-    const samePath = toParsed.path === fromParsed.path;
+    const samePath = toParsed.pathname === fromParsed.pathname;
 
     if (sameProto && sameHost && samePath) {
       if (toParsed.hash) {
