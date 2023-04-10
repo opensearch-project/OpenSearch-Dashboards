@@ -48,7 +48,7 @@ describe('Console Proxy Route', () => {
 
       return handler(
         { core: requestHandlerContextMock, dataSource: {} as any },
-        { headers: {}, query: { method, path } } as any,
+        { headers: {}, query: { method, path }, body: jest.fn() } as any,
         opensearchDashboardsResponseFactory
       );
     };
@@ -64,6 +64,7 @@ describe('Console Proxy Route', () => {
         it('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
           const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
+
           expect(args.path).toBe('/http://evil.com/test?pretty=true');
         });
       });
