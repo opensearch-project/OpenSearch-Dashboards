@@ -6,13 +6,15 @@ name: Build and test
 # trigger on every commit push and PR for all branches except pushes for backport branches
 on:
   push:
-    branches: [ '**', '!backport/**' ]
+    branches: ['**', '!backport/**']
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
   pull_request:
-    branches: [ '**' ]
+    branches: ['**']
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
 
 env:
   TEST_BROWSER_HEADLESS: 1
@@ -26,17 +28,34 @@ env:
 
 jobs:
   build-lint-test:
-    runs-on: ubuntu-latest
-    container:
-      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
-    name: Build and Verify
+    name: Build and Verify on ${{ matrix.name }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            name: Linux
+          - os: windows-latest
+            name: Windows
+    runs-on: ${{ matrix.os }}
     steps:
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Setup JDK (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -45,13 +64,41 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
 
-      - name: Run bootstrap
+      - name: Configure Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Configure Yarn Cache (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Run bootstrap (Linux)
+        if: matrix.os != 'windows-latest'
         run: yarn osd bootstrap
+
+      - name: Run bootstrap (Windows)
+        if: matrix.os == 'windows-latest'
+        run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Run linter
         id: linter
         run: yarn lint
+
+      - name: Validate NOTICE file
+        id: notice-validate
+        run: yarn notice:validate
 
       - name: Run unit tests with coverage
         id: unit-tests
@@ -66,28 +113,44 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           directory: ./target/opensearch-dashboards-coverage
+          flags: ${{ matrix.name }}
 
       - name: Run integration tests
         id: integration-tests
         run: yarn test:jest_integration:ci
 
   functional-tests:
-    runs-on: ubuntu-latest
-    container:
-      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
-    name: Run functional tests
+    name: Run functional tests on ${{ matrix.name }} (ciGroup${{ matrix.group }})
     strategy:
       matrix:
-        group: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 ]
+        os: [ubuntu-latest, windows-latest]
+        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        include:
+          - os: ubuntu-latest
+            name: Linux
+          - os: windows-latest
+            name: Windows
+    runs-on: ${{ matrix.os }}
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
 
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Setup JDK (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -96,13 +159,36 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
 
-      # image has the latest chrome v99
+      - name: Configure Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Configure Yarn Cache (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
       - name: Setup chromedriver
-        run: yarn add --dev chromedriver@99.0.0
+        run: node scripts/upgrade_chromedriver.js
 
-      - name: Run bootstrap
+      - name: Run bootstrap (Linux)
+        if: matrix.os != 'windows-latest'
         run: yarn osd bootstrap
+
+      - name: Run bootstrap (Windows)
+        if: matrix.os == 'windows-latest'
+        run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
@@ -116,34 +202,52 @@ jobs:
           JOB: ci${{ matrix.group }}
           CACHE_DIR: ciGroup${{ matrix.group }}
 
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: failure-artifacts-ci${{ matrix.group }}
+          path: |
+            test/*/failure_debug/
+            test/*/screenshots/
+
   build-min-artifact-tests:
-    runs-on: ubuntu-latest
-    container:
-      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
-    name: Build min release artifacts
-    defaults:
-      run:
-        working-directory: ./artifacts
+    name: Build min release artifacts on ${{ matrix.name }}
     strategy:
       matrix:
         include:
-          - name: Linux x64
+          - os: ubuntu-latest
+            name: Linux x64
             ext: tar.gz
             suffix: linux-x64
             script: build-platform --linux --skip-os-packages
-          - name: Linux ARM64
+          - os: ubuntu-latest
+            name: Linux ARM64
             ext: tar.gz
             suffix: linux-arm64
             script: build-platform --linux-arm --skip-os-packages
+          - os: windows-latest
+            name: Windows x64
+            ext: zip
+            suffix: windows-x64
+            script: build-platform --windows --skip-os-packages
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./artifacts
     steps:
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+        working-directory: .
+
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ./artifacts
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -152,14 +256,45 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
 
-      - name: Get package version
+      - name: Configure Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Configure Yarn Cache (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Get package version (Linux)
+        if: matrix.os != 'windows-latest'
         run: |
           echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
 
-      - name: Get artifact build name
+      - name: Get artifact build name (Linux)
+        if: matrix.os != 'windows-latest'
         run: |
           echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $GITHUB_ENV
+
+      - name: Get package version (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $env:GITHUB_ENV
+
+      - name: Get artifact build name (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $env:GITHUB_ENV
 
       - name: Run bootstrap
         run: yarn osd bootstrap
@@ -174,8 +309,78 @@ jobs:
           path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
           retention-days: 1
 
+  build-min-artifact-tests-windows:
+    runs-on: windows-latest
+    name: Build min release artifacts on Windows
+    defaults:
+      run:
+        working-directory: artifacts
+    strategy:
+      matrix:
+        include:
+          - name: Windows x64
+            ext: zip
+            suffix: windows-x64
+            script: build-platform --windows --skip-os-packages
+    steps:
+      - name: Configure git's autocrlf
+        run: |
+          git config --global core.autocrlf false
+        working-directory: .
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          path: artifacts
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: 'artifacts/.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: |
+          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
+          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Get package version
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $env:GITHUB_ENV
+
+      - name: Get artifact build name
+        run: |
+          echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $env:GITHUB_ENV
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build `${{ matrix.name }}`
+        run: yarn ${{ matrix.script }} --release
+
+      - uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: ${{ matrix.suffix }}-${{ env.VERSION }}
+          path: artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
+          retention-days: 1
+
   bwc-tests:
-    needs: [build-min-artifact-tests]
+    needs: [build-min-artifact-tests-linux]
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
@@ -186,10 +391,10 @@ jobs:
         working-directory: ./artifacts
     strategy:
       matrix:
-        version: [ osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0 ]
+        version: [osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ./artifacts
 
@@ -197,7 +402,7 @@ jobs:
       - run: echo [NOTE] These tests will be ran using Linux x64 release builds without security
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -206,6 +411,18 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Get package version
         run: |

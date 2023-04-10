@@ -50,7 +50,7 @@ export const CreateArchivesSources: Task = {
 
         // copy node.js install
         await scanCopy({
-          source: getNodeDownloadInfo(config, platform).extractDir,
+          source: (await getNodeDownloadInfo(config, platform)).extractDir,
           destination: build.resolvePathForPlatform(platform, 'node'),
         });
 

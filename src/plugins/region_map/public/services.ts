@@ -7,7 +7,7 @@ import { CoreStart, HttpFetchError } from 'opensearch-dashboards/public';
 
 export interface Services {
   getCustomIndices: () => Promise<undefined | HttpFetchError>;
-  getIndexData: (indexName: string) => Promise<undefined | HttpFetchError>;
+  getIndexData: (indexName: string, size: number) => Promise<undefined | HttpFetchError>;
   getIndexMapping: (indexName: string) => Promise<undefined | HttpFetchError>;
 }
 
@@ -25,11 +25,12 @@ export function getServices(http: CoreStart['http']): Services {
         return e;
       }
     },
-    getIndexData: async (indexName: string) => {
+    getIndexData: async (indexName: string, size: number) => {
       try {
         const response = await http.post('../api/geospatial/_search', {
           body: JSON.stringify({
             index: indexName,
+            size,
           }),
         });
         return response;

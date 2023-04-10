@@ -33,7 +33,6 @@ import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
-import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
@@ -123,7 +122,7 @@ export class ChromeService {
    */
   private initVisibility(application: StartDeps['application']) {
     // Start off the chrome service hidden if "embed" is in the hash query string.
-    const isEmbedded = 'embed' in parse(location.hash.slice(1), true).query;
+    const isEmbedded = new URL(location.hash.slice(1), location.origin).searchParams.has('embed');
     this.isForceHidden$ = new BehaviorSubject(isEmbedded);
 
     const appHidden$ = merge(

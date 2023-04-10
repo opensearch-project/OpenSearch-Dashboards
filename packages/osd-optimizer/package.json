@@ -51,7 +51,7 @@
     "babel-loader": "^8.2.3",
     "css-loader": "^5.2.7",
     "file-loader": "^6.2.0",
-    "loader-utils": "^1.2.3",
+    "loader-utils": "^2.0.4",
     "postcss-loader": "^4.2.0",
     "raw-loader": "^4.0.2",
     "sass-loader": "^10.2.0",

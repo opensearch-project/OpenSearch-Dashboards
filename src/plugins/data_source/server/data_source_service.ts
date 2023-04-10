@@ -3,16 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  Auditor,
-  LegacyCallAPIOptions,
-  Logger,
-  OpenSearchClient,
-} from '../../../../src/core/server';
+import { LegacyCallAPIOptions, Logger, OpenSearchClient } from '../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../config';
-import { configureClient, OpenSearchClientPool } from './client';
+import { OpenSearchClientPool } from './client';
 import { configureLegacyClient } from './legacy';
 import { DataSourceClientParams } from './types';
+import { configureClient } from './client/configure_client';
 export interface DataSourceServiceSetup {
   getDataSourceClient: (params: DataSourceClientParams) => Promise<OpenSearchClient>;
 
@@ -38,8 +34,8 @@ export class DataSourceService {
   }
 
   async setup(config: DataSourcePluginConfigType): Promise<DataSourceServiceSetup> {
-    const opensearchClientPoolSetup = await this.openSearchClientPool.setup(config);
-    const legacyClientPoolSetup = await this.legacyClientPool.setup(config);
+    const opensearchClientPoolSetup = this.openSearchClientPool.setup(config);
+    const legacyClientPoolSetup = this.legacyClientPool.setup(config);
 
     const getDataSourceClient = async (
       params: DataSourceClientParams

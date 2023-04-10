@@ -85,6 +85,12 @@ const createStartContract = (): Start => {
         },
       }),
       get: jest.fn().mockReturnValue(Promise.resolve({})),
+      getDefault: jest.fn().mockReturnValue(
+        Promise.resolve({
+          name: 'Default name',
+          id: 'id',
+        })
+      ),
       clearCache: jest.fn(),
     } as unknown) as IndexPatternsContract,
   };

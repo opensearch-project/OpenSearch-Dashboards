@@ -9,6 +9,7 @@
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.16.5",
     "@babel/plugin-proposal-export-namespace-from": "^7.16.5",
+    "@babel/plugin-proposal-logical-assignment-operators": "^7.16.5",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.5",
     "@babel/plugin-proposal-optional-chaining": "^7.16.5",
     "@babel/plugin-proposal-private-methods": "^7.16.5",
@@ -19,6 +20,6 @@
     "babel-plugin-styled-components": "^2.0.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "react-is": "^16.8.0",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.9"
   }
 }

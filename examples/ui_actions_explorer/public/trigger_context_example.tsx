@@ -33,12 +33,10 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiDataGrid } from '@elastic/eui';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { useOpenSearchDashboards } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { USER_TRIGGER, PHONE_TRIGGER, COUNTRY_TRIGGER, User } from './actions/actions';
-
-export interface Props {
-  uiActionsApi: UiActionsStart;
-}
+import { UiActionsExplorerServices } from './types';
 
 interface UserRowData {
   name: string;
@@ -93,7 +91,11 @@ const createRowData = (
   ),
 });
 
-export function TriggerContextExample({ uiActionsApi }: Props) {
+export function TriggerContextExample() {
+  const {
+    services: { uiActions },
+  } = useOpenSearchDashboards<UiActionsExplorerServices>();
+
   const columns = [
     {
       id: 'name',
@@ -118,12 +120,12 @@ export function TriggerContextExample({ uiActionsApi }: Props) {
   const updateUser = (newUser: User, oldName: string) => {
     const index = rows.findIndex((u) => u.name === oldName);
     const newRows = [...rows];
-    newRows.splice(index, 1, createRowData(newUser, uiActionsApi, updateUser));
+    newRows.splice(index, 1, createRowData(newUser, uiActions, updateUser));
     setRows(newRows);
   };
 
   const initialRows: UserRowData[] = rawData.map((user: User) =>
-    createRowData(user, uiActionsApi, updateUser)
+    createRowData(user, uiActions, updateUser)
   );
 
   const [rows, setRows] = useState(initialRows);

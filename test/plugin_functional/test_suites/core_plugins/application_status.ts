@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import Url from 'url';
 import expect from '@osd/expect';
 import {
   AppNavLinkStatus,
@@ -38,14 +37,18 @@ import {
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_app_status/public/types';
 
-const getOpenSearchDashboardsUrl = (pathname?: string, search?: string) =>
-  Url.format({
-    protocol: 'http:',
-    hostname: process.env.TEST_OPENSEARCH_DASHBOARDS_HOST || 'localhost',
-    port: process.env.TEST_OPENSEARCH_DASHBOARDS_PORT || '5620',
-    pathname,
-    search,
-  });
+const getOpenSearchDashboardsUrl = (pathname?: string, search?: string) => {
+  const url = new URL(
+    pathname ?? '',
+    `http://${process.env.TEST_OPENSEARCH_DASHBOARDS_HOST || 'localhost'}:${
+      process.env.TEST_OPENSEARCH_DASHBOARDS_PORT || '5620'
+    }`
+  );
+  if (search) {
+    url.search = search;
+  }
+  return url.toString();
+};
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
@@ -126,7 +129,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await navigateToApp('app_status');
       expect(await testSubjects.exists('appStatusApp')).to.eql(true);
       const currentUrl = await browser.getCurrentUrl();
-      expect(Url.parse(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
+      expect(new URL('', currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
     });
 
     it('can change the state of the currently mounted app', async () => {

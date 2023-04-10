@@ -29,6 +29,7 @@
  */
 
 import { deepFreeze } from '@osd/std';
+import { parse } from 'semver';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 interface StartDeps {
@@ -39,10 +40,24 @@ interface StartDeps {
 export class DocLinksService {
   public setup() {}
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
-    const DOC_LINK_VERSION =
-      injectedMetadata.getOpenSearchDashboardsBranch() === 'main'
-        ? 'latest'
-        : injectedMetadata.getOpenSearchDashboardsBranch();
+    const buildVersion = injectedMetadata.getOpenSearchDashboardsVersion();
+    const pkgBranch = injectedMetadata.getOpenSearchDashboardsBranch();
+    /**
+     * OpenSearch server uses the `branch` property from `package.json` to
+     * build links to the documentation. If set to `main`, it would use `/latest`
+     * and if not, it would use the `version` to construct URLs.
+     */
+    let branch = pkgBranch;
+    if (pkgBranch === 'main') {
+      branch = 'latest';
+    } else {
+      const validDocPathsPattern = /^\d+\.\d+$/;
+      const parsedBuildVersion = parse(buildVersion);
+      if (!validDocPathsPattern.test(pkgBranch) && parsedBuildVersion) {
+        branch = `${parsedBuildVersion.major}.${parsedBuildVersion.minor}`;
+      }
+    }
+    const DOC_LINK_VERSION = branch;
     const OPENSEARCH_WEBSITE_URL = 'https://opensearch.org/';
     const OPENSEARCH_WEBSITE_DOCS = `${OPENSEARCH_WEBSITE_URL}docs/${DOC_LINK_VERSION}`;
     const OPENSEARCH_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/opensearch/`;
@@ -338,6 +353,8 @@ export class DocLinksService {
               close: `${OPENSEARCH_VERSIONED_DOCS}rest-api/index-apis/close-index/`,
             },
           },
+          // https://opensearch.org/docs/latest/opensearch/supported-field-types/date/#date-math
+          dateMath: `${OPENSEARCH_VERSIONED_DOCS}supported-field-types/date/#date-math`,
         },
         opensearchDashboards: {
           // https://opensearch.org/docs/latest/dashboards/index/
@@ -386,6 +403,7 @@ export class DocLinksService {
             // https://opensearch.org/docs/latest/dashboards/dql/#nested-field-query
             nested_query: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dql/#nested-field-query`,
           },
+          // https://opensearch.org/docs/latest/dashboards/browser-compatibility
           browser: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}browser-compatibility`,
         },
         noDocumentation: {
@@ -425,7 +443,6 @@ export class DocLinksService {
           },
           addData: `${OPENSEARCH_WEBSITE_DOCS}`,
           vega: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}`,
-          dateMath: `${OPENSEARCH_WEBSITE_DOCS}`,
           savedObject: {
             manageSavedObject: `https://opensearch.org/docs/latest/guide/en/kibana/current/managing-saved-objects.html#_export`,
           },
@@ -718,6 +735,7 @@ export interface DocLinksStart {
           readonly close: string;
         };
       };
+      readonly dateMath: string;
     };
     readonly opensearchDashboards: {
       readonly introduction: string;
@@ -777,7 +795,6 @@ export interface DocLinksStart {
       readonly visualize: Record<string, string>;
       readonly addData: string;
       readonly vega: string;
-      readonly dateMath: string;
       readonly savedObject: {
         readonly manageSavedObject: string;
       };
