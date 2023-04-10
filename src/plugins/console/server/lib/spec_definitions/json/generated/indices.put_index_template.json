@@ -1,0 +1,17 @@
+{
+  "indices.put_index_template": {
+    "url_params": {
+      "create": "__flag__",
+      "cause": "",
+      "cluster_manager_timeout": ""
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_index_template/{name}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/index-templates/#create-a-template"
+  }
+}
