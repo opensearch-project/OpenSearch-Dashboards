@@ -9,6 +9,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
+- [CVE-2021-23490] Bump parse-link-header from `1.0.1` to `2.0.0` ([#3738](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3738))
 - [CVE-2022-25758] Bump scss-tokenizer from `0.3.0` to `0.4.3` ([#3727](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3727))
 - [CVE-2021-3765] Update `@microsoft/api-documenter` and `@microsoft/api-extractor` versions to bump validator from `8.2.0` to `13.9.0` ([#3725](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3725))
 - [CVE-2022-1537] Bump grunt from `1.4.1` to `1.5.3` ([#3723](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3723))
