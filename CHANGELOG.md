@@ -9,9 +9,15 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
-- [CVE-2022-25851] Bump jpeg-js from `0.4.1` to `0.4.4` ([#3741](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3741))
+- [CVE-2021-23490] Bump parse-link-header from `1.0.1` to `2.0.0` ([#3738](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3738))
+- [CVE-2022-25758] Bump scss-tokenizer from `0.3.0` to `0.4.3` ([#3727](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3727))
+- [CVE-2021-3765] Update `@microsoft/api-documenter` and `@microsoft/api-extractor` versions to bump validator from `8.2.0` to `13.9.0` ([#3725](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3725))
+- [CVE-2022-1537] Bump grunt from `1.4.1` to `1.5.3` ([#3723](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3723))
+- [CVE-2022-0436] Bump grunt from `1.4.1` to `1.5.3` ([#3723](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3723))
 - [CVE-2021-23382] Bump postcss from `8.2.10` to `8.2.13` ([#3739](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3739))
 - [CVE-2021-3803] Bump nth-check from `1.0.2` to `2.0.1` ([#3729](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3729))
+- [CVE-2022-25858] Bump terser from `4.8.0` to `4.8.1` ([#3726](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3726))
+- [CVE-2022-25851] Bump jpeg-js from `0.4.1` to `0.4.4` ([#3741](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3741))
 
 ### 📈 Features/Enhancements
 
