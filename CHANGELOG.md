@@ -28,6 +28,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 📝 Documentation
 
+- [Doc] Update DEVELOPER_GUIDE.md with added manual bootstrap timeout solution and max virtual memory error solution with docker ([#3764](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3764))
+
 ### 🛠 Maintenance
 
 - Bumps `re2` and `supertest` ([3018](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3018))
