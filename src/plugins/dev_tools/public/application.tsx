@@ -28,21 +28,43 @@
  * under the License.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
+import {
+  EuiTab,
+  EuiTabs,
+  EuiToolTip,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { ApplicationStart, ChromeStart, ScopedHistory } from 'src/core/public';
+import {
+  ApplicationStart,
+  ChromeStart,
+  CoreStart,
+  NotificationsStart,
+  SavedObjectsStart,
+  ScopedHistory,
+} from 'src/core/public';
 
+import { useEffectOnce } from 'react-use';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { getDataSources } from '../../data_source_management/public/components/utils';
 import { DevToolApp } from './dev_tool';
+import { DevToolsSetupDependencies } from './plugin';
 
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
   updateRoute: (newRoute: string) => void;
+  savedObjects: SavedObjectsStart;
+  notifications: NotificationsStart;
+  dataSourceEnabled: boolean;
 }
 
 interface MountedDevToolDescriptor {
@@ -51,8 +73,22 @@ interface MountedDevToolDescriptor {
   unmountHandler: () => void;
 }
 
-function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapperProps) {
+interface DataSourceOption extends EuiComboBoxOptionOption {
+  id: string;
+  label: string;
+}
+
+function DevToolsWrapper({
+  devTools,
+  activeDevTool,
+  updateRoute,
+  savedObjects,
+  notifications: { toasts },
+  dataSourceEnabled,
+}: DevToolsWrapperProps) {
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
+  const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<DataSourceOption[]>([]);
 
   useEffect(
     () => () => {
@@ -63,25 +99,107 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
     []
   );
 
+  useEffectOnce(() => {
+    fetchDataSources();
+  });
+
+  const fetchDataSources = () => {
+    getDataSources(savedObjects.client)
+      .then((fetchedDataSources) => {
+        if (fetchedDataSources?.length) {
+          const dataSourceOptions = fetchedDataSources.map((dataSource) => ({
+            id: dataSource.id,
+            label: dataSource.title,
+          }));
+          setDataSources(dataSourceOptions);
+        }
+      })
+      .catch(() => {
+        toasts.addDanger(
+          i18n.translate('devTool.devToolWrapper.fetchDataSourceError', {
+            defaultMessage: 'Unable to fetch existing data sources',
+          })
+        );
+      });
+  };
+
+  const onChange = async (e: Array<EuiComboBoxOptionOption<any>>) => {
+    const dataSourceId = e[0] ? e[0].id : undefined;
+    setSelectedOptions(e);
+    await remount(mountedTool.current!.mountpoint, dataSourceId);
+  };
+
+  const remount = async (mountPoint: HTMLElement, dataSourceId?: string) => {
+    if (mountedTool.current) {
+      mountedTool.current.unmountHandler();
+    }
+
+    const params = {
+      element: mountPoint,
+      appBasePath: '',
+      onAppLeave: () => undefined,
+      setHeaderActionMenu: () => undefined,
+      // TODO: adapt to use Core's ScopedHistory
+      history: {} as any,
+      dataSourceId,
+    };
+    const unmountHandler = await activeDevTool.mount(params);
+
+    mountedTool.current = {
+      devTool: activeDevTool,
+      mountpoint: mountPoint,
+      unmountHandler,
+    };
+  };
+
   return (
     <main className="devApp">
-      <EuiTabs>
-        {devTools.map((currentDevTool) => (
-          <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
-            <EuiTab
-              disabled={currentDevTool.isDisabled()}
-              isSelected={currentDevTool === activeDevTool}
-              onClick={() => {
-                if (!currentDevTool.isDisabled()) {
-                  updateRoute(`/${currentDevTool.id}`);
-                }
-              }}
-            >
-              {currentDevTool.title}
-            </EuiTab>
-          </EuiToolTip>
-        ))}
-      </EuiTabs>
+      <div>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem>
+            <EuiTabs>
+              {devTools.map((currentDevTool) => (
+                <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
+                  <EuiTab
+                    disabled={currentDevTool.isDisabled()}
+                    isSelected={currentDevTool === activeDevTool}
+                    onClick={() => {
+                      if (!currentDevTool.isDisabled()) {
+                        updateRoute(`/${currentDevTool.id}`);
+                      }
+                    }}
+                  >
+                    {currentDevTool.title}
+                  </EuiTab>
+                </EuiToolTip>
+              ))}
+            </EuiTabs>
+          </EuiFlexItem>
+          {dataSourceEnabled ? (
+            <EuiFlexItem grow={false} className="dataSourceSelector">
+              <EuiComboBox
+                aria-label={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxAriaLabel', {
+                  defaultMessage: 'Select a Data Source',
+                })}
+                placeholder={i18n.translate(
+                  'devTool.devToolWrapper.DataSourceComboBoxPlaceholder',
+                  {
+                    defaultMessage: 'Select a Data Source',
+                  }
+                )}
+                singleSelection={{ asPlainText: true }}
+                options={dataSources}
+                selectedOptions={selectedOptions}
+                onChange={onChange}
+                prepend="DataSource"
+                compressed
+                isDisabled={!dataSourceEnabled}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </div>
+
       <div
         className="devApp__container"
         role="tabpanel"
@@ -93,26 +211,7 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
               mountedTool.current.devTool !== activeDevTool ||
               mountedTool.current.mountpoint !== element)
           ) {
-            if (mountedTool.current) {
-              mountedTool.current.unmountHandler();
-            }
-
-            const params = {
-              element,
-              appBasePath: '',
-              onAppLeave: () => undefined,
-              setHeaderActionMenu: () => undefined,
-              // TODO: adapt to use Core's ScopedHistory
-              history: {} as any,
-            };
-
-            const unmountHandler = await activeDevTool.mount(params);
-
-            mountedTool.current = {
-              devTool: activeDevTool,
-              mountpoint: element,
-              unmountHandler,
-            };
+            await remount(element);
           }
         }}
       />
@@ -164,12 +263,13 @@ function setBreadcrumbs(chrome: ChromeStart) {
 }
 
 export function renderApp(
+  { application, chrome, savedObjects, notifications }: CoreStart,
   element: HTMLElement,
-  application: ApplicationStart,
-  chrome: ChromeStart,
   history: ScopedHistory,
-  devTools: readonly DevToolApp[]
+  devTools: readonly DevToolApp[],
+  { dataSource }: DevToolsSetupDependencies
 ) {
+  const dataSourceEnabled = !!dataSource;
   if (redirectOnMissingCapabilities(application)) {
     return () => {};
   }
@@ -195,6 +295,9 @@ export function renderApp(
                     updateRoute={props.history.push}
                     activeDevTool={devTool}
                     devTools={devTools}
+                    savedObjects={savedObjects}
+                    notifications={notifications}
+                    dataSourceEnabled={dataSourceEnabled}
                   />
                 )}
               />

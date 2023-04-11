@@ -46,6 +46,7 @@ export interface BootDependencies {
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
+  dataSourceId?: string;
 }
 
 export function renderApp({
@@ -55,6 +56,7 @@ export function renderApp({
   usageCollection,
   element,
   http,
+  dataSourceId,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -88,7 +90,7 @@ export function renderApp({
       >
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
-            <Main />
+            <Main dataSourceId={dataSourceId} />
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>

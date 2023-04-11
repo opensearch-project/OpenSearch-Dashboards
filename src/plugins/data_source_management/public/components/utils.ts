@@ -4,7 +4,7 @@
  */
 
 import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
-import { AuthType, DataSourceAttributes, DataSourceTableItem } from '../types';
+import { DataSourceAttributes, DataSourceTableItem } from '../types';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
