@@ -9,6 +9,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
+- [CVE-2021-3765] Update `@microsoft/api-documenter` and `@microsoft/api-extractor` versions to bump validator from `8.2.0` to `13.9.0` ([#3725](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3725))
+
 ### 📈 Features/Enhancements
 
 ### 🐛 Bug Fixes
