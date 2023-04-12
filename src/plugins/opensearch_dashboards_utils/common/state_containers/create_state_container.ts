@@ -30,7 +30,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import deepFreeze from 'deep-freeze-strict';
 import {
   PureTransitionsToTransitions,
   PureTransition,
@@ -47,12 +46,18 @@ const isProduction =
     ? process.env.NODE_ENV === 'production'
     : !process.env.NODE_ENV || process.env.NODE_ENV === 'production';
 
+const deepFreeze = (value: any) => {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    Object.getOwnPropertyNames(value).forEach((prop) => deepFreeze(value[prop]));
+  }
+  return value;
+};
+
 const defaultFreeze: <T>(value: T) => T = isProduction
   ? <T>(value: T) => value as T
   : <T>(value: T): T => {
-      const isFreezable = value !== null && typeof value === 'object';
-      if (isFreezable) return deepFreeze(value) as T;
-      return value as T;
+      return deepFreeze(value) as T;
     };
 
 /**
