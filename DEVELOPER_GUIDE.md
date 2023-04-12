@@ -952,4 +952,4 @@ POST /api/opensearch-dashboards/index_patterns
 
 [Core is a set of systems (frontend, backend etc.) that OpenSearch Dashboards and its plugins are built on top of]: https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/README.md
 [This package can be used to generate an OpenSearch Dashboards plugin from the OpenSearch Dashboards repo]: 
-https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator
+https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generato
