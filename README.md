@@ -23,7 +23,7 @@ Feel free to take a look at what the community has been up to, and then head ove
 * [Project Website](https://opensearch.org/)
 * [Downloads](https://opensearch.org/downloads.html)
 * [Documentation](https://opensearch.org/docs/)
-* Need help? Try [Forums](https://discuss.opendistrocommunity.dev/)
+* Need help? See the [communication guide](COMMUNICATION.md) for various options
 * [Project Principles](https://opensearch.org/#principles)
 * [Developer Guide](DEVELOPER_GUIDE.md)
 * [Contributing to OpenSearch](CONTRIBUTING.md)
