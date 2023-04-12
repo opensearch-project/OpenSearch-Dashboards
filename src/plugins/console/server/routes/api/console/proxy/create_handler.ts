@@ -70,13 +70,15 @@ function getProxyHeaders(req: OpenSearchDashboardsRequest) {
 }
 
 function toUrlPath(path: string) {
-  let urlPath = `/${trimStart(path, '/')}`;
+  const FAKE_BASE = 'http://localhost';
+  const urlWithFakeBase = new URL(`${FAKE_BASE}/${trimStart(path, '/')}`);
   // Appending pretty here to have OpenSearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
   // measurement precision)
-  if (!urlPath.includes('?pretty')) {
-    urlPath += '?pretty=true';
+  if (!urlWithFakeBase.searchParams.get('pretty')) {
+    urlWithFakeBase.searchParams.append('pretty', 'true');
   }
+  const urlPath = urlWithFakeBase.href.replace(urlWithFakeBase.origin, '');
   return urlPath;
 }
 
