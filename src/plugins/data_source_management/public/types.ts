@@ -15,6 +15,7 @@ import {
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { SavedObjectAttributes } from 'src/core/types';
+import { i18n } from '@osd/i18n';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -57,9 +58,24 @@ export enum AuthType {
 }
 
 export const credentialSourceOptions = [
-  { id: AuthType.NoAuth, label: 'No authentication' },
-  { id: AuthType.UsernamePasswordType, label: 'Username & Password' },
-  { id: AuthType.SigV4, label: 'AWS SigV4' },
+  {
+    value: AuthType.NoAuth,
+    text: i18n.translate('dataSourceManagement.credentialSourceOptions.NoAuthentication', {
+      defaultMessage: 'No authentication',
+    }),
+  },
+  {
+    value: AuthType.UsernamePasswordType,
+    text: i18n.translate('dataSourceManagement.credentialSourceOptions.UsernamePassword', {
+      defaultMessage: 'Username & Password',
+    }),
+  },
+  {
+    value: AuthType.SigV4,
+    text: i18n.translate('dataSourceManagement.credentialSourceOptions.AwsSigV4', {
+      defaultMessage: 'AWS SigV4',
+    }),
+  },
 ];
 
 export interface DataSourceAttributes extends SavedObjectAttributes {
