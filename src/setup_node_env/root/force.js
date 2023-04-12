@@ -29,12 +29,11 @@
  */
 
 module.exports = function (argv) {
-  var args = process.argv.slice(2);
-  var rootIndex = args.indexOf('--allow-root');
+  var rootIndex = argv.indexOf('--allow-root');
   var force = rootIndex >= 0;
   if (force) argv.splice(rootIndex, 1);
   if (rootIndex !== -1) {
-    args.splice(rootIndex, 1);
+    argv.splice(rootIndex, 1);
   }
   return force;
 };

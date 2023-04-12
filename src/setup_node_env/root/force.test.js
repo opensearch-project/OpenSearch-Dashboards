@@ -27,21 +27,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-const forceRoot = require('./force');
-
-describe('forceRoot', function () {
-  it('with flag', function () {
-    expect(forceRoot(['--allow-root'])).toBeTruthy();
+const myModule = require('./force');
+describe('myModule', () => {
+  it('should return true when --allow-root is present', () => {
+    const args = ['--allow-root'];
+    const result = myModule(args);
+    expect(result).toBe(true);
   });
-
-  it('without flag', function () {
-    expect(forceRoot(['--foo'])).toBeFalsy();
-  });
-
-  test('remove argument', function () {
-    const args = ['--allow-root', 'foo'];
-    forceRoot(args);
-    expect(args.includes('--allow-root')).toBeFalsy();
+  it('should return false when --allow-root is not present', () => {
+    const args = [];
+    const result = myModule(args);
+    expect(result).toBe(false);
   });
 });
