@@ -82,6 +82,14 @@ describe('Console Proxy Route', () => {
           expect(args.path).toBe('/index/id?pretty=true');
         });
       });
+
+      describe(`contains query parameter`, () => {
+        it('adds slash to path before sending request', async () => {
+          await request('GET', '_cat/tasks?v');
+          const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
+          expect(args.path).toBe('/_cat/tasks?v=&pretty=true');
+        });
+      });
     });
   });
 });
