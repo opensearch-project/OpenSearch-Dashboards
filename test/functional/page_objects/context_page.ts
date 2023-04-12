@@ -51,7 +51,7 @@ export function ContextPageProvider({ getService, getPageObjects }: FtrProviderC
         ...DEFAULT_INITIAL_STATE,
         ...overrideInitialState,
       });
-      const appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards'), {
+      const appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards.fullURL'), {
         ...config.get('apps.context'),
         hash: `${config.get('apps.context.hash')}/${indexPattern}/${anchorId}?_a=${initialState}`,
       });
