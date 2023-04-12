@@ -30,18 +30,19 @@ export const registerTestConnectionRoute = (
                   schema.literal(AuthType.NoAuth),
                   schema.literal(AuthType.SigV4),
                 ]),
-                credentials: schema.oneOf([
-                  schema.object({
-                    username: schema.string(),
-                    password: schema.string(),
-                  }),
-                  schema.object({
-                    region: schema.string(),
-                    accessKey: schema.string(),
-                    secretKey: schema.string(),
-                  }),
-                  schema.literal(null),
-                ]),
+                credentials: schema.maybe(
+                  schema.oneOf([
+                    schema.object({
+                      username: schema.string(),
+                      password: schema.string(),
+                    }),
+                    schema.object({
+                      region: schema.string(),
+                      accessKey: schema.string(),
+                      secretKey: schema.string(),
+                    }),
+                  ])
+                ),
               })
             ),
           }),
