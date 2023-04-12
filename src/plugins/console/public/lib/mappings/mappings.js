@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import $ from 'jquery';
 import _ from 'lodash';
 import * as opensearch from '../opensearch/opensearch';
 
@@ -38,10 +37,8 @@ const POLL_INTERVAL = 60000;
 let pollTimeoutId;
 
 let perIndexTypes = {};
-let perAliasIndexes = [];
+let perAliasIndices = {};
 let templates = [];
-
-const mappingObj = {};
 
 export function expandAliases(indicesOrAliases) {
   // takes a list of indices or aliases or a string which may be either and returns a list of indices
@@ -54,20 +51,23 @@ export function expandAliases(indicesOrAliases) {
   if (typeof indicesOrAliases === 'string') {
     indicesOrAliases = [indicesOrAliases];
   }
-  indicesOrAliases = $.map(indicesOrAliases, function (iOrA) {
-    if (perAliasIndexes[iOrA]) {
-      return perAliasIndexes[iOrA];
+
+  indicesOrAliases = indicesOrAliases.map((iOrA) => {
+    if (perAliasIndices[iOrA]) {
+      return perAliasIndices[iOrA];
     }
     return [iOrA];
   });
   let ret = [].concat.apply([], indicesOrAliases);
   ret.sort();
-  let last;
-  ret = $.map(ret, function (v) {
-    const r = last === v ? null : v;
-    last = v;
-    return r;
-  });
+  ret = ret.reduce((result, value, index, array) => {
+    const last = array[index - 1];
+    if (last !== value) {
+      result.push(value);
+    }
+    return result;
+  }, []);
+
   return ret.length > 1 ? ret : ret[0];
 }
 
@@ -91,8 +91,8 @@ export function getFields(indices, types) {
       ret = f ? f : [];
     } else {
       // filter what we need
-      $.each(typeDict, function (type, fields) {
-        if (!types || types.length === 0 || $.inArray(type, types) !== -1) {
+      Object.entries(typeDict).forEach(([type, fields]) => {
+        if (!types || types.length === 0 || types.includes(type)) {
           ret.push(fields);
         }
       });
@@ -101,8 +101,8 @@ export function getFields(indices, types) {
     }
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function (index) {
-      if (!indices || indices.length === 0 || $.inArray(index, indices) !== -1) {
+    Object.keys(perIndexTypes).forEach((index) => {
+      if (!indices || indices.length === 0 || indices.includes(index)) {
         ret.push(getFields(index, types));
       }
     });
@@ -124,13 +124,19 @@ export function getTypes(indices) {
     }
 
     // filter what we need
-    $.each(typeDict, function (type) {
-      ret.push(type);
-    });
+    if (Array.isArray(typeDict)) {
+      typeDict.forEach((type) => {
+        ret.push(type);
+      });
+    } else if (typeof typeDict === 'object') {
+      Object.keys(typeDict).forEach((type) => {
+        ret.push(type);
+      });
+    }
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function (index) {
-      if (!indices || $.inArray(index, indices) !== -1) {
+    Object.keys(perIndexTypes).forEach((index) => {
+      if (!indices || indices.includes(index)) {
         ret.push(getTypes(index));
       }
     });
@@ -142,11 +148,12 @@ export function getTypes(indices) {
 
 export function getIndices(includeAliases) {
   const ret = [];
-  $.each(perIndexTypes, function (index) {
+  Object.keys(perIndexTypes).forEach((index) => {
     ret.push(index);
   });
+
   if (typeof includeAliases === 'undefined' ? true : includeAliases) {
-    $.each(perAliasIndexes, function (alias) {
+    Object.keys(perAliasIndices).forEach((alias) => {
       ret.push(alias);
     });
   }
@@ -162,7 +169,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   function applyPathSettings(nestedFieldNames) {
     const pathType = fieldMapping.path || 'full';
     if (pathType === 'full') {
-      return $.map(nestedFieldNames, function (f) {
+      return nestedFieldNames.map((f) => {
         f.name = fieldName + '.' + f.name;
         return f;
       });
@@ -185,7 +192,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   }
 
   if (fieldMapping.fields) {
-    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
+    nestedFields = Object.entries(fieldMapping.fields).flatMap(([fieldName, fieldMapping]) => {
       return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
     nestedFields = applyPathSettings(nestedFields);
@@ -197,7 +204,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 }
 
 function getFieldNamesFromProperties(properties = {}) {
-  const fieldList = $.map(properties, function (fieldMapping, fieldName) {
+  const fieldList = Object.entries(properties).flatMap(([fieldName, fieldMapping]) => {
     return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
   });
 
@@ -214,15 +221,15 @@ function loadTemplates(templatesObject = {}) {
 export function loadMappings(mappings) {
   perIndexTypes = {};
 
-  $.each(mappings, function (index, indexMapping) {
+  Object.entries(mappings).forEach(([index, indexMapping]) => {
     const normalizedIndexMappings = {};
 
     // Migrate 1.0.0 mappings. This format has changed, so we need to extract the underlying mapping.
-    if (indexMapping.mappings && _.keys(indexMapping).length === 1) {
+    if (indexMapping.mappings && Object.keys(indexMapping).length === 1) {
       indexMapping = indexMapping.mappings;
     }
 
-    $.each(indexMapping, function (typeName, typeMapping) {
+    Object.entries(indexMapping).forEach(([typeName, typeMapping]) => {
       if (typeName === 'properties') {
         const fieldList = getFieldNamesFromProperties(typeMapping);
         normalizedIndexMappings[typeName] = fieldList;
@@ -230,40 +237,39 @@ export function loadMappings(mappings) {
         normalizedIndexMappings[typeName] = [];
       }
     });
-
     perIndexTypes[index] = normalizedIndexMappings;
   });
 }
 
 export function loadAliases(aliases) {
-  perAliasIndexes = {};
-  $.each(aliases || {}, function (index, omdexAliases) {
+  perAliasIndices = {};
+  Object.entries(aliases).forEach(([index, omdexAliases]) => {
     // verify we have an index defined. useful when mapping loading is disabled
     perIndexTypes[index] = perIndexTypes[index] || {};
 
-    $.each(omdexAliases.aliases || {}, function (alias) {
+    Object.keys(omdexAliases.aliases || {}).forEach((alias) => {
       if (alias === index) {
         return;
       } // alias which is identical to index means no index.
-      let curAliases = perAliasIndexes[alias];
+      let curAliases = perAliasIndices[alias];
       if (!curAliases) {
         curAliases = [];
-        perAliasIndexes[alias] = curAliases;
+        perAliasIndices[alias] = curAliases;
       }
       curAliases.push(index);
     });
   });
 
-  perAliasIndexes._all = getIndices(false);
+  perAliasIndices._all = getIndices(false);
 }
 
 export function clear() {
   perIndexTypes = {};
-  perAliasIndexes = {};
+  perAliasIndices = {};
   templates = [];
 }
 
-function retrieveSettings(settingsKey, settingsToRetrieve) {
+function retrieveSettings(http, settingsKey, settingsToRetrieve, dataSourceId) {
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
@@ -272,15 +278,14 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
-    return opensearch.send('GET', settingKeyToPathMap[settingsKey], null);
+    return opensearch.send(http, 'GET', settingKeyToPathMap[settingsKey], null, dataSourceId);
   } else {
-    const settingsPromise = new $.Deferred();
     if (settingsToRetrieve[settingsKey] === false) {
       // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
+      return Promise.resolve({});
     } else {
       // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return settingsPromise.resolve();
+      return Promise.resolve();
     }
   }
 }
@@ -302,52 +307,75 @@ export function clearSubscriptions() {
   }
 }
 
+const retrieveMappings = async (http, settingsToRetrieve, dataSourceId) => {
+  const { body: mappings } = await retrieveSettings(
+    http,
+    'fields',
+    settingsToRetrieve,
+    dataSourceId
+  );
+  if (mappings) {
+    const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
+    let mappingsResponse;
+    if (maxMappingSize) {
+      console.warn(
+        `Mapping size is larger than 10MB (${
+          Object.keys(mappings).length / 1024 / 1024
+        } MB). Ignoring...`
+      );
+      mappingsResponse = '{}';
+    } else {
+      mappingsResponse = mappings;
+    }
+    loadMappings(mappingsResponse);
+  }
+};
+
+const retrieveAliases = async (http, settingsToRetrieve, dataSourceId) => {
+  const { body: aliases } = await retrieveSettings(
+    http,
+    'indices',
+    settingsToRetrieve,
+    dataSourceId
+  );
+
+  if (aliases) {
+    loadAliases(aliases);
+  }
+};
+
+const retrieveTemplates = async (http, settingsToRetrieve, dataSourceId) => {
+  const { body: templates } = await retrieveSettings(
+    http,
+    'templates',
+    settingsToRetrieve,
+    dataSourceId
+  );
+
+  if (templates) {
+    loadTemplates(templates);
+  }
+};
+
 /**
  *
  * @param settings Settings A way to retrieve the current settings
  * @param settingsToRetrieve any
  */
-export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
+export function retrieveAutoCompleteInfo(http, settings, settingsToRetrieve, dataSourceId) {
   clearSubscriptions();
 
-  const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
-  const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
-  const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
-
-  $.when(mappingPromise, aliasesPromise, templatesPromise).done((mappings, aliases, templates) => {
-    let mappingsResponse;
-    if (mappings) {
-      const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
-      if (maxMappingSize) {
-        console.warn(
-          `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
-        );
-        mappingsResponse = '[{}]';
-      } else {
-        mappingsResponse = mappings[0];
-      }
-      loadMappings(JSON.parse(mappingsResponse));
-    }
-
-    if (aliases) {
-      loadAliases(JSON.parse(aliases[0]));
-    }
-
-    if (templates) {
-      loadTemplates(JSON.parse(templates[0]));
-    }
-
-    if (mappings && aliases) {
-      // Trigger an update event with the mappings, aliases
-      $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
-    }
-
+  Promise.allSettled([
+    retrieveMappings(http, settingsToRetrieve, dataSourceId),
+    retrieveAliases(http, settingsToRetrieve, dataSourceId),
+    retrieveTemplates(http, settingsToRetrieve, dataSourceId),
+  ]).then(() => {
     // Schedule next request.
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
       // a scheduled request if the user turns off polling.
       if (settings.getPolling()) {
-        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete(), dataSourceId);
       }
     }, POLL_INTERVAL);
   });

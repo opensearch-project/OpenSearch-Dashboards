@@ -30,16 +30,19 @@
 
 import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';
 import { trimStart } from 'lodash';
+import { Readable } from 'stream';
 
-import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { ApiResponse } from '@opensearch-project/opensearch/';
 
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { isResponseError } from '../../../../../../../core/server/opensearch/client/errors';
 
 import { RouteDependencies } from '../../../';
 
 import { Body, Query } from './validation_config';
+import { buildBufferedBody } from './utils';
 
 function getProxyHeaders(req: OpenSearchDashboardsRequest) {
   const headers = Object.create(null);
@@ -67,13 +70,15 @@ function getProxyHeaders(req: OpenSearchDashboardsRequest) {
 }
 
 function toUrlPath(path: string) {
-  let urlPath = `/${trimStart(path, '/')}`;
+  const FAKE_BASE = 'http://localhost';
+  const urlWithFakeBase = new URL(`${FAKE_BASE}/${trimStart(path, '/')}`);
   // Appending pretty here to have OpenSearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
   // measurement precision)
-  if (!urlPath.includes('?pretty')) {
-    urlPath += '?pretty=true';
+  if (!urlWithFakeBase.searchParams.get('pretty')) {
+    urlWithFakeBase.searchParams.append('pretty', 'true');
   }
+  const urlPath = urlWithFakeBase.href.replace(urlWithFakeBase.origin, '');
   return urlPath;
 }
 
@@ -82,9 +87,10 @@ export const createHandler = ({
   proxy: { readLegacyOpenSearchConfig, pathFilters, proxyConfigCollection },
 }: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
   const { body, query } = request;
-  const { path, method } = query;
-  const client = ctx.core.opensearch.client.asCurrentUser;
-
+  const { path, method, dataSourceId } = query;
+  const client = dataSourceId
+    ? await ctx.dataSource.opensearch.getClient(dataSourceId)
+    : ctx.core.opensearch.client.asCurrentUser;
   let opensearchResponse: ApiResponse;
 
   if (!pathFilters.some((re) => re.test(path))) {
@@ -97,12 +103,16 @@ export const createHandler = ({
   }
 
   try {
-    const requestHeaders = {
-      ...getProxyHeaders(request),
-    };
+    // TODO: proxy header will fail sigv4 auth type in data source, need create issue in opensearch-js repo to track
+    const requestHeaders = dataSourceId
+      ? {}
+      : {
+          ...getProxyHeaders(request),
+        };
 
+    const bufferedBody = await buildBufferedBody(body);
     opensearchResponse = await client.transport.request(
-      { path: toUrlPath(path), method, body },
+      { path: toUrlPath(path), method, body: bufferedBody },
       { headers: requestHeaders }
     );
 
@@ -127,15 +137,22 @@ export const createHandler = ({
       },
     });
   } catch (e: any) {
-    log.error(e);
     const isResponseErrorFlag = isResponseError(e);
+    if (!isResponseError) log.error(e);
+    const errorMessage = isResponseErrorFlag ? JSON.stringify(e.meta.body) : e.message;
+    // core http route handler has special logic that asks for stream readable input to pass error opaquely
+    const errorResponseBody = new Readable({
+      read() {
+        this.push(errorMessage);
+        this.push(null);
+      },
+    });
     return response.customError({
       statusCode: isResponseErrorFlag ? e.statusCode : 502,
-      body: isResponseErrorFlag ? JSON.stringify(e.meta.body) : `502.${e.statusCode || 0}`,
+      body: errorResponseBody,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
   }
-};
-
-const isResponseError = (error: any): error is ResponseError => {
-  return Boolean(error && error.body && error.statusCode && error.header);
 };
