@@ -18433,7 +18433,7 @@ xml2js@0.4.19:
     sax ">=0.6.0"
     xmlbuilder "~9.0.1"
 
-xml2js@^0.4.22, xml2js@^0.4.5:
+xml2js@^0.4.5:
   version "0.4.23"
   resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.4.23.tgz#a0c69516752421eb2ac758ee4d4ccf58843eac66"
   integrity sha512-ySPiMjM0+pLDftHgXY4By0uswI3SPKLDw/i3UXbnO8M/p28zqexCUoPmQFrYD+/1BzhGJSs2i1ERWKJAtiLrug==
