@@ -46,7 +46,7 @@ export const DashboardApp = ({ onAppLeave }: DashboardAppProps) => {
         exact
         path={[DashboardConstants.CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl(':id')]}
       >
-        <DashboardViewport />
+        <DashboardEditor />
       </Route>
       <DashboardNoMatch />
     </Switch>
