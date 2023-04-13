@@ -170,23 +170,25 @@ function DevToolsWrapper({
             </EuiTab>
           </EuiToolTip>
         ))}
-        <div className="devAppDataSourcePicker">
-          <EuiComboBox
-            aria-label={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxAriaLabel', {
-              defaultMessage: 'Select a Data Source',
-            })}
-            placeholder={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxPlaceholder', {
-              defaultMessage: 'Select a Data Source',
-            })}
-            singleSelection={{ asPlainText: true }}
-            options={dataSources}
-            selectedOptions={selectedOptions}
-            onChange={onChange}
-            prepend="DataSource"
-            compressed
-            isDisabled={!dataSourceEnabled}
-          />
-        </div>
+        {dataSourceEnabled ? (
+          <div className="devAppDataSourcePicker">
+            <EuiComboBox
+              aria-label={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxAriaLabel', {
+                defaultMessage: 'Select a Data Source',
+              })}
+              placeholder={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxPlaceholder', {
+                defaultMessage: 'Select a Data Source',
+              })}
+              singleSelection={{ asPlainText: true }}
+              options={dataSources}
+              selectedOptions={selectedOptions}
+              onChange={onChange}
+              prepend="DataSource"
+              compressed
+              isDisabled={!dataSourceEnabled}
+            />
+          </div>
+        ) : null}
       </EuiTabs>
 
       <div
