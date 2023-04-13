@@ -5413,7 +5413,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                             onClick={[Function]}
                           >
                             <EuiIcon
-                              size="l"
+                              size="m"
                               type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
@@ -5506,12 +5506,12 @@ exports[`Header handles visibility and lock changes 1`] = `
                                           className="euiHeaderSectionItemButton__content"
                                         >
                                           <EuiIcon
-                                            size="l"
+                                            size="m"
                                             type="questionInCircle"
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
-                                              size="l"
+                                              size="m"
                                             />
                                           </EuiIcon>
                                         </span>
@@ -10649,7 +10649,7 @@ exports[`Header renders condensed header 1`] = `
                             onClick={[Function]}
                           >
                             <EuiIcon
-                              size="l"
+                              size="m"
                               type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
@@ -10742,12 +10742,12 @@ exports[`Header renders condensed header 1`] = `
                                           className="euiHeaderSectionItemButton__content"
                                         >
                                           <EuiIcon
-                                            size="l"
+                                            size="m"
                                             type="questionInCircle"
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
-                                              size="l"
+                                              size="m"
                                             />
                                           </EuiIcon>
                                         </span>

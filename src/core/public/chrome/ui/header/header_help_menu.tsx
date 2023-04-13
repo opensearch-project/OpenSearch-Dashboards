@@ -227,7 +227,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           <div>
             <EuiButtonEmpty href={surveyLink} target="_blank" size="xs" flush="left">
               <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuSatisfactionSurveyTitle"
+                id="core.ui.chrome.headerGlobalNav.helpMenuFeedbackSurveyTitle"
                 defaultMessage="Give feedback"
               />
             </EuiButtonEmpty>

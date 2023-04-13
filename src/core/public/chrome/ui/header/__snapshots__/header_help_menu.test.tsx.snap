@@ -1623,7 +1623,7 @@ exports[`Header help menu hides survey link 1`] = `
           onClick={[Function]}
         >
           <EuiIcon
-            size="l"
+            size="m"
             type="questionInCircle"
           />
         </EuiHeaderSectionItemButton>
@@ -1716,12 +1716,12 @@ exports[`Header help menu hides survey link 1`] = `
                         className="euiHeaderSectionItemButton__content"
                       >
                         <EuiIcon
-                          size="l"
+                          size="m"
                           type="questionInCircle"
                         >
                           <span
                             data-euiicon-type="questionInCircle"
-                            size="l"
+                            size="m"
                           />
                         </EuiIcon>
                       </span>
@@ -3779,7 +3779,7 @@ exports[`Header help menu renders survey link 1`] = `
           onClick={[Function]}
         >
           <EuiIcon
-            size="l"
+            size="m"
             type="questionInCircle"
           />
         </EuiHeaderSectionItemButton>
@@ -3872,12 +3872,12 @@ exports[`Header help menu renders survey link 1`] = `
                         className="euiHeaderSectionItemButton__content"
                       >
                         <EuiIcon
-                          size="l"
+                          size="m"
                           type="questionInCircle"
                         >
                           <span
                             data-euiicon-type="questionInCircle"
-                            size="l"
+                            size="m"
                           />
                         </EuiIcon>
                       </span>
@@ -4286,7 +4286,7 @@ exports[`Header help menu renders survey link 1`] = `
                                     >
                                       <FormattedMessage
                                         defaultMessage="Give feedback"
-                                        id="core.ui.chrome.headerGlobalNav.helpMenuSatisfactionSurveyTitle"
+                                        id="core.ui.chrome.headerGlobalNav.helpMenuFeedbackSurveyTitle"
                                         values={Object {}}
                                       >
                                         Give feedback
