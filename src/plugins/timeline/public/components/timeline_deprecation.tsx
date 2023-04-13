@@ -34,7 +34,7 @@ import React from 'react';
 import { DocLinksStart } from '../../../../core/public';
 
 export const TimelineDeprecation = ({ links }: DocLinksStart) => {
-  const timelineDeprecationLink = links.noDocumentation.visualize.timelineDeprecation;
+  const timelineDeprecationLink = links.opensearchDashboards.visualize.timelineDeprecation;
   return (
     <>
       <EuiCallOut
