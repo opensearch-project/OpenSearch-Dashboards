@@ -2,7 +2,7 @@
 
 - [Overview](#overview)
 - [Slack](#slack)
-- [Forum](https://discuss.opendistrocommunity.dev/)
+- [Forum](#forum)
 - [Developer Office Hours](#developer-office-hours)
     - [What it is](#what-it-is)
     - [When](#when)
@@ -30,7 +30,7 @@ Slack conversations are not searchable outside the workspace. For this reason we
 
 ### What it is
 
-An recurring 1-hour virtual meeting for community developers to chat with [OpenSearch Dashboards project maintainers](MAINTAINERS.md). Priority will be given to topics that are signed-up in advance, but ad-hoc discussions are welcome in any remaining time.
+A recurring 1-hour virtual meeting for community developers to chat with [OpenSearch Dashboards project maintainers](MAINTAINERS.md). Priority will be given to topics that are signed-up in advance, but ad-hoc discussions are welcome in any remaining time.
 
 While we'll always prioritize asynchronous communication, sometimes a community call is the most effective and efficient venue to share information and knowledge. Some reasons to sign up:
 
