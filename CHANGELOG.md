@@ -9,6 +9,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
+- [CVE-2022-25858] Bump terser from `4.8.0` to `4.8.1` ([#3726](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3726))
+
 ### 📈 Features/Enhancements
 
 ### 🐛 Bug Fixes
