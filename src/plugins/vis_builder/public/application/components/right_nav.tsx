@@ -122,4 +122,6 @@ const OptionItem = ({ icon, title }: { icon: IconType; title: string }) => (
   </>
 );
 
+// The app uses EuiResizableContainer that triggers a rerender for ever mouseover action.
+// To prevent this child component from unnecessarily rerendering in that instance, it needs to be memoized
 export const RightNav = React.memo(RightNavUI);
