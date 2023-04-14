@@ -22,6 +22,6 @@
       "_msearch",
       "{indices}/_msearch"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/#multi-match"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/multi-search/"
   }
 }
