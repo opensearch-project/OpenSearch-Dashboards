@@ -85,6 +85,11 @@ export const config = {
         defaultValue: true,
       }),
     }),
+    survey: schema.object({
+      url: schema.string({
+        defaultValue: 'https://survey.opensearch.org',
+      }),
+    }),
   }),
   deprecations,
 };
