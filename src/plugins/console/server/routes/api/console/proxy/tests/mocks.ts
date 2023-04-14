@@ -32,6 +32,11 @@ jest.mock('../../../../../lib/proxy_request', () => ({
   proxyRequest: jest.fn(),
 }));
 
+export const buildBufferedBodyMock = jest.fn();
+jest.doMock('../utils.ts', () => ({
+  buildBufferedBody: buildBufferedBodyMock,
+}));
+
 import { duration } from 'moment';
 import { ProxyConfigCollection } from '../../../../../lib';
 import { RouteDependencies, ProxyDependencies } from '../../../../../routes';
