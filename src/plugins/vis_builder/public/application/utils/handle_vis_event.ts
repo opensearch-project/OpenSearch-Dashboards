@@ -14,21 +14,12 @@ export const handleVisEvent = async (
   timeFieldName?: string
 ) => {
   const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
-  let context;
-
-  if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
-    context = {
-      timeFieldName,
-      ...event.data,
-    };
-  } else {
-    context = {
-      data: {
-        timeFieldName,
-        ...event.data,
-      },
-    };
-  }
+  const isApplyFilter = triggerId === VIS_EVENT_TO_TRIGGER.applyFilter;
+  const dataContext  {
+    timeFieldName,
+    ...event.data,
+  };
+  const context = isApplyFilter ? dataContext : { data: dataContext } 
 
   await uiActions.getTrigger(triggerId).exec(context);
 };
