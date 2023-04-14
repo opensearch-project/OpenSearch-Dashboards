@@ -65,34 +65,6 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
       await searchFilter.click();
     }
 
-    private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
-      const visualizationNames = [];
-      const links = await find.allByCssSelector('.kuiLink');
-      for (let i = 0; i < links.length; i++) {
-        visualizationNames.push(await links[i].getVisibleText());
-      }
-      log.debug(`Found ${visualizationNames.length} visualizations on current page`);
-      return visualizationNames;
-    }
-
-    /**
-     * Navigates through all pages on Landing page and returns array of items names
-     */
-    public async getAllItemsNames(): Promise<string[]> {
-      log.debug('ListingTable.getAllItemsNames');
-      let morePages = true;
-      let visualizationNames: string[] = [];
-      while (morePages) {
-        visualizationNames = visualizationNames.concat(await this.getAllItemsNamesOnCurrentPage());
-        morePages = !((await testSubjects.getAttribute('pagerNextButton', 'disabled')) === 'true');
-        if (morePages) {
-          await testSubjects.click('pagerNextButton');
-          await header.waitUntilLoadingHasFinished();
-        }
-      }
-      return visualizationNames;
-    }
-
     /**
      * Returns items count on landing page
      * @param appName 'visualize' | 'dashboard'
