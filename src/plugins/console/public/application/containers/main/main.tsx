@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eui';
 import { ConsoleHistory } from '../console_history';
@@ -48,7 +48,11 @@ import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
 
-export function Main() {
+interface MainProps {
+  dataSourceId?: string;
+}
+
+export function Main({ dataSourceId }: MainProps) {
   const {
     services: { storage },
   } = useServicesContext();
@@ -130,7 +134,7 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor loading={!done} />
+          <Editor loading={!done} dataSourceId={dataSourceId} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -143,7 +147,9 @@ export function Main() {
         />
       ) : null}
 
-      {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
+      {showSettings ? (
+        <Settings onClose={() => setShowSettings(false)} dataSourceId={dataSourceId} />
+      ) : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
     </div>

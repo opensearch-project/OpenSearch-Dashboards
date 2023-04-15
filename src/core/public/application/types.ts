@@ -503,6 +503,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+  /**
+   * Optional datasource id to pass while mounting app
+   */
+  dataSourceId?: string;
 }
 
 /**

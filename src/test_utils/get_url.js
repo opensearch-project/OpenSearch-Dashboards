@@ -28,9 +28,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import url from 'url';
-
 /**
  * Converts a config and a pathname to a url
  * @param {object} config A url config
@@ -50,17 +47,24 @@ import url from 'url';
  * @return {string}
  */
 
-export default function getUrl(config, app) {
-  return url.format(_.assign({}, config, app));
+export default function getUrl(url, app) {
+  url = new URL(url);
+  if (app.pathname) {
+    url.pathname = app.pathname;
+  }
+  if (app.hash) {
+    url.hash = app.hash;
+  }
+  return url.toString();
 }
 
-getUrl.noAuth = function getUrlNoAuth(config, app) {
-  config = _.pickBy(config, function (val, param) {
-    return param !== 'auth';
-  });
-  return getUrl(config, app);
+getUrl.noAuth = function getUrlNoAuth(url, app) {
+  url = new URL(url);
+  url.username = '';
+  url.password = '';
+  return getUrl(url, app);
 };
 
-getUrl.baseUrl = function getBaseUrl(config) {
-  return url.format(_.pick(config, 'protocol', 'hostname', 'port'));
+getUrl.baseUrl = function getBaseUrl(url) {
+  return url.origin;
 };

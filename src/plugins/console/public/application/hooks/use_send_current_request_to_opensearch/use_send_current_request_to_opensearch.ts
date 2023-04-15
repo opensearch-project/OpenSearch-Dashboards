@@ -38,7 +38,7 @@ import { track } from './track';
 // @ts-ignore
 import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
 
-export const useSendCurrentRequestToOpenSearch = () => {
+export const useSendCurrentRequestToOpenSearch = (dataSourceId?: string) => {
   const {
     services: { history, settings, notifications, trackUiMetric, http },
   } = useServicesContext();
@@ -64,7 +64,7 @@ export const useSendCurrentRequestToOpenSearch = () => {
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
-      const results = await sendRequestToOpenSearch({ http, requests });
+      const results = await sendRequestToOpenSearch({ http, requests, dataSourceId });
 
       results.forEach(({ request: { path, method, data } }) => {
         try {
@@ -85,7 +85,7 @@ export const useSendCurrentRequestToOpenSearch = () => {
         // or templates may have changed, so we'll need to update this data. Assume that if
         // the user disables polling they're trying to optimize performance or otherwise
         // preserve resources, so they won't want this request sent either.
-        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete(), dataSourceId);
       }
 
       dispatch({
@@ -112,5 +112,5 @@ export const useSendCurrentRequestToOpenSearch = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications, trackUiMetric, http]);
+  }, [dispatch, http, dataSourceId, settings, notifications.toasts, trackUiMetric, history]);
 };
