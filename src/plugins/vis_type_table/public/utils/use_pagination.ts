@@ -9,7 +9,7 @@ import { TableVisConfig } from '../types';
 export const usePagination = (visConfig: TableVisConfig, nRow: number) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: visConfig.perPage || 10,
+    pageSize: Math.min(visConfig.perPage || 10, nRow),
   });
   const onChangeItemsPerPage = useCallback(
     (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
@@ -20,7 +20,7 @@ export const usePagination = (visConfig: TableVisConfig, nRow: number) => {
   ]);
 
   useEffect(() => {
-    const perPage = visConfig.perPage || 10;
+    const perPage = Math.min(visConfig.perPage || 10, nRow);
     const maxiPageIndex = Math.ceil(nRow / perPage) - 1;
     setPagination((p) => ({
       pageIndex: p.pageIndex > maxiPageIndex ? maxiPageIndex : p.pageIndex,
