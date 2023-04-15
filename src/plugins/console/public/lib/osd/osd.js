@@ -185,7 +185,7 @@ export function setActiveApi(api) {
       .then(function (data) {
         setActiveApi(loadApisFromJson(data));
       })
-      .catch((error) => console.log("failed to load API '" + api + "': " + error));
+      .catch((error) => console.log(`failed to load API '${api}': ${error}`));
     return;
   }
 
