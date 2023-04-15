@@ -154,51 +154,42 @@ function DevToolsWrapper({
 
   return (
     <main className="devApp">
-      <div>
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem>
-            <EuiTabs>
-              {devTools.map((currentDevTool) => (
-                <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
-                  <EuiTab
-                    disabled={currentDevTool.isDisabled()}
-                    isSelected={currentDevTool === activeDevTool}
-                    onClick={() => {
-                      if (!currentDevTool.isDisabled()) {
-                        updateRoute(`/${currentDevTool.id}`);
-                      }
-                    }}
-                  >
-                    {currentDevTool.title}
-                  </EuiTab>
-                </EuiToolTip>
-              ))}
-            </EuiTabs>
-          </EuiFlexItem>
-          {dataSourceEnabled ? (
-            <EuiFlexItem grow={false} className="dataSourceSelector">
-              <EuiComboBox
-                aria-label={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxAriaLabel', {
-                  defaultMessage: 'Select a Data Source',
-                })}
-                placeholder={i18n.translate(
-                  'devTool.devToolWrapper.DataSourceComboBoxPlaceholder',
-                  {
-                    defaultMessage: 'Select a Data Source',
-                  }
-                )}
-                singleSelection={{ asPlainText: true }}
-                options={dataSources}
-                selectedOptions={selectedOptions}
-                onChange={onChange}
-                prepend="DataSource"
-                compressed
-                isDisabled={!dataSourceEnabled}
-              />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </div>
+      <EuiTabs className="devAppTabs">
+        {devTools.map((currentDevTool) => (
+          <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
+            <EuiTab
+              disabled={currentDevTool.isDisabled()}
+              isSelected={currentDevTool === activeDevTool}
+              onClick={() => {
+                if (!currentDevTool.isDisabled()) {
+                  updateRoute(`/${currentDevTool.id}`);
+                }
+              }}
+            >
+              {currentDevTool.title}
+            </EuiTab>
+          </EuiToolTip>
+        ))}
+        {dataSourceEnabled ? (
+          <div className="devAppDataSourcePicker">
+            <EuiComboBox
+              aria-label={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxAriaLabel', {
+                defaultMessage: 'Select a Data Source',
+              })}
+              placeholder={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxPlaceholder', {
+                defaultMessage: 'Select a Data Source',
+              })}
+              singleSelection={{ asPlainText: true }}
+              options={dataSources}
+              selectedOptions={selectedOptions}
+              onChange={onChange}
+              prepend="DataSource"
+              compressed
+              isDisabled={!dataSourceEnabled}
+            />
+          </div>
+        ) : null}
+      </EuiTabs>
 
       <div
         className="devApp__container"
