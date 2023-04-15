@@ -10,6 +10,6 @@
     "patterns": [
       "_remotestore/_restore"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/"
+    "documentation": "https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/remote/#restoring-from-a-backup"
   }
 }
