@@ -2435,7 +2435,7 @@ main {
 .kuiSubduedText {
   color: #69707D !important; }
 
-.kuiVerticalRhythm + .kuiVerticalRhythm {
+.verticalRhythm + .verticalRhythm {
   margin-top: 16px; }
 
 .kuiVerticalRhythmSmall + .kuiVerticalRhythmSmall {
