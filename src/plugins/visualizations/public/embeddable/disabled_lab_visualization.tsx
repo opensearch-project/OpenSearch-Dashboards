@@ -35,17 +35,17 @@ export function DisabledLabVisualization({ title }: { title: string }) {
   return (
     <div className="visDisabledLabVisualization">
       <div
-        className="kuiVerticalRhythm visDisabledLabVisualization__icon kuiIcon fa-flask"
+        className="verticalRhythm visDisabledLabVisualization__icon kuiIcon fa-flask"
         aria-hidden="true"
       />
-      <div className="kuiVerticalRhythm">
+      <div className="verticalRhythm">
         <FormattedMessage
           id="visualizations.disabledLabVisualizationTitle"
           defaultMessage="{title} is a lab visualization."
           values={{ title: <em className="visDisabledLabVisualization__title">{title}</em> }}
         />
       </div>
-      <div className="kuiVerticalRhythm">
+      <div className="verticalRhythm">
         <FormattedMessage
           id="visualizations.disabledLabVisualizationMessage"
           defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
