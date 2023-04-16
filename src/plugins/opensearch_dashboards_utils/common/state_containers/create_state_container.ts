@@ -47,7 +47,11 @@ const isProduction =
     : !process.env.NODE_ENV || process.env.NODE_ENV === 'production';
 
 const deepFreeze = (value: any) => {
-  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+  if (
+    value &&
+    (typeof value === 'object' || typeof value === 'function') &&
+    !Object.isFrozen(value)
+  ) {
     Object.freeze(value);
     Object.getOwnPropertyNames(value).forEach((prop) => deepFreeze(value[prop]));
   }
