@@ -7,7 +7,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import ReactDOM from 'react-dom';
 import { merge, Subscription } from 'rxjs';
 
-import { PLUGIN_ID, VisBuilderSavedObjectAttributes, VISBUILDER_SAVED_OBJECT } from '../../common';
+import { PLUGIN_ID, VISBUILDER_SAVED_OBJECT } from '../../common';
 import {
   Embeddable,
   EmbeddableOutput,
@@ -28,15 +28,21 @@ import {
   TimeRange,
 } from '../../../data/public';
 import { validateSchemaState } from '../application/utils/validations/validate_schema_state';
-import { getExpressionLoader, getTypeService } from '../plugin_services';
+import {
+  getExpressionLoader,
+  getIndexPatterns,
+  getTypeService,
+  getUIActions,
+} from '../plugin_services';
 import { PersistedState } from '../../../visualizations/public';
-import { RenderState, VisualizationState } from '../application/utils/state_management';
+import { VisBuilderSavedVis } from '../saved_visualizations/transforms';
+import { handleVisEvent } from '../application/utils/handle_vis_event';
 
 // Apparently this needs to match the saved object type for the clone and replace panel actions to work
 export const VISBUILDER_EMBEDDABLE = VISBUILDER_SAVED_OBJECT;
 
 export interface VisBuilderEmbeddableConfiguration {
-  savedVisBuilder: VisBuilderSavedObjectAttributes;
+  savedVis: VisBuilderSavedVis;
   // TODO: add indexPatterns as part of configuration
   // indexPatterns?: IIndexPattern[];
   editPath: string;
@@ -44,12 +50,14 @@ export interface VisBuilderEmbeddableConfiguration {
   editable: boolean;
 }
 
+export type VisBuilderInput = SavedObjectEmbeddableInput;
+
 export interface VisBuilderOutput extends EmbeddableOutput {
   /**
    * Will contain the saved object attributes of the VisBuilder Saved Object that matches
    * `input.savedObjectId`. If the id is invalid, this may be undefined.
    */
-  savedVisBuilder?: VisBuilderSavedObjectAttributes;
+  savedVis?: VisBuilderSavedVis;
 }
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
@@ -65,13 +73,13 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
   private autoRefreshFetchSubscription: Subscription;
   private subscriptions: Subscription[] = [];
   private node?: HTMLElement;
-  private savedVisBuilder?: VisBuilderSavedObjectAttributes;
-  private serializedState?: { visualization: string; style: string };
+  private savedVis?: VisBuilderSavedVis;
+  private serializedState?: string;
   private uiState?: PersistedState;
 
   constructor(
     timefilter: TimefilterContract,
-    { savedVisBuilder, editPath, editUrl, editable }: VisBuilderEmbeddableConfiguration,
+    { savedVis, editPath, editUrl, editable }: VisBuilderEmbeddableConfiguration,
     initialInput: SavedObjectEmbeddableInput,
     {
       parent,
@@ -82,17 +90,17 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     super(
       initialInput,
       {
-        defaultTitle: savedVisBuilder.title,
+        defaultTitle: savedVis.title,
         editPath,
         editApp: PLUGIN_ID,
         editUrl,
         editable,
-        savedVisBuilder,
+        savedVis,
       },
       parent
     );
 
-    this.savedVisBuilder = savedVisBuilder;
+    this.savedVis = savedVis;
     this.uiState = new PersistedState();
 
     this.autoRefreshFetchSubscription = timefilter
@@ -106,54 +114,34 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     );
   }
 
-  private getSerializedState = () => {
-    const { visualizationState: visualization = '{}', styleState: style = '{}' } =
-      this.savedVisBuilder || {};
-    return {
-      visualization,
-      style,
-    };
-  };
+  private getSerializedState = () => JSON.stringify(this.savedVis?.state);
 
   private getExpression = async () => {
-    if (!this.serializedState) {
-      return;
-    }
-    const { visualization, style } = this.serializedState;
+    try {
+      // Check if saved visualization exists
+      const renderState = this.savedVis?.state;
+      if (!renderState) throw new Error('No saved visualization');
 
-    const vizStateWithoutIndex = JSON.parse(visualization);
-    const visualizationState: VisualizationState = {
-      searchField: vizStateWithoutIndex.searchField,
-      activeVisualization: vizStateWithoutIndex.activeVisualization,
-      indexPattern: this.savedVisBuilder?.searchSourceFields?.index,
-    };
-    const renderState: RenderState = {
-      visualization: visualizationState,
-      style: JSON.parse(style),
-    };
-    const visualizationName = renderState.visualization?.activeVisualization?.name ?? '';
-    const visualizationType = getTypeService().get(visualizationName);
-    if (!visualizationType) {
-      this.onContainerError(new Error(`Invalid visualization type ${visualizationName}`));
-      return;
-    }
-    const { toExpression, ui } = visualizationType;
-    const schemas = ui.containerConfig.data.schemas;
-    const { valid, errorMsg } = validateSchemaState(schemas, visualizationState);
+      const visTypeString = renderState.visualization?.activeVisualization?.name || '';
+      const visualizationType = getTypeService().get(visTypeString);
 
-    if (!valid) {
-      if (errorMsg) {
-        this.onContainerError(new Error(errorMsg));
-        return;
-      }
-    } else {
-      // TODO: handle error in Expression creation
+      if (!visualizationType) throw new Error(`Invalid visualization type ${visTypeString}`);
+
+      const { toExpression, ui } = visualizationType;
+      const schemas = ui.containerConfig.data.schemas;
+      const { valid, errorMsg } = validateSchemaState(schemas, renderState.visualization);
+
+      if (!valid && errorMsg) throw new Error(errorMsg);
+
       const exp = await toExpression(renderState, {
         filters: this.filters,
         query: this.query,
         timeRange: this.timeRange,
       });
       return exp;
+    } catch (error) {
+      this.onContainerError(error as Error);
+      return;
     }
   };
 
@@ -167,7 +155,7 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
 
   // Needed to add informational tooltip
   public getDescription() {
-    return this.savedVisBuilder?.description;
+    return this.savedVis?.description;
   }
 
   public render(node: HTMLElement) {
@@ -197,8 +185,20 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
       },
     });
 
-    if (this.savedVisBuilder?.description) {
-      div.setAttribute('data-description', this.savedVisBuilder.description);
+    this.subscriptions.push(
+      this.handler.events$.subscribe(async (event) => {
+        if (!this.input.disableTriggers) {
+          const indexPattern = await getIndexPatterns().get(
+            this.savedVis?.state.visualization.indexPattern ?? ''
+          );
+
+          handleVisEvent(event, getUIActions(), indexPattern.timeFieldName);
+        }
+      })
+    );
+
+    if (this.savedVis?.description) {
+      div.setAttribute('data-description', this.savedVis.description);
     }
 
     div.setAttribute('data-test-subj', 'visBuilderLoader');
@@ -271,7 +271,7 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     }
 
     // Check if rootState has changed
-    if (!isEqual(this.getSerializedState(), this.serializedState)) {
+    if (this.getSerializedState() !== this.serializedState) {
       this.serializedState = this.getSerializedState();
       dirty = true;
     }
