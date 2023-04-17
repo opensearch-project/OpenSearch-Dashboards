@@ -30,7 +30,6 @@
 
 import ace from 'brace';
 import { Editor as IAceEditor, IEditSession as IAceEditSession } from 'brace';
-import $ from 'jquery';
 import {
   CoreEditor,
   Position,
@@ -54,11 +53,11 @@ const rangeToAceRange = ({ start, end }: Range) =>
 
 export class LegacyCoreEditor implements CoreEditor {
   private _aceOnPaste: any;
-  $actions: any;
+  actions: any;
   resize: () => void;
 
   constructor(private readonly editor: IAceEditor, actions: HTMLElement) {
-    this.$actions = $(actions);
+    this.actions = actions;
     this.editor.setShowPrintMargin(false);
 
     const session = this.editor.getSession();
@@ -274,20 +273,16 @@ export class LegacyCoreEditor implements CoreEditor {
 
   private setActionsBar = (value?: any, topOrBottom: 'top' | 'bottom' = 'top') => {
     if (value === null) {
-      this.$actions.css('visibility', 'hidden');
+      this.actions.style.visibility = 'hidden';
     } else {
       if (topOrBottom === 'top') {
-        this.$actions.css({
-          bottom: 'auto',
-          top: value,
-          visibility: 'visible',
-        });
+        this.actions.style.bottom = 'auto';
+        this.actions.style.top = value;
+        this.actions.style.visibility = 'visible';
       } else {
-        this.$actions.css({
-          top: 'auto',
-          bottom: value,
-          visibility: 'visible',
-        });
+        this.actions.style.top = 'auto';
+        this.actions.style.bottom = value;
+        this.actions.style.visibility = 'visible';
       }
     }
   };
@@ -318,14 +313,14 @@ export class LegacyCoreEditor implements CoreEditor {
   }
 
   legacyUpdateUI(range: any) {
-    if (!this.$actions) {
+    if (!this.actions) {
       return;
     }
     if (range) {
       // elements are positioned relative to the editor's container
       // pageY is relative to page, so subtract the offset
       // from pageY to get the new top value
-      const offsetFromPage = $(this.editor.container).offset()!.top;
+      const offsetFromPage = this.editor.container.offsetTop;
       const startLine = range.start.lineNumber;
       const startColumn = range.start.column;
       const firstLine = this.getLineValue(startLine);
@@ -345,11 +340,11 @@ export class LegacyCoreEditor implements CoreEditor {
         let offset = 0;
         if (isWrapping) {
           // Try get the line height of the text area in pixels.
-          const textArea = $(this.editor.container.querySelector('textArea')!);
+          const textArea = this.editor.container.querySelector('textArea');
           const hasRoomOnNextLine = this.getLineValue(startLine).length < maxLineLength;
           if (textArea && hasRoomOnNextLine) {
             // Line height + the number of wraps we have on a line.
-            offset += this.getLineValue(startLine).length * textArea.height()!;
+            offset += this.getLineValue(startLine).length * textArea.getBoundingClientRect().height;
           } else {
             if (startLine > 1) {
               this.setActionsBar(getScreenCoords(startLine - 1));
