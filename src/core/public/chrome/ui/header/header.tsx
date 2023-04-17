@@ -175,7 +175,13 @@ export function Header({
                   aria-controls={navId}
                   ref={toggleCollapsibleNavRef}
                 >
-                  <EuiIcon type="menu" size="m" />
+                  <EuiIcon
+                    type="menu"
+                    size="m"
+                    title={i18n.translate('core.ui.primaryNav.menu', {
+                      defaultMessage: 'Menu',
+                    })}
+                  />
                 </EuiHeaderSectionItemButton>
               </EuiHeaderSectionItem>
 
