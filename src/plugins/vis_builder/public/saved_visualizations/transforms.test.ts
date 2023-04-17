@@ -9,7 +9,7 @@ import { IndexPattern } from '../../../data/public';
 import { RootState } from '../application/utils/state_management';
 import { VisBuilderSavedObject } from '../types';
 import { getStateFromSavedObject, saveStateToSavedObject } from './transforms';
-import { VisBuilderSavedObjectAttributes } from '../../common/vis_builder_saved_object_attributes';
+import { VisBuilderSavedObjectAttributes } from '../../common';
 
 const getConfig = (cfg: any) => cfg;
 

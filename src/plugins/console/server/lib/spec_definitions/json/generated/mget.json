@@ -18,6 +18,6 @@
       "_mget",
       "{indices}/_mget"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/multi-get/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/document-apis/multi-get/"
   }
 }

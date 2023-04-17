@@ -39,6 +39,7 @@ import { BaseResponseType } from '../../../types';
 export interface OpenSearchRequestArgs {
   http: HttpSetup;
   requests: any;
+  dataSourceId?: string;
 }
 
 export interface OpenSearchRequestObject {
@@ -101,7 +102,8 @@ export function sendRequestToOpenSearch(
           args.http,
           opensearchMethod,
           opensearchPath,
-          opensearchData
+          opensearchData,
+          args.dataSourceId
         );
         if (reqId !== CURRENT_REQ_ID) {
           return;

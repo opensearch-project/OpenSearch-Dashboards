@@ -153,6 +153,7 @@ export class RenderingService {
               applicationTitle: brandingAssignment.applicationTitle,
               useExpandedHeader: brandingAssignment.useExpandedHeader,
             },
+            survey: opensearchDashboardsConfig.survey.url,
           },
         };
 

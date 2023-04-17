@@ -6,6 +6,6 @@
     "patterns": [
       "_data_stream/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/"
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/data-streams/#step-2-create-a-data-stream"
   }
 }

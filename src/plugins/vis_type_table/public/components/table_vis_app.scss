@@ -1,3 +1,10 @@
+.visTable {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0;
+  overflow: auto;
+}
+
 .visTable__group {
   padding: $euiSizeS;
   margin-bottom: $euiSizeL;

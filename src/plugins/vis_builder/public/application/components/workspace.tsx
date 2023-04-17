@@ -151,4 +151,6 @@ export const WorkspaceUI = () => {
   );
 };
 
+// The app uses EuiResizableContainer that triggers a rerender for ever mouseover action.
+// To prevent this child component from unnecessarily rerendering in that instance, it needs to be memoized
 export const Workspace = React.memo(WorkspaceUI);

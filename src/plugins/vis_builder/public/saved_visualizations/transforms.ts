@@ -7,7 +7,7 @@ import { i18n } from '@osd/i18n';
 import produce from 'immer';
 import { IndexPattern } from '../../../data/public';
 import { InvalidJSONProperty } from '../../../opensearch_dashboards_utils/public';
-import { RootState, VisualizationState, RenderState } from '../application/utils/state_management';
+import { RenderState, RootState, VisualizationState } from '../application/utils/state_management';
 import { validateVisBuilderState } from '../application/utils/validations';
 import { VisBuilderSavedObject } from '../types';
 import { VisBuilderSavedObjectAttributes } from '../../common';
