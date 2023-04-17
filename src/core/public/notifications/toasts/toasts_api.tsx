@@ -142,8 +142,9 @@ export class ToastsApi implements IToasts {
    */
   public add(toastOrTitle: ToastInput) {
     if (typeof toastOrTitle !== 'string') {
+      const toastObject = toastOrTitle;
       const list = this.toasts$.getValue();
-      const existingToast = list.find((toast) => toast.id === toastOrTitle.id);
+      const existingToast = list.find((toast) => toast.id === toastObject.id);
 
       if (existingToast) {
         return existingToast;
