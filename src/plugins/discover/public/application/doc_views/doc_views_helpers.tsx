@@ -98,7 +98,6 @@ export function convertDirectiveToRenderFn(
     return () => {
       if (!rejected) {
         // for cleanup
-        // http://roubenmeschian.com/rubo/?p=51
         cleanupFnPromise.then((cleanup) => cleanup());
       }
     };
