@@ -25,7 +25,7 @@ import {
 } from '../utils/state_management';
 import { getPersistedAggParams } from '../utils/get_persisted_agg_params';
 
-export const RightNav = () => {
+export const RightNavUI = () => {
   const { ui, name: activeVisName } = useVisualizationType();
   const [confirmAggs, setConfirmAggs] = useState<ActiveVisPayload | undefined>();
   const {
@@ -121,3 +121,7 @@ const OptionItem = ({ icon, title }: { icon: IconType; title: string }) => (
     <span>{title}</span>
   </>
 );
+
+// The app uses EuiResizableContainer that triggers a rerender for ever mouseover action.
+// To prevent this child component from unnecessarily rerendering in that instance, it needs to be memoized
+export const RightNav = React.memo(RightNavUI);
