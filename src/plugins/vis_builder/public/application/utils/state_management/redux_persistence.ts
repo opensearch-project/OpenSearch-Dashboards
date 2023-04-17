@@ -12,9 +12,8 @@ export const loadReduxState = async (services: VisBuilderServices) => {
     const serializedState = services.osdUrlStateStorage.get<RootState>('_a');
     if (serializedState !== null) return serializedState;
   } catch (err) {
-    /* eslint-disable no-console */
+    // eslint-disable-next-line no-console
     console.error(err);
-    /* eslint-enable no-console */
   }
 
   return await getPreloadedState(services);

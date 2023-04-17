@@ -71,7 +71,7 @@ describe('transforms', () => {
       visualizationState: JSON.stringify({
         searchField: '',
       }),
-      uiState: JSON.stringify('{}'),
+      uiState: '{}',
       searchSourceFields: {
         index: 'test-index',
       },
@@ -83,11 +83,11 @@ describe('transforms', () => {
       expect(state).toMatchInlineSnapshot(`
         Object {
           "style": Object {},
+          "ui": Object {},
           "visualization": Object {
             "indexPattern": "test-index",
             "searchField": "",
           },
-          "ui": Object {},
         }
       `);
     });

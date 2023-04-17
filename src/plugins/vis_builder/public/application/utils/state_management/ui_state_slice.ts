@@ -4,10 +4,18 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { VisBuilderServices } from '../../../types';
 
 export type UIStateState<T = any> = T;
 
 const initialState = {} as UIStateState;
+
+export const getPreloadedState = async ({
+  types,
+  data,
+}: VisBuilderServices): Promise<UIStateState> => {
+  return initialState;
+};
 
 export const uiStateSlice = createSlice({
   name: 'ui',
