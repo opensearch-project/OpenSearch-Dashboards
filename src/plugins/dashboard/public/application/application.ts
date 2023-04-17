@@ -81,6 +81,7 @@ export interface RenderDeps {
   };
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
+  addBasePath: (path: string) => string;
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   embeddable: EmbeddableStart;
   localStorage: Storage;
