@@ -98,7 +98,8 @@
     "**/unset-value": "^2.0.1",
     "**/minimatch": "^3.0.5",
     "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
-    "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1"
+    "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1",
+    "**/xml2js": "^0.5.0"
   },
   "workspaces": {
     "packages": [
@@ -466,7 +467,7 @@
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.30.0",
     "vinyl-fs": "^3.0.3",
-    "xml2js": "^0.4.22",
+    "xml2js": "^0.5.0",
     "xmlbuilder": "13.0.2",
     "zlib": "^1.0.5"
   },
