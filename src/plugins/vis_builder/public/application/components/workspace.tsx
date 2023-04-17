@@ -10,7 +10,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { VisBuilderServices } from '../../types';
 import { validateSchemaState, validateAggregations } from '../utils/validations';
-import { useTypedDispatch, useTypedSelector } from '../utils/state_management';
+import { useTypedDispatch, useTypedSelector, setUIStateState } from '../utils/state_management';
 import { useAggs, useVisualizationType } from '../utils/use';
 import { PersistedState } from '../../../../visualizations/public';
 
@@ -20,7 +20,6 @@ import fields_bg from '../../assets/fields_bg.svg';
 import './workspace.scss';
 import { ExperimentalInfo } from './experimental_info';
 import { handleVisEvent } from '../utils/handle_vis_event';
-import { setUiState } from '../utils/state_management/metadata_slice';
 
 export const WorkspaceUI = () => {
   const {
@@ -43,11 +42,11 @@ export const WorkspaceUI = () => {
   const dispatch = useTypedDispatch();
   // Visualizations require the uiState object to persist even when the expression changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const uiState = useMemo(() => new PersistedState(rootState.metadata.uiState), []);
+  const uiState = useMemo(() => new PersistedState(rootState.ui), []);
 
   useEffect(() => {
     if (rootState.metadata.editor.state === 'loaded') {
-      uiState.setSilent(rootState.metadata.uiState);
+      uiState.setSilent(rootState.ui);
     }
     // To update uiState once saved object data is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,7 +55,7 @@ export const WorkspaceUI = () => {
   useEffect(() => {
     uiState.on('change', (args) => {
       // Store changes to UI state
-      dispatch(setUiState({ state: uiState.toJSON() }));
+      dispatch(setUIStateState(uiState.toJSON()));
     });
   }, [dispatch, uiState]);
 
@@ -151,6 +150,6 @@ export const WorkspaceUI = () => {
   );
 };
 
-// The app uses EuiResizableContainer that triggers a rerender for ever mouseover action.
+// The app uses EuiResizableContainer that triggers a rerender for every mouseover action.
 // To prevent this child component from unnecessarily rerendering in that instance, it needs to be memoized
 export const Workspace = React.memo(WorkspaceUI);

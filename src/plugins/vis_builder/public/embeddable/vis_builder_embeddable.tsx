@@ -116,7 +116,7 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
 
     this.deps = deps;
     this.savedVis = savedVis;
-    this.uiState = new PersistedState(savedVis.uiState);
+    this.uiState = new PersistedState(savedVis.state.ui);
     this.uiState.on('change', this.uiStateChangeHandler);
     this.uiState.on('reload', this.reload);
 

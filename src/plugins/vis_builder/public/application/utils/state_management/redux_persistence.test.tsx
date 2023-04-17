@@ -18,6 +18,7 @@ describe('test redux state persistence', () => {
       style: 'style',
       visualization: 'visualization',
       metadata: 'metadata',
+      ui: 'ui',
     };
   });
 
@@ -32,8 +33,8 @@ describe('test redux state persistence', () => {
       metadata: {
         editor: { errors: {}, state: 'loading' },
         originatingApp: undefined,
-        uiState: {},
       },
+      ui: {},
     };
 
     const returnStates = await loadReduxState(mockServices);

@@ -21,13 +21,13 @@ export const loadReduxState = async (services: VisBuilderServices) => {
 };
 
 export const persistReduxState = (
-  { style, visualization, metadata },
+  { style, visualization, metadata, ui }: RootState,
   services: VisBuilderServices
 ) => {
   try {
     services.osdUrlStateStorage.set<RootState>(
       '_a',
-      { style, visualization, metadata },
+      { style, visualization, metadata, ui },
       {
         replace: true,
       }

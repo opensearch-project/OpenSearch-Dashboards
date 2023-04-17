@@ -22,7 +22,6 @@ export interface MetadataState {
     state: EditorState;
   };
   originatingApp?: string;
-  uiState: any;
 }
 
 const initialState: MetadataState = {
@@ -31,7 +30,6 @@ const initialState: MetadataState = {
     state: 'loading',
   },
   originatingApp: undefined,
-  uiState: {},
 };
 
 export const getPreloadedState = async ({
@@ -63,10 +61,6 @@ export const slice = createSlice({
     setOriginatingApp: (state, action: PayloadAction<{ state?: string }>) => {
       state.originatingApp = action.payload.state;
     },
-    setUiState: (state, action: PayloadAction<{ state: any; editorState?: EditorState }>) => {
-      state.uiState = action.payload.state;
-      state.editor.state = action.payload.editorState || 'dirty';
-    },
     setState: (_state, action: PayloadAction<MetadataState>) => {
       return action.payload;
     },
@@ -74,4 +68,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setError, setEditorState, setOriginatingApp, setState, setUiState } = slice.actions;
+export const { setError, setEditorState, setOriginatingApp, setState } = slice.actions;
