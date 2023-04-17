@@ -14,16 +14,10 @@ import {
 import { EDIT_PATH, PLUGIN_ID } from '../../../../common';
 import { VisBuilderServices } from '../../../types';
 import { getCreateBreadcrumbs, getEditBreadcrumbs } from '../breadcrumbs';
-import { getSavedVisBuilderVis } from '../get_saved_vis_builder_vis';
-import {
-  useTypedDispatch,
-  setStyleState,
-  setVisualizationState,
-  VisualizationState,
-} from '../state_management';
+import { useTypedDispatch, setStyleState, setVisualizationState } from '../state_management';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setEditorState } from '../state_management/metadata_slice';
-import { validateVisBuilderState } from '../validations/vis_builder_state_validation';
+import { getStateFromSavedObject } from '../../../saved_visualizations/transforms';
 
 // This function can be used when instantiating a saved vis or creating a new one
 // using url parameters, embedding and destroying it in DOM
@@ -39,6 +33,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
       history,
       http: { basePath },
       toastNotifications,
+      savedVisBuilderLoader,
     } = services;
     const toastNotification = (message: string) => {
       toastNotifications.addDanger({
@@ -51,40 +46,20 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
 
     const loadSavedVisBuilderVis = async () => {
       try {
-        const savedVisBuilderVis = await getSavedVisBuilderVis(services, visualizationIdFromUrl);
+        const savedVisBuilderVis = await getSavedVisBuilderVis(
+          savedVisBuilderLoader,
+          visualizationIdFromUrl
+        );
 
         if (savedVisBuilderVis.id) {
-          chrome.setBreadcrumbs(getEditBreadcrumbs(savedVisBuilderVis.title, navigateToApp));
-          chrome.docTitle.change(savedVisBuilderVis.title);
+          const { title, state } = getStateFromSavedObject(savedVisBuilderVis);
+          chrome.setBreadcrumbs(getEditBreadcrumbs(title, navigateToApp));
+          chrome.docTitle.change(title);
+
+          dispatch(setStyleState(state.style));
+          dispatch(setVisualizationState(state.visualization));
         } else {
           chrome.setBreadcrumbs(getCreateBreadcrumbs(navigateToApp));
-        }
-
-        if (
-          savedVisBuilderVis.styleState !== '{}' &&
-          savedVisBuilderVis.visualizationState !== '{}'
-        ) {
-          const styleState = JSON.parse(savedVisBuilderVis.styleState);
-          const vizStateWithoutIndex = JSON.parse(savedVisBuilderVis.visualizationState);
-          const visualizationState: VisualizationState = {
-            searchField: vizStateWithoutIndex.searchField,
-            activeVisualization: vizStateWithoutIndex.activeVisualization,
-            indexPattern: savedVisBuilderVis.searchSourceFields.index,
-          };
-
-          const validateResult = validateVisBuilderState({ styleState, visualizationState });
-          if (!validateResult.valid) {
-            throw new InvalidJSONProperty(
-              validateResult.errorMsg ||
-                i18n.translate('visBuilder.useSavedVisBuilderVis.genericJSONError', {
-                  defaultMessage:
-                    'Something went wrong while loading your saved object. The object may be corrupted or does not match the latest schema',
-                })
-            );
-          }
-
-          dispatch(setStyleState(styleState));
-          dispatch(setVisualizationState(visualizationState));
         }
 
         setSavedVisState(savedVisBuilderVis);
@@ -123,3 +98,12 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
 
   return savedVisState;
 };
+
+async function getSavedVisBuilderVis(
+  savedVisBuilderLoader: VisBuilderServices['savedVisBuilderLoader'],
+  visBuilderVisId?: string
+) {
+  const savedVisBuilderVis = await savedVisBuilderLoader.get(visBuilderVisId);
+
+  return savedVisBuilderVis;
+}

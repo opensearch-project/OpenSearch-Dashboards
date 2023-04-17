@@ -23,10 +23,12 @@ import {
 import { DisabledEmbeddable } from './disabled_embeddable';
 import {
   VisBuilderEmbeddable,
+  VisBuilderInput,
   VisBuilderOutput,
   VISBUILDER_EMBEDDABLE,
 } from './vis_builder_embeddable';
 import visBuilderIcon from '../assets/vis_builder_icon.svg';
+import { getStateFromSavedObject } from '../saved_visualizations/transforms';
 import {
   getHttp,
   getSavedVisBuilderLoader,
@@ -75,11 +77,11 @@ export class VisBuilderEmbeddableFactoryDefinition
 
   public async createFromSavedObject(
     savedObjectId: string,
-    input: Partial<SavedObjectEmbeddableInput> & { id: string },
+    input: VisBuilderInput,
     parent?: IContainer
   ): Promise<VisBuilderEmbeddable | ErrorEmbeddable | DisabledEmbeddable> {
     try {
-      const savedVisBuilder = await getSavedVisBuilderLoader().get(savedObjectId);
+      const savedObject = await getSavedVisBuilderLoader().get(savedObjectId);
       const editPath = `${EDIT_PATH}/${savedObjectId}`;
       const editUrl = getHttp().basePath.prepend(`/app/${PLUGIN_ID}${editPath}`);
       const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
@@ -91,7 +93,7 @@ export class VisBuilderEmbeddableFactoryDefinition
       return new VisBuilderEmbeddable(
         getTimeFilter(),
         {
-          savedVisBuilder,
+          savedVis: getStateFromSavedObject(savedObject),
           editUrl,
           editPath,
           editable: true,
