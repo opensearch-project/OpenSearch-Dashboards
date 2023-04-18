@@ -25,8 +25,7 @@ env:
   TEST_OPENSEARCH_TRANSPORT_PORT: 9403
   TEST_OPENSEARCH_PORT: 9400
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  # Version 112.0.5615.0
-  CHROME_VERSION: 1109208
+  NODE_OPTIONS: "--max-old-space-size=6144"
 
 jobs:
   build-lint-test:
@@ -124,7 +123,6 @@ jobs:
   functional-tests:
     name: Run functional tests on ${{ matrix.name }} (ciGroup${{ matrix.group }})
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
@@ -136,22 +134,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
-
-      - name: Setup Chrome
-        id: setup-chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: ${{ env.CHROME_VERSION }}
-
-      - name: Set Chrome Path
-        if: matrix.os != 'windows-latest'
-        run: |
-          echo "TEST_BROWSER_BINARY_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
-
-      - name: Set Chrome Path (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "TEST_BROWSER_BINARY_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $env:GITHUB_ENV
 
       - name: Configure git's autocrlf (Windows only)
         if: matrix.os == 'windows-latest'
@@ -361,6 +343,17 @@ jobs:
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
 
       - name: Get package version
         run: |
