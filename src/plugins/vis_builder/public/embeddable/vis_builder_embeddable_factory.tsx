@@ -5,7 +5,6 @@
 
 import { i18n } from '@osd/i18n';
 import {
-  EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
   ErrorEmbeddable,
@@ -35,16 +34,14 @@ import {
   getTimeFilter,
   getUISettings,
 } from '../plugin_services';
+import { StartServicesGetter } from '../../../opensearch_dashboards_utils/public';
+import { VisBuilderPluginStartDependencies } from '../types';
 
-// TODO: use or remove?
-export type VisBuilderEmbeddableFactory = EmbeddableFactory<
-  SavedObjectEmbeddableInput,
-  VisBuilderOutput | EmbeddableOutput,
-  VisBuilderEmbeddable | DisabledEmbeddable,
-  VisBuilderSavedObjectAttributes
->;
+export interface VisBuilderEmbeddableFactoryDeps {
+  start: StartServicesGetter<VisBuilderPluginStartDependencies>;
+}
 
-export class VisBuilderEmbeddableFactoryDefinition
+export class VisBuilderEmbeddableFactory
   implements
     EmbeddableFactoryDefinition<
       SavedObjectEmbeddableInput,
@@ -62,7 +59,7 @@ export class VisBuilderEmbeddableFactoryDefinition
   };
 
   // TODO: Would it be better to explicitly declare start service dependencies?
-  constructor() {}
+  constructor(private readonly deps: VisBuilderEmbeddableFactoryDeps) {}
 
   public canCreateNew() {
     // Because VisBuilder creation starts with the visualization modal, no need to have a separate entry for VisBuilder until it's separate
@@ -90,13 +87,22 @@ export class VisBuilderEmbeddableFactoryDefinition
         return new DisabledEmbeddable(PLUGIN_NAME, input);
       }
 
+      const savedVis = getStateFromSavedObject(savedObject);
+      const indexPatternService = this.deps.start().plugins.data.indexPatterns;
+      const indexPattern = await indexPatternService.get(
+        savedVis.state.visualization.indexPattern || ''
+      );
+      const indexPatterns = indexPattern ? [indexPattern] : [];
+
       return new VisBuilderEmbeddable(
         getTimeFilter(),
         {
-          savedVis: getStateFromSavedObject(savedObject),
+          savedVis,
           editUrl,
           editPath,
           editable: true,
+          deps: this.deps,
+          indexPatterns,
         },
         {
           ...input,

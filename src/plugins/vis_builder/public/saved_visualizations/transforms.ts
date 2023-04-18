@@ -27,6 +27,7 @@ export const saveStateToSavedObject = (
   );
   obj.styleState = JSON.stringify(state.style);
   obj.searchSourceFields = { index: indexPattern };
+  obj.uiState = JSON.stringify(state.ui);
 
   return obj;
 };
@@ -40,7 +41,8 @@ export const getStateFromSavedObject = (
   obj: VisBuilderSavedObjectAttributes
 ): VisBuilderSavedVis => {
   const { id, title, description } = obj;
-  const styleState = JSON.parse(obj.styleState || '');
+  const styleState = JSON.parse(obj.styleState || '{}');
+  const uiState = JSON.parse(obj.uiState || '{}');
   const vizStateWithoutIndex = JSON.parse(obj.visualizationState || '');
   const visualizationState: VisualizationState = {
     searchField: '',
@@ -48,7 +50,7 @@ export const getStateFromSavedObject = (
     indexPattern: obj.searchSourceFields?.index,
   };
 
-  const validateResult = validateVisBuilderState({ styleState, visualizationState });
+  const validateResult = validateVisBuilderState({ styleState, visualizationState, uiState });
 
   if (!validateResult.valid) {
     throw new InvalidJSONProperty(
@@ -75,6 +77,7 @@ export const getStateFromSavedObject = (
     state: {
       visualization: visualizationState,
       style: styleState,
+      ui: uiState,
     },
   };
 };

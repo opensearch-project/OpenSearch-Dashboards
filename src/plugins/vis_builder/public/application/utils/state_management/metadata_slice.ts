@@ -11,7 +11,7 @@ import { VisBuilderServices } from '../../../types';
  * Clean state: when viz finished loading and ready to be edited
  * Dirty state: when there are changes applied to the viz after it finished loading
  */
-type EditorState = 'loading' | 'clean' | 'dirty';
+type EditorState = 'loading' | 'loaded' | 'clean' | 'dirty';
 
 export interface MetadataState {
   editor: {

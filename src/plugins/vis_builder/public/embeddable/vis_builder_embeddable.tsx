@@ -22,6 +22,7 @@ import {
 } from '../../../expressions/public';
 import {
   Filter,
+  IIndexPattern,
   opensearchFilters,
   Query,
   TimefilterContract,
@@ -37,20 +38,23 @@ import {
 import { PersistedState } from '../../../visualizations/public';
 import { VisBuilderSavedVis } from '../saved_visualizations/transforms';
 import { handleVisEvent } from '../application/utils/handle_vis_event';
+import { VisBuilderEmbeddableFactoryDeps } from './vis_builder_embeddable_factory';
 
 // Apparently this needs to match the saved object type for the clone and replace panel actions to work
 export const VISBUILDER_EMBEDDABLE = VISBUILDER_SAVED_OBJECT;
 
 export interface VisBuilderEmbeddableConfiguration {
   savedVis: VisBuilderSavedVis;
-  // TODO: add indexPatterns as part of configuration
-  // indexPatterns?: IIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   editPath: string;
   editUrl: string;
   editable: boolean;
+  deps: VisBuilderEmbeddableFactoryDeps;
 }
 
-export type VisBuilderInput = SavedObjectEmbeddableInput;
+export interface VisBuilderInput extends SavedObjectEmbeddableInput {
+  uiState?: any;
+}
 
 export interface VisBuilderOutput extends EmbeddableOutput {
   /**
@@ -58,11 +62,12 @@ export interface VisBuilderOutput extends EmbeddableOutput {
    * `input.savedObjectId`. If the id is invalid, this may be undefined.
    */
   savedVis?: VisBuilderSavedVis;
+  indexPatterns?: IIndexPattern[];
 }
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
-export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput, VisBuilderOutput> {
+export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilderOutput> {
   public readonly type = VISBUILDER_EMBEDDABLE;
   private handler?: ExpressionLoader;
   private timeRange?: TimeRange;
@@ -75,11 +80,19 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
   private node?: HTMLElement;
   private savedVis?: VisBuilderSavedVis;
   private serializedState?: string;
-  private uiState?: PersistedState;
+  private uiState: PersistedState;
+  private readonly deps: VisBuilderEmbeddableFactoryDeps;
 
   constructor(
     timefilter: TimefilterContract,
-    { savedVis, editPath, editUrl, editable }: VisBuilderEmbeddableConfiguration,
+    {
+      savedVis,
+      editPath,
+      editUrl,
+      editable,
+      deps,
+      indexPatterns,
+    }: VisBuilderEmbeddableConfiguration,
     initialInput: SavedObjectEmbeddableInput,
     {
       parent,
@@ -96,12 +109,16 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
         editUrl,
         editable,
         savedVis,
+        indexPatterns,
       },
       parent
     );
 
+    this.deps = deps;
     this.savedVis = savedVis;
-    this.uiState = new PersistedState();
+    this.uiState = new PersistedState(savedVis.state.ui);
+    this.uiState.on('change', this.uiStateChangeHandler);
+    this.uiState.on('reload', this.reload);
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
@@ -216,6 +233,8 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
   public destroy() {
     super.destroy();
     this.subscriptions.forEach((s) => s.unsubscribe());
+    this.uiState.off('change', this.uiStateChangeHandler);
+    this.uiState.off('reload', this.reload);
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
@@ -249,6 +268,7 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
 
   public async handleChanges() {
     // TODO: refactor (here and in visualize) to remove lodash dependency - immer probably a better choice
+    this.transferInputToUiState();
 
     let dirty = false;
 
@@ -301,6 +321,17 @@ export class VisBuilderEmbeddable extends Embeddable<SavedObjectEmbeddableInput,
     }
     this.renderComplete.dispatchError();
     this.updateOutput({ loading: false, error });
+  };
+
+  private uiStateChangeHandler = () => {
+    this.updateInput({
+      uiState: this.uiState.toJSON(),
+    });
+  };
+
+  private transferInputToUiState = () => {
+    if (JSON.stringify(this.input.uiState) !== this.uiState.toString())
+      this.uiState.set(this.input.uiState);
   };
 
   // TODO: we may eventually need to add support for visualizations that use triggers like filter or brush, but current VisBuilder vis types don't support triggers

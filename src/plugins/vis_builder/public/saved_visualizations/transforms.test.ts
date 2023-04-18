@@ -25,7 +25,7 @@ describe('transforms', () => {
       savedObject = {} as VisBuilderSavedObject;
       rootState = {
         metadata: { editor: { state: 'loading', errors: {} } },
-        style: '',
+        style: {},
         visualization: {
           searchField: '',
           indexPattern: TEST_INDEX_PATTERN_ID,
@@ -34,6 +34,7 @@ describe('transforms', () => {
             aggConfigParams: [],
           },
         },
+        ui: {},
       };
       indexPattern = getStubIndexPattern(
         TEST_INDEX_PATTERN_ID,
@@ -49,6 +50,7 @@ describe('transforms', () => {
 
       expect(savedObject.visualizationState).not.toContain(TEST_INDEX_PATTERN_ID);
       expect(savedObject.styleState).toEqual(JSON.stringify(rootState.style));
+      expect(savedObject.uiState).toEqual(JSON.stringify(rootState.ui));
       expect(savedObject.searchSourceFields?.index?.id).toEqual(TEST_INDEX_PATTERN_ID);
     });
 
@@ -69,6 +71,7 @@ describe('transforms', () => {
       visualizationState: JSON.stringify({
         searchField: '',
       }),
+      uiState: '{}',
       searchSourceFields: {
         index: 'test-index',
       },
@@ -80,6 +83,7 @@ describe('transforms', () => {
       expect(state).toMatchInlineSnapshot(`
         Object {
           "style": Object {},
+          "ui": Object {},
           "visualization": Object {
             "indexPattern": "test-index",
             "searchField": "",
