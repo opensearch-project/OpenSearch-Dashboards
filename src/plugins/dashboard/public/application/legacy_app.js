@@ -114,7 +114,6 @@ export function initDashboardApp(app, deps) {
           deps.core.chrome.docTitle.change(
             i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
           );
-          const service = deps.savedDashboards;
           const dashboardConfig = deps.dashboardConfig;
 
           // syncs `_g` portion of url with query services
@@ -171,7 +170,18 @@ export function initDashboardApp(app, deps) {
             history.push(deps.addBasePath(viewUrl));
           };
           $scope.delete = (dashboards) => {
-            return service.delete(dashboards.map((d) => d.id));
+            const ids = dashboards.map((d) => ({ id: d.id, appId: d.appId }));
+            return Promise.all(
+              ids.map(({ id, appId }) => {
+                return deps.savedObjectsClient.delete(appId, id);
+              })
+            ).catch((error) => {
+              deps.toastNotifications.addError(error, {
+                title: i18n.translate('dashboard.dashboardListingDeleteErrorTitle', {
+                  defaultMessage: 'Error deleting dashboard',
+                }),
+              });
+            });
           };
           $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
           $scope.initialFilter = parse(history.location.search).filter || EMPTY_FILTER;
