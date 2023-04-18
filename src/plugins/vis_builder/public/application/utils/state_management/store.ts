@@ -49,9 +49,9 @@ export const getPreloadedStore = async (services: VisBuilderServices) => {
   };
 
   // the store subscriber will automatically detect changes and call handleChange function
-  store.subscribe(handleChange);
+  const unsubscribe = store.subscribe(handleChange);
 
-  return store;
+  return { store, unsubscribe };
 };
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

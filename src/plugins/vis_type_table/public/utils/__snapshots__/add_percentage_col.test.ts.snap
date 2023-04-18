@@ -1,0 +1,170 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`addPercentageCol should add new percentage column 1`] = `
+Object {
+  "cols": Array [
+    Object {
+      "filterable": true,
+      "formatter": Object {},
+      "id": "col-0-2",
+      "title": "name.keyword: Descending",
+    },
+    Object {
+      "filterable": false,
+      "formatter": Object {},
+      "id": "col-1-1",
+      "sumTotal": 5,
+      "title": "Count",
+    },
+    Object {
+      "filterable": false,
+      "formatter": Object {},
+      "id": "col-1-1-percents",
+      "title": "count percentages",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "col-0-2": "Alice",
+      "col-1-1": 3,
+      "col-1-1-percents": 0.6,
+    },
+    Object {
+      "col-0-2": "Anthony",
+      "col-1-1": 1,
+      "col-1-1-percents": 0.2,
+    },
+    Object {
+      "col-0-2": "Timmy",
+      "col-1-1": 1,
+      "col-1-1-percents": 0.2,
+    },
+  ],
+}
+`;
+
+exports[`addPercentageCol should handle empty input data 1`] = `
+Object {
+  "cols": Array [],
+  "rows": Array [],
+}
+`;
+
+exports[`addPercentageCol should handle input data with null values 1`] = `
+Object {
+  "cols": Array [
+    Object {
+      "filterable": true,
+      "formatter": Object {},
+      "id": "col-0-2",
+      "title": "name.keyword: Descending",
+    },
+    Object {
+      "filterable": false,
+      "formatter": Object {},
+      "id": "col-1-1",
+      "sumTotal": 5,
+      "title": "Count",
+    },
+    Object {
+      "filterable": false,
+      "formatter": Object {},
+      "id": "col-1-1-percents",
+      "title": "count percentages",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "col-0-2": "Alice",
+      "col-1-1": null,
+      "col-1-1-percents": 0,
+    },
+    Object {
+      "col-0-2": "Anthony",
+      "col-1-1": null,
+      "col-1-1-percents": 0,
+    },
+    Object {
+      "col-0-2": "Timmy",
+      "col-1-1": null,
+      "col-1-1-percents": 0,
+    },
+  ],
+}
+`;
+
+exports[`addPercentageCol should handle input data with one row 1`] = `
+Object {
+  "cols": Array [
+    Object {
+      "filterable": true,
+      "formatter": Object {},
+      "id": "col-0-2",
+      "title": "name.keyword: Descending",
+    },
+    Object {
+      "filterable": false,
+      "formatter": Object {},
+      "id": "col-1-1",
+      "sumTotal": 5,
+      "title": "Count",
+    },
+    Object {
+      "filterable": false,
+      "formatter": Object {},
+      "id": "col-1-1-percents",
+      "title": "count percentages",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "col-0-2": "Alice",
+      "col-1-1": 3,
+      "col-1-1-percents": 0.6,
+    },
+  ],
+}
+`;
+
+exports[`addPercentageCol should handle sumTotal being 0 1`] = `
+Object {
+  "cols": Array [
+    Object {
+      "filterable": true,
+      "formatter": Object {},
+      "id": "col-0-2",
+      "title": "name.keyword: Descending",
+    },
+    Object {
+      "filterable": false,
+      "formatter": Object {},
+      "id": "col-1-1",
+      "sumTotal": 0,
+      "title": "Count",
+    },
+    Object {
+      "filterable": false,
+      "formatter": Object {},
+      "id": "col-1-1-percents",
+      "title": "count percentages",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "col-0-2": "Alice",
+      "col-1-1": 3,
+      "col-1-1-percents": 0,
+    },
+    Object {
+      "col-0-2": "Anthony",
+      "col-1-1": 1,
+      "col-1-1-percents": 0,
+    },
+    Object {
+      "col-0-2": "Timmy",
+      "col-1-1": 1,
+      "col-1-1-percents": 0,
+    },
+  ],
+}
+`;
