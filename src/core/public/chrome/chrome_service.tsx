@@ -210,7 +210,7 @@ export class ChromeService {
         title: mountReactNode(
           <FormattedMessage
             id="core.chrome.browserDeprecationWarning"
-            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
+            defaultMessage="Internet Explorer lacks features required for OpenSearch Dashboards to function correctly; please use one of {link}."
             values={{
               link: (
                 <EuiLink
@@ -220,7 +220,7 @@ export class ChromeService {
                 >
                   <FormattedMessage
                     id="core.chrome.browserDeprecationLink"
-                    defaultMessage="the support matrix on our website"
+                    defaultMessage="the supported browsers listed on our website"
                   />
                 </EuiLink>
               ),
@@ -262,6 +262,7 @@ export class ChromeService {
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
+          survey={injectedMetadata.getSurvey()}
         />
       ),
 

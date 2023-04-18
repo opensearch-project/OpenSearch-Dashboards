@@ -38,5 +38,8 @@ export const CopyBinScripts: Task = {
       config.resolveFromRepo('src/dev/build/tasks/bin/scripts'),
       build.resolvePath('bin')
     );
+    await copyAll(config.resolveFromRepo('scripts'), build.resolvePath('bin'), {
+      select: ['use_node*'],
+    });
   },
 };

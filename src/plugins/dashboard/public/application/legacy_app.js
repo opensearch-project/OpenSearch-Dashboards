@@ -53,9 +53,10 @@ export function initDashboardApp(app, deps) {
   app.directive('dashboardListing', function (reactDirective) {
     return reactDirective(DashboardListing, [
       ['core', { watchDepth: 'reference' }],
+      ['dashboardProviders', { watchDepth: 'reference' }],
       ['createItem', { watchDepth: 'reference' }],
-      ['getViewUrl', { watchDepth: 'reference' }],
       ['editItem', { watchDepth: 'reference' }],
+      ['viewItem', { watchDepth: 'reference' }],
       ['findItems', { watchDepth: 'reference' }],
       ['deleteItems', { watchDepth: 'reference' }],
       ['listingLimit', { watchDepth: 'reference' }],
@@ -127,14 +128,47 @@ export function initDashboardApp(app, deps) {
           $scope.create = () => {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
-          $scope.find = (search) => {
-            return service.find(search, $scope.listingLimit);
+          $scope.dashboardProviders = deps.dashboardProviders() || [];
+          $scope.dashboardListTypes = Object.keys($scope.dashboardProviders);
+
+          const mapListAttributesToDashboardProvider = (obj) => {
+            const provider = $scope.dashboardProviders[obj.type];
+            return {
+              id: obj.id,
+              appId: provider.appId,
+              type: provider.savedObjectsName,
+              ...obj.attributes,
+              updated_at: obj.updated_at,
+              viewUrl: provider.viewUrlPathFn(obj),
+              editUrl: provider.editUrlPathFn(obj),
+            };
           };
-          $scope.editItem = ({ id }) => {
-            history.push(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
+
+          $scope.find = async (search) => {
+            const savedObjectsClient = deps.savedObjectsClient;
+
+            const res = await savedObjectsClient.find({
+              type: $scope.dashboardListTypes,
+              search: search ? `${search}*` : undefined,
+              fields: ['title', 'type', 'description', 'updated_at'],
+              perPage: $scope.initialPageSize,
+              page: 1,
+              searchFields: ['title^3', 'type', 'description'],
+              defaultSearchOperator: 'AND',
+            });
+            const list = res.savedObjects?.map(mapListAttributesToDashboardProvider) || [];
+
+            return {
+              total: list.length,
+              hits: list,
+            };
           };
-          $scope.getViewUrl = ({ id }) => {
-            return deps.addBasePath(`#${createDashboardEditUrl(id)}`);
+
+          $scope.editItem = ({ editUrl }) => {
+            history.push(deps.addBasePath(editUrl));
+          };
+          $scope.viewItem = ({ viewUrl }) => {
+            history.push(deps.addBasePath(viewUrl));
           };
           $scope.delete = (dashboards) => {
             return service.delete(dashboards.map((d) => d.id));

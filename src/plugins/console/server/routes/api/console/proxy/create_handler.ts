@@ -28,76 +28,21 @@
  * under the License.
  */
 
-import { Agent, IncomingMessage } from 'http';
-import * as url from 'url';
-import { pick, trimStart, trimEnd } from 'lodash';
-
 import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';
+import { trimStart } from 'lodash';
+import { Readable } from 'stream';
 
-import { OpenSearchConfigForProxy } from '../../../../types';
-import {
-  getOpenSearchProxyConfig,
-  ProxyConfigCollection,
-  proxyRequest,
-  setHeaders,
-} from '../../../../lib';
+import { ApiResponse } from '@opensearch-project/opensearch/';
 
-// TODO: find a better way to get information from the request like remoteAddress and remotePort
-// for forwarding.
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { isResponseError } from '../../../../../../../core/server/opensearch/client/errors';
 
 import { RouteDependencies } from '../../../';
 
 import { Body, Query } from './validation_config';
-
-function toURL(base: string, path: string) {
-  const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
-  // Appending pretty here to have OpenSearch do the JSON formatting, as doing
-  // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
-  // measurement precision)
-  if (!urlResult.searchParams.get('pretty')) {
-    urlResult.searchParams.append('pretty', 'true');
-  }
-  return urlResult;
-}
-
-function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
-  const normalizeHeader = function (header: any) {
-    if (!header) {
-      return '';
-    }
-    header = header.toString();
-    return header.trim().toLowerCase();
-  };
-
-  // Normalize list of headers we want to allow in upstream request
-  const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
-
-  return pick(originalHeaders, headersToKeepNormalized);
-}
-
-function getRequestConfig(
-  headers: object,
-  opensearchConfig: OpenSearchConfigForProxy,
-  proxyConfigCollection: ProxyConfigCollection,
-  uri: string
-): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
-  const filteredHeaders = filterHeaders(headers, opensearchConfig.requestHeadersWhitelist);
-  const newHeaders = setHeaders(filteredHeaders, opensearchConfig.customHeaders);
-
-  if (proxyConfigCollection.hasConfig()) {
-    return {
-      ...proxyConfigCollection.configForUri(uri),
-      headers: newHeaders,
-    } as any;
-  }
-
-  return {
-    ...getOpenSearchProxyConfig(opensearchConfig),
-    headers: newHeaders,
-  };
-}
+import { buildBufferedBody } from './utils';
 
 function getProxyHeaders(req: OpenSearchDashboardsRequest) {
   const headers = Object.create(null);
@@ -124,12 +69,29 @@ function getProxyHeaders(req: OpenSearchDashboardsRequest) {
   return headers;
 }
 
+function toUrlPath(path: string) {
+  const FAKE_BASE = 'http://localhost';
+  const urlWithFakeBase = new URL(`${FAKE_BASE}/${trimStart(path, '/')}`);
+  // Appending pretty here to have OpenSearch do the JSON formatting, as doing
+  // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
+  // measurement precision)
+  if (!urlWithFakeBase.searchParams.get('pretty')) {
+    urlWithFakeBase.searchParams.append('pretty', 'true');
+  }
+  const urlPath = urlWithFakeBase.href.replace(urlWithFakeBase.origin, '');
+  return urlPath;
+}
+
 export const createHandler = ({
   log,
   proxy: { readLegacyOpenSearchConfig, pathFilters, proxyConfigCollection },
 }: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
   const { body, query } = request;
-  const { path, method } = query;
+  const { path, method, dataSourceId } = query;
+  const client = dataSourceId
+    ? await ctx.dataSource.opensearch.getClient(dataSourceId)
+    : ctx.core.opensearch.client.asCurrentUser;
+  let opensearchResponse: ApiResponse;
 
   if (!pathFilters.some((re) => re.test(path))) {
     return response.forbidden({
@@ -140,77 +102,57 @@ export const createHandler = ({
     });
   }
 
-  const legacyConfig = await readLegacyOpenSearchConfig();
-  const { hosts } = legacyConfig;
-  let opensearchIncomingMessage: IncomingMessage;
+  try {
+    // TODO: proxy header will fail sigv4 auth type in data source, need create issue in opensearch-js repo to track
+    const requestHeaders = dataSourceId
+      ? {}
+      : {
+          ...getProxyHeaders(request),
+        };
 
-  for (let idx = 0; idx < hosts.length; ++idx) {
-    const host = hosts[idx];
-    try {
-      const uri = toURL(host, path);
+    const bufferedBody = await buildBufferedBody(body);
+    opensearchResponse = await client.transport.request(
+      { path: toUrlPath(path), method, body: bufferedBody },
+      { headers: requestHeaders }
+    );
 
-      // Because this can technically be provided by a settings-defined proxy config, we need to
-      // preserve these property names to maintain BWC.
-      const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
-        request.headers,
-        legacyConfig,
-        proxyConfigCollection,
-        uri.toString()
-      );
+    const { statusCode, body: responseContent, warnings } = opensearchResponse;
 
-      const requestHeaders = {
-        ...headers,
-        ...getProxyHeaders(request),
-      };
-
-      opensearchIncomingMessage = await proxyRequest({
-        method: method.toLowerCase() as any,
-        headers: requestHeaders,
-        uri,
-        timeout,
-        payload: body,
-        rejectUnauthorized,
-        agent,
+    if (method.toUpperCase() !== 'HEAD') {
+      return response.custom({
+        statusCode: statusCode!,
+        body: responseContent,
+        headers: {
+          warning: warnings || '',
+        },
       });
-
-      break;
-    } catch (e) {
-      // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
-      // We try contacting another node in that case.
-      log.error(e);
-      if (idx === hosts.length - 1) {
-        log.warn(`Could not connect to any configured OpenSearch node [${hosts.join(', ')}]`);
-        return response.customError({
-          statusCode: 502,
-          body: e,
-        });
-      }
-      // Otherwise, try the next host...
     }
-  }
 
-  const {
-    statusCode,
-    statusMessage,
-    headers: { warning },
-  } = opensearchIncomingMessage!;
-
-  if (method.toUpperCase() !== 'HEAD') {
     return response.custom({
       statusCode: statusCode!,
-      body: opensearchIncomingMessage!,
+      body: `${statusCode} - ${responseContent}`,
       headers: {
-        warning: warning || '',
+        warning: warnings || '',
+        'Content-Type': 'text/plain',
+      },
+    });
+  } catch (e: any) {
+    const isResponseErrorFlag = isResponseError(e);
+    if (!isResponseError) log.error(e);
+    const errorMessage = isResponseErrorFlag ? JSON.stringify(e.meta.body) : e.message;
+    // core http route handler has special logic that asks for stream readable input to pass error opaquely
+    const errorResponseBody = new Readable({
+      read() {
+        this.push(errorMessage);
+        this.push(null);
+      },
+    });
+    return response.customError({
+      statusCode: isResponseErrorFlag ? e.statusCode : 502,
+      body: errorResponseBody,
+      headers: {
+        'Content-Type': 'application/json',
       },
     });
   }
-
-  return response.custom({
-    statusCode: statusCode!,
-    body: `${statusCode} - ${statusMessage}`,
-    headers: {
-      warning: warning || '',
-      'Content-Type': 'text/plain',
-    },
-  });
 };

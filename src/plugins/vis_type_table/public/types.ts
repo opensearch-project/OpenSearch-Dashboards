@@ -75,10 +75,3 @@ export interface ColumnSort {
   colIndex?: number;
   direction?: 'asc' | 'desc';
 }
-
-export interface TableUiState {
-  sort: ColumnSort;
-  setSort: (sort: ColumnSort) => void;
-  width: ColumnWidth[];
-  setWidth: (columnWidths: ColumnWidth[]) => void;
-}

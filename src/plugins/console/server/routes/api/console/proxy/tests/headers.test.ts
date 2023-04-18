@@ -32,25 +32,21 @@ jest.mock('../../../../../../../../core/server/http/router/request', () => ({
   ensureRawRequest: jest.fn(),
 }));
 
-import { opensearchDashboardsResponseFactory } from '../../../../../../../../core/server';
-
+import {
+  IScopedClusterClient,
+  opensearchDashboardsResponseFactory,
+} from '../../../../../../../../core/server';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../../core/server/http/router/request';
-
 import { getProxyRouteHandlerDeps } from './mocks';
-
 import expect from '@osd/expect';
-import * as requestModule from '../../../../../lib/proxy_request';
-
 import { createHandler } from '../create_handler';
-
-import { createResponseStub } from './stubs';
+import { coreMock } from '../../../../../../../../core/server/mocks';
 
 describe('Console Proxy Route', () => {
   let handler: ReturnType<typeof createHandler>;
 
   beforeEach(() => {
-    (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub(''));
     handler = createHandler(getProxyRouteHandlerDeps({}));
   });
 
@@ -59,7 +55,10 @@ describe('Console Proxy Route', () => {
   });
 
   describe('headers', () => {
+    let opensearchClient: DeeplyMockedKeys<IScopedClusterClient>;
     it('forwards the remote header info', async () => {
+      const requestHandlerContextMock = coreMock.createRequestHandlerContext();
+      opensearchClient = requestHandlerContextMock.opensearch.client;
       (ensureRawRequest as jest.Mock).mockReturnValue({
         // This mocks the shape of the hapi request object, will probably change
         info: {
@@ -75,7 +74,7 @@ describe('Console Proxy Route', () => {
       });
 
       await handler(
-        {} as any,
+        { core: requestHandlerContextMock, dataSource: {} as any },
         {
           headers: {},
           query: {
@@ -86,16 +85,16 @@ describe('Console Proxy Route', () => {
         opensearchDashboardsResponseFactory
       );
 
-      expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
-      const [[{ headers }]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
+      const [[, opts]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
+      const headers = opts?.headers;
       expect(headers).to.have.property('x-forwarded-for');
-      expect(headers['x-forwarded-for']).to.be('0.0.0.0');
+      expect(headers!['x-forwarded-for']).to.be('0.0.0.0');
       expect(headers).to.have.property('x-forwarded-port');
-      expect(headers['x-forwarded-port']).to.be('1234');
+      expect(headers!['x-forwarded-port']).to.be('1234');
       expect(headers).to.have.property('x-forwarded-proto');
-      expect(headers['x-forwarded-proto']).to.be('http');
+      expect(headers!['x-forwarded-proto']).to.be('http');
       expect(headers).to.have.property('x-forwarded-host');
-      expect(headers['x-forwarded-host']).to.be('test');
+      expect(headers!['x-forwarded-host']).to.be('test');
     });
   });
 });

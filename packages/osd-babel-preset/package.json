@@ -20,6 +20,6 @@
     "babel-plugin-styled-components": "^2.0.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "react-is": "^16.8.0",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.9"
   }
 }
