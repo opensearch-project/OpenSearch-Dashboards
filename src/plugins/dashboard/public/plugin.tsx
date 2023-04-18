@@ -390,6 +390,7 @@ export class DashboardPlugin
         const services: DashboardServices = {
           ...coreStart,
           pluginInitializerContext: this.initializerContext,
+          opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
           history,
           osdUrlStateStorage: createOsdUrlStateStorage({
             history,

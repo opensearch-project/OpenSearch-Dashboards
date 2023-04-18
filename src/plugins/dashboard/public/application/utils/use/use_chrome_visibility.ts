@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChromeStart } from 'opensearch-dashboards/public';
 
 export const useChromeVisibility = (chrome: ChromeStart) => {
-  const [isVisible, setIsVisible] = useState<boolean>();
+  const [isVisible, setIsVisible] = useState<boolean>(true);
 
   useEffect(() => {
     const subscription = chrome.getIsVisible$().subscribe((value: boolean) => {
