@@ -62,6 +62,7 @@ export interface ISavedVis {
   description?: string;
   visualizationState?: string;
   styleState?: string;
+  uiState?: string;
   version?: number;
 }
 

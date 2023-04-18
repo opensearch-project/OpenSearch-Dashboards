@@ -23,7 +23,7 @@ import {
   VisBuilderSetup,
   VisBuilderStart,
 } from './types';
-import { VisBuilderEmbeddableFactoryDefinition, VISBUILDER_EMBEDDABLE } from './embeddable';
+import { VisBuilderEmbeddableFactory, VISBUILDER_EMBEDDABLE } from './embeddable';
 import visBuilderIconSecondaryFill from './assets/vis_builder_icon_secondary_fill.svg';
 import visBuilderIcon from './assets/vis_builder_icon.svg';
 import {
@@ -54,6 +54,7 @@ import { ConfigSchema } from '../config';
 import {
   createOsdUrlStateStorage,
   createOsdUrlTracker,
+  createStartServicesGetter,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
 import { opensearchFilters } from '../../data/public';
@@ -163,7 +164,7 @@ export class VisBuilderPlugin
         };
 
         // Instantiate the store
-        const store = await getPreloadedStore(services);
+        const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(services);
         const unmount = renderApp(params, services, store);
 
         // Render the application
@@ -171,15 +172,14 @@ export class VisBuilderPlugin
           unlistenParentHistory();
           unmount();
           appUnMounted();
+          unsubscribeStore();
         };
       },
     });
 
     // Register embeddable
-    // TODO: investigate simplification via getter a la visualizations:
-    // const start = createStartServicesGetter(core.getStartServices));
-    // const embeddableFactory = new VisBuilderEmbeddableFactoryDefinition({ start });
-    const embeddableFactory = new VisBuilderEmbeddableFactoryDefinition();
+    const start = createStartServicesGetter(core.getStartServices);
+    const embeddableFactory = new VisBuilderEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISBUILDER_EMBEDDABLE, embeddableFactory);
 
     // Register the plugin as an alias to create visualization
