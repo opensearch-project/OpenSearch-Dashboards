@@ -175,7 +175,13 @@ export function initDashboardApp(app, deps) {
               ids.map(({ id, appId }) => {
                 return deps.savedObjectsClient.delete(appId, id);
               })
-            );
+            ).catch((error) => {
+              toastNotifications.addError(error, {
+                title: i18n.translate('dashboard.dashboardListingDeleteErrorTitle', {
+                  defaultMessage: 'Error deleting dashboard',
+                }),
+              });
+            });
           };
           $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
           $scope.initialFilter = parse(history.location.search).filter || EMPTY_FILTER;
