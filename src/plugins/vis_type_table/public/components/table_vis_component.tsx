@@ -152,11 +152,9 @@ export const TableVisComponent = ({
           showSortSelector: false,
           showFullScreenSelector: false,
           showStyleSelector: false,
-          additionalControls: (
-            <TableVisControl filename={visConfig.title} rows={sortedRows} columns={columns} />
-          ),
         }}
       />
+      <TableVisControl filename={visConfig.title} rows={sortedRows} columns={columns} />
     </>
   );
 };
