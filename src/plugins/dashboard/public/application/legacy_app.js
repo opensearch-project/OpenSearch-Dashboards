@@ -165,7 +165,7 @@ export function initDashboardApp(app, deps) {
           };
 
           $scope.editItem = ({ editUrl }) => {
-            history.push(deps.addBasePath(editUrl));
+            history.push(editUrl);
           };
           $scope.viewItem = ({ viewUrl }) => {
             history.push(deps.addBasePath(viewUrl));
