@@ -12,7 +12,7 @@
   ],
   "private": true,
   "version": "2.7.0",
-  "branch": "2.x",
+  "branch": "2.7",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
