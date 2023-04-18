@@ -54,8 +54,9 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
     const hasVersionHeader = VERSION_HEADER in request.headers;
     const hasXsrfHeader = XSRF_HEADER in request.headers;
 
+    // ToDo: Remove !hasVersionHeader; `osd-version` incorrectly used for satisfying XSRF protection
     if (!isSafeMethod(request.route.method) && !hasVersionHeader && !hasXsrfHeader) {
-      return response.badRequest({ body: `Request must contain a ${XSRF_HEADER} header.` });
+      return response.badRequest({ body: `Request must contain the ${XSRF_HEADER} header.` });
     }
 
     return toolkit.next();
