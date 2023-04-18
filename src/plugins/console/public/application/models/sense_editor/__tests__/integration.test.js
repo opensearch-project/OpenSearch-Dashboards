@@ -44,11 +44,11 @@ describe('Integration', () => {
       '<div><div id="ConAppEditor" /><div id="ConAppEditorActions" /><div id="ConCopyAsCurl" /></div>';
 
     senseEditor = create(document.querySelector('#ConAppEditor'));
-    $(senseEditor.getCoreEditor().getContainer()).show();
+    senseEditor.getCoreEditor().getContainer().style.display = '';
     senseEditor.autocomplete._test.removeChangeListener();
   });
   afterEach(() => {
-    $(senseEditor.getCoreEditor().getContainer()).hide();
+    senseEditor.getCoreEditor().getContainer().style.display = 'none';
     senseEditor.autocomplete._test.addChangeListener();
   });
 

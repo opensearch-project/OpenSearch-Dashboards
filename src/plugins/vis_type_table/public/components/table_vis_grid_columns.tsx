@@ -7,20 +7,15 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { OpenSearchDashboardsDatatableRow } from 'src/plugins/expressions';
-import { Table } from '../table_vis_response_handler';
-import { ColumnWidth, FormattedColumn } from '../types';
+import { FormattedTableContext } from '../table_vis_response_handler';
+import { ColumnWidth } from '../types';
 
 export const getDataGridColumns = (
-  rows: OpenSearchDashboardsDatatableRow[],
-  cols: FormattedColumn[],
-  table: Table,
+  table: FormattedTableContext,
   event: IInterpreterRenderHandlers['event'],
   columnWidths: ColumnWidth[]
 ) => {
   const filterBucket = (rowIndex: number, columnIndex: number, negate: boolean) => {
-    const foramttedColumnId = cols[columnIndex].id;
-    const rawColumnIndex = table.columns.findIndex((col) => col.id === foramttedColumnId);
     event({
       name: 'filterBucket',
       data: {
@@ -28,10 +23,10 @@ export const getDataGridColumns = (
           {
             table: {
               columns: table.columns,
-              rows,
+              rows: table.rows,
             },
             row: rowIndex,
-            column: rawColumnIndex,
+            column: columnIndex,
           },
         ],
         negate,
@@ -39,11 +34,11 @@ export const getDataGridColumns = (
     });
   };
 
-  return cols.map((col, colIndex) => {
+  return table.formattedColumns.map((col, colIndex) => {
     const cellActions = col.filterable
       ? [
           ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const filterValue = rows[rowIndex][columnId];
+            const filterValue = table.rows[rowIndex][columnId];
             const filterContent = col.formatter?.convert(filterValue);
 
             const filterForValueText = i18n.translate(
@@ -79,7 +74,7 @@ export const getDataGridColumns = (
             );
           },
           ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const filterValue = rows[rowIndex][columnId];
+            const filterValue = table.rows[rowIndex][columnId];
             const filterContent = col.formatter?.convert(filterValue);
 
             const filterOutValueText = i18n.translate(
