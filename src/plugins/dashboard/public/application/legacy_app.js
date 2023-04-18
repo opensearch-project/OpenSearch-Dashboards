@@ -176,7 +176,7 @@ export function initDashboardApp(app, deps) {
                 return deps.savedObjectsClient.delete(appId, id);
               })
             ).catch((error) => {
-              toastNotifications.addError(error, {
+              deps.toastNotifications.addError(error, {
                 title: i18n.translate('dashboard.dashboardListingDeleteErrorTitle', {
                   defaultMessage: 'Error deleting dashboard',
                 }),

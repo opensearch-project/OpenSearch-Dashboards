@@ -37,6 +37,7 @@ import 'angular-sanitize';
 import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
 import {
   ChromeStart,
+  ToastsStart,
   IUiSettingsClient,
   CoreStart,
   SavedObjectsClientContract,
@@ -92,6 +93,7 @@ export interface RenderDeps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjects: SavedObjectsStart;
   restorePreviousUrl: () => void;
+  toastNotifications: ToastsStart;
 }
 
 let angularModuleInstance: IModule | null = null;
