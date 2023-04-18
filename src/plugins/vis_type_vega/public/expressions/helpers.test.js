@@ -21,10 +21,25 @@ import {
   simpleDimensions,
   noXAxisDimensions,
 } from './__mocks__';
+import {
+  TEST_DATATABLE_NO_VIS_LAYERS,
+  TEST_DATATABLE_NO_VIS_LAYERS_DIRTY,
+} from '../../../vis_augmenter/public/test_constants';
 
 describe('helpers', function () {
+  describe('formatDatatable()', function () {
+    it('formatSimpleDatatable', function () {
+      expect(formatDatatable(TEST_DATATABLE_NO_VIS_LAYERS)).toBe(TEST_DATATABLE_NO_VIS_LAYERS);
+    });
+    it('formatDirtyDatatable', function () {
+      expect(formatDatatable(TEST_DATATABLE_NO_VIS_LAYERS_DIRTY)).toStrictEqual(
+        TEST_DATATABLE_NO_VIS_LAYERS
+      );
+    });
+  });
+
   describe('cleanString()', function () {
-    it('string should not contain "', function () {
+    it('string should not contain', function () {
       const dirtyString = '"someString"';
       expect(cleanString(dirtyString)).toBe('someString');
     });

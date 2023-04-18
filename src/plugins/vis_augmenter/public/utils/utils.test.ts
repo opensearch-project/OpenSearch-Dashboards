@@ -16,10 +16,12 @@ import {
   getMockAugmentVisSavedObjectClient,
   generateAugmentVisSavedObject,
 } from '../saved_augment_vis';
-import { AggConfigs, AggTypesRegistryStart } from '../../../data/common/search/aggs';
-import { stubIndexPatternWithFields } from '../../../data/common/index_patterns/index_pattern.stub';
-import { IndexPattern } from '../../../data/common/index_patterns/index_patterns';
-import { mockAggTypesRegistry } from '../../../data/common/search/aggs/test_helpers';
+import {
+  AggConfigs,
+  AggTypesRegistryStart,
+  IndexPattern,
+  mockAggTypesRegistry,
+} from '../../../data/common';
 
 describe('utils', () => {
   describe('isEligibleForVisLayers', () => {
@@ -37,15 +39,31 @@ describe('utils', () => {
     const configStates = [
       {
         enabled: true,
-        type: 'histogram',
+        type: 'max',
         params: {},
+        schema: 'metric',
       },
       {
         enabled: true,
         type: 'date_histogram',
         params: {},
+        schema: 'segment',
       },
     ];
+    const stubIndexPatternWithFields = {
+      id: '1234',
+      title: 'logstash-*',
+      fields: [
+        {
+          name: 'response',
+          type: 'number',
+          esTypes: ['integer'],
+          aggregatable: true,
+          filterable: true,
+          searchable: true,
+        },
+      ],
+    };
     const typesRegistry: AggTypesRegistryStart = mockAggTypesRegistry();
     const aggs = new AggConfigs(stubIndexPatternWithFields as IndexPattern, configStates, {
       typesRegistry,
@@ -58,6 +76,11 @@ describe('utils', () => {
             type: 'line',
           },
         ],
+        categoryAxes: [
+          {
+            position: 'bottom',
+          },
+        ],
       },
       data: {
         aggs,
@@ -68,6 +91,11 @@ describe('utils', () => {
         params: {
           type: 'not-line',
           seriesParams: [],
+          categoryAxes: [
+            {
+              position: 'bottom',
+            },
+          ],
         },
         data: {
           aggs,
@@ -115,13 +143,15 @@ describe('utils', () => {
         },
         {
           enabled: true,
-          type: 'date_histogram',
+          type: 'dot',
           params: {},
+          schema: 'radius',
         },
         {
           enabled: true,
           type: 'metrics',
           params: {},
+          schema: 'metrics',
         },
       ];
       const invalidAggs = new AggConfigs(
@@ -151,12 +181,44 @@ describe('utils', () => {
               type: 'area',
             },
           ],
+          categoryAxes: [
+            {
+              position: 'bottom',
+            },
+          ],
         },
         data: {
           aggs,
         },
       } as unknown) as Vis;
       expect(isEligibleForVisLayers(vis, validDimensions)).toEqual(false);
+    });
+    it('vis is ineligible with invalid dimensions', async () => {
+      const invalidDimensions = {
+        x: null,
+      } as VislibDimensions;
+      expect(isEligibleForVisLayers(validVis, invalidDimensions)).toEqual(false);
+    });
+    it('vis is ineligible with xaxis not on bottom', async () => {
+      const invalidVis = ({
+        params: {
+          type: 'line',
+          seriesParams: [
+            {
+              type: 'line',
+            },
+          ],
+          categoryAxes: [
+            {
+              position: 'top',
+            },
+          ],
+        },
+        data: {
+          aggs,
+        },
+      } as unknown) as Vis;
+      expect(isEligibleForVisLayers(invalidVis, validDimensions)).toEqual(false);
     });
     it('vis is eligible with valid type', async () => {
       expect(isEligibleForVisLayers(validVis, validDimensions)).toEqual(true);

@@ -14,14 +14,23 @@ import {
 import { ISavedAugmentVis, SavedAugmentVisLoader, VisLayerFunctionDefinition } from '../';
 
 export const isEligibleForVisLayers = (vis: Vis, dimensions: VislibDimensions): boolean => {
-  const isDateHistogram =
-    vis.data.aggs?.byTypeName('date_histogram').length === 1 && vis.data.aggs?.aggs.length === 2;
+  // Only support date histogram and ensure there is only 1 x-axis and it has to be on the bottom
+  const isValidXaxis =
+    vis.data.aggs?.byTypeName('date_histogram').length === 1 &&
+    vis.params.categoryAxes.length === 1 &&
+    vis.params.categoryAxes[0].position === 'bottom';
+  // Support 1 segment for x axis bucket (that is date_histogram) and support metrics for
+  // multiple supported yaxis only. If there are other aggregation types, this is not
+  // valid for augmentation
+  const hasCorrectAggregationCount =
+    vis.data.aggs !== undefined &&
+    vis.data.aggs?.bySchemaName('metric').length === vis.data.aggs?.aggs.length - 1;
   let isOnlyLine = vis.params.type === 'line';
   vis.params.seriesParams.forEach((seriesParam: { type: string }) => {
     isOnlyLine = isOnlyLine && seriesParam.type === 'line';
   });
   const isValidDimensions = dimensions.x !== null;
-  return isDateHistogram && isOnlyLine && isValidDimensions;
+  return isValidXaxis && hasCorrectAggregationCount && isOnlyLine && isValidDimensions;
 };
 
 /**
