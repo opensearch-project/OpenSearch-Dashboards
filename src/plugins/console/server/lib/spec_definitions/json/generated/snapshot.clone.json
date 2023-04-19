@@ -1,0 +1,14 @@
+{
+  "snapshot.clone": {
+    "url_params": {
+      "cluster_manager_timeout": ""
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/{snapshot}/_clone/{target_snapshot}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/"
+  }
+}

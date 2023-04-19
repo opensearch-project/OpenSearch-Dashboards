@@ -1,0 +1,17 @@
+{
+  "indices.simulate_template": {
+    "url_params": {
+      "create": "__flag__",
+      "cause": "",
+      "cluster_manager_timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_index_template/_simulate",
+      "_index_template/_simulate/{name}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/index/"
+  }
+}
