@@ -8,8 +8,8 @@
   },
   "license": "Apache-2.0",
   "scripts": {
-    "osd": "node ../../../../scripts/osd.js",
-    "build": "node ../../../../scripts/remove.js './target' && tsc"
+    "osd": "../../../../scripts/use_node ../../../../scripts/osd.js",
+    "build": "../../../../scripts/use_node ../../../../scripts/remove.js './target' && tsc"
   },
   "devDependencies": {
     "@elastic/eui": "npm:@opensearch-project/oui@1.0.0",
