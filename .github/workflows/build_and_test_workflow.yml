@@ -25,7 +25,7 @@ env:
   TEST_OPENSEARCH_TRANSPORT_PORT: 9403
   TEST_OPENSEARCH_PORT: 9400
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  NODE_OPTIONS: "--max-old-space-size=6144"
+  NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
 
 jobs:
   build-lint-test:
