@@ -29,10 +29,13 @@
  */
 
 import chalk from 'chalk';
-import { isMaster as isClusterManager } from 'cluster';
+import cluster from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
+
+// ToDo: `isMaster` is a Node 14- prop; remove it when Node 18+ is the only engine supported
+const isClusterManager = cluster.isPrimary ?? cluster.isMaster;
 
 interface OpenSearchDashboardsFeatures {
   // Indicates whether we can run OpenSearch Dashboards in a so called cluster mode in which
@@ -96,8 +99,8 @@ export async function bootstrap({
   // This is only used by the LogRotator service
   // in order to be able to reload the log configuration
   // under the cluster mode
-  process.on('message', (msg) => {
-    if (!msg || msg.reloadLoggingConfig !== true) {
+  process.on('message', (msg: any) => {
+    if (msg?.reloadLoggingConfig !== true) {
       return;
     }
 
