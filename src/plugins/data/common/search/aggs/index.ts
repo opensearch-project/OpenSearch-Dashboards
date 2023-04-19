@@ -40,4 +40,3 @@ export * from './metrics';
 export * from './param_types';
 export * from './types';
 export * from './utils';
-export * from './test_helpers';

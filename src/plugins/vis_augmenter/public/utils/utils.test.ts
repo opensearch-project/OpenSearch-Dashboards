@@ -16,12 +16,8 @@ import {
   getMockAugmentVisSavedObjectClient,
   generateAugmentVisSavedObject,
 } from '../saved_augment_vis';
-import {
-  AggConfigs,
-  AggTypesRegistryStart,
-  IndexPattern,
-  mockAggTypesRegistry,
-} from '../../../data/common';
+import { AggConfigs, AggTypesRegistryStart, IndexPattern } from '../../../data/common';
+import { mockAggTypesRegistry } from '../../../data/common/search/aggs/test_helpers';
 
 describe('utils', () => {
   describe('isEligibleForVisLayers', () => {

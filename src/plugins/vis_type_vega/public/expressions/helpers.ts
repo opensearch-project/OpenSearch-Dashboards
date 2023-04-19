@@ -134,6 +134,7 @@ export const buildYAxis = (
     labels: valueAxis.labels.show,
     labelAngle: valueAxis.labels.rotate,
   };
+  // Percentile ranks aggregation metric needs percentile formatting.
   if (column.meta?.type === 'percentile_ranks') Object.assign(subAxis, { format: '.0%' });
   return {
     axis: subAxis,

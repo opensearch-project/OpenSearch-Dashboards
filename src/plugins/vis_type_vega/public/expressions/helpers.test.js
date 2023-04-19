@@ -156,6 +156,34 @@ describe('helpers', function () {
       vegaYAxis.axis.title = 'columnName';
       expect(buildYAxis(column, valueAxis, visParams)).toStrictEqual(vegaYAxis);
     });
+    it('build YAxis with percentile rank', function () {
+      const valueAxis = {
+        id: 'someId',
+        labels: {
+          rotate: 75,
+          show: false,
+        },
+        position: 'left',
+        title: {
+          text: 'someText',
+        },
+      };
+      const column = { name: 'columnName', id: 'columnId', meta: { type: 'percentile_ranks' } };
+      const visParams = { grid: { valueAxis: true } };
+      const vegaYAxis = {
+        axis: {
+          title: 'someText',
+          grid: true,
+          orient: 'left',
+          labels: false,
+          labelAngle: 75,
+          format: '.0%',
+        },
+        field: 'columnId',
+        type: 'quantitative',
+      };
+      expect(buildYAxis(column, valueAxis, visParams)).toStrictEqual(vegaYAxis);
+    });
   });
 
   describe('createSpecFromDatatable()', function () {
