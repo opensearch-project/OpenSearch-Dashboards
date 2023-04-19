@@ -28,7 +28,6 @@ env:
 
 jobs:
   build-lint-test:
-    if: ${{ false }}
     name: Build and Verify on ${{ matrix.name }}
     strategy:
       matrix:
@@ -121,7 +120,6 @@ jobs:
         run: yarn test:jest_integration:ci
 
   functional-tests:
-    if: ${{ false }}
     name: Run functional tests on ${{ matrix.name }} (ciGroup${{ matrix.group }})
     strategy:
       matrix:
