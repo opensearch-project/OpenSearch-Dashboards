@@ -9,6 +9,6 @@
     "patterns": [
       "_reindex/{task_id}/_rethrottle"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/reindex/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/document-apis/reindex/"
   }
 }

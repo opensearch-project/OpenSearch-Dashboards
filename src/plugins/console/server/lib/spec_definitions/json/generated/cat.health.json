@@ -23,6 +23,6 @@
     "patterns": [
       "_cat/health"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-health/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-health/"
   }
 }

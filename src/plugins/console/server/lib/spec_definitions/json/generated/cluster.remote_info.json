@@ -6,6 +6,6 @@
     "patterns": [
       "_remote/info"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/remote-info/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/remote-info/"
   }
 }

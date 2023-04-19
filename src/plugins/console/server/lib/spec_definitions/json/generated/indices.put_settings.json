@@ -23,6 +23,6 @@
       "_settings",
       "{indices}/_settings"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-update-settings.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/update-settings/"
   }
 }
