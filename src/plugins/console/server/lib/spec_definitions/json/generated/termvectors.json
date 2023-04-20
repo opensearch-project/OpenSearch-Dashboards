@@ -28,6 +28,6 @@
       "{indices}/{type}/{id}/_termvectors",
       "{indices}/{type}/_termvectors"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/docs-termvectors.html"
+    "documentation": "https://opensearch.org/docs/"
   }
 }

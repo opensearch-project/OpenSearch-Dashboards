@@ -25,6 +25,6 @@
       "{indices}/_explain/{id}",
       "{indices}/{type}/{id}/_explain"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/explain/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/explain/"
   }
 }

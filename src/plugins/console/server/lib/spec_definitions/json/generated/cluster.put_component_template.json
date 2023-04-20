@@ -1,0 +1,17 @@
+{
+  "cluster.put_component_template": {
+    "url_params": {
+      "create": "__flag__",
+      "timeout": "",
+      "cluster_manager_timeout": ""
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_component_template/{name}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/index-templates/#create-a-component-template"
+  }
+}

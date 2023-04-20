@@ -13,6 +13,6 @@
       "_template",
       "_template/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/index-templates/"
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/index-templates/#retrieve-a-template"
   }
 }
