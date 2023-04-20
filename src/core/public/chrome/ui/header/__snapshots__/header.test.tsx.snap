@@ -4695,6 +4695,11 @@ exports[`Header renders 1`] = `
                           >
                             <EuiIcon
                               size="m"
+                              type="questionInCircle"
+                            />
+                            <EuiIcon
+                              size="m"
+                              title="Help"
                               type="help"
                             />
                           </EuiHeaderSectionItemButton>
@@ -4742,11 +4747,22 @@ exports[`Header renders 1`] = `
                                 >
                                   <EuiIcon
                                     size="m"
+                                    type="questionInCircle"
+                                  >
+                                    <div
+                                      data-euiicon-type="questionInCircle"
+                                      size="m"
+                                    />
+                                  </EuiIcon>
+                                  <EuiIcon
+                                    size="m"
+                                    title="Help"
                                     type="help"
                                   >
                                     <div
                                       data-euiicon-type="help"
                                       size="m"
+                                      title="Help"
                                     />
                                   </EuiIcon>
                                 </button>
@@ -4862,11 +4878,13 @@ exports[`Header renders 1`] = `
                     >
                       <EuiIcon
                         size="m"
+                        title="Menu"
                         type="menu"
                       >
                         <div
                           data-euiicon-type="menu"
                           size="m"
+                          title="Menu"
                         />
                       </EuiIcon>
                     </button>
