@@ -50,7 +50,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
   const commonConfig: webpack.Configuration = {
     node: { fs: 'empty' },
-    context: bundle.contextDir,
+    context: Path.normalize(bundle.contextDir),
     cache: true,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
