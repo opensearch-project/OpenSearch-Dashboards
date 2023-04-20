@@ -1,0 +1,9 @@
+{
+  "id": "internal",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}

@@ -2,6 +2,7 @@
 .signing-config.json
 .ackrc
 /.opensearch
+/.heap_snapshots
 /.chromium
 /package.json.bak
 .DS_Store
