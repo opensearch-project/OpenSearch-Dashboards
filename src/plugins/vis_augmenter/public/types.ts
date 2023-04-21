@@ -14,7 +14,7 @@ export enum VisLayerErrorTypes {
 
 export interface VisLayerError {
   type: keyof typeof VisLayerErrorTypes;
-  message?: string;
+  message: string;
 }
 
 export type PluginResourceType = string;
