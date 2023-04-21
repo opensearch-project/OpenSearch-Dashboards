@@ -153,6 +153,14 @@ describe('utils', () => {
       'resource-2',
       'oh no something terrible has happened :('
     );
+    const errorLayer3 = generateVisLayer(
+      VisLayerTypes.PointInTimeEvents,
+      true,
+      'resource-type-1',
+      'abcd',
+      'resource-3',
+      'oops!'
+    );
 
     it('empty array - returns undefined', async () => {
       const err = getAnyErrors([], 'title-vis-title');
@@ -177,6 +185,13 @@ describe('utils', () => {
       expect(err?.stack).toStrictEqual(
         `-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"\n\n\n` +
           `-----resource-type-2-----\nID: 5678\nMessage: "oh no something terrible has happened :("`
+      );
+    });
+    it('multiple VisLayers with errors of same type - returns formatted error', async () => {
+      const err = getAnyErrors([errorLayer1, errorLayer3], 'test-vis-title');
+      expect(err).not.toEqual(undefined);
+      expect(err?.stack).toStrictEqual(
+        `-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"\n\n` + `ID: abcd\nMessage: "oops!"`
       );
     });
     it('VisLayers with and without error - returns formatted error', async () => {
