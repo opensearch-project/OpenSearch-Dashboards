@@ -277,11 +277,11 @@ export class LegacyCoreEditor implements CoreEditor {
     } else {
       if (topOrBottom === 'top') {
         this.actions.style.bottom = 'auto';
-        this.actions.style.top = value;
+        this.actions.style.top = `${value}px`;
         this.actions.style.visibility = 'visible';
       } else {
         this.actions.style.top = 'auto';
-        this.actions.style.bottom = value;
+        this.actions.style.bottom = `${value}px`;
         this.actions.style.visibility = 'visible';
       }
     }
@@ -320,7 +320,7 @@ export class LegacyCoreEditor implements CoreEditor {
       // elements are positioned relative to the editor's container
       // pageY is relative to page, so subtract the offset
       // from pageY to get the new top value
-      const offsetFromPage = this.editor.container.offsetTop;
+      const { top: offsetFromPage } = this.editor.container.getBoundingClientRect();
       const startLine = range.start.lineNumber;
       const startColumn = range.start.column;
       const firstLine = this.getLineValue(startLine);

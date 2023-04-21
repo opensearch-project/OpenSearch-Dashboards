@@ -249,6 +249,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Console] Fix dev tool console autocomplete not loading issue ([#3775](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3775))
 - [Console] Fix dev tool console run command with query parameter error ([#3813](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3813))
 - Add clarifying tooltips to header navigation ([#3573](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3573))
+- [Console] Fix dev tool console not updating action bar ([#3920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3920))
 
 ### 🚞 Infrastructure
 
