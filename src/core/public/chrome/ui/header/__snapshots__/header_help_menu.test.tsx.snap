@@ -1624,12 +1624,8 @@ exports[`Header help menu hides survey link 1`] = `
         >
           <EuiIcon
             size="m"
-            type="questionInCircle"
-          />
-          <EuiIcon
-            size="m"
             title="Help"
-            type="help"
+            type="questionInCircle"
           />
         </EuiHeaderSectionItemButton>
       }
@@ -1681,9 +1677,6 @@ exports[`Header help menu hides survey link 1`] = `
                         >
                           <span
                             data-euiicon-type="questionInCircle"
-                          />
-                          <span
-                            data-euiicon-type="help"
                             title="Help"
                           />
                         </span>
@@ -1726,20 +1719,11 @@ exports[`Header help menu hides survey link 1`] = `
                       >
                         <EuiIcon
                           size="m"
+                          title="Help"
                           type="questionInCircle"
                         >
                           <span
                             data-euiicon-type="questionInCircle"
-                            size="m"
-                          />
-                        </EuiIcon>
-                        <EuiIcon
-                          size="m"
-                          title="Help"
-                          type="help"
-                        >
-                          <span
-                            data-euiicon-type="help"
                             size="m"
                             title="Help"
                           />
@@ -3800,12 +3784,8 @@ exports[`Header help menu renders survey link 1`] = `
         >
           <EuiIcon
             size="m"
-            type="questionInCircle"
-          />
-          <EuiIcon
-            size="m"
             title="Help"
-            type="help"
+            type="questionInCircle"
           />
         </EuiHeaderSectionItemButton>
       }
@@ -3857,9 +3837,6 @@ exports[`Header help menu renders survey link 1`] = `
                         >
                           <span
                             data-euiicon-type="questionInCircle"
-                          />
-                          <span
-                            data-euiicon-type="help"
                             title="Help"
                           />
                         </span>
@@ -3902,20 +3879,11 @@ exports[`Header help menu renders survey link 1`] = `
                       >
                         <EuiIcon
                           size="m"
+                          title="Help"
                           type="questionInCircle"
                         >
                           <span
                             data-euiicon-type="questionInCircle"
-                            size="m"
-                          />
-                        </EuiIcon>
-                        <EuiIcon
-                          size="m"
-                          title="Help"
-                          type="help"
-                        >
-                          <span
-                            data-euiicon-type="help"
                             size="m"
                             title="Help"
                           />
