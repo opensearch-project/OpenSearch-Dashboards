@@ -177,7 +177,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                       )};\n${content}`;
                     },
                     webpackImporter: false,
-                    implementation: require('sass'),
+                    implementation: require('node-sass'),
                     sassOptions: {
                       outputStyle: 'compressed',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
