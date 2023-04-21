@@ -335,7 +335,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           size="m"
           title={intl.formatMessage({
             id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonTitle',
-            defaultMessage: 'Help menu',
+            defaultMessage: 'Help',
           })}
         />
       </EuiHeaderSectionItemButton>
