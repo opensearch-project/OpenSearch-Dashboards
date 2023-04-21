@@ -405,18 +405,6 @@ export class VisualizeEmbeddable
     this.abortController = new AbortController();
     const abortController = this.abortController;
 
-    // TODO: remove toast code after testing
-    const { toasts } = getNotifications();
-    toasts.addError(
-      new Error(
-        'The following plugin resources failed to load: <plugin-resource-1>, <plugin-resource-2>'
-      ),
-      {
-        title: `Some of the plugin resources failed to load for ${this.vis.title} chart`,
-        toastMessage: ' ',
-      }
-    );
-
     const visLayers = await this.fetchVisLayers(expressionParams, abortController);
 
     this.expression = await buildPipeline(this.vis, {
@@ -524,22 +512,21 @@ export class VisualizeEmbeddable
         layers: [] as VisLayers,
       };
       // We cannot use this.handler in this case, since it does not support the run() cmd
-      // we need here. So, we consume the expressions service to run this instead.
+      // we need here. So, we consume the expressions service to run this directly instead.
       const exprVisLayers = (await getExpressions().run(
         visLayersPipeline,
         visLayersPipelineInput,
         expressionParams as Record<string, unknown>
       )) as ExprVisLayers;
       const visLayers = exprVisLayers.layers;
-      const visLayerError = getAnyErrors(visLayers);
-
-      if (visLayerError !== undefined) {
-        // TODO: clean up and test different formatting once how error is supposed to look is defined
+      const err = getAnyErrors(visLayers, this.vis.title);
+      if (err !== undefined) {
         const { toasts } = getNotifications();
-        toasts.addError(visLayerError, {
+        toasts.addError(err, {
           title: i18n.translate('visualizations.renderVisTitle', {
-            defaultMessage: 'Some test error',
+            defaultMessage: `Error loading data on the ${this.vis.title} chart`,
           }),
+          toastMessage: ' ',
         });
       }
 

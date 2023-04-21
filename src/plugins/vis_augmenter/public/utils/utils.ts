@@ -17,7 +17,6 @@ import {
   VisLayerFunctionDefinition,
   VisLayer,
   isVisLayerWithError,
-  VisLayerErrorTypes,
 } from '../';
 
 // TODO: provide a deeper eligibility check.
@@ -70,18 +69,32 @@ export const buildPipelineFromAugmentVisSavedObjs = (objs: ISavedAugmentVis[]): 
  * Returns an error with an aggregated message about all of the
  * errors found in the set of VisLayers. If no errors, returns undefined.
  */
-export const getAnyErrors = (visLayers: VisLayer[]): Error | undefined => {
+export const getAnyErrors = (visLayers: VisLayer[], visTitle: string): Error | undefined => {
   const visLayersWithErrors = visLayers.filter((visLayer) => isVisLayerWithError(visLayer));
-  const permissionsErrorsList = visLayersWithErrors.filter(
-    (visLayer) => visLayer.error?.type === VisLayerErrorTypes.PERMISSIONS_FAILURE
-  );
-  const fetchErrorsList = visLayersWithErrors.filter(
-    (visLayer) => visLayer.error?.type === VisLayerErrorTypes.FETCH_FAILURE
-  );
+  if (!isEmpty(visLayersWithErrors)) {
+    // Aggregate by unique plugin resource type
+    const resourceTypes = [
+      ...new Set(visLayersWithErrors.map((visLayer) => visLayer.pluginResource.type)),
+    ];
 
-  if (!isEmpty(permissionsErrorsList) || !isEmpty(fetchErrorsList)) {
-    const msg = 'some generated string thats partitioning the vislayer failures';
-    return new Error(msg);
+    let msgDetails = '';
+    resourceTypes.forEach((type, index) => {
+      const matchingVisLayers = visLayersWithErrors.filter(
+        (visLayer) => visLayer.pluginResource.type === type
+      );
+      if (index !== 0) msgDetails += '\n\n\n';
+      msgDetails += `-----${type}-----`;
+      matchingVisLayers.forEach((visLayer, idx) => {
+        if (idx !== 0) msgDetails += '\n';
+        msgDetails += `\nID: ${visLayer.pluginResource.id}`;
+        msgDetails += `\nMessage: "${visLayer.error?.message}"`;
+      });
+    });
+
+    const err = new Error(`Certain plugin resources failed to load on the ${visTitle} chart`);
+    // We set as the stack here so it can be parsed and shown cleanly in the details modal coming from the error toast notification.
+    err.stack = msgDetails;
+    return err;
   } else {
     return undefined;
   }

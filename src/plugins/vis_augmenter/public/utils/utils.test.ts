@@ -135,34 +135,54 @@ describe('utils', () => {
   });
 
   describe('getAnyErrors', () => {
-    const noErrorLayer1 = generateVisLayer(VisLayerTypes.PointInTimeEvents);
-    const noErrorLayer2 = generateVisLayer(VisLayerTypes.PointInTimeEvents);
-    const errorLayer1 = generateVisLayer(VisLayerTypes.PointInTimeEvents, true);
-    const errorLayer2 = generateVisLayer(VisLayerTypes.PointInTimeEvents, true);
+    const noErrorLayer1 = generateVisLayer(VisLayerTypes.PointInTimeEvents, false);
+    const noErrorLayer2 = generateVisLayer(VisLayerTypes.PointInTimeEvents, false);
+    const errorLayer1 = generateVisLayer(
+      VisLayerTypes.PointInTimeEvents,
+      true,
+      'resource-type-1',
+      '1234',
+      'resource-1',
+      'uh-oh!'
+    );
+    const errorLayer2 = generateVisLayer(
+      VisLayerTypes.PointInTimeEvents,
+      true,
+      'resource-type-2',
+      '5678',
+      'resource-2',
+      'oh no something terrible has happened :('
+    );
 
     it('empty array - returns undefined', async () => {
-      const err = getAnyErrors([noErrorLayer1]);
+      const err = getAnyErrors([], 'title-vis-title');
       expect(err).toEqual(undefined);
     });
     it('single VisLayer no errors - returns undefined', async () => {
-      const err = getAnyErrors([noErrorLayer1]);
+      const err = getAnyErrors([noErrorLayer1], 'test-vis-title');
       expect(err).toEqual(undefined);
     });
     it('multiple VisLayers no errors - returns undefined', async () => {
-      const err = getAnyErrors([noErrorLayer1, noErrorLayer2]);
+      const err = getAnyErrors([noErrorLayer1, noErrorLayer2], 'test-vis-title');
       expect(err).toEqual(undefined);
     });
-    it('single VisLayer with error - returns error', async () => {
-      const err = getAnyErrors([errorLayer1]);
+    it('single VisLayer with error - returns formatted error', async () => {
+      const err = getAnyErrors([errorLayer1], 'test-vis-title');
       expect(err).not.toEqual(undefined);
+      expect(err?.stack).toStrictEqual(`-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"`);
     });
-    it('multiple VisLayers with errors - returns error', async () => {
-      const err = getAnyErrors([errorLayer1, errorLayer2]);
+    it('multiple VisLayers with errors - returns formatted error', async () => {
+      const err = getAnyErrors([errorLayer1, errorLayer2], 'test-vis-title');
       expect(err).not.toEqual(undefined);
+      expect(err?.stack).toStrictEqual(
+        `-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"\n\n\n` +
+          `-----resource-type-2-----\nID: 5678\nMessage: "oh no something terrible has happened :("`
+      );
     });
-    it('VisLayers with and without error - returns error', async () => {
-      const err = getAnyErrors([noErrorLayer1, errorLayer1]);
+    it('VisLayers with and without error - returns formatted error', async () => {
+      const err = getAnyErrors([noErrorLayer1, errorLayer1], 'test-vis-title');
       expect(err).not.toEqual(undefined);
+      expect(err?.stack).toStrictEqual(`-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"`);
     });
   });
 });

@@ -5,20 +5,27 @@
 
 import { VisLayer, VisLayerErrorTypes } from './types';
 
-export const generateVisLayer = (type: any, error: boolean = false): VisLayer => {
+export const generateVisLayer = (
+  type: any,
+  error: boolean = false,
+  resourceType: string = 'test-resource-type',
+  resourceID: string = 'test-resource-id',
+  resourceName: string = 'test-resource-name',
+  errorMessage: string = 'some-error-message'
+): VisLayer => {
   return {
     type,
     originPlugin: 'test-plugin',
     pluginResource: {
-      type: 'test-resource-type',
-      id: 'test-resource-id',
-      name: 'test-resource-name',
+      type: resourceType,
+      id: resourceID,
+      name: resourceName,
       urlPath: 'test-resource-url-path',
     },
     error: error
       ? {
           type: VisLayerErrorTypes.FETCH_FAILURE,
-          message: 'some-error-message',
+          message: errorMessage,
         }
       : undefined,
   };
