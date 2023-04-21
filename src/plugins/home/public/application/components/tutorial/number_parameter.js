@@ -39,12 +39,8 @@ export function NumberParameter({ id, label, value, setParameter }) {
 
   return (
     <EuiFormRow label={label}>
-      <EuiFieldNumber
-        value={value}
-        onChange={handleChange}
-        fullWidth
-      />
-  </EuiFormRow>
+      <EuiFieldNumber value={value} onChange={handleChange} fullWidth />
+    </EuiFormRow>
   );
 }
 

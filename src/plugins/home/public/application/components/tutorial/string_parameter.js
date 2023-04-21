@@ -39,8 +39,8 @@ export function StringParameter({ id, label, value, setParameter }) {
 
   return (
     <EuiFormRow label={label}>
-        <EuiFieldText value={value} onChange={handleChange} />
-  </EuiFormRow>
+      <EuiFieldText value={value} onChange={handleChange} />
+    </EuiFormRow>
   );
 }
 

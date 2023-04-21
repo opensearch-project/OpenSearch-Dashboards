@@ -119,6 +119,7 @@ module.exports = {
 
   overrides: [
     /**
+     *
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
     {

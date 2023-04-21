@@ -28,16 +28,15 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { updateOldState } from './vis_update_state';
 
 // eslint-disable-next-line camelcase
 import { pre_6_1, since_6_1 } from './vis_update_state.stub';
 
 function watchForChanges(obj) {
-  const originalObject = _.cloneDeep(obj);
+  const originalObject = JSON.parse(JSON.stringify(obj));
   return () => {
-    return _.isEqual(originalObject, obj);
+    return JSON.stringify(originalObject) === JSON.stringify(obj);
   };
 }
 
