@@ -1,0 +1,11 @@
+{
+  "indices.create_data_stream": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_data_stream/{name}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/data-streams/#step-2-create-a-data-stream"
+  }
+}

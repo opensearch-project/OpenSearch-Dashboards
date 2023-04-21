@@ -15,6 +15,6 @@
     "patterns": [
       "_cluster/reroute"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-reroute.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cluster-api/index/"
   }
 }
