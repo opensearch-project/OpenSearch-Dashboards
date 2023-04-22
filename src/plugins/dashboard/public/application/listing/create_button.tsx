@@ -38,7 +38,7 @@ const CreateButton = (props: CreateButtonProps) => {
         <EuiContextMenuItem
           key={provider.savedObjectsType}
           href={provider.createUrl}
-          data-test-subj="contextMenuItem"
+          data-test-subj={`contextMenuItem-${provider.appId}`}
         >
           {provider.createLinkText}
         </EuiContextMenuItem>
