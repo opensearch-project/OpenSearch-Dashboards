@@ -5417,12 +5417,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                           >
                             <EuiIcon
                               size="m"
-                              type="questionInCircle"
-                            />
-                            <EuiIcon
-                              size="m"
                               title="Help"
-                              type="help"
+                              type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
                         }
@@ -5474,9 +5470,6 @@ exports[`Header handles visibility and lock changes 1`] = `
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
-                                            />
-                                            <span
-                                              data-euiicon-type="help"
                                               title="Help"
                                             />
                                           </span>
@@ -5519,20 +5512,11 @@ exports[`Header handles visibility and lock changes 1`] = `
                                         >
                                           <EuiIcon
                                             size="m"
+                                            title="Help"
                                             type="questionInCircle"
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
-                                              size="m"
-                                            />
-                                          </EuiIcon>
-                                          <EuiIcon
-                                            size="m"
-                                            title="Help"
-                                            type="help"
-                                          >
-                                            <span
-                                              data-euiicon-type="help"
                                               size="m"
                                               title="Help"
                                             />
@@ -10676,12 +10660,8 @@ exports[`Header renders condensed header 1`] = `
                           >
                             <EuiIcon
                               size="m"
-                              type="questionInCircle"
-                            />
-                            <EuiIcon
-                              size="m"
                               title="Help"
-                              type="help"
+                              type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
                         }
@@ -10733,9 +10713,6 @@ exports[`Header renders condensed header 1`] = `
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
-                                            />
-                                            <span
-                                              data-euiicon-type="help"
                                               title="Help"
                                             />
                                           </span>
@@ -10778,20 +10755,11 @@ exports[`Header renders condensed header 1`] = `
                                         >
                                           <EuiIcon
                                             size="m"
+                                            title="Help"
                                             type="questionInCircle"
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
-                                              size="m"
-                                            />
-                                          </EuiIcon>
-                                          <EuiIcon
-                                            size="m"
-                                            title="Help"
-                                            type="help"
-                                          >
-                                            <span
-                                              data-euiicon-type="help"
                                               size="m"
                                               title="Help"
                                             />
