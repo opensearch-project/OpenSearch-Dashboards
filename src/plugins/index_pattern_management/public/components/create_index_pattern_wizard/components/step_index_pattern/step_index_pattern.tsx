@@ -55,6 +55,7 @@ import { context as contextType } from '../../../../../../opensearch_dashboards_
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
 import { MatchedItem, StepInfo } from '../../types';
 import { DataSourceRef, IndexPatternManagmentContextValue } from '../../../../types';
+import { validateDataSourceReference } from '../../../../../../../plugins/data/common';
 
 interface StepIndexPatternProps {
   allIndices: MatchedItem[];
@@ -131,7 +132,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
 
-  dataSrouceEnabled: boolean;
+  dataSourceEnabled: boolean;
 
   constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
@@ -140,7 +141,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     this.state.query =
       initialQuery || context.services.uiSettings.get(UI_SETTINGS.INDEXPATTERN_PLACEHOLDER);
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
-    this.dataSrouceEnabled = context.services.dataSourceEnabled;
+    this.dataSourceEnabled = context.services.dataSourceEnabled;
   }
 
   lastQuery = '';
@@ -163,7 +164,9 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     });
 
     const existingIndexPatterns = savedObjects.map((obj) =>
-      obj && obj.attributes ? obj.attributes.title : ''
+      obj && obj.attributes && validateDataSourceReference(obj, this.props.dataSourceRef?.id)
+        ? obj.attributes.title
+        : ''
     ) as string[];
 
     this.setState({ existingIndexPatterns });
@@ -461,7 +464,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         {this.renderStatusMessage(matchedIndices)}
         <EuiSpacer />
         {this.renderList(matchedIndices)}
-        {this.dataSrouceEnabled && this.renderGoToPrevious()}
+        {this.dataSourceEnabled && this.renderGoToPrevious()}
       </>
     );
   }

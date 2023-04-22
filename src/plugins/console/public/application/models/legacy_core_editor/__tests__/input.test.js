@@ -31,7 +31,6 @@
 import '../legacy_core_editor.test.mocks';
 import RowParser from '../../../../lib/row_parser';
 import { createTokenIterator } from '../../../factories';
-import $ from 'jquery';
 import { create } from '../create';
 
 describe('Input', () => {
@@ -46,10 +45,10 @@ describe('Input', () => {
 
     coreEditor = create(document.querySelector('#ConAppEditor'));
 
-    $(coreEditor.getContainer()).show();
+    coreEditor.getContainer().style.display = '';
   });
   afterEach(() => {
-    $(coreEditor.getContainer()).hide();
+    coreEditor.getContainer().style.display = 'none';
   });
 
   describe('.getLineCount', () => {

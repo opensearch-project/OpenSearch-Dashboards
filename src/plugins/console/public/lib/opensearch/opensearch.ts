@@ -45,12 +45,14 @@ export async function send(
   http: HttpSetup,
   method: string,
   path: string,
-  data: any
+  data: any,
+  dataSourceId?: string
 ): Promise<HttpResponse> {
   return await http.post<HttpResponse>('/api/console/proxy', {
     query: {
       path,
       method,
+      dataSourceId,
     },
     body: data,
     prependBasePath: true,

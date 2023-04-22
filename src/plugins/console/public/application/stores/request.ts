@@ -37,7 +37,8 @@ import { OpenSearchRequestResult } from '../hooks/use_send_current_request_to_op
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }
   | { type: 'requestSuccess'; payload: { data: OpenSearchRequestResult[] } }
-  | { type: 'requestFail'; payload: OpenSearchRequestResult<string> | undefined };
+  | { type: 'requestFail'; payload: OpenSearchRequestResult<string> | undefined }
+  | { type: 'resetLastResult'; payload: undefined };
 
 export interface Store {
   requestInFlight: boolean;
@@ -79,4 +80,11 @@ export const reducer: Reducer<Store, Actions> = (state, action) =>
       draft.lastResult = { ...initialResultValue, error: action.payload };
       return;
     }
+
+    if (action.type === 'resetLastResult') {
+      draft.lastResult = initialResultValue;
+      return;
+    }
+
+    return draft;
   });

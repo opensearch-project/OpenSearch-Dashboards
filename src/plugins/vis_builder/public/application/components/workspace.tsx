@@ -5,12 +5,12 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
-import React, { FC, useState, useMemo, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { VisBuilderServices } from '../../types';
 import { validateSchemaState, validateAggregations } from '../utils/validations';
-import { useTypedSelector } from '../utils/state_management';
+import { useTypedDispatch, useTypedSelector, setUIStateState } from '../utils/state_management';
 import { useAggs, useVisualizationType } from '../utils/use';
 import { PersistedState } from '../../../../visualizations/public';
 
@@ -19,17 +19,19 @@ import fields_bg from '../../assets/fields_bg.svg';
 
 import './workspace.scss';
 import { ExperimentalInfo } from './experimental_info';
+import { handleVisEvent } from '../utils/handle_vis_event';
 
-export const Workspace: FC = ({ children }) => {
+export const WorkspaceUI = () => {
   const {
     services: {
       expressions: { ReactExpressionRenderer },
       notifications: { toasts },
       data,
+      uiActions,
     },
   } = useOpenSearchDashboards<VisBuilderServices>();
   const { toExpression, ui } = useVisualizationType();
-  const { aggConfigs } = useAggs();
+  const { aggConfigs, indexPattern } = useAggs();
   const [expression, setExpression] = useState<string>();
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: data.query.queryString.getQuery(),
@@ -37,22 +39,45 @@ export const Workspace: FC = ({ children }) => {
     timeRange: data.query.timefilter.timefilter.getTime(),
   });
   const rootState = useTypedSelector((state) => state);
-  // Visualizations require the uiState to persist even when the expression changes
-  const uiState = useMemo(() => new PersistedState(), []);
+  const dispatch = useTypedDispatch();
+  // Visualizations require the uiState object to persist even when the expression changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const uiState = useMemo(() => new PersistedState(rootState.ui), []);
+
+  useEffect(() => {
+    if (rootState.metadata.editor.state === 'loaded') {
+      uiState.setSilent(rootState.ui);
+    }
+    // To update uiState once saved object data is loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rootState.metadata.editor.state, uiState]);
+
+  useEffect(() => {
+    uiState.on('change', (args) => {
+      // Store changes to UI state
+      dispatch(setUIStateState(uiState.toJSON()));
+    });
+  }, [dispatch, uiState]);
 
   useEffect(() => {
     async function loadExpression() {
       const schemas = ui.containerConfig.data.schemas;
 
-      const noAggs = aggConfigs?.aggs?.length === 0;
+      const noAggs = (aggConfigs?.aggs?.length ?? 0) === 0;
       const schemaValidation = validateSchemaState(schemas, rootState.visualization);
       const aggValidation = validateAggregations(aggConfigs?.aggs || []);
 
-      if (noAggs || !aggValidation.valid || !schemaValidation.valid) {
+      if (!aggValidation.valid || !schemaValidation.valid) {
+        setExpression(undefined);
+        if (noAggs) return; // don't show error when there are no active aggregations
+
         const err = schemaValidation.errorMsg || aggValidation.errorMsg;
 
-        if (err) toasts.addWarning(err);
-        setExpression(undefined);
+        if (err)
+          toasts.addWarning({
+            id: 'vb_expression_validation',
+            title: err,
+          });
 
         return;
       }
@@ -91,6 +116,7 @@ export const Workspace: FC = ({ children }) => {
             expression={expression}
             searchContext={searchContext}
             uiState={uiState}
+            onEvent={(event) => handleVisEvent(event, uiActions, indexPattern?.timeFieldName)}
           />
         ) : (
           <EuiFlexItem className="vbWorkspace__empty" data-test-subj="emptyWorkspace">
@@ -127,3 +153,7 @@ export const Workspace: FC = ({ children }) => {
     </section>
   );
 };
+
+// The app uses EuiResizableContainer that triggers a rerender for every mouseover action.
+// To prevent this child component from unnecessarily rerendering in that instance, it needs to be memoized
+export const Workspace = React.memo(WorkspaceUI);

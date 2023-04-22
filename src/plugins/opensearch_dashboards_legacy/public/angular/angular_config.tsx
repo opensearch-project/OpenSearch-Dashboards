@@ -159,6 +159,8 @@ export const $setupXsrfRequestInterceptor = (version: string) => {
   // Configure jQuery prefilter
   $.ajaxPrefilter(({ osdXsrfToken = true }: any, originalOptions, jqXHR) => {
     if (osdXsrfToken) {
+      jqXHR.setRequestHeader('osd-xsrf', 'osd-legacy');
+      // ToDo: Remove next; `osd-version` incorrectly used for satisfying XSRF protection
       jqXHR.setRequestHeader('osd-version', version);
     }
   });
@@ -170,6 +172,8 @@ export const $setupXsrfRequestInterceptor = (version: string) => {
         request(opts) {
           const { osdXsrfToken = true } = opts as any;
           if (osdXsrfToken) {
+            set(opts, ['headers', 'osd-xsrf'], 'osd-legacy');
+            // ToDo: Remove next; `osd-version` incorrectly used for satisfying XSRF protection
             set(opts, ['headers', 'osd-version'], version);
           }
           return opts;

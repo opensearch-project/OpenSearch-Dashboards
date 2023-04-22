@@ -74,6 +74,7 @@ export interface RenderingMetadata {
       };
     };
     branding: Branding;
+    survey?: string;
   };
 }
 
