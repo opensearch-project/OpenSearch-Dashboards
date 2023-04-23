@@ -28,14 +28,10 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
-
+import { mkdir } from 'fs/promises';
 import del from 'del';
 
 import { BuildContext } from '../contexts';
-
-const asyncMkdir = promisify(Fs.mkdir);
 
 export async function initTargets({ log, sourceDir, buildDir }: BuildContext) {
   log.info('deleting the build and target directories');
@@ -44,5 +40,5 @@ export async function initTargets({ log, sourceDir, buildDir }: BuildContext) {
   });
 
   log.debug(`creating build output dir [${buildDir}]`);
-  await asyncMkdir(buildDir, { recursive: true });
+  await mkdir(buildDir, { recursive: true });
 }

@@ -29,7 +29,7 @@
  */
 
 import { PathConfigType } from '@osd/utils';
-import { mkdir } from './fs';
+import { mkdir } from 'fs/promises';
 import { Logger } from '../logging';
 
 export async function createDataFolder({

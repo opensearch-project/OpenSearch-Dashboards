@@ -29,17 +29,13 @@
  */
 
 import Path from 'path';
-import { chmod, writeFile } from 'fs';
-import { promisify } from 'util';
+import { chmod, writeFile } from 'fs/promises';
 import { REPO_ROOT } from '@osd/utils';
 
 import { run } from '../run';
 import { createFailError, isFailError } from '../run';
 import { SCRIPT_SOURCE } from './script_source';
 import { getGitDir } from './get_git_dir';
-
-const chmodAsync = promisify(chmod);
-const writeFileAsync = promisify(writeFile);
 
 function validateGitDir(gitDir: string) {
   if (gitDir === '--git-common-dir') {
@@ -57,8 +53,8 @@ run(
       const installPath = Path.resolve(REPO_ROOT, gitDir, 'hooks/pre-commit');
 
       log.info(`Registering OpenSearch Dashboards pre-commit git hook...`);
-      await writeFileAsync(installPath, SCRIPT_SOURCE);
-      await chmodAsync(installPath, 0o755);
+      await writeFile(installPath, SCRIPT_SOURCE);
+      await chmod(installPath, 0o755);
       log.success(`OpenSearch Dashboards pre-commit git hook was installed successfully.`);
     } catch (e) {
       if (isFailError(e)) {

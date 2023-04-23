@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import { pipeline } from 'stream/promises';
 
 // @ts-expect-error @types/gulp-babel is outdated and doesn't work for gulp-babel v8
 import gulpBabel from 'gulp-babel';
@@ -37,12 +36,10 @@ import vfs from 'vinyl-fs';
 
 import { Task, Build } from '../lib';
 
-const asyncPipeline = promisify(pipeline);
-
 const transpileWithBabel = async (srcGlobs: string[], build: Build, presets: string[]) => {
   const buildRoot = build.resolvePath();
 
-  await asyncPipeline(
+  await pipeline(
     vfs.src(
       srcGlobs.concat([
         '!**/*.d.ts',

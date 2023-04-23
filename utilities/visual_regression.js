@@ -28,18 +28,15 @@
  * under the License.
  */
 
-import bluebird, { promisify } from 'bluebird';
+import bluebird from 'bluebird';
 import Handlebars from 'handlebars';
 import fs from 'fs';
+import { readFile, writeFile, readdir } from 'fs/promises';
 import path from 'path';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
 import moment from 'moment';
 import SimpleGit from 'simple-git';
-
-const readDirAsync = promisify(fs.readdir);
-const readFileAsync = promisify(fs.readFile);
-const writeFileAsync = promisify(fs.writeFile);
 
 Handlebars.registerHelper('lte', function lessThanEquals(value, threshold, options) {
   if (value <= threshold) {
@@ -57,11 +54,10 @@ Handlebars.registerHelper('gte', function greaterThanEquals(value, threshold, op
 
 async function buildGallery(comparisons) {
   const simpleGit = new SimpleGit();
-  const asyncBranch = promisify(simpleGit.branch, simpleGit);
-  const branch = await asyncBranch();
+  const branch = await simpleGit.branch();
 
   const template = Handlebars.compile(
-    await readFileAsync(
+    await readFile(
       path.resolve('./utilities/templates/visual_regression_gallery.handlebars'),
       'utf8'
     ),
@@ -76,7 +72,7 @@ async function buildGallery(comparisons) {
     comparisons,
   });
 
-  return writeFileAsync(
+  return writeFile(
     path.resolve('./test/functional/screenshots/visual_regression_gallery.html'),
     html
   );
@@ -91,7 +87,7 @@ async function compareScreenshots() {
   // We don't need to create the baseline dir because it's committed.
   fs.mkdirSync(DIFF_SCREENSHOTS_DIR, { recursive: true });
   fs.mkdirSync(SESSION_SCREENSHOTS_DIR, { recursive: true });
-  const files = await readDirAsync(SESSION_SCREENSHOTS_DIR);
+  const files = await readdir(SESSION_SCREENSHOTS_DIR);
   const screenshots = files.filter((file) => file.indexOf('.png') !== -1);
 
   // We'll use this data to build a screenshot gallery in HTML.
@@ -114,8 +110,8 @@ async function compareScreenshots() {
 
     const diffImagePath = path.resolve(DIFF_SCREENSHOTS_DIR, screenshot);
 
-    const sessionImage = PNG.sync.read(await readFileAsync(sessionImagePath));
-    const baselineImage = PNG.sync.read(await readFileAsync(baselineImagePath));
+    const sessionImage = PNG.sync.read(await readFile(sessionImagePath));
+    const baselineImage = PNG.sync.read(await readFile(baselineImagePath));
     const { width, height } = sessionImage;
     const diff = new PNG({ width, height });
 
@@ -128,7 +124,7 @@ async function compareScreenshots() {
       { threshold: 0 }
     );
 
-    await writeFileAsync(diffImagePath, PNG.sync.write(diff));
+    await writeFile(diffImagePath, PNG.sync.write(diff));
 
     const change = numDiffPixels / (width * height);
     const changePercentage = (change * 100).toFixed(2);
@@ -137,11 +133,11 @@ async function compareScreenshots() {
     comparison.change = change;
 
     // Once the images have been diffed, we can load and store the image data.
-    comparison.imageData.session = await readFileAsync(sessionImagePath, 'base64');
+    comparison.imageData.session = await readFile(sessionImagePath, 'base64');
 
-    comparison.imageData.baseline = await readFileAsync(baselineImagePath, 'base64');
+    comparison.imageData.baseline = await readFile(baselineImagePath, 'base64');
 
-    comparison.imageData.diff = await readFileAsync(diffImagePath, 'base64');
+    comparison.imageData.diff = await readFile(diffImagePath, 'base64');
 
     return comparison;
   });

@@ -28,9 +28,8 @@
  * under the License.
  */
 
-import * as fs from 'fs';
+import { readFile } from 'fs/promises';
 import * as path from 'path';
-import { promisify } from 'util';
 
 import { unique } from './core/helper';
 import { Translation } from './translation';
@@ -79,7 +78,7 @@ function getLocaleFromFileName(fullFileName: string) {
  */
 async function loadFile(pathToFile: string): Promise<Translation> {
   // doing this at the moment because fs is mocked in a lot of places where this would otherwise fail
-  return JSON.parse(await promisify(fs.readFile)(pathToFile, 'utf8'));
+  return JSON.parse(await readFile(pathToFile, 'utf8'));
 }
 
 /**

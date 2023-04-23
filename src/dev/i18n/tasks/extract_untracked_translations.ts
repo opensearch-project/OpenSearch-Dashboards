@@ -28,9 +28,10 @@
  * under the License.
  */
 
+import { readFile } from 'fs/promises';
 import { createFailError } from '@osd/dev-utils';
 import { ListrContext } from '.';
-import { I18nConfig, matchEntriesWithExctractors, normalizePath, readFileAsync } from '..';
+import { I18nConfig, matchEntriesWithExctractors, normalizePath } from '..';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>
@@ -81,7 +82,7 @@ export async function extractUntrackedMessagesTask({
           })
           .map(async (entry: any) => ({
             name: entry,
-            content: await readFileAsync(entry),
+            content: await readFile(entry),
           }))
       );
 

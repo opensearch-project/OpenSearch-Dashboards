@@ -29,20 +29,19 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import { promisify } from 'util';
-
-const existsAsync = promisify(Fs.exists);
+import { stat } from 'fs/promises';
 
 export async function findOpenSearchDashboardsJson(directory: string): Promise<string | undefined> {
-  if (await existsAsync(Path.resolve(directory, 'opensearch_dashboards.json'))) {
+  try {
+    await stat(Path.resolve(directory, 'opensearch_dashboards.json'));
     return directory;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error getting file stats:', error);
+    const parent = Path.dirname(directory);
+    if (parent === directory) {
+      return undefined;
+    }
+    return findOpenSearchDashboardsJson(parent);
   }
-
-  const parent = Path.dirname(directory);
-  if (parent === directory) {
-    return undefined;
-  }
-
-  return findOpenSearchDashboardsJson(parent);
 }

@@ -28,12 +28,9 @@
  * under the License.
  */
 
-import { promisify } from 'util';
-import { readFile } from 'fs';
+import { readFile } from 'fs/promises';
 import { resolve, dirname } from 'path';
 import globby from 'globby';
-
-const readFileAsync = promisify(readFile);
 
 interface I18NRCFileStructure {
   translations?: string[];

@@ -54,6 +54,12 @@ jest.mock('fs', () => ({
   }),
 }));
 
+jest.mock('glob', () => ({
+  globSync: jest.fn().mockImplementation(() => {
+    return ['/data/oldest.yml', '/data/newest.yml', '/data/middle.yml'];
+  }),
+}));
+
 const { findMostRecentlyChanged } = require('./find_most_recently_changed');
 
 test('returns newest file', () => {

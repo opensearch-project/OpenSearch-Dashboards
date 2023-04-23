@@ -28,10 +28,10 @@
  * under the License.
  */
 
-import { unlinkSync as unlink } from 'fs';
 import once from 'lodash/once';
+import { unlinkSync as unlink } from 'fs';
+import { writeFile, stat } from 'fs/promises';
 import { Logger } from '../logging';
-import { writeFile, exists } from './fs';
 import { PidConfigType } from './pid_config';
 
 export const writePidFile = async ({
@@ -48,12 +48,17 @@ export const writePidFile = async ({
 
   const pid = String(process.pid);
 
-  if (await exists(path)) {
+  try {
+    await stat(path);
     const message = `pid file already exists at ${path}`;
     if (pidConfig.exclusive) {
       throw new Error(message);
     } else {
       logger.warn(message, { path, pid });
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
     }
   }
 

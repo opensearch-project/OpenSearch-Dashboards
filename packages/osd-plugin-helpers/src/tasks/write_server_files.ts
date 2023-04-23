@@ -28,15 +28,11 @@
  * under the License.
  */
 
-import { pipeline } from 'stream';
-import { promisify } from 'util';
-
+import { pipeline } from 'stream/promises';
 import vfs from 'vinyl-fs';
 import { transformFileWithBabel, transformFileStream } from '@osd/dev-utils';
 
 import { BuildContext } from '../contexts';
-
-const asyncPipeline = promisify(pipeline);
 
 export async function writeServerFiles({
   log,
@@ -49,7 +45,7 @@ export async function writeServerFiles({
   log.info('copying server source into the build and converting with babel');
 
   // copy source files and apply some babel transformations in the process
-  await asyncPipeline(
+  await pipeline(
     vfs.src(
       [
         'opensearch_dashboards.json',

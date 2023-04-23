@@ -29,9 +29,11 @@
  */
 
 import path from 'path';
+import { glob } from 'glob';
+import { readFile } from 'fs/promises';
 
 import { extractHtmlMessages, extractCodeMessages } from './extractors';
-import { globAsync, readFileAsync, normalizePath } from './utils';
+import { normalizePath } from './utils';
 
 import { createFailError, isFailError } from '@osd/dev-utils';
 
@@ -81,7 +83,7 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     '**/*.d.ts',
   ].concat(additionalIgnore);
 
-  const entries = await globAsync('*.{js,jsx,ts,tsx,html}', {
+  const entries = await glob('*.{js,jsx,ts,tsx,html}', {
     cwd: inputPath,
     matchBase: true,
     ignore,
@@ -118,7 +120,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
         filterEntries(entries, config.exclude).map(async (entry) => {
           return {
             name: entry,
-            content: await readFileAsync(entry),
+            content: await readFile(entry),
           };
         })
       );

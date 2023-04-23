@@ -33,7 +33,7 @@ import { stringify as stringifyLockfile } from '@yarnpkg/lockfile';
 import dedent from 'dedent';
 import chalk from 'chalk';
 
-import { writeFile } from './fs';
+import { writeFile } from 'fs/promises';
 import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
 import { YarnLock } from './yarn_lock';
 import { log } from './log';

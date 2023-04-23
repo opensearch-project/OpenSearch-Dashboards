@@ -31,13 +31,14 @@
 const fetch = require('node-fetch');
 const AbortController = require('abort-controller');
 const fs = require('fs');
-const { promisify } = require('util');
-const { pipeline, Transform } = require('stream');
+const {
+  Transform,
+  promises: { pipeline },
+} = require('stream');
 const chalk = require('chalk');
 const { createHash } = require('crypto');
 const path = require('path');
 
-const asyncPipeline = promisify(pipeline);
 const SUPPORTED_PLATFORMS = ['linux', 'windows', 'darwin'];
 const DAILY_SNAPSHOTS_BASE_URL = 'https://artifacts.opensearch.org/snapshots/core/opensearch';
 // TODO: [RENAMEME] currently do not have an existing replacement
@@ -399,7 +400,7 @@ exports.Artifact = class Artifact {
 
     fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
 
-    await asyncPipeline(
+    await pipeline(
       resp.body,
       new Transform({
         transform(chunk, encoding, cb) {

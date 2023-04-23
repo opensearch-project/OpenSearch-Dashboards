@@ -29,9 +29,9 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-import { stat, Stats, rename, createReadStream, createWriteStream } from 'fs';
+import { Stats, createReadStream, createWriteStream } from 'fs';
+import { stat, rename } from 'fs/promises';
 import { Readable, Writable } from 'stream';
-import { fromNode } from 'bluebird';
 import { ToolingLog } from '@osd/dev-utils';
 
 import { createPromiseFromStreams } from '../lib/streams';
@@ -44,7 +44,7 @@ import {
 } from '../lib';
 
 async function isDirectory(path: string): Promise<boolean> {
-  const stats: Stats = await fromNode((cb) => stat(path, cb));
+  const stats: Stats = await stat(path);
   return stats.isDirectory();
 }
 
@@ -82,7 +82,7 @@ export async function rebuildAllAction({
       createWriteStream(tempFile),
     ] as [Readable, ...Writable[]]);
 
-    await fromNode((cb) => rename(tempFile, childPath, cb));
+    await rename(tempFile, childPath);
     log.info(`${archiveName} Rebuilt ${childName}`);
   }
 }

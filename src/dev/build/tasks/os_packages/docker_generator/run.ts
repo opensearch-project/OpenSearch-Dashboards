@@ -28,9 +28,8 @@
  * under the License.
  */
 
-import { access, link, unlink, chmod } from 'fs';
+import { access, link, unlink, chmod } from 'fs/promises';
 import { resolve } from 'path';
-import { promisify } from 'util';
 
 import { ToolingLog } from '@osd/dev-utils';
 
@@ -38,11 +37,6 @@ import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
-
-const accessAsync = promisify(access);
-const linkAsync = promisify(link);
-const unlinkAsync = promisify(unlink);
-const chmodAsync = promisify(chmod);
 
 export async function runDockerGenerator(
   config: Config,
@@ -90,9 +84,9 @@ export async function runDockerGenerator(
   // and  delete the current linked target into the
   // OpenSearch Dashboards docker build folder if we have one.
   try {
-    await accessAsync(resolve(artifactsDir, artifactTarball));
+    await access(resolve(artifactsDir, artifactTarball));
     await mkdirp(dockerBuildDir);
-    await unlinkAsync(resolve(dockerBuildDir, artifactTarball));
+    await unlink(resolve(dockerBuildDir, artifactTarball));
   } catch (e) {
     if (e && e.code === 'ENOENT' && e.syscall === 'access') {
       throw new Error(
@@ -103,7 +97,7 @@ export async function runDockerGenerator(
 
   // Create the OpenSearch Dashboards linux target inside the
   // OpenSearch Dashboards docker build
-  await linkAsync(resolve(artifactsDir, artifactTarball), resolve(dockerBuildDir, artifactTarball));
+  await link(resolve(artifactsDir, artifactTarball), resolve(dockerBuildDir, artifactTarball));
 
   // Write all the needed docker config files
   // into opensearch-dashboards-docker folder
@@ -123,7 +117,7 @@ export async function runDockerGenerator(
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js
   // and we just run that bash script
-  await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
+  await chmod(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
   await exec(log, `./build_docker.sh`, [], {
     cwd: dockerBuildDir,
     level: 'info',

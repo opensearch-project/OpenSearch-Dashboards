@@ -29,18 +29,13 @@
  */
 
 import { resolve } from 'path';
-import { writeFile, mkdir } from 'fs';
-import { promisify } from 'util';
-
+import { writeFile, mkdir } from 'fs/promises';
 import del from 'del';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 interface Test {
   fullTitle(): string;
 }
-
-const writeFileAsync = promisify(writeFile);
-const mkdirAsync = promisify(mkdir);
 
 export async function FailureDebuggingProvider({ getService }: FtrProviderContext) {
   const screenshots = getService('screenshots');
@@ -59,14 +54,14 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
   }
 
   async function savePageHtml(name: string) {
-    await mkdirAsync(config.get('failureDebugging.htmlDirectory'), { recursive: true });
+    await mkdir(config.get('failureDebugging.htmlDirectory'), { recursive: true });
     const htmlOutputFileName = resolve(
       config.get('failureDebugging.htmlDirectory'),
       `${name}.html`
     );
     const pageSource = await browser.getPageSource();
     log.info(`Saving page source to: ${htmlOutputFileName}`);
-    await writeFileAsync(htmlOutputFileName, pageSource);
+    await writeFile(htmlOutputFileName, pageSource);
   }
 
   async function onFailure(_: any, test: Test) {

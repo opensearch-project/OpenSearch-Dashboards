@@ -31,7 +31,7 @@
 // @ts-expect-error published types are worthless
 import { parse as parseLockfile } from '@yarnpkg/lockfile';
 
-import { readFile } from '../utils/fs';
+import { readFile } from 'fs/promises';
 import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
 import { Project } from '../utils/project';
 import { Log } from '../utils/log';
