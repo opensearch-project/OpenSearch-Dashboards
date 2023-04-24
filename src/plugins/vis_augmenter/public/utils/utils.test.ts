@@ -15,11 +15,11 @@ import {
   SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
   getMockAugmentVisSavedObjectClient,
   generateAugmentVisSavedObject,
-  generateVisLayer,
   ISavedAugmentVis,
   VisLayerExpressionFn,
   VisLayerTypes,
 } from '../';
+import { generateVisLayer } from './';
 
 describe('utils', () => {
   // TODO: redo / update this test suite when eligibility is finalized.
@@ -137,30 +137,26 @@ describe('utils', () => {
   describe('getAnyErrors', () => {
     const noErrorLayer1 = generateVisLayer(VisLayerTypes.PointInTimeEvents, false);
     const noErrorLayer2 = generateVisLayer(VisLayerTypes.PointInTimeEvents, false);
-    const errorLayer1 = generateVisLayer(
-      VisLayerTypes.PointInTimeEvents,
-      true,
-      'resource-type-1',
-      '1234',
-      'resource-1',
-      'uh-oh!'
-    );
+    const errorLayer1 = generateVisLayer(VisLayerTypes.PointInTimeEvents, true, 'uh-oh!', {
+      type: 'resource-type-1',
+      id: '1234',
+      name: 'resource-1',
+    });
     const errorLayer2 = generateVisLayer(
       VisLayerTypes.PointInTimeEvents,
       true,
-      'resource-type-2',
-      '5678',
-      'resource-2',
-      'oh no something terrible has happened :('
+      'oh no something terrible has happened :(',
+      {
+        type: 'resource-type-2',
+        id: '5678',
+        name: 'resource-2',
+      }
     );
-    const errorLayer3 = generateVisLayer(
-      VisLayerTypes.PointInTimeEvents,
-      true,
-      'resource-type-1',
-      'abcd',
-      'resource-3',
-      'oops!'
-    );
+    const errorLayer3 = generateVisLayer(VisLayerTypes.PointInTimeEvents, true, 'oops!', {
+      type: 'resource-type-1',
+      id: 'abcd',
+      name: 'resource-3',
+    });
 
     it('empty array - returns undefined', async () => {
       const err = getAnyErrors([], 'title-vis-title');
@@ -177,27 +173,53 @@ describe('utils', () => {
     it('single VisLayer with error - returns formatted error', async () => {
       const err = getAnyErrors([errorLayer1], 'test-vis-title');
       expect(err).not.toEqual(undefined);
-      expect(err?.stack).toStrictEqual(`-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"`);
+      expect(err?.stack).toMatchInlineSnapshot(`
+        "-----resource-type-1-----
+        ID: 1234
+        Message: \\"uh-oh!\\""
+      `);
     });
     it('multiple VisLayers with errors - returns formatted error', async () => {
       const err = getAnyErrors([errorLayer1, errorLayer2], 'test-vis-title');
       expect(err).not.toEqual(undefined);
-      expect(err?.stack).toStrictEqual(
+      expect(err?.stack).toMatchInlineSnapshot(
         `-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"\n\n\n` +
-          `-----resource-type-2-----\nID: 5678\nMessage: "oh no something terrible has happened :("`
+          `-----resource-type-2-----\nID: 5678\nMessage: "oh no something terrible has happened :("`,
+        `
+        "-----resource-type-1-----
+        ID: 1234
+        Message: \\"uh-oh!\\"
+
+
+        -----resource-type-2-----
+        ID: 5678
+        Message: \\"oh no something terrible has happened :(\\""
+      `
       );
     });
     it('multiple VisLayers with errors of same type - returns formatted error', async () => {
       const err = getAnyErrors([errorLayer1, errorLayer3], 'test-vis-title');
       expect(err).not.toEqual(undefined);
-      expect(err?.stack).toStrictEqual(
-        `-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"\n\n` + `ID: abcd\nMessage: "oops!"`
+      expect(err?.stack).toMatchInlineSnapshot(
+        `-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"\n\n` + `ID: abcd\nMessage: "oops!"`,
+        `
+        "-----resource-type-1-----
+        ID: 1234
+        Message: \\"uh-oh!\\"
+
+        ID: abcd
+        Message: \\"oops!\\""
+      `
       );
     });
     it('VisLayers with and without error - returns formatted error', async () => {
       const err = getAnyErrors([noErrorLayer1, errorLayer1], 'test-vis-title');
       expect(err).not.toEqual(undefined);
-      expect(err?.stack).toStrictEqual(`-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"`);
+      expect(err?.stack).toMatchInlineSnapshot(`
+        "-----resource-type-1-----
+        ID: 1234
+        Message: \\"uh-oh!\\""
+      `);
     });
   });
 });

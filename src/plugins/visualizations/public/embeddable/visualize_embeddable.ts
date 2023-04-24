@@ -520,6 +520,7 @@ export class VisualizeEmbeddable
       )) as ExprVisLayers;
       const visLayers = exprVisLayers.layers;
       const err = getAnyErrors(visLayers, this.vis.title);
+      // This is only true when one or more VisLayers has an error
       if (err !== undefined) {
         const { toasts } = getNotifications();
         toasts.addError(err, {

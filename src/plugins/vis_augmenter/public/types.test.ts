@@ -9,7 +9,7 @@ import {
   isValidVisLayer,
   isVisLayerWithError,
 } from './types';
-import { generateVisLayer } from './test_helpers';
+import { generateVisLayer } from './utils';
 
 describe('isPointInTimeEventsVisLayer()', function () {
   it('should return false if type does not match', function () {

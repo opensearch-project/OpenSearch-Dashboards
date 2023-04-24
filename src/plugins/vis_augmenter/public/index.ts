@@ -24,8 +24,6 @@ export {
   isVisLayerWithError,
 } from './types';
 
-export { generateVisLayer } from './test_helpers';
-
 export * from './expressions';
 export * from './utils';
 export * from './constants';
