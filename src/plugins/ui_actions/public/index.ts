@@ -71,7 +71,6 @@ export {
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
-  DEFAULT_ACTION,
 } from './types';
 export {
   ActionByType,
