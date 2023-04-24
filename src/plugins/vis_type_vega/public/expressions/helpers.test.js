@@ -39,7 +39,7 @@ describe('helpers', function () {
   });
 
   describe('cleanString()', function () {
-    it('string should not contain', function () {
+    it('string should not contain quotation marks', function () {
       const dirtyString = '"someString"';
       expect(cleanString(dirtyString)).toBe('someString');
     });

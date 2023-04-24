@@ -24,6 +24,7 @@ export const isEligibleForVisLayers = (vis: Vis, dimensions: VislibDimensions): 
   // valid for augmentation
   const hasCorrectAggregationCount =
     vis.data.aggs !== undefined &&
+    vis.data.aggs?.bySchemaName('metric').length > 0 &&
     vis.data.aggs?.bySchemaName('metric').length === vis.data.aggs?.aggs.length - 1;
   let isOnlyLine = vis.params.type === 'line';
   vis.params.seriesParams.forEach((seriesParam: { type: string }) => {

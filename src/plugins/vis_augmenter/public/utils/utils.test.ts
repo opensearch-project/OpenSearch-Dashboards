@@ -168,6 +168,32 @@ describe('utils', () => {
       } as unknown) as Vis;
       expect(isEligibleForVisLayers(vis, validDimensions)).toEqual(false);
     });
+    it('vis is ineligible with no metric aggs', async () => {
+      const invalidConfigStates = [
+        {
+          enabled: true,
+          type: 'date_histogram',
+          params: {},
+        },
+      ];
+      const invalidAggs = new AggConfigs(
+        stubIndexPatternWithFields as IndexPattern,
+        invalidConfigStates,
+        {
+          typesRegistry,
+        }
+      );
+      const vis = ({
+        params: {
+          type: 'line',
+          seriesParams: [],
+        },
+        data: {
+          invalidAggs,
+        },
+      } as unknown) as Vis;
+      expect(isEligibleForVisLayers(vis, validDimensions)).toEqual(false);
+    });
     it('vis is ineligible with series param is not line type', async () => {
       const vis = ({
         params: {
