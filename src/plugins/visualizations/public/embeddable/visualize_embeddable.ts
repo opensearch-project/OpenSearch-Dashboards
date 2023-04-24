@@ -528,6 +528,7 @@ export class VisualizeEmbeddable
             defaultMessage: `Error loading data on the ${this.vis.title} chart`,
           }),
           toastMessage: ' ',
+          id: this.id,
         });
       }
 
