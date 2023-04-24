@@ -60,7 +60,7 @@ export interface Presentable<Context extends object = object> {
   /**
    * Returns a title to be displayed to the user.
    */
-  getDisplayName(context: Context): string;
+  getDisplayName(context: Context): JSX.Element | string;
 
   /**
    * Returns tooltip text which should be displayed when user hovers this object.

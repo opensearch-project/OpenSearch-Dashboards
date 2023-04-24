@@ -36,20 +36,28 @@ const createTestAction = ({
   type,
   dispayName,
   order,
+  grouping,
 }: {
   type?: string;
   dispayName: string;
   order?: number;
+  grouping?: any[];
 }) =>
   createAction({
     type: type as any, // mapping doesn't matter for this test
     getDisplayName: () => dispayName,
     order,
     execute: async () => {},
+    grouping,
   });
 
 const resultMapper = (panel: EuiContextMenuPanelDescriptor) => ({
-  items: panel.items ? panel.items.map((item) => ({ name: item.name })) : [],
+  items: panel.items
+    ? panel.items.map((item) => ({
+        ...(item.name ? { name: item.name } : {}),
+        ...(item.isSeparator ? { isSeparator: true } : {}),
+      }))
+    : [],
 });
 
 test('sorts items in DESC order by "order" field first, then by display name', async () => {
@@ -242,6 +250,135 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
           },
           Object {
             "name": "Foo 5",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('tests groups and separators', async () => {
+  const grouping1 = [
+    {
+      id: 'test-group',
+      getDisplayName: () => 'Test group',
+      getIconType: () => 'bell',
+    },
+  ];
+  const grouping2 = [
+    {
+      id: 'test-group-2',
+      getDisplayName: () => 'Test group 2',
+      getIconType: () => 'bell',
+    },
+  ];
+  const grouping3 = [
+    {
+      id: 'test-group-3',
+      getDisplayName: () => 'Test group 3',
+      getIconType: () => 'bell',
+    },
+    {
+      id: 'test-group-4',
+      getDisplayName: () => 'Test group 4',
+      getIconType: () => 'bell',
+    },
+  ];
+
+  const actions = [
+    createTestAction({
+      dispayName: 'First action',
+    }),
+    createTestAction({
+      dispayName: 'Foo 1',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Foo 2',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Foo 3',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Bar 1',
+      grouping: grouping2,
+    }),
+    createTestAction({
+      dispayName: 'Bar 2',
+      grouping: grouping2,
+    }),
+    createTestAction({
+      dispayName: 'Inner',
+      grouping: grouping3,
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "First action",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group 2",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group 4",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "name": "Foo 2",
+          },
+          Object {
+            "name": "Foo 3",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Bar 1",
+          },
+          Object {
+            "name": "Bar 2",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Test group 4",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Inner",
           },
         ],
       },

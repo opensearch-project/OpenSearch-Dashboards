@@ -83,6 +83,12 @@ interface Props {
   SavedObjectFinder: React.ComponentType<any>;
   stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
+  // By default, embeddable.destroy() is called when this component unmounts.
+  // To prevent this default behavior, set this prop to true.
+  isDestroyPrevented?: boolean;
+  // Toggle off the border and shadow applied around the embeddable.
+  // By default, the embeddable will have a shadow and border around it.
+  isBorderless?: boolean;
 }
 
 interface State {
@@ -200,7 +206,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.state.errorEmbeddable) {
       this.state.errorEmbeddable.destroy();
     }
-    this.props.embeddable.destroy();
+
+    if (!this.props.isDestroyPrevented) {
+      this.props.embeddable.destroy();
+    }
   }
 
   public onFocus = (focusedPanelIndex: string) => {
@@ -234,6 +243,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
+        hasBorder={!this.props.isBorderless}
+        hasShadow={!this.props.isBorderless}
       >
         {!this.props.hideHeader && (
           <PanelHeader
