@@ -30,6 +30,7 @@
 
 import '../sense_editor.test.mocks';
 
+import $ from 'jquery';
 import _ from 'lodash';
 
 import { create } from '../create';
@@ -50,11 +51,11 @@ describe('Editor', () => {
       </div>`;
 
     input = create(document.querySelector('#ConAppEditor'));
-    input.getCoreEditor().getContainer().style.display = '';
+    $(input.getCoreEditor().getContainer()).show();
     input.autocomplete._test.removeChangeListener();
   });
   afterEach(function () {
-    input.getCoreEditor().getContainer().style.display = 'none';
+    $(input.getCoreEditor().getContainer()).hide();
     input.autocomplete._test.addChangeListener();
   });
 
