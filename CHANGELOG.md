@@ -182,6 +182,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Remove the unused `renovate.json5` file ([3489](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3489))
 - Allow selecting the Node.js binary using `NODE_HOME` and `OSD_NODE_HOME` ([3508](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3508))
 - Bump `styled-components` from 5.3.5 to 5.3.9 ([#3678](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3678))
+- Bump `js-yaml` from 3.14.0 to 4.1.0 ([#3770](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3770))
 - Bump `oui` from `1.0.0` to `1.1.1` ([#3884](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3884))
 
 ### 🪛 Refactoring
