@@ -33,7 +33,7 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
     params.visLayers == null ||
     Object.keys(params.visLayers).length === 0
   ) {
-    // This wont work but is needed so then it will default to the original vis lib renderer
+    // Render using vislib instead of vega-lite
     const visConfig = { ...vis.params, dimensions };
     const vislib = buildExpressionFunction<any>('vislib', {
       type: 'line',
