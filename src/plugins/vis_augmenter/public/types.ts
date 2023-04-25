@@ -53,8 +53,15 @@ export const isPointInTimeEventsVisLayer = (obj: any) => {
   return obj?.type === VisLayerTypes.PointInTimeEvents;
 };
 
+/**
+ * Used to determine if a given saved obj has a valid type and can
+ * be converted into a VisLayer
+ */
 export const isValidVisLayer = (obj: any) => {
   return obj?.type in VisLayerTypes;
 };
 
+/**
+ * Used for checking if an existing VisLayer has a populated error field or not
+ */
 export const isVisLayerWithError = (visLayer: VisLayer): boolean => visLayer.error !== undefined;
