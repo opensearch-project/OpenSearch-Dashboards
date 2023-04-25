@@ -1,0 +1,9 @@
+{
+  "id": "dashboard_listing_test_plugin",
+  "version": "0.0.1",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "configPath": ["dashboard_listing_test_plugin"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["dashboard"]
+}
