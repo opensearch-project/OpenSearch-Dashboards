@@ -24,14 +24,13 @@ import {
   UsernamePasswordTypedContent,
 } from '../../common/data_sources';
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
+import { isValidURL } from '../util/endpoint_validator';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
  * which contains the factory used to create Saved Objects Client Wrapper instances
  */
 export class DataSourceSavedObjectsClientWrapper {
-  constructor(private cryptography: CryptographyServiceSetup, private logger: Logger) {}
-
   /**
    * Describes the factory used to create instances of Saved Objects Client Wrappers
    * for data source specific operations such as credentials encryption
@@ -138,14 +137,11 @@ export class DataSourceSavedObjectsClientWrapper {
     };
   };
 
-  private isValidUrl(endpoint: string) {
-    try {
-      const url = new URL(endpoint);
-      return Boolean(url) && (url.protocol === 'http:' || url.protocol === 'https:');
-    } catch (e) {
-      return false;
-    }
-  }
+  constructor(
+    private cryptography: CryptographyServiceSetup,
+    private logger: Logger,
+    private endpointBlockedIps?: string[]
+  ) {}
 
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
     this.validateAttributes(attributes);
@@ -254,8 +250,10 @@ export class DataSourceSavedObjectsClientWrapper {
       );
     }
 
-    if (!this.isValidUrl(endpoint)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('"endpoint" attribute is not valid');
+    if (!isValidURL(endpoint, this.endpointBlockedIps)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"endpoint" attribute is not valid or allowed'
+      );
     }
 
     if (!auth) {
