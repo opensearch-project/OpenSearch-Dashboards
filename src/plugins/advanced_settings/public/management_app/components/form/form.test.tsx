@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { UiSettingsType } from '../../../../../../core/public';
+import { UiSettingsType } from '../../../../../../core/types';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -43,6 +43,15 @@ jest.mock('../field', () => ({
     return 'field';
   },
 }));
+
+jest.mock('@elastic/eui', () => {
+  const lib = jest.requireActual('@elastic/eui');
+
+  return {
+    ...lib,
+    EuiPortal: ({ children }: any) => <>{children}</>,
+  };
+});
 
 beforeAll(() => {
   const localStorage: Record<string, any> = {
