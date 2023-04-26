@@ -299,12 +299,9 @@ export class VegaBaseView {
       }
 
       if (this._parser.visInteractions) {
-        this._parser.visInteractions.forEach((interaction) => {
-          if (interactionHandlersByAction[interaction.handlerName]) {
-            view.addEventListener(
-              interaction.event,
-              interactionHandlersByAction[interaction.handlerName]
-            );
+        this._parser.visInteractions.forEach(({ handlerName, event }) => {
+          if (interactionHandlersByAction[handlerName]) {
+            view.addEventListener(event, interactionHandlersByAction[handlerName]);
           }
         });
       }

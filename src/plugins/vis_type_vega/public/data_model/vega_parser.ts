@@ -57,6 +57,7 @@ import {
   ControlsLocation,
   ControlsDirection,
   OpenSearchDashboards,
+  VisInteractionDescriptor,
 } from './types';
 
 // Set default single color to match other OpenSearch Dashboards visualizations
@@ -94,7 +95,7 @@ export class VegaParser {
   filters: Bool;
   timeCache: TimeCache;
   visibleVisLayers: Map<VisLayerTypes, boolean>;
-  visInteractions?: Array<{ event: string; handlerName: string }>;
+  visInteractions?: VisInteractionDescriptor[];
 
   constructor(
     spec: VegaSpec | string,

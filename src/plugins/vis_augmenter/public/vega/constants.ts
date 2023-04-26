@@ -4,9 +4,10 @@
  */
 
 export enum VisInteraction {
-  VIEW_EVENTS_FLYOUT = 'viewEventsFlyout',
+  POINT_IN_TIME_ANNOTATION = 'POINT_IN_TIME_DATA_POINT',
 }
 
-export enum VisInteractionHandler {
+export enum VisInteractionEventHandlerName {
   HANDLE_POINT_IN_TIME_CLICK = 'visAugmenter.handlePointInTimeClick',
+  HANDLE_POINT_IN_TIME_HOVER_IN = 'visAugmenter.handlePointInTimeHover',
 }

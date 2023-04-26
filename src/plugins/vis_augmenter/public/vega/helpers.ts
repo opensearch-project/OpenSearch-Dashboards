@@ -25,7 +25,7 @@ import {
   VisLayers,
   VisLayerTypes,
 } from '../';
-import { VisInteractionHandler, VisInteraction } from './constants';
+import { VisInteractionEventHandlerName, VisInteraction as VisAnnotationType } from './constants';
 
 // Given any visLayers, create a map to indicate which VisLayer types are present.
 // Convert to an array since ES6 Maps cannot be stringified.
@@ -318,7 +318,7 @@ export const addPointInTimeEventsLayersToSpec = (
     },
     transform: [
       { filter: generateVisLayerFilterString(visLayerColumnIds) },
-      { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
+      { calculate: `'${VisAnnotationType.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
     ],
     params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
     encoding: {
@@ -350,12 +350,20 @@ export const addPointInTimeEventsLayersToSpec = (
  * Interaction handling functions mapped by their action names.
  */
 export const interactionHandlersByAction = {
-  [VisInteractionHandler.HANDLE_POINT_IN_TIME_CLICK]: (
+  [VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_CLICK]: (
     _event: ScenegraphEvent,
     item?: Item | null
   ) => {
     if (isPointInTimeAnnotation(item)) {
       // TODO: Show the events flyout
+    }
+  },
+  [VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_HOVER_IN]: (
+    _event: ScenegraphEvent,
+    item?: Item | null
+  ) => {
+    if (isPointInTimeAnnotation(item)) {
+      // TODO: Show the custom tooltip
     }
   },
 };
@@ -372,7 +380,11 @@ export const addPointInTimeInteractionsConfig = (config: object) => {
     ...kibana,
     visInteractions: [
       ...(kibana.visInteractions || []),
-      { event: 'click', handlerName: VisInteractionHandler.HANDLE_POINT_IN_TIME_CLICK },
+      { event: 'click', handlerName: VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_CLICK },
+      {
+        event: 'mouseover',
+        handlerName: VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_HOVER_IN,
+      },
     ],
   };
 
@@ -383,5 +395,5 @@ export const addPointInTimeInteractionsConfig = (config: object) => {
 };
 
 export const isPointInTimeAnnotation = (item?: Item | null) => {
-  return item?.datum?.userAction === VisInteraction.VIEW_EVENTS_FLYOUT;
+  return item?.datum?.annotationType === VisAnnotationType.POINT_IN_TIME_ANNOTATION;
 };
