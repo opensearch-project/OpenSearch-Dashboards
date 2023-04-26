@@ -5,7 +5,7 @@
 
 import { OpenSearchDashboardsDatatable } from '../../expressions/public';
 import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, HOVER_PARAM } from './';
-import { VisInteraction } from './vega/constants';
+import { VisInteraction, VisInteractionEventHandlerName } from './vega/constants';
 
 const TEST_X_AXIS_ID = 'test-x-axis-id';
 const TEST_VALUE_AXIS_ID = 'test-value-axis-id';
@@ -576,4 +576,21 @@ export const TEST_RESULT_SPEC_MULTIPLE_VIS_LAYERS = {
     },
     TEST_EVENTS_LAYER_MULTIPLE_VIS_LAYERS,
   ],
+};
+
+export const TEST_RESULT_SPEC_WITH_VIS_INTERACTION_CONFIG = {
+  ...TEST_SPEC_NO_VIS_LAYERS,
+  config: {
+    ...TEST_SPEC_NO_VIS_LAYERS.config,
+    kibana: {
+      ...(TEST_SPEC_NO_VIS_LAYERS.config.kibana || {}),
+      visInteractions: [
+        { event: 'click', handlerName: VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_CLICK },
+        {
+          event: 'mouseover',
+          handlerName: VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_HOVER_IN,
+        },
+      ],
+    },
+  },
 };
