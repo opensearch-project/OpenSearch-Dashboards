@@ -30,8 +30,8 @@
 
 import React, { Fragment, PureComponent } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiSearchBar, EuiFormErrorText, Query } from '@elastic/eui';
-
+import { EuiSearchBar, EuiFormErrorText } from '@elastic/eui';
+import { Query } from '@opensearch-project/oui/src/eui_components/search_bar/query';
 import { getCategoryName } from '../../lib';
 
 interface SearchProps {
