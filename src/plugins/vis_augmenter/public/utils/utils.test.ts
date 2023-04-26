@@ -173,53 +173,27 @@ describe('utils', () => {
     it('single VisLayer with error - returns formatted error', async () => {
       const err = getAnyErrors([errorLayer1], 'test-vis-title');
       expect(err).not.toEqual(undefined);
-      expect(err?.stack).toMatchInlineSnapshot(`
-        "-----resource-type-1-----
-        ID: 1234
-        Message: \\"uh-oh!\\""
-      `);
+      expect(err?.stack).toStrictEqual(`-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"`);
     });
     it('multiple VisLayers with errors - returns formatted error', async () => {
       const err = getAnyErrors([errorLayer1, errorLayer2], 'test-vis-title');
       expect(err).not.toEqual(undefined);
-      expect(err?.stack).toMatchInlineSnapshot(
+      expect(err?.stack).toStrictEqual(
         `-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"\n\n\n` +
-          `-----resource-type-2-----\nID: 5678\nMessage: "oh no something terrible has happened :("`,
-        `
-        "-----resource-type-1-----
-        ID: 1234
-        Message: \\"uh-oh!\\"
-
-
-        -----resource-type-2-----
-        ID: 5678
-        Message: \\"oh no something terrible has happened :(\\""
-      `
+          `-----resource-type-2-----\nID: 5678\nMessage: "oh no something terrible has happened :("`
       );
     });
     it('multiple VisLayers with errors of same type - returns formatted error', async () => {
       const err = getAnyErrors([errorLayer1, errorLayer3], 'test-vis-title');
       expect(err).not.toEqual(undefined);
-      expect(err?.stack).toMatchInlineSnapshot(
-        `-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"\n\n` + `ID: abcd\nMessage: "oops!"`,
-        `
-        "-----resource-type-1-----
-        ID: 1234
-        Message: \\"uh-oh!\\"
-
-        ID: abcd
-        Message: \\"oops!\\""
-      `
+      expect(err?.stack).toStrictEqual(
+        `-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"\n\n` + `ID: abcd\nMessage: "oops!"`
       );
     });
     it('VisLayers with and without error - returns formatted error', async () => {
       const err = getAnyErrors([noErrorLayer1, errorLayer1], 'test-vis-title');
       expect(err).not.toEqual(undefined);
-      expect(err?.stack).toMatchInlineSnapshot(`
-        "-----resource-type-1-----
-        ID: 1234
-        Message: \\"uh-oh!\\""
-      `);
+      expect(err?.stack).toStrictEqual(`-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"`);
     });
   });
 });
