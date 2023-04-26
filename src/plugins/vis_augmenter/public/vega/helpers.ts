@@ -350,7 +350,7 @@ export const addPointInTimeEventsLayersToSpec = (
  * Interaction handling functions mapped by their action names.
  */
 export const interactionHandlersByAction = {
-  [VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_CLICK]: (
+  [VisInteractionEventHandlerName.POINT_IN_TIME_CLICK_EVENT_HANDLER]: (
     _event: ScenegraphEvent,
     item?: Item | null
   ) => {
@@ -358,7 +358,7 @@ export const interactionHandlersByAction = {
       // TODO: Show the events flyout
     }
   },
-  [VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_HOVER_IN]: (
+  [VisInteractionEventHandlerName.POINT_IN_TIME_HOVER_IN_EVENT_HANDLER]: (
     _event: ScenegraphEvent,
     item?: Item | null
   ) => {
@@ -380,10 +380,10 @@ export const addPointInTimeInteractionsConfig = (config: object) => {
     ...kibana,
     visInteractions: [
       ...(kibana.visInteractions || []),
-      { event: 'click', handlerName: VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_CLICK },
+      { event: 'click', handlerName: VisInteractionEventHandlerName.POINT_IN_TIME_CLICK_EVENT_HANDLER },
       {
         event: 'mouseover',
-        handlerName: VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_HOVER_IN,
+        handlerName: VisInteractionEventHandlerName.POINT_IN_TIME_HOVER_IN_EVENT_HANDLER,
       },
     ],
   };

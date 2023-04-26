@@ -8,6 +8,6 @@ export enum VisInteraction {
 }
 
 export enum VisInteractionEventHandlerName {
-  HANDLE_POINT_IN_TIME_CLICK = 'visAugmenter.handlePointInTimeClick',
-  HANDLE_POINT_IN_TIME_HOVER_IN = 'visAugmenter.handlePointInTimeHover',
+  POINT_IN_TIME_CLICK_EVENT_HANDLER = 'visAugmenter.pointInTimeClickEventHandler',
+  POINT_IN_TIME_HOVER_IN_EVENT_HANDLER = 'visAugmenter.pointInTimeHoverInEventHandler',
 }

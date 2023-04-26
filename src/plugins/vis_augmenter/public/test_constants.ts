@@ -585,10 +585,10 @@ export const TEST_RESULT_SPEC_WITH_VIS_INTERACTION_CONFIG = {
     kibana: {
       ...(TEST_SPEC_NO_VIS_LAYERS.config.kibana || {}),
       visInteractions: [
-        { event: 'click', handlerName: VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_CLICK },
+        { event: 'click', handlerName: VisInteractionEventHandlerName.POINT_IN_TIME_CLICK_EVENT_HANDLER },
         {
           event: 'mouseover',
-          handlerName: VisInteractionEventHandlerName.HANDLE_POINT_IN_TIME_HOVER_IN,
+          handlerName: VisInteractionEventHandlerName.POINT_IN_TIME_HOVER_IN_EVENT_HANDLER,
         },
       ],
     },
