@@ -29,13 +29,13 @@
  */
 
 import { readFileSync } from 'fs';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import { set } from '@elastic/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import { ensureDeepObject } from './ensure_deep_object';
 
-const readYaml = (path: string) => safeLoad(readFileSync(path, 'utf8'));
+const readYaml = (path: string) => load(readFileSync(path, 'utf8'));
 
 function replaceEnvVarRefs(val: string) {
   return val.replace(/\$\{(\w+)\}/g, (match, envVarName) => {

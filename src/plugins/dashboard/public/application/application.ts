@@ -37,6 +37,7 @@ import 'angular-sanitize';
 import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
 import {
   ChromeStart,
+  ToastsStart,
   IUiSettingsClient,
   CoreStart,
   SavedObjectsClientContract,
@@ -81,6 +82,7 @@ export interface RenderDeps {
   };
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
+  addBasePath: (path: string) => string;
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   embeddable: EmbeddableStart;
   localStorage: Storage;
@@ -92,6 +94,7 @@ export interface RenderDeps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjects: SavedObjectsStart;
   restorePreviousUrl: () => void;
+  toastNotifications: ToastsStart;
 }
 
 let angularModuleInstance: IModule | null = null;
