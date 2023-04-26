@@ -460,7 +460,7 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
   },
   transform: [
     { filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` },
-    { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
+    { calculate: `'${VisInteraction.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
   ],
   params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
   encoding: {
@@ -507,7 +507,7 @@ const TEST_EVENTS_LAYER_MULTIPLE_VIS_LAYERS = {
     {
       filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0 || datum['${TEST_PLUGIN_RESOURCE_ID_2}'] > 0`,
     },
-    { calculate: `'${VisInteraction.VIEW_EVENTS_FLYOUT}'`, as: 'userAction' },
+    { calculate: `'${VisInteraction.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
   ],
 };
 
