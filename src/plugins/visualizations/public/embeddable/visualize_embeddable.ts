@@ -57,7 +57,7 @@ import {
 } from '../../../expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getUiActions } from '../services';
+import { getExpressions, getNotifications, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
@@ -71,6 +71,7 @@ import {
   isEligibleForVisLayers,
   getAugmentVisSavedObjs,
   buildPipelineFromAugmentVisSavedObjs,
+  getAnyErrors,
 } from '../../../vis_augmenter/public';
 import { VisSavedObject } from '../types';
 
@@ -511,13 +512,27 @@ export class VisualizeEmbeddable
         layers: [] as VisLayers,
       };
       // We cannot use this.handler in this case, since it does not support the run() cmd
-      // we need here. So, we consume the expressions service to run this instead.
+      // we need here. So, we consume the expressions service to run this directly instead.
       const exprVisLayers = (await getExpressions().run(
         visLayersPipeline,
         visLayersPipelineInput,
         expressionParams as Record<string, unknown>
       )) as ExprVisLayers;
-      return exprVisLayers.layers;
+      const visLayers = exprVisLayers.layers;
+      const err = getAnyErrors(visLayers, this.vis.title);
+      // This is only true when one or more VisLayers has an error
+      if (err !== undefined) {
+        const { toasts } = getNotifications();
+        toasts.addError(err, {
+          title: i18n.translate('visualizations.renderVisTitle', {
+            defaultMessage: `Error loading data on the ${this.vis.title} chart`,
+          }),
+          toastMessage: ' ',
+          id: this.id,
+        });
+      }
+
+      return visLayers;
     }
     return [] as VisLayers;
   };

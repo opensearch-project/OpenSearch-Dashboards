@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { Vis } from '../../../../plugins/visualizations/public';
 import {
   formatExpression,
@@ -11,7 +11,13 @@ import {
   buildExpression,
   ExpressionAstFunctionBuilder,
 } from '../../../../plugins/expressions/public';
-import { ISavedAugmentVis, SavedAugmentVisLoader, VisLayerFunctionDefinition } from '../';
+import {
+  ISavedAugmentVis,
+  SavedAugmentVisLoader,
+  VisLayerFunctionDefinition,
+  VisLayer,
+  isVisLayerWithError,
+} from '../';
 
 // TODO: provide a deeper eligibility check.
 // Tracked in https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
@@ -56,5 +62,40 @@ export const buildPipelineFromAugmentVisSavedObjs = (objs: ISavedAugmentVis[]): 
     return formatExpression(ast);
   } catch (e) {
     throw new Error('Expression function from augment-vis saved objects could not be generated');
+  }
+};
+
+/**
+ * Returns an error with an aggregated message about all of the
+ * errors found in the set of VisLayers. If no errors, returns undefined.
+ */
+export const getAnyErrors = (visLayers: VisLayer[], visTitle: string): Error | undefined => {
+  const visLayersWithErrors = visLayers.filter((visLayer) => isVisLayerWithError(visLayer));
+  if (!isEmpty(visLayersWithErrors)) {
+    // Aggregate by unique plugin resource type
+    const resourceTypes = [
+      ...new Set(visLayersWithErrors.map((visLayer) => visLayer.pluginResource.type)),
+    ];
+
+    let msgDetails = '';
+    resourceTypes.forEach((type, index) => {
+      const matchingVisLayers = visLayersWithErrors.filter(
+        (visLayer) => visLayer.pluginResource.type === type
+      );
+      if (index !== 0) msgDetails += '\n\n\n';
+      msgDetails += `-----${type}-----`;
+      matchingVisLayers.forEach((visLayer, idx) => {
+        if (idx !== 0) msgDetails += '\n';
+        msgDetails += `\nID: ${visLayer.pluginResource.id}`;
+        msgDetails += `\nMessage: "${visLayer.error?.message}"`;
+      });
+    });
+
+    const err = new Error(`Certain plugin resources failed to load on the ${visTitle} chart`);
+    // We set as the stack here so it can be parsed and shown cleanly in the details modal coming from the error toast notification.
+    err.stack = msgDetails;
+    return err;
+  } else {
+    return undefined;
   }
 };

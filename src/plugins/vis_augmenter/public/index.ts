@@ -21,6 +21,7 @@ export {
   PointInTimeEvent,
   PointInTimeEventsVisLayer,
   isPointInTimeEventsVisLayer,
+  isVisLayerWithError,
 } from './types';
 
 export * from './expressions';
