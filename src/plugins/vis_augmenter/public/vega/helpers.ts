@@ -380,7 +380,10 @@ export const addPointInTimeInteractionsConfig = (config: object) => {
     ...kibana,
     visInteractions: [
       ...(kibana.visInteractions || []),
-      { event: 'click', handlerName: VisInteractionEventHandlerName.POINT_IN_TIME_CLICK_EVENT_HANDLER },
+      {
+        event: 'click',
+        handlerName: VisInteractionEventHandlerName.POINT_IN_TIME_CLICK_EVENT_HANDLER,
+      },
       {
         event: 'mouseover',
         handlerName: VisInteractionEventHandlerName.POINT_IN_TIME_HOVER_IN_EVENT_HANDLER,
