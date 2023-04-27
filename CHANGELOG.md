@@ -192,6 +192,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Bump `js-yaml` from 3.14.0 to 4.1.0 ([#3770](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3770))
 - Bump `oui` from `1.0.0` to `1.1.1` ([#3884](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3884))
 - Adding @ZilongX and @Flyingliuhub as maintainers. ([#4137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4137))
+- Remove timeline application ([#3971](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3971))
 
 ### 🪛 Refactoring
 

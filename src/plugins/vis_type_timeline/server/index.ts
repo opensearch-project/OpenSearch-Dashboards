@@ -32,41 +32,8 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/
 import { configSchema, ConfigSchema } from '../config';
 import { Plugin } from './plugin';
 
-export { PluginSetupContract } from './plugin';
-
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
-  exposeToBrowser: {
-    ui: true,
-  },
-  deprecations: ({ renameFromRoot, renameFromRootWithoutMap }) => [
-    // timelion.enabled and timelion_vis.enabled deprecation
-    renameFromRoot('timelion.enabled', 'vis_type_timeline.enabled'),
-    renameFromRoot('timelion_vis.enabled', 'vis_type_timeline.enabled'),
-    renameFromRoot('vis_type_timelion.enabled', 'vis_type_timeline.enabled'),
-    renameFromRoot('timeline.enabled', 'vis_type_timeline.enabled'),
-    renameFromRoot('timeline_vis.enabled', 'vis_type_timeline.enabled'),
-
-    // timelion.graphiteUrls deprecation
-    renameFromRoot('timelion.graphiteUrls', 'vis_type_timeline.graphiteAllowedUrls'),
-    renameFromRoot('vis_type_timelion.graphiteUrls', 'vis_type_timeline.graphiteAllowedUrls'),
-    renameFromRoot(
-      'vis_type_timelion.graphiteAllowedUrls',
-      'vis_type_timeline.graphiteAllowedUrls'
-    ),
-    renameFromRoot('timeline.graphiteUrls', 'vis_type_timeline.graphiteAllowedUrls'),
-    renameFromRoot('vis_type_timeline.graphiteUrls', 'vis_type_timeline.graphiteAllowedUrls'),
-
-    // timelion.ui.enabled deprecation
-    renameFromRoot('timelion.ui.enabled', 'vis_type_timeline.ui.enabled', true),
-    renameFromRoot('vis_type_timelion.ui.enabled', 'vis_type_timeline.ui.enabled', true),
-    renameFromRoot('timeline.ui.enabled', 'vis_type_timeline.ui.enabled', true),
-
-    renameFromRootWithoutMap(
-      'vis_type_timeline.graphiteBlockedIPs',
-      'vis_type_timeline.graphiteDeniedIPs'
-    ),
-  ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new Plugin(initializerContext);
