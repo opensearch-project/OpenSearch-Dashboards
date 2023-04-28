@@ -17,6 +17,7 @@ trash
 target
 /build
 /bwc_tmp
+/perf_tmp
 .jruby
 .idea
 *.iml

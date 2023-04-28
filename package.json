@@ -44,6 +44,7 @@
     "opensearch": "scripts/use_node scripts/opensearch",
     "test": "grunt test",
     "test:bwc": "./scripts/bwctest_osd.sh",
+    "test:perf": "./scripts/perftest_osd.sh",
     "test:jest": "scripts/use_node scripts/jest",
     "test:jest:coverage": "scripts/use_node scripts/jest --coverage",
     "test:jest:ci": "scripts/use_node scripts/jest --ci --colors --runInBand",

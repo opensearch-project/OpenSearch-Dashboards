@@ -7,6 +7,7 @@ Overview
     - [Integration tests](#integration-tests)
     - [Functional tests](#functional-tests)
     - [Backwards Compatibility tests](#backwards-compatibility-tests)
+    - [Performance Tests](#performance-tests)
     - [Additional checks](#additional-checks)
 - [Writing Tests](#writing-tests)
 - [Continuous Integration](#continuous-integration)
@@ -77,6 +78,26 @@ To generate test data that will be utilized for backwards compatibility tests:
 `yarn test:bwc -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -g true`
 
 This will create an archive of the data based on the OpenSearch Dashboards version you have provided. For example, if a tarball of 2.0.0 was passed then an `osd-2.0.0.zip` will be created. This command is intended to be executed when needed per a version. For example, when end-users cannot migrate directly from `vPrevious` to `vNext`. If `osd-vCurrent.zip` does not exist, then this command be ran and the output sourced controlled for future use.
+
+### Performance tests
+To run all the performance tests on OpenSearch Dashboards without security:
+
+`yarn test:perf -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz]`
+
+To run all the performance tests on OpenSearch Dashboards with security, pass the security parameter to the test:
+
+`yarn test:perf -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -s true`
+
+To run specific tests, pass a CSV cypress tests to run:
+
+`yarn test:perf -o [test path to opensearch.tar.gz] -d [test path to opensearch-dashboards.tar.gz] -t "test1,test2"`
+
+To upload test results to a running OpenSearch Cluster:
+
+`yarn test:perf -u true`
+
+This will take the results produced by a previous performance test run and index the data into `osd-stats-$OSD_VERSION`.
+Requires a running version of OpenSearch.
 
 ### Additional checks
 Make sure you run lint checker before submitting a pull request. To run lint checker:
