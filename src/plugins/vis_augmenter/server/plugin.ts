@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+import { schema } from '@osd/config-schema';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -30,6 +32,33 @@ export class VisAugmenterPlugin
     this.logger.debug('VisAugmenter: Setup');
     core.savedObjects.registerType(augmentVisSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    core.uiSettings.register({
+      ['visualization:enablePluginAugmentation']: {
+        name: i18n.translate('visualization.enablePluginAugmentationTitle', {
+          defaultMessage: 'Enable plugin augmentation',
+        }),
+        value: true,
+        description: i18n.translate('visualization.enablePluginAugmentationText', {
+          defaultMessage: 'Plugin functionality can be accessed from line chart visualizations',
+        }),
+        category: ['visualization'],
+        schema: schema.boolean(),
+      },
+      ['visualization:enablePluginAugmentation.maxPluginObjects']: {
+        name: i18n.translate('visualization.enablePluginAugmentation.maxPluginObjectsTitle', {
+          defaultMessage: 'Max number of associated augmentations',
+        }),
+        value: 10,
+        description: i18n.translate('visualization.enablePluginAugmentation.maxPluginObjectsText', {
+          defaultMessage:
+            'Associating more than 10 plugin resources per visualization can lead to performance ' +
+            'issues and increase the cost of running clusters.',
+        }),
+        category: ['visualization'],
+        schema: schema.number({ min: 0 }),
+      },
+    });
     return {};
   }
 

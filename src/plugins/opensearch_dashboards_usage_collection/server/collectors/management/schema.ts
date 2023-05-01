@@ -40,6 +40,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'visualization:regionmap:showWarnings': { type: 'boolean' },
   'visualization:dimmingOpacity': { type: 'float' },
   'visualization:tileMap:maxPrecision': { type: 'long' },
+  'visualization:enablePluginAugmentation': { type: 'boolean' },
+  'visualization:enablePluginAugmentation.maxPluginObjects': { type: 'number' },
   'securitySolution:ipReputationLinks': { type: 'text' },
   'csv:separator': { type: 'keyword' },
   'visualization:tileMap:WMSdefaults': { type: 'text' },
