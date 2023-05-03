@@ -30,8 +30,6 @@
 
 import '../../application/models/sense_editor/sense_editor.test.mocks';
 
-import $ from 'jquery';
-
 // TODO:
 // We import from application models as a convenient way to bootstrap loading up of an editor using
 // this lib. We also need to import application specific mocks which is not ideal.
@@ -59,14 +57,14 @@ describe('Ace (legacy) token provider', () => {
 
     senseEditor = create(document.querySelector<HTMLElement>('#ConAppEditor')!);
 
-    $(senseEditor.getCoreEditor().getContainer())!.show();
+    senseEditor.getCoreEditor().getContainer().style.display = '';
 
     (senseEditor as any).autocomplete._test.removeChangeListener();
     tokenProvider = senseEditor.getCoreEditor().getTokenProvider();
   });
 
   afterEach(async () => {
-    $(senseEditor.getCoreEditor().getContainer())!.hide();
+    senseEditor.getCoreEditor().getContainer().style.display = 'none';
     (senseEditor as any).autocomplete._test.addChangeListener();
     await senseEditor.update('', true);
   });

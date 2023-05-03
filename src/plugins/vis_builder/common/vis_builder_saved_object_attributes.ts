@@ -13,6 +13,7 @@ export interface VisBuilderSavedObjectAttributes extends SavedObjectAttributes {
   visualizationState?: string;
   updated_at?: string;
   styleState?: string;
+  uiState?: string;
   version: number;
   searchSourceFields?: {
     index?: string;

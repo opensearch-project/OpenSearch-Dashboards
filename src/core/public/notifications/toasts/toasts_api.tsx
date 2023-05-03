@@ -42,12 +42,10 @@ import { I18nStart } from '../../i18n';
 /**
  * Allowed fields for {@link ToastInput}.
  *
- * @remarks
- * `id` cannot be specified.
- *
  * @public
  */
 export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
+  id?: string;
   title?: string | MountPoint;
   text?: string | MountPoint;
 };
@@ -89,6 +87,10 @@ export interface ErrorToastOptions extends ToastOptions {
    * message will still be shown in the detailed error modal.
    */
   toastMessage?: string;
+  /**
+   * Unique ID for the toast. Can be used to prevent duplicate toasts on re-renders.
+   */
+  id?: string;
 }
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
@@ -143,6 +145,16 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public add(toastOrTitle: ToastInput) {
+    if (typeof toastOrTitle !== 'string') {
+      const toastObject = toastOrTitle;
+      const list = this.toasts$.getValue();
+      const existingToast = list.find((toast) => toast.id === toastObject.id);
+
+      if (existingToast) {
+        return existingToast;
+      }
+    }
+
     const toast: Toast = {
       id: String(this.idCounter++),
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:info'),

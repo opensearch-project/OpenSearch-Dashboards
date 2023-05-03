@@ -37,6 +37,7 @@ import {
   Plugin,
   ApplicationStart,
   SavedObjectsClientContract,
+  NotificationsStart,
 } from '../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
@@ -61,6 +62,7 @@ import {
   setOverlays,
   setSavedSearchLoader,
   setEmbeddable,
+  setNotifications,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -130,6 +132,7 @@ export interface VisualizationsStartDeps {
   dashboard: DashboardStart;
   getAttributeService: DashboardStart['getAttributeService'];
   savedObjectsClient: SavedObjectsClientContract;
+  notifications: NotificationsStart;
 }
 
 /**
@@ -220,6 +223,7 @@ export class VisualizationsPlugin
     });
     setSavedAugmentVisLoader(savedAugmentVisLoader);
     setSavedSearchLoader(savedSearchLoader);
+    setNotifications(core.notifications);
     return {
       ...types,
       showNewVisModal,

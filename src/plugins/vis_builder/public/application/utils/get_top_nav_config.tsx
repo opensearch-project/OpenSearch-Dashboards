@@ -37,13 +37,13 @@ import {
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { VisBuilderServices } from '../..';
-import { VisBuilderVisSavedObject } from '../../types';
+import { VisBuilderSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
 import { EDIT_PATH, VISBUILDER_SAVED_OBJECT } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
 export interface TopNavConfigParams {
   visualizationIdFromUrl: string;
-  savedVisBuilderVis: VisBuilderVisSavedObject;
+  savedVisBuilderVis: VisBuilderSavedObject;
   saveDisabledReason?: string;
   dispatch: AppDispatch;
   originatingApp?: string;
