@@ -94,7 +94,6 @@ export const getGeoHashBucketAgg = () =>
         write: () => {},
       },
     ],
-    //!!!
     getRequestAggs(agg) {
       const aggs = [];
       const params = agg.params;
