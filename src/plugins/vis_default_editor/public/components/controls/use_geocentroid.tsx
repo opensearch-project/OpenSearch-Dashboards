@@ -28,24 +28,57 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiSwitch, EuiFormRow } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { EuiSwitch, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { AggParamEditorProps } from '../agg_param_props';
+import { OSD_FIELD_TYPES } from '../../../../../plugins/data/common';
 
-function UseGeocentroidParamEditor({ value = false, setValue }: AggParamEditorProps<boolean>) {
+function UseGeocentroidParamEditor({ agg, value = false, setValue }: AggParamEditorProps<boolean>) {
+  const [disabled, setDisabled] = useState(false);
+
   const label = i18n.translate('visDefaultEditor.controls.placeMarkersOffGridLabel', {
     defaultMessage: 'Place markers off grid (use geocentroid)',
   });
 
+  const tooltipLabel = i18n.translate(
+    'visDefaultEditor.controls.placeMarkersOffGridLabelUnsupport',
+    {
+      defaultMessage: 'Currently geo_shape type field does not support centroid aggregation.',
+    }
+  );
+
+  useEffect(() => {
+    //geo_shape type field does not support centroid aggregation
+    if (agg?.params?.field?.type === OSD_FIELD_TYPES.GEO_SHAPE) {
+      setDisabled(true);
+      setValue(false);
+    } else {
+      setDisabled(false);
+    }
+  }, [agg]);
+
   return (
     <EuiFormRow display={'rowCompressed'}>
-      <EuiSwitch
-        compressed={true}
-        label={label}
-        checked={value}
-        onChange={(ev) => setValue(ev.target.checked)}
-      />
+      {disabled ? (
+        <EuiToolTip content={tooltipLabel}>
+          <EuiSwitch
+            compressed={true}
+            disabled={true}
+            label={label}
+            checked={value}
+            onChange={(ev) => setValue(ev.target.checked)}
+          />
+        </EuiToolTip>
+      ) : (
+        <EuiSwitch
+          compressed={true}
+          disabled={false}
+          label={label}
+          checked={value}
+          onChange={(ev) => setValue(ev.target.checked)}
+        />
+      )}
     </EuiFormRow>
   );
 }

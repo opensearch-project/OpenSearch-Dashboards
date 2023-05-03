@@ -46,6 +46,9 @@ const buckets = {
   [BUCKET_TYPES.FILTERS]: {
     filters: controls.FiltersParamEditor,
   },
+  [BUCKET_TYPES.GEOTILE_GRID]: {
+    useGeocentroid: controls.UseGeocentroidParamEditor,
+  },
   [BUCKET_TYPES.GEOHASH_GRID]: {
     autoPrecision: controls.AutoPrecisionParamEditor,
     precision: controls.PrecisionParamEditor,
