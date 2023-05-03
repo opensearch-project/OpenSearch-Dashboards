@@ -211,6 +211,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Prevent primitive linting limitations from being applied to unit tests found under `src/setup_node_env` ([#3403](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3403))
 - [Tests] Fix unit tests for `get_keystore` ([#3854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3854))
 - [Tests] Use `scripts/use_node` instead of `node` in functional test plugins ([#3783](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3783))
+- Temporarily hardcode the largest support `chromedriver` version to `112.0.0` to enable all ftr tests ([#3976](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3976))
 
 ## [2.x]
 
