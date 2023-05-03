@@ -49,14 +49,14 @@ function UseGeocentroidParamEditor({ agg, value = false, setValue }: AggParamEdi
   );
 
   useEffect(() => {
-    //geo_shape type field does not support centroid aggregation
+    // geo_shape type field does not support centroid aggregation
     if (agg?.params?.field?.type === OSD_FIELD_TYPES.GEO_SHAPE) {
       setDisabled(true);
       setValue(false);
     } else {
       setDisabled(false);
     }
-  }, [agg]);
+  }, [agg, setValue]);
 
   return (
     <EuiFormRow display={'rowCompressed'}>
