@@ -51,12 +51,35 @@ describe('utils', () => {
         testArg: 'test-value',
       },
     } as VisLayerExpressionFn;
+    const originPlugin = 'test-plugin';
+    const pluginResource = {
+      type: 'test-plugin',
+      id: 'test-plugin-resource-id',
+    };
     const visId1 = 'test-vis-id-1';
     const visId2 = 'test-vis-id-2';
     const visId3 = 'test-vis-id-3';
-    const obj1 = generateAugmentVisSavedObject('valid-obj-id-1', fn, visId1);
-    const obj2 = generateAugmentVisSavedObject('valid-obj-id-2', fn, visId1);
-    const obj3 = generateAugmentVisSavedObject('valid-obj-id-3', fn, visId2);
+    const obj1 = generateAugmentVisSavedObject(
+      'valid-obj-id-1',
+      fn,
+      visId1,
+      originPlugin,
+      pluginResource
+    );
+    const obj2 = generateAugmentVisSavedObject(
+      'valid-obj-id-2',
+      fn,
+      visId1,
+      originPlugin,
+      pluginResource
+    );
+    const obj3 = generateAugmentVisSavedObject(
+      'valid-obj-id-3',
+      fn,
+      visId2,
+      originPlugin,
+      pluginResource
+    );
 
     it('returns no matching saved objs with filtering', async () => {
       const loader = createSavedAugmentVisLoader({
@@ -93,7 +116,11 @@ describe('utils', () => {
   describe('buildPipelineFromAugmentVisSavedObjs', () => {
     const obj1 = {
       title: 'obj1',
-      pluginResourceId: 'obj-1-resource-id',
+      originPlugin: 'test-plugin',
+      pluginResource: {
+        type: 'test-resource-type',
+        id: 'obj-1-resource-id',
+      },
       visLayerExpressionFn: {
         type: VisLayerTypes.PointInTimeEvents,
         name: 'fn-1',
@@ -104,7 +131,11 @@ describe('utils', () => {
     } as ISavedAugmentVis;
     const obj2 = {
       title: 'obj2',
-      pluginResourceId: 'obj-2-resource-id',
+      originPlugin: 'test-plugin',
+      pluginResource: {
+        type: 'test-resource-type',
+        id: 'obj-2-resource-id',
+      },
       visLayerExpressionFn: {
         type: VisLayerTypes.PointInTimeEvents,
         name: 'fn-2',

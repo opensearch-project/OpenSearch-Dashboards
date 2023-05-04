@@ -26,7 +26,8 @@ export function createSavedAugmentVisClass(services: SavedObjectOpenSearchDashbo
     public static type: string = name;
     public static mapping: Record<string, string> = {
       description: 'text',
-      pluginResourceId: 'text',
+      originPlugin: 'text',
+      pluginResource: 'text',
       visId: 'keyword',
       visLayerExpressionFn: 'text',
       version: 'integer',
@@ -45,7 +46,8 @@ export function createSavedAugmentVisClass(services: SavedObjectOpenSearchDashbo
         indexPattern: opts.indexPattern as IIndexPattern,
         defaults: {
           description: get(opts, 'description', ''),
-          pluginResourceId: get(opts, 'pluginResourceId', ''),
+          originPlugin: get(opts, 'originPlugin', ''),
+          pluginResource: get(opts, 'pluginResource', {}),
           visId: get(opts, 'visId', ''),
           visLayerExpressionFn: get(opts, 'visLayerExpressionFn', {}),
           version: 1,

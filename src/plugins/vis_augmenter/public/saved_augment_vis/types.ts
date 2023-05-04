@@ -6,11 +6,17 @@
 import { SavedObject } from '../../../saved_objects/public';
 import { VisLayerExpressionFn } from '../expressions';
 
+export interface ISavedPluginResource {
+  type: string;
+  id: string;
+}
+
 export interface ISavedAugmentVis {
   id?: string;
   title: string;
   description?: string;
-  pluginResourceId: string;
+  originPlugin: string;
+  pluginResource: ISavedPluginResource;
   visName?: string;
   visId?: string;
   visLayerExpressionFn: VisLayerExpressionFn;

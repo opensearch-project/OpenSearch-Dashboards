@@ -37,6 +37,18 @@ export function createSavedAugmentVisLoader(
         source.error = 'Unknown VisLayer expression function type';
         return source;
       }
+      if (get(source, 'originPlugin', undefined) === undefined) {
+        source.error = 'originPlugin is missing in augment-vis saved object';
+        return source;
+      }
+      if (get(source, 'pluginResource.type', undefined) === undefined) {
+        source.error = 'pluginResource.type is missing in augment-vis saved object';
+        return source;
+      }
+      if (get(source, 'pluginResource.id', undefined) === undefined) {
+        source.error = 'pluginResource.id is missing in augment-vis saved object';
+        return source;
+      }
       return source;
     };
 

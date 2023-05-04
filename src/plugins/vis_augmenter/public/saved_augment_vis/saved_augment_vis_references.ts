@@ -4,7 +4,7 @@
  */
 
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
-import { AugmentVisSavedObject } from '../types';
+import { AugmentVisSavedObject } from './types';
 
 /**
  * Note that references aren't stored in the object's client-side interface (AugmentVisSavedObject).

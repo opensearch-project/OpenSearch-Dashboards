@@ -4,22 +4,24 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { VisLayerExpressionFn, ISavedAugmentVis } from '../../';
+import { VisLayerExpressionFn, ISavedAugmentVis, ISavedPluginResource } from '../../';
 import { VIS_REFERENCE_NAME } from '../saved_augment_vis_references';
 
-const pluginResourceId = 'test-plugin-resource-id';
 const title = 'test-title';
 const version = 1;
 
 export const generateAugmentVisSavedObject = (
   idArg: string,
   exprFnArg: VisLayerExpressionFn,
-  visIdArg: string
+  visIdArg: string,
+  originPluginArg: string,
+  pluginResourceArg: ISavedPluginResource
 ) => {
   return {
     id: idArg,
     title,
-    pluginResourceId,
+    originPlugin: originPluginArg,
+    pluginResource: pluginResourceArg,
     visLayerExpressionFn: exprFnArg,
     VIS_REFERENCE_NAME,
     visId: visIdArg,
