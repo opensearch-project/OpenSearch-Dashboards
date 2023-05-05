@@ -56,15 +56,13 @@ export const formatDatatable = (
   });
 
   // clean row keys to remove "." as that will cause vega to not process it correctly
-  const updatedRows: OpenSearchDashboardsDatatableRow[] = [];
-  datatable.rows.forEach((row) => {
-    const newRow = {};
-    for (const [key, value] of Object.entries(row)) {
+  const updatedRows: OpenSearchDashboardsDatatableRow[] = datatable.rows.map((row) =>
+    Object.entries(row).reduce((updatedRow, [key, value]) => {
       const cleanKey = key.replaceAll('.', '-');
-      Object.assign(newRow, { [cleanKey]: value });
-    }
-    updatedRows.push(newRow);
-  });
+      return Object.assign(updatedRow, { [cleanKey]: value });
+    }, {})
+  );
+
   datatable.rows = updatedRows;
   return datatable;
 };

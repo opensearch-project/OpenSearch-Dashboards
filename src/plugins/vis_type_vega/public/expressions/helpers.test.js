@@ -24,7 +24,7 @@ import {
 import {
   TEST_DATATABLE_NO_VIS_LAYERS,
   TEST_DATATABLE_NO_VIS_LAYERS_DIRTY,
-} from '../../../vis_augmenter/public/test_constants';
+} from '../../../vis_augmenter/public';
 
 describe('helpers', function () {
   describe('formatDatatable()', function () {

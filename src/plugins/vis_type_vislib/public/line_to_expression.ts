@@ -29,9 +29,9 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
   // Checks if there are vislayers to overlay. If not, default to the vislib implementation.
   const dimensions: VislibDimensions = await buildVislibDimensions(vis, params);
   if (
-    !isEligibleForVisLayers(vis, dimensions) ||
     params.visLayers == null ||
-    Object.keys(params.visLayers).length === 0
+    Object.keys(params.visLayers).length === 0 ||
+    !isEligibleForVisLayers(vis)
   ) {
     // Render using vislib instead of vega-lite
     const visConfig = { ...vis.params, dimensions };
