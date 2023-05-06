@@ -30,16 +30,18 @@
 
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from 'test_utils/helpers';
 import { keys } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { columnServiceMock } from '../../../services/column_service.mock';
 import { SavedObjectsManagementAction } from '../../..';
 import { Table, TableProps } from './table';
+import { namespaceServiceMock } from '../../../services/namespace_service.mock';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
+  namespaceRegistry: namespaceServiceMock.createStart(),
   actionRegistry: actionServiceMock.createStart(),
   columnRegistry: columnServiceMock.createStart(),
   selectedSavedObjects: [
