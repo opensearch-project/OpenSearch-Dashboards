@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-export interface SavedObjectsManagementNamespace {
+export interface SavedObjectsManagementNamespace<T> {
   id: string;
   name: string;
 }

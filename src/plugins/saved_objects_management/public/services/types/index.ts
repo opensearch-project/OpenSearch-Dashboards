@@ -30,4 +30,5 @@
 
 export { SavedObjectsManagementAction } from './action';
 export { SavedObjectsManagementColumn } from './column';
+export { SavedObjectsManagementNamespace } from './namespace';
 export { SavedObjectsManagementRecord } from './record';

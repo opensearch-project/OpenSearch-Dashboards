@@ -94,6 +94,9 @@ export const registerFindRoute = (
         ...req.query,
         fields: undefined,
         searchFields: [...searchFields],
+        namespaces: req.query.namespaces
+          ? ([] as string[]).concat(req.query.namespaces)
+          : undefined,
       });
 
       const savedObjects = await Promise.all(
