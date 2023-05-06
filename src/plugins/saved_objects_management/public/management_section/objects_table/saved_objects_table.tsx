@@ -206,7 +206,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const exportAllOptions: ExportAllOption[] = [];
     const exportAllSelectedOptions: Record<string, boolean> = {};
 
-    const filteredTypeCounts = filteredSavedObjectCounts.type || {};
+    const filteredTypeCounts = (filteredSavedObjectCounts.type || {}) as Record<string, number>;
 
     Object.keys(filteredTypeCounts).forEach((id) => {
       // Add this type as a bulk-export option.
@@ -802,7 +802,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
     };
-    const typeCounts = savedObjectCounts.type || {};
+    const typeCounts = (savedObjectCounts.type || {}) as Record<string, number>;
 
     const filterOptions = allowedTypes.map((type) => ({
       value: type,
@@ -824,7 +824,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const availableNamespaces = namespaceRegistry.getAll() || [];
     if (availableNamespaces.length) {
-      const nsCounts = savedObjectCounts.namespaces || {};
+      const nsCounts = (savedObjectCounts.namespaces || {}) as Record<string, number>;
       const nsFilterOptions = availableNamespaces.map((ns) => {
         return {
           name: ns.name,
@@ -864,6 +864,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             basePath={http.basePath}
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}
+            namespaceRegistry={this.props.namespaceRegistry}
             columnRegistry={this.props.columnRegistry}
             selectionConfig={selectionConfig}
             selectedSavedObjects={selectedSavedObjects}
