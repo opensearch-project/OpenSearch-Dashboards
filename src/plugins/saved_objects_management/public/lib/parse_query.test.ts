@@ -34,7 +34,7 @@ describe('getQueryText', () => {
   it('should know how to get the text out of the AST', () => {
     const ast = {
       getTermClauses: () => [{ value: 'foo' }, { value: 'bar' }],
-      getFieldClauses: (field) => {
+      getFieldClauses: (field: string) => {
         if (field === 'type') {
           return [{ value: 'lala' }, { value: 'lolo' }];
         } else if (field === 'namespaces') {
@@ -43,7 +43,7 @@ describe('getQueryText', () => {
         return [];
       },
     };
-    expect(parseQuery({ ast } as any, ['type'])).toEqual({
+    expect(parseQuery({ ast } as any)).toEqual({
       queryText: 'foo bar',
       visibleTypes: 'lala',
       visibleNamespaces: 'default',
