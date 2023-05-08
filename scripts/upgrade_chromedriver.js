@@ -21,6 +21,20 @@ if (!process.argv.includes(__filename)) {
 }
 
 const versionCheckCommands = [];
+// TODO: Temporary fix to install chromedriver 112.0.0 if major version is 112.
+//       Exit if major version is greater than 112.
+//       Revert this once node is bumped to 16+.
+// https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3975
+const compatibleChromeVersionMap = {
+  win32: {
+    maxVersion: 113,
+    targetVersion: '113.0.0',
+  },
+  default: {
+    maxVersion: 112,
+    targetVersion: '112.0.0',
+  },
+};
 
 switch (process.platform) {
   case 'win32':
@@ -77,9 +91,12 @@ if (majorVersion) {
   //       Exit if major version is greater than 112.
   //       Revert this once node is bumped to 16+.
   // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3975
-  if (parseInt(majorVersion) === 112) {
-    targetVersion = '112.0.0';
-  } else if (parseInt(majorVersion) > 112) {
+  const compatibleChromeVersionObject =
+    compatibleChromeVersionMap[process.platform] ?? compatibleChromeVersionMap.default;
+
+  if (parseInt(majorVersion) === compatibleChromeVersionObject.maxVersion) {
+    targetVersion = compatibleChromeVersionObject.targetVersion;
+  } else if (parseInt(majorVersion) > compatibleChromeVersionObject.maxVersion) {
     console.error(
       `::error::Chrome version (${majorVersion}) is not supported by this script. The largest chrome version we support is 112.`
     );
