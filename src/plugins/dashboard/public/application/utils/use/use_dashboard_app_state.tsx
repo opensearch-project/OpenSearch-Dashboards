@@ -24,9 +24,13 @@ export const useDashboardAppState = (
   eventEmitter: EventEmitter,
   instance: any
 ) => {
+  
   const [appState, setAppState] = useState<DashboardAppStateContainer | null>(null);
-
+  
   useEffect(() => {
+    if(!instance){
+      return;
+    }
     const { dashboardConfig, usageCollection, opensearchDashboardsVersion } = services;
     const hideWriteControls = dashboardConfig.getHideWriteControls();
     const stateDefaults = migrateAppState(

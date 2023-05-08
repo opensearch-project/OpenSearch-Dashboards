@@ -41,7 +41,7 @@ const TopNav = ({
   savedDashboardInstance,
   appState
 }: DashboardTopNavProps) => {
-  console.log("in dashboard top nav", "savedDashboardInstance: ", savedDashboardInstance, "appState: ", appState)
+  //console.log("in dashboard top nav", "savedDashboardInstance: ", savedDashboardInstance, "appState: ", appState)
     const { embed } = useParams<{ embed: string }>();
     const { param } = useParams<{ param: string }>();
 
@@ -55,13 +55,14 @@ const TopNav = ({
     const { query: queryService } = data;
     const isEmbeddedExternally = Boolean(embed);
 
+    //TODO
     const shouldForceDisplay = (param: string): boolean => {
-      const [searchParams] = useSearchParams();
-      return isEmbeddedExternally && Boolean(searchParams.get(param));
+      //const [searchParams] = useSearchParams();
+      return true;
     }
 
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
-      (forceShow || isChromeVisible) && !appState.fullScreenMode;
+      (forceShow || isChromeVisible) && !appState?.fullScreenMode;
 
     useEffect(() => {
       setFilters(queryService.filterManager.getFilters())
@@ -70,7 +71,7 @@ const TopNav = ({
     const navActions: {
       [key: string]: NavAction;
     } = {};
-    navActions[TopNavIds.FULL_SCREEN] = () => {
+    /*navActions[TopNavIds.FULL_SCREEN] = () => {
       dashboardStateManager.setFullScreenMode(true);
       //updateNavBar();
     };
@@ -188,11 +189,11 @@ const TopNav = ({
           dashboardStateManager.setHidePanelTitles(isChecked);
         },
       });
-    };
+    };*/
 
     useEffect(() => {
       setTopNavMenu(getTopNavConfig(
-        appState.viewMode,
+        appState?.viewMode,
         navActions,
         dashboardConfig.getHideWriteControls()
       ))
@@ -200,7 +201,7 @@ const TopNav = ({
 
     //const filters = queryService.filterManager.getFilters()
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
-      !forceHide && (filters!.length > 0 || !appState.fullScreenMode);
+      !forceHide && (filters!.length > 0 || !appState?.fullScreenMode);
       
 
     const forceShowTopNavMenu = shouldForceDisplay(UrlParams.SHOW_TOP_MENU);
@@ -244,10 +245,10 @@ const TopNav = ({
     return isChromeVisible ? (
       <TopNavMenu
         appName={'dashboard'}
-        savedQueryId={appState.savedQuery}
+        savedQueryId={appState?.savedQuery}
         config={showTopNavMenu ? topNavMenu : undefined}
-        /*className={isFullScreenMode ? 'osdTopNavMenu-isFullScreen' : undefined}
-        screenTitle={screenTitle}
+        //className={isFullScreenMode ? 'osdTopNavMenu-isFullScreen' : undefined}
+        screenTitle={""}
         //showTopNavMenu={showTopNavMenu}
         showSearchBar={showSearchBar}
         showQueryBar={showQueryBar}
@@ -255,7 +256,7 @@ const TopNav = ({
         showDatePicker={showDatePicker}
         showFilterBar={showFilterBar}
         indexPatterns={[]}
-        showSaveQuery={services.dashboardCapabilities.SavedQuery}*/
+        showSaveQuery={services.dashboardCapabilities.SavedQuery}
       />
     ):null;
 }

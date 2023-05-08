@@ -75,6 +75,7 @@ export const VisualizeEditorCommon = ({
   embeddableId,
   visEditorRef,
 }: VisualizeEditorCommonProps) => {
+  console.log("visualize editor ref", visEditorRef)
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
       {visInstance && appState && currentAppState && (

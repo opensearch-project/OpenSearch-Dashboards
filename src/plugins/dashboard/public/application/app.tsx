@@ -9,9 +9,9 @@ import { Route, Switch, useLocation } from 'react-router-dom';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 import { DashboardListing, DashboardEditor, DashboardNoMatch } from '../application/components';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { DashboardServices } from './types';
 import { syncQueryStateWithUrl } from '../../../data/public';
-import { DashboardViewport } from './embeddable/viewport/dashboard_viewport';
+import { DashboardServices } from '../types';
+
 
 export interface DashboardAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];
@@ -47,6 +47,7 @@ export const DashboardApp = ({ onAppLeave }: DashboardAppProps) => {
         path={[DashboardConstants.CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl(':id')]}
       >
         <DashboardEditor />
+        <div id="dashboardViewport"></div>
       </Route>
       <DashboardNoMatch />
     </Switch>
