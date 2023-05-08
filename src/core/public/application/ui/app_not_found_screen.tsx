@@ -28,11 +28,12 @@
  * under the License.
  */
 
-import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexItem, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
-export const AppNotFound = () => (
+export const AppNotFound = ({goToHomePage}: any) => (
+
   <EuiPage style={{ minHeight: '100%' }} data-test-subj="appNotFoundPageContent">
     <EuiPageBody component="main">
       <EuiPageContent verticalPosition="center" horizontalPosition="center">
@@ -48,15 +49,23 @@ export const AppNotFound = () => (
             </h2>
           }
           body={
-            <p>
+            <><p>
               <FormattedMessage
                 id="core.application.appNotFound.pageDescription"
-                defaultMessage="No application was found at this URL. Try going back or choosing an app from the menu."
-              />
-            </p>
+                defaultMessage="No application was found at this URL. Try going back or choosing an app from the menu." />
+            </p><div style={{paddingLeft: '170px', paddingRight: '170px'}}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton fill onClick={goToHomePage}>
+                  Go to Default Page
+                  </EuiButton>
+                </EuiFlexItem>
+              </div></>
+
+
           }
         />
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
 );
+
