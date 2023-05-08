@@ -27,6 +27,7 @@ describe('Datasource Management: Create Datasource form', () => {
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const mockSubmitHandler = jest.fn();
   const mockTestConnectionHandler = jest.fn();
+  const mockCancelHandler = jest.fn();
 
   const getFields = (comp: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>) => {
     return {
@@ -65,6 +66,7 @@ describe('Datasource Management: Create Datasource form', () => {
         <CreateDataSourceForm
           handleTestConnection={mockTestConnectionHandler}
           handleSubmit={mockSubmitHandler}
+          handleCancel={mockCancelHandler}
           existingDatasourceNamesList={['dup20']}
         />
       ),

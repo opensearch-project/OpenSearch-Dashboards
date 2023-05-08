@@ -229,8 +229,7 @@
 # functionality in Visualization.
 # vis_builder.enabled: false
 
-# Set the value of this setting to true to enable the experimental multiple data source
-# support feature. Use with caution.
+# Set the value of this setting to true to enable multiple data source feature.
 #data_source.enabled: false
 # Set the value of these settings to customize crypto materials to encryption saved credentials
 # in data sources.

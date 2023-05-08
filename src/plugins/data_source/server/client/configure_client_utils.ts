@@ -91,7 +91,7 @@ export const getAWSCredential = async (
   cryptography: CryptographyServiceSetup
 ): Promise<SigV4Content> => {
   const { endpoint } = dataSource;
-  const { accessKey, secretKey, region } = dataSource.auth.credentials! as SigV4Content;
+  const { accessKey, secretKey, region, service } = dataSource.auth.credentials! as SigV4Content;
 
   const {
     decryptedText: accessKeyText,
@@ -122,6 +122,7 @@ export const getAWSCredential = async (
     region,
     accessKey: accessKeyText,
     secretKey: secretKeyText,
+    service,
   };
 
   return credential;

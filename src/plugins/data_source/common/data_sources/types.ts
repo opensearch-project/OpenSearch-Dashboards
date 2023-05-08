@@ -25,6 +25,7 @@ export interface SigV4Content extends SavedObjectAttributes {
   accessKey: string;
   secretKey: string;
   region: string;
+  service?: SigV4ServiceName;
 }
 
 export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
@@ -36,4 +37,9 @@ export enum AuthType {
   NoAuth = 'no_auth',
   UsernamePasswordType = 'username_password',
   SigV4 = 'sigv4',
+}
+
+export enum SigV4ServiceName {
+  OpenSearch = 'es',
+  OpenSearchServerless = 'aoss',
 }
