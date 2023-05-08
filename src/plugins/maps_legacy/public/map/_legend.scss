@@ -33,11 +33,12 @@
   left: $euiSizeXXL;
   white-space: nowrap;
 }
-.mapButton{
-  display: inline-block; /*1*/
-  font:normal normal normal 14px/1 FontAwesome, sans-serif; /*1*/
-  font-size:inherit; /*1*/
-  text-rendering:auto; /*1*/
-  -webkit-font-smoothing:antialiased; /*1*/
-  -moz-osx-font-smoothing:grayscale; /*1*/
+
+.mapButton {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome, sans-serif;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
