@@ -41,6 +41,7 @@ import { i18n } from '@osd/i18n';
 import { ORIGIN } from '../common/constants/origin';
 import { getToasts } from '../opensearch_dashboards_services';
 import { L } from '../leaflet';
+import './_legend.scss';
 
 function makeFitControl(fitContainer, opensearchDashboardsMap) {
   // eslint-disable-next-line no-undef
@@ -61,7 +62,7 @@ function makeFitControl(fitContainer, opensearchDashboardsMap) {
       );
       $(this._fitContainer)
         .html(
-          `<a class="kuiIcon fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`
+          `<a class="mapButton fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`
         )
         .on('click', (e) => {
           e.preventDefault();
