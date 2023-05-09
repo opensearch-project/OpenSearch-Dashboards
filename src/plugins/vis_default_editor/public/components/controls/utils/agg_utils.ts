@@ -71,6 +71,8 @@ function useFallbackMetric(
       if (!respAgg && value !== fallbackValue) {
         setValue(fallbackValue);
       }
+    } else {
+      setValue(DEFAULT_METRIC);
     }
   }, [setValue, isCompatibleAgg, metricAggs, value, fallbackValue]);
 }
