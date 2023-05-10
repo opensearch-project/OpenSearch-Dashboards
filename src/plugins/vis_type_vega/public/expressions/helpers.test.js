@@ -21,10 +21,25 @@ import {
   simpleDimensions,
   noXAxisDimensions,
 } from './__mocks__';
+import {
+  TEST_DATATABLE_NO_VIS_LAYERS,
+  TEST_DATATABLE_NO_VIS_LAYERS_DIRTY,
+} from '../../../vis_augmenter/public';
 
 describe('helpers', function () {
+  describe('formatDatatable()', function () {
+    it('formatSimpleDatatable', function () {
+      expect(formatDatatable(TEST_DATATABLE_NO_VIS_LAYERS)).toBe(TEST_DATATABLE_NO_VIS_LAYERS);
+    });
+    it('formatDirtyDatatable', function () {
+      expect(formatDatatable(TEST_DATATABLE_NO_VIS_LAYERS_DIRTY)).toStrictEqual(
+        TEST_DATATABLE_NO_VIS_LAYERS
+      );
+    });
+  });
+
   describe('cleanString()', function () {
-    it('string should not contain "', function () {
+    it('string should not contain quotation marks', function () {
       const dirtyString = '"someString"';
       expect(cleanString(dirtyString)).toBe('someString');
     });
@@ -139,6 +154,34 @@ describe('helpers', function () {
 
       valueAxis.title.text = '""';
       vegaYAxis.axis.title = 'columnName';
+      expect(buildYAxis(column, valueAxis, visParams)).toStrictEqual(vegaYAxis);
+    });
+    it('build YAxis with percentile rank', function () {
+      const valueAxis = {
+        id: 'someId',
+        labels: {
+          rotate: 75,
+          show: false,
+        },
+        position: 'left',
+        title: {
+          text: 'someText',
+        },
+      };
+      const column = { name: 'columnName', id: 'columnId', meta: { type: 'percentile_ranks' } };
+      const visParams = { grid: { valueAxis: true } };
+      const vegaYAxis = {
+        axis: {
+          title: 'someText',
+          grid: true,
+          orient: 'left',
+          labels: false,
+          labelAngle: 75,
+          format: '.0%',
+        },
+        field: 'columnId',
+        type: 'quantitative',
+      };
       expect(buildYAxis(column, valueAxis, visParams)).toStrictEqual(vegaYAxis);
     });
   });

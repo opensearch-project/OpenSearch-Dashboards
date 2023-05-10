@@ -19,10 +19,26 @@ import {
   isVisLayerWithError,
 } from '../';
 
-// TODO: provide a deeper eligibility check.
-// Tracked in https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
 export const isEligibleForVisLayers = (vis: Vis): boolean => {
-  return vis.params.type === 'line';
+  // Only support date histogram and ensure there is only 1 x-axis and it has to be on the bottom.
+  // Additionally to have a valid x-axis, there needs to be a segment aggregation
+  const hasValidXaxis =
+    vis.data.aggs !== undefined &&
+    vis.data.aggs?.byTypeName('date_histogram').length === 1 &&
+    vis.params.categoryAxes.length === 1 &&
+    vis.params.categoryAxes[0].position === 'bottom' &&
+    vis.data.aggs?.bySchemaName('segment').length > 0;
+  // Support 1 segment for x axis bucket (that is date_histogram) and support metrics for
+  // multiple supported yaxis only. If there are other aggregation types, this is not
+  // valid for augmentation
+  const hasCorrectAggregationCount =
+    vis.data.aggs !== undefined &&
+    vis.data.aggs?.bySchemaName('metric').length > 0 &&
+    vis.data.aggs?.bySchemaName('metric').length === vis.data.aggs?.aggs.length - 1;
+  const hasOnlyLineSeries =
+    vis.params.seriesParams.every((seriesParam: { type: string }) => seriesParam.type === 'line') &&
+    vis.params.type === 'line';
+  return hasValidXaxis && hasCorrectAggregationCount && hasOnlyLineSeries;
 };
 
 /**
