@@ -30,7 +30,6 @@ export const registerStatsRoute = (router: IRouter, logger: Logger) => {
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        // console.log('--------running api-----------');
         const savedObjectsClient = context.core.savedObjects.client;
         const augmentVisSavedObjects: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes> = await getAugmentVisSavedObjects(
           savedObjectsClient,
