@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { get } from 'lodash';
 import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
@@ -51,29 +52,40 @@ export const getAugmentVisSavedObjects = async (
   return augmentVisSavedObjects;
 };
 
+/**
+ * Given the _find response that contains all of the saved objects, iterate through them and
+ * increment counters for each unique value we are tracking
+ */
 export const getStats = (
-  augmentVisSavedObjects: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes>
+  resp: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes>
 ): VisAugmenterStats => {
-  // TODO: instantiate count/agg maps here
-  augmentVisSavedObjects.saved_objects.forEach((augmentVisObj) => {
-    // TODO: extract/populate maps here
+  const originPluginMap = {} as { [originPlugin: string]: number };
+  const pluginResourceTypeMap = {} as { [pluginResourceType: string]: number };
+  const pluginResourceIdMap = {} as { [pluginResourceId: string]: number };
+  const visualizationIdMap = {} as { [visualizationId: string]: number };
+
+  resp.saved_objects.forEach((augmentVisObj) => {
+    const originPlugin = augmentVisObj.attributes.originPlugin;
+    const pluginResourceType = augmentVisObj.attributes.pluginResource.type;
+    const pluginResourceId = augmentVisObj.attributes.pluginResource.id;
+    const visualizationId = augmentVisObj.attributes.visId as string;
+
+    originPluginMap[originPlugin] = (get(originPluginMap, originPlugin, 0) as number) + 1;
+    pluginResourceTypeMap[pluginResourceType] =
+      (get(pluginResourceTypeMap, pluginResourceType, 0) as number) + 1;
+    pluginResourceIdMap[pluginResourceId] =
+      (get(pluginResourceIdMap, pluginResourceId, 0) as number) + 1;
+    visualizationIdMap[visualizationId] =
+      (get(visualizationIdMap, visualizationId, 0) as number) + 1;
   });
 
   return {
-    total_objs: augmentVisSavedObjects.total,
+    total_objs: resp.total,
     obj_breakdown: {
-      origin_plugin: {
-        test: 1,
-      },
-      plugin_resource_type: {
-        test: 1,
-      },
-      plugin_resource_id: {
-        test: 1,
-      },
-      visualization_id: {
-        test: 1,
-      },
+      origin_plugin: originPluginMap,
+      plugin_resource_type: pluginResourceTypeMap,
+      plugin_resource_id: pluginResourceIdMap,
+      visualization_id: visualizationIdMap,
     },
   };
 };

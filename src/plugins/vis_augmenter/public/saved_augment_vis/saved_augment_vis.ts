@@ -10,6 +10,7 @@ import {
 } from '../../../saved_objects/public';
 import { createSavedAugmentVisClass } from './_saved_augment_vis';
 import { VisLayerTypes } from '../types';
+import { AugmentVisSavedObjectAttributes } from '../../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectOpenSearchDashboardsServicesWithAugmentVis
@@ -21,9 +22,9 @@ export function createSavedAugmentVisLoader(
   const { savedObjectsClient } = services;
 
   class SavedObjectLoaderAugmentVis extends SavedObjectLoader {
-    mapHitSource = (source: Record<string, any>, id: string) => {
+    mapHitSource = (source: AugmentVisSavedObjectAttributes, id: string) => {
       source.id = id;
-      source.visId = get(source, 'visReference.id', '');
+      source.visId = get(source, 'visReference.id', '') as string;
 
       if (isEmpty(source.visReference)) {
         source.error = 'visReference is missing in augment-vis saved object';
@@ -33,7 +34,7 @@ export function createSavedAugmentVisLoader(
         source.error = 'visLayerExpressionFn is missing in augment-vis saved object';
         return source;
       }
-      if (!(get(source, 'visLayerExpressionFn.type', '') in VisLayerTypes)) {
+      if (!((get(source, 'visLayerExpressionFn.type', '') as string) in VisLayerTypes)) {
         source.error = 'Unknown VisLayer expression function type';
         return source;
       }
@@ -60,7 +61,7 @@ export function createSavedAugmentVisLoader(
      */
     mapSavedObjectApiHits(hit: {
       references: any[];
-      attributes: Record<string, unknown>;
+      attributes: AugmentVisSavedObjectAttributes;
       id: string;
     }) {
       // For now we are assuming only one vis reference per saved object.
