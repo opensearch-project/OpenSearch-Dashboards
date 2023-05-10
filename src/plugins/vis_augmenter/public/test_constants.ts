@@ -7,7 +7,9 @@ import { OpenSearchDashboardsDatatable } from '../../expressions/public';
 import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, HOVER_PARAM } from './';
 
 const TEST_X_AXIS_ID = 'test-x-axis-id';
+const TEST_X_AXIS_ID_DIRTY = 'test.x.axis.id';
 const TEST_VALUE_AXIS_ID = 'test-value-axis-id';
+const TEST_VALUE_AXIS_ID_DIRTY = 'test.value.axis.id';
 const TEST_X_AXIS_TITLE = 'time';
 const TEST_VALUE_AXIS_TITLE = 'avg value';
 const TEST_PLUGIN = 'test-plugin';
@@ -51,6 +53,20 @@ const TEST_VALUES_NO_VIS_LAYERS = [
   { [TEST_X_AXIS_ID]: 40 },
   { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3 },
   { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5 },
+];
+
+const TEST_VALUES_NO_VIS_LAYERS_DIRTY = [
+  { [TEST_X_AXIS_ID_DIRTY]: 0, [TEST_VALUE_AXIS_ID_DIRTY]: 5 },
+  { [TEST_X_AXIS_ID_DIRTY]: 5, [TEST_VALUE_AXIS_ID_DIRTY]: 10 },
+  { [TEST_X_AXIS_ID_DIRTY]: 10, [TEST_VALUE_AXIS_ID_DIRTY]: 6 },
+  { [TEST_X_AXIS_ID_DIRTY]: 15, [TEST_VALUE_AXIS_ID_DIRTY]: 4 },
+  { [TEST_X_AXIS_ID_DIRTY]: 20, [TEST_VALUE_AXIS_ID_DIRTY]: 5 },
+  { [TEST_X_AXIS_ID_DIRTY]: 25 },
+  { [TEST_X_AXIS_ID_DIRTY]: 30 },
+  { [TEST_X_AXIS_ID_DIRTY]: 35 },
+  { [TEST_X_AXIS_ID_DIRTY]: 40 },
+  { [TEST_X_AXIS_ID_DIRTY]: 45, [TEST_VALUE_AXIS_ID_DIRTY]: 3 },
+  { [TEST_X_AXIS_ID_DIRTY]: 50, [TEST_VALUE_AXIS_ID_DIRTY]: 5 },
 ];
 
 const TEST_VALUES_SINGLE_VIS_LAYER = [
@@ -111,6 +127,17 @@ export const TEST_COLUMNS_NO_VIS_LAYERS = [
   },
 ];
 
+export const TEST_COLUMNS_NO_VIS_LAYERS_DIRTY = [
+  {
+    id: TEST_X_AXIS_ID_DIRTY,
+    name: TEST_X_AXIS_TITLE,
+  },
+  {
+    id: TEST_VALUE_AXIS_ID_DIRTY,
+    name: TEST_VALUE_AXIS_TITLE,
+  },
+];
+
 export const TEST_COLUMNS_SINGLE_VIS_LAYER = [
   ...TEST_COLUMNS_NO_VIS_LAYERS,
   {
@@ -155,6 +182,12 @@ export const TEST_DATATABLE_NO_VIS_LAYERS = {
   type: 'opensearch_dashboards_datatable',
   columns: TEST_COLUMNS_NO_VIS_LAYERS,
   rows: TEST_VALUES_NO_VIS_LAYERS,
+} as OpenSearchDashboardsDatatable;
+
+export const TEST_DATATABLE_NO_VIS_LAYERS_DIRTY = {
+  type: 'opensearch_dashboards_datatable',
+  columns: TEST_COLUMNS_NO_VIS_LAYERS_DIRTY,
+  rows: TEST_VALUES_NO_VIS_LAYERS_DIRTY,
 } as OpenSearchDashboardsDatatable;
 
 export const TEST_DATATABLE_SINGLE_VIS_LAYER_EMPTY = {

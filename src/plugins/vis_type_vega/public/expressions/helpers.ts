@@ -6,6 +6,7 @@
 import {
   OpenSearchDashboardsDatatable,
   OpenSearchDashboardsDatatableColumn,
+  OpenSearchDashboardsDatatableRow,
 } from '../../../expressions/public';
 import { VislibDimensions, VisParams } from '../../../visualizations/public';
 import { isVisLayerColumn } from '../../../vis_augmenter/public';
@@ -49,7 +50,20 @@ export const formatDatatable = (
   datatable.columns.forEach((column) => {
     // clean quotation marks from names in columns
     column.name = cleanString(column.name);
+    // clean ids to remove "." as that will cause vega to not process it correctly.
+    // This happens for different metric types
+    column.id = column.id.replaceAll('.', '-');
   });
+
+  // clean row keys to remove "." as that will cause vega to not process it correctly
+  const updatedRows: OpenSearchDashboardsDatatableRow[] = datatable.rows.map((row) =>
+    Object.entries(row).reduce((updatedRow, [key, value]) => {
+      const cleanKey = key.replaceAll('.', '-');
+      return Object.assign(updatedRow, { [cleanKey]: value });
+    }, {})
+  );
+
+  datatable.rows = updatedRows;
   return datatable;
 };
 
@@ -111,14 +125,17 @@ export const buildYAxis = (
   valueAxis: ValueAxis,
   visParams: VisParams
 ) => {
+  const subAxis = {
+    title: cleanString(valueAxis.title.text) || column.name,
+    grid: visParams.grid.valueAxis !== undefined,
+    orient: valueAxis.position,
+    labels: valueAxis.labels.show,
+    labelAngle: valueAxis.labels.rotate,
+  };
+  // Percentile ranks aggregation metric needs percentile formatting.
+  if (column.meta?.type === 'percentile_ranks') Object.assign(subAxis, { format: '.0%' });
   return {
-    axis: {
-      title: cleanString(valueAxis.title.text) || column.name,
-      grid: visParams.grid.valueAxis,
-      orient: valueAxis.position,
-      labels: valueAxis.labels.show,
-      labelAngle: valueAxis.labels.rotate,
-    },
+    axis: subAxis,
     field: column.id,
     type: 'quantitative',
   };
