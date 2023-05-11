@@ -299,10 +299,10 @@ export class VegaBaseView {
       }
 
       ['click', 'mouseover', 'mouseout'].forEach((eventName) => {
-        view.addEventListener(eventName, (event, item) => {
+        view.addEventListener(eventName, (_event, item) => {
           this._triggerExternalAction({
-            event,
-            data: { item },
+            event: eventName,
+            item,
           });
         });
       });
