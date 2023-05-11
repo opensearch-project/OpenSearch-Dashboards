@@ -29,18 +29,63 @@
  */
 
 import _ from 'lodash';
+import { HttpResponse, HttpSetup } from 'opensearch-dashboards/public';
 import * as opensearch from '../opensearch/opensearch';
+import { Settings } from '../../services';
+
+export interface Field {
+  name: string;
+  type: string;
+}
+
+interface FieldMapping {
+  enabled?: boolean;
+  path?: string;
+  properties?: Properties;
+  type?: string;
+  index_name?: string;
+  fields?: Record<string, FieldMapping>;
+  index?: string;
+}
+
+type Properties = Record<string, FieldMapping>;
+
+interface IndexMapping {
+  [index: string]: {
+    properties: Properties;
+  };
+}
+
+interface IndexMappingOld {
+  [index: string]: {
+    mappings: {
+      properties: Properties;
+    };
+  };
+}
+
+interface Aliases {
+  [aliasName: string]: Record<string, unknown>;
+}
+
+interface IndexAliases {
+  [indexName: string]: {
+    aliases: Aliases;
+  };
+}
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
 const POLL_INTERVAL = 60000;
-let pollTimeoutId;
+let pollTimeoutId: NodeJS.Timeout | null;
 
-let perIndexTypes = {};
-let perAliasIndices = {};
-let templates = [];
+let perIndexTypes: { [index: string]: { [type: string]: Field[] } } = {};
+let perAliasIndices: { [alias: string]: string[] } = {};
+let templates: string[] = [];
 
-export function expandAliases(indicesOrAliases) {
+export function expandAliases(
+  indicesOrAliases: string | string[] | null | undefined
+): string | string[] | null | undefined {
   // takes a list of indices or aliases or a string which may be either and returns a list of indices
   // returns a list for multiple values or a string for a single.
 
@@ -52,15 +97,15 @@ export function expandAliases(indicesOrAliases) {
     indicesOrAliases = [indicesOrAliases];
   }
 
-  indicesOrAliases = indicesOrAliases.map((iOrA) => {
+  const mappedIndicesOrAliases = indicesOrAliases.map((iOrA) => {
     if (perAliasIndices[iOrA]) {
       return perAliasIndices[iOrA];
     }
     return [iOrA];
   });
-  let ret = [].concat.apply([], indicesOrAliases);
+  let ret: string[] = ([] as string[]).concat(...mappedIndicesOrAliases);
   ret.sort();
-  ret = ret.reduce((result, value, index, array) => {
+  ret = ret.reduce<string[]>((result, value, index, array) => {
     const last = array[index - 1];
     if (last !== value) {
       result.push(value);
@@ -75,9 +120,12 @@ export function getTemplates() {
   return [...templates];
 }
 
-export function getFields(indices, types) {
+export function getFields(
+  indices?: string | string[] | null,
+  types?: string | string[] | null
+): Field[] {
   // get fields for indices and types. Both can be a list, a string or null (meaning all).
-  let ret = [];
+  let ret: Array<Field | Field[]> = [];
   indices = expandAliases(indices);
 
   if (typeof indices === 'string') {
@@ -96,8 +144,6 @@ export function getFields(indices, types) {
           ret.push(fields);
         }
       });
-
-      ret = [].concat.apply([], ret);
     }
   } else {
     // multi index mode.
@@ -106,16 +152,13 @@ export function getFields(indices, types) {
         ret.push(getFields(index, types));
       }
     });
-    ret = [].concat.apply([], ret);
   }
 
-  return _.uniqBy(ret, function (f) {
-    return f.name + ':' + f.type;
-  });
+  return _.uniqBy(_.flatten(ret), (f: Field) => f.name + ':' + f.type);
 }
 
-export function getTypes(indices) {
-  let ret = [];
+export function getTypes(indices?: string | string[] | null) {
+  let ret: string[] = [];
   indices = expandAliases(indices);
   if (typeof indices === 'string') {
     const typeDict = perIndexTypes[indices];
@@ -137,17 +180,17 @@ export function getTypes(indices) {
     // multi index mode.
     Object.keys(perIndexTypes).forEach((index) => {
       if (!indices || indices.includes(index)) {
-        ret.push(getTypes(index));
+        ret.push(...getTypes(index));
       }
     });
-    ret = [].concat.apply([], ret);
+    ret = ([] as string[]).concat.apply([], ret);
   }
 
   return _.uniq(ret);
 }
 
-export function getIndices(includeAliases) {
-  const ret = [];
+export function getIndices(includeAliases?: boolean) {
+  const ret: string[] = [];
   Object.keys(perIndexTypes).forEach((index) => {
     ret.push(index);
   });
@@ -160,13 +203,13 @@ export function getIndices(includeAliases) {
   return ret;
 }
 
-function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
+function getFieldNamesFromFieldMapping(fieldName: string, fieldMapping: FieldMapping) {
   if (fieldMapping.enabled === false) {
     return [];
   }
   let nestedFields;
 
-  function applyPathSettings(nestedFieldNames) {
+  function applyPathSettings(nestedFieldNames: Field[]) {
     const pathType = fieldMapping.path || 'full';
     if (pathType === 'full') {
       return nestedFieldNames.map((f) => {
@@ -185,16 +228,18 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 
   const fieldType = fieldMapping.type;
 
-  const ret = { name: fieldName, type: fieldType };
+  const ret: Field = { name: fieldName, type: fieldType as string };
 
   if (fieldMapping.index_name) {
     ret.name = fieldMapping.index_name;
   }
 
   if (fieldMapping.fields) {
-    nestedFields = Object.entries(fieldMapping.fields).flatMap(([fieldName, fieldMapping]) => {
-      return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
-    });
+    nestedFields = Object.entries(fieldMapping.fields).flatMap(
+      ([nestedFieldName, nestedFieldMapping]) => {
+        return getFieldNamesFromFieldMapping(nestedFieldName, nestedFieldMapping);
+      }
+    );
     nestedFields = applyPathSettings(nestedFields);
     nestedFields.unshift(ret);
     return nestedFields;
@@ -203,7 +248,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   return [ret];
 }
 
-function getFieldNamesFromProperties(properties = {}) {
+function getFieldNamesFromProperties(properties: Properties = {}): Field[] {
   const fieldList = Object.entries(properties).flatMap(([fieldName, fieldMapping]) => {
     return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
   });
@@ -218,11 +263,12 @@ function loadTemplates(templatesObject = {}) {
   templates = Object.keys(templatesObject);
 }
 
-export function loadMappings(mappings) {
+export function loadMappings(mappings: IndexMapping | IndexMappingOld | '{}') {
   perIndexTypes = {};
+  if (mappings === '{}') return;
 
   Object.entries(mappings).forEach(([index, indexMapping]) => {
-    const normalizedIndexMappings = {};
+    const normalizedIndexMappings: Record<string, Field[]> = {};
 
     // Migrate 1.0.0 mappings. This format has changed, so we need to extract the underlying mapping.
     if (indexMapping.mappings && Object.keys(indexMapping).length === 1) {
@@ -231,7 +277,7 @@ export function loadMappings(mappings) {
 
     Object.entries(indexMapping).forEach(([typeName, typeMapping]) => {
       if (typeName === 'properties') {
-        const fieldList = getFieldNamesFromProperties(typeMapping);
+        const fieldList = getFieldNamesFromProperties(typeMapping as Properties);
         normalizedIndexMappings[typeName] = fieldList;
       } else {
         normalizedIndexMappings[typeName] = [];
@@ -241,13 +287,13 @@ export function loadMappings(mappings) {
   });
 }
 
-export function loadAliases(aliases) {
+export function loadAliases(aliases: IndexAliases) {
   perAliasIndices = {};
-  Object.entries(aliases).forEach(([index, omdexAliases]) => {
+  Object.entries(aliases).forEach(([index, indexAliases]) => {
     // verify we have an index defined. useful when mapping loading is disabled
     perIndexTypes[index] = perIndexTypes[index] || {};
 
-    Object.keys(omdexAliases.aliases || {}).forEach((alias) => {
+    Object.keys(indexAliases.aliases || {}).forEach((alias) => {
       if (alias === index) {
         return;
       } // alias which is identical to index means no index.
@@ -269,8 +315,13 @@ export function clear() {
   templates = [];
 }
 
-function retrieveSettings(http, settingsKey, settingsToRetrieve, dataSourceId) {
-  const settingKeyToPathMap = {
+function retrieveSettings(
+  http: HttpSetup,
+  settingsKey: string,
+  settingsToRetrieve: any,
+  dataSourceId: string
+): Promise<HttpResponse<any>> | Promise<void> | Promise<{}> {
+  const settingKeyToPathMap: { [key: string]: string } = {
     fields: '_mapping',
     indices: '_aliases',
     templates: '_template',
@@ -307,17 +358,20 @@ export function clearSubscriptions() {
   }
 }
 
-const retrieveMappings = async (http, settingsToRetrieve, dataSourceId) => {
-  const { body: mappings } = await retrieveSettings(
-    http,
-    'fields',
-    settingsToRetrieve,
-    dataSourceId
-  );
-  if (mappings) {
+// Type guard function
+function isHttpResponse<T>(object: any): object is HttpResponse<T> {
+  return object && typeof object === 'object' && 'body' in object;
+}
+
+const retrieveMappings = async (http: HttpSetup, settingsToRetrieve: any, dataSourceId: string) => {
+  const response = await retrieveSettings(http, 'fields', settingsToRetrieve, dataSourceId);
+
+  if (isHttpResponse(response) && response.body) {
+    const mappings = response.body;
     const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
-    let mappingsResponse;
+    let mappingsResponse: IndexMapping | IndexMappingOld | '{}';
     if (maxMappingSize) {
+      // eslint-disable-next-line no-console
       console.warn(
         `Mapping size is larger than 10MB (${
           Object.keys(mappings).length / 1024 / 1024
@@ -325,35 +379,31 @@ const retrieveMappings = async (http, settingsToRetrieve, dataSourceId) => {
       );
       mappingsResponse = '{}';
     } else {
-      mappingsResponse = mappings;
+      mappingsResponse = mappings as IndexMapping | IndexMappingOld;
     }
     loadMappings(mappingsResponse);
   }
 };
 
-const retrieveAliases = async (http, settingsToRetrieve, dataSourceId) => {
-  const { body: aliases } = await retrieveSettings(
-    http,
-    'indices',
-    settingsToRetrieve,
-    dataSourceId
-  );
+const retrieveAliases = async (http: HttpSetup, settingsToRetrieve: any, dataSourceId: string) => {
+  const response = await retrieveSettings(http, 'fields', settingsToRetrieve, dataSourceId);
 
-  if (aliases) {
+  if (isHttpResponse(response) && response.body) {
+    const aliases = response.body as IndexAliases;
     loadAliases(aliases);
   }
 };
 
-const retrieveTemplates = async (http, settingsToRetrieve, dataSourceId) => {
-  const { body: templates } = await retrieveSettings(
-    http,
-    'templates',
-    settingsToRetrieve,
-    dataSourceId
-  );
+const retrieveTemplates = async (
+  http: HttpSetup,
+  settingsToRetrieve: any,
+  dataSourceId: string
+) => {
+  const response = await retrieveSettings(http, 'fields', settingsToRetrieve, dataSourceId);
 
-  if (templates) {
-    loadTemplates(templates);
+  if (isHttpResponse(response) && response.body) {
+    const resTemplates = response.body;
+    loadTemplates(resTemplates);
   }
 };
 
@@ -362,7 +412,12 @@ const retrieveTemplates = async (http, settingsToRetrieve, dataSourceId) => {
  * @param settings Settings A way to retrieve the current settings
  * @param settingsToRetrieve any
  */
-export function retrieveAutoCompleteInfo(http, settings, settingsToRetrieve, dataSourceId) {
+export function retrieveAutoCompleteInfo(
+  http: HttpSetup,
+  settings: Settings,
+  settingsToRetrieve: any,
+  dataSourceId: string
+) {
   clearSubscriptions();
 
   Promise.allSettled([
