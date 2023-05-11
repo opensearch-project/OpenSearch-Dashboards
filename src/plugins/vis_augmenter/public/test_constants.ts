@@ -5,7 +5,7 @@
 
 import { OpenSearchDashboardsDatatable } from '../../expressions/public';
 import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, HOVER_PARAM } from './';
-import { VisInteraction, VisInteractionEventHandlerName } from './vega/constants';
+import { VisAnnotationType } from './vega/constants';
 
 const TEST_X_AXIS_ID = 'test-x-axis-id';
 const TEST_X_AXIS_ID_DIRTY = 'test.x.axis.id';
@@ -493,7 +493,7 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
   },
   transform: [
     { filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` },
-    { calculate: `'${VisInteraction.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
+    { calculate: `'${VisAnnotationType.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
   ],
   params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
   encoding: {
@@ -540,7 +540,7 @@ const TEST_EVENTS_LAYER_MULTIPLE_VIS_LAYERS = {
     {
       filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0 || datum['${TEST_PLUGIN_RESOURCE_ID_2}'] > 0`,
     },
-    { calculate: `'${VisInteraction.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
+    { calculate: `'${VisAnnotationType.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
   ],
 };
 
@@ -609,24 +609,4 @@ export const TEST_RESULT_SPEC_MULTIPLE_VIS_LAYERS = {
     },
     TEST_EVENTS_LAYER_MULTIPLE_VIS_LAYERS,
   ],
-};
-
-export const TEST_RESULT_SPEC_WITH_VIS_INTERACTION_CONFIG = {
-  ...TEST_SPEC_NO_VIS_LAYERS,
-  config: {
-    ...TEST_SPEC_NO_VIS_LAYERS.config,
-    kibana: {
-      ...(TEST_SPEC_NO_VIS_LAYERS.config.kibana || {}),
-      visInteractions: [
-        {
-          event: 'click',
-          handlerName: VisInteractionEventHandlerName.POINT_IN_TIME_CLICK_EVENT_HANDLER,
-        },
-        {
-          event: 'mouseover',
-          handlerName: VisInteractionEventHandlerName.POINT_IN_TIME_HOVER_IN_EVENT_HANDLER,
-        },
-      ],
-    },
-  },
 };

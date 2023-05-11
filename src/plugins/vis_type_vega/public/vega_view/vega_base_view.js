@@ -40,7 +40,6 @@ import { opensearchFilters } from '../../../data/public';
 
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
-import { interactionHandlersByAction } from '../../../vis_augmenter/public';
 
 vega.scheme('euiPaletteColorBlind', euiPaletteColorBlind());
 
@@ -77,6 +76,7 @@ export class VegaBaseView {
     this._serviceSettings = opts.serviceSettings;
     this._filterManager = opts.filterManager;
     this._applyFilter = opts.applyFilter;
+    this._triggerExternalAction = opts.externalAction;
     this._timefilter = opts.timefilter;
     this._view = null;
     this._vegaViewConfig = null;
@@ -298,13 +298,14 @@ export class VegaBaseView {
         this._addDestroyHandler(() => tthandler.hideTooltip());
       }
 
-      if (this._parser.visInteractions) {
-        this._parser.visInteractions.forEach(({ handlerName, event }) => {
-          if (interactionHandlersByAction[handlerName]) {
-            view.addEventListener(event, interactionHandlersByAction[handlerName]);
-          }
+      ['click', 'mouseover', 'mouseout'].forEach((eventName) => {
+        view.addEventListener(eventName, (event, item) => {
+          this._triggerExternalAction({
+            event,
+            data: { item },
+          });
         });
-      }
+      });
 
       return view.runAsync(); // Allows callers to await rendering
     }

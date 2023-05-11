@@ -108,11 +108,6 @@ type ContextVarsObjectProps =
 
 type ToolTipPositions = 'top' | 'right' | 'bottom' | 'left';
 
-export interface VisInteractionDescriptor {
-  event: string;
-  handlerName: string;
-}
-
 export interface OpenSearchDashboards {
   controlsLocation: ControlsLocation;
   controlsDirection: ControlsDirection;
@@ -120,7 +115,6 @@ export interface OpenSearchDashboards {
   type: string;
   renderer: Renderer;
   visibleVisLayers?: Map<VisLayerTypes, boolean>;
-  visInteractions?: VisInteractionDescriptor[];
 }
 
 export interface VegaSpec {

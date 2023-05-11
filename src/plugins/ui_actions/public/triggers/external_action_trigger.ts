@@ -28,13 +28,17 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
-export * from './value_click_trigger';
-export * from './apply_filter_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './external_action_trigger';
-export * from './default_trigger';
+import { i18n } from '@osd/i18n';
+import { Trigger } from '.';
+
+export const EXTERNAL_ACTION_TRIGGER = 'EXTERNAL_ACTION_TRIGGER';
+export const externalActionTrigger: Trigger<'EXTERNAL_ACTION_TRIGGER'> = {
+  id: EXTERNAL_ACTION_TRIGGER,
+  title: i18n.translate('uiActions.triggers.externalActionTitle', {
+    defaultMessage: 'Single click',
+  }),
+  description: i18n.translate('uiActions.triggers.externalActionDescription', {
+    defaultMessage:
+      'A data point click on the visualization used to trigger external action like show flyout, etc.',
+  }),
+};

@@ -15,7 +15,6 @@ import {
   addMissingRowsToTableBounds,
   addPointInTimeEventsLayersToTable,
   addPointInTimeEventsLayersToSpec,
-  addPointInTimeInteractionsConfig,
 } from './helpers';
 import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, PointInTimeEventsVisLayer, VisLayer } from '../';
 import {
@@ -455,15 +454,6 @@ describe('helpers', function () {
       delete expectedSpec.vconcat[1].encoding.x.scale;
       delete returnSpec.vconcat[1].encoding.x.scale;
       expect(returnSpec).toEqual(expectedSpec);
-    });
-  });
-
-  describe('addPointInTimeInteractionsConfig()', function () {
-    it('appends interactions config to the provided config from visualization spec', function () {
-      const expectedSpec = TEST_RESULT_SPEC_WITH_VIS_INTERACTION_CONFIG;
-      const testSpec = { ...TEST_SPEC_NO_VIS_LAYERS };
-      testSpec.config = addPointInTimeInteractionsConfig(TEST_SPEC_NO_VIS_LAYERS.config) as any;
-      expect(testSpec).toEqual(expectedSpec);
     });
   });
 });

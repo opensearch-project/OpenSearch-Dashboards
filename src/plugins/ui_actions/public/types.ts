@@ -36,6 +36,7 @@ import {
   APPLY_FILTER_TRIGGER,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
+  EXTERNAL_ACTION_TRIGGER,
   DEFAULT_TRIGGER,
 } from './triggers';
 import type { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
@@ -63,6 +64,7 @@ export interface TriggerContextMapping {
   [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
   [VISUALIZE_FIELD_TRIGGER]: VisualizeFieldContext;
   [VISUALIZE_GEO_FIELD_TRIGGER]: VisualizeFieldContext;
+  [EXTERNAL_ACTION_TRIGGER]: ValueClickContext;
 }
 
 const DEFAULT_ACTION = '';
