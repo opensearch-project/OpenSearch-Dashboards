@@ -21,6 +21,7 @@ export {
   PointInTimeEvent,
   PointInTimeEventsVisLayer,
   isPointInTimeEventsVisLayer,
+  isVisLayerWithError,
 } from './types';
 
 export * from './expressions';
@@ -28,3 +29,4 @@ export * from './utils';
 export * from './constants';
 export * from './vega';
 export * from './saved_augment_vis';
+export * from './test_constants';

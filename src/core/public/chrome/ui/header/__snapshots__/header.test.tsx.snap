@@ -1870,6 +1870,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  survey="/"
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -2797,6 +2798,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                 >
                                   <span
                                     data-euiicon-type="menu"
+                                    title="Menu"
                                   />
                                 </span>
                               </span>
@@ -2841,11 +2843,13 @@ exports[`Header handles visibility and lock changes 1`] = `
                               >
                                 <EuiIcon
                                   size="m"
+                                  title="Menu"
                                   type="menu"
                                 >
                                   <span
                                     data-euiicon-type="menu"
                                     size="m"
+                                    title="Menu"
                                   />
                                 </EuiIcon>
                               </span>
@@ -4593,6 +4597,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                     }
                     opensearchDashboardsDocLink="/docs"
                     opensearchDashboardsVersion="1.0.0"
+                    surveyLink="/"
                     useDefaultContent={true}
                   >
                     <HeaderHelpMenuUI
@@ -5398,6 +5403,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                       }
                       opensearchDashboardsDocLink="/docs"
                       opensearchDashboardsVersion="1.0.0"
+                      surveyLink="/"
                       useDefaultContent={true}
                     >
                       <EuiPopover
@@ -5411,6 +5417,11 @@ exports[`Header handles visibility and lock changes 1`] = `
                           >
                             <EuiIcon
                               size="m"
+                              type="questionInCircle"
+                            />
+                            <EuiIcon
+                              size="m"
+                              title="Help"
                               type="help"
                             />
                           </EuiHeaderSectionItemButton>
@@ -5462,7 +5473,11 @@ exports[`Header handles visibility and lock changes 1`] = `
                                             class="euiHeaderSectionItemButton__content"
                                           >
                                             <span
+                                              data-euiicon-type="questionInCircle"
+                                            />
+                                            <span
                                               data-euiicon-type="help"
+                                              title="Help"
                                             />
                                           </span>
                                         </span>
@@ -5504,11 +5519,22 @@ exports[`Header handles visibility and lock changes 1`] = `
                                         >
                                           <EuiIcon
                                             size="m"
+                                            type="questionInCircle"
+                                          >
+                                            <span
+                                              data-euiicon-type="questionInCircle"
+                                              size="m"
+                                            />
+                                          </EuiIcon>
+                                          <EuiIcon
+                                            size="m"
+                                            title="Help"
                                             type="help"
                                           >
                                             <span
                                               data-euiicon-type="help"
                                               size="m"
+                                              title="Help"
                                             />
                                           </EuiIcon>
                                         </span>
@@ -8050,6 +8076,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  survey="/"
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -8113,6 +8140,7 @@ exports[`Header renders condensed header 1`] = `
                                 >
                                   <span
                                     data-euiicon-type="menu"
+                                    title="Menu"
                                   />
                                 </span>
                               </span>
@@ -8157,11 +8185,13 @@ exports[`Header renders condensed header 1`] = `
                               >
                                 <EuiIcon
                                   size="m"
+                                  title="Menu"
                                   type="menu"
                                 >
                                   <span
                                     data-euiicon-type="menu"
                                     size="m"
+                                    title="Menu"
                                   />
                                 </EuiIcon>
                               </span>
@@ -9826,6 +9856,7 @@ exports[`Header renders condensed header 1`] = `
                     }
                     opensearchDashboardsDocLink="/docs"
                     opensearchDashboardsVersion="1.0.0"
+                    surveyLink="/"
                     useDefaultContent={true}
                   >
                     <HeaderHelpMenuUI
@@ -10631,6 +10662,7 @@ exports[`Header renders condensed header 1`] = `
                       }
                       opensearchDashboardsDocLink="/docs"
                       opensearchDashboardsVersion="1.0.0"
+                      surveyLink="/"
                       useDefaultContent={true}
                     >
                       <EuiPopover
@@ -10644,6 +10676,11 @@ exports[`Header renders condensed header 1`] = `
                           >
                             <EuiIcon
                               size="m"
+                              type="questionInCircle"
+                            />
+                            <EuiIcon
+                              size="m"
+                              title="Help"
                               type="help"
                             />
                           </EuiHeaderSectionItemButton>
@@ -10695,7 +10732,11 @@ exports[`Header renders condensed header 1`] = `
                                             class="euiHeaderSectionItemButton__content"
                                           >
                                             <span
+                                              data-euiicon-type="questionInCircle"
+                                            />
+                                            <span
                                               data-euiicon-type="help"
+                                              title="Help"
                                             />
                                           </span>
                                         </span>
@@ -10737,11 +10778,22 @@ exports[`Header renders condensed header 1`] = `
                                         >
                                           <EuiIcon
                                             size="m"
+                                            type="questionInCircle"
+                                          >
+                                            <span
+                                              data-euiicon-type="questionInCircle"
+                                              size="m"
+                                            />
+                                          </EuiIcon>
+                                          <EuiIcon
+                                            size="m"
+                                            title="Help"
                                             type="help"
                                           >
                                             <span
                                               data-euiicon-type="help"
                                               size="m"
+                                              title="Help"
                                             />
                                           </EuiIcon>
                                         </span>

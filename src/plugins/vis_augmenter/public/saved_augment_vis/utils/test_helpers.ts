@@ -4,7 +4,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { VisLayerExpressionFn, ISavedAugmentVis } from '../../types';
+import { VisLayerExpressionFn, ISavedAugmentVis } from '../../';
 import { VIS_REFERENCE_NAME } from '../saved_augment_vis_references';
 
 const pluginResourceId = 'test-plugin-resource-id';

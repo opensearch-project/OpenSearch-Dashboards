@@ -3,20 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisLayerTypes, VisLayer, isPointInTimeEventsVisLayer, isValidVisLayer } from './types';
-
-const generateVisLayer = (type: any): VisLayer => {
-  return {
-    type,
-    originPlugin: 'test-plugin',
-    pluginResource: {
-      type: 'test-resource-type',
-      id: 'test-resource-id',
-      name: 'test-resource-name',
-      urlPath: 'test-resource-url-path',
-    },
-  };
-};
+import {
+  VisLayerTypes,
+  isPointInTimeEventsVisLayer,
+  isValidVisLayer,
+  isVisLayerWithError,
+} from './types';
+import { generateVisLayer } from './utils';
 
 describe('isPointInTimeEventsVisLayer()', function () {
   it('should return false if type does not match', function () {
@@ -39,5 +32,17 @@ describe('isValidVisLayer()', function () {
   it('should return true if type matches', function () {
     const visLayer = generateVisLayer(VisLayerTypes.PointInTimeEvents);
     expect(isValidVisLayer(visLayer)).toBe(true);
+  });
+});
+
+describe('isVisLayerWithError()', function () {
+  it('should return false if no error', function () {
+    const visLayer = generateVisLayer('unknown-vis-layer-type', false);
+    expect(isVisLayerWithError(visLayer)).toBe(false);
+  });
+
+  it('should return true if error', function () {
+    const visLayer = generateVisLayer(VisLayerTypes.PointInTimeEvents, true);
+    expect(isVisLayerWithError(visLayer)).toBe(true);
   });
 });
