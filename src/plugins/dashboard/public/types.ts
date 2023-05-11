@@ -28,10 +28,29 @@
  * under the License.
  */
 
-import { Query, Filter } from 'src/plugins/data/public';
-import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
+import { Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
+import {
+  SavedObject as SavedObjectType,
+  SavedObjectAttributes,
+  CoreStart,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+  ChromeStart,
+  ScopedHistory,
+  AppMountParameters,
+  SavedObjectsStart,
+} from 'src/core/public';
+import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
+import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
+import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
+import { SharePluginStart } from 'src/plugins/share/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { History } from 'history';
+import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import { EmbeddableStart, ViewMode } from './embeddable_plugin';
 import { SavedDashboardPanel730ToLatest } from '../common';
-import { ViewMode } from './embeddable_plugin';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -211,4 +230,37 @@ export interface DashboardProvider {
   // At onClick of rendered table "edit" link for item {id: 'abc123', ...}, the navigated path will be:
   //   "http://../app/myplugin#/edit/abc123"
   editUrlPathFn: (obj: SavedObjectType) => string;
+}
+
+export interface DashboardServices extends CoreStart {
+  pluginInitializerContext: PluginInitializerContext;
+  opensearchDashboardsVersion: string;
+  history: History;
+  osdUrlStateStorage: IOsdUrlStateStorage;
+  core: CoreStart;
+  data: DataPublicPluginStart;
+  navigation: NavigationStart;
+  savedObjectsClient: SavedObjectsClientContract;
+  savedDashboards: SavedObjectLoader;
+  dashboardProviders: () => { [key: string]: DashboardProvider };
+  dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
+  dashboardCapabilities: any;
+  embeddableCapabilities: {
+    visualizeCapabilities: any;
+    mapsCapabilities: any;
+  };
+  uiSettings: IUiSettingsClient;
+  chrome: ChromeStart;
+  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  embeddable: EmbeddableStart;
+  localStorage: Storage;
+  share?: SharePluginStart;
+  usageCollection?: UsageCollectionSetup;
+  navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
+  navigateToLegacyOpenSearchDashboardsUrl: UrlForwardingStart['navigateToLegacyOpenSearchDashboardsUrl'];
+  scopedHistory: () => ScopedHistory;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  savedObjectsPublic: SavedObjectsStart;
+  restorePreviousUrl: () => void;
+  addBasePath?: (url: string) => string;
 }
