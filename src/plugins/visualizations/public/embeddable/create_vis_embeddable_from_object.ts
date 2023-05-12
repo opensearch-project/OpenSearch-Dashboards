@@ -40,12 +40,13 @@ import { IContainer, ErrorEmbeddable } from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
   getSavedVisualizationsLoader,
-  getSavedAugmentVisLoader,
+  // getSavedAugmentVisLoader,
   getUISettings,
   getHttp,
   getTimeFilter,
   getCapabilities,
 } from '../services';
+import { getSavedAugmentVisLoader } from '../../../vis_augmenter/public';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
@@ -89,7 +90,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
 
     const editable = getCapabilities().visualize.save as boolean;
 
-    const savedAugmentVisLoader = getSavedAugmentVisLoader();
+    const savedAugmentVisLoader = await getSavedAugmentVisLoader();
 
     return new VisualizeEmbeddable(
       getTimeFilter(),
