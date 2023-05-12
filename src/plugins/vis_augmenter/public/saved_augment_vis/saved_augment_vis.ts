@@ -12,6 +12,7 @@ import {
 import { createSavedAugmentVisClass } from './_saved_augment_vis';
 import { VisLayerTypes } from '../types';
 import { getUISettings } from '../services';
+import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectOpenSearchDashboardsServicesWithAugmentVis
@@ -65,18 +66,36 @@ export class SavedObjectLoaderAugmentVis extends SavedObjectLoader {
    * @returns {Promise<SavedObject>}
    */
   get(opts?: Record<string, unknown> | string) {
-    const isAugmentationEnabled = this.config.get('visualization:enablePluginAugmentation');
+    this.isAugmentationEnabled();
+    return super.get(opts);
+  }
 
+  /**
+   * TODO: Rather than use a hardcoded limit, implement pagination. See
+   * https://github.com/elastic/kibana/issues/8044 for reference.
+   *
+   * @param search
+   * @param size
+   * @param fields
+   * @returns {Promise}
+   */
+  findAll(search: string = '', size: number = 100, fields?: string[]) {
+    this.isAugmentationEnabled();
+    return super.findAll(search, size, fields);
+  }
+
+  find(search: string = '', size: number = 100) {
+    this.isAugmentationEnabled();
+    return super.find(search, size);
+  }
+
+  private isAugmentationEnabled() {
+    const isAugmentationEnabled = this.config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING, true);
     if (!isAugmentationEnabled) {
-      // eslint-disable-next-line no-throw-literal
-      throw 'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.';
+      throw new Error(
+        'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
+      );
     }
-
-    // can accept object as argument in accordance to SavedVis class
-    // see src/plugins/saved_objects/public/saved_object/saved_object_loader.ts
-    // @ts-ignore
-    const obj = new this.Class(opts);
-    return obj.init();
   }
 }
 

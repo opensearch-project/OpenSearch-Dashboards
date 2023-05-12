@@ -9,8 +9,18 @@ import {
   SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
 } from './saved_augment_vis';
 import { generateAugmentVisSavedObject, getMockAugmentVisSavedObjectClient } from './utils';
+import { uiSettingsServiceMock } from '../../../../core/public/mocks';
+import { setUISettings } from '../services';
+import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../constants';
+
+const uiSettingsMock = uiSettingsServiceMock.createStartContract();
+setUISettings(uiSettingsMock);
 
 describe('SavedObjectLoaderAugmentVis', () => {
+  uiSettingsMock.get.mockImplementation((key: string) => {
+    return key === PLUGIN_AUGMENTATION_ENABLE_SETTING;
+  });
+
   const fn = {
     type: VisLayerTypes.PointInTimeEvents,
     name: 'test-fn',
@@ -104,5 +114,56 @@ describe('SavedObjectLoaderAugmentVis', () => {
     expect(resp.hits.length).toEqual(1);
     expect(resp.hits[0].id).toEqual('valid-obj-id-1');
     expect(resp.hits[0].error).toEqual('visReference is missing in augment-vis saved object');
+  });
+
+  it('find returns exception due to setting being disabled', async () => {
+    uiSettingsMock.get.mockImplementation((key: string) => {
+      return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
+    });
+    const loader = createSavedAugmentVisLoader(({
+      // config: uiSettingsMock,
+      savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
+    } as unknown) as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+    try {
+      await loader.find();
+    } catch (e) {
+      expect(e.message).toBe(
+        'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
+      );
+    }
+  });
+
+  it('findAll returns exception due to setting being disabled', async () => {
+    uiSettingsMock.get.mockImplementation((key: string) => {
+      return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
+    });
+    const loader = createSavedAugmentVisLoader(({
+      // config: uiSettingsMock,
+      savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
+    } as unknown) as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+    try {
+      await loader.findAll();
+    } catch (e) {
+      expect(e.message).toBe(
+        'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
+      );
+    }
+  });
+
+  it('get returns exception due to setting being disabled', async () => {
+    uiSettingsMock.get.mockImplementation((key: string) => {
+      return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
+    });
+    const loader = createSavedAugmentVisLoader(({
+      // config: uiSettingsMock,
+      savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
+    } as unknown) as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+    try {
+      await loader.get();
+    } catch (e) {
+      expect(e.message).toBe(
+        'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
+      );
+    }
   });
 });

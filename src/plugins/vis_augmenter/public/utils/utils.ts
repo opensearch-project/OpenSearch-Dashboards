@@ -17,6 +17,7 @@ import {
   VisLayerFunctionDefinition,
   VisLayer,
   isVisLayerWithError,
+  PLUGIN_AUGMENTATION_ENABLE_SETTING,
 } from '../';
 import { getUISettings } from '../services';
 
@@ -41,7 +42,7 @@ export const isEligibleForVisLayers = (vis: Vis): boolean => {
     vis.params.type === 'line';
   // Checks if the augmentation setting is enabled
   const config = getUISettings();
-  const isAugmentationEnabled = config.get('visualization:enablePluginAugmentation');
+  const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   return isAugmentationEnabled && hasValidXaxis && hasCorrectAggregationCount && hasOnlyLineSeries;
 };
 
@@ -58,10 +59,11 @@ export const getAugmentVisSavedObjs = async (
     return [] as ISavedAugmentVis[];
   }
   const config = getUISettings();
-  const isAugmentationEnabled = config.get('visualization:enablePluginAugmentation');
+  const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   if (!isAugmentationEnabled) {
-    // eslint-disable-next-line no-throw-literal
-    throw 'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.';
+    throw new Error(
+      'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
+    );
   }
   try {
     const resp = await loader?.findAll();

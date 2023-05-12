@@ -11,3 +11,6 @@ export const EVENT_MARK_SIZE = 100;
 export const EVENT_MARK_SIZE_ENLARGED = 140;
 export const EVENT_MARK_SHAPE = 'triangle-up';
 export const EVENT_TIMELINE_HEIGHT = 25;
+export const PLUGIN_AUGMENTATION_ENABLE_SETTING = 'visualization:enablePluginAugmentation';
+export const PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING =
+  'visualization:enablePluginAugmentation.maxPluginObjects';

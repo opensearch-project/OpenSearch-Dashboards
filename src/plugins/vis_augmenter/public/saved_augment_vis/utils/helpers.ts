@@ -6,6 +6,10 @@
 import { get } from 'lodash';
 import { getSavedAugmentVisLoader, getUISettings } from '../../services';
 import { ISavedAugmentVis } from '../types';
+import {
+  PLUGIN_AUGMENTATION_ENABLE_SETTING,
+  PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING,
+} from '../../constants';
 
 /**
  * Create an augment vis saved object given an object that
@@ -15,12 +19,13 @@ export const createAugmentVisSavedObject = async (AugmentVis: ISavedAugmentVis):
   const loader = getSavedAugmentVisLoader();
   const config = getUISettings();
 
-  const isAugmentationEnabled = config.get('visualization:enablePluginAugmentation');
+  const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   if (!isAugmentationEnabled) {
-    // eslint-disable-next-line no-throw-literal
-    throw 'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.';
+    throw new Error(
+      'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
+    );
   }
-  const maxAssociatedCount = config.get('visualization:enablePluginAugmentation.maxPluginObjects');
+  const maxAssociatedCount = config.get(PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING);
 
   await loader.findAll().then(async (resp) => {
     if (resp !== undefined) {
@@ -31,14 +36,10 @@ export const createAugmentVisSavedObject = async (AugmentVis: ISavedAugmentVis):
       );
 
       if (maxAssociatedCount <= savedObjectsForThisVisualization.length) {
-        // eslint-disable-next-line no-throw-literal
-        throw (
-          'Cannot associate the plugin resource to the visualization due to the limit of the' +
-          'max amount of associated plugin resources (' +
-          maxAssociatedCount +
-          ') with ' +
-          savedObjectsForThisVisualization.length +
-          ' associated to the visualization'
+        throw new Error(
+          `Cannot associate the plugin resource to the visualization due to the limit of the max
+          amount of associated plugin resources (${maxAssociatedCount}) with
+          ${savedObjectsForThisVisualization.length} associated to the visualization`
         );
       }
     }

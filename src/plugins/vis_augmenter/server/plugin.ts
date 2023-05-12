@@ -17,6 +17,10 @@ import {
 import { augmentVisSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 import { VisAugmenterPluginConfigType } from '../config';
+import {
+  PLUGIN_AUGMENTATION_ENABLE_SETTING,
+  PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING,
+} from './constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterPluginSetup {}
@@ -44,7 +48,7 @@ export class VisAugmenterPlugin
 
     if (isAugmentationEnabled) {
       core.uiSettings.register({
-        ['visualization:enablePluginAugmentation']: {
+        [PLUGIN_AUGMENTATION_ENABLE_SETTING]: {
           name: i18n.translate('visualization.enablePluginAugmentationTitle', {
             defaultMessage: 'Enable plugin augmentation',
           }),
@@ -55,7 +59,7 @@ export class VisAugmenterPlugin
           category: ['visualization'],
           schema: schema.boolean(),
         },
-        ['visualization:enablePluginAugmentation.maxPluginObjects']: {
+        [PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING]: {
           name: i18n.translate('visualization.enablePluginAugmentation.maxPluginObjectsTitle', {
             defaultMessage: 'Max number of associated augmentations',
           }),
