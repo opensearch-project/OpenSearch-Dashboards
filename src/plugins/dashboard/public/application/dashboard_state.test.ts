@@ -29,7 +29,7 @@
  */
 
 import { createBrowserHistory } from 'history';
-import { DashboardStateManager } from './dashboard_state_manager';
+// import { DashboardStateManager } from './dashboard_state_manager';
 import { getSavedDashboardMock } from './test_helpers';
 import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
@@ -38,7 +38,10 @@ import { DashboardContainer, DashboardContainerInput } from '.';
 import { DashboardContainerOptions } from './embeddable/dashboard_container';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 
-describe('DashboardState', function () {
+// TODO:
+// This unit test will fail because we delete the dashboard state manager
+// Will revisit this when we implement the new state management
+describe.skip('DashboardState', function () {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
 
