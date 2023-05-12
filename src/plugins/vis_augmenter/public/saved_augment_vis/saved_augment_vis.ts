@@ -4,7 +4,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { IUiSettingsClient, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import {
   SavedObjectLoader,
   SavedObjectOpenSearchDashboardsServices,
@@ -20,13 +20,6 @@ export type SavedAugmentVisLoader = ReturnType<typeof createSavedAugmentVisLoade
 
 export class SavedObjectLoaderAugmentVis extends SavedObjectLoader {
   private readonly config: IUiSettingsClient = getUISettings();
-  constructor(
-    servicesWithAugmentVis: SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
-    SavedObjectClass: any,
-    savedObjectsClientContract: SavedObjectsClientContract
-  ) {
-    super(SavedObjectClass, savedObjectsClientContract);
-  }
 
   mapHitSource = (source: Record<string, any>, id: string) => {
     source.id = id;
@@ -93,5 +86,5 @@ export function createSavedAugmentVisLoader(
   const { savedObjectsClient } = services;
 
   const SavedAugmentVis = createSavedAugmentVisClass(services);
-  return new SavedObjectLoaderAugmentVis(services, SavedAugmentVis, savedObjectsClient);
+  return new SavedObjectLoaderAugmentVis(SavedAugmentVis, savedObjectsClient);
 }
