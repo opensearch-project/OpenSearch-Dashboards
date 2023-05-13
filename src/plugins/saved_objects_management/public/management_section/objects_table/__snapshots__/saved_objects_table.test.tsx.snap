@@ -365,6 +365,47 @@ exports[`SavedObjectsTable should render normally 1`] = `
           },
         ]
       }
+      namespaceRegistry={
+        Object {
+          "getAlias": [MockFunction],
+          "getAll": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Array [],
+              },
+              Object {
+                "type": "return",
+                "value": Array [],
+              },
+              Object {
+                "type": "return",
+                "value": Array [],
+              },
+              Object {
+                "type": "return",
+                "value": Array [],
+              },
+              Object {
+                "type": "return",
+                "value": Array [],
+              },
+              Object {
+                "type": "return",
+                "value": Array [],
+              },
+            ],
+          },
+        }
+      }
       onActionRefresh={[Function]}
       onDelete={[Function]}
       onExport={[Function]}
