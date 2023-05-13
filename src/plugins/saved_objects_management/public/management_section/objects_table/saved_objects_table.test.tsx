@@ -161,6 +161,7 @@ describe('SavedObjectsTable', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       search,
+      dateFormat: 'YYYY-MM-DD',
     };
 
     findObjectsMock.mockImplementation(() => ({
