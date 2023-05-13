@@ -55,9 +55,6 @@ export const getAugmentVisSavedObjs = async (
   visId: string | undefined,
   loader: SavedAugmentVisLoader | undefined
 ): Promise<ISavedAugmentVis[]> => {
-  if (visId === undefined || loader === undefined) {
-    return [] as ISavedAugmentVis[];
-  }
   const config = getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   if (!isAugmentationEnabled) {

@@ -46,6 +46,9 @@ export class VisAugmenterPlugin
     const isAugmentationEnabled =
       config.pluginAugmentationEnabled === undefined ? true : config.pluginAugmentationEnabled;
 
+    // Checks if the global yaml setting for enabling plugin augmentation is disabled.
+    // If it is disabled, remove the settings as we would not want to show these to the
+    // user due to it being disabled at the cluster level.
     if (isAugmentationEnabled) {
       core.uiSettings.register({
         [PLUGIN_AUGMENTATION_ENABLE_SETTING]: {

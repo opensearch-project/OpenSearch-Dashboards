@@ -121,7 +121,6 @@ describe('SavedObjectLoaderAugmentVis', () => {
       return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
     });
     const loader = createSavedAugmentVisLoader(({
-      // config: uiSettingsMock,
       savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
     } as unknown) as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
     try {
@@ -138,7 +137,6 @@ describe('SavedObjectLoaderAugmentVis', () => {
       return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
     });
     const loader = createSavedAugmentVisLoader(({
-      // config: uiSettingsMock,
       savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
     } as unknown) as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
     try {
@@ -155,7 +153,6 @@ describe('SavedObjectLoaderAugmentVis', () => {
       return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
     });
     const loader = createSavedAugmentVisLoader(({
-      // config: uiSettingsMock,
       savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
     } as unknown) as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
     try {
