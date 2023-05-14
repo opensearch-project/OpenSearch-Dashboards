@@ -36,7 +36,7 @@ import { Progress } from '../progress';
 import { createIndexDocRecordsStream } from './index_doc_records_stream';
 import { createStubStats, createStubClient, createPersonDocRecords } from './test_stubs';
 
-function delay(ms: number | undefined) {
+function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 

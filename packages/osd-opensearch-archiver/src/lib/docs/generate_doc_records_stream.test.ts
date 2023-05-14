@@ -37,7 +37,7 @@ import { createGenerateDocRecordsStream } from './generate_doc_records_stream';
 import { Progress } from '../progress';
 import { createStubStats, createStubClient } from './test_stubs';
 
-function delay(ms: number | undefined) {
+function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
