@@ -29,7 +29,7 @@
  */
 
 import SimpleGit from 'simple-git';
-import { fromNode as fcb } from 'bluebird';
+import { promisify } from 'util';
 
 import { REPO_ROOT } from '@osd/utils';
 import { File } from '../file';
@@ -44,7 +44,7 @@ import { File } from '../file';
 export async function getFilesForCommit() {
   const simpleGit = new SimpleGit(REPO_ROOT);
 
-  const output = await fcb((cb) => simpleGit.diff(['--name-status', '--cached'], cb));
+  const output = await promisify(simpleGit.diff)(['--name-status', '--cached']);
 
   return (
     output
