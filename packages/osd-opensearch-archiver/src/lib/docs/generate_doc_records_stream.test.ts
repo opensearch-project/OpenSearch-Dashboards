@@ -30,13 +30,16 @@
 
 import sinon from 'sinon';
 import expect from '@osd/expect';
-import { delay } from 'bluebird';
 
 import { createListStream, createPromiseFromStreams, createConcatStream } from '../streams';
 
 import { createGenerateDocRecordsStream } from './generate_doc_records_stream';
 import { Progress } from '../progress';
 import { createStubStats, createStubClient } from './test_stubs';
+
+function delay(ms: number | undefined) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
   it('scolls 1000 documents at a time', async () => {

@@ -29,13 +29,16 @@
  */
 
 import expect from '@osd/expect';
-import { delay } from 'bluebird';
 
 import { createListStream, createPromiseFromStreams } from '../streams';
 
 import { Progress } from '../progress';
 import { createIndexDocRecordsStream } from './index_doc_records_stream';
 import { createStubStats, createStubClient, createPersonDocRecords } from './test_stubs';
+
+function delay(ms: number | undefined) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 const recordsToBulkBody = (records: any[]) => {
   return records.reduce((acc, record) => {

@@ -29,9 +29,9 @@
  */
 
 import { readdir } from 'fs';
-import { fromNode } from 'bluebird';
+import { promisify } from 'util';
 
 export async function readDirectory(path: string) {
-  const allNames = await fromNode<string[]>((cb) => readdir(path, cb));
+  const allNames: string[] = await promisify(readdir)(path);
   return allNames.filter((name) => !name.startsWith('.'));
 }
