@@ -31,7 +31,6 @@
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import worldbank from './worldbank.js';
-import Bluebird from 'bluebird';
 import Datasource from '../lib/classes/datasource';
 
 export default new Datasource('worldbank_indicators', {
@@ -83,9 +82,7 @@ export default new Datasource('worldbank_indicators', {
       return worldbank.timelineFn(wbArgs, tlConfig);
     });
 
-    return Bluebird.map(seriesLists, function (seriesList) {
-      return seriesList.list[0];
-    }).then(function (list) {
+    return Promise.all(seriesLists.map((seriesList) => seriesList.list[0])).then(function (list) {
       return {
         type: 'seriesList',
         list: list,
