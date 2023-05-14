@@ -178,15 +178,16 @@ export default function chainRunner(tlConfig) {
         const functionDef = tlConfig.getFunction(query.function);
         const resolvedDatasource = resolvedDatasources[i];
 
-        if (resolvedDatasource.isRejected()) {
-          if (resolvedDatasource.reason().isBoom) {
-            throw resolvedDatasource.reason();
+        if (resolvedDatasource.status === 'rejected') {
+          const reason = resolvedDatasource.reason;
+          if (reason && reason.isBoom) {
+            throw reason;
           } else {
-            throwWithCell(query.cell, resolvedDatasource.reason());
+            throwWithCell(query.cell, reason || new Error('Unknown error'));
           }
         }
 
-        queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value();
+        queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value;
       });
 
       stats.cacheCount = _.keys(queryCache).length;
