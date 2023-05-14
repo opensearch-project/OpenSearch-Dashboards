@@ -32,7 +32,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 import 'jest-canvas-mock';
 
-import { promisify } from 'util';
 import { TagCloud } from './tag_cloud';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public';
 
@@ -153,7 +152,11 @@ describe('tag cloud tests', () => {
         tagCloud = new TagCloud(domNode, colorScale);
         tagCloud.setData(currentTest.data);
         tagCloud.setOptions(currentTest.options);
-        await promisify(tagCloud.once)('renderComplete');
+        await new Promise((resolve) => {
+          tagCloud.once('renderComplete', () => {
+            resolve();
+          });
+        });
       });
 
       afterEach(teardownDOM);
@@ -187,7 +190,11 @@ describe('tag cloud tests', () => {
         //this timeout modifies the settings before the cloud is rendered.
         //the cloud needs to use the correct options
         setTimeout(() => tagCloud.setOptions(logScaleTest.options), timeout);
-        await promisify(tagCloud.once)('renderComplete');
+        await new Promise((resolve) => {
+          tagCloud.once('renderComplete', () => {
+            resolve();
+          });
+        });
       });
 
       afterEach(teardownDOM);
@@ -215,7 +222,11 @@ describe('tag cloud tests', () => {
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
       tagCloud.setOptions(logScaleTest.options);
-      await promisify(tagCloud.once)('renderComplete');
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -242,7 +253,11 @@ describe('tag cloud tests', () => {
       tagCloud.setOptions(baseTest.options);
       tagCloud.setData(trimDataTest.data);
 
-      await promisify(tagCloud.once)('renderComplete');
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -328,7 +343,11 @@ describe('tag cloud tests', () => {
         tagCloud.setData(baseTest.data);
         tagCloud.setOptions(baseTest.options);
       }, 200);
-      await promisify(tagCloud.once)('renderComplete');
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -353,7 +372,11 @@ describe('tag cloud tests', () => {
       tagCloud = new TagCloud(domNode, colorScale);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
-      await promisify(tagCloud.once)('renderComplete');
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -375,12 +398,20 @@ describe('tag cloud tests', () => {
       tagCloud = new TagCloud(domNode, colorScale);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
-      await promisify(tagCloud.once)('renderComplete');
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
 
       //make bigger
       tagCloud._size = [600, 600];
       tagCloud.resize();
-      await promisify(tagCloud.once)('renderComplete');
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -398,12 +429,20 @@ describe('tag cloud tests', () => {
       tagCloud = new TagCloud(domNode, colorScale);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
-      await promisify(tagCloud.once)('renderComplete');
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
 
       //make smaller
       tagCloud._size = [];
       tagCloud.resize();
-      await promisify(tagCloud.once)('renderComplete');
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -421,7 +460,11 @@ describe('tag cloud tests', () => {
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
 
-      await promisify(tagCloud.once)('renderComplete');
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
 
       expect(domNode.innerHTML).toMatchSnapshot();
     });
