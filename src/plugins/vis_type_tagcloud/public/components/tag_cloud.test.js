@@ -31,6 +31,7 @@
 import _ from 'lodash';
 import d3 from 'd3';
 import 'jest-canvas-mock';
+
 import { promisify } from 'util';
 import { TagCloud } from './tag_cloud';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public';
