@@ -82,7 +82,11 @@ export default new Datasource('worldbank_indicators', {
       return worldbank.timelineFn(wbArgs, tlConfig);
     });
 
-    return Promise.all(seriesLists.map((seriesList) => seriesList.list[0])).then(function (list) {
+    Promise.all(
+      seriesLists.map(function (seriesList) {
+        return seriesList.list[0];
+      })
+    ).then(function (list) {
       return {
         type: 'seriesList',
         list: list,
