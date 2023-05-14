@@ -29,7 +29,6 @@
  */
 
 import _ from 'lodash';
-import Bluebird from 'bluebird';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 
@@ -56,7 +55,7 @@ export default function chainRunner(tlConfig) {
 
     function resolveArgument(item) {
       if (Array.isArray(item)) {
-        return Bluebird.all(_.map(item, resolveArgument));
+        return Promise.all(_.map(item, resolveArgument));
       }
 
       if (_.isObject(item)) {
@@ -65,7 +64,7 @@ export default function chainRunner(tlConfig) {
             const itemFunctionDef = tlConfig.getFunction(item.function);
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
-              return Bluebird.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
+              return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
             return invoke(item.function, item.arguments);
           }
@@ -108,7 +107,7 @@ export default function chainRunner(tlConfig) {
 
     args = _.map(args, resolveArgument);
 
-    return Bluebird.all(args).then(function (args) {
+    return Promise.all(args).then(function (args) {
       args.byName = indexArguments(functionDef, args);
       return functionDef.fn(args, tlConfig);
     });
@@ -142,7 +141,7 @@ export default function chainRunner(tlConfig) {
         return args;
       });
     });
-    return Bluebird.all(seriesList).then(function (args) {
+    return Promise.all(seriesList).then(function (args) {
       const list = _.chain(args).map('list').flatten().value();
       const seriesList = _.merge.apply(this, _.flatten([{}, args]));
       seriesList.list = list;
@@ -172,7 +171,7 @@ export default function chainRunner(tlConfig) {
       })
       .value();
 
-    return Bluebird.settle(promises).then(function (resolvedDatasources) {
+    return Promise.allSettled(promises).then(function (resolvedDatasources) {
       stats.queryTime = new Date().getTime();
 
       _.each(queries, function (query, i) {
