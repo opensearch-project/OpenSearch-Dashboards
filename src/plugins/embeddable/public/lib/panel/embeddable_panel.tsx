@@ -200,6 +200,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.state.errorEmbeddable) {
       this.state.errorEmbeddable.destroy();
     }
+    this.props.embeddable.destroy();
   }
 
   public onFocus = (focusedPanelIndex: string) => {
