@@ -97,7 +97,8 @@
     "**/unset-value": "^2.0.1",
     "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
     "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1",
-    "**/xml2js": "^0.5.0"
+    "**/xml2js": "^0.5.0",
+    "**/yaml": "^2.2.2"
   },
   "workspaces": {
     "packages": [
@@ -183,7 +184,7 @@
     "https-proxy-agent": "^5.0.0",
     "inline-style": "^2.0.0",
     "ip-cidr": "^2.1.0",
-    "joi": "^13.5.2",
+    "joi": "^14.3.1",
     "js-yaml": "^4.1.0",
     "json-stable-stringify": "^1.0.1",
     "json-stringify-safe": "5.0.1",
