@@ -28,8 +28,11 @@
  * under the License.
  */
 
-import { delay } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export function LoginPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
