@@ -81,7 +81,7 @@ export interface EmbeddableFactory<
    * Returns a display name for this type of embeddable. Used in "Create new... " options
    * in the add panel for containers.
    */
-  getDisplayName(): JSX.Element | string;
+  getDisplayName(): string;
 
   /**
    * If false, this type of embeddable can't be created with the "createNew" functionality. Instead,
