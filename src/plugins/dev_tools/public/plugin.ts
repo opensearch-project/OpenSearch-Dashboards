@@ -78,7 +78,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         defaultMessage: 'Dev Tools',
       }),
       updater$: this.appStateUpdater,
-      euiIconType: '/plugins/home/assets/logos/opensearch_mark_default.svg',
+      icon: '/plugins/home/public/assets/logos/opensearch_mark_default.svg',
       order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
