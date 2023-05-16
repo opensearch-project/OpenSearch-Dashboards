@@ -17,7 +17,10 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2021-23382] Bump postcss from `8.2.10` to `8.2.13` ([#3739](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3739))
 - [CVE-2021-3803] Bump nth-check from `1.0.2` to `2.0.1` ([#3729](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3729))
 - [CVE-2022-25858] Bump terser from `4.8.0` to `4.8.1` ([#3726](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3726))
+- [CVE-2020-15366] Bump ajv from `4.11.8` to `6.12.6` ([#3769](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3769))
+- [CVE-2021-35065] Bump glob-parent from `6.0.0` to `6.0.2` ([#3742](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3742))
 - [CVE-2022-25851] Bump jpeg-js from `0.4.1` to `0.4.4` ([#3741](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3741))
+- [CVE-2022-48285] Bump jszip from `3.7.1` to `3.10.1` ([#3740](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3740))
 
 ### 📈 Features/Enhancements
 

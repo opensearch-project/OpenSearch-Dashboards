@@ -85,6 +85,7 @@
   "resolutions": {
     "**/@types/node": ">=10.17.17 <10.20.0",
     "**/@types/react": "^16.14.23",
+    "**/ajv": "^6.12.6",
     "**/ansi-html": "^0.0.8",
     "**/ansi-regex": "^5.0.1",
     "!chromedriver/**/axios": "^0.21.4",
@@ -94,7 +95,7 @@
     "**/flat": "^5.0.2",
     "**/follow-redirects": "^1.15.2",
     "**/front-matter": "^4.0.2",
-    "**/glob-parent": "^6.0.0",
+    "**/glob-parent": "^6.0.2",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/immer": "^8.0.1",
     "**/istanbul-instrumenter-loader/schema-utils": "^1.0.0",
