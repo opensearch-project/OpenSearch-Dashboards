@@ -34,7 +34,7 @@ import { ReactWrapper } from 'enzyme';
 import { ContextErrorMessage } from './context_error_message';
 // @ts-ignore
 import { FAILURE_REASONS, LOADING_STATUS } from '../../angular/context/query';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from 'test_utils/helpers';
 
 describe('loading spinner', function () {
   let component: ReactWrapper;
