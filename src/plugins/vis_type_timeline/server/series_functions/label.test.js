@@ -51,4 +51,24 @@ describe('label.js', () => {
       expect(r.output.list[0].label).to.equal('beerative');
     });
   });
+
+  it('can use a regex to capture groups to modify series label', () => {
+    return invoke(fn, [seriesList, 'beer$2', '(N)(egative)']).then((r) => {
+      expect(r.output.list[0].label).to.equal('beeregative');
+    });
+  });
+
+  it('can handle different regex patterns', () => {
+    const seriesListCopy1 = JSON.parse(JSON.stringify(seriesList));
+    const seriesListCopy2 = JSON.parse(JSON.stringify(seriesList));
+
+    return Promise.all([
+      invoke(fn, [seriesListCopy1, 'beer$1 - $2', '(N)(egative)']).then((r) => {
+        expect(r.output.list[0].label).to.equal('beerN - egative');
+      }),
+      invoke(fn, [seriesListCopy2, 'beer$1_$2', '(N)(eg.*)']).then((r) => {
+        expect(r.output.list[0].label).to.equal('beerN_egative');
+      }),
+    ]);
+  });
 });
