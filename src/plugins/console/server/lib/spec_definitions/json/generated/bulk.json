@@ -24,6 +24,6 @@
       "_bulk",
       "{indices}/_bulk"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/bulk/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/document-apis/bulk/"
   }
 }

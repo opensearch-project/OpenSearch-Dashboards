@@ -89,6 +89,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   branding: ChromeBranding;
+  survey: string | undefined;
 }
 
 export function Header({
@@ -99,6 +100,7 @@ export function Header({
   onIsLockedUpdate,
   homeHref,
   branding,
+  survey,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -171,7 +173,13 @@ export function Header({
                   aria-controls={navId}
                   ref={toggleCollapsibleNavRef}
                 >
-                  <EuiIcon type="menu" size="m" />
+                  <EuiIcon
+                    type="menu"
+                    size="m"
+                    title={i18n.translate('core.ui.primaryNav.menu', {
+                      defaultMessage: 'Menu',
+                    })}
+                  />
                 </EuiHeaderSectionItemButton>
               </EuiHeaderSectionItem>
 
@@ -220,6 +228,7 @@ export function Header({
                   helpSupportUrl$={observables.helpSupportUrl$}
                   opensearchDashboardsDocLink={opensearchDashboardsDocLink}
                   opensearchDashboardsVersion={opensearchDashboardsVersion}
+                  surveyLink={survey}
                 />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>

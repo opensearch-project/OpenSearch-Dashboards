@@ -114,7 +114,6 @@ export function initDashboardApp(app, deps) {
           deps.core.chrome.docTitle.change(
             i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
           );
-          const service = deps.savedDashboards;
           const dashboardConfig = deps.dashboardConfig;
 
           // syncs `_g` portion of url with query services
@@ -151,7 +150,7 @@ export function initDashboardApp(app, deps) {
               type: $scope.dashboardListTypes,
               search: search ? `${search}*` : undefined,
               fields: ['title', 'type', 'description', 'updated_at'],
-              perPage: $scope.initialPageSize,
+              perPage: $scope.listingLimit,
               page: 1,
               searchFields: ['title^3', 'type', 'description'],
               defaultSearchOperator: 'AND',
@@ -164,14 +163,33 @@ export function initDashboardApp(app, deps) {
             };
           };
 
-          $scope.editItem = ({ editUrl }) => {
-            history.push(deps.addBasePath(editUrl));
+          $scope.editItem = ({ appId, editUrl }) => {
+            if (appId === 'dashboard') {
+              history.push(editUrl);
+            } else {
+              deps.core.application.navigateToUrl(editUrl);
+            }
           };
-          $scope.viewItem = ({ viewUrl }) => {
-            history.push(deps.addBasePath(viewUrl));
+          $scope.viewItem = ({ appId, viewUrl }) => {
+            if (appId === 'dashboard') {
+              history.push(viewUrl);
+            } else {
+              deps.core.application.navigateToUrl(viewUrl);
+            }
           };
           $scope.delete = (dashboards) => {
-            return service.delete(dashboards.map((d) => d.id));
+            const ids = dashboards.map((d) => ({ id: d.id, appId: d.appId }));
+            return Promise.all(
+              ids.map(({ id, appId }) => {
+                return deps.savedObjectsClient.delete(appId, id);
+              })
+            ).catch((error) => {
+              deps.toastNotifications.addError(error, {
+                title: i18n.translate('dashboard.dashboardListingDeleteErrorTitle', {
+                  defaultMessage: 'Error deleting dashboard',
+                }),
+              });
+            });
           };
           $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
           $scope.initialFilter = parse(history.location.search).filter || EMPTY_FILTER;
