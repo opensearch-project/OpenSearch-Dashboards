@@ -1,7 +1,11 @@
 # https://docs.codecov.com/docs/codecov-yaml
+codecov:
+  require_ci_to_pass: yes
+
 coverage:
   status:
     project:
       default:
-        # https://docs.codecov.com/docs/commit-status#target
-        target: auto  # coverage must be equal or above the previous commit
+        target: auto
+        threshold: 2% # the leniency in hitting the target
+
