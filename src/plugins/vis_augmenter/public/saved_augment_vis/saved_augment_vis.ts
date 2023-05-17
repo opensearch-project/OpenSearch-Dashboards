@@ -12,7 +12,7 @@ import {
 import { createSavedAugmentVisClass } from './_saved_augment_vis';
 import { VisLayerTypes } from '../types';
 import { getUISettings } from '../services';
-import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../constants';
+import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectOpenSearchDashboardsServicesWithAugmentVis

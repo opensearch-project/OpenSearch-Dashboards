@@ -17,8 +17,8 @@ import {
   VisLayerFunctionDefinition,
   VisLayer,
   isVisLayerWithError,
-  PLUGIN_AUGMENTATION_ENABLE_SETTING,
 } from '../';
+import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { getUISettings } from '../services';
 
 export const isEligibleForVisLayers = (vis: Vis): boolean => {

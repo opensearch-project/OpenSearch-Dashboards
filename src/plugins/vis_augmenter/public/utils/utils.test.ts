@@ -17,8 +17,8 @@ import {
   generateVisLayer,
   VisLayerTypes,
   VisLayerExpressionFn,
-  PLUGIN_AUGMENTATION_ENABLE_SETTING,
 } from '../';
+import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { AggConfigs, AggTypesRegistryStart, IndexPattern } from '../../../data/common';
 import { mockAggTypesRegistry } from '../../../data/common/search/aggs/test_helpers';
 import { uiSettingsServiceMock } from '../../../../core/public/mocks';

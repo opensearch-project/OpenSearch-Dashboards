@@ -9,7 +9,7 @@ import { ISavedAugmentVis } from '../types';
 import {
   PLUGIN_AUGMENTATION_ENABLE_SETTING,
   PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING,
-} from '../../constants';
+} from '../../../common/constants';
 
 /**
  * Create an augment vis saved object given an object that

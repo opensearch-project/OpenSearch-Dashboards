@@ -20,7 +20,7 @@ import { VisAugmenterPluginConfigType } from '../config';
 import {
   PLUGIN_AUGMENTATION_ENABLE_SETTING,
   PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING,
-} from './constants';
+} from '../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterPluginSetup {}

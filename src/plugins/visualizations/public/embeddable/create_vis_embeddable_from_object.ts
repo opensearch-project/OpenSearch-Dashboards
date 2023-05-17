@@ -45,7 +45,7 @@ import {
   getTimeFilter,
   getCapabilities,
 } from '../services';
-import { getSavedAugmentVisLoader } from '../../../vis_augmenter/public';
+import { getSavedAugmentVisLoader } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { SavedVisualizationsLoader } from '../saved_visualizations';

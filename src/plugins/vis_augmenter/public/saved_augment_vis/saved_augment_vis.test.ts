@@ -11,7 +11,7 @@ import {
 import { generateAugmentVisSavedObject, getMockAugmentVisSavedObjectClient } from './utils';
 import { uiSettingsServiceMock } from '../../../../core/public/mocks';
 import { setUISettings } from '../services';
-import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../constants';
+import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 
 const uiSettingsMock = uiSettingsServiceMock.createStartContract();
 setUISettings(uiSettingsMock);
