@@ -490,6 +490,7 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
     color: 'red',
     filled: true,
     opacity: 1,
+    style: [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`],
   },
   transform: [
     { filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` },
