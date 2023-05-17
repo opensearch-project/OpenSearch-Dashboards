@@ -36,6 +36,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 // @ts-ignore
+import { Signal } from 'vega';
 import { vega, vegaLite } from '../lib/vega';
 import { OpenSearchQueryParser } from './opensearch_query_parser';
 import { Utils } from './utils';
@@ -322,6 +323,49 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       ) {
         delete this.spec.autosize;
       }
+    }
+
+    if (this._config?.signals) {
+      Object.entries(this._config?.signals).forEach(([markId, signals]: [string, any]) => {
+        const mark = this.getMarkWithStyle(this.spec.marks, markId);
+
+        if (mark) {
+          signals.forEach((signal: Signal) => {
+            signal.on?.forEach((eventObj) => {
+              eventObj.events = `@${mark.name}:${eventObj.events}`;
+            });
+          });
+          this.spec.signals = (this.spec.signals || []).concat(signals);
+        }
+      });
+    }
+  }
+
+  /**
+   *
+   */
+  getMarkWithStyle(marks: any[], style: string): any {
+    if (!marks) {
+      return undefined;
+    }
+
+    if (Array.isArray(marks)) {
+      const markWithStyle = marks.find((mark) => {
+        return mark.style?.includes(style);
+      });
+
+      if (markWithStyle) {
+        return markWithStyle;
+      }
+
+      for (let i = 0; i < marks.length; i++) {
+        const res = this.getMarkWithStyle(marks[i].marks, style);
+        if (res) {
+          return res;
+        }
+      }
+
+      return undefined;
     }
   }
 

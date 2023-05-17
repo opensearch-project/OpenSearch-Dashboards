@@ -9,12 +9,6 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public'
 import { visLayers } from './expressions';
 import { setSavedAugmentVisLoader } from './services';
 import { createSavedAugmentVisLoader, SavedAugmentVisLoader } from './saved_augment_vis';
-import {
-  UiActionsSetup,
-  EXTERNAL_ACTION_TRIGGER,
-  externalActionTrigger,
-} from '../../ui_actions/public';
-import { createExternalActionAction } from './actions/external_action_action';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterSetup {}
@@ -26,7 +20,6 @@ export interface VisAugmenterStart {
 export interface VisAugmenterSetupDeps {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
-  uiActions: UiActionsSetup;
 }
 
 export interface VisAugmenterStartDeps {
@@ -40,15 +33,9 @@ export class VisAugmenterPlugin
 
   public setup(
     core: CoreSetup<VisAugmenterStartDeps, VisAugmenterStart>,
-    { data, expressions, uiActions }: VisAugmenterSetupDeps
+    { data, expressions }: VisAugmenterSetupDeps
   ): VisAugmenterSetup {
     expressions.registerType(visLayers);
-    try {
-      uiActions.registerTrigger(externalActionTrigger);
-      uiActions.addTriggerAction(EXTERNAL_ACTION_TRIGGER, createExternalActionAction());
-    } catch (error: any) {
-      // NYI
-    }
     return {};
   }
 

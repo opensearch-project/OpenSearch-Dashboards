@@ -3,5 +3,5 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "savedObjects", "opensearchDashboardsUtils", "expressions", "uiActions"]
+  "requiredPlugins": ["data", "savedObjects", "opensearchDashboardsUtils", "expressions"]
 }

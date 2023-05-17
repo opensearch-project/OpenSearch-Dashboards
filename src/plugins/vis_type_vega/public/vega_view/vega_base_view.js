@@ -51,6 +51,7 @@ const vegaFunctions = {
   opensearchDashboardsRemoveFilter: 'removeFilterHandler',
   opensearchDashboardsRemoveAllFilters: 'removeAllFiltersHandler',
   opensearchDashboardsSetTimeFilter: 'setTimeFilterHandler',
+  opensearchDashboardsVisEventTriggered: 'triggerExternalActionHandler',
 };
 
 for (const funcName of Object.keys(vegaFunctions)) {
@@ -298,15 +299,6 @@ export class VegaBaseView {
         this._addDestroyHandler(() => tthandler.hideTooltip());
       }
 
-      ['click', 'mouseover', 'mouseout'].forEach((eventName) => {
-        view.addEventListener(eventName, (_event, item) => {
-          this._triggerExternalAction({
-            event: eventName,
-            item,
-          });
-        });
-      });
-
       return view.runAsync(); // Allows callers to await rendering
     }
   }
@@ -351,6 +343,18 @@ export class VegaBaseView {
       alias
     );
     this._applyFilter({ filters: [filter] });
+  }
+
+  /**
+   * This method is triggered using signal expression in vega-spec via @see opensearchDashboardsVisEventTriggered
+   * @param {import('vega').ScenegraphEvent} event   Event triggered by the underlying vega visualization.
+   * @param {import('vega').Item} datum   Data associated with the element on which the event was triggered.
+   */
+  triggerExternalActionHandler(event, datum) {
+    this._triggerExternalAction({
+      event,
+      item: datum,
+    });
   }
 
   /**

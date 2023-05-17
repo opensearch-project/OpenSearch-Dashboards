@@ -50,6 +50,34 @@ export const enableVisLayersInSpecConfig = (spec: object, visLayers: VisLayers):
   };
 };
 
+/**
+ * Adds the signals which vega will use to trigger required events on the point in time annotation marks
+ */
+export const addVisEventSignalsToSpecConfig = (spec: object) => {
+  const config = get(spec, 'config', { kibana: {} });
+  const signals = {
+    ...(config.kibana.signals || {}),
+    [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`]: [
+      {
+        name: 'PointInTimeAnnotationVisEvent',
+        on: [
+          { events: 'click', update: 'opensearchDashboardsVisEventTriggered(event, datum)' },
+          { events: 'mouseover', update: 'opensearchDashboardsVisEventTriggered(event, datum)' },
+          { events: 'mouseout', update: 'opensearchDashboardsVisEventTriggered(event, datum)' },
+        ],
+      },
+    ],
+  };
+
+  return {
+    ...config,
+    kibana: {
+      ...config.kibana,
+      signals,
+    },
+  };
+};
+
 // Get the first xaxis field as only 1 setup of X Axis will be supported and
 // there won't be support for split series and split chart
 export const getXAxisId = (
@@ -315,6 +343,9 @@ export const addPointInTimeEventsLayersToSpec = (
       color: EVENT_COLOR,
       filled: true,
       opacity: 1,
+      // This style is only used to locate this mark when trying to add signals in the compiled vega spec.
+      // @see @method vega_parser._compileVegaLite
+      style: [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`],
     },
     transform: [
       { filter: generateVisLayerFilterString(visLayerColumnIds) },
