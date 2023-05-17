@@ -9,7 +9,6 @@ import { i18n } from '@osd/i18n';
 
 export interface ImportModeControlProps {
   initialValues: ImportMode;
-  isLegacyFile: boolean;
   updateSelection: (result: ImportMode) => void;
 }
 
@@ -33,11 +32,7 @@ const importOptionsTitle = i18n.translate('console.importModeControl.importOptio
   defaultMessage: 'Import options',
 });
 
-export const ImportModeControl = ({
-  initialValues,
-  isLegacyFile,
-  updateSelection,
-}: ImportModeControlProps) => {
+export const ImportModeControl = ({ initialValues, updateSelection }: ImportModeControlProps) => {
   const [overwrite, setOverwrite] = useState(initialValues.overwrite);
 
   const onChange = (partial: Partial<ImportMode>) => {
@@ -54,10 +49,6 @@ export const ImportModeControl = ({
       onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
     />
   );
-
-  if (isLegacyFile) {
-    return overwriteRadio;
-  }
 
   return (
     <EuiFormFieldset

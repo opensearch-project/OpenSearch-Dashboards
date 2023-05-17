@@ -38,7 +38,7 @@ interface ImportFlyoutProps {
 }
 
 const getErrorMessage = () => {
-  return i18n.translate('console.ImpoerFlyout.importFileErrorMessage', {
+  return i18n.translate('console.ImportFlyout.importFileErrorMessage', {
     defaultMessage: 'The file could not be processed due to error.',
   });
 };
@@ -150,7 +150,6 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
         <EuiFormRow fullWidth>
           <ImportModeControl
             initialValues={importMode}
-            isLegacyFile={false}
             updateSelection={(newValues: ImportMode) => setImportMode(newValues)}
           />
         </EuiFormRow>
@@ -203,7 +202,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
       } else {
         setStatus('error');
         setError(
-          i18n.translate('console.ImpoerFlyout.importFileErrorMessage', {
+          i18n.translate('console.ImportFlyout.importFileErrorMessage', {
             defaultMessage: 'The selected file is not valid. Please select a valid JSON file.',
           })
         );
