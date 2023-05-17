@@ -95,7 +95,7 @@ import {
 } from './saved_visualizations/_saved_vis';
 import { createSavedSearchesLoader } from '../../discover/public';
 import { DashboardStart } from '../../dashboard/public';
-import { createSavedAugmentVisLoader } from '../../vis_augmenter/public';
+import { createSavedAugmentVisLoader, VisAugmenterStart } from '../../vis_augmenter/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -133,6 +133,7 @@ export interface VisualizationsStartDeps {
   getAttributeService: DashboardStart['getAttributeService'];
   savedObjectsClient: SavedObjectsClientContract;
   notifications: NotificationsStart;
+  visAugmenter: VisAugmenterStart;
 }
 
 /**
@@ -179,7 +180,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, dashboard }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable, dashboard, visAugmenter }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
@@ -198,6 +199,7 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
+    setSavedAugmentVisLoader(visAugmenter.savedAugmentVisLoader);
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
