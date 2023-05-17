@@ -386,6 +386,7 @@ jobs:
         with:
           name: ${{ matrix.version }}-test-failures
           path: |
-            ./artifacts/bwc_tmp/test/cypress/videos/without-security/*
-            ./artifacts/bwc_tmp/test/cypress/screenshots/without-security/*
+            ./artifacts/bwc_tmp/test/cypress/videos/*
+            ./artifacts/bwc_tmp/test/cypress/screenshots/*
+            ./artifacts/bwc_tmp/test/cypress/results/*
           retention-days: 1
