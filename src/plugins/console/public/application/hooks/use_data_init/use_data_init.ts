@@ -31,6 +31,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
+import { DEFAULT_INPUT_VALUE } from '../../containers/editor/legacy/console_editor/editor';
 
 export const useDataInit = () => {
   const [error, setError] = useState<Error | null>(null);
@@ -58,7 +59,7 @@ export const useDataInit = () => {
           const newObject = await objectStorageClient.text.create({
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            text: '',
+            text: DEFAULT_INPUT_VALUE,
           });
           dispatch({ type: 'setCurrentTextObject', payload: newObject });
         } else {

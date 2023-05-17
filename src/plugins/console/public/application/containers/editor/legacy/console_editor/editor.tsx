@@ -68,7 +68,7 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-const DEFAULT_INPUT_VALUE = `GET _search
+export const DEFAULT_INPUT_VALUE = `GET _search
 {
   "query": {
     "match_all": {}
