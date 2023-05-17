@@ -28,22 +28,28 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import _ from 'lodash';
-
 /**
  * Will figure out if an heatmap state was saved before the auto coloring
  * feature of heatmaps was created. If so it will set the overwriteColor flag
  * for the label to true if labels are enabled and a non default color has been used.
  * So that those earlier created heatmaps will still use the manual specified color.
  */
+
+const get = (obj, path, defaultValue) => {
+  const travel = (regexp) =>
+    String.prototype.split
+      .call(path, regexp)
+      .filter(Boolean)
+      .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+  const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
+  return result === null || result === obj ? defaultValue : result;
+};
+
 function convertHeatmapLabelColor(visState) {
   const hasOverwriteColorParam =
-    _.get(visState, 'params.valueAxes[0].labels.overwriteColor') !== undefined;
+    get(visState, 'params.valueAxes[0].labels.overwriteColor') !== undefined;
   if (visState.type === 'heatmap' && visState.params && !hasOverwriteColorParam) {
-    const showLabels = _.get(visState, 'params.valueAxes[0].labels.show', false);
-    const color = _.get(visState, 'params.valueAxes[0].labels.color', '#555');
-    set(visState, 'params.valueAxes[0].labels.overwriteColor', showLabels && color !== '#555');
+    visState.gauge = { style: { fontSize: visState.fontSize } };
   }
 }
 
@@ -64,7 +70,7 @@ function convertTermAggregation(visState) {
 
 function convertPropertyNames(visState) {
   // 'showMeticsAtAllLevels' is a legacy typo we'll fix by changing it to 'showMetricsAtAllLevels'.
-  if (typeof _.get(visState, 'params.showMeticsAtAllLevels') === 'boolean') {
+  if (typeof get(visState, 'params.showMeticsAtAllLevels') === 'boolean') {
     visState.params.showMetricsAtAllLevels = visState.params.showMeticsAtAllLevels;
     delete visState.params.showMeticsAtAllLevels;
   }
@@ -91,7 +97,6 @@ function convertSeriesParams(visState) {
   if (visState.params.seriesParams) {
     return;
   }
-
   // update value axis options
   const isUserDefinedYAxis = visState.params.setYExtents;
   const defaultYExtents = visState.params.defaultYExtents;
@@ -167,7 +172,7 @@ function convertSeriesParams(visState) {
  */
 export const updateOldState = (visState) => {
   if (!visState) return visState;
-  const newState = _.cloneDeep(visState);
+  const newState = JSON.parse(JSON.stringify(visState));
 
   convertTermAggregation(newState);
   convertPropertyNames(newState);
@@ -179,14 +184,14 @@ export const updateOldState = (visState) => {
 
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;
-    set(newState, 'gauge.style.fontSize', visState.fontSize);
+    newState.gauge = { style: { fontSize: visState.fontSize } };
   }
 
   // update old metric to the new one
   // Changed from 6.0 -> 6.1
   if (
     ['gauge', 'metric'].includes(visState.type) &&
-    _.get(visState.params, 'gauge.gaugeType', null) === 'Metric'
+    get(visState.params, 'gauge.gaugeType', null) === 'Metric'
   ) {
     newState.type = 'metric';
     newState.params.addLegend = false;
@@ -205,7 +210,7 @@ export const updateOldState = (visState) => {
     delete newState.params.metric.gaugeColorMode;
   } else if (
     visState.type === 'metric' &&
-    _.get(visState.params, 'gauge.gaugeType', 'Metric') !== 'Metric'
+    get(visState.params, 'gauge.gaugeType', 'Metric') !== 'Metric'
   ) {
     newState.type = 'gauge';
     newState.params.type = 'gauge';

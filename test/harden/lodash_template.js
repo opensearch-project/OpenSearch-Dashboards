@@ -25,16 +25,14 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.
+ * under the License
  */
-
 require('../../src/setup_node_env');
 const _ = require('lodash');
 const template = require('lodash/template');
 const fp = require('lodash/fp');
 const fpTemplate = require('lodash/fp/template');
 const test = require('tape');
-
 Object.prototype.sourceURL = '\u2028\u2029\n;global.whoops=true'; // eslint-disable-line no-extend-native
 
 test.onFinish(() => {
