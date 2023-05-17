@@ -53,7 +53,6 @@ export const VisualizeListing = () => {
       savedVisualizations,
       toastNotifications,
       visualizations,
-      savedObjects,
       savedObjectsPublic,
       uiSettings,
       visualizeCapabilities,
@@ -135,7 +134,7 @@ export const VisualizeListing = () => {
   const deleteItems = useCallback(
     async (selectedItems: object[]) => {
       await Promise.all(
-        selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
+        selectedItems.map((item: any) => savedVisualizations.delete(item.id))
       ).catch((error) => {
         toastNotifications.addError(error, {
           title: i18n.translate('visualize.visualizeListingDeleteErrorTitle', {
@@ -144,7 +143,7 @@ export const VisualizeListing = () => {
         });
       });
     },
-    [savedObjects.client, toastNotifications]
+    [savedVisualizations, toastNotifications]
   );
 
   return (

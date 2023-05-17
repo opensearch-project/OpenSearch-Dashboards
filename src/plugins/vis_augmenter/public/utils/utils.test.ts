@@ -16,6 +16,11 @@ import {
   ISavedAugmentVis,
   VisLayerTypes,
   VisLayerExpressionFn,
+  cleanupStaleObjects,
+  VisLayer,
+  PluginResource,
+  VisLayerErrorTypes,
+  SavedObjectLoaderAugmentVis,
 } from '../';
 import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { AggConfigs, AggTypesRegistryStart, IndexPattern } from '../../../data/common';
@@ -427,6 +432,131 @@ describe('utils', () => {
       const err = getAnyErrors([noErrorLayer1, errorLayer1], 'test-vis-title');
       expect(err).not.toEqual(undefined);
       expect(err?.stack).toStrictEqual(`-----resource-type-1-----\nID: 1234\nMessage: "uh-oh!"`);
+    });
+  });
+
+  describe('cleanupStaleObjects', () => {
+    const fn = {
+      type: VisLayerTypes.PointInTimeEvents,
+      name: 'test-fn',
+      args: {
+        testArg: 'test-value',
+      },
+    } as VisLayerExpressionFn;
+    const originPlugin = 'test-plugin';
+    const resourceId1 = 'resource-1';
+    const resourceId2 = 'resource-2';
+    const resourceType1 = 'resource-type-1';
+    const augmentVisObj1 = generateAugmentVisSavedObject('id-1', fn, 'vis-id-1', originPlugin, {
+      type: resourceType1,
+      id: resourceId1,
+    });
+    const augmentVisObj2 = generateAugmentVisSavedObject('id-2', fn, 'vis-id-1', originPlugin, {
+      type: resourceType1,
+      id: resourceId2,
+    });
+    const resource1 = {
+      type: 'test-resource-type-1',
+      id: resourceId1,
+      name: 'resource-1',
+      urlPath: 'test-path',
+    } as PluginResource;
+    const resource2 = {
+      type: 'test-resource-type-1',
+      id: resourceId2,
+      name: 'resource-2',
+      urlPath: 'test-path',
+    } as PluginResource;
+    const validVisLayer1 = generateVisLayer(VisLayerTypes.PointInTimeEvents, false, '', resource1);
+    const staleVisLayer1 = {
+      ...generateVisLayer(VisLayerTypes.PointInTimeEvents, true, '', resource1),
+      error: {
+        type: VisLayerErrorTypes.RESOURCE_DELETED,
+        message: 'resource is deleted',
+      },
+    };
+    const staleVisLayer2 = {
+      ...generateVisLayer(VisLayerTypes.PointInTimeEvents, true, '', resource2),
+      error: {
+        type: VisLayerErrorTypes.RESOURCE_DELETED,
+        message: 'resource is deleted',
+      },
+    };
+
+    it('no augment-vis objs, no vislayers', async () => {
+      const mockDeleteFn = jest.fn();
+      const augmentVisObjs = [] as ISavedAugmentVis[];
+      const visLayers = [] as VisLayer[];
+      const augmentVisLoader = createSavedAugmentVisLoader({
+        savedObjectsClient: {
+          ...getMockAugmentVisSavedObjectClient(augmentVisObjs),
+          delete: mockDeleteFn,
+        },
+      } as any) as SavedObjectLoaderAugmentVis;
+
+      cleanupStaleObjects(augmentVisObjs, visLayers, augmentVisLoader);
+
+      expect(mockDeleteFn).toHaveBeenCalledTimes(0);
+    });
+    it('no stale vislayers', async () => {
+      const mockDeleteFn = jest.fn();
+      const augmentVisObjs = [augmentVisObj1];
+      const visLayers = [validVisLayer1];
+      const augmentVisLoader = createSavedAugmentVisLoader({
+        savedObjectsClient: {
+          ...getMockAugmentVisSavedObjectClient(augmentVisObjs),
+          delete: mockDeleteFn,
+        },
+      } as any) as SavedObjectLoaderAugmentVis;
+
+      cleanupStaleObjects(augmentVisObjs, visLayers, augmentVisLoader);
+
+      expect(mockDeleteFn).toHaveBeenCalledTimes(0);
+    });
+    it('1 stale vislayer', async () => {
+      const mockDeleteFn = jest.fn();
+      const augmentVisObjs = [augmentVisObj1];
+      const visLayers = [staleVisLayer1];
+      const augmentVisLoader = createSavedAugmentVisLoader({
+        savedObjectsClient: {
+          ...getMockAugmentVisSavedObjectClient(augmentVisObjs),
+          delete: mockDeleteFn,
+        },
+      } as any) as SavedObjectLoaderAugmentVis;
+
+      cleanupStaleObjects(augmentVisObjs, visLayers, augmentVisLoader);
+
+      expect(mockDeleteFn).toHaveBeenCalledTimes(1);
+    });
+    it('multiple stale vislayers', async () => {
+      const mockDeleteFn = jest.fn();
+      const augmentVisObjs = [augmentVisObj1, augmentVisObj2];
+      const visLayers = [staleVisLayer1, staleVisLayer2];
+      const augmentVisLoader = createSavedAugmentVisLoader({
+        savedObjectsClient: {
+          ...getMockAugmentVisSavedObjectClient(augmentVisObjs),
+          delete: mockDeleteFn,
+        },
+      } as any) as SavedObjectLoaderAugmentVis;
+
+      cleanupStaleObjects(augmentVisObjs, visLayers, augmentVisLoader);
+
+      expect(mockDeleteFn).toHaveBeenCalledTimes(2);
+    });
+    it('stale and valid vislayers', async () => {
+      const mockDeleteFn = jest.fn();
+      const augmentVisObjs = [augmentVisObj1, augmentVisObj2];
+      const visLayers = [validVisLayer1, staleVisLayer2];
+      const augmentVisLoader = createSavedAugmentVisLoader({
+        savedObjectsClient: {
+          ...getMockAugmentVisSavedObjectClient(augmentVisObjs),
+          delete: mockDeleteFn,
+        },
+      } as any) as SavedObjectLoaderAugmentVis;
+
+      cleanupStaleObjects(augmentVisObjs, visLayers, augmentVisLoader);
+
+      expect(mockDeleteFn).toHaveBeenCalledTimes(1);
     });
   });
 });

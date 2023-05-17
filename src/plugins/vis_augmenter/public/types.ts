@@ -10,6 +10,7 @@ export enum VisLayerTypes {
 export enum VisLayerErrorTypes {
   PERMISSIONS_FAILURE = 'PERMISSIONS_FAILURE',
   FETCH_FAILURE = 'FETCH_FAILURE',
+  RESOURCE_DELETED = 'RESOURCE_DELETED',
 }
 
 export enum VisFlyoutContext {

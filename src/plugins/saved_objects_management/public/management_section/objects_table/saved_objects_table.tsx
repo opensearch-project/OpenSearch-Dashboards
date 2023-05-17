@@ -512,9 +512,19 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    const deletes = objects.savedObjects.map((object) =>
-      savedObjectsClient.delete(object.type, object.id, { force: true })
-    );
+    // TODO: may ignore this use case. leaving commented out code for now
+    const visualizeLoader = this.props.serviceRegistry.get('savedVisualizations')?.service;
+    const deletes = objects.savedObjects.map((object) => {
+      // // If we are deleting a visualization: call with the visualize loader so we can clean
+      // // up any potential augment-vis saved objects associated to it.
+      // if (object.type === 'visualization' && visualizeLoader !== undefined) {
+      //   await visualizeLoader.delete(object.id);
+      // } else {
+      //   savedObjectsClient.delete(object.type, object.id, { force: true });
+      // }
+      savedObjectsClient.delete(object.type, object.id, { force: true });
+    });
+
     await Promise.all(deletes);
 
     // Unset this

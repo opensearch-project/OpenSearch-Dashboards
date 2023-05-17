@@ -168,7 +168,16 @@ export class SavedObjectEdition extends Component<
       }
     );
     if (confirmed) {
-      await savedObjectsClient.delete(type, id);
+      // If we are deleting a visualization: call with the visualize loader so we can clean
+      // up any potential augment-vis saved objects associated to it.
+      if (type === 'visualization') {
+        const visualizeLoader = this.props.serviceRegistry.get('savedVisualizations')?.service;
+        if (visualizeLoader !== undefined) {
+          await visualizeLoader.delete(id);
+        }
+      } else {
+        await savedObjectsClient.delete(type, id);
+      }
       notifications.toasts.addSuccess(`Deleted ${this.formatTitle(object)} ${type} object`);
       this.redirectToListing();
     }

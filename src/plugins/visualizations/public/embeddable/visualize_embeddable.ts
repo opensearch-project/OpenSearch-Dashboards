@@ -74,14 +74,13 @@ import {
   getAnyErrors,
   VisLayerErrorTypes,
   AugmentVisContext,
-} from '../../../vis_augmenter/public';
-import { VisSavedObject } from '../types';
-import {
+  cleanupStaleObjects,
   PointInTimeEventsVisLayer,
   VisLayer,
   VisLayerTypes,
   VisAugmenterEmbeddableConfig,
 } from '../../../vis_augmenter/public';
+import { VisSavedObject } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -558,6 +557,11 @@ export class VisualizeEmbeddable
           expressionParams as Record<string, unknown>
         )) as ExprVisLayers;
         const visLayers = exprVisLayers.layers;
+
+        // There may be some stale saved objs if any plugin resources have been deleted since last time
+        // data was fetched from them via the expression functions. This will collect and delete them.
+        cleanupStaleObjects(augmentVisSavedObjs, visLayers, this.savedAugmentVisLoader);
+
         const err = getAnyErrors(visLayers, this.vis.title);
         // This is only true when one or more VisLayers has an error
         if (err !== undefined) {
