@@ -8,7 +8,7 @@ import {
   injectReferences,
   VIS_REFERENCE_NAME,
 } from './saved_augment_vis_references';
-import { AugmentVisSavedObject } from '../types';
+import { AugmentVisSavedObject } from './types';
 
 describe('extractReferences()', () => {
   test('extracts nothing if visId is null', () => {

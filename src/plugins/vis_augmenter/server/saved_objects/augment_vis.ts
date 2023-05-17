@@ -24,7 +24,13 @@ export const augmentVisSavedObjectType: SavedObjectsType = {
     properties: {
       title: { type: 'text' },
       description: { type: 'text' },
-      pluginResourceId: { type: 'text' },
+      originPlugin: { type: 'text' },
+      pluginResource: {
+        properties: {
+          type: { type: 'text' },
+          id: { type: 'text' },
+        },
+      },
       visName: { type: 'keyword', index: false, doc_values: false },
       visLayerExpressionFn: {
         properties: {

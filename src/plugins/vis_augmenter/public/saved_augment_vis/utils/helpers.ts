@@ -4,7 +4,7 @@
  */
 
 import { getSavedAugmentVisLoader } from '../../services';
-import { ISavedAugmentVis } from '../../types';
+import { ISavedAugmentVis } from '../types';
 
 /**
  * Create an augment vis saved object given an object that

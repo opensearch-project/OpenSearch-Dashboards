@@ -14,8 +14,8 @@ import {
   SavedObject,
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
-import { IIndexPattern } from '../../../data/public';
 import { extractReferences, injectReferences } from './saved_augment_vis_references';
+import { AugmentVisSavedObjectAttributes } from '../../common';
 
 const name = 'augment-vis';
 
@@ -24,28 +24,19 @@ export function createSavedAugmentVisClass(services: SavedObjectOpenSearchDashbo
 
   class SavedAugmentVis extends SavedObjectClass {
     public static type: string = name;
-    public static mapping: Record<string, string> = {
-      description: 'text',
-      pluginResourceId: 'text',
-      visId: 'keyword',
-      visLayerExpressionFn: 'text',
-      version: 'integer',
-    };
+    public static mapping: AugmentVisSavedObjectAttributes;
 
-    constructor(opts: Record<string, unknown> | string = {}) {
-      if (typeof opts !== 'object') {
-        opts = { id: opts };
-      }
+    constructor(opts: AugmentVisSavedObjectAttributes) {
       super({
         type: SavedAugmentVis.type,
         mapping: SavedAugmentVis.mapping,
         extractReferences,
         injectReferences,
         id: (opts.id as string) || '',
-        indexPattern: opts.indexPattern as IIndexPattern,
         defaults: {
           description: get(opts, 'description', ''),
-          pluginResourceId: get(opts, 'pluginResourceId', ''),
+          originPlugin: get(opts, 'originPlugin', ''),
+          pluginResource: get(opts, 'pluginResource', {}),
           visId: get(opts, 'visId', ''),
           visLayerExpressionFn: get(opts, 'visLayerExpressionFn', {}),
           version: 1,
@@ -55,5 +46,5 @@ export function createSavedAugmentVisClass(services: SavedObjectOpenSearchDashbo
     }
   }
 
-  return SavedAugmentVis as new (opts: Record<string, unknown> | string) => SavedObject;
+  return SavedAugmentVis as new (opts: AugmentVisSavedObjectAttributes) => SavedObject;
 }

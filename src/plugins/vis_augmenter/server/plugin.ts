@@ -12,6 +12,7 @@ import {
 } from '../../../core/server';
 import { augmentVisSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
+import { registerStatsRoute } from './routes/stats';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterPluginSetup {}
@@ -30,6 +31,11 @@ export class VisAugmenterPlugin
     this.logger.debug('VisAugmenter: Setup');
     core.savedObjects.registerType(augmentVisSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    // Register server-side APIs
+    const router = core.http.createRouter();
+    registerStatsRoute(router, this.logger);
+
     return {};
   }
 
