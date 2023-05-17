@@ -71,31 +71,16 @@ versionCheckCommands.some((cmd) => {
 const majorVersion = versionCheckOutput?.match?.(/(?:^|\s)(9\d|\d{3})\./)?.[1];
 
 if (majorVersion) {
-  let targetVersion = `^${majorVersion}`;
-
-  // TODO: Temporary fix to install chromedriver 112.0.0 if major version is 112.
-  //       Exit if major version is greater than 112.
-  //       Revert this once node is bumped to 16+.
-  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3975
-  if (parseInt(majorVersion) === 112) {
-    targetVersion = '112.0.0';
-  } else if (parseInt(majorVersion) > 112) {
-    console.error(
-      `::error::Chrome version (${majorVersion}) is not supported by this script. The largest chrome version we support is 112.`
-    );
-    process.exit(1);
-  }
-
   if (process.argv.includes('--install')) {
-    console.log(`Installing chromedriver@${targetVersion}`);
+    console.log(`Installing chromedriver@^${majorVersion}`);
 
-    spawnSync(`yarn add --dev chromedriver@${targetVersion}`, {
+    spawnSync(`yarn add --dev chromedriver@^${majorVersion}`, {
       stdio: 'inherit',
       cwd: process.cwd(),
       shell: true,
     });
   } else {
-    console.log(`Upgrading to chromedriver@${targetVersion}`);
+    console.log(`Upgrading to chromedriver@^${majorVersion}`);
 
     let upgraded = false;
     const writeStream = createWriteStream('package.json.upgrading-chromedriver', { flags: 'w' });
@@ -107,7 +92,7 @@ if (majorVersion) {
       if (line.includes('"chromedriver": "')) {
         line = line.replace(
           /"chromedriver":\s*"[~^]?\d[\d.]*\d"/,
-          `"chromedriver": "${targetVersion}"`
+          `"chromedriver": "^${majorVersion}"`
         );
         upgraded = true;
       }
@@ -122,11 +107,11 @@ if (majorVersion) {
         renameSync('package.json', 'package.json.bak');
         renameSync('package.json.upgrading-chromedriver', 'package.json');
 
-        console.log(`Backed up package.json and updated chromedriver to ${targetVersion}`);
+        console.log(`Backed up package.json and updated chromedriver to ${majorVersion}`);
       } else {
         unlinkSync('package.json.upgrading-chromedriver');
         console.error(
-          `Failed to update chromedriver to ${targetVersion}. Try adding the \`--install\` switch.`
+          `Failed to update chromedriver to ${majorVersion}. Try adding the \`--install\` switch.`
         );
       }
     });
