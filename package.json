@@ -97,6 +97,7 @@
     "**/unset-value": "^2.0.1",
     "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
     "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1",
+    "**/set-value": "^4.1.0",
     "**/xml2js": "^0.5.0",
     "**/yaml": "^2.2.2"
   },
@@ -211,6 +212,7 @@
     "rison-node": "1.0.2",
     "rxjs": "^6.5.5",
     "semver": "^5.7.0",
+    "set-value": "^4.1.0",
     "source-map-support": "^0.5.19",
     "symbol-observable": "^1.2.0",
     "tar": "^6.1.11",
