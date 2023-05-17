@@ -70,7 +70,6 @@ export {
   ActionContextMapping,
   ActionType,
   VisualizeFieldContext,
-  ExternalActionContext,
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,

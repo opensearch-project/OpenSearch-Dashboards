@@ -332,6 +332,8 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         if (mark) {
           signals.forEach((signal: Signal) => {
             signal.on?.forEach((eventObj) => {
+              // We are prepending mark name here so that the signals only listens to the events on
+              // the elements related to this mark
               eventObj.events = `@${mark.name}:${eventObj.events}`;
             });
           });
@@ -342,7 +344,8 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
   }
 
   /**
-   *
+   * This method recursively looks for a mark that includes the given style.
+   * Returns undefined if it doesn't find it.
    */
   getMarkWithStyle(marks: any[], style: string): any {
     if (!marks) {
