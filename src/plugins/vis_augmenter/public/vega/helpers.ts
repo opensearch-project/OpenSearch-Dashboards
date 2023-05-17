@@ -60,11 +60,7 @@ export const addVisEventSignalsToSpecConfig = (spec: object) => {
     [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`]: [
       {
         name: 'PointInTimeAnnotationVisEvent',
-        on: [
-          { events: 'click', update: 'opensearchDashboardsVisEventTriggered(event, datum)' },
-          { events: 'mouseover', update: 'opensearchDashboardsVisEventTriggered(event, datum)' },
-          { events: 'mouseout', update: 'opensearchDashboardsVisEventTriggered(event, datum)' },
-        ],
+        on: [{ events: 'click', update: 'opensearchDashboardsVisEventTriggered(event, datum)' }],
       },
     ],
   };
