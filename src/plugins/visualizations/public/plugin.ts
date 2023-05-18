@@ -216,14 +216,6 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
-    const savedAugmentVisLoader = createSavedAugmentVisLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome: core.chrome,
-      overlays: core.overlays,
-    });
-    setSavedAugmentVisLoader(savedAugmentVisLoader);
     setSavedSearchLoader(savedSearchLoader);
     setNotifications(core.notifications);
     return {
