@@ -132,7 +132,9 @@ export class CreateDataSourceForm extends React.Component<
         type: authType,
         credentials: {
           ...this.state.auth.credentials,
-          service: authType === AuthType.SigV4 ? SigV4ServiceName.OpenSearch : undefined,
+          service:
+            (this.state.auth.credentials.service as SigV4ServiceName) ||
+            SigV4ServiceName.OpenSearch,
         },
       },
     });
