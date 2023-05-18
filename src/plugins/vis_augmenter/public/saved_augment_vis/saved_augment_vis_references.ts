@@ -4,7 +4,8 @@
  */
 
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
-import { AugmentVisSavedObject } from '../types';
+import { AugmentVisSavedObjectAttributes } from '../../common';
+import { AugmentVisSavedObject } from './types';
 
 /**
  * Note that references aren't stored in the object's client-side interface (AugmentVisSavedObject).
@@ -35,7 +36,7 @@ export function extractReferences({
   attributes: SavedObjectAttributes;
   references: SavedObjectReference[];
 }) {
-  const updatedAttributes = { ...attributes };
+  const updatedAttributes = { ...attributes } as AugmentVisSavedObjectAttributes;
   const updatedReferences = [...references];
 
   // Extract saved object

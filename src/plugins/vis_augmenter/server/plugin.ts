@@ -21,6 +21,7 @@ import {
   PLUGIN_AUGMENTATION_ENABLE_SETTING,
   PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING,
 } from '../common/constants';
+import { registerStatsRoute } from './routes/stats';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterPluginSetup {}
@@ -80,6 +81,11 @@ export class VisAugmenterPlugin
         },
       });
     }
+
+    // Register server-side APIs
+    const router = core.http.createRouter();
+    registerStatsRoute(router, this.logger);
+
     return {};
   }
 

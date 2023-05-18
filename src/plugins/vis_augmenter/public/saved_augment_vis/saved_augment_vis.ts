@@ -12,7 +12,7 @@ import {
 import { createSavedAugmentVisClass } from './_saved_augment_vis';
 import { VisLayerTypes } from '../types';
 import { getUISettings } from '../services';
-import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
+import { AugmentVisSavedObjectAttributes, PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectOpenSearchDashboardsServicesWithAugmentVis
@@ -22,9 +22,9 @@ export type SavedAugmentVisLoader = ReturnType<typeof createSavedAugmentVisLoade
 export class SavedObjectLoaderAugmentVis extends SavedObjectLoader {
   private readonly config: IUiSettingsClient = getUISettings();
 
-  mapHitSource = (source: Record<string, any>, id: string) => {
+  mapHitSource = (source: AugmentVisSavedObjectAttributes, id: string) => {
     source.id = id;
-    source.visId = get(source, 'visReference.id', '');
+    source.visId = get(source, 'visReference.id', '') as string;
 
     if (isEmpty(source.visReference)) {
       source.error = 'visReference is missing in augment-vis saved object';
@@ -34,8 +34,20 @@ export class SavedObjectLoaderAugmentVis extends SavedObjectLoader {
       source.error = 'visLayerExpressionFn is missing in augment-vis saved object';
       return source;
     }
-    if (!(get(source, 'visLayerExpressionFn.type', '') in VisLayerTypes)) {
+    if (!((get(source, 'visLayerExpressionFn.type', '') as string) in VisLayerTypes)) {
       source.error = 'Unknown VisLayer expression function type';
+      return source;
+    }
+    if (get(source, 'originPlugin', undefined) === undefined) {
+      source.error = 'originPlugin is missing in augment-vis saved object';
+      return source;
+    }
+    if (get(source, 'pluginResource.type', undefined) === undefined) {
+      source.error = 'pluginResource.type is missing in augment-vis saved object';
+      return source;
+    }
+    if (get(source, 'pluginResource.id', undefined) === undefined) {
+      source.error = 'pluginResource.id is missing in augment-vis saved object';
       return source;
     }
     return source;
@@ -49,7 +61,7 @@ export class SavedObjectLoaderAugmentVis extends SavedObjectLoader {
    */
   mapSavedObjectApiHits(hit: {
     references: any[];
-    attributes: Record<string, unknown>;
+    attributes: AugmentVisSavedObjectAttributes;
     id: string;
   }) {
     // For now we are assuming only one vis reference per saved object.

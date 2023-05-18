@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisLayerExpressionFn, VisLayerTypes } from '../types';
+import { VisLayerTypes } from '../types';
+import { VisLayerExpressionFn } from '../expressions';
 import {
   createSavedAugmentVisLoader,
   SavedObjectOpenSearchDashboardsServicesWithAugmentVis,
@@ -12,6 +13,7 @@ import { generateAugmentVisSavedObject, getMockAugmentVisSavedObjectClient } fro
 import { uiSettingsServiceMock } from '../../../../core/public/mocks';
 import { setUISettings } from '../services';
 import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
+import { ISavedPluginResource } from './types';
 
 const uiSettingsMock = uiSettingsServiceMock.createStartContract();
 setUISettings(uiSettingsMock);
@@ -28,8 +30,25 @@ describe('SavedObjectLoaderAugmentVis', () => {
       testArg: 'test-value',
     },
   } as VisLayerExpressionFn;
-  const validObj1 = generateAugmentVisSavedObject('valid-obj-id-1', fn, 'test-vis-id');
-  const validObj2 = generateAugmentVisSavedObject('valid-obj-id-2', fn, 'test-vis-id');
+  const originPlugin = 'test-plugin';
+  const pluginResource = {
+    type: 'test-plugin',
+    id: 'test-plugin-resource-id',
+  };
+  const validObj1 = generateAugmentVisSavedObject(
+    'valid-obj-id-1',
+    fn,
+    'test-vis-id',
+    originPlugin,
+    pluginResource
+  );
+  const validObj2 = generateAugmentVisSavedObject(
+    'valid-obj-id-2',
+    fn,
+    'test-vis-id',
+    originPlugin,
+    pluginResource
+  );
   const invalidFnTypeObj = generateAugmentVisSavedObject(
     'invalid-fn-obj-id-1',
     {
@@ -37,13 +56,48 @@ describe('SavedObjectLoaderAugmentVis', () => {
       // @ts-ignore
       type: 'invalid-type',
     },
-    'test-vis-id'
+    'test-vis-id',
+    originPlugin,
+    pluginResource
   );
 
   const missingFnObj = generateAugmentVisSavedObject(
     'missing-fn-obj-id-1',
     {} as VisLayerExpressionFn,
-    'test-vis-id'
+    'test-vis-id',
+    originPlugin,
+    pluginResource
+  );
+
+  const missingOriginPluginObj = generateAugmentVisSavedObject(
+    'missing-origin-plugin-obj-id-1',
+    fn,
+    'test-vis-id',
+    // @ts-ignore
+    undefined,
+    pluginResource
+  );
+
+  const missingPluginResourceTypeObj = generateAugmentVisSavedObject(
+    'missing-plugin-resource-type-obj-id-1',
+    fn,
+    'test-vis-id',
+    // @ts-ignore
+    originPlugin,
+    {
+      id: pluginResource.id,
+    } as ISavedPluginResource
+  );
+
+  const missingPluginResourceIdObj = generateAugmentVisSavedObject(
+    'missing-plugin-resource-id-obj-id-1',
+    fn,
+    'test-vis-id',
+    // @ts-ignore
+    originPlugin,
+    {
+      type: pluginResource.type,
+    } as ISavedPluginResource
   );
 
   it('find returns single saved obj', async () => {
@@ -114,6 +168,38 @@ describe('SavedObjectLoaderAugmentVis', () => {
     expect(resp.hits.length).toEqual(1);
     expect(resp.hits[0].id).toEqual('valid-obj-id-1');
     expect(resp.hits[0].error).toEqual('visReference is missing in augment-vis saved object');
+  });
+
+  it('findAll returns obj with missing originPlugin', async () => {
+    const loader = createSavedAugmentVisLoader({
+      savedObjectsClient: getMockAugmentVisSavedObjectClient([missingOriginPluginObj]),
+    } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+    const resp = await loader.findAll();
+    expect(resp.hits.length).toEqual(1);
+    expect(resp.hits[0].id).toEqual('missing-origin-plugin-obj-id-1');
+    expect(resp.hits[0].error).toEqual('originPlugin is missing in augment-vis saved object');
+  });
+
+  it('findAll returns obj with missing plugin resource type', async () => {
+    const loader = createSavedAugmentVisLoader({
+      savedObjectsClient: getMockAugmentVisSavedObjectClient([missingPluginResourceTypeObj]),
+    } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+    const resp = await loader.findAll();
+    expect(resp.hits.length).toEqual(1);
+    expect(resp.hits[0].id).toEqual('missing-plugin-resource-type-obj-id-1');
+    expect(resp.hits[0].error).toEqual(
+      'pluginResource.type is missing in augment-vis saved object'
+    );
+  });
+
+  it('findAll returns obj with missing plugin resource id', async () => {
+    const loader = createSavedAugmentVisLoader({
+      savedObjectsClient: getMockAugmentVisSavedObjectClient([missingPluginResourceIdObj]),
+    } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+    const resp = await loader.findAll();
+    expect(resp.hits.length).toEqual(1);
+    expect(resp.hits[0].id).toEqual('missing-plugin-resource-id-obj-id-1');
+    expect(resp.hits[0].error).toEqual('pluginResource.id is missing in augment-vis saved object');
   });
 
   it('find returns exception due to setting being disabled', async () => {
