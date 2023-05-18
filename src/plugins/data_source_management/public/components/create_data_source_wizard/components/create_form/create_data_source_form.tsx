@@ -125,7 +125,17 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    this.setState({ auth: { ...this.state.auth, type: e.target.value as AuthType } });
+    const authType = e.target.value as AuthType;
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        type: authType,
+        credentials: {
+          ...this.state.auth.credentials,
+          service: authType === AuthType.SigV4 ? SigV4ServiceName.OpenSearch : undefined,
+        },
+      },
+    });
   };
 
   onChangeSigV4ServiceName = (e: React.ChangeEvent<HTMLSelectElement>) => {
