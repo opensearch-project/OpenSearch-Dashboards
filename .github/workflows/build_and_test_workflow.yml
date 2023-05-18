@@ -31,6 +31,7 @@ jobs:
   build-lint-test:
     name: Build and Verify on ${{ matrix.name }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         include:

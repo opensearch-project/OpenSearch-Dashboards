@@ -66,7 +66,7 @@ export async function bootstrap({
   features,
 }: BootstrapArgs) {
   if (cliArgs.repl && !features.isReplModeSupported) {
-    onRootShutdown('OpenSearch Dashboards REPL mode can only be run in development mode.');
+    terminate('OpenSearch Dashboards REPL mode can only be run in development mode.');
   }
 
   if (cliArgs.optimize) {
@@ -136,16 +136,27 @@ export async function bootstrap({
   }
 }
 
+/* `onRootShutdown` is called multiple times due to catching and rethrowing of exceptions
+ * in Root and bootstrap. The debouncer below is to make sure every catch and rethrow is
+ * executed before calling `terminate`.
+ */
+let shutdownTimer: NodeJS.Timeout;
 function onRootShutdown(reason?: any) {
+  clearTimeout(shutdownTimer);
+  shutdownTimer = setTimeout(() => terminate(reason), 300);
+}
+
+function terminate(reason?: any) {
+  const exitCode =
+    reason === undefined ? 0 : reason instanceof CriticalError ? reason.processExitCode : 1;
+
   if (reason !== undefined) {
     // There is a chance that logger wasn't configured properly and error that
     // that forced root to shut down could go unnoticed. To prevent this we always
     // mirror such fatal errors in standard output with `console.error`.
     // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
-
-    process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }
 
-  process.exit(0);
+  process.exit(exitCode);
 }

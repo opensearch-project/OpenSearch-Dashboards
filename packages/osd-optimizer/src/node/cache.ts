@@ -144,6 +144,7 @@ export class Cache {
 
   close() {
     clearTimeout(this.timer);
+    return this.codes?.close?.();
   }
 
   private getKey(path: string) {
