@@ -17,7 +17,7 @@ export const getNoItemsMessage = (
     return (
       <div>
         <EuiEmptyPrompt
-          iconType="visualizeApp"
+          iconType="dashboardApp"
           title={
             <h1 id="dashboardListingHeading">
               <FormattedMessage
