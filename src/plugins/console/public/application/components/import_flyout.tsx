@@ -199,6 +199,10 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
             toasts.addSuccess('Queries merged.');
           }
         }
+        refresh();
+        setLoadingMessage(undefined);
+        setStatus('idle');
+        close();
       } else {
         setStatus('error');
         setError(
@@ -206,11 +210,8 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
             defaultMessage: 'The selected file is not valid. Please select a valid JSON file.',
           })
         );
+        return;
       }
-      refresh();
-      setLoadingMessage(undefined);
-      setStatus('idle');
-      close();
     } catch (e) {
       setStatus('error');
       setError(getErrorMessage());
