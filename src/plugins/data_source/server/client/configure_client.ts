@@ -160,7 +160,7 @@ const getBasicAuthClient = (
 };
 
 const getAWSClient = (credential: SigV4Content, clientOptions: ClientOptions): Client => {
-  const { accessKey, secretKey, region } = credential;
+  const { accessKey, secretKey, region, service } = credential;
 
   const credentialProvider = (): Promise<Credentials> => {
     return new Promise((resolve) => {
@@ -172,6 +172,7 @@ const getAWSClient = (credential: SigV4Content, clientOptions: ClientOptions): C
     ...AwsSigv4Signer({
       region,
       getCredentials: credentialProvider,
+      service,
     }),
     ...clientOptions,
   });
