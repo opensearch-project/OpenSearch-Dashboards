@@ -167,6 +167,30 @@ describe('configureClient', () => {
     expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(2);
   });
 
+  test('configure client with auth.type == sigv4, service == aoss, should successfully call new Client()', async () => {
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: { ...sigV4AuthContent, service: 'aoss' },
+        },
+      },
+      references: [],
+    });
+
+    jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+      decryptedText: 'accessKey',
+      encryptionContext: { endpoint: 'http://localhost' },
+    });
+
+    await configureClient(dataSourceClientParams, clientPoolSetup, config, logger);
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+  });
+
   test('configure test client for non-exist datasource should not call saved object api, nor decode any credential', async () => {
     const decodeAndDecryptSpy = jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
       decryptedText: 'password',

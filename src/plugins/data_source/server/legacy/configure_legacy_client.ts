@@ -5,10 +5,9 @@
 
 import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient, ConfigOptions } from 'elasticsearch';
-import { Credentials } from 'aws-sdk';
+import { Credentials, Config } from 'aws-sdk';
 import { get } from 'lodash';
 import HttpAmazonESConnector from 'http-aws-es';
-import { Config } from 'aws-sdk';
 import {
   Headers,
   LegacyAPICaller,
@@ -27,7 +26,7 @@ import { CryptographyServiceSetup } from '../cryptography_service';
 import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
 import { OpenSearchClientPoolSetup } from '../client';
 import { parseClientOptions } from './client_config';
-import { createDataSourceError, DataSourceError } from '../lib/error';
+import { createDataSourceError } from '../lib/error';
 import {
   getRootClient,
   getAWSCredential,
@@ -195,13 +194,14 @@ const getBasicAuthClient = async (
 };
 
 const getAWSClient = (credential: SigV4Content, clientOptions: ConfigOptions): LegacyClient => {
-  const { accessKey, secretKey, region } = credential;
+  const { accessKey, secretKey, region, service } = credential;
   const client = new LegacyClient({
     connectionClass: HttpAmazonESConnector,
     awsConfig: new Config({
       region,
       credentials: new Credentials({ accessKeyId: accessKey, secretAccessKey: secretKey }),
     }),
+    service,
     ...clientOptions,
   });
   return client;
