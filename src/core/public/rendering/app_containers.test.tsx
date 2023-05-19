@@ -43,6 +43,7 @@ describe('AppWrapper', () => {
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
         class="app-wrapper"
+        id="app-wrapper"
       >
         app-content
       </div>
@@ -53,6 +54,7 @@ describe('AppWrapper', () => {
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
         class="app-wrapper hidden-chrome"
+        id="app-wrapper"
       >
         app-content
       </div>
@@ -63,6 +65,7 @@ describe('AppWrapper', () => {
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
         class="app-wrapper"
+        id="app-wrapper"
       >
         app-content
       </div>
