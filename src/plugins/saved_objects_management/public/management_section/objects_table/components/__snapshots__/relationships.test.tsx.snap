@@ -10,7 +10,9 @@ exports[`Relationships from legacy app should render dashboards normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="dashboard"
           delay="regular"
@@ -169,7 +171,9 @@ exports[`Relationships from legacy app should render errors 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="dashboard"
           delay="regular"
@@ -213,7 +217,9 @@ exports[`Relationships from legacy app should render index patterns normally 1`]
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="index patterns"
           delay="regular"
@@ -377,7 +383,9 @@ exports[`Relationships from legacy app should render searches normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="search"
           delay="regular"
@@ -541,7 +549,9 @@ exports[`Relationships from legacy app should render visualizations normally 1`]
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="visualization"
           delay="regular"
@@ -700,7 +710,9 @@ exports[`Relationships should render dashboards normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="dashboard"
           delay="regular"
@@ -859,7 +871,9 @@ exports[`Relationships should render errors 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="dashboard"
           delay="regular"
@@ -903,7 +917,9 @@ exports[`Relationships should render index patterns normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="index patterns"
           delay="regular"
@@ -1067,7 +1083,9 @@ exports[`Relationships should render searches normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="search"
           delay="regular"
@@ -1231,7 +1249,9 @@ exports[`Relationships should render visualizations normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        className="savedObjectsManagementRelationships__title"
+      >
         <EuiToolTip
           content="visualization"
           delay="regular"
