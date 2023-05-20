@@ -175,7 +175,9 @@ exports[`Relationships from legacy app should render errors 1`] = `
         />
       }
     >
-      foo
+      <p>
+        foo
+      </p>
     </EuiCallOut>
   </EuiFlyoutBody>
 </EuiFlyout>
@@ -810,7 +812,9 @@ exports[`Relationships should render errors 1`] = `
         />
       }
     >
-      foo
+      <p>
+        foo
+      </p>
     </EuiCallOut>
   </EuiFlyoutBody>
 </EuiFlyout>

@@ -918,16 +918,16 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     return (
       <Fragment>
         {legacyFileWarning && (
-          <span>
+          <>
             <EuiSpacer size="s" />
             {legacyFileWarning}
-          </span>
+          </>
         )}
         {indexPatternConflictsWarning && (
-          <span>
+          <>
             <EuiSpacer size="s" />
             {indexPatternConflictsWarning}
-          </span>
+          </>
         )}
       </Fragment>
     );
