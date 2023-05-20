@@ -398,7 +398,7 @@
     "immer": "^9.0.6",
     "intl-messageformat-parser": "^1.4.0",
     "jest": "^27.5.1",
-    "jest-canvas-mock": "^2.3.1",
+    "jest-canvas-mock": "^2.5.1",
     "jest-raw-loader": "^1.0.1",
     "jimp": "^0.14.0",
     "jquery": "^3.5.0",
@@ -470,7 +470,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "^18.0.0",
+    "node": ">=14.20.1 <19",
     "yarn": "^1.22.10"
   }
 }
