@@ -30,8 +30,19 @@
 
 import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'opensearch-dashboards/server';
+import { createReplaceSerializer } from '@osd/dev-utils';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+
+// ToDo: Remove this logic when Node 14 support is removed
+if (process.version.startsWith('v14.')) {
+  expect.addSnapshotSerializer(
+    createReplaceSerializer(
+      /Cannot read property '([^ ]+?)' of undefined/g,
+      "Cannot read properties of undefined (reading '$1')"
+    )
+  );
+}
 
 const testMigrateMatchAllQuery = (migrate: Function) => {
   it('should migrate obsolete match_all query', () => {
