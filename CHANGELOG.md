@@ -250,6 +250,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - README.md for dataSource and dataSourceManagement Plugin ([#2448](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2448))
 - Updates functionl testing information in Testing.md ([#2492](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2492))
 - Fixes typo in TSVB README ([#3518](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3518))
+- Add plugin development section in DEVELOPER_GUIDE.md ([#778](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3989))
 
 ### 🛠 Maintenance
 
