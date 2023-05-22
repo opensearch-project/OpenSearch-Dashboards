@@ -1,4 +1,4 @@
-# New Saved Object Service Interface for Custom Repository
+# Proposed Saved Object Service Interface for Custom Repository
 
 ## Introduction
 
