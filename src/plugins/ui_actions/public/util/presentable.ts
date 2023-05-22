@@ -94,6 +94,13 @@ export interface PresentableGroup<Context extends object = object>
     Pick<Presentable<Context>, 'getDisplayName' | 'getDisplayNameTooltip' | 'getIconType' | 'order'>
   > {
   id: string;
+  /**
+   * Typically, a group will only be flattened if there is only a single item.
+   * This flag allows showing all items in a group, within the mainMenu,
+   * next to each other, but separated from other items.
+   * See PanelGroupOptionsAndContextActions example to learn more.
+   */
+  isFlattened?: boolean;
 }
 
 export type PresentableGrouping<Context extends object = object> = Array<PresentableGroup<Context>>;

@@ -448,3 +448,62 @@ test('groups with deep nesting', async () => {
     ]
   `);
 });
+
+test('groups with flattening', async () => {
+  const grouping1 = [
+    {
+      id: 'test-group',
+      getDisplayName: () => 'Test group',
+      getIconType: () => 'bell',
+      isFlattened: true,
+    },
+  ];
+
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Bar 1',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Bar 2',
+      grouping: grouping1,
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Bar 1",
+          },
+          Object {
+            "name": "Bar 2",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Bar 1",
+          },
+          Object {
+            "name": "Bar 2",
+          },
+        ],
+      },
+    ]
+  `);
+});

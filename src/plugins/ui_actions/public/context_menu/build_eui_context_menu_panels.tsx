@@ -64,6 +64,7 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   _level?: number;
   _icon?: string;
   items: ItemDescriptor[];
+  _isFlattened?: boolean;
 };
 
 const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
@@ -125,7 +126,7 @@ const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemD
 const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
   const euiPanels: EuiContextMenuPanelDescriptor[] = [];
   for (const panel of panels) {
-    const { _level: omit, _icon: omit2, ...rest } = panel;
+    const { _level: omit, _icon: omit2, _isFlattened: omit3, ...rest } = panel;
     euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
   }
   return euiPanels;
@@ -179,6 +180,7 @@ export async function buildContextMenuForActions({
             items: [],
             _level: i,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
+            _isFlattened: group.isFlattened,
           };
 
           // If there are multiple groups and this is not the first group,
@@ -240,10 +242,14 @@ export async function buildContextMenuForActions({
         panels.mainMenu.items.push({ isSeparator: true, key: `${panel.id}separator` });
       }
 
-      // If a panel has more than one child, then allow items to be grouped
-      // and link to it in the mainMenu. Otherwise, flatten the group.
-      // Note: this only happens on the root level panels, not for inner groups.
-      if (panel.items.length > 1) {
+      // If the panel has the isFlattened flag, add all items for this group
+      // into the mainMenu together, separated from other items already there.
+      if (panel._isFlattened) {
+        panels.mainMenu.items.push(...panel.items);
+      } else if (panel.items.length > 1) {
+        // If a panel has more than one child, then allow items to be grouped
+        // and link to it in the mainMenu. Otherwise, flatten the group.
+        // Note: this only happens on the root level panels, not for inner groups.
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
           icon: panel._icon || 'empty',
