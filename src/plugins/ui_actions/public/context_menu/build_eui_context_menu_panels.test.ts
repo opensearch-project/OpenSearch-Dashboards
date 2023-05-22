@@ -257,7 +257,108 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
   `);
 });
 
-test('tests groups and separators', async () => {
+test('flattening of group with only one action', async () => {
+  const grouping1 = [
+    {
+      id: 'test-group',
+      getDisplayName: () => 'Test group',
+      getIconType: () => 'bell',
+    },
+  ];
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Bar 1',
+      grouping: grouping1,
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Bar 1",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Bar 1",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('grouping with only two actions', async () => {
+  const grouping1 = [
+    {
+      id: 'test-group',
+      getDisplayName: () => 'Test group',
+      getIconType: () => 'bell',
+    },
+  ];
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Bar 1',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Bar 2',
+      grouping: grouping1,
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Bar 1",
+          },
+          Object {
+            "name": "Bar 2",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('groups with deep nesting', async () => {
   const grouping1 = [
     {
       id: 'test-group',
@@ -271,47 +372,28 @@ test('tests groups and separators', async () => {
       getDisplayName: () => 'Test group 2',
       getIconType: () => 'bell',
     },
-  ];
-  const grouping3 = [
     {
       id: 'test-group-3',
       getDisplayName: () => 'Test group 3',
-      getIconType: () => 'bell',
-    },
-    {
-      id: 'test-group-4',
-      getDisplayName: () => 'Test group 4',
       getIconType: () => 'bell',
     },
   ];
 
   const actions = [
     createTestAction({
-      dispayName: 'First action',
-    }),
-    createTestAction({
       dispayName: 'Foo 1',
-      grouping: grouping1,
-    }),
-    createTestAction({
-      dispayName: 'Foo 2',
-      grouping: grouping1,
-    }),
-    createTestAction({
-      dispayName: 'Foo 3',
-      grouping: grouping1,
     }),
     createTestAction({
       dispayName: 'Bar 1',
-      grouping: grouping2,
+      grouping: grouping1,
     }),
     createTestAction({
       dispayName: 'Bar 2',
-      grouping: grouping2,
+      grouping: grouping1,
     }),
     createTestAction({
-      dispayName: 'Inner',
-      grouping: grouping3,
+      dispayName: 'Qux 1',
+      grouping: grouping2,
     }),
   ];
   const menu = await buildContextMenuForActions({
@@ -323,7 +405,7 @@ test('tests groups and separators', async () => {
       Object {
         "items": Array [
           Object {
-            "name": "First action",
+            "name": "Foo 1",
           },
           Object {
             "isSeparator": true,
@@ -335,26 +417,7 @@ test('tests groups and separators', async () => {
             "isSeparator": true,
           },
           Object {
-            "name": "Test group 2",
-          },
-          Object {
-            "isSeparator": true,
-          },
-          Object {
-            "name": "Test group 4",
-          },
-        ],
-      },
-      Object {
-        "items": Array [
-          Object {
-            "name": "Foo 1",
-          },
-          Object {
-            "name": "Foo 2",
-          },
-          Object {
-            "name": "Foo 3",
+            "name": "Test group 3",
           },
         ],
       },
@@ -371,14 +434,14 @@ test('tests groups and separators', async () => {
       Object {
         "items": Array [
           Object {
-            "name": "Test group 4",
+            "name": "Test group 3",
           },
         ],
       },
       Object {
         "items": Array [
           Object {
-            "name": "Inner",
+            "name": "Qux 1",
           },
         ],
       },

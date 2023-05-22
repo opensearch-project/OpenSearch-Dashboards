@@ -242,6 +242,7 @@ export async function buildContextMenuForActions({
 
       // If a panel has more than one child, then allow items to be grouped
       // and link to it in the mainMenu. Otherwise, flatten the group.
+      // Note: this only happens on the root level panels, not for inner groups.
       if (panel.items.length > 1) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
