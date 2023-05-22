@@ -2338,10 +2338,10 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
-"@opensearch-project/opensearch-next@npm:@opensearch-project/opensearch@^2.1.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.2.0.tgz#2a31a67242bf3bacedc9644a0c68893eb5fb9420"
-  integrity sha512-E0f2Hooruz9y+17AF69oyyruikVMAEr1TxcQBNEQV4aQnI3o0+6CjqZS+t94SCZdWRTuN7HjIIVGbaYCJDpxgA==
+"@opensearch-project/opensearch-next@npm:@opensearch-project/opensearch@^2.2.0":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.2.1.tgz#a400203afa6512ef73945663163a404763a10f5a"
+  integrity sha512-8zfQX1acL9eWG+ohIc9nJVT9LSqXCdbVEJs0rCPRtji3XF6ahzsiKmGNTeWLxCPDxWCjAIWq9t95xP3Y5Egi6Q==
   dependencies:
     aws4 "^1.11.0"
     debug "^4.3.1"
@@ -9892,10 +9892,10 @@ htmlparser2@^7.0:
     domutils "^2.8.0"
     entities "^3.0.1"
 
-http-aws-es@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/http-aws-es/-/http-aws-es-6.0.0.tgz#1528978d2bee718b8732dcdced0856efa747aeff"
-  integrity sha512-g+qp7J110/m4aHrR3iit4akAlnW0UljZ6oTq/rCcbsI8KP9x+95vqUtx49M2XQ2JMpwJio3B6gDYx+E8WDxqiA==
+"http-aws-es@npm:@zhongnansu/http-aws-es@6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@zhongnansu/http-aws-es/-/http-aws-es-6.0.1.tgz#1ab929eb7faa78ac5386c84069fb2e885fe1661c"
+  integrity sha512-uhe3FUtgT+sDyW2VA0hxQ44HUfeI8tf4nUo83mc3jtQPAIO57ZpRFKePmCoU+qaqHWfesD9hIQkTkXOJGlW26w==
 
 http-cache-semantics@^4.0.0, http-cache-semantics@^4.1.0:
   version "4.1.1"

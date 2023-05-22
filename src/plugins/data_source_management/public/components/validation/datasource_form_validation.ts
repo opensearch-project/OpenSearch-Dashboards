@@ -20,6 +20,7 @@ export interface CreateEditDataSourceValidation {
     region: string[];
     accessKey: string[];
     secretKey: string[];
+    service: string[];
   };
 }
 
@@ -34,6 +35,7 @@ export const defaultValidation: CreateEditDataSourceValidation = {
     region: [],
     accessKey: [],
     secretKey: [],
+    service: [],
   },
 };
 
@@ -108,6 +110,11 @@ export const performDataSourceFormValidation = (
 
     /* Region */
     if (!formValues.auth.credentials?.region) {
+      return false;
+    }
+
+    /* Service Name */
+    if (!formValues.auth.credentials?.service) {
       return false;
     }
   }

@@ -5,7 +5,9 @@
 
 import React from 'react';
 import {
+  EuiBottomBar,
   EuiButton,
+  EuiButtonEmpty,
   EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
@@ -19,13 +21,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import {
   AuthType,
   credentialSourceOptions,
   DataSourceAttributes,
   DataSourceManagementContextValue,
   UsernamePasswordTypedContent,
-  SigV4Content,
+  sigV4ServiceOptions,
 } from '../../../../types';
 import { Header } from '../header';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
@@ -41,6 +44,7 @@ export interface CreateDataSourceProps {
   existingDatasourceNamesList: string[];
   handleSubmit: (formValues: DataSourceAttributes) => void;
   handleTestConnection: (formValues: DataSourceAttributes) => void;
+  handleCancel: () => void;
 }
 export interface CreateDataSourceState {
   /* Validation */
@@ -121,7 +125,31 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    this.setState({ auth: { ...this.state.auth, type: e.target.value as AuthType } });
+    const authType = e.target.value as AuthType;
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        type: authType,
+        credentials: {
+          ...this.state.auth.credentials,
+          service:
+            (this.state.auth.credentials.service as SigV4ServiceName) ||
+            SigV4ServiceName.OpenSearch,
+        },
+      },
+    });
+  };
+
+  onChangeSigV4ServiceName = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: {
+          ...this.state.auth.credentials,
+          service: e.target.value as SigV4ServiceName,
+        },
+      },
+    });
   };
 
   onChangeUsername = (e: { target: { value: any } }) => {
@@ -267,6 +295,7 @@ export class CreateDataSourceForm extends React.Component<
         region: this.state.auth.credentials.region,
         accessKey: this.state.auth.credentials.accessKey,
         secretKey: this.state.auth.credentials.secretKey,
+        service: this.state.auth.credentials.service || SigV4ServiceName.OpenSearch,
       } as SigV4Content;
     }
 
@@ -392,6 +421,19 @@ export class CreateDataSourceForm extends React.Component<
               />
             </EuiFormRow>
             <EuiFormRow
+              label={i18n.translate('dataSourcesManagement.createDataSource.serviceName', {
+                defaultMessage: 'Service Name',
+              })}
+            >
+              <EuiSelect
+                options={sigV4ServiceOptions}
+                value={this.state.auth.credentials.service}
+                onChange={(e) => this.onChangeSigV4ServiceName(e)}
+                name="ServiceName"
+                data-test-subj="createDataSourceFormAuthTypeSelect"
+              />
+            </EuiFormRow>
+            <EuiFormRow
               label={i18n.translate('dataSourcesManagement.createDataSource.accessKey', {
                 defaultMessage: 'Access Key',
               })}
@@ -447,169 +489,207 @@ export class CreateDataSourceForm extends React.Component<
 
   renderContent = () => {
     return (
-      <EuiPageContent>
-        {this.renderHeader()}
-        <EuiSpacer size="m" />
-        <EuiForm data-test-subj="data-source-creation">
-          {/* Endpoint section */}
-          {this.renderSectionHeader(
-            'dataSourceManagement.connectToDataSource.connectionDetails',
-            'Connection Details'
-          )}
-          <EuiSpacer size="s" />
-
-          {/* Title */}
-          <EuiFormRow
-            label={i18n.translate('dataSourcesManagement.createDataSource.title', {
-              defaultMessage: 'Title',
-            })}
-            isInvalid={!!this.state.formErrorsByField.title.length}
-            error={this.state.formErrorsByField.title}
-          >
-            <EuiFieldText
-              name="dataSourceTitle"
-              value={this.state.title || ''}
-              placeholder={i18n.translate(
-                'dataSourcesManagement.createDataSource.titlePlaceHolder',
-                {
-                  defaultMessage: 'Title',
-                }
-              )}
-              isInvalid={!!this.state.formErrorsByField.title.length}
-              onChange={this.onChangeTitle}
-              onBlur={this.validateTitle}
-              data-test-subj="createDataSourceFormTitleField"
-            />
-          </EuiFormRow>
-
-          {/* Description */}
-          <EuiFormRow
-            label={this.renderFieldLabelAsOptional(
-              'dataSourceManagement.createDataSource.description',
-              'Description'
-            )}
-          >
-            <EuiFieldText
-              name="dataSourceDescription"
-              value={this.state.description || ''}
-              placeholder={i18n.translate(
-                'dataSourcesManagement.createDataSource.descriptionPlaceholder',
-                {
-                  defaultMessage: 'Description of the data source',
-                }
-              )}
-              onChange={this.onChangeDescription}
-              data-test-subj="createDataSourceFormDescriptionField"
-            />
-          </EuiFormRow>
-
-          {/* Endpoint URL */}
-          <EuiFormRow
-            label={i18n.translate('dataSourcesManagement.createDataSource.endpointURL', {
-              defaultMessage: 'Endpoint URL',
-            })}
-            isInvalid={!!this.state.formErrorsByField.endpoint.length}
-            error={this.state.formErrorsByField.endpoint}
-          >
-            <EuiFieldText
-              name="endpoint"
-              value={this.state.endpoint || ''}
-              placeholder={i18n.translate(
-                'dataSourcesManagement.createDataSource.endpointPlaceholder',
-                {
-                  defaultMessage: 'https://connectionurl.com',
-                }
-              )}
-              isInvalid={!!this.state.formErrorsByField.endpoint.length}
-              onChange={this.onChangeEndpoint}
-              onBlur={this.validateEndpoint}
-              data-test-subj="createDataSourceFormEndpointField"
-            />
-          </EuiFormRow>
-
-          {/* Authentication Section: */}
-
-          <EuiSpacer size="xl" />
-
-          {this.renderSectionHeader(
-            'dataSourceManagement.connectToDataSource.authenticationHeader',
-            'Authentication Method'
-          )}
+      <>
+        <EuiPageContent>
+          {this.renderHeader()}
           <EuiSpacer size="m" />
+          <EuiForm data-test-subj="data-source-creation">
+            {/* Endpoint section */}
+            {this.renderSectionHeader(
+              'dataSourceManagement.connectToDataSource.connectionDetails',
+              'Connection Details'
+            )}
+            <EuiSpacer size="s" />
 
-          <EuiFormRow>
-            <EuiText>
-              <FormattedMessage
-                id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
-                defaultMessage="Provide authentication details require to gain access to the endpoint. If no authentication is required, choose "
+            {/* Title */}
+            <EuiFormRow
+              label={i18n.translate('dataSourcesManagement.createDataSource.title', {
+                defaultMessage: 'Title',
+              })}
+              isInvalid={!!this.state.formErrorsByField.title.length}
+              error={this.state.formErrorsByField.title}
+            >
+              <EuiFieldText
+                name="dataSourceTitle"
+                value={this.state.title || ''}
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.createDataSource.titlePlaceHolder',
+                  {
+                    defaultMessage: 'Title',
+                  }
+                )}
+                isInvalid={!!this.state.formErrorsByField.title.length}
+                onChange={this.onChangeTitle}
+                onBlur={this.validateTitle}
+                data-test-subj="createDataSourceFormTitleField"
               />
-              <b>
+            </EuiFormRow>
+
+            {/* Description */}
+            <EuiFormRow
+              label={this.renderFieldLabelAsOptional(
+                'dataSourceManagement.createDataSource.description',
+                'Description'
+              )}
+            >
+              <EuiFieldText
+                name="dataSourceDescription"
+                value={this.state.description || ''}
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.createDataSource.descriptionPlaceholder',
+                  {
+                    defaultMessage: 'Description of the data source',
+                  }
+                )}
+                onChange={this.onChangeDescription}
+                data-test-subj="createDataSourceFormDescriptionField"
+              />
+            </EuiFormRow>
+
+            {/* Endpoint URL */}
+            <EuiFormRow
+              label={i18n.translate('dataSourcesManagement.createDataSource.endpointURL', {
+                defaultMessage: 'Endpoint URL',
+              })}
+              isInvalid={!!this.state.formErrorsByField.endpoint.length}
+              error={this.state.formErrorsByField.endpoint}
+            >
+              <EuiFieldText
+                name="endpoint"
+                value={this.state.endpoint || ''}
+                placeholder={i18n.translate(
+                  'dataSourcesManagement.createDataSource.endpointPlaceholder',
+                  {
+                    defaultMessage: 'https://connectionurl.com',
+                  }
+                )}
+                isInvalid={!!this.state.formErrorsByField.endpoint.length}
+                onChange={this.onChangeEndpoint}
+                onBlur={this.validateEndpoint}
+                data-test-subj="createDataSourceFormEndpointField"
+              />
+            </EuiFormRow>
+
+            {/* Authentication Section: */}
+
+            <EuiSpacer size="xl" />
+
+            {this.renderSectionHeader(
+              'dataSourceManagement.connectToDataSource.authenticationHeader',
+              'Authentication Method'
+            )}
+            <EuiSpacer size="m" />
+
+            <EuiFormRow>
+              <EuiText>
                 <FormattedMessage
-                  id="dataSourcesManagement.createDataSource.noAuthentication"
-                  defaultMessage="No authentication"
+                  id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
+                  defaultMessage="Provide authentication details require to gain access to the endpoint. If no authentication is required, choose "
                 />
-              </b>
-            </EuiText>
-          </EuiFormRow>
-
-          {/* Credential source */}
-          <EuiSpacer size="l" />
-          <EuiFormRow>
-            <EuiSelect
-              options={credentialSourceOptions}
-              value={this.state.auth.type}
-              onChange={(e) => this.onChangeAuthType(e)}
-              name="Credential"
-              data-test-subj="createDataSourceFormAuthTypeSelect"
-            />
-          </EuiFormRow>
-
-          {/* Create New credentials */}
-          {this.state.auth.type === AuthType.UsernamePasswordType
-            ? this.renderCreateNewCredentialsForm(this.state.auth.type)
-            : null}
-
-          {this.state.auth.type === AuthType.SigV4
-            ? this.renderCreateNewCredentialsForm(this.state.auth.type)
-            : null}
-
-          <EuiSpacer size="xl" />
-          <EuiFormRow>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                {/* Test Connection button*/}
-                <EuiButton
-                  type="submit"
-                  fill={false}
-                  disabled={!this.isFormValid()}
-                  onClick={this.onClickTestConnection}
-                  data-test-subj="createDataSourceTestConnectionButton"
-                >
+                <b>
                   <FormattedMessage
-                    id="dataSourcesManagement.createDataSource.testConnectionButton"
-                    defaultMessage="Test connection"
+                    id="dataSourcesManagement.createDataSource.noAuthentication"
+                    defaultMessage="No authentication"
                   />
-                </EuiButton>
-              </EuiFlexItem>
-              {/* Create Data Source button*/}
-              <EuiFlexItem>
-                <EuiButton
-                  type="submit"
-                  fill={this.isFormValid()}
-                  disabled={!this.isFormValid()}
-                  onClick={this.onClickCreateNewDataSource}
-                  data-test-subj="createDataSourceButton"
-                >
-                  <FormattedMessage
-                    id="dataSourcesManagement.createDataSource.createButton"
-                    defaultMessage="Create data source connection"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiForm>
-      </EuiPageContent>
+                </b>
+              </EuiText>
+            </EuiFormRow>
+
+            {/* Credential source */}
+            <EuiSpacer size="l" />
+            <EuiFormRow>
+              <EuiSelect
+                options={credentialSourceOptions}
+                value={this.state.auth.type}
+                onChange={(e) => this.onChangeAuthType(e)}
+                name="Credential"
+                data-test-subj="createDataSourceFormAuthTypeSelect"
+              />
+            </EuiFormRow>
+
+            {/* Create New credentials */}
+            {this.state.auth.type === AuthType.UsernamePasswordType
+              ? this.renderCreateNewCredentialsForm(this.state.auth.type)
+              : null}
+
+            {this.state.auth.type === AuthType.SigV4
+              ? this.renderCreateNewCredentialsForm(this.state.auth.type)
+              : null}
+
+            <EuiSpacer size="xl" />
+            <EuiFormRow>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  {/* Test Connection button*/}
+                  <EuiButton
+                    type="submit"
+                    fill={false}
+                    disabled={!this.isFormValid()}
+                    onClick={this.onClickTestConnection}
+                    data-test-subj="createDataSourceTestConnectionButton"
+                  >
+                    <FormattedMessage
+                      id="dataSourcesManagement.createDataSource.testConnectionButton"
+                      defaultMessage="Test connection"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          </EuiForm>
+        </EuiPageContent>
+        <EuiSpacer size="xxl" />
+        <EuiSpacer size="xl" />
+        {this.renderBottomBar()}
+      </>
+    );
+  };
+
+  renderBottomBar = () => {
+    return (
+      <EuiBottomBar data-test-subj="datasource-create-bottomBar" affordForDisplacement={true}>
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+          gutterSize="s"
+        >
+          <EuiFlexItem />
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="ghost"
+              size="s"
+              iconType="cross"
+              onClick={this.props.handleCancel}
+              aria-describedby="aria-describedby.countOfUnsavedSettings"
+              data-test-subj="cancelCreateDataSourceButton"
+            >
+              <FormattedMessage
+                id="dataSourcesManagement.createDataSource.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              className="mgtAdvancedSettingsForm__button"
+              disabled={!this.isFormValid()}
+              color="secondary"
+              fill={this.isFormValid()}
+              size="s"
+              iconType="check"
+              onClick={this.onClickCreateNewDataSource}
+              data-test-subj="createDataSourceButton"
+            >
+              <FormattedMessage
+                id="dataSourcesManagement.createDataSource.createButtonLabel"
+                defaultMessage="Create data source"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBottomBar>
     );
   };
 
