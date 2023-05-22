@@ -232,7 +232,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multi DataSource] UX enhancement on Update stored password modal for Data source management stack ([#2532](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2532))
 - [Monaco editor] Add json worker support ([#3424](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3424))
 - Enhance grouping for context menus ([#3169](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3169))
-- Allow group flattening in context menus ([#3169](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4072))
+- Allow group flattening in context menus ([#4072](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4072))
 
 ### 🐛 Bug Fixes
 
