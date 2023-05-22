@@ -5,6 +5,7 @@
 
 import moment from 'moment';
 import { cloneDeep, isEmpty, get } from 'lodash';
+import { Item } from 'vega';
 import {
   OpenSearchDashboardsDatatable,
   OpenSearchDashboardsDatatableColumn,
@@ -24,6 +25,7 @@ import {
   VisLayers,
   VisLayerTypes,
 } from '../';
+import { VisAnnotationType } from './constants';
 
 // Given any visLayers, create a map to indicate which VisLayer types are present.
 // Convert to an array since ES6 Maps cannot be stringified.
@@ -44,6 +46,30 @@ export const enableVisLayersInSpecConfig = (spec: object, visLayers: VisLayers):
     kibana: {
       ...config.kibana,
       visibleVisLayers: [...visibleVisLayers],
+    },
+  };
+};
+
+/**
+ * Adds the signals which vega will use to trigger required events on the point in time annotation marks
+ */
+export const addVisEventSignalsToSpecConfig = (spec: object) => {
+  const config = get(spec, 'config', { kibana: {} });
+  const signals = {
+    ...(config.kibana.signals || {}),
+    [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`]: [
+      {
+        name: 'PointInTimeAnnotationVisEvent',
+        on: [{ events: 'click', update: 'opensearchDashboardsVisEventTriggered(event, datum)' }],
+      },
+    ],
+  };
+
+  return {
+    ...config,
+    kibana: {
+      ...config.kibana,
+      signals,
     },
   };
 };
@@ -313,8 +339,14 @@ export const addPointInTimeEventsLayersToSpec = (
       color: EVENT_COLOR,
       filled: true,
       opacity: 1,
+      // This style is only used to locate this mark when trying to add signals in the compiled vega spec.
+      // @see @method vega_parser._compileVegaLite
+      style: [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`],
     },
-    transform: [{ filter: generateVisLayerFilterString(visLayerColumnIds) }],
+    transform: [
+      { filter: generateVisLayerFilterString(visLayerColumnIds) },
+      { calculate: `'${VisAnnotationType.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
+    ],
     params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
     encoding: {
       x: {
@@ -339,4 +371,8 @@ export const addPointInTimeEventsLayersToSpec = (
   });
 
   return newSpec;
+};
+
+export const isPointInTimeAnnotation = (item?: Item | null) => {
+  return item?.datum?.annotationType === VisAnnotationType.POINT_IN_TIME_ANNOTATION;
 };

@@ -5,6 +5,7 @@
 
 import { OpenSearchDashboardsDatatable } from '../../expressions/public';
 import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, HOVER_PARAM } from './';
+import { VisAnnotationType } from './vega/constants';
 
 const TEST_X_AXIS_ID = 'test-x-axis-id';
 const TEST_X_AXIS_ID_DIRTY = 'test.x.axis.id';
@@ -489,8 +490,12 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
     color: 'red',
     filled: true,
     opacity: 1,
+    style: [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`],
   },
-  transform: [{ filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` }],
+  transform: [
+    { filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` },
+    { calculate: `'${VisAnnotationType.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
+  ],
   params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
   encoding: {
     x: {
@@ -536,6 +541,7 @@ const TEST_EVENTS_LAYER_MULTIPLE_VIS_LAYERS = {
     {
       filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0 || datum['${TEST_PLUGIN_RESOURCE_ID_2}'] > 0`,
     },
+    { calculate: `'${VisAnnotationType.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
   ],
 };
 

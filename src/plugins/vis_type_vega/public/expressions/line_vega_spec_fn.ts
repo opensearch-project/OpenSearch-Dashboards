@@ -18,6 +18,7 @@ import {
   addPointInTimeEventsLayersToTable,
   addPointInTimeEventsLayersToSpec,
   enableVisLayersInSpecConfig,
+  addVisEventSignalsToSpecConfig,
 } from '../../../vis_augmenter/public';
 import { formatDatatable, createSpecFromDatatable } from './helpers';
 import { VegaVisualizationDependencies } from '../plugin';
@@ -85,6 +86,7 @@ export const createLineVegaSpecFn = (
     if (!isEmpty(pointInTimeEventsVisLayers) && dimensions.x !== null) {
       spec = addPointInTimeEventsLayersToSpec(table, dimensions, spec);
       spec.config = enableVisLayersInSpecConfig(spec, pointInTimeEventsVisLayers);
+      spec.config = addVisEventSignalsToSpecConfig(spec);
     }
     return JSON.stringify(spec);
   },
