@@ -24,6 +24,7 @@ import {
   VisLayer,
   VisLayers,
   VisLayerTypes,
+  EVENT_TOOLTIP_CENTER_ON_MARK,
 } from '../';
 import { VisAnnotationType } from './constants';
 
@@ -70,6 +71,9 @@ export const addVisEventSignalsToSpecConfig = (spec: object) => {
     kibana: {
       ...config.kibana,
       signals,
+      tooltips: {
+        centerOnMark: EVENT_TOOLTIP_CENTER_ON_MARK,
+      },
     },
   };
 };
@@ -339,6 +343,7 @@ export const addPointInTimeEventsLayersToSpec = (
       color: EVENT_COLOR,
       filled: true,
       opacity: 1,
+      tooltip: true,
       // This style is only used to locate this mark when trying to add signals in the compiled vega spec.
       // @see @method vega_parser._compileVegaLite
       style: [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`],
