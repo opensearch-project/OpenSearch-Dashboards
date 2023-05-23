@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, OpenSearchClient } from 'opensearch-dashboards/server';
-import { AuthType, DataSourceAttributes } from '../../common/data_sources';
+import { AuthType, DataSourceAttributes, SigV4ServiceName } from '../../common/data_sources';
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
 import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
@@ -40,6 +40,10 @@ export const registerTestConnectionRoute = (
                       region: schema.string(),
                       accessKey: schema.string(),
                       secretKey: schema.string(),
+                      service: schema.oneOf([
+                        schema.literal(SigV4ServiceName.OpenSearch),
+                        schema.literal(SigV4ServiceName.OpenSearchServerless),
+                      ]),
                     }),
                   ])
                 ),
@@ -61,9 +65,13 @@ export const registerTestConnectionRoute = (
             testClientDataSourceAttr: dataSourceAttr as DataSourceAttributes,
           }
         );
-        const dsValidator = new DataSourceConnectionValidator(dataSourceClient);
 
-        await dsValidator.validate();
+        const dataSourceValidator = new DataSourceConnectionValidator(
+          dataSourceClient,
+          dataSourceAttr
+        );
+
+        await dataSourceValidator.validate();
 
         return response.ok({
           body: {
