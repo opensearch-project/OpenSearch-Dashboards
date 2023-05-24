@@ -37,7 +37,7 @@ export function createSavedAugmentVisClass(services: SavedObjectOpenSearchDashbo
     constructor(opts: Record<string, unknown> | string = {}) {
       // The default delete() fn from the saved object loader will only
       // pass a string ID. To handle that case here, we embed it within
-      // and opts object still.
+      // an opts object.
       if (typeof opts !== 'object') {
         opts = { id: opts };
       }
