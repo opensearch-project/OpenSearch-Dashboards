@@ -57,7 +57,7 @@ describe('create button with props', () => {
     expect(createButtons.length).toBe(0);
     const createDropdown = findTestSubject(component, 'createMenuDropdown');
     createDropdown.simulate('click');
-    const contextMenus = findTestSubject(component, 'contextMenuItem');
+    const contextMenus = findTestSubject(component, 'contextMenuItem-test');
     expect(contextMenus.length).toBe(2);
     expect(contextMenus.at(0).prop('href')).toBe('test1');
   });

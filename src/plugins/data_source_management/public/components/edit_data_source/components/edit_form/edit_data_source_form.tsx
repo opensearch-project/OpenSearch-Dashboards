@@ -23,13 +23,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import { Header } from '../header';
 import {
   AuthType,
   credentialSourceOptions,
   DataSourceAttributes,
   DataSourceManagementContextValue,
-  SigV4Content,
+  sigV4ServiceOptions,
   ToastMessageItem,
   UsernamePasswordTypedContent,
 } from '../../../../types';
@@ -46,9 +47,9 @@ import { UpdateAwsCredentialModal } from '../update_aws_credential_modal';
 export interface EditDataSourceProps {
   existingDataSource: DataSourceAttributes;
   existingDatasourceNamesList: string[];
-  handleSubmit: (formValues: DataSourceAttributes) => void;
-  handleTestConnection: (formValues: DataSourceAttributes) => void;
-  onDeleteDataSource?: () => void;
+  handleSubmit: (formValues: DataSourceAttributes) => Promise<void>;
+  handleTestConnection: (formValues: DataSourceAttributes) => Promise<void>;
+  onDeleteDataSource?: () => Promise<void>;
   displayToastMessage: (info: ToastMessageItem) => void;
 }
 export interface EditDataSourceState {
@@ -123,7 +124,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           credentials: {
             username: authTypeCheckResults.isUserNamePassword ? auth.credentials?.username : '',
             password: authTypeCheckResults.isUserNamePassword ? this.maskedPassword : '',
-            region: authTypeCheckResults.isSigV4 ? auth.credentials?.region : '',
+            service: authTypeCheckResults.isSigV4
+              ? auth.credentials?.service || SigV4ServiceName.OpenSearch
+              : '',
+            region: authTypeCheckResults.isSigV4 ? auth.credentials!.region : '',
             accessKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
             secretKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
           },
@@ -183,6 +187,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       },
     });
   };
+
   validateUsername = () => {
     const isValid = !!this.state.auth.credentials.username?.trim().length;
     this.setState({
@@ -221,6 +226,18 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
+  onChangeSigV4ServiceName = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: {
+          ...this.state.auth.credentials,
+          service: e.target.value as SigV4ServiceName,
+        } as SigV4Content,
+      },
+    });
+  };
+
   onChangeRegion = (e: { target: { value: any } }) => {
     this.setState({
       auth: {
@@ -253,7 +270,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateAccessKey = () => {
-    const isValid = !!this.state.auth.credentials.accessKey;
+    const isValid = !!this.state.auth.credentials?.accessKey;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -275,7 +292,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateSecretKey = () => {
-    const isValid = !!this.state.auth.credentials.secretKey;
+    const isValid = !!this.state.auth.credentials?.secretKey;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -338,9 +355,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     }
   };
 
-  onClickDeleteDataSource = () => {
+  onClickDeleteDataSource = async () => {
     if (this.props.onDeleteDataSource) {
-      this.props.onDeleteDataSource();
+      await this.props.onDeleteDataSource();
     }
   };
 
@@ -359,6 +376,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         break;
       case AuthType.SigV4:
         credentials = {
+          service: this.state.auth.credentials?.service,
           region: this.state.auth.credentials?.region,
           accessKey: isNewCredential ? this.state.auth.credentials?.accessKey : '',
           secretKey: isNewCredential ? this.state.auth.credentials?.secretKey : '',
@@ -533,7 +551,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         {this.state.showUpdateAwsCredentialModal ? (
           <UpdateAwsCredentialModal
-            region={this.state.auth?.credentials?.region || ''}
+            region={this.state.auth.credentials!.region}
+            service={this.state.auth.credentials!.service}
             handleUpdateAwsCredential={this.updateAwsCredential}
             closeUpdateAwsCredentialModal={this.closeAwsCredentialModal}
           />
@@ -789,6 +808,19 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           />
         </EuiFormRow>
         <EuiFormRow
+          label={i18n.translate('dataSourcesManagement.createDataSource.serviceName', {
+            defaultMessage: 'Service Name',
+          })}
+        >
+          <EuiSelect
+            options={sigV4ServiceOptions}
+            value={this.state.auth.credentials?.service}
+            onChange={(e) => this.onChangeSigV4ServiceName(e)}
+            name="ServiceName"
+            data-test-subj="createDataSourceFormAuthTypeSelect"
+          />
+        </EuiFormRow>
+        <EuiFormRow
           label={i18n.translate('dataSourcesManagement.createDataSource.accessKey', {
             defaultMessage: 'Access Key',
           })}
@@ -930,17 +962,21 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       auth.type === formValues.auth.type &&
       auth.type === AuthType.UsernamePasswordType &&
       formValues.auth.credentials?.username !== auth.credentials?.username;
+    const isAuthTypeSigV4Unchanged =
+      auth.type === formValues.auth.type && auth.type === AuthType.SigV4;
     const isRegionChanged =
-      auth.type === formValues.auth.type &&
-      auth.type === AuthType.SigV4 &&
-      formValues.auth.credentials?.region !== auth.credentials?.region;
+      isAuthTypeSigV4Unchanged && formValues.auth.credentials?.region !== auth.credentials?.region;
+    const isServiceNameChanged =
+      isAuthTypeSigV4Unchanged &&
+      formValues.auth.credentials?.service !== auth.credentials?.service;
 
     if (
       formValues.title !== title ||
       formValues.description !== description ||
       formValues.auth.type !== auth.type ||
       isUsernameChanged ||
-      isRegionChanged
+      isRegionChanged ||
+      isServiceNameChanged
     ) {
       this.setState({ showUpdateOptions: true });
     } else {

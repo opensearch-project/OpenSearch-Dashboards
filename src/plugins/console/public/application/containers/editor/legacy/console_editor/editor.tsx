@@ -231,7 +231,6 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
   return (
     <div style={abs} className="conApp">
       <div className="conApp__editor">
-        <ul className="conApp__autoComplete" id="autocomplete" />
         <EuiFlexGroup
           className="conApp__editorActions"
           id="ConAppEditorActions"
