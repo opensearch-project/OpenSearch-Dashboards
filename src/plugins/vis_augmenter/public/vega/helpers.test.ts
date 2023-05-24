@@ -15,6 +15,7 @@ import {
   addMissingRowsToTableBounds,
   addPointInTimeEventsLayersToTable,
   addPointInTimeEventsLayersToSpec,
+  generateVisLayerTooltipFields,
 } from './helpers';
 import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, PointInTimeEventsVisLayer, VisLayer } from '../';
 import {
@@ -175,6 +176,24 @@ describe('helpers', function () {
       const visLayerColumnIds = ['test-id-1', 'test-id-2'];
       const filterString = `datum['test-id-1'] > 0 || datum['test-id-2'] > 0`;
       expect(generateVisLayerFilterString(visLayerColumnIds)).toStrictEqual(filterString);
+    });
+  });
+
+  describe('generateVisLayerTooltipFields()', function () {
+    it('empty array returns empty', function () {
+      const visLayerColumnIds = [] as string[];
+      const tooltipFields = [] as Array<{ field: string }>;
+      expect(generateVisLayerTooltipFields(visLayerColumnIds)).toStrictEqual(tooltipFields);
+    });
+    it('array with one value returns correct array', function () {
+      const visLayerColumnIds = ['test-id-1'];
+      const tooltipFields = [{ field: 'test-id-1' }];
+      expect(generateVisLayerTooltipFields(visLayerColumnIds)).toStrictEqual(tooltipFields);
+    });
+    it('array with multiple values returns correct array', function () {
+      const visLayerColumnIds = ['test-id-1', 'test-id-2'];
+      const tooltipFields = [{ field: 'test-id-1' }, { field: 'test-id-2' }];
+      expect(generateVisLayerTooltipFields(visLayerColumnIds)).toStrictEqual(tooltipFields);
     });
   });
 
@@ -356,7 +375,7 @@ describe('helpers', function () {
           TEST_VIS_LAYERS_SINGLE
         )
       ).toStrictEqual({
-        ...TEST_DATATABLE_SINGLE_VIS_LAYER_EMPTY,
+        ...TEST_DATATABLE_NO_VIS_LAYERS,
         rows: [],
       });
     });

@@ -37,7 +37,6 @@ export type VisLayers = VisLayer[];
 
 export interface EventMetadata {
   pluginResourceId: string;
-  tooltip?: string;
 }
 
 export interface PointInTimeEvent {
@@ -47,6 +46,7 @@ export interface PointInTimeEvent {
 
 export interface PointInTimeEventsVisLayer extends VisLayer {
   events: PointInTimeEvent[];
+  pluginEventType: string;
 }
 
 export const isPointInTimeEventsVisLayer = (obj: any) => {

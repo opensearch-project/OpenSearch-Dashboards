@@ -123,6 +123,16 @@ export const generateVisLayerFilterString = (visLayerColumnIds: string[]): strin
   }
 };
 
+export const generateVisLayerTooltipFields = (
+  visLayerColumnIds: string[]
+): Array<{ field: string }> => {
+  return visLayerColumnIds.map((id) => {
+    return {
+      field: id,
+    };
+  });
+};
+
 /**
  * By default, the source datatable will not include rows with empty data.
  * For handling events that may belong in missing buckets that are not yet
@@ -195,28 +205,34 @@ export const addPointInTimeEventsLayersToTable = (
   const augmentedTable = addMissingRowsToTableBounds(datatable, dimensions);
   const xAxisId = getXAxisId(dimensions, augmentedTable.columns);
 
-  if (isEmpty(visLayers)) return augmentedTable;
+  if (isEmpty(visLayers) || augmentedTable.rows.length === 0) return augmentedTable;
 
-  visLayers.every((visLayer: PointInTimeEventsVisLayer) => {
-    const visLayerColumnId = `${visLayer.pluginResource.id}`;
-    const visLayerColumnName = `${visLayer.pluginResource.name}`;
+  // Create columns for every unique event type. This is so we can aggregate on the different event types
+  // (e.g., 'Anomalies', 'Alerts')
+  [
+    ...new Set(visLayers.map((visLayer: PointInTimeEventsVisLayer) => visLayer.pluginEventType)),
+  ].forEach((pluginEventType: string) => {
     augmentedTable.columns.push({
-      id: visLayerColumnId,
-      name: visLayerColumnName,
+      id: pluginEventType,
+      name: `${pluginEventType} count`,
       meta: {
         type: VIS_LAYER_COLUMN_TYPE,
       },
     });
+  });
 
-    if (augmentedTable.rows.length === 0 || isEmpty(visLayer.events)) return false;
+  visLayers.forEach((visLayer: PointInTimeEventsVisLayer) => {
+    if (isEmpty(visLayer.events)) return;
+    const visLayerColumnId = `${visLayer.pluginEventType}`;
 
     // if only one row / one datapoint, put all events into this bucket
     if (augmentedTable.rows.length === 1) {
       augmentedTable.rows[0] = {
         ...augmentedTable.rows[0],
-        [visLayerColumnId]: visLayer.events.length,
+        [visLayerColumnId]:
+          (get(augmentedTable.rows[0], visLayerColumnId, 0) as number) + visLayer.events.length,
       };
-      return false;
+      return;
     }
 
     // Bin the timestamps to the closest x-axis key, adding
@@ -267,8 +283,6 @@ export const addPointInTimeEventsLayersToTable = (
         break;
       }
     });
-
-    return true;
   });
   return augmentedTable;
 };
@@ -372,6 +386,7 @@ export const addPointInTimeEventsLayersToSpec = (
         condition: { empty: false, param: HOVER_PARAM, value: EVENT_MARK_SIZE_ENLARGED },
         value: EVENT_MARK_SIZE,
       },
+      tooltip: generateVisLayerTooltipFields(visLayerColumnIds),
     },
   });
 

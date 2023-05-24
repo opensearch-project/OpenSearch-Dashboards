@@ -14,6 +14,8 @@ const TEST_VALUE_AXIS_ID_DIRTY = 'test.value.axis.id';
 const TEST_X_AXIS_TITLE = 'time';
 const TEST_VALUE_AXIS_TITLE = 'avg value';
 const TEST_PLUGIN = 'test-plugin';
+const TEST_PLUGIN_EVENT_TYPE = 'test-plugin-event-type';
+const TEST_PLUGIN_EVENT_TYPE_2 = 'test-plugin-event-type-2';
 const TEST_PLUGIN_RESOURCE_TYPE = 'test-resource-type';
 const TEST_PLUGIN_RESOURCE_ID = 'test-resource-id';
 const TEST_PLUGIN_RESOURCE_ID_2 = 'test-resource-id-2';
@@ -25,18 +27,18 @@ const TEST_PLUGIN_RESOURCE_PATH_2 = `${TEST_PLUGIN}/${TEST_PLUGIN_RESOURCE_TYPE}
 const TEST_VALUES_SINGLE_ROW_NO_VIS_LAYERS = [{ [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5 }];
 
 const TEST_VALUES_SINGLE_ROW_SINGLE_VIS_LAYER = [
-  { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_RESOURCE_ID]: 3 },
+  { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 3 },
 ];
 
 const TEST_VALUES_ONLY_VIS_LAYERS = [
   { [TEST_X_AXIS_ID]: 0 },
-  { [TEST_X_AXIS_ID]: 5, [TEST_PLUGIN_RESOURCE_ID]: 2 },
+  { [TEST_X_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 2 },
   { [TEST_X_AXIS_ID]: 10 },
   { [TEST_X_AXIS_ID]: 15 },
   { [TEST_X_AXIS_ID]: 20 },
   { [TEST_X_AXIS_ID]: 25 },
   { [TEST_X_AXIS_ID]: 30 },
-  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_RESOURCE_ID]: 1 },
+  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 1 },
   { [TEST_X_AXIS_ID]: 40 },
   { [TEST_X_AXIS_ID]: 45 },
   { [TEST_X_AXIS_ID]: 50 },
@@ -72,20 +74,20 @@ const TEST_VALUES_NO_VIS_LAYERS_DIRTY = [
 
 const TEST_VALUES_SINGLE_VIS_LAYER = [
   { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5 },
-  { [TEST_X_AXIS_ID]: 5, [TEST_VALUE_AXIS_ID]: 10, [TEST_PLUGIN_RESOURCE_ID]: 2 },
+  { [TEST_X_AXIS_ID]: 5, [TEST_VALUE_AXIS_ID]: 10, [TEST_PLUGIN_EVENT_TYPE]: 2 },
   { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6 },
   { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4 },
   { [TEST_X_AXIS_ID]: 20, [TEST_VALUE_AXIS_ID]: 5 },
   { [TEST_X_AXIS_ID]: 25 },
   { [TEST_X_AXIS_ID]: 30 },
-  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_RESOURCE_ID]: 1 },
+  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 1 },
   { [TEST_X_AXIS_ID]: 40 },
   { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3 },
   { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5 },
 ];
 
 const TEST_VALUES_SINGLE_VIS_LAYER_ON_BOUNDS = [
-  { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_RESOURCE_ID]: 2 },
+  { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 2 },
   { [TEST_X_AXIS_ID]: 5, [TEST_VALUE_AXIS_ID]: 10 },
   { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6 },
   { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4 },
@@ -95,7 +97,7 @@ const TEST_VALUES_SINGLE_VIS_LAYER_ON_BOUNDS = [
   { [TEST_X_AXIS_ID]: 35 },
   { [TEST_X_AXIS_ID]: 40 },
   { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3 },
-  { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_RESOURCE_ID]: 1 },
+  { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 1 },
 ];
 
 const TEST_VALUES_MULTIPLE_VIS_LAYERS = [
@@ -103,18 +105,18 @@ const TEST_VALUES_MULTIPLE_VIS_LAYERS = [
   {
     [TEST_X_AXIS_ID]: 5,
     [TEST_VALUE_AXIS_ID]: 10,
-    [TEST_PLUGIN_RESOURCE_ID]: 2,
-    [TEST_PLUGIN_RESOURCE_ID_2]: 1,
+    [TEST_PLUGIN_EVENT_TYPE]: 2,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 1,
   },
   { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6 },
-  { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4, [TEST_PLUGIN_RESOURCE_ID_2]: 1 },
+  { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4, [TEST_PLUGIN_EVENT_TYPE_2]: 1 },
   { [TEST_X_AXIS_ID]: 20, [TEST_VALUE_AXIS_ID]: 5 },
   { [TEST_X_AXIS_ID]: 25 },
   { [TEST_X_AXIS_ID]: 30 },
-  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_RESOURCE_ID]: 1 },
+  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 1 },
   { [TEST_X_AXIS_ID]: 40 },
   { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3 },
-  { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_RESOURCE_ID_2]: 2 },
+  { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE_2]: 2 },
 ];
 
 export const TEST_COLUMNS_NO_VIS_LAYERS = [
@@ -142,8 +144,8 @@ export const TEST_COLUMNS_NO_VIS_LAYERS_DIRTY = [
 export const TEST_COLUMNS_SINGLE_VIS_LAYER = [
   ...TEST_COLUMNS_NO_VIS_LAYERS,
   {
-    id: TEST_PLUGIN_RESOURCE_ID,
-    name: TEST_PLUGIN_RESOURCE_NAME,
+    id: TEST_PLUGIN_EVENT_TYPE,
+    name: `${TEST_PLUGIN_EVENT_TYPE} count`,
     meta: {
       type: VIS_LAYER_COLUMN_TYPE,
     },
@@ -153,8 +155,8 @@ export const TEST_COLUMNS_SINGLE_VIS_LAYER = [
 export const TEST_COLUMNS_MULTIPLE_VIS_LAYERS = [
   ...TEST_COLUMNS_SINGLE_VIS_LAYER,
   {
-    id: TEST_PLUGIN_RESOURCE_ID_2,
-    name: TEST_PLUGIN_RESOURCE_NAME_2,
+    id: TEST_PLUGIN_EVENT_TYPE_2,
+    name: `${TEST_PLUGIN_EVENT_TYPE_2} count`,
     meta: {
       type: VIS_LAYER_COLUMN_TYPE,
     },
@@ -322,6 +324,7 @@ export const TEST_VIS_LAYERS_SINGLE = [
       name: TEST_PLUGIN_RESOURCE_NAME,
       urlPath: TEST_PLUGIN_RESOURCE_PATH,
     },
+    pluginEventType: TEST_PLUGIN_EVENT_TYPE,
     events: [
       {
         timestamp: 4,
@@ -355,6 +358,7 @@ export const TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS = [
       name: TEST_PLUGIN_RESOURCE_NAME,
       urlPath: TEST_PLUGIN_RESOURCE_PATH,
     },
+    pluginEventType: TEST_PLUGIN_EVENT_TYPE,
     events: [
       {
         timestamp: -5,
@@ -388,6 +392,7 @@ export const TEST_VIS_LAYERS_SINGLE_EMPTY_EVENTS = [
       name: TEST_PLUGIN_RESOURCE_NAME,
       urlPath: TEST_PLUGIN_RESOURCE_PATH,
     },
+    pluginEventType: TEST_PLUGIN_EVENT_TYPE,
   },
 ];
 
@@ -401,6 +406,7 @@ export const TEST_VIS_LAYERS_SINGLE_ON_BOUNDS = [
       name: TEST_PLUGIN_RESOURCE_NAME,
       urlPath: TEST_PLUGIN_RESOURCE_PATH,
     },
+    pluginEventType: TEST_PLUGIN_EVENT_TYPE,
     events: [
       {
         timestamp: 0,
@@ -435,6 +441,7 @@ export const TEST_VIS_LAYERS_MULTIPLE = [
       name: TEST_PLUGIN_RESOURCE_NAME_2,
       urlPath: TEST_PLUGIN_RESOURCE_PATH_2,
     },
+    pluginEventType: TEST_PLUGIN_EVENT_TYPE_2,
     events: [
       {
         timestamp: 5,
@@ -466,7 +473,7 @@ export const TEST_VIS_LAYERS_MULTIPLE = [
 
 const TEST_RULE_LAYER_SINGLE_VIS_LAYER = {
   mark: { type: 'rule', color: 'red', opacity: 1 },
-  transform: [{ filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` }],
+  transform: [{ filter: `datum['${TEST_PLUGIN_EVENT_TYPE}'] > 0` }],
   encoding: {
     x: { field: TEST_X_AXIS_ID, type: 'temporal' },
     opacity: { value: 0, condition: { empty: false, param: HOVER_PARAM, value: 1 } },
@@ -477,7 +484,7 @@ const TEST_RULE_LAYER_MULTIPLE_VIS_LAYERS = {
   ...TEST_RULE_LAYER_SINGLE_VIS_LAYER,
   transform: [
     {
-      filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0 || datum['${TEST_PLUGIN_RESOURCE_ID_2}'] > 0`,
+      filter: `datum['${TEST_PLUGIN_EVENT_TYPE}'] > 0 || datum['${TEST_PLUGIN_EVENT_TYPE_2}'] > 0`,
     },
   ],
 };
@@ -491,9 +498,10 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
     filled: true,
     opacity: 1,
     style: [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`],
+    tooltip: true,
   },
   transform: [
-    { filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0` },
+    { filter: `datum['${TEST_PLUGIN_EVENT_TYPE}'] > 0` },
     { calculate: `'${VisAnnotationType.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
   ],
   params: [{ name: HOVER_PARAM, select: { type: 'point', on: 'mouseover' } }],
@@ -532,6 +540,7 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
       },
     },
     size: { condition: { empty: false, param: HOVER_PARAM, value: 140 }, value: 100 },
+    tooltip: [{ field: TEST_PLUGIN_EVENT_TYPE }],
   },
 };
 
@@ -539,10 +548,14 @@ const TEST_EVENTS_LAYER_MULTIPLE_VIS_LAYERS = {
   ...TEST_EVENTS_LAYER_SINGLE_VIS_LAYER,
   transform: [
     {
-      filter: `datum['${TEST_PLUGIN_RESOURCE_ID}'] > 0 || datum['${TEST_PLUGIN_RESOURCE_ID_2}'] > 0`,
+      filter: `datum['${TEST_PLUGIN_EVENT_TYPE}'] > 0 || datum['${TEST_PLUGIN_EVENT_TYPE_2}'] > 0`,
     },
     { calculate: `'${VisAnnotationType.POINT_IN_TIME_ANNOTATION}'`, as: 'annotationType' },
   ],
+  encoding: {
+    ...TEST_EVENTS_LAYER_SINGLE_VIS_LAYER.encoding,
+    tooltip: [{ field: TEST_PLUGIN_EVENT_TYPE }, { field: TEST_PLUGIN_EVENT_TYPE_2 }],
+  },
 };
 
 export const TEST_RESULT_SPEC_SINGLE_VIS_LAYER = {
