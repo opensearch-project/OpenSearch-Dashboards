@@ -495,44 +495,47 @@ export class VisualizeEmbeddable
     expressionParams: IExpressionLoaderParams,
     abortController: AbortController
   ): Promise<VisLayers> => {
-    const augmentVisSavedObjs = await getAugmentVisSavedObjs(
-      this.vis.id,
-      this.savedAugmentVisLoader
-    );
-    if (
-      !isEmpty(augmentVisSavedObjs) &&
-      !abortController.signal.aborted &&
-      isEligibleForVisLayers(this.vis)
-    ) {
-      const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
-      // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
-      // expression functions are ran, they will incrementally append their generated VisLayers to it.
-      const visLayersPipelineInput = {
-        type: 'vis_layers',
-        layers: [] as VisLayers,
-      };
-      // We cannot use this.handler in this case, since it does not support the run() cmd
-      // we need here. So, we consume the expressions service to run this directly instead.
-      const exprVisLayers = (await getExpressions().run(
-        visLayersPipeline,
-        visLayersPipelineInput,
-        expressionParams as Record<string, unknown>
-      )) as ExprVisLayers;
-      const visLayers = exprVisLayers.layers;
-      const err = getAnyErrors(visLayers, this.vis.title);
-      // This is only true when one or more VisLayers has an error
-      if (err !== undefined) {
-        const { toasts } = getNotifications();
-        toasts.addError(err, {
-          title: i18n.translate('visualizations.renderVisTitle', {
-            defaultMessage: `Error loading data on the ${this.vis.title} chart`,
-          }),
-          toastMessage: ' ',
-          id: this.id,
-        });
+    try {
+      const augmentVisSavedObjs = await getAugmentVisSavedObjs(
+        this.vis.id,
+        this.savedAugmentVisLoader
+      );
+      if (
+        !isEmpty(augmentVisSavedObjs) &&
+        !abortController.signal.aborted &&
+        isEligibleForVisLayers(this.vis)
+      ) {
+        const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
+        // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
+        // expression functions are ran, they will incrementally append their generated VisLayers to it.
+        const visLayersPipelineInput = {
+          type: 'vis_layers',
+          layers: [] as VisLayers,
+        };
+        // We cannot use this.handler in this case, since it does not support the run() cmd
+        // we need here. So, we consume the expressions service to run this directly instead.
+        const exprVisLayers = (await getExpressions().run(
+          visLayersPipeline,
+          visLayersPipelineInput,
+          expressionParams as Record<string, unknown>
+        )) as ExprVisLayers;
+        const visLayers = exprVisLayers.layers;
+        const err = getAnyErrors(visLayers, this.vis.title);
+        // This is only true when one or more VisLayers has an error
+        if (err !== undefined) {
+          const { toasts } = getNotifications();
+          toasts.addError(err, {
+            title: i18n.translate('visualizations.renderVisTitle', {
+              defaultMessage: `Error loading data on the ${this.vis.title} chart`,
+            }),
+            toastMessage: ' ',
+            id: this.id,
+          });
+        }
+        return visLayers;
       }
-
-      return visLayers;
+    } catch {
+      return [] as VisLayers;
     }
     return [] as VisLayers;
   };

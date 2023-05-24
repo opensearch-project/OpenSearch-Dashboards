@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createGetterSetter } from '../../opensearch_dashboards_utils/common';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
+import { IUiSettingsClient } from '../../../core/public';
+import { SavedObjectLoaderAugmentVis } from './saved_augment_vis';
 
 export const [getSavedAugmentVisLoader, setSavedAugmentVisLoader] = createGetterSetter<
-  SavedObjectLoader
+  SavedObjectLoaderAugmentVis
 >('savedAugmentVisLoader');
+
+export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');

@@ -18,6 +18,8 @@ import {
   VisLayer,
   isVisLayerWithError,
 } from '../';
+import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
+import { getUISettings } from '../services';
 
 export const isEligibleForVisLayers = (vis: Vis): boolean => {
   // Only support date histogram and ensure there is only 1 x-axis and it has to be on the bottom.
@@ -38,7 +40,10 @@ export const isEligibleForVisLayers = (vis: Vis): boolean => {
   const hasOnlyLineSeries =
     vis.params.seriesParams.every((seriesParam: { type: string }) => seriesParam.type === 'line') &&
     vis.params.type === 'line';
-  return hasValidXaxis && hasCorrectAggregationCount && hasOnlyLineSeries;
+  // Checks if the augmentation setting is enabled
+  const config = getUISettings();
+  const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
+  return isAugmentationEnabled && hasValidXaxis && hasCorrectAggregationCount && hasOnlyLineSeries;
 };
 
 /**
@@ -50,6 +55,13 @@ export const getAugmentVisSavedObjs = async (
   visId: string | undefined,
   loader: SavedAugmentVisLoader | undefined
 ): Promise<ISavedAugmentVis[]> => {
+  const config = getUISettings();
+  const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
+  if (!isAugmentationEnabled) {
+    throw new Error(
+      'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
+    );
+  }
   try {
     const resp = await loader?.findAll();
     const allSavedObjects = (get(resp, 'hits', []) as any[]) as ISavedAugmentVis[];

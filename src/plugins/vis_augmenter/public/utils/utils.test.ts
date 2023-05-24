@@ -18,10 +18,20 @@ import {
   VisLayerTypes,
   VisLayerExpressionFn,
 } from '../';
+import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { AggConfigs, AggTypesRegistryStart, IndexPattern } from '../../../data/common';
 import { mockAggTypesRegistry } from '../../../data/common/search/aggs/test_helpers';
+import { uiSettingsServiceMock } from '../../../../core/public/mocks';
+import { setUISettings } from '../services';
 
 describe('utils', () => {
+  const uiSettingsMock = uiSettingsServiceMock.createStartContract();
+  setUISettings(uiSettingsMock);
+  beforeEach(() => {
+    uiSettingsMock.get.mockImplementation((key: string) => {
+      return key === PLUGIN_AUGMENTATION_ENABLE_SETTING;
+    });
+  });
   describe('isEligibleForVisLayers', () => {
     const validConfigStates = [
       {
@@ -278,6 +288,12 @@ describe('utils', () => {
         },
       } as unknown) as Vis;
       expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
+    });
+    it('vis is ineligible with valid type and disabled setting', async () => {
+      uiSettingsMock.get.mockImplementation((key: string) => {
+        return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
+      });
+      expect(isEligibleForVisLayers(validVis)).toEqual(false);
     });
     it('vis is eligible with valid type', async () => {
       expect(isEligibleForVisLayers(validVis)).toEqual(true);

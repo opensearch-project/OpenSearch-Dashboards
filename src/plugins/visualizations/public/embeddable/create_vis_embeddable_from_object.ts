@@ -40,11 +40,11 @@ import { IContainer, ErrorEmbeddable } from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
   getSavedVisualizationsLoader,
-  getSavedAugmentVisLoader,
   getUISettings,
   getHttp,
   getTimeFilter,
   getCapabilities,
+  getSavedAugmentVisLoader,
 } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';

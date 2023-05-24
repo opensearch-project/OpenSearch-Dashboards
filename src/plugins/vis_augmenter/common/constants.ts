@@ -10,3 +10,6 @@ export const APP_API = '/api/vis_augmenter';
 
 // used for limiting results received from the stats API
 export const PER_PAGE_REQUEST_NUMBER = 50;
+export const PLUGIN_AUGMENTATION_ENABLE_SETTING = 'visualization:enablePluginAugmentation';
+export const PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING =
+  'visualization:enablePluginAugmentation.maxPluginObjects';
