@@ -515,7 +515,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const deletes = objects.savedObjects.map((object) =>
       savedObjectsClient.delete(object.type, object.id, { force: true })
     );
-
     await Promise.all(deletes);
 
     // Unset this

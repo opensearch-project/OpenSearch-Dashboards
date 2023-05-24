@@ -115,7 +115,6 @@ export const buildPipelineFromAugmentVisSavedObjs = (objs: ISavedAugmentVis[]): 
  * errors found in the set of VisLayers. If no errors, returns undefined.
  */
 export const getAnyErrors = (visLayers: VisLayer[], visTitle: string): Error | undefined => {
-  // TODO: filter out deleted errors. we won't show them, but rather suppress it
   const visLayersWithErrors = visLayers.filter((visLayer) => isVisLayerWithError(visLayer));
   if (!isEmpty(visLayersWithErrors)) {
     // Aggregate by unique plugin resource type
