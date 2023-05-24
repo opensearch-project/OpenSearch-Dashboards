@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
+import { mkdir } from 'fs/promises';
 import path from 'path';
 
 import del from 'del';
@@ -39,8 +38,6 @@ import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
 import { existingInstall, assertVersion } from './opensearch_dashboards';
-
-const mkdir = promisify(Fs.mkdir);
 
 export async function install(settings, logger) {
   try {

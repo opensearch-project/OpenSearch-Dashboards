@@ -31,21 +31,14 @@
 import * as chokidar from 'chokidar';
 import { isMaster as isClusterManager } from 'cluster';
 import fs from 'fs';
+import { mkdir, readdir, rename, unlink, writeFile, stat } from 'fs/promises';
 import { Server } from '@hapi/hapi';
 import { throttle } from 'lodash';
 import { tmpdir } from 'os';
 import { basename, dirname, join, sep } from 'path';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { promisify } from 'util';
 import { OpenSearchDashboardsConfig } from '../../osd_server';
-
-const mkdirAsync = promisify(fs.mkdir);
-const readdirAsync = promisify(fs.readdir);
-const renameAsync = promisify(fs.rename);
-const statAsync = promisify(fs.stat);
-const unlinkAsync = promisify(fs.unlink);
-const writeFileAsync = promisify(fs.writeFile);
 
 export class LogRotator {
   private readonly config: OpenSearchDashboardsConfig;
@@ -118,13 +111,13 @@ export class LogRotator {
       const tempFileDir = tmpdir();
       const tempFile = join(tempFileDir, 'osd_log_rotation_use_polling_test_file.log');
 
-      await mkdirAsync(tempFileDir, { recursive: true });
-      await writeFileAsync(tempFile, '');
+      await mkdir(tempFileDir, { recursive: true });
+      await writeFile(tempFile, '');
 
       // setup fs.watch for the temp test file
       const testWatcher = fs.watch(tempFile, { persistent: false });
 
-      // await writeFileAsync(tempFile, 'test');
+      // await writeFile(tempFile, 'test');
 
       const usePollingTest$ = new Observable<boolean>((observer) => {
         // observable complete function
@@ -154,7 +147,7 @@ export class LogRotator {
       const usePollingTestResult = await usePollingTest$.pipe(first()).toPromise();
 
       // delete the temp file used for the test
-      await unlinkAsync(tempFile);
+      await unlink(tempFile);
 
       return usePollingTestResult;
     } catch {
@@ -224,12 +217,12 @@ export class LogRotator {
 
   async _getLogFileSizeAndCreateIfNeeded() {
     try {
-      const logFileStats = await statAsync(this.logFilePath);
+      const logFileStats = await stat(this.logFilePath);
       return logFileStats.size;
     } catch {
       // touch the file to make the watcher being able to register
       // change events
-      await writeFileAsync(this.logFilePath, '');
+      await writeFile(this.logFilePath, '');
       return 0;
     }
   }
@@ -304,7 +297,7 @@ export class LogRotator {
   async _readRotatedFilesMetadata() {
     const logFileBaseName = basename(this.logFilePath);
     const logFilesFolder = dirname(this.logFilePath);
-    const foundLogFiles: string[] = await readdirAsync(logFilesFolder);
+    const foundLogFiles: string[] = await readdir(logFilesFolder);
 
     return (
       foundLogFiles
@@ -327,7 +320,7 @@ export class LogRotator {
     );
 
     await Promise.all(
-      rotatedFilesToDelete.map((rotatedFilePath: string) => unlinkAsync(rotatedFilePath))
+      rotatedFilesToDelete.map((rotatedFilePath: string) => unlink(rotatedFilePath))
     );
 
     return finalRotatedFiles;
@@ -339,7 +332,7 @@ export class LogRotator {
     }
 
     const lastFilePath: string = rotatedFiles.pop() as string;
-    await unlinkAsync(lastFilePath);
+    await unlink(lastFilePath);
   }
 
   async _renameRotatedFilesByOne(rotatedFiles: string[]) {
@@ -349,13 +342,13 @@ export class LogRotator {
     for (let i = rotatedFiles.length - 1; i >= 0; i--) {
       const oldFilePath = rotatedFiles[i];
       const newFilePath = `${logFilesFolder}${sep}${logFileBaseName}.${i + 1}`;
-      await renameAsync(oldFilePath, newFilePath);
+      await rename(oldFilePath, newFilePath);
     }
   }
 
   async _rotateCurrentLogFile() {
     const newFilePath = `${this.logFilePath}.0`;
-    await renameAsync(this.logFilePath, newFilePath);
+    await rename(this.logFilePath, newFilePath);
   }
 
   _sendReloadLogConfigSignal() {

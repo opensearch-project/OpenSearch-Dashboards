@@ -28,9 +28,7 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import Util from 'util';
-const readFile = Util.promisify(Fs.readFile);
+import { readFile } from 'fs/promises';
 
 function replaceAllNumbers(input: string) {
   return input.replace(/\d/g, 'x');

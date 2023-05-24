@@ -28,18 +28,20 @@
  * under the License.
  */
 
-import { writeFile, exists } from './fs';
+import { Stats } from 'fs';
+import { writeFile, stat } from 'fs/promises';
 import { writePidFile } from './write_pid_file';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
-jest.mock('./fs', () => ({
+jest.mock('fs/promises', () => ({
   writeFile: jest.fn(),
-  exists: jest.fn(),
+  stat: jest.fn(),
 }));
 
 const writeFileMock = writeFile as jest.MockedFunction<typeof writeFile>;
-const existsMock = exists as jest.MockedFunction<typeof exists>;
+const statMock = stat as jest.MockedFunction<typeof stat>;
 
+const dummyStats = new Stats();
 const pid = String(process.pid);
 
 describe('writePidFile', () => {
@@ -50,7 +52,7 @@ describe('writePidFile', () => {
     jest.spyOn(process, 'once');
 
     writeFileMock.mockImplementation(() => Promise.resolve());
-    existsMock.mockImplementation(() => Promise.resolve(false));
+    statMock.mockImplementation(() => Promise.reject({ code: 'ENOENT' }));
   });
 
   afterEach(() => {
@@ -76,7 +78,7 @@ describe('writePidFile', () => {
   });
 
   it('writes the pid file to `pid.file`', async () => {
-    existsMock.mockResolvedValue(false);
+    statMock.mockResolvedValue(dummyStats);
 
     await writePidFile({
       pidConfig: {
@@ -99,12 +101,16 @@ describe('writePidFile', () => {
           "debug",
           "wrote pid file to /pid-file",
         ],
+        Array [
+          "warn",
+          "pid file already exists at /pid-file",
+        ],
       ]
     `);
   });
 
   it('throws an error if the file exists and `pid.exclusive is true`', async () => {
-    existsMock.mockResolvedValue(true);
+    statMock.mockResolvedValue(dummyStats);
 
     await expect(
       writePidFile({
@@ -122,7 +128,7 @@ describe('writePidFile', () => {
   });
 
   it('logs a warning if the file exists and `pid.exclusive` is false', async () => {
-    existsMock.mockResolvedValue(true);
+    statMock.mockResolvedValue(dummyStats);
 
     await writePidFile({
       pidConfig: {

@@ -28,15 +28,12 @@
  * under the License.
  */
 
-import globSync from 'glob';
+import { glob } from 'glob';
 import path from 'path';
-import { promisify } from 'util';
 
 import { CliError } from './errors';
 import { Project } from './project';
 import { workspacePackagePaths } from './workspaces';
-
-const glob = promisify(globSync);
 
 /** a Map of project names to Project instances */
 export type ProjectMap = Map<string, Project>;

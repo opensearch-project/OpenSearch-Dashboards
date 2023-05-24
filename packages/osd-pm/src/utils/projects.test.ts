@@ -28,10 +28,9 @@
  * under the License.
  */
 
-import { mkdir, symlink } from 'fs';
+import { mkdir, symlink } from 'fs/promises';
 import { join, resolve } from 'path';
 import del from 'del';
-import { promisify } from 'util';
 
 import { getProjectPaths } from '../config';
 import { Project } from './project';
@@ -53,9 +52,9 @@ describe('#getProjects', () => {
     // Make sure we start clean
     await del(rootPlugins, { cwd: PROCESS_WORKING_DIR });
 
-    await promisify(mkdir)(rootPlugins);
+    await mkdir(rootPlugins);
 
-    await promisify(symlink)(
+    await symlink(
       join(__dirname, '__fixtures__/symlinked-plugins/corge'),
       join(rootPlugins, 'corge'),
       'junction' // This parameter would only be used on Windows
@@ -256,8 +255,8 @@ describe('#topologicallyBatchProjects', () => {
 
       expect(expectedBatches).toEqual([
         ['opensearch-dashboards'],
-        ['bar', 'foo'],
-        ['baz', 'zorge'],
+        ['foo', 'bar'],
+        ['zorge', 'baz'],
         ['quux'],
       ]);
     });

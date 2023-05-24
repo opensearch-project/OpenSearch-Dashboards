@@ -28,12 +28,14 @@
  * under the License.
  */
 
-import fs from 'fs';
+import { accessSync, createReadStream, createWriteStream, constants } from 'fs';
+import { copyFile, mkdir, readFile, readdir, stat, utimes, writeFile } from 'fs/promises';
 import { createHash } from 'crypto';
-import { pipeline, Writable } from 'stream';
+import { Writable } from 'stream';
+import { pipeline } from 'stream/promises';
 import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
-import { inspect, promisify } from 'util';
+import { inspect } from 'util';
 
 import archiver from 'archiver';
 import * as StreamZip from 'node-stream-zip';
@@ -43,15 +45,6 @@ import del from 'del';
 import deleteEmpty from 'delete-empty';
 import tar, { ExtractOptions } from 'tar';
 import { ToolingLog } from '@osd/dev-utils';
-
-const pipelineAsync = promisify(pipeline);
-const mkdirAsync = promisify(fs.mkdir);
-const writeFileAsync = promisify(fs.writeFile);
-const readFileAsync = promisify(fs.readFile);
-const readdirAsync = promisify(fs.readdir);
-const utimesAsync = promisify(fs.utimes);
-const copyFileAsync = promisify(fs.copyFile);
-const statAsync = promisify(fs.stat);
 
 export function assertAbsolute(path: string) {
   if (!isAbsolute(path)) {
@@ -65,7 +58,7 @@ export function isFileAccessible(path: string) {
   assertAbsolute(path);
 
   try {
-    fs.accessSync(path);
+    accessSync(path);
     return true;
   } catch (e) {
     return false;
@@ -80,23 +73,23 @@ function longInspect(value: any) {
 
 export async function mkdirp(path: string) {
   assertAbsolute(path);
-  await mkdirAsync(path, { recursive: true });
+  await mkdir(path, { recursive: true });
 }
 
 export async function write(path: string, contents: string) {
   assertAbsolute(path);
   await mkdirp(dirname(path));
-  await writeFileAsync(path, contents);
+  await writeFile(path, contents);
 }
 
 export async function read(path: string) {
   assertAbsolute(path);
-  return await readFileAsync(path, 'utf8');
+  return await readFile(path, 'utf8');
 }
 
 export async function getChildPaths(path: string) {
   assertAbsolute(path);
-  const childNames = await readdirAsync(path);
+  const childNames = await readdir(path);
   return childNames.map((name) => resolve(path, name));
 }
 
@@ -164,13 +157,9 @@ export async function copy(source: string, destination: string, options: CopyOpt
   assertAbsolute(destination);
 
   // ensure source exists before creating destination directory and copying source
-  await statAsync(source);
+  await stat(source);
   await mkdirp(dirname(destination));
-  return await copyFileAsync(
-    source,
-    destination,
-    options.clone ? fs.constants.COPYFILE_FICLONE : 0
-  );
+  return await copyFile(source, destination, options.clone ? constants.COPYFILE_FICLONE : 0);
 }
 
 interface CopyAllOptions {
@@ -189,7 +178,7 @@ export async function copyAll(
   assertAbsolute(sourceDir);
   assertAbsolute(destination);
 
-  await pipelineAsync(
+  await pipeline(
     vfs.src(select, {
       buffer: false,
       cwd: sourceDir,
@@ -202,7 +191,7 @@ export async function copyAll(
   // we must update access and modified file times after the file copy
   // has completed, otherwise the copy action can effect modify times.
   if (Boolean(time)) {
-    await pipelineAsync(
+    await pipeline(
       vfs.src(select, {
         buffer: false,
         cwd: destination,
@@ -212,7 +201,7 @@ export async function copyAll(
       new Writable({
         objectMode: true,
         write(file: File, _, cb) {
-          utimesAsync(file.path, time, time).then(() => cb(), cb);
+          utimes(file.path, time, time).then(() => cb(), cb);
         },
       })
     );
@@ -223,7 +212,7 @@ export async function getFileHash(path: string, algo: string) {
   assertAbsolute(path);
 
   const hash = createHash(algo);
-  const readStream = fs.createReadStream(path);
+  const readStream = createReadStream(path);
   await new Promise((res, rej) => {
     readStream
       .on('data', (chunk) => hash.update(chunk))
@@ -242,10 +231,10 @@ export async function untar(
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirAsync(destination, { recursive: true });
+  await mkdir(destination, { recursive: true });
 
-  await pipelineAsync(
-    fs.createReadStream(source),
+  await pipeline(
+    createReadStream(source),
     createGunzip(),
     tar.extract({
       ...extractOptions,
@@ -258,13 +247,9 @@ export async function gunzip(source: string, destination: string) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirAsync(dirname(destination), { recursive: true });
+  await mkdir(dirname(destination), { recursive: true });
 
-  await pipelineAsync(
-    fs.createReadStream(source),
-    createGunzip(),
-    fs.createWriteStream(destination)
-  );
+  await pipeline(createReadStream(source), createGunzip(), createWriteStream(destination));
 }
 
 interface UnzipOptions {
@@ -275,7 +260,7 @@ export async function unzip(source: string, destination: string, options: UnzipO
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirAsync(destination, { recursive: true });
+  await mkdir(destination, { recursive: true });
 
   const zip = new StreamZip.async({ file: source });
 
@@ -311,7 +296,7 @@ export async function compressTar({
   archiverOptions,
   createRootDirectory,
 }: CompressTarOptions) {
-  const output = fs.createWriteStream(destination);
+  const output = createWriteStream(destination);
   const archive = archiver('tar', archiverOptions);
   const name = createRootDirectory ? source.split(sep).slice(-1)[0] : false;
 
@@ -341,7 +326,7 @@ export async function compressZip({
   archiverOptions,
   createRootDirectory,
 }: CompressZipOptions) {
-  const output = fs.createWriteStream(destination);
+  const output = createWriteStream(destination);
   const archive = archiver('zip', archiverOptions);
   const name = createRootDirectory ? source.split(sep).slice(-1)[0] : false;
 

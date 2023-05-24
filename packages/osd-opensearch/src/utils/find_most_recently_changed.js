@@ -30,7 +30,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const glob = require('glob');
+const { globSync } = require('glob');
 
 /**
  *  Find the most recently modified file that matches the pattern pattern
@@ -45,8 +45,7 @@ exports.findMostRecentlyChanged = function findMostRecentlyChanged(pattern) {
 
   const ctime = (path) => fs.statSync(path).ctime.getTime();
 
-  return glob
-    .sync(pattern)
+  return globSync(pattern)
     .sort((a, b) => ctime(a) - ctime(b))
     .pop();
 };

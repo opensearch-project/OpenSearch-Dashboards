@@ -28,8 +28,7 @@
  * under the License.
  */
 
-const fs = require('fs');
-const util = require('util');
+const { readFile } = require('fs/promises');
 const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
@@ -41,7 +40,6 @@ const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
 const { CA_CERT_PATH, OPENSEARCH_P12_PATH, OPENSEARCH_P12_PASSWORD } = require('@osd/dev-utils');
-const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>

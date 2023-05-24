@@ -33,8 +33,7 @@ import * as fs from 'fs';
 import { zipObject } from 'lodash';
 import * as stream from 'stream';
 import * as util from 'util';
-
-const pipeline = util.promisify(stream.pipeline);
+import { pipeline } from 'stream/promises';
 
 export type Hash = string;
 

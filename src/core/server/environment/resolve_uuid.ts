@@ -31,7 +31,7 @@
 import uuid from 'uuid';
 import { join } from 'path';
 import { PathConfigType } from '@osd/utils';
-import { readFile, writeFile } from './fs';
+import { readFile, writeFile } from 'fs/promises';
 import { HttpConfigType } from '../http';
 import { Logger } from '../logging';
 

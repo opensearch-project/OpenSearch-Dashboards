@@ -28,15 +28,11 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
-
+import { writeFile } from 'fs/promises';
 import { ToolingLog } from '@osd/dev-utils';
 import xml2js from 'xml2js';
 
 import { TestReport, makeFailedTestCaseIter } from './test_report';
-
-const writeAsync = promisify(Fs.writeFile);
 
 export interface Message {
   classname: string;
@@ -97,7 +93,7 @@ export async function addMessagesToReport(options: {
   if (dryRun) {
     log.info(`updated ${reportPath}\n${xml}`);
   } else {
-    await writeAsync(reportPath, xml, 'utf8');
+    await writeFile(reportPath, xml, 'utf8');
   }
   return xml;
 }

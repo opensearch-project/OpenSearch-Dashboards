@@ -3,26 +3,26 @@
 exports[`handles projects outside root folder 1`] = `
 opensearch-dashboards
 ├── packages
-│   ├── bar
-│   └── foo
+│   ├── foo
+│   └── bar
 └── ../plugins
-    ├── baz
+    ├── zorge
     ├── quux
-    └── zorge
+    └── baz
 `;
 
 exports[`handles projects with root folder 1`] = `
 opensearch-dashboards
 └── packages
-    ├── bar
-    └── foo
+    ├── foo
+    └── bar
 `;
 
 exports[`handles projects within projects outside root folder 1`] = `
 opensearch-dashboards
 ├── packages
-│   ├── bar
-│   └── foo
+│   ├── foo
+│   └── bar
 └── ../opensearch-dashboards-extra/additional_projects (with-additional-projects)
     ├── packages/baz
     └── plugins/quux

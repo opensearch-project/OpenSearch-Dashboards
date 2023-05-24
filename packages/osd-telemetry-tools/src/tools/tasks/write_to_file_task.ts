@@ -29,7 +29,7 @@
  */
 
 import * as path from 'path';
-import { writeFileAsync } from '../utils';
+import { writeFile } from 'fs/promises';
 import { TaskContext } from './task_context';
 
 export function writeToFileTask({ roots }: TaskContext) {
@@ -38,7 +38,7 @@ export function writeToFileTask({ roots }: TaskContext) {
       const fullPath = path.resolve(process.cwd(), root.config.output);
       if (root.mapping && Object.keys(root.mapping.properties).length > 0) {
         const serializedMapping = JSON.stringify(root.mapping, null, 2).concat('\n');
-        await writeFileAsync(fullPath, serializedMapping);
+        await writeFile(fullPath, serializedMapping);
       }
     },
     title: `Writing mapping for ${root.config.root}`,

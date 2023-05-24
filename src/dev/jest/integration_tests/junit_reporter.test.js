@@ -29,7 +29,6 @@
  */
 
 import { resolve } from 'path';
-import { promisify } from 'util';
 import { readFileSync } from 'fs';
 
 import del from 'del';
@@ -48,7 +47,7 @@ afterAll(async () => {
   await del(TARGET_DIR, { cwd: PROCESS_WORKING_DIR });
 });
 
-const parseXml = promisify(xml2js.parseString);
+const parseXml = xml2js.parseStringPromise;
 
 it(
   'produces a valid junit report for failures',

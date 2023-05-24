@@ -42,16 +42,14 @@
  *  the promise to be rejected with that error.
  */
 
-import { pipeline, Writable } from 'stream';
-import { promisify } from 'util';
-
-const asyncPipeline = promisify(pipeline);
+import { Writable } from 'stream';
+import { pipeline } from 'stream/promises';
 
 export async function createPromiseFromStreams<T = any>(streams: any): Promise<T> {
   let finalChunk: any;
   const last = streams[streams.length - 1];
   if (typeof last.read !== 'function' && streams.length === 1) {
-    // For a nicer error than what stream.pipeline throws
+    // For a nicer error than what stream.promises.pipeline throws
     throw new Error('A minimum of 2 streams is required when a non-readable stream is given');
   }
   if (typeof last.read === 'function') {
@@ -69,7 +67,7 @@ export async function createPromiseFromStreams<T = any>(streams: any): Promise<T
     );
   }
 
-  await asyncPipeline(...(streams as [any]));
+  await pipeline(...(streams as [any]));
 
   return finalChunk;
 }

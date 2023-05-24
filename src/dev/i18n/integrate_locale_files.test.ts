@@ -28,11 +28,22 @@
  * under the License.
  */
 
-import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.test.mocks';
-
+import * as fsPromises from 'fs/promises';
 import { resolve } from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';
 import { relativeToRepoRoot, standardize } from '@osd/cross-platform';
+
+jest.mock('fs/promises', () => {
+  const actualFsPromises = jest.requireActual('fs/promises');
+  return {
+    ...actualFsPromises,
+    writeFile: jest.fn(),
+    mkdir: jest.fn(),
+  };
+});
+
+const writeFileMock = fsPromises.writeFile as jest.MockedFunction<typeof fsPromises.writeFile>;
+const mkdirMock = fsPromises.mkdir as jest.MockedFunction<typeof fsPromises.mkdir>;
 
 const currentDir = relativeToRepoRoot(__dirname);
 const localePath = resolve(currentDir, '__fixtures__', 'integrate_locale_files', 'fr.json');
@@ -178,8 +189,8 @@ Map {
     test('splits locale file by plugins and writes them into the right folders', async () => {
       await integrateLocaleFiles(mockDefaultMessagesMap, defaultIntegrateOptions);
 
-      const [[path1, json1], [path2, json2]] = mockWriteFileAsync.mock.calls;
-      const [[dirPath1], [dirPath2]] = mockMakeDirAsync.mock.calls;
+      const [[path1, json1], [path2, json2]] = writeFileMock.mock.calls;
+      const [[dirPath1], [dirPath2]] = mkdirMock.mock.calls;
 
       expect([standardize(relativeToRepoRoot(path1)), json1]).toMatchSnapshot();
       expect([standardize(relativeToRepoRoot(path2)), json2]).toMatchSnapshot();

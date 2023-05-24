@@ -30,15 +30,15 @@
 
 import * as ts from 'typescript';
 import * as path from 'path';
+import { glob } from 'glob';
 import { parseUsageCollection } from './ts_parser';
-import { globAsync } from './utils';
 import { TelemetryRC } from './config';
 
 export async function getProgramPaths({
   root,
   exclude,
 }: Pick<TelemetryRC, 'root' | 'exclude'>): Promise<string[]> {
-  const filePaths = await globAsync('**/*.ts', {
+  const filePaths = await glob('**/*.ts', {
     cwd: root,
     ignore: [
       '**/node_modules/**',

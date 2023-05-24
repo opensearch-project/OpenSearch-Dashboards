@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import fs from 'fs';
+import { readFile } from 'fs/promises';
 import { join as joinPath } from 'path';
 import { Logger } from '@osd/logging';
 import { MetricsCollector, OpsOsMetrics } from './types';
@@ -135,7 +135,7 @@ const CPU_FS_QUOTA_US_FILE = 'cpu.cfs_quota_us';
 const CPU_STATS_FILE = 'cpu.stat';
 
 async function readControlGroups() {
-  const data = await fs.promises.readFile(PROC_SELF_CGROUP_FILE);
+  const data = await readFile(PROC_SELF_CGROUP_FILE);
 
   return data
     .toString()
@@ -155,7 +155,7 @@ async function readControlGroups() {
 }
 
 async function fileContentsToInteger(path: string) {
-  const data = await fs.promises.readFile(path);
+  const data = await readFile(path);
   return parseInt(data.toString(), 10);
 }
 
@@ -179,9 +179,7 @@ async function readCPUStat(controlGroup: string) {
   };
 
   try {
-    const data = await fs.promises.readFile(
-      joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_STATS_FILE)
-    );
+    const data = await readFile(joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_STATS_FILE));
     return data
       .toString()
       .split(/\n/)

@@ -30,10 +30,10 @@
 
 import { PathConfigType } from '@osd/utils';
 import { createDataFolder } from './create_data_folder';
-import { mkdir } from './fs';
+import { mkdir } from 'fs/promises';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
-jest.mock('./fs', () => ({
+jest.mock('fs/promises', () => ({
   mkdir: jest.fn(() => Promise.resolve('')),
 }));
 

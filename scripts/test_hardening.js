@@ -30,7 +30,7 @@
 
 var execFileSync = require('child_process').execFileSync;
 var path = require('path');
-var syncGlob = require('glob').sync;
+var { globSync } = require('glob');
 var program = require('commander');
 
 program
@@ -42,7 +42,7 @@ program
   .action(function (globs) {
     if (globs.length === 0) globs.push(path.join('test', 'harden', '*'));
     globs.forEach(function (glob) {
-      syncGlob(glob).forEach(function (filename) {
+      globSync(glob).forEach(function (filename) {
         if (path.basename(filename)[0] === '_') return;
         console.log(process.argv[0], filename);
         execFileSync(process.argv[0], [filename], { stdio: 'inherit' });

@@ -31,7 +31,7 @@
 import { join } from 'path';
 import { PathConfigType } from '@osd/utils';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { readFile, writeFile } from './fs';
+import { readFile, writeFile } from 'fs/promises';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
 import { HttpConfigType } from '../http';
 
@@ -39,7 +39,7 @@ jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
-jest.mock('./fs', () => ({
+jest.mock('fs/promises', () => ({
   readFile: jest.fn(() => Promise.resolve('')),
   writeFile: jest.fn(() => Promise.resolve('')),
 }));

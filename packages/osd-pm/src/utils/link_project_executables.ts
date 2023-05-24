@@ -29,8 +29,9 @@
  */
 
 import { dirname, relative, resolve, sep } from 'path';
+import { chmod, mkdir } from 'fs/promises';
 
-import { chmod, createSymlink, isFile, mkdirp } from './fs';
+import { createSymlink, isFile } from './fs';
 import { log } from './log';
 import { ProjectGraph, ProjectMap } from './projects';
 
@@ -69,7 +70,7 @@ export async function linkProjectExecutables(
 
         log.debug(`[${project.name}] ${name} -> ${projectRelativePath}`);
 
-        await mkdirp(dirname(dest));
+        await mkdir(dirname(dest), { recursive: true });
         await createSymlink(srcPath, dest, 'exec');
         await chmod(dest, '755');
       }

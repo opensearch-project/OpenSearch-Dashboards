@@ -32,7 +32,7 @@ import path from 'path';
 import os from 'os';
 
 import del from 'del';
-import glob from 'glob';
+import { globSync } from 'glob';
 
 import { analyzeArchive, extractArchive } from './zip';
 
@@ -72,7 +72,7 @@ describe('opensearchDashboards cli', function () {
         const archive = path.resolve(repliesPath, 'test_plugin.zip');
         await extractArchive(archive, tempPath, 'opensearch-dashboards/test-plugin');
 
-        expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
+        expect(globSync('**/*', { cwd: tempPath }).sort()).toMatchInlineSnapshot(`
           Array [
             "bin",
             "bin/executable",

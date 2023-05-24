@@ -30,16 +30,16 @@
 
 const { resolve, basename } = require('path');
 const { createHash } = require('crypto');
-const { promisify } = require('util');
-const { pipeline, Transform } = require('stream');
+const {
+  Transform,
+  promises: { pipeline },
+} = require('stream');
 const Fs = require('fs');
 
 const getopts = require('getopts');
 const del = require('del');
 
 const { buildSnapshot, log } = require('../utils');
-
-const pipelineAsync = promisify(pipeline);
 
 exports.description = 'Build and collect OpenSearch snapshots';
 
@@ -76,7 +76,7 @@ exports.run = async (defaults = {}) => {
       const filename = basename(snapshotPath);
       const outputPath = resolve(outputDir, filename);
       const hash = createHash('sha512');
-      await pipelineAsync(
+      await pipeline(
         Fs.createReadStream(snapshotPath),
         new Transform({
           transform(chunk, _, cb) {

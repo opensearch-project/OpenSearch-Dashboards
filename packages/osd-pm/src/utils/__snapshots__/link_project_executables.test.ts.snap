@@ -2,8 +2,6 @@
 
 exports[`bin script points nowhere does not try to create symlink or node_modules/.bin directory: fs module calls 1`] = `
 Object {
-  "chmod": Array [],
-  "copyDirectory": Array [],
   "createSymlink": Array [],
   "isDirectory": Array [],
   "isFile": Array [
@@ -15,26 +13,11 @@ Object {
     ],
   ],
   "isSymlink": Array [],
-  "mkdirp": Array [],
-  "readFile": Array [],
-  "unlink": Array [],
-  "writeFile": Array [],
 }
 `;
 
 exports[`bin script points to a file creates a symlink in the project node_modules/.bin directory: fs module calls 1`] = `
 Object {
-  "chmod": Array [
-    Array [
-      "<repoRoot>/packages/osd-pm/src/utils/foo/node_modules/.bin/bar",
-      "755",
-    ],
-    Array [
-      "<repoRoot>/packages/osd-pm/src/utils/baz/node_modules/.bin/bar",
-      "755",
-    ],
-  ],
-  "copyDirectory": Array [],
   "createSymlink": Array [
     Array [
       "<repoRoot>/packages/osd-pm/src/utils/bar/bin/bar.js",
@@ -57,16 +40,5 @@ Object {
     ],
   ],
   "isSymlink": Array [],
-  "mkdirp": Array [
-    Array [
-      "<repoRoot>/packages/osd-pm/src/utils/foo/node_modules/.bin",
-    ],
-    Array [
-      "<repoRoot>/packages/osd-pm/src/utils/baz/node_modules/.bin",
-    ],
-  ],
-  "readFile": Array [],
-  "unlink": Array [],
-  "writeFile": Array [],
 }
 `;

@@ -28,11 +28,9 @@
  * under the License.
  */
 
-import fs from 'fs';
+import { readFile } from 'fs/promises';
 import semver from 'semver';
 import { engines } from '../../package.json';
-import { promisify } from 'util';
-const readFile = promisify(fs.readFile);
 import expect from '@osd/expect';
 
 // ToDo: `.node-version` seems to exist for no good reason; find out if we can get rid of it and this test.

@@ -30,8 +30,6 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-jest.mock('./fs');
-
 import { resolve } from 'path';
 
 import { ToolingLogCollectingWriter } from '@osd/dev-utils/tooling_log';
@@ -41,6 +39,18 @@ import { linkProjectExecutables } from './link_project_executables';
 import { Project } from './project';
 import { buildProjectGraph } from './projects';
 import { log } from './log';
+
+jest.mock('./fs');
+
+jest.mock('fs/promises', () => {
+  const originalFsPromises = jest.requireActual('fs/promises');
+
+  return {
+    ...originalFsPromises,
+    mkdir: jest.fn(),
+    chmod: jest.fn(),
+  };
+});
 
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);

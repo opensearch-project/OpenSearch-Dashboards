@@ -28,20 +28,17 @@
  * under the License.
  */
 
+import { readFile, writeFile, access, mkdir } from 'fs/promises';
 import { ToolingLog } from '@osd/dev-utils';
 import { i18n } from '@osd/i18n';
 import path from 'path';
 
 import { createFailError } from '@osd/dev-utils';
 import {
-  accessAsync,
   checkValuesProperty,
   difference,
   extractValueReferencesFromMessage,
-  makeDirAsync,
   normalizePath,
-  readFileAsync,
-  writeFileAsync,
   verifyICUMessage,
 } from './utils';
 
@@ -173,7 +170,7 @@ async function writeMessages(
   // If target file name is specified we need to write all the translations into one file,
   // irrespective to the namespace.
   if (options.targetFileName) {
-    await writeFileAsync(
+    await writeFile(
       options.targetFileName,
       serializeToJson(
         [...localizedMessagesByNamespace.values()].reduce((acc, val) => acc.concat(val), []),
@@ -193,13 +190,13 @@ async function writeMessages(
       const destPath = path.resolve(namespacedPath, 'translations');
 
       try {
-        await accessAsync(destPath);
+        await access(destPath);
       } catch (_) {
-        await makeDirAsync(destPath);
+        await mkdir(destPath);
       }
 
       const writePath = path.resolve(destPath, fileName);
-      await writeFileAsync(writePath, serializeToJson(messages, formats));
+      await writeFile(writePath, serializeToJson(messages, formats));
       options.log.success(`Translations have been integrated to ${normalizePath(writePath)}`);
     }
   }
@@ -209,7 +206,7 @@ export async function integrateLocaleFiles(
   defaultMessagesMap: MessageMap,
   options: IntegrateOptions
 ) {
-  const localizedMessages = JSON.parse((await readFileAsync(options.sourceFileName)).toString());
+  const localizedMessages = JSON.parse((await readFile(options.sourceFileName)).toString());
   if (!localizedMessages.formats) {
     throw createFailError(`Locale file should contain formats object.`);
   }

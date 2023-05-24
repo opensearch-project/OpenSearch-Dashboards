@@ -481,7 +481,6 @@ module.exports = {
           'VariableDeclaration[kind="const"]',
           'VariableDeclaration[kind="let"]',
           'VariableDeclarator[id.type="ArrayPattern"]',
-          'VariableDeclarator[id.type="ObjectPattern"]',
         ],
       },
     },

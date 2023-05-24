@@ -28,9 +28,8 @@
  * under the License.
  */
 
-import Fs from 'fs';
 import { resolve } from 'path';
-import { promisify } from 'util';
+import Fs, { promises as fsPromises } from 'fs';
 
 import Accept from '@hapi/accept';
 import Boom from '@hapi/boom';
@@ -43,13 +42,9 @@ const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-const asyncOpen = promisify(Fs.open);
-const asyncClose = promisify(Fs.close);
-const asyncFstat = promisify(Fs.fstat);
-
 async function tryToOpenFile(filePath: string) {
   try {
-    return await asyncOpen(filePath, 'r');
+    return await fsPromises.open(filePath, 'r');
   } catch (e) {
     if (e.code === 'ENOENT') {
       return undefined;
@@ -60,7 +55,7 @@ async function tryToOpenFile(filePath: string) {
 }
 
 async function selectCompressedFile(acceptEncodingHeader: string | undefined, path: string) {
-  let fd: number | undefined;
+  let fd: fsPromises.FileHandle | undefined;
   let fileEncoding: 'gzip' | 'br' | undefined;
 
   const supportedEncodings = Accept.encodings(acceptEncodingHeader, ['br', 'gzip']);
@@ -76,7 +71,7 @@ async function selectCompressedFile(acceptEncodingHeader: string | undefined, pa
   if (!fd) {
     fileEncoding = undefined;
     // Use raw open to trigger exception if it does not exist
-    fd = await asyncOpen(path, 'r');
+    fd = await fsPromises.open(path, 'r');
   }
 
   return { fd, fileEncoding };
@@ -130,7 +125,7 @@ export async function createDynamicAssetResponse({
     // the file 2 or 3 times per request it seems logical
     ({ fd, fileEncoding } = await selectCompressedFile(request.headers['accept-encoding'], path));
 
-    const stat = await asyncFstat(fd);
+    const stat = await fd.stat();
     const hash = isDist ? undefined : await getFileHash(fileHashCache, path, stat, fd);
 
     const content = Fs.createReadStream(null as any, {
@@ -163,7 +158,7 @@ export async function createDynamicAssetResponse({
   } catch (error) {
     if (fd) {
       try {
-        await asyncClose(fd);
+        await fd.close();
       } catch (_) {
         // ignore errors from close, we already have one to report
         // and it's very likely they are the same

@@ -28,12 +28,8 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
-
+import { readFile } from 'fs/promises';
 import xml2js from 'xml2js';
-
-const readAsync = promisify(Fs.readFile);
 
 export type TestReport =
   | {
@@ -92,7 +88,7 @@ export async function parseTestReport(xml: string): Promise<TestReport> {
 }
 
 export async function readTestReport(testReportPath: string) {
-  return await parseTestReport(await readAsync(testReportPath, 'utf8'));
+  return await parseTestReport(await readFile(testReportPath, 'utf8'));
 }
 
 export function* makeTestCaseIter(report: TestReport) {

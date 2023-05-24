@@ -29,15 +29,15 @@
  */
 
 import * as path from 'path';
+import { readFile } from 'fs/promises';
 import { TaskContext } from './task_context';
 import { checkMatchingMapping } from '../check_collector_integrity';
-import { readFileAsync } from '../utils';
 
 export function checkMatchingSchemasTask({ roots }: TaskContext, throwOnDiff: boolean) {
   return roots.map((root) => ({
     task: async () => {
       const fullPath = path.resolve(process.cwd(), root.config.output);
-      const opensearchMappingString = await readFileAsync(fullPath, 'utf-8');
+      const opensearchMappingString = await readFile(fullPath, 'utf-8');
       const opensearchMapping = JSON.parse(opensearchMappingString);
 
       if (root.parsedCollections) {

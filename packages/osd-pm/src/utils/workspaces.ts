@@ -28,16 +28,18 @@
  * under the License.
  */
 
-import globSync from 'glob';
+import { glob } from 'glob';
 import path from 'path';
-import { promisify } from 'util';
 
+import { unlink, cp } from 'fs/promises';
 import { getProjectPaths } from '../config';
-import { copyDirectory, isSymlink, unlink } from './fs';
+import { isSymlink } from './fs';
 import { readPackageJson } from './package_json';
 import { getProjects } from './projects';
 
-const glob = promisify(globSync);
+async function copyDirectory(src: string, dest: string) {
+  await cp(src, dest, { recursive: true });
+}
 
 export async function workspacePackagePaths(rootPath: string): Promise<string[]> {
   const rootPkgJson = await readPackageJson(rootPath);

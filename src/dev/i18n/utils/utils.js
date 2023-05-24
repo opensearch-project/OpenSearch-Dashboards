@@ -39,9 +39,6 @@ import {
   isTemplateLiteral,
   isBinaryExpression,
 } from '@babel/types';
-import fs from 'fs';
-import glob from 'glob';
-import { promisify } from 'util';
 import normalize from 'normalize-path';
 import path from 'path';
 import chalk from 'chalk';
@@ -55,12 +52,6 @@ const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 
 const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
 const HTML_KEY_PREFIX = 'html_';
-
-export const readFileAsync = promisify(fs.readFile);
-export const writeFileAsync = promisify(fs.writeFile);
-export const makeDirAsync = promisify(fs.mkdir);
-export const accessAsync = promisify(fs.access);
-export const globAsync = promisify(glob);
 
 export function normalizePath(inputPath) {
   return normalize(path.relative(PROCESS_WORKING_DIR, inputPath));
