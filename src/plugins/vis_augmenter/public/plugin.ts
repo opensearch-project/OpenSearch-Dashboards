@@ -21,6 +21,8 @@ import { EmbeddableStart } from '../../embeddable/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VIEW_EVENTS_FLYOUT_STATE, setFlyoutState } from './view_events_flyout';
+import { PluginResourceDeleteAction, SavedObjectDeleteAction } from './actions';
+import { pluginResourceDeleteTrigger } from './triggers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterSetup {}
@@ -75,6 +77,14 @@ export class VisAugmenterPlugin
       overlays: core.overlays,
     });
     setSavedAugmentVisLoader(savedAugmentVisLoader);
+
+    // TODO: add these actions/triggers to ui_actions_bootstrap after view events PR is merged
+    const savedObjectDeleteAction = new SavedObjectDeleteAction(core);
+    const pluginResourceDeleteAction = new PluginResourceDeleteAction(core);
+    uiActions.registerAction(savedObjectDeleteAction);
+    uiActions.registerAction(pluginResourceDeleteAction);
+    uiActions.registerTrigger(pluginResourceDeleteTrigger);
+
     return { savedAugmentVisLoader };
   }
 
