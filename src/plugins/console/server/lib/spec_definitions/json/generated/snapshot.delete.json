@@ -9,6 +9,6 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/snapshot-restore/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/snapshots/delete-snapshot/"
   }
 }

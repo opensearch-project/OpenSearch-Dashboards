@@ -27,6 +27,7 @@ describe('Datasource Management: Create Datasource form', () => {
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const mockSubmitHandler = jest.fn();
   const mockTestConnectionHandler = jest.fn();
+  const mockCancelHandler = jest.fn();
 
   const getFields = (comp: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>) => {
     return {
@@ -51,17 +52,12 @@ describe('Datasource Management: Create Datasource form', () => {
     component.find(testSubjId).last().simulate('blur');
   };
 
-  const setAuthTypeValue = (
-    comp: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>,
-    value: AuthType
-  ) => {
-    // @ts-ignore
-    comp
-      .find(authTypeIdentifier)
-      .first()
-      // @ts-ignore
-      .prop('onChange')(value);
-    comp.update();
+  const setAuthTypeValue = (testSubjId: string, value: string) => {
+    component.find(testSubjId).last().simulate('change', {
+      target: {
+        value,
+      },
+    });
   };
 
   beforeEach(() => {
@@ -70,6 +66,7 @@ describe('Datasource Management: Create Datasource form', () => {
         <CreateDataSourceForm
           handleTestConnection={mockTestConnectionHandler}
           handleSubmit={mockSubmitHandler}
+          handleCancel={mockCancelHandler}
           existingDatasourceNamesList={['dup20']}
         />
       ),
@@ -98,7 +95,7 @@ describe('Datasource Management: Create Datasource form', () => {
   /* Change option: No Authentication */
   test('should validate when auth type changed & previously submit button clicked', () => {
     /* Update Eui Super Select Value to No Auth*/
-    setAuthTypeValue(component, AuthType.NoAuth);
+    setAuthTypeValue(authTypeIdentifier, AuthType.NoAuth);
     component.update();
 
     /* Click on submit without any user input */
@@ -106,7 +103,7 @@ describe('Datasource Management: Create Datasource form', () => {
 
     const { authType, username, password } = getFields(component);
 
-    expect(authType.prop('idSelected')).toBe(AuthType.NoAuth);
+    expect(authType.prop('value')).toBe(AuthType.NoAuth);
     expect(username.exists()).toBeFalsy(); // username field does not exist when No Auth option is selected
     expect(password.exists()).toBeFalsy(); // password field does not exist when No Auth option is selected
   });
@@ -138,7 +135,7 @@ describe('Datasource Management: Create Datasource form', () => {
   /* Username & Password */
   test('should create data source with username & password when all fields are valid', () => {
     /* set form fields */
-    setAuthTypeValue(component, AuthType.UsernamePasswordType);
+    setAuthTypeValue(authTypeIdentifier, AuthType.UsernamePasswordType);
     changeTextFieldValue(titleIdentifier, 'test');
     changeTextFieldValue(descriptionIdentifier, 'test');
     changeTextFieldValue(endpointIdentifier, 'https://test.com');
@@ -155,7 +152,7 @@ describe('Datasource Management: Create Datasource form', () => {
   /* No Auth - Username & Password */
   test('should create data source with No Auth when all fields are valid', () => {
     /* set form fields */
-    setAuthTypeValue(component, AuthType.NoAuth); // No auth
+    setAuthTypeValue(authTypeIdentifier, AuthType.NoAuth); // No auth
     changeTextFieldValue(titleIdentifier, 'test');
     changeTextFieldValue(descriptionIdentifier, 'test');
     changeTextFieldValue(endpointIdentifier, 'https://test.com');

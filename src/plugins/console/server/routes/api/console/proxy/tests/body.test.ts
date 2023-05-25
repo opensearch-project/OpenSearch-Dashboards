@@ -28,26 +28,33 @@
  * under the License.
  */
 
-import { getProxyRouteHandlerDeps } from './mocks';
+import { buildBufferedBodyMock, getProxyRouteHandlerDeps } from './mocks';
 
 import expect from '@osd/expect';
-import { Readable } from 'stream';
 
-import { opensearchDashboardsResponseFactory } from '../../../../../../../../core/server';
+import {
+  IScopedClusterClient,
+  opensearchDashboardsResponseFactory,
+} from '../../../../../../../../core/server';
 import { createHandler } from '../create_handler';
-import * as requestModule from '../../../../../lib/proxy_request';
-import { createResponseStub } from './stubs';
+
+import { coreMock, opensearchServiceMock } from '../../../../../../../../core/server/mocks';
 
 describe('Console Proxy Route', () => {
   let request: any;
+  let opensearchClient: DeeplyMockedKeys<IScopedClusterClient>;
 
   beforeEach(() => {
     request = (method: string, path: string, response: string) => {
-      (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub(response));
+      const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise(response);
+      const requestHandlerContextMock = coreMock.createRequestHandlerContext();
+      opensearchClient = requestHandlerContextMock.opensearch.client;
+
+      opensearchClient.asCurrentUser.transport.request.mockResolvedValueOnce(mockResponse);
       const handler = createHandler(getProxyRouteHandlerDeps({}));
 
       return handler(
-        {} as any,
+        { core: requestHandlerContextMock, dataSource: {} as any },
         {
           headers: {},
           query: { method, path },
@@ -57,15 +64,6 @@ describe('Console Proxy Route', () => {
     };
   });
 
-  const readStream = (s: Readable) =>
-    new Promise((resolve) => {
-      let v = '';
-      s.on('data', (data) => {
-        v += data;
-      });
-      s.on('end', () => resolve(v));
-    });
-
   afterEach(async () => {
     jest.resetAllMocks();
   });
@@ -74,36 +72,36 @@ describe('Console Proxy Route', () => {
     describe('GET request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('GET', '/', 'foobar');
-        expect(await readStream(payload)).to.be('foobar');
+        expect(payload).to.be('foobar');
       });
     });
     describe('POST request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('POST', '/', 'foobar');
-        expect(await readStream(payload)).to.be('foobar');
+        expect(payload).to.be('foobar');
       });
     });
     describe('PUT request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('PUT', '/', 'foobar');
-        expect(await readStream(payload)).to.be('foobar');
+        expect(payload).to.be('foobar');
       });
     });
     describe('DELETE request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('DELETE', '/', 'foobar');
-        expect(await readStream(payload)).to.be('foobar');
+        expect(payload).to.be('foobar');
       });
     });
     describe('HEAD request', () => {
       it('returns the status code and text', async () => {
-        const { payload } = await request('HEAD', '/');
+        const { payload } = await request('HEAD', '/', 'OK');
         expect(typeof payload).to.be('string');
         expect(payload).to.be('200 - OK');
       });
       describe('mixed casing', () => {
         it('returns the status code and text', async () => {
-          const { payload } = await request('HeAd', '/');
+          const { payload } = await request('HeAd', '/', 'OK');
           expect(typeof payload).to.be('string');
           expect(payload).to.be('200 - OK');
         });

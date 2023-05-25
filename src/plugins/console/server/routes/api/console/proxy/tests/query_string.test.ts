@@ -28,26 +28,27 @@
  * under the License.
  */
 
-import { opensearchDashboardsResponseFactory } from '../../../../../../../../core/server';
+import {
+  IScopedClusterClient,
+  opensearchDashboardsResponseFactory,
+} from '../../../../../../../../core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
-import { createResponseStub } from './stubs';
-import * as requestModule from '../../../../../lib/proxy_request';
-
-import expect from '@osd/expect';
-
 import { createHandler } from '../create_handler';
+import { coreMock } from '../../../../../../../../core/server/mocks';
 
 describe('Console Proxy Route', () => {
   let request: any;
+  let opensearchClient: DeeplyMockedKeys<IScopedClusterClient>;
   beforeEach(() => {
-    (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub('foo'));
+    const requestHandlerContextMock = coreMock.createRequestHandlerContext();
+    opensearchClient = requestHandlerContextMock.opensearch.client;
 
     request = async (method: string, path: string) => {
       const handler = createHandler(getProxyRouteHandlerDeps({}));
 
       return handler(
-        {} as any,
-        { headers: {}, query: { method, path } } as any,
+        { core: requestHandlerContextMock, dataSource: {} as any },
+        { headers: {}, query: { method, path }, body: jest.fn() } as any,
         opensearchDashboardsResponseFactory
       );
     };
@@ -62,25 +63,31 @@ describe('Console Proxy Route', () => {
       describe('contains full url', () => {
         it('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
-          const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).to.be('http://localhost:9200/http://evil.com/test?pretty=true');
+          const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
+
+          expect(args.path).toBe('/http://evil.com/test?pretty=true');
         });
       });
       describe('starts with a slash', () => {
-        it('combines well with the base url', async () => {
+        it('keeps as it is', async () => {
           await request('GET', '/index/id');
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
-          const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).to.be('http://localhost:9200/index/id?pretty=true');
+          const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
+          expect(args.path).toBe('/index/id?pretty=true');
         });
       });
       describe(`doesn't start with a slash`, () => {
-        it('combines well with the base url', async () => {
+        it('adds slash to path before sending request', async () => {
           await request('GET', 'index/id');
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
-          const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).to.be('http://localhost:9200/index/id?pretty=true');
+          const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
+          expect(args.path).toBe('/index/id?pretty=true');
+        });
+      });
+
+      describe(`contains query parameter`, () => {
+        it('adds slash to path before sending request', async () => {
+          await request('GET', '_cat/tasks?v');
+          const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
+          expect(args.path).toBe('/_cat/tasks?v=&pretty=true');
         });
       });
     });

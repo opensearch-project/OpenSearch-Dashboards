@@ -88,6 +88,7 @@ https://opensearch.org/redirect
 http://www.opensearch.org/painlessDocs
 https://www.hostedgraphite.com/
 https://connectionurl.com
+http://169.254.169.254/latest/meta-data/
 
 # External urls
 https://www.zeek.org/
@@ -103,6 +104,7 @@ http://github.com/
 http://jsperf
 https://jsperf
 https://gist.githubusercontent.com/
+https://codeload.github.com/gist/
 https://nodejs.org/
 https://www.npmjs.com/
 https://microsoft.github.io/
@@ -116,3 +118,5 @@ http://www.creedthoughts.gov
 https://media-for-the-masses.theacademyofperformingartsandscience.org/
 https://yarnpkg.com/latest.msi
 https://forum.opensearch.org/
+https://facebook.github.io/jest/
+https://facebook.github.io/jest/docs/cli.html

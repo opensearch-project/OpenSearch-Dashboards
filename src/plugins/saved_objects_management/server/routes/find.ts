@@ -30,6 +30,8 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from 'src/core/server';
+import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
+import { getIndexPatternTitle } from '../../../data/common/index_patterns/utils';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
 
@@ -84,13 +86,33 @@ export const registerFindRoute = (
         }
       });
 
+      const getDataSource = async (id: string) => {
+        return await client.get<DataSourceAttributes>('data-source', id);
+      };
+
       const findResponse = await client.find<any>({
         ...req.query,
         fields: undefined,
         searchFields: [...searchFields],
       });
 
-      const enhancedSavedObjects = findResponse.saved_objects
+      const savedObjects = await Promise.all(
+        findResponse.saved_objects.map(async (obj) => {
+          if (obj.type === 'index-pattern') {
+            const result = { ...obj };
+            result.attributes.title = await getIndexPatternTitle(
+              obj.attributes.title,
+              obj.references,
+              getDataSource
+            );
+            return result;
+          } else {
+            return obj;
+          }
+        })
+      );
+
+      const enhancedSavedObjects = savedObjects
         .map((so) => injectMetaAttributes(so, managementService))
         .map((obj) => {
           const result = { ...obj, attributes: {} as Record<string, any> };

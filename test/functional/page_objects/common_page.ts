@@ -105,7 +105,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         useActualUrl,
         insertTimestamp,
       } = navigateProps;
-      const appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards'), appConfig);
+      const appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards.fullURL'), appConfig);
 
       await retry.try(async () => {
         if (useActualUrl) {
@@ -234,12 +234,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       if (config.has(['apps', appName])) {
         // Legacy applications
         const appConfig = config.get(['apps', appName]);
-        appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards'), {
+        appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards.fullURL'), {
           pathname: `${basePath}${appConfig.pathname}`,
           hash: hash || appConfig.hash,
         });
       } else {
-        appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards'), {
+        appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards.fullURL'), {
           pathname: `${basePath}/app/${appName}`,
           hash,
         });

@@ -7,8 +7,9 @@ import React, { memo } from 'react';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { TableGroup } from '../table_vis_response_handler';
-import { TableVisConfig, TableUiState } from '../types';
+import { TableVisConfig } from '../types';
 import { TableVisComponent } from './table_vis_component';
+import { TableUiState } from '../utils';
 
 interface TableVisGroupComponentProps {
   tableGroups: TableGroup[];
@@ -21,11 +22,11 @@ export const TableVisComponentGroup = memo(
   ({ tableGroups, visConfig, event, uiState }: TableVisGroupComponentProps) => {
     return (
       <>
-        {tableGroups.map(({ tables, title }) => (
+        {tableGroups.map(({ table, title }) => (
           <div key={title} className="visTable__group">
             <TableVisComponent
               title={title}
-              table={tables[0]}
+              table={table}
               visConfig={visConfig}
               event={event}
               uiState={uiState}

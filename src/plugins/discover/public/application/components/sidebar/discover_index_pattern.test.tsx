@@ -47,14 +47,14 @@ const indexPattern = {
 const indexPattern1 = {
   id: 'test1',
   attributes: {
-    title: 'test1 title',
+    title: 'test1 titleToDisplay',
   },
 } as SavedObject<any>;
 
 const indexPattern2 = {
   id: 'test2',
   attributes: {
-    title: 'test2 title',
+    title: 'test2 titleToDisplay',
   },
 } as SavedObject<any>;
 
@@ -97,15 +97,15 @@ describe('DiscoverIndexPattern', () => {
     const instance = shallow(<DiscoverIndexPattern {...defaultProps} />);
 
     expect(getIndexPatternPickerOptions(instance)!.map((option: any) => option.label)).toEqual([
-      'test1 title',
-      'test2 title',
+      'test1 titleToDisplay',
+      'test2 titleToDisplay',
     ]);
   });
 
   test('should switch data panel to target index pattern', () => {
     const instance = shallow(<DiscoverIndexPattern {...defaultProps} />);
 
-    selectIndexPatternPickerOption(instance, 'test2 title');
+    selectIndexPatternPickerOption(instance, 'test2 titleToDisplay');
     expect(defaultProps.setIndexPattern).toHaveBeenCalledWith('test2');
   });
 });

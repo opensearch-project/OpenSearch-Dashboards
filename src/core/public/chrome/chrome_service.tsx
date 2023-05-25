@@ -33,7 +33,6 @@ import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
-import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
@@ -123,7 +122,7 @@ export class ChromeService {
    */
   private initVisibility(application: StartDeps['application']) {
     // Start off the chrome service hidden if "embed" is in the hash query string.
-    const isEmbedded = 'embed' in parse(location.hash.slice(1), true).query;
+    const isEmbedded = new URL(location.hash.slice(1), location.origin).searchParams.has('embed');
     this.isForceHidden$ = new BehaviorSubject(isEmbedded);
 
     const appHidden$ = merge(
@@ -210,7 +209,7 @@ export class ChromeService {
         title: mountReactNode(
           <FormattedMessage
             id="core.chrome.browserDeprecationWarning"
-            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
+            defaultMessage="Internet Explorer lacks features required for OpenSearch Dashboards to function correctly; please use one of {link}."
             values={{
               link: (
                 <EuiLink
@@ -220,7 +219,7 @@ export class ChromeService {
                 >
                   <FormattedMessage
                     id="core.chrome.browserDeprecationLink"
-                    defaultMessage="the support matrix on our website"
+                    defaultMessage="the supported browsers listed on our website"
                   />
                 </EuiLink>
               ),
@@ -262,6 +261,7 @@ export class ChromeService {
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
+          survey={injectedMetadata.getSurvey()}
         />
       ),
 

@@ -11,11 +11,12 @@ import { DragDropProvider } from './utils/drag_drop/drag_drop_context';
 import { LeftNav } from './components/left_nav';
 import { TopNav } from './components/top_nav';
 import { Workspace } from './components/workspace';
-import './app.scss';
 import { RightNav } from './components/right_nav';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { VisBuilderServices } from '../types';
 import { syncQueryStateWithUrl } from '../../../data/public';
+
+import './app.scss';
 
 export const VisBuilderApp = () => {
   const {

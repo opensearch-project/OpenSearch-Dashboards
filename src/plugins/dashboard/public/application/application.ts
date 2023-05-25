@@ -37,6 +37,7 @@ import 'angular-sanitize';
 import { i18nDirective, i18nFilter, I18nProvider } from '@osd/i18n/angular';
 import {
   ChromeStart,
+  ToastsStart,
   IUiSettingsClient,
   CoreStart,
   SavedObjectsClientContract,
@@ -45,6 +46,7 @@ import {
   AppMountParameters,
 } from 'opensearch-dashboards/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { DashboardProvider } from 'src/plugins/dashboard/public/types';
 import { Storage } from '../../../opensearch_dashboards_utils/public';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
@@ -71,6 +73,7 @@ export interface RenderDeps {
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
+  dashboardProviders: () => { [key: string]: DashboardProvider };
   dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
   embeddableCapabilities: {
@@ -91,6 +94,7 @@ export interface RenderDeps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjects: SavedObjectsStart;
   restorePreviousUrl: () => void;
+  toastNotifications: ToastsStart;
 }
 
 let angularModuleInstance: IModule | null = null;
@@ -141,12 +145,11 @@ function createLocalAngularModule() {
   createLocalI18nModule();
   createLocalIconModule();
 
-  const dashboardAngularModule = angular.module(moduleName, [
+  return angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
     'app/dashboard/I18n',
     'app/dashboard/icon',
   ]);
-  return dashboardAngularModule;
 }
 
 function createLocalIconModule() {

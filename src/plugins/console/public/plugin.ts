@@ -62,7 +62,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
         defaultMessage: 'Console',
       }),
       enableRouting: false,
-      mount: async ({ element }) => {
+      mount: async ({ element, dataSourceId }) => {
         const [core] = await getStartServices();
 
         const {
@@ -79,6 +79,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           notifications,
           usageCollection,
           element,
+          dataSourceId,
         });
       },
     });

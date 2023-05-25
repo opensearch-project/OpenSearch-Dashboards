@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { UiActionsStart, UiActionsSetup } from '../../../src/plugins/ui_actions/public';
 import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import {
   PHONE_TRIGGER,
@@ -50,17 +49,12 @@ import {
   ACTION_TRIGGER_PHONE_USER,
   createTriggerPhoneTriggerAction,
 } from './actions/actions';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
 import image from './ui_actions.png';
-
-interface StartDeps {
-  uiActions: UiActionsStart;
-}
-
-interface SetupDeps {
-  uiActions: UiActionsSetup;
-  developerExamples: DeveloperExamplesSetup;
-}
+import {
+  UiActionsExplorerPluginSetup,
+  UiActionsExplorerPluginStart,
+  UiActionsExplorerStartDependencies,
+} from './types';
 
 declare module '../../../src/plugins/ui_actions/public' {
   export interface TriggerContextMapping {
@@ -79,8 +73,12 @@ declare module '../../../src/plugins/ui_actions/public' {
   }
 }
 
-export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
+export class UiActionsExplorerPlugin
+  implements Plugin<void, void, {}, UiActionsExplorerPluginStart> {
+  public setup(
+    core: CoreSetup<UiActionsExplorerStartDependencies>,
+    deps: UiActionsExplorerPluginSetup
+  ) {
     deps.uiActions.registerTrigger({
       id: COUNTRY_TRIGGER,
     });
@@ -116,10 +114,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        return renderApp(
-          { uiActionsApi: depsStart.uiActions, openModal: coreStart.overlays.openModal },
-          params
-        );
+        return renderApp(coreStart, depsStart, params);
       },
     });
 

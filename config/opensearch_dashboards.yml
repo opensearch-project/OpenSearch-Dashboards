@@ -229,11 +229,38 @@
 # functionality in Visualization.
 # vis_builder.enabled: false
 
-# Set the value of this setting to true to enable the experimental multiple data source
-# support feature. Use with caution.
+# Set the value of this setting to true to enable multiple data source feature.
 #data_source.enabled: false
 # Set the value of these settings to customize crypto materials to encryption saved credentials
 # in data sources.
 #data_source.encryption.wrappingKeyName: 'changeme'
 #data_source.encryption.wrappingKeyNamespace: 'changeme'
 #data_source.encryption.wrappingKey: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+#data_source.endpointDeniedIPs: [
+#    '127.0.0.0/8',
+#    '::1/128',
+#    '169.254.0.0/16',
+#    'fe80::/10',
+#    '10.0.0.0/8',
+#    '172.16.0.0/12',
+#    '192.168.0.0/16',
+#    'fc00::/7',
+#    '0.0.0.0/8',
+#    '100.64.0.0/10',
+#    '192.0.0.0/24',
+#    '192.0.2.0/24',
+#    '198.18.0.0/15',
+#    '192.88.99.0/24',
+#    '198.51.100.0/24',
+#    '203.0.113.0/24',
+#    '224.0.0.0/4',
+#    '240.0.0.0/4',
+#    '255.255.255.255/32',
+#    '::/128',
+#    '2001:db8::/32',
+#    'ff00::/8',
+# ]
+
+# Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
+# opensearchDashboards.survey.url: "https://survey.opensearch.org"

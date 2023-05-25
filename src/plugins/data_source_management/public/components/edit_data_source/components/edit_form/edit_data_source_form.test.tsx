@@ -22,7 +22,7 @@ const titleFormRowIdentifier = '[data-test-subj="editDataSourceTitleFormRow"]';
 const endpointFieldIdentifier = '[data-test-subj="editDatasourceEndpointField"]';
 const descriptionFieldIdentifier = 'dataSourceDescription';
 const descriptionFormRowIdentifier = '[data-test-subj="editDataSourceDescriptionFormRow"]';
-const authTypeRadioIdentifier = '[data-test-subj="editDataSourceSelectAuthType"]';
+const authTypeSelectIdentifier = '[data-test-subj="editDataSourceSelectAuthType"]';
 const usernameFieldIdentifier = 'datasourceUsername';
 const usernameFormRowIdentifier = '[data-test-subj="editDatasourceUsernameFormRow"]';
 const passwordFieldIdentifier = '[data-test-subj="updateDataSourceFormPasswordField"]';
@@ -47,6 +47,14 @@ describe('Datasource Management: Edit Datasource Form', () => {
       field.last().simulate('focus').simulate('blur');
     });
     comp.update();
+  };
+
+  const setAuthTypeValue = (testSubjId: string, value: string) => {
+    component.find(testSubjId).last().simulate('change', {
+      target: {
+        value,
+      },
+    });
   };
 
   describe('Case 1: With Username & Password', () => {
@@ -147,10 +155,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
       expect(component.find('UpdatePasswordModal').exists()).toBe(false);
     });
     test("should hide username & password fields when 'No Authentication' is selected as the credential type", () => {
-      act(() => {
-        // @ts-ignore
-        component.find(authTypeRadioIdentifier).first().prop('onChange')(AuthType.NoAuth);
-      });
+      setAuthTypeValue(authTypeSelectIdentifier, AuthType.NoAuth);
       component.update();
       expect(component.find(usernameFormRowIdentifier).exists()).toBe(false);
       expect(component.find(passwordFieldIdentifier).exists()).toBe(false);
@@ -255,13 +260,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
     /* functionality */
 
     test("should show username & password fields when 'Username & Password' is selected as the credential type", () => {
-      act(() => {
-        // @ts-ignore
-        component.find(authTypeRadioIdentifier).first().prop('onChange')(
-          // @ts-ignore
-          AuthType.UsernamePasswordType
-        );
-      });
+      setAuthTypeValue(authTypeSelectIdentifier, AuthType.UsernamePasswordType);
       component.update();
       expect(component.find(usernameFormRowIdentifier).exists()).toBe(true);
       expect(component.find(passwordFieldIdentifier).exists()).toBe(true);
@@ -270,13 +269,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
     /* validation - Password */
 
     test('should validate password as required field', () => {
-      act(() => {
-        // @ts-ignore
-        component.find(authTypeRadioIdentifier).first().prop('onChange')(
-          // @ts-ignore
-          AuthType.UsernamePasswordType
-        );
-      });
+      setAuthTypeValue(authTypeSelectIdentifier, AuthType.UsernamePasswordType);
       component.update();
 
       /* Validate empty username - required */
@@ -297,7 +290,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
     });
 
     /* Save Changes */
-    test('should update the form with NoAUth on click save changes', async () => {
+    test('should update the form with NoAuth on click save changes', async () => {
       await new Promise((resolve) =>
         setTimeout(() => {
           updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
