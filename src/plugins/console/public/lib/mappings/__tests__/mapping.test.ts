@@ -263,4 +263,31 @@ describe('Mappings', () => {
     ]);
     expect(mappings.expandAliases('alias2')).toEqual('test_index2');
   });
+
+  test('Multi types', function () {
+    mappings.loadMappings({
+      index: {
+        properties: {
+          name1: {
+            type: 'object',
+            path: 'just_name',
+            properties: {
+              first1: { type: 'string' },
+              last1: { type: 'string', index_name: 'i_last_1' },
+            },
+          },
+          name2: {
+            type: 'object',
+            path: 'full',
+            properties: {
+              first2: { type: 'string' },
+              last2: { type: 'string', index_name: 'i_last_2' },
+            },
+          },
+        },
+      },
+    });
+
+    expect(mappings.getTypes()).toEqual(['properties']);
+  });
 });
