@@ -11,6 +11,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import './styles.scss';
 import { VisualizeEmbeddable } from '../../../../visualizations/public';
@@ -56,7 +57,9 @@ export function ViewEventsFlyout(props: Props) {
 
   useEffect(() => {
     fetchVisEmbeddable(props.savedObjectId, setTimeRange, setVisEmbeddable, setErrorMessage);
-    /* eslint-disable */
+    // adding all of the values to the deps array cause a circular re-render. we don't want
+    // to keep re-fetching the visEmbeddable after it is set.
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [props.savedObjectId]);
 
   useEffect(() => {
@@ -92,7 +95,15 @@ export function ViewEventsFlyout(props: Props) {
       <EuiFlyout size="l" onClose={props.onClose}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h1>{isLoading || errorMessage ? <>&nbsp;</> : `${visEmbeddable?.getTitle()}`}</h1>
+            <h1>
+              {isLoading ? (
+                <EuiLoadingContent lines={1} />
+              ) : errorMessage ? (
+                'Error fetching events'
+              ) : (
+                `${visEmbeddable?.getTitle()}`
+              )}
+            </h1>
           </EuiTitle>
         </EuiFlyoutHeader>
         {errorMessage ? (

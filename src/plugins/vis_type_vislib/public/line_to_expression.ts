@@ -43,7 +43,6 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
     const ast = buildExpression([opensearchaggsFn, vislib]);
     return ast.toAst();
   } else {
-    const dimensions = await buildVislibDimensions(vis, params);
     const visAugmenterConfig = get(
       params,
       'visAugmenterConfig',

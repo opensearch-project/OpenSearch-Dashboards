@@ -1,10 +1,14 @@
 $vis-description-width: 150px;
 $event-vis-height: 55px;
 $timeline-panel-height: 100px;
+$content-padding-top: 110px; // Padding needed within view events flyout content to sit comfortably below flyout header
+$date-range-height: 45px; // Static height we want for the date range picker component
+$error-icon-padding-right: -8px; // This is so the error icon is aligned consistent with the event count icons
+$base-vis-min-height: 25vh; // Visualizations require the container to have a valid width and height to render
 
 .view-events-flyout {
   &__baseVis {
-    min-height: 25vh; // Visualizations require the container to have a valid width and height to render
+    min-height: $base-vis-min-height;
   }
 
   &__eventVis {
@@ -22,7 +26,7 @@ $timeline-panel-height: 100px;
 
   &__content {
     position: absolute;
-    top: 110px;
+    top: $content-padding-top;
     right: $euiSizeM;
     bottom: $euiSizeM;
     left: $euiSizeM;
@@ -46,7 +50,7 @@ $timeline-panel-height: 100px;
 }
 
 .date-range-panel-height {
-  height: 45px;
+  height: $date-range-height;
 }
 
 .timeline-panel-height {
@@ -54,5 +58,5 @@ $timeline-panel-height: 100px;
 }
 
 .error-icon-padding {
-  margin-right: -8px;
+  margin-right: $error-icon-padding-right;
 }
