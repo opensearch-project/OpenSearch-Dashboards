@@ -72,6 +72,15 @@ elif [ $OS = "freebsd" ]; then
   NODE="${LOCALBASE}/bin/node"
 else
   NODE="$(command -v node)"
+  if [ $? -ne 0 ]; then
+    NODE=""
+    for dir in "${OSD_HOME}/build/"*; do
+      if [[ -d "${dir}" && -f "${dir}/node/fallback/bin/node" ]]; then
+        NODE="${dir}/node/fallback/bin/node"
+        break
+      fi
+    done
+  fi
 fi
 
 if [ ! -x "$NODE" ]; then
