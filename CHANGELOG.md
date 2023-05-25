@@ -191,7 +191,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Bump `styled-components` from 5.3.5 to 5.3.9 ([#3678](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3678))
 - Bump `js-yaml` from 3.14.0 to 4.1.0 ([#3770](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3770))
 - Bump `oui` from `1.0.0` to `1.1.1` ([#3884](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3884))
-- Adding @ZilongX and @Flyingliuhub as maintainers. ([#4136](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4136))
+- Adding @ZilongX and @Flyingliuhub as maintainers. ([#4137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4137))
 
 ### 🪛 Refactoring
 
