@@ -10,12 +10,36 @@ import {
   OPEN_EVENTS_FLYOUT_ACTION,
   VIEW_EVENTS_OPTION_ACTION,
 } from './view_events_flyout';
-import { externalActionTrigger, EXTERNAL_ACTION_TRIGGER } from '../../ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, EmbeddableContext } from '../../embeddable/public';
 import { getUiActions } from './services';
 
+import {
+  externalActionTrigger,
+  EXTERNAL_ACTION_TRIGGER,
+  UiActionsSetup,
+} from '../../ui_actions/public';
+import { AugmentVisSavedObject } from './saved_augment_vis';
+import { VisLayer } from './types';
+import {
+  PLUGIN_RESOURCE_DELETE_ACTION,
+  PluginResourceDeleteAction,
+  SAVED_OBJECT_DELETE_ACTION,
+  SavedObjectDeleteAction,
+} from './actions';
+import { PLUGIN_RESOURCE_DELETE_TRIGGER, pluginResourceDeleteTrigger } from './triggers';
+
 export interface AugmentVisContext {
   savedObjectId: string;
+}
+
+export interface SavedObjectDeleteContext {
+  type: string;
+  savedObjectId: string;
+}
+
+export interface PluginResourceDeleteContext {
+  savedObjs: AugmentVisSavedObject[];
+  visLayers: VisLayer[];
 }
 
 // Overriding the mappings defined in UIActions plugin so that
@@ -24,24 +48,36 @@ export interface AugmentVisContext {
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
     [EXTERNAL_ACTION_TRIGGER]: AugmentVisContext;
+    [PLUGIN_RESOURCE_DELETE_TRIGGER]: PluginResourceDeleteContext;
   }
 
   export interface ActionContextMapping {
     [OPEN_EVENTS_FLYOUT_ACTION]: AugmentVisContext;
     [VIEW_EVENTS_OPTION_ACTION]: EmbeddableContext;
+    [SAVED_OBJECT_DELETE_ACTION]: SavedObjectDeleteContext;
+    [PLUGIN_RESOURCE_DELETE_ACTION]: PluginResourceDeleteContext;
   }
 }
 
-export const registerTriggersAndActions = (core: CoreStart) => {
-  const openEventsFlyoutAction = new OpenEventsFlyoutAction(core);
-  const viewEventsOptionAction = new ViewEventsOptionAction(core);
+export const bootstrapUiActions = (uiActions: UiActionsSetup) => {
+  // TODO: change so core isn't needed, or if needed then add a fn arg.
+  const openEventsFlyoutAction = new OpenEventsFlyoutAction();
+  const viewEventsOptionAction = new ViewEventsOptionAction();
 
-  getUiActions().registerAction(openEventsFlyoutAction);
-  getUiActions().registerAction(viewEventsOptionAction);
-  getUiActions().registerTrigger(externalActionTrigger);
+  uiActions.registerAction(openEventsFlyoutAction);
+  uiActions.registerAction(viewEventsOptionAction);
+  uiActions.registerTrigger(externalActionTrigger);
 
   // Opening View Events flyout from the chart
-  getUiActions().addTriggerAction(EXTERNAL_ACTION_TRIGGER, openEventsFlyoutAction);
+  uiActions.addTriggerAction(EXTERNAL_ACTION_TRIGGER, openEventsFlyoutAction);
   // Opening View Events flyout from the context menu
-  getUiActions().addTriggerAction(CONTEXT_MENU_TRIGGER, viewEventsOptionAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, viewEventsOptionAction);
+
+  const savedObjectDeleteAction = new SavedObjectDeleteAction();
+  const pluginResourceDeleteAction = new PluginResourceDeleteAction();
+  uiActions.registerAction(savedObjectDeleteAction);
+  uiActions.registerAction(pluginResourceDeleteAction);
+  uiActions.registerTrigger(pluginResourceDeleteTrigger);
+  uiActions.addTriggerAction(SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteAction);
+  uiActions.addTriggerAction(PLUGIN_RESOURCE_DELETE_TRIGGER, pluginResourceDeleteAction);
 };

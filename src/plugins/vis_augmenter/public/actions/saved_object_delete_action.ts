@@ -5,24 +5,17 @@
 
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { CoreStart } from 'opensearch-dashboards/public';
 import { Action, IncompatibleActionError } from '../../../ui_actions/public';
 import { getAllAugmentVisSavedObjs } from '../utils';
 import { getSavedAugmentVisLoader } from '../services';
+import { SavedObjectDeleteContext } from '../ui_actions_bootstrap';
 
 export const SAVED_OBJECT_DELETE_ACTION = 'SAVED_OBJECT_DELETE_ACTION';
 
-interface SavedObjectContext {
-  type: string;
-  savedObjectId: string;
-}
-
-export class SavedObjectDeleteAction implements Action<SavedObjectContext> {
+export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext> {
   public readonly type = SAVED_OBJECT_DELETE_ACTION;
   public readonly id = SAVED_OBJECT_DELETE_ACTION;
   public order = 1;
-
-  constructor(private core: CoreStart) {}
 
   public getIconType() {
     return undefined;
@@ -34,8 +27,8 @@ export class SavedObjectDeleteAction implements Action<SavedObjectContext> {
     });
   }
 
-  public async isCompatible({ type, savedObjectId }: SavedObjectContext) {
-    return type === 'visualization' && savedObjectId;
+  public async isCompatible({ type, savedObjectId }: SavedObjectDeleteContext) {
+    return type === 'visualization' && (savedObjectId ? true : false);
   }
 
   /**
@@ -43,7 +36,7 @@ export class SavedObjectDeleteAction implements Action<SavedObjectContext> {
    * any augment-vis saved objects that have a reference to this vis since it
    * is now stale.
    */
-  public async execute({ type, savedObjectId }: SavedObjectContext) {
+  public async execute({ type, savedObjectId }: SavedObjectDeleteContext) {
     if (!(await this.isCompatible({ type, savedObjectId }))) {
       throw new IncompatibleActionError();
     }

@@ -9,7 +9,7 @@ import { visLayers } from './expressions';
 import { setSavedAugmentVisLoader, setUISettings } from './services';
 import { createSavedAugmentVisLoader, SavedAugmentVisLoader } from './saved_augment_vis';
 import { registerTriggersAndActions } from './ui_actions_bootstrap';
-import { UiActionsStart } from '../../ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from '../../ui_actions/public';
 import {
   setUiActions,
   setEmbeddable,
@@ -23,6 +23,7 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VIEW_EVENTS_FLYOUT_STATE, setFlyoutState } from './view_events_flyout';
 import { PluginResourceDeleteAction, SavedObjectDeleteAction } from './actions';
 import { pluginResourceDeleteTrigger } from './triggers';
+import { bootstrapUiActions } from './ui_actions_bootstrap';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterSetup {}
@@ -33,6 +34,7 @@ export interface VisAugmenterStart {
 
 export interface VisAugmenterSetupDeps {
   expressions: ExpressionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface VisAugmenterStartDeps {
@@ -49,10 +51,16 @@ export class VisAugmenterPlugin
 
   public setup(
     core: CoreSetup<VisAugmenterStartDeps, VisAugmenterStart>,
-    { expressions }: VisAugmenterSetupDeps
+    { data, expressions, uiActions }: VisAugmenterSetupDeps
   ): VisAugmenterSetup {
     expressions.registerType(visLayers);
     setUISettings(core.uiSettings);
+
+    expressions.registerType(visLayers);
+
+    // sets up the context mappings and registers any triggers/actions for the plugin
+    bootstrapUiActions(uiActions);
+
     return {};
   }
 
@@ -77,13 +85,6 @@ export class VisAugmenterPlugin
       overlays: core.overlays,
     });
     setSavedAugmentVisLoader(savedAugmentVisLoader);
-
-    // TODO: add these actions/triggers to ui_actions_bootstrap after view events PR is merged
-    const savedObjectDeleteAction = new SavedObjectDeleteAction(core);
-    const pluginResourceDeleteAction = new PluginResourceDeleteAction(core);
-    uiActions.registerAction(savedObjectDeleteAction);
-    uiActions.registerAction(pluginResourceDeleteAction);
-    uiActions.registerTrigger(pluginResourceDeleteTrigger);
 
     return { savedAugmentVisLoader };
   }

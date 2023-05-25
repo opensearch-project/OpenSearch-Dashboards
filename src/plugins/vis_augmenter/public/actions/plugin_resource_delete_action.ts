@@ -5,25 +5,17 @@
 
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { CoreStart } from 'opensearch-dashboards/public';
 import { Action, IncompatibleActionError } from '../../../ui_actions/public';
 import { getSavedAugmentVisLoader } from '../services';
-import { AugmentVisSavedObject } from '../saved_augment_vis';
-import { VisLayer, VisLayerErrorTypes, isVisLayerWithError } from '../types';
+import { VisLayerErrorTypes, isVisLayerWithError } from '../types';
+import { PluginResourceDeleteContext } from '../ui_actions_bootstrap';
 
 export const PLUGIN_RESOURCE_DELETE_ACTION = 'PLUGIN_RESOURCE_DELETE_ACTION';
 
-interface PluginResourceContext {
-  savedObjs: AugmentVisSavedObject[];
-  visLayers: VisLayer[];
-}
-
-export class PluginResourceDeleteAction implements Action<PluginResourceContext> {
+export class PluginResourceDeleteAction implements Action<PluginResourceDeleteContext> {
   public readonly type = PLUGIN_RESOURCE_DELETE_ACTION;
   public readonly id = PLUGIN_RESOURCE_DELETE_ACTION;
   public order = 1;
-
-  constructor(private core: CoreStart) {}
 
   public getIconType() {
     return undefined;
@@ -35,7 +27,7 @@ export class PluginResourceDeleteAction implements Action<PluginResourceContext>
     });
   }
 
-  public async isCompatible({ savedObjs, visLayers }: PluginResourceContext) {
+  public async isCompatible({ savedObjs, visLayers }: PluginResourceDeleteContext) {
     return !isEmpty(savedObjs) && !isEmpty(visLayers);
   }
 
@@ -44,7 +36,7 @@ export class PluginResourceDeleteAction implements Action<PluginResourceContext>
    * sweep through them all and if any of the resources are deleted, delete those
    * corresponding saved objects
    */
-  public async execute({ savedObjs, visLayers }: PluginResourceContext) {
+  public async execute({ savedObjs, visLayers }: PluginResourceDeleteContext) {
     const staleVisLayers = visLayers
       .filter((visLayer) => isVisLayerWithError(visLayer))
       .filter(
