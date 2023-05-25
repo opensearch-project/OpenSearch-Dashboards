@@ -50,7 +50,6 @@ export class VisAugmenterPlugin
     { expressions }: VisAugmenterSetupDeps
   ): VisAugmenterSetup {
     expressions.registerType(visLayers);
-    setUISettings(core.uiSettings);
     return {};
   }
 
