@@ -301,7 +301,7 @@ export class DataSourceSavedObjectsClientWrapper {
           );
         }
 
-        const { accessKey, secretKey, region } = credentials as SigV4Content;
+        const { accessKey, secretKey, region, service } = credentials as SigV4Content;
 
         if (!accessKey) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -318,6 +318,12 @@ export class DataSourceSavedObjectsClientWrapper {
         if (!region) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
             '"auth.credentials.region" attribute is required'
+          );
+        }
+
+        if (!service) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(
+            '"auth.credentials.service" attribute is required'
           );
         }
         break;
@@ -457,7 +463,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
   private async encryptSigV4Credential<T = unknown>(auth: T, encryptionContext: EncryptionContext) {
     const {
-      credentials: { accessKey, secretKey, region },
+      credentials: { accessKey, secretKey, region, service },
     } = auth;
 
     return {
@@ -466,6 +472,7 @@ export class DataSourceSavedObjectsClientWrapper {
         region,
         accessKey: await this.cryptography.encryptAndEncode(accessKey, encryptionContext),
         secretKey: await this.cryptography.encryptAndEncode(secretKey, encryptionContext),
+        service,
       },
     };
   }

@@ -20,15 +20,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
+import { sigV4ServiceOptions } from '../../../../../../data_source_management/public/types';
 
 export interface UpdateAwsCredentialModalProps {
   region: string;
+  service: SigV4ServiceName;
   handleUpdateAwsCredential: (accessKey: string, secretKey: string) => void;
   closeUpdateAwsCredentialModal: () => void;
 }
 
 export const UpdateAwsCredentialModal = ({
   region,
+  service,
   handleUpdateAwsCredential,
   closeUpdateAwsCredentialModal,
 }: UpdateAwsCredentialModalProps) => {
@@ -87,6 +91,16 @@ export const UpdateAwsCredentialModal = ({
           <EuiSpacer size="m" />
 
           <EuiForm data-test-subj="data-source-update-aws-credential">
+            {/* Service Name */}
+            <EuiFormRow
+              label={i18n.translate('dataSourcesManagement.editDataSource.serviceName', {
+                defaultMessage: 'Service Name',
+              })}
+            >
+              <EuiText size="s" data-test-subj="data-source-update-credential-service-name">
+                {sigV4ServiceOptions.find((option) => option.value === service)?.text}
+              </EuiText>
+            </EuiFormRow>
             {/* Region */}
             <EuiFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.region', {
