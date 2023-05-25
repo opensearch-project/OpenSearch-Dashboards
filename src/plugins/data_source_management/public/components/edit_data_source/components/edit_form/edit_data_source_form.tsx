@@ -59,7 +59,7 @@ export interface EditDataSourceState {
   endpoint: string;
   auth: {
     type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content | undefined;
+    credentials: UsernamePasswordTypedContent | SigV4Content;
   };
   showUpdatePasswordModal: boolean;
   showUpdateAwsCredentialModal: boolean;
@@ -167,9 +167,24 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    this.setState({ auth: { ...this.state.auth, type: e.target.value as AuthType } }, () => {
-      this.onChangeFormValues();
-    });
+    const authType = e.target.value as AuthType;
+    this.setState(
+      {
+        auth: {
+          ...this.state.auth,
+          type: authType,
+          credentials: {
+            ...this.state.auth.credentials,
+            service:
+              (this.state.auth.credentials?.service as SigV4ServiceName) ||
+              SigV4ServiceName.OpenSearch,
+          },
+        },
+      },
+      () => {
+        this.onChangeFormValues();
+      }
+    );
   };
 
   onChangeDescription = (e: { target: { value: any } }) => {
@@ -804,7 +819,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             value={this.state.auth.credentials?.region || ''}
             onChange={this.onChangeRegion}
             onBlur={this.validateRegion}
-            data-test-subj="updateDataSourceFormRegionField"
+            data-test-subj="editDataSourceFormRegionField"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -817,7 +832,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             value={this.state.auth.credentials?.service}
             onChange={(e) => this.onChangeSigV4ServiceName(e)}
             name="ServiceName"
-            data-test-subj="createDataSourceFormAuthTypeSelect"
+            data-test-subj="editDataSourceFormSigV4ServiceTypeSelect"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -845,7 +860,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             onBlur={this.validateAccessKey}
             spellCheck={false}
             disabled={this.props.existingDataSource.auth.type === AuthType.SigV4}
-            data-test-subj="updateDataSourceFormAccessKeyField"
+            data-test-subj="editDataSourceFormAccessKeyField"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -873,7 +888,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             onBlur={this.validateSecretKey}
             spellCheck={false}
             disabled={this.props.existingDataSource.auth.type === AuthType.SigV4}
-            data-test-subj="updateDataSourceFormSecretKeyField"
+            data-test-subj="editDataSourceFormSecretKeyField"
           />
         </EuiFormRow>
         <EuiSpacer />

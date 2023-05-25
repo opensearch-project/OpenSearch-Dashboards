@@ -430,7 +430,7 @@ export class CreateDataSourceForm extends React.Component<
                 value={this.state.auth.credentials.service}
                 onChange={(e) => this.onChangeSigV4ServiceName(e)}
                 name="ServiceName"
-                data-test-subj="createDataSourceFormAuthTypeSelect"
+                data-test-subj="createDataSourceFormSigV4ServiceTypeSelect"
               />
             </EuiFormRow>
             <EuiFormRow
