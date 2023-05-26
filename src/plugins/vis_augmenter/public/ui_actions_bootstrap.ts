@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+<<<<<<< HEAD
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
   OpenEventsFlyoutAction,
@@ -20,6 +21,10 @@ import {
 } from '../../ui_actions/public';
 import { AugmentVisSavedObject, ISavedAugmentVis } from './saved_augment_vis';
 // import { CONTEXT_MENU_TRIGGER, EmbeddableContext } from '../../embeddable/public';
+=======
+import { UiActionsStart } from '../../ui_actions/public';
+import { ISavedAugmentVis } from './saved_augment_vis';
+>>>>>>> b7ccf0cb29 (Remove comments in bootstrap file)
 import { VisLayer } from './types';
 import {
   PLUGIN_RESOURCE_DELETE_ACTION,
