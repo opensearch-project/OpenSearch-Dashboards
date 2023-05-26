@@ -37,7 +37,7 @@ import {
 
 import { Config } from '../../lib';
 import { ExtractNodeBuilds } from './extract_node_builds_task';
-import { getLatestNodeVersion } from './node_download_info';
+import { getRequiredVersion } from './node_download_info';
 
 jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
@@ -62,7 +62,7 @@ async function setup() {
     },
   });
 
-  const realNodeVersion = await getLatestNodeVersion(config);
+  const realNodeVersion = getRequiredVersion(config);
   if (realNodeVersion) {
     expect.addSnapshotSerializer(
       createRecursiveSerializer(

@@ -37,6 +37,10 @@ export function createAbsolutePathSerializer(
 ) {
   const rootPaths = Array.isArray(rootPath) ? rootPath : [rootPath];
 
+  if (process.platform === 'win32') {
+    rootPaths.push(...rootPaths.map((name) => name.replace(/\\/g, '/')));
+  }
+
   return {
     test: (value: any) =>
       typeof value === 'string' && rootPaths.some((path) => value.startsWith(path)),

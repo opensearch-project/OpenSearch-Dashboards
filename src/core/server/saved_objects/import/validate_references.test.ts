@@ -31,7 +31,9 @@
 import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
 import { savedObjectsClientMock } from '../../mocks';
 import { SavedObjectsErrorHelpers } from '..';
+import { createStripPromisesSerializer } from '@osd/dev-utils';
 
+expect.addSnapshotSerializer(createStripPromisesSerializer());
 describe('getNonExistingReferenceAsKeys()', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
 
@@ -132,22 +134,22 @@ describe('getNonExistingReferenceAsKeys()', () => {
           Array [
             Array [
               Object {
-                "fields": Array [
-                  "id",
+                fields: Array [
+                  id,
                 ],
-                "id": "1",
-                "type": "index-pattern",
+                id: 1,
+                type: index-pattern,
               },
             ],
             Object {
-              "namespace": undefined,
+              namespace: undefined,
             },
           ],
         ],
         "results": Array [
           Object {
-            "type": "return",
-            "value": Promise {},
+            type: return,
+            value: Promise {},
           },
         ],
       }
@@ -226,29 +228,29 @@ describe('getNonExistingReferenceAsKeys()', () => {
           Array [
             Array [
               Object {
-                "fields": Array [
-                  "id",
+                fields: Array [
+                  id,
                 ],
-                "id": "1",
-                "type": "index-pattern",
+                id: 1,
+                type: index-pattern,
               },
               Object {
-                "fields": Array [
-                  "id",
+                fields: Array [
+                  id,
                 ],
-                "id": "3",
-                "type": "search",
+                id: 3,
+                type: search,
               },
             ],
             Object {
-              "namespace": undefined,
+              namespace: undefined,
             },
           ],
         ],
         "results": Array [
           Object {
-            "type": "return",
-            "value": Promise {},
+            type: return,
+            value: Promise {},
           },
         ],
       }
@@ -366,46 +368,46 @@ describe('validateReferences()', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
-          "error": Object {
-            "references": Array [
+          error: Object {
+            references: Array [
               Object {
-                "id": "3",
-                "type": "index-pattern",
+                id: 3,
+                type: index-pattern,
               },
             ],
-            "type": "missing_references",
+            type: missing_references,
           },
-          "id": "2",
-          "meta": Object {
-            "title": "My Visualization 2",
+          id: 2,
+          meta: Object {
+            title: My Visualization 2,
           },
-          "title": "My Visualization 2",
-          "type": "visualization",
+          title: My Visualization 2,
+          type: visualization,
         },
         Object {
-          "error": Object {
-            "references": Array [
+          error: Object {
+            references: Array [
               Object {
-                "id": "5",
-                "type": "index-pattern",
+                id: 5,
+                type: index-pattern,
               },
               Object {
-                "id": "6",
-                "type": "index-pattern",
+                id: 6,
+                type: index-pattern,
               },
               Object {
-                "id": "7",
-                "type": "search",
+                id: 7,
+                type: search,
               },
             ],
-            "type": "missing_references",
+            type: missing_references,
           },
-          "id": "4",
-          "meta": Object {
-            "title": "My Visualization 4",
+          id: 4,
+          meta: Object {
+            title: My Visualization 4,
           },
-          "title": "My Visualization 4",
-          "type": "visualization",
+          title: My Visualization 4,
+          type: visualization,
         },
       ]
     `);
@@ -415,50 +417,50 @@ describe('validateReferences()', () => {
           Array [
             Array [
               Object {
-                "fields": Array [
-                  "id",
+                fields: Array [
+                  id,
                 ],
-                "id": "3",
-                "type": "index-pattern",
+                id: 3,
+                type: index-pattern,
               },
               Object {
-                "fields": Array [
-                  "id",
+                fields: Array [
+                  id,
                 ],
-                "id": "5",
-                "type": "index-pattern",
+                id: 5,
+                type: index-pattern,
               },
               Object {
-                "fields": Array [
-                  "id",
+                fields: Array [
+                  id,
                 ],
-                "id": "6",
-                "type": "index-pattern",
+                id: 6,
+                type: index-pattern,
               },
               Object {
-                "fields": Array [
-                  "id",
+                fields: Array [
+                  id,
                 ],
-                "id": "7",
-                "type": "search",
+                id: 7,
+                type: search,
               },
               Object {
-                "fields": Array [
-                  "id",
+                fields: Array [
+                  id,
                 ],
-                "id": "8",
-                "type": "search",
+                id: 8,
+                type: search,
               },
             ],
             Object {
-              "namespace": undefined,
+              namespace: undefined,
             },
           ],
         ],
         "results": Array [
           Object {
-            "type": "return",
-            "value": Promise {},
+            type: return,
+            value: Promise {},
           },
         ],
       }
@@ -597,6 +599,6 @@ describe('validateReferences()', () => {
     ];
     await expect(
       validateReferences(savedObjects, savedObjectsClient)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad Request"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`Bad Request`);
   });
 });
