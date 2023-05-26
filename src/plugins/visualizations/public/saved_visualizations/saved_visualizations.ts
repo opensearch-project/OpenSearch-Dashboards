@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { isEmpty } from 'lodash';
 import {
   SavedObjectLoader,
   SavedObjectOpenSearchDashboardsServices,
@@ -36,18 +35,16 @@ import {
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 import { TypesStart } from '../vis_types';
-import { SavedAugmentVisLoader, getAllAugmentVisSavedObjs } from '../../../vis_augmenter/public';
 
 export interface SavedObjectOpenSearchDashboardsServicesWithVisualizations
   extends SavedObjectOpenSearchDashboardsServices {
   visualizationTypes: TypesStart;
-  savedAugmentVisLoader: SavedAugmentVisLoader;
 }
 export type SavedVisualizationsLoader = ReturnType<typeof createSavedVisLoader>;
 export function createSavedVisLoader(
   services: SavedObjectOpenSearchDashboardsServicesWithVisualizations
 ) {
-  const { savedObjectsClient, visualizationTypes, savedAugmentVisLoader } = services;
+  const { savedObjectsClient, visualizationTypes } = services;
 
   class SavedObjectLoaderVisualize extends SavedObjectLoader {
     mapHitSource = (source: Record<string, any>, id: string) => {
@@ -91,25 +88,6 @@ export function createSavedVisLoader(
         savedObjectsClient,
         visTypes: visualizationTypes.getAliases(),
       });
-    }
-
-    // Similar to the default SavedObjectLoader delete(), but doing some extra checking and deletion
-    // of any associated augment-vis saved objects for a particular visualization saved object.
-    async delete(ids: string | string[]): Promise<void> {
-      const visObjIds = !Array.isArray(ids) ? [ids] : ids;
-      const allAugmentVisObjs = await getAllAugmentVisSavedObjs(savedAugmentVisLoader);
-      const deletions = visObjIds.map((visObjId) => {
-        const augmentVisIdsToDelete = allAugmentVisObjs
-          .filter((augmentVisObj) => augmentVisObj.visId === visObjId)
-          .map((augmentVisObj) => augmentVisObj.id as string);
-        if (!isEmpty(augmentVisIdsToDelete)) savedAugmentVisLoader.delete(augmentVisIdsToDelete);
-
-        // @ts-ignore
-        const savedObject = new this.Class(visObjId);
-        return savedObject.delete();
-      });
-
-      await Promise.all(deletions);
     }
   }
   const SavedVis = createSavedVisClass(services);
