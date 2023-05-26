@@ -65,6 +65,7 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   _icon?: string;
   items: ItemDescriptor[];
   _category?: string;
+  _order?: number;
 };
 
 const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
@@ -126,7 +127,7 @@ const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemD
 const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
   const euiPanels: EuiContextMenuPanelDescriptor[] = [];
   for (const panel of panels) {
-    const { _level: omit, _icon: omit2, _category: omit3, ...rest } = panel;
+    const { _level: omit, _icon: omit2, _category: omit3, _order: omit4, ...rest } = panel;
     euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
   }
   return euiPanels;
@@ -181,6 +182,7 @@ export async function buildContextMenuForActions({
             _level: i,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
             _category: group.category,
+            _order: group.order,
           };
 
           // If there are multiple groups and this is not the first group,
@@ -254,12 +256,20 @@ export async function buildContextMenuForActions({
         // Otherwise, just store the single item into the category.
         if (panel.items.length > 1) {
           categories[panel._category].push({
-            name: panel.title || panel.id,
-            icon: panel._icon || 'empty',
-            panel: panel.id,
+            order: panel._order,
+            items: [
+              {
+                name: panel.title || panel.id,
+                icon: panel._icon || 'empty',
+                panel: panel.id,
+              },
+            ],
           });
         } else {
-          categories[panel._category].push(...panel.items);
+          categories[panel._category].push({
+            order: panel._order || 0,
+            items: panel.items,
+          });
         }
       } else {
         // Add separator with unique key if needed
@@ -286,12 +296,21 @@ export async function buildContextMenuForActions({
   // For each category, add a separator before each one and then add category items.
   // This is for the mainMenu panel.
   Object.keys(categories).forEach((key) => {
+    // Get the items sorted by group order, allowing for groups within categories
+    // to be ordered. A category consists of an order and its items.
+    // Higher orders are sorted to the top.
+    const sortedEntries = categories[key].sort((a, b) => b.order - a.order);
+    const sortedItems = sortedEntries.reduce(
+      (items, category) => [...items, ...category.items],
+      []
+    );
+
     // Add separator with unique key if needed
     if (panels.mainMenu.items.length) {
       panels.mainMenu.items.push({ isSeparator: true, key: `${key}separator` });
     }
 
-    panels.mainMenu.items.push(...categories[key]);
+    panels.mainMenu.items.push(...sortedItems);
   });
 
   const panelList = Object.values(panels);

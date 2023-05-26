@@ -452,9 +452,9 @@ test('groups with deep nesting', async () => {
 // Tests with:
 // a regular action
 // a group with 2 actions uncategorized
-// a group with 2 actions with a category of "test-category"
-// a group with 1 actions with a category of "test-category"
-test('groups with categories', async () => {
+// a group with 2 actions with a category of "test-category" and low order of 10
+// a group with 1 actions with a category of "test-category" and high order of 20
+test('groups with categories and order', async () => {
   const grouping1 = [
     {
       id: 'test-group',
@@ -468,6 +468,7 @@ test('groups with categories', async () => {
       getDisplayName: () => 'Test group 2',
       getIconType: () => 'bell',
       category: 'test-category',
+      order: 10,
     },
   ];
   const grouping3 = [
@@ -476,6 +477,7 @@ test('groups with categories', async () => {
       getDisplayName: () => 'Test group 3',
       getIconType: () => 'bell',
       category: 'test-category',
+      order: 20,
     },
   ];
 
@@ -525,10 +527,10 @@ test('groups with categories', async () => {
             "isSeparator": true,
           },
           Object {
-            "name": "Test group 2",
+            "name": "Waldo 1",
           },
           Object {
-            "name": "Waldo 1",
+            "name": "Test group 2",
           },
         ],
       },
