@@ -28,19 +28,15 @@
  * under the License.
  */
 
-import { readFile, stat } from 'fs';
+import { readFile, stat } from 'fs/promises';
 import { resolve } from 'path';
 import { coerce } from 'semver';
-import { promisify } from 'util';
 import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '../../config';
 import { Logger } from '../../logging';
 import { PluginManifest } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
-
-const fsReadFileAsync = promisify(readFile);
-const fsStatAsync = promisify(stat);
 
 /**
  * Name of the JSON manifest file that should be located in the plugin directory.
@@ -92,7 +88,7 @@ export async function parseManifest(
 
   let manifestContent;
   try {
-    manifestContent = await fsReadFileAsync(manifestPath);
+    manifestContent = await readFile(manifestPath);
   } catch (err) {
     throw PluginDiscoveryError.missingManifest(manifestPath, err);
   }
@@ -219,7 +215,7 @@ export async function parseManifest(
  */
 export async function isNewPlatformPlugin(pluginPath: string) {
   try {
-    return (await fsStatAsync(resolve(pluginPath, MANIFEST_FILE_NAME))).isFile();
+    return (await stat(resolve(pluginPath, MANIFEST_FILE_NAME))).isFile();
   } catch (err) {
     return false;
   }
