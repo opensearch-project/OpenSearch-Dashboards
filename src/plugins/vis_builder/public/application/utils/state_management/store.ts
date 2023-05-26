@@ -8,12 +8,14 @@ import { isEqual } from 'lodash';
 import { reducer as styleReducer } from './style_slice';
 import { reducer as visualizationReducer } from './visualization_slice';
 import { reducer as metadataReducer } from './metadata_slice';
+import { reducer as uiStateReducer } from './ui_state_slice';
 import { VisBuilderServices } from '../../..';
 import { loadReduxState, persistReduxState } from './redux_persistence';
 import { handlerEditorState } from './handlers/editor_state';
 import { handlerParentAggs } from './handlers/parent_aggs';
 
 const rootReducer = combineReducers({
+  ui: uiStateReducer,
   style: styleReducer,
   visualization: visualizationReducer,
   metadata: metadataReducer,
@@ -47,9 +49,9 @@ export const getPreloadedStore = async (services: VisBuilderServices) => {
   };
 
   // the store subscriber will automatically detect changes and call handleChange function
-  store.subscribe(handleChange);
+  const unsubscribe = store.subscribe(handleChange);
 
-  return store;
+  return { store, unsubscribe };
 };
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
@@ -60,3 +62,5 @@ export type AppDispatch = Store['dispatch'];
 
 export { setState as setStyleState, StyleState } from './style_slice';
 export { setState as setVisualizationState, VisualizationState } from './visualization_slice';
+export { MetadataState } from './metadata_slice';
+export { setState as setUIStateState, UIStateState } from './ui_state_slice';
