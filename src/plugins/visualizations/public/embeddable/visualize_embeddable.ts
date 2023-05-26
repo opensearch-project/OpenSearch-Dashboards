@@ -525,20 +525,24 @@ export class VisualizeEmbeddable
    * is used below. For more details, see
    * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
    */
-  fetchVisLayers = async (
-    expressionParams: IExpressionLoaderParams,
-    abortController: AbortController
-  ): Promise<VisLayers> => {
+  fetchVisLayers = async (): Promise<VisLayers> => {
     try {
+      const expressionParams: IExpressionLoaderParams = {
+        searchContext: {
+          timeRange: this.timeRange,
+          query: this.input.query,
+          filters: this.input.filters,
+        },
+        uiState: this.vis.uiState,
+        inspectorAdapters: this.inspectorAdapters,
+      };
+      const aborted = get(this.abortController, 'signal.aborted', false) as boolean;
       const augmentVisSavedObjs = await getAugmentVisSavedObjs(
         this.vis.id,
         this.savedAugmentVisLoader
       );
-      if (
-        !isEmpty(augmentVisSavedObjs) &&
-        !abortController.signal.aborted &&
-        isEligibleForVisLayers(this.vis)
-      ) {
+
+      if (!isEmpty(augmentVisSavedObjs) && !aborted && isEligibleForVisLayers(this.vis)) {
         const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
         // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
         // expression functions are ran, they will incrementally append their generated VisLayers to it.

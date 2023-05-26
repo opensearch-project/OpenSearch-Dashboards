@@ -50,6 +50,7 @@ export class VisAugmenterPlugin
     { expressions }: VisAugmenterSetupDeps
   ): VisAugmenterSetup {
     expressions.registerType(visLayers);
+    setUISettings(core.uiSettings);
     return {};
   }
 
@@ -57,7 +58,6 @@ export class VisAugmenterPlugin
     core: CoreStart,
     { uiActions, embeddable, data, visualizations }: VisAugmenterStartDeps
   ): VisAugmenterStart {
-    setUISettings(core.uiSettings);
     setUiActions(uiActions);
     setEmbeddable(embeddable);
     setQueryService(data.query);
