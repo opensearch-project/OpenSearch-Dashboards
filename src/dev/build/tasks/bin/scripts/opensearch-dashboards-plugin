@@ -28,4 +28,4 @@ done
 # Get an absolute path for OSD_HOME
 OSD_HOME="$(cd "$(dirname "${SCRIPT}")/.."; pwd)"
 
-OSD_NODE_OPTS_PREFIX="--no-warnings" OSD_USE_NODE_JS_FILE_PATH=/src/cli_plugin/dist NODE_ENV=production ${OSD_HOME}/bin/use_node "${@}"
+OSD_NODE_OPTS_PREFIX="--no-warnings" OSD_USE_NODE_JS_FILE_PATH=/src/cli_plugin/dist NODE_ENV=production exec ${OSD_HOME}/bin/use_node "${@}"
