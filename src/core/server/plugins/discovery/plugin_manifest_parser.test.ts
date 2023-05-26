@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { mockReadFile } from './plugin_manifest_parser.test.mocks';
+import { mockReadFilePromise } from './plugin_manifest_parser.test.mocks';
 
 import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -52,9 +52,7 @@ afterEach(() => {
 });
 
 test('return error when manifest is empty', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(''));
-  });
+  mockReadFilePromise.mockResolvedValue(Buffer.from(''));
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Unexpected end of JSON input (invalid-manifest, ${pluginManifestPath})`,
@@ -64,9 +62,7 @@ test('return error when manifest is empty', async () => {
 });
 
 test('return error when manifest content is null', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from('null'));
-  });
+  mockReadFilePromise.mockResolvedValue(Buffer.from('null'));
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Plugin manifest must contain a JSON encoded object. (invalid-manifest, ${pluginManifestPath})`,
@@ -76,9 +72,7 @@ test('return error when manifest content is null', async () => {
 });
 
 test('return error when manifest content is not a valid JSON', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from('not-json'));
-  });
+  mockReadFilePromise.mockResolvedValue(Buffer.from('not-json'));
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Unexpected token o in JSON at position 1 (invalid-manifest, ${pluginManifestPath})`,
@@ -88,9 +82,7 @@ test('return error when manifest content is not a valid JSON', async () => {
 });
 
 test('return error when plugin id is missing', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ version: 'some-version' })));
-  });
+  mockReadFilePromise.mockResolvedValue(Buffer.from(JSON.stringify({ version: 'some-version' })));
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Plugin manifest must contain an "id" property. (invalid-manifest, ${pluginManifestPath})`,
@@ -100,9 +92,9 @@ test('return error when plugin id is missing', async () => {
 });
 
 test('return error when plugin id includes `.` characters', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some.name', version: 'some-version' })));
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'some.name', version: 'some-version' }))
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Plugin "id" must not include \`.\` characters. (invalid-manifest, ${pluginManifestPath})`,
@@ -112,14 +104,9 @@ test('return error when plugin id includes `.` characters', async () => {
 });
 
 test('logs warning if pluginId is not in camelCase format', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
-      Buffer.from(
-        JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true })
-      )
-    );
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true }))
+  );
 
   expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
   await parseManifest(pluginPath, packageInfo, logger);
@@ -133,14 +120,9 @@ test('logs warning if pluginId is not in camelCase format', async () => {
 });
 
 test('does not log pluginId format warning in dist mode', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
-      Buffer.from(
-        JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true })
-      )
-    );
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'some_name', version: 'opensearchDashboards', server: true }))
+  );
 
   expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
   await parseManifest(pluginPath, { ...packageInfo, dist: true }, logger);
@@ -148,9 +130,7 @@ test('does not log pluginId format warning in dist mode', async () => {
 });
 
 test('return error when plugin version is missing', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId' })));
-  });
+  mockReadFilePromise.mockResolvedValue(Buffer.from(JSON.stringify({ id: 'someId' })));
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Plugin manifest for "someId" must contain a "version" property. (invalid-manifest, ${pluginManifestPath})`,
@@ -160,9 +140,9 @@ test('return error when plugin version is missing', async () => {
 });
 
 test('return error when plugin expected OpenSearch Dashboards version is lower than actual version', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2' })));
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2' }))
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "6.4.2", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
@@ -172,18 +152,15 @@ test('return error when plugin expected OpenSearch Dashboards version is lower t
 });
 
 test('return error when plugin expected OpenSearch Dashboards version cannot be interpreted as semver', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
-      Buffer.from(
-        JSON.stringify({
-          id: 'someId',
-          version: '1.0.0',
-          opensearchDashboardsVersion: 'non-sem-ver',
-        })
-      )
-    );
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(
+      JSON.stringify({
+        id: 'someId',
+        version: '1.0.0',
+        opensearchDashboardsVersion: 'non-sem-ver',
+      })
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "non-sem-ver", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
@@ -193,9 +170,9 @@ test('return error when plugin expected OpenSearch Dashboards version cannot be 
 });
 
 test('return error when plugin config path is not a string', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', configPath: 2 })));
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', configPath: 2 }))
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `The "configPath" in plugin manifest for "someId" should either be a string or an array of strings. (invalid-manifest, ${pluginManifestPath})`,
@@ -205,12 +182,9 @@ test('return error when plugin config path is not a string', async () => {
 });
 
 test('return error when plugin config path is an array that contains non-string values', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
-      Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', configPath: ['config', 2] }))
-    );
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', configPath: ['config', 2] }))
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `The "configPath" in plugin manifest for "someId" should either be a string or an array of strings. (invalid-manifest, ${pluginManifestPath})`,
@@ -220,9 +194,9 @@ test('return error when plugin config path is an array that contains non-string 
 });
 
 test('return error when plugin expected OpenSearch Dashboards version is higher than actual version', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.1' })));
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.1' }))
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "7.0.1", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
@@ -232,9 +206,9 @@ test('return error when plugin expected OpenSearch Dashboards version is higher 
 });
 
 test('return error when both `server` and `ui` are set to `false` or missing', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0' })));
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0' }))
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Both "server" and "ui" are missing or set to "false" in plugin manifest for "someId", but at least one of these must be set to "true". (invalid-manifest, ${pluginManifestPath})`,
@@ -242,12 +216,9 @@ test('return error when both `server` and `ui` are set to `false` or missing', a
     path: pluginManifestPath,
   });
 
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
-      Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: false, ui: false }))
-    );
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: false, ui: false }))
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Both "server" and "ui" are missing or set to "false" in plugin manifest for "someId", but at least one of these must be set to "true". (invalid-manifest, ${pluginManifestPath})`,
@@ -257,20 +228,17 @@ test('return error when both `server` and `ui` are set to `false` or missing', a
 });
 
 test('return error when manifest contains unrecognized properties', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
-      Buffer.from(
-        JSON.stringify({
-          id: 'someId',
-          version: '7.0.0',
-          server: true,
-          unknownOne: 'one',
-          unknownTwo: true,
-        })
-      )
-    );
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(
+      JSON.stringify({
+        id: 'someId',
+        version: '7.0.0',
+        server: true,
+        unknownOne: 'one',
+        unknownTwo: true,
+      })
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     message: `Manifest for plugin "someId" contains the following unrecognized properties: unknownOne,unknownTwo. (invalid-manifest, ${pluginManifestPath})`,
@@ -281,46 +249,40 @@ test('return error when manifest contains unrecognized properties', async () => 
 
 describe('configPath', () => {
   test('falls back to plugin id if not specified', async () => {
-    mockReadFile.mockImplementation((path, cb) => {
-      cb(null, Buffer.from(JSON.stringify({ id: 'plugin', version: '7.0.0', server: true })));
-    });
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(JSON.stringify({ id: 'plugin', version: '7.0.0', server: true }))
+    );
 
     const manifest = await parseManifest(pluginPath, packageInfo, logger);
     expect(manifest.configPath).toBe(manifest.id);
   });
 
   test('falls back to plugin id in snakeCase format', async () => {
-    mockReadFile.mockImplementation((path, cb) => {
-      cb(null, Buffer.from(JSON.stringify({ id: 'SomeId', version: '7.0.0', server: true })));
-    });
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(JSON.stringify({ id: 'SomeId', version: '7.0.0', server: true }))
+    );
 
     const manifest = await parseManifest(pluginPath, packageInfo, logger);
     expect(manifest.configPath).toBe('some_id');
   });
 
   test('not formated to snakeCase if defined explicitly as string', async () => {
-    mockReadFile.mockImplementation((path, cb) => {
-      cb(
-        null,
-        Buffer.from(
-          JSON.stringify({ id: 'someId', configPath: 'somePath', version: '7.0.0', server: true })
-        )
-      );
-    });
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({ id: 'someId', configPath: 'somePath', version: '7.0.0', server: true })
+      )
+    );
 
     const manifest = await parseManifest(pluginPath, packageInfo, logger);
     expect(manifest.configPath).toBe('somePath');
   });
 
   test('not formated to snakeCase if defined explicitly as an array of strings', async () => {
-    mockReadFile.mockImplementation((path, cb) => {
-      cb(
-        null,
-        Buffer.from(
-          JSON.stringify({ id: 'someId', configPath: ['somePath'], version: '7.0.0', server: true })
-        )
-      );
-    });
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({ id: 'someId', configPath: ['somePath'], version: '7.0.0', server: true })
+      )
+    );
 
     const manifest = await parseManifest(pluginPath, packageInfo, logger);
     expect(manifest.configPath).toEqual(['somePath']);
@@ -328,9 +290,9 @@ describe('configPath', () => {
 });
 
 test('set defaults for all missing optional fields', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: true })));
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: true }))
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
     id: 'someId',
@@ -346,22 +308,19 @@ test('set defaults for all missing optional fields', async () => {
 });
 
 test('return all set optional fields as they are in manifest', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
-      Buffer.from(
-        JSON.stringify({
-          id: 'someId',
-          configPath: ['some', 'path'],
-          version: 'some-version',
-          opensearchDashboardsVersion: '7.0.0',
-          requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
-          optionalPlugins: ['some-optional-plugin'],
-          ui: true,
-        })
-      )
-    );
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(
+      JSON.stringify({
+        id: 'someId',
+        configPath: ['some', 'path'],
+        version: 'some-version',
+        opensearchDashboardsVersion: '7.0.0',
+        requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+        optionalPlugins: ['some-optional-plugin'],
+        ui: true,
+      })
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
     id: 'someId',
@@ -377,21 +336,18 @@ test('return all set optional fields as they are in manifest', async () => {
 });
 
 test('return manifest when plugin expected OpenSearch Dashboards version matches actual version', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
-      Buffer.from(
-        JSON.stringify({
-          id: 'someId',
-          configPath: 'some-path',
-          version: 'some-version',
-          opensearchDashboardsVersion: '7.0.0-alpha2',
-          requiredPlugins: ['some-required-plugin'],
-          server: true,
-        })
-      )
-    );
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(
+      JSON.stringify({
+        id: 'someId',
+        configPath: 'some-path',
+        version: 'some-version',
+        opensearchDashboardsVersion: '7.0.0-alpha2',
+        requiredPlugins: ['some-required-plugin'],
+        server: true,
+      })
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
     id: 'someId',
@@ -407,21 +363,18 @@ test('return manifest when plugin expected OpenSearch Dashboards version matches
 });
 
 test('return manifest when plugin expected OpenSearch Dashboards version is `opensearchDashboards`', async () => {
-  mockReadFile.mockImplementation((path, cb) => {
-    cb(
-      null,
-      Buffer.from(
-        JSON.stringify({
-          id: 'someId',
-          version: 'some-version',
-          opensearchDashboardsVersion: 'opensearchDashboards',
-          requiredPlugins: ['some-required-plugin'],
-          server: true,
-          ui: true,
-        })
-      )
-    );
-  });
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(
+      JSON.stringify({
+        id: 'someId',
+        version: 'some-version',
+        opensearchDashboardsVersion: 'opensearchDashboards',
+        requiredPlugins: ['some-required-plugin'],
+        server: true,
+        ui: true,
+      })
+    )
+  );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
     id: 'someId',

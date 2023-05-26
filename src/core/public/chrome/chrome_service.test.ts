@@ -50,6 +50,9 @@ class FakeApp implements App {
 const store = new Map();
 const originalLocalStorage = window.localStorage;
 
+// @ts-expect-error to allow redeclaring a readonly prop
+delete window.localStorage;
+
 (window as any).localStorage = {
   setItem: (key: string, value: string) => store.set(String(key), String(value)),
   getItem: (key: string) => store.get(String(key)),
