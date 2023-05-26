@@ -52,7 +52,7 @@ type Properties = Record<string, FieldMapping>;
 
 interface IndexMapping {
   [index: string]: {
-    properties: Properties;
+    [mapping: string]: FieldMapping | Properties;
   };
 }
 
@@ -321,7 +321,7 @@ function retrieveSettings(
   settingsToRetrieve: any,
   dataSourceId: string
 ): Promise<HttpResponse<any>> | Promise<void> | Promise<{}> {
-  const settingKeyToPathMap: { [key: string]: string } = {
+  const settingKeyToPathMap: { [settingsKey: string]: string } = {
     fields: '_mapping',
     indices: '_aliases',
     templates: '_template',
