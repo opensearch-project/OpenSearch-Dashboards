@@ -43,7 +43,17 @@ jest.mock('os', () => {
   return realOs;
 });
 
+jest.mock('fs', () => {
+  const originalFs = jest.requireActual('fs');
+  return {
+    ...originalFs,
+    existsSync: jest.fn(),
+    realpathSync: originalFs.realpathSync,
+  };
+});
+
 import Path from 'path';
+import { existsSync } from 'fs';
 import { REPO_ROOT } from '@osd/utils';
 import { createAbsolutePathSerializer } from '@osd/dev-utils';
 
@@ -122,7 +132,265 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(parseThemeTags).toBeCalledWith('foo');
   });
 
-  it('applies defaults', () => {
+  it('applies defaults if opensearch-dashboards-extra path does not exist', () => {
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": true,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [
+          <absolute path>/src/plugins,
+          <absolute path>/plugins,
+          <absolute path>/opensearch-dashboards-extra,
+        ],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        cache: false,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": false,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [
+          <absolute path>/src/plugins,
+          <absolute path>/plugins,
+          <absolute path>/opensearch-dashboards-extra,
+        ],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        examples: true,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": true,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [
+          <absolute path>/src/plugins,
+          <absolute path>/plugins,
+          <absolute path>/examples,
+          <absolute path>/opensearch-dashboards-extra,
+        ],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": true,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [
+          <absolute path>/src/plugins,
+          <absolute path>/plugins,
+          <absolute path>/opensearch-dashboards-extra,
+        ],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [Path.resolve(REPO_ROOT, 'x/y/z'), '/outside/of/repo'],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": true,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 2,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [
+          <absolute path>/x/y/z,
+          "/outside/of/repo",
+        ],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+
+    process.env.OSD_OPTIMIZER_MAX_WORKERS = '100';
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": true,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+
+    process.env.OSD_OPTIMIZER_NO_CACHE = '0';
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": false,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+
+    process.env.OSD_OPTIMIZER_NO_CACHE = '1';
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": false,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+
+    process.env.OSD_OPTIMIZER_NO_CACHE = '1';
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+        cache: true,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": false,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+
+    delete process.env.OSD_OPTIMIZER_NO_CACHE;
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+        cache: true,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": true,
+        "dist": false,
+        "filters": Array [],
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "outputRoot": <absolute path>,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "themeTags": undefined,
+        "watch": false,
+      }
+    `);
+  });
+
+  it('applies defaults if opensearch-dashboards-extra path exists', () => {
+    (existsSync as jest.Mock).mockReturnValue(true);
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
@@ -461,7 +729,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          21,
+          39,
         ],
         "lastCall": Array [
           Symbol(parsed plugin scan dirs),
@@ -491,7 +759,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          23,
+          41,
         ],
         "lastCall": Array [
           Array [],
@@ -522,7 +790,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          22,
+          40,
         ],
         "lastCall": Array [
           Symbol(new platform plugins),
