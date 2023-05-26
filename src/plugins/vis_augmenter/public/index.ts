@@ -34,3 +34,5 @@ export * from './constants';
 export * from './vega';
 export * from './saved_augment_vis';
 export * from './test_constants';
+export * from './triggers';
+export * from './actions';

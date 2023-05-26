@@ -41,8 +41,6 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
       throw new IncompatibleActionError();
     }
 
-    // console.log('deleting augment-vis saved objs from deleted vis id: ', savedObjectId);
-
     const loader = getSavedAugmentVisLoader();
     const allAugmentVisObjs = await getAllAugmentVisSavedObjs(loader);
     const augmentVisIdsToDelete = allAugmentVisObjs

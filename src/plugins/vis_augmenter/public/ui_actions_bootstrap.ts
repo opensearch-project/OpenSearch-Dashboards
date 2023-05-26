@@ -18,7 +18,8 @@ import {
   EXTERNAL_ACTION_TRIGGER,
   UiActionsSetup,
 } from '../../ui_actions/public';
-import { AugmentVisSavedObject } from './saved_augment_vis';
+import { AugmentVisSavedObject, ISavedAugmentVis } from './saved_augment_vis';
+// import { CONTEXT_MENU_TRIGGER, EmbeddableContext } from '../../embeddable/public';
 import { VisLayer } from './types';
 import {
   PLUGIN_RESOURCE_DELETE_ACTION,
@@ -27,6 +28,7 @@ import {
   SavedObjectDeleteAction,
 } from './actions';
 import { PLUGIN_RESOURCE_DELETE_TRIGGER, pluginResourceDeleteTrigger } from './triggers';
+import { SAVED_OBJECT_DELETE_TRIGGER } from '../../saved_objects_management/public';
 
 export interface AugmentVisContext {
   savedObjectId: string;
@@ -38,7 +40,7 @@ export interface SavedObjectDeleteContext {
 }
 
 export interface PluginResourceDeleteContext {
-  savedObjs: AugmentVisSavedObject[];
+  savedObjs: ISavedAugmentVis[];
   visLayers: VisLayer[];
 }
 

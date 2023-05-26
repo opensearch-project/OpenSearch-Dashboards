@@ -79,6 +79,7 @@ import {
   VisLayer,
   VisLayerTypes,
   VisAugmenterEmbeddableConfig,
+  PLUGIN_RESOURCE_DELETE_TRIGGER,
 } from '../../../vis_augmenter/public';
 import { VisSavedObject } from '../types';
 
@@ -559,8 +560,12 @@ export class VisualizeEmbeddable
         const visLayers = exprVisLayers.layers;
 
         // There may be some stale saved objs if any plugin resources have been deleted since last time
-        // data was fetched from them via the expression functions. This will collect and delete them.
-        cleanupStaleObjects(augmentVisSavedObjs, visLayers, this.savedAugmentVisLoader);
+        // data was fetched from them via the expression functions. Execute this trigger so any listening
+        // action can perform cleanup.
+        getUiActions().getTrigger(PLUGIN_RESOURCE_DELETE_TRIGGER).exec({
+          savedObjs: augmentVisSavedObjs,
+          visLayers,
+        });
 
         const err = getAnyErrors(visLayers, this.vis.title);
         // This is only true when one or more VisLayers has an error

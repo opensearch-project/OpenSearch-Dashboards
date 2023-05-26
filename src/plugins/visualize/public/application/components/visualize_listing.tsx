@@ -29,7 +29,7 @@
  */
 
 import './visualize_listing.scss';
-
+import { get } from 'lodash';
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { useUnmount, useMount } from 'react-use';
@@ -43,6 +43,8 @@ import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
+import { getUiActions } from '../../services';
+import { SAVED_OBJECT_DELETE_TRIGGER } from '../../../../saved_objects_management/public';
 
 export const VisualizeListing = () => {
   const {
@@ -141,6 +143,12 @@ export const VisualizeListing = () => {
             defaultMessage: 'Error deleting visualization',
           }),
         });
+      });
+      const uiActions = getUiActions();
+      selectedItems.forEach((item: any) => {
+        uiActions
+          .getTrigger(SAVED_OBJECT_DELETE_TRIGGER)
+          .exec({ type: 'visualization', savedObjectId: get(item, 'id', '') });
       });
     },
     [savedVisualizations, toastNotifications]

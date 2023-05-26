@@ -9,6 +9,7 @@ import { Action, IncompatibleActionError } from '../../../ui_actions/public';
 import { getSavedAugmentVisLoader } from '../services';
 import { VisLayerErrorTypes, isVisLayerWithError } from '../types';
 import { PluginResourceDeleteContext } from '../ui_actions_bootstrap';
+import { cleanupStaleObjects } from '../utils';
 
 export const PLUGIN_RESOURCE_DELETE_ACTION = 'PLUGIN_RESOURCE_DELETE_ACTION';
 
@@ -37,26 +38,9 @@ export class PluginResourceDeleteAction implements Action<PluginResourceDeleteCo
    * corresponding saved objects
    */
   public async execute({ savedObjs, visLayers }: PluginResourceDeleteContext) {
-    const staleVisLayers = visLayers
-      .filter((visLayer) => isVisLayerWithError(visLayer))
-      .filter(
-        (visLayerWithError) => visLayerWithError.error?.type === VisLayerErrorTypes.RESOURCE_DELETED
-      );
-
-    if (!(await this.isCompatible({ savedObjs, visLayers: staleVisLayers }))) {
+    if (!(await this.isCompatible({ savedObjs, visLayers }))) {
       throw new IncompatibleActionError();
     }
-
-    const loader = getSavedAugmentVisLoader();
-    const objIdsToDelete = [] as string[];
-    staleVisLayers.forEach((staleVisLayer) => {
-      // Match the VisLayer to its origin saved obj to extract the to-be-deleted saved obj ID
-      const deletedPluginResourceId = staleVisLayer.pluginResource.id;
-      const savedObjId = savedObjs.find(
-        (savedObj) => savedObj.pluginResource.id === deletedPluginResourceId
-      )?.id;
-      if (savedObjId !== undefined) objIdsToDelete.push(savedObjId);
-    });
-    loader.delete(objIdsToDelete);
+    cleanupStaleObjects(savedObjs, visLayers, getSavedAugmentVisLoader());
   }
 }
