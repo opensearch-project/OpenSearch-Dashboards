@@ -6,7 +6,7 @@
 import { SavedObjectsClientContract } from '../../../../core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/server/mocks';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
-import { AuthType, DataSourceAttributes } from '../../common/data_sources';
+import { AuthType, DataSourceAttributes, SigV4Content } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
@@ -27,6 +27,7 @@ describe('configureLegacyClient', () => {
   let clientPoolSetup: OpenSearchClientPoolSetup;
   let configOptions: ConfigOptions;
   let dataSourceAttr: DataSourceAttributes;
+  let sigV4AuthContent: SigV4Content;
 
   let mockOpenSearchClientInstance: {
     close: jest.Mock;
@@ -70,6 +71,12 @@ describe('configureLegacyClient', () => {
         },
       },
     } as DataSourceAttributes;
+
+    sigV4AuthContent = {
+      region: 'us-east-1',
+      accessKey: 'accessKey',
+      secretKey: 'secretKey',
+    };
 
     clientPoolSetup = {
       getClientFromPool: jest.fn(),
@@ -155,6 +162,42 @@ describe('configureLegacyClient', () => {
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
     expect(mockResult).toBeDefined();
+  });
+
+  test('configure client with auth.type == sigv4 and service param, should call new Client() with service param', async () => {
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: { ...sigV4AuthContent, service: 'aoss' },
+        },
+      },
+      references: [],
+    });
+
+    parseClientOptionsMock.mockReturnValue(configOptions);
+
+    jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+      decryptedText: 'accessKey',
+      encryptionContext: { endpoint: 'http://localhost' },
+    });
+
+    await configureLegacyClient(
+      dataSourceClientParams,
+      callApiParams,
+      clientPoolSetup,
+      config,
+      logger
+    );
+
+    expect(parseClientOptionsMock).toHaveBeenCalled();
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining({ service: 'aoss' }));
+
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
   });
 
   test('configure client with auth.type == username_password and password contaminated', async () => {
