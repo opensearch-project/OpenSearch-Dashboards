@@ -29,12 +29,14 @@
  */
 
 import _ from 'lodash';
-import { UrlPatternMatcher } from '../autocomplete/components';
+import { SharedComponent, UrlPatternMatcher } from '../autocomplete/components';
 import { UrlParams } from '../autocomplete/url_params';
 import {
   globalsOnlyAutocompleteComponents,
   compileBodyDescription,
 } from '../autocomplete/body_completer';
+import { Endpoint } from '../autocomplete/types';
+import { ParametrizedComponentFactories } from './osd';
 
 /**
  *
@@ -44,33 +46,42 @@ import {
  * @constructor
  * @param bodyParametrizedComponentFactories same as urlParametrizedComponentFactories but used for body compilation
  */
-function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
-  this.globalRules = Object.create(null);
-  this.endpoints = Object.create(null);
-  this.urlPatternMatcher = new UrlPatternMatcher(urlParametrizedComponentFactories);
-  this.globalBodyComponentFactories = bodyParametrizedComponentFactories;
-  this.name = '';
-}
+export class Api {
+  globalRules: Record<string, any>;
+  endpoints: Record<string, Endpoint>;
+  urlPatternMatcher: UrlPatternMatcher;
+  globalBodyComponentFactories: ParametrizedComponentFactories | undefined;
+  name: string;
 
-(function (cls) {
-  cls.addGlobalAutocompleteRules = function (parentNode, rules) {
+  constructor(
+    urlParametrizedComponentFactories?: ParametrizedComponentFactories,
+    bodyParametrizedComponentFactories?: ParametrizedComponentFactories
+  ) {
+    this.globalRules = Object.create(null);
+    this.endpoints = Object.create(null);
+    this.urlPatternMatcher = new UrlPatternMatcher(urlParametrizedComponentFactories);
+    this.globalBodyComponentFactories = bodyParametrizedComponentFactories;
+    this.name = '';
+  }
+
+  addGlobalAutocompleteRules(parentNode: string, rules: Record<string, any>): void {
     this.globalRules[parentNode] = compileBodyDescription(
       'GLOBAL.' + parentNode,
       rules,
       this.globalBodyComponentFactories
     );
-  };
+  }
 
-  cls.getGlobalAutocompleteComponents = function (term, throwOnMissing) {
-    const result = this.globalRules[term];
+  getGlobalAutocompleteComponents(term: string, throwOnMissing?: boolean) {
+    const result: SharedComponent[] = this.globalRules[term];
     if (_.isUndefined(result) && (throwOnMissing || _.isUndefined(throwOnMissing))) {
       throw new Error("failed to resolve global components for  ['" + term + "']");
     }
     return result;
-  };
+  }
 
-  cls.addEndpointDescription = function (endpoint, description) {
-    const copiedDescription = {};
+  addEndpointDescription(endpoint: string, description?: Record<string, any>) {
+    const copiedDescription: Record<string, any> = {};
     _.assign(copiedDescription, description || {});
     _.defaults(copiedDescription, {
       id: endpoint,
@@ -78,7 +89,7 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
       methods: ['GET'],
     });
     _.each(copiedDescription.patterns, (p) => {
-      this.urlPatternMatcher.addEndpoint(p, copiedDescription);
+      this.urlPatternMatcher.addEndpoint(p, copiedDescription as Endpoint);
     });
 
     copiedDescription.paramsAutocomplete = new UrlParams(copiedDescription.url_params);
@@ -88,25 +99,23 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
       this.globalBodyComponentFactories
     );
 
-    this.endpoints[endpoint] = copiedDescription;
-  };
+    this.endpoints[endpoint] = copiedDescription as Endpoint;
+  }
 
-  cls.getEndpointDescriptionByEndpoint = function (endpoint) {
+  getEndpointDescriptionByEndpoint(endpoint: string) {
     return this.endpoints[endpoint];
-  };
+  }
 
-  cls.getTopLevelUrlCompleteComponents = function (method) {
+  getTopLevelUrlCompleteComponents(method: string) {
     return this.urlPatternMatcher.getTopLevelComponents(method);
-  };
+  }
 
-  cls.getUnmatchedEndpointComponents = function () {
+  getUnmatchedEndpointComponents() {
     return globalsOnlyAutocompleteComponents();
-  };
+  }
 
-  cls.clear = function () {
+  clear(): void {
     this.endpoints = {};
     this.globalRules = {};
-  };
-})(Api.prototype);
-
-export default Api;
+  }
+}

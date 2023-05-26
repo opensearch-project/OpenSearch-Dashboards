@@ -28,12 +28,12 @@
  * under the License.
  */
 
-function detectCURLinLine(line) {
+function detectCURLinLine(line: string) {
   // returns true if text matches a curl request
   return line.match(/^\s*?curl\s+(-X[A-Z]+)?\s*['"]?.*?['"]?(\s*$|\s+?-d\s*?['"])/);
 }
 
-export function detectCURL(text) {
+export function detectCURL(text: string) {
   // returns true if text matches a curl request
   if (!text) return false;
   for (const line of text.split('\n')) {
@@ -44,10 +44,10 @@ export function detectCURL(text) {
   return false;
 }
 
-export function parseCURL(text) {
+export function parseCURL(text: string) {
   let state = 'NONE';
-  const out = [];
-  let body = [];
+  const out: string[] = [];
+  let body: string[] = [];
   let line = '';
   const lines = text.trim().split('\n');
   let matches;
@@ -79,12 +79,12 @@ export function parseCURL(text) {
     if (lines.length === 0) {
       return false;
     }
-    line = lines.shift().replace(/[\r\n]+/g, '\n') + '\n';
+    line = lines.shift()?.replace(/[\r\n]+/g, '\n') + '\n';
     return true;
   }
 
   function unescapeLastBodyEl() {
-    const str = body.pop().replace(/\\([\\"'])/g, '$1');
+    const str = (body.pop() as string).replace(/\\([\\"'])/g, '$1');
     body.push(str);
   }
 
@@ -115,11 +115,11 @@ export function parseCURL(text) {
   // If the pattern matches, then the state is about to change,
   // so add the capture to the body and detect the next state
   // Otherwise add the whole line
-  function consumeMatching(pattern) {
-    const matches = line.match(pattern);
-    if (matches) {
-      body.push(matches[1]);
-      line = line.substr(matches[0].length);
+  function consumeMatching(pattern: RegExp) {
+    const patternMatches = line.match(pattern);
+    if (patternMatches) {
+      body.push(patternMatches[1]);
+      line = line.substr(patternMatches[0].length);
       detectQuote();
     } else {
       body.push(line);
@@ -130,9 +130,9 @@ export function parseCURL(text) {
   function parseCurlLine() {
     let verb = 'GET';
     let request = '';
-    let matches;
-    if ((matches = line.match(CurlVerb))) {
-      verb = matches[1];
+    let curlMatches: RegExpMatchArray | null;
+    if ((curlMatches = line.match(CurlVerb))) {
+      verb = curlMatches[1];
     }
 
     // JS regexen don't support possessive quantifiers, so

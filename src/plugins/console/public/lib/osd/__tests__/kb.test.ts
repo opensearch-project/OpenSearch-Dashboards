@@ -32,8 +32,10 @@ import _ from 'lodash';
 import { populateContext } from '../../autocomplete/engine';
 
 import '../../../application/models/sense_editor/sense_editor.test.mocks';
-import * as osd from '../../osd';
+import * as osd from '../osd';
 import * as mappings from '../../mappings/mappings';
+import { PartialAutoCompleteContext } from '../../autocomplete/components/autocomplete_component';
+import { Term } from '../../autocomplete/types';
 
 describe('Knowledge base', () => {
   beforeEach(() => {
@@ -67,17 +69,21 @@ describe('Knowledge base', () => {
     },
   };
 
-  function testUrlContext(tokenPath, otherTokenValues, expectedContext) {
+  function testUrlContext(
+    tokenPath: Array<string | string[]>,
+    otherTokenValues: string[],
+    expectedContext: PartialAutoCompleteContext
+  ) {
     if (expectedContext.autoCompleteSet) {
-      expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
-        if (_.isString(t)) {
-          t = { name: t };
+      expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (term) {
+        if (_.isString(term)) {
+          term = { name: term };
         }
-        return t;
+        return term;
       });
     }
 
-    const context = { otherTokenValues: otherTokenValues };
+    const context: PartialAutoCompleteContext = { otherTokenValues };
     populateContext(
       tokenPath,
       context,
@@ -88,16 +94,16 @@ describe('Knowledge base', () => {
 
     // override context to just check on id
     if (context.endpoint) {
-      context.endpoint = context.endpoint.id;
+      context.endpoint = (context as any).endpoint.id;
     }
 
     delete context.otherTokenValues;
 
-    function norm(t) {
-      if (_.isString(t)) {
-        return { name: t };
+    function norm(term: Term) {
+      if (_.isString(term)) {
+        return { name: term };
       }
-      return t;
+      return term;
     }
 
     if (context.autoCompleteSet) {
@@ -113,34 +119,35 @@ describe('Knowledge base', () => {
     expect(context).toEqual(expectedContext);
   }
 
-  function t(term) {
+  function t(term: string) {
     return { name: term, meta: 'type' };
   }
 
-  function i(term) {
+  function i(term: string) {
     return { name: term, meta: 'index' };
   }
 
-  function indexTest(name, tokenPath, otherTokenValues, expectedContext) {
+  function indexTest(
+    name: string,
+    tokenPath: Array<string | string[]>,
+    otherTokenValues: string[],
+    expectedContext: PartialAutoCompleteContext
+  ) {
     test(name, function () {
-      // eslint-disable-next-line new-cap
-      const testApi = new osd._test.loadApisFromJson(
-        {
-          indexTest: {
-            endpoints: {
-              _multi_indices: {
-                patterns: ['{indices}/_multi_indices'],
-              },
-              _single_index: { patterns: ['{index}/_single_index'] },
-              _no_index: {
-                // testing default patters
-                //  patterns: ["_no_index"]
-              },
+      const testApi = osd._test.loadApisFromJson({
+        indexTest: {
+          endpoints: {
+            _multi_indices: {
+              patterns: ['{indices}/_multi_indices'],
+            },
+            _single_index: { patterns: ['{index}/_single_index'] },
+            _no_index: {
+              // testing default patters
+              //  patterns: ["_no_index"]
             },
           },
         },
-        osd._test.globalUrlComponentFactories
-      );
+      });
 
       osd.setActiveApi(testApi);
 
@@ -171,20 +178,22 @@ describe('Knowledge base', () => {
     autoCompleteSet: ['_multi_indices'],
   });
 
-  function typeTest(name, tokenPath, otherTokenValues, expectedContext) {
+  function typeTest(
+    name: string,
+    tokenPath: Array<string | string[]>,
+    otherTokenValues: string[],
+    expectedContext: PartialAutoCompleteContext
+  ) {
     test(name, function () {
-      const testApi = osd._test.loadApisFromJson(
-        {
-          typeTest: {
-            endpoints: {
-              _multi_types: { patterns: ['{indices}/{types}/_multi_types'] },
-              _single_type: { patterns: ['{indices}/{type}/_single_type'] },
-              _no_types: { patterns: ['{indices}/_no_types'] },
-            },
+      const testApi = osd._test.loadApisFromJson({
+        typeTest: {
+          endpoints: {
+            _multi_types: { patterns: ['{indices}/{types}/_multi_types'] },
+            _single_type: { patterns: ['{indices}/{type}/_single_type'] },
+            _no_types: { patterns: ['{indices}/_no_types'] },
           },
         },
-        osd._test.globalUrlComponentFactories
-      );
+      });
       osd.setActiveApi(testApi);
 
       mappings.loadMappings(MAPPING);
