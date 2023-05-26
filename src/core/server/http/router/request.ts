@@ -242,11 +242,7 @@ export class OpenSearchDashboardsRequest<
   }
 
   private getEvents(request: Request): OpenSearchDashboardsRequestEvents {
-    const finish$ = merge(
-      fromEvent(request.raw.res, 'finish'), // Response has been sent
-      fromEvent(request.raw.req, 'close') // connection was closed
-    ).pipe(shareReplay(1), first());
-
+    const finish$ = fromEvent(request.raw.res, 'finish').pipe(shareReplay(1), first());
     const aborted$ = fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$));
     const completed$ = merge<void, void>(finish$, aborted$).pipe(shareReplay(1), first());
 
