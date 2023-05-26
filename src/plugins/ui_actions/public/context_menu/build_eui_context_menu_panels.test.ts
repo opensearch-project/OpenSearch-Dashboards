@@ -448,3 +448,117 @@ test('groups with deep nesting', async () => {
     ]
   `);
 });
+
+// Tests with:
+// a regular action
+// a group with 2 actions uncategorized
+// a group with 2 actions with a category of "test-category"
+// a group with 1 actions with a category of "test-category"
+test('groups with categories', async () => {
+  const grouping1 = [
+    {
+      id: 'test-group',
+      getDisplayName: () => 'Test group',
+      getIconType: () => 'bell',
+    },
+  ];
+  const grouping2 = [
+    {
+      id: 'test-group-2',
+      getDisplayName: () => 'Test group 2',
+      getIconType: () => 'bell',
+      category: 'test-category',
+    },
+  ];
+  const grouping3 = [
+    {
+      id: 'test-group-3',
+      getDisplayName: () => 'Test group 3',
+      getIconType: () => 'bell',
+      category: 'test-category',
+    },
+  ];
+
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Bar 1',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Bar 2',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Qux 1',
+      grouping: grouping2,
+    }),
+    createTestAction({
+      dispayName: 'Qux 2',
+      grouping: grouping2,
+    }),
+    createTestAction({
+      dispayName: 'Waldo 1',
+      grouping: grouping3,
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group 2",
+          },
+          Object {
+            "name": "Waldo 1",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Bar 1",
+          },
+          Object {
+            "name": "Bar 2",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Qux 1",
+          },
+          Object {
+            "name": "Qux 2",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Waldo 1",
+          },
+        ],
+      },
+    ]
+  `);
+});

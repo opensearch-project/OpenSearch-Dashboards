@@ -64,6 +64,7 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   _level?: number;
   _icon?: string;
   items: ItemDescriptor[];
+  _category?: string;
 };
 
 const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
@@ -125,7 +126,7 @@ const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemD
 const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
   const euiPanels: EuiContextMenuPanelDescriptor[] = [];
   for (const panel of panels) {
-    const { _level: omit, _icon: omit2, ...rest } = panel;
+    const { _level: omit, _icon: omit2, _category: omit3, ...rest } = panel;
     euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
   }
   return euiPanels;
@@ -179,6 +180,7 @@ export async function buildContextMenuForActions({
             items: [],
             _level: i,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
+            _category: group.category,
           };
 
           // If there are multiple groups and this is not the first group,
@@ -231,30 +233,68 @@ export async function buildContextMenuForActions({
   // Any additional items are hidden behind a "more" item
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
+  // This will be used to store items that eventually are placed into the
+  // mainMenu panel. Specifying a category allows for placing groups into the
+  // mainMenu so they appear without the separator between them.
+  const categories = {};
+
   for (const panel of Object.values(panels)) {
     // If the panel is a root-level panel, such as the parent of a group,
     // then create mainMenu item for this panel
     if (panel._level === 0) {
-      // Add separator with unique key if needed
-      if (panels.mainMenu.items.length) {
-        panels.mainMenu.items.push({ isSeparator: true, key: `${panel.id}separator` });
-      }
+      // If a category is specified, store either a link to the panel or the
+      // item within. We will deal with it after looping through all panels.
+      if (panel._category) {
+        // Create array to store category items
+        if (!categories[panel._category]) {
+          categories[panel._category] = [];
+        }
 
-      // If a panel has more than one child, then allow items to be grouped
-      // and link to it in the mainMenu. Otherwise, flatten the group.
-      // Note: this only happens on the root level panels, not for inner groups.
-      if (panel.items.length > 1) {
-        panels.mainMenu.items.push({
-          name: panel.title || panel.id,
-          icon: panel._icon || 'empty',
-          panel: panel.id,
-        });
+        // If multiple items in the panel, store a link to this panel into the category.
+        // Otherwise, just store the single item into the category.
+        if (panel.items.length > 1) {
+          categories[panel._category].push({
+            name: panel.title || panel.id,
+            icon: panel._icon || 'empty',
+            panel: panel.id,
+          });
+        } else {
+          categories[panel._category].push(...panel.items);
+        }
       } else {
-        panels.mainMenu.items.push(...panel.items);
+        // Add separator with unique key if needed
+        if (panels.mainMenu.items.length) {
+          panels.mainMenu.items.push({ isSeparator: true, key: `${panel.id}separator` });
+        }
+
+        // If a panel has more than one child, then allow items to be grouped
+        // and link to it in the mainMenu. Otherwise, flatten the group.
+        // Note: this only happens on the root level panels, not for inner groups.
+        if (panel.items.length > 1) {
+          panels.mainMenu.items.push({
+            name: panel.title || panel.id,
+            icon: panel._icon || 'empty',
+            panel: panel.id,
+          });
+        } else {
+          panels.mainMenu.items.push(...panel.items);
+        }
       }
     }
   }
 
+  // For each category, add a separator before each one and then add category items.
+  // This is for the mainMenu panel.
+  Object.keys(categories).forEach((key) => {
+    // Add separator with unique key if needed
+    if (panels.mainMenu.items.length) {
+      panels.mainMenu.items.push({ isSeparator: true, key: `${key}separator` });
+    }
+
+    panels.mainMenu.items.push(...categories[key]);
+  });
+
   const panelList = Object.values(panels);
+
   return removePanelMetaFields(panelList);
 }
