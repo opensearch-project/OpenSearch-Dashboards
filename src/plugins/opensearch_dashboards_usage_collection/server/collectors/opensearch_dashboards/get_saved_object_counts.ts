@@ -40,14 +40,7 @@
 import { snakeCase } from 'lodash';
 import { LegacyAPICaller } from 'opensearch-dashboards/server';
 
-const TYPES = [
-  'dashboard',
-  'visualization',
-  'search',
-  'index-pattern',
-  'graph-workspace',
-  'timelion-sheet',
-];
+const TYPES = ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-workspace'];
 
 export interface OpenSearchDashboardsSavedObjectCounts {
   dashboard: { total: number };
@@ -55,7 +48,6 @@ export interface OpenSearchDashboardsSavedObjectCounts {
   search: { total: number };
   index_pattern: { total: number };
   graph_workspace: { total: number };
-  timelion_sheet: { total: number };
 }
 
 export async function getSavedObjectsCounts(
