@@ -24,6 +24,6 @@
       "{indices}/_doc/{id}",
       "{indices}/{type}/{id}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/get-documents/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/document-apis/get-documents/"
   }
 }

@@ -12,6 +12,6 @@
       "_snapshot/{repository}/_status",
       "_snapshot/{repository}/{snapshot}/_status"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/snapshot-restore/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/snapshots/get-snapshot-status/"
   }
 }

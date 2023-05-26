@@ -19,6 +19,6 @@
     "patterns": [
       "_tasks"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/tasks/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/tasks/"
   }
 }
