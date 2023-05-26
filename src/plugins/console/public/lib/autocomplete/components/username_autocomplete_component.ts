@@ -29,34 +29,27 @@
  */
 
 import _ from 'lodash';
-import { getFields } from '../../mappings/mappings';
+import { getIndices } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
-
-function FieldGenerator(context) {
-  return _.map(getFields(context.indices, context.types), function (field) {
-    return { name: field.name, meta: field.type };
-  });
+function nonValidUsernameType(token: string) {
+  return token[0] === '_';
 }
-
-export class FieldAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
-    super(name, FieldGenerator, parent, multiValued);
+export class UsernameAutocompleteComponent extends ListComponent {
+  constructor(name: string, parent: ListComponent, multiValued?: boolean) {
+    super(name, getIndices, parent, multiValued);
   }
-  validateTokens(tokens) {
+  validateTokens(tokens: string[]) {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }
-
-    return !_.find(tokens, function (token) {
-      return token.match(/[^\w.?*]/);
-    });
+    return !_.find(tokens, nonValidUsernameType);
   }
 
   getDefaultTermMeta() {
-    return 'field';
+    return 'username';
   }
 
   getContextKey() {
-    return 'fields';
+    return 'username';
   }
 }

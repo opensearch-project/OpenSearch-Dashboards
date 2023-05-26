@@ -31,27 +31,36 @@
 import _ from 'lodash';
 import { UrlParams } from '../../autocomplete/url_params';
 import { populateContext } from '../../autocomplete/engine';
+import { AutoCompleteContext, Term } from '../types';
+import { PartialAutoCompleteContext } from '../components/autocomplete_component';
+import { SharedComponent } from '../components';
 
 describe('Url params', () => {
-  function paramTest(name, description, tokenPath, expectedContext, globalParams) {
+  function paramTest(
+    name: string,
+    description: Record<string, unknown>,
+    tokenPath: string | Array<string | string[]>,
+    expectedContext: PartialAutoCompleteContext,
+    globalParams?: Record<string, unknown>
+  ) {
     test(name, function () {
       const urlParams = new UrlParams(description, globalParams || {});
       if (typeof tokenPath === 'string') {
         tokenPath = _.map(tokenPath.split('/'), function (p) {
-          p = p.split(',');
-          if (p.length === 1) {
-            return p[0];
+          const pSplit = p.split(',');
+          if (pSplit.length === 1) {
+            return pSplit[0];
           }
-          return p;
+          return pSplit;
         });
       }
 
       if (expectedContext.autoCompleteSet) {
-        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
-          if (_.isString(t)) {
-            t = { name: t };
+        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (term) {
+          if (_.isString(term)) {
+            term = { name: term };
           }
-          return t;
+          return term;
         });
         expectedContext.autoCompleteSet = _.sortBy(expectedContext.autoCompleteSet, 'name');
       }
@@ -63,32 +72,34 @@ describe('Url params', () => {
         context,
         null,
         expectedContext.autoCompleteSet,
-        urlParams.getTopLevelComponents()
+        urlParams.getTopLevelComponents() as SharedComponent[]
       );
 
-      if (context.autoCompleteSet) {
-        context.autoCompleteSet = _.sortBy(context.autoCompleteSet, 'name');
+      const populatedContext = context as AutoCompleteContext;
+
+      if (populatedContext.autoCompleteSet) {
+        populatedContext.autoCompleteSet = _.sortBy(populatedContext.autoCompleteSet, 'name');
       }
 
-      expect(context).toEqual(expectedContext);
+      expect(populatedContext).toEqual(expectedContext);
     });
   }
 
-  function t(name, meta, insertValue) {
-    let r = name;
+  function t(name: string, meta?: string, insertValue?: string) {
+    let r: string | Term = name;
     if (meta) {
-      r = { name: name, meta: meta };
+      r = { name, meta };
       if (meta === 'param' && !insertValue) {
         insertValue = name + '=';
       }
     }
     if (insertValue) {
       if (_.isString(r)) {
-        r = { name: name };
+        r = { name };
       }
       r.insertValue = insertValue;
     }
-    return r;
+    return r as Term;
   }
 
   (function () {

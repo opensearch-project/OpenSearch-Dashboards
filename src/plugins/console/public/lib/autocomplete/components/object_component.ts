@@ -30,30 +30,45 @@
 
 import _ from 'lodash';
 import { SharedComponent } from './index';
+import { ConstantComponent } from './constant_component';
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext, Term } from '../types';
 /**
  * @param constants list of components that represent constant keys
  * @param patternsAndWildCards list of components that represent patterns and should be matched only if
  * there is no constant matches
  */
 export class ObjectComponent extends SharedComponent {
-  constructor(name, constants, patternsAndWildCards) {
+  constants: ConstantComponent[];
+  patternsAndWildCards: SharedComponent[];
+
+  constructor(
+    name: string,
+    constants: ConstantComponent[],
+    patternsAndWildCards: SharedComponent[]
+  ) {
     super(name);
     this.constants = constants;
     this.patternsAndWildCards = patternsAndWildCards;
   }
-  getTerms(context, editor) {
-    const options = [];
+  getTerms(context: AutoCompleteContext, editor: CoreEditor) {
+    const options: Array<string | Term> = [];
     _.each(this.constants, function (component) {
       options.push.apply(options, component.getTerms(context, editor));
     });
     _.each(this.patternsAndWildCards, function (component) {
-      options.push.apply(options, component.getTerms(context, editor));
+      const option = component.getTerms(context, editor);
+      if (option) {
+        options.push.apply(options, option);
+      }
     });
     return options;
   }
 
-  match(token, context, editor) {
-    const result = {
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    const result: {
+      next: SharedComponent[];
+    } = {
       next: [],
     };
     _.each(this.constants, function (component) {

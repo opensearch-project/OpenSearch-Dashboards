@@ -28,14 +28,31 @@
  * under the License.
  */
 
+import { Token, CoreEditor } from '../../../types';
+import { AutoCompleteContext, Term } from '../types';
+import { SharedComponent } from './shared_component';
+
+// A partial context object that can be merged into an AutoCompleteContext
+export type PartialAutoCompleteContext = Partial<AutoCompleteContext>;
+
+export interface MatchResult {
+  context_values?: PartialAutoCompleteContext;
+  priority?: number;
+  next: SharedComponent[];
+}
+
 export class AutocompleteComponent {
-  constructor(name) {
+  name: string;
+  next: SharedComponent[];
+
+  constructor(name: string) {
     this.name = name;
+    this.next = [];
   }
   /** called to get the possible suggestions for tokens, when this object is at the end of
    * the resolving chain (and thus can suggest possible continuation paths)
    */
-  getTerms() {
+  getTerms(context: AutoCompleteContext, editor: CoreEditor | null): Array<Term | string> | null {
     return [];
   }
   /*
@@ -48,7 +65,11 @@ export class AutocompleteComponent {
  priority: optional priority to solve collisions between multiple paths. Min value is used across entire chain
  }
  */
-  match() {
+  match(
+    token: string | string[] | Token,
+    context: AutoCompleteContext,
+    editor: CoreEditor | null
+  ): MatchResult | null | false {
     return {
       next: this.next,
     };

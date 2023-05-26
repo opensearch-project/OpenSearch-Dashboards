@@ -28,28 +28,24 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getIndices } from '../../mappings/mappings';
-import { ListComponent } from './list_component';
-function nonValidIndexType(token) {
-  return !(token === '_all' || token[0] !== '_');
-}
-export class IndexAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
-    super(name, getIndices, parent, multiValued);
+import { Term } from '../types';
+import { ConstantComponent } from './constant_component';
+
+export class ParamComponent extends ConstantComponent {
+  description: string | unknown;
+
+  constructor(name: string, parent: ConstantComponent, description: string | unknown) {
+    super(name, parent);
+    this.description = description;
   }
-  validateTokens(tokens) {
-    if (!this.multiValued && tokens.length > 1) {
-      return false;
+  getTerms() {
+    const t: Term = { name: this.name };
+    if (this.description === '__flag__') {
+      t.meta = 'flag';
+    } else {
+      t.meta = 'param';
+      t.insertValue = this.name + '=';
     }
-    return !_.find(tokens, nonValidIndexType);
-  }
-
-  getDefaultTermMeta() {
-    return 'index';
-  }
-
-  getContextKey() {
-    return 'indices';
+    return [t];
   }
 }

@@ -30,26 +30,35 @@
 
 import _ from 'lodash';
 import { SharedComponent } from './shared_component';
-export const URL_PATH_END_MARKER = '__url_path_end__';
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext, Term } from '../types';
+export class ConstantComponent extends SharedComponent {
+  options: Term[];
 
-export class AcceptEndpointComponent extends SharedComponent {
-  constructor(endpoint, parent) {
-    super(endpoint.id, parent);
-    this.endpoint = endpoint;
+  constructor(name: string, parent?: SharedComponent | null, options?: string | Term[]) {
+    super(name, parent);
+    if (_.isString(options)) {
+      options = [options];
+    }
+    this.options = options || [name];
   }
-  match(token, context, editor) {
-    if (token !== URL_PATH_END_MARKER) {
+  getTerms(context?: AutoCompleteContext, editor?: CoreEditor | null): string[] | Term[] {
+    return this.options;
+  }
+
+  addOption(options: string | string[]) {
+    if (!Array.isArray(options)) {
+      options = [options];
+    }
+
+    this.options.push(...options);
+    this.options = _.uniq(this.options);
+  }
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    if (token !== this.name) {
       return null;
     }
-    if (this.endpoint.methods && -1 === _.indexOf(this.endpoint.methods, context.method)) {
-      return null;
-    }
-    const r = super.match(token, context, editor);
-    r.context_values = r.context_values || {};
-    r.context_values.endpoint = this.endpoint;
-    if (_.isNumber(this.endpoint.priority)) {
-      r.priority = this.endpoint.priority;
-    }
-    return r;
+
+    return super.match(token, context, editor);
   }
 }

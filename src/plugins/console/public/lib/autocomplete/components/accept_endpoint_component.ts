@@ -28,29 +28,33 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import { SharedComponent } from './shared_component';
-export class GlobalOnlyComponent extends SharedComponent {
-  getTerms() {
-    return null;
+import { AutoCompleteContext, Endpoint } from '../types';
+import { CoreEditor } from '../../../types';
+export const URL_PATH_END_MARKER = '__url_path_end__';
+
+export class AcceptEndpointComponent extends SharedComponent {
+  endpoint: Endpoint;
+  constructor(endpoint: Endpoint, parent?: SharedComponent) {
+    super(endpoint.id, parent);
+    this.endpoint = endpoint;
   }
-
-  match(token, context) {
-    const result = {
-      next: [],
-    };
-
-    // try to link to GLOBAL rules
-    const globalRules = context.globalComponentResolver(token, false);
-    if (globalRules) {
-      result.next.push.apply(result.next, globalRules);
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    if (token !== URL_PATH_END_MARKER) {
+      return null;
     }
-
-    if (result.next.length) {
-      return result;
+    if (this.endpoint.methods && -1 === _.indexOf(this.endpoint.methods, context.method)) {
+      return null;
     }
-    // just loop back to us
-    result.next = [this];
-
-    return result;
+    const r = super.match(token, context, editor);
+    if (r) {
+      r.context_values = r.context_values || {};
+      r.context_values.endpoint = this.endpoint;
+      if (_.isNumber(this.endpoint.priority)) {
+        r.priority = this.endpoint.priority;
+      }
+    }
+    return r;
   }
 }

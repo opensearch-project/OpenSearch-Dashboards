@@ -29,8 +29,15 @@
  */
 
 import _ from 'lodash';
+import { AutoCompleteContext, Term } from './types';
+import { CoreEditor } from '../../types';
+import { PartialAutoCompleteContext } from './components/autocomplete_component';
+import { SharedComponent } from './components';
 
-export function wrapComponentWithDefaults(component, defaults) {
+export function wrapComponentWithDefaults(
+  component: SharedComponent,
+  defaults: Record<string, unknown>
+) {
   const originalGetTerms = component.getTerms;
   component.getTerms = function (context, editor) {
     let result = originalGetTerms.call(component, context, editor);
@@ -48,39 +55,58 @@ export function wrapComponentWithDefaults(component, defaults) {
   return component;
 }
 
-const tracer = function () {
-  if (window.engine_trace) {
-    console.log.call(console, ...arguments);
+const tracer = function (...args: unknown[]) {
+  if ((window as any).engine_trace) {
+    // eslint-disable-next-line no-console
+    console.log(...args);
   }
 };
 
-function passThroughContext(context, extensionList) {
-  function PTC() {}
-
-  PTC.prototype = context;
-  const result = new PTC();
+function passThroughContext(
+  context: AutoCompleteContext | PartialAutoCompleteContext,
+  extensionList?: PartialAutoCompleteContext[]
+) {
+  const result = Object.create(context) as AutoCompleteContext;
   if (extensionList) {
-    extensionList.unshift(result);
-    _.assign.apply(_, extensionList);
-    extensionList.shift();
+    _.assign(result, ...extensionList);
   }
   return result;
 }
 
-export function WalkingState(parentName, components, contextExtensionList, depth, priority) {
-  this.parentName = parentName;
-  this.components = components;
-  this.contextExtensionList = contextExtensionList;
-  this.depth = depth || 0;
-  this.priority = priority;
+export class WalkingState {
+  name?: string;
+  parentName: string;
+  components: SharedComponent[];
+  contextExtensionList: PartialAutoCompleteContext[];
+  depth: number;
+  priority: number | undefined;
+
+  constructor(
+    parentName: string,
+    components: SharedComponent[],
+    contextExtensionList: PartialAutoCompleteContext[],
+    depth = 0,
+    priority?: number
+  ) {
+    this.parentName = parentName;
+    this.components = components;
+    this.contextExtensionList = contextExtensionList;
+    this.depth = depth;
+    this.priority = priority;
+  }
 }
 
-export function walkTokenPath(tokenPath, walkingStates, context, editor) {
+export function walkTokenPath(
+  tokenPath: Array<string | string[]>,
+  walkingStates: WalkingState[],
+  context: AutoCompleteContext | PartialAutoCompleteContext,
+  editor: CoreEditor | null
+): WalkingState[] {
   if (!tokenPath || tokenPath.length === 0) {
     return walkingStates;
   }
   const token = tokenPath[0];
-  const nextWalkingStates = [];
+  const nextWalkingStates: WalkingState[] = [];
 
   tracer('starting token evaluation [' + token + ']');
 
@@ -92,7 +118,7 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
       if (result && !_.isEmpty(result)) {
         tracer('matched [' + token + '] with:', result);
         let next;
-        let extensionList;
+        let extensionList: PartialAutoCompleteContext[];
         if (result.next && !Array.isArray(result.next)) {
           next = [result.next];
         } else {
@@ -100,7 +126,7 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
         }
         if (result.context_values) {
           extensionList = [];
-          [].push.apply(extensionList, ws.contextExtensionList);
+          extensionList = [...extensionList, ...ws.contextExtensionList];
           extensionList.push(result.context_values);
         } else {
           extensionList = ws.contextExtensionList;
@@ -125,14 +151,20 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
   if (nextWalkingStates.length === 0) {
     // no where to go, still return context variables returned so far..
     return _.map(walkingStates, function (ws) {
-      return new WalkingState(ws.name, [], ws.contextExtensionList);
+      return new WalkingState(ws.name ?? '', [], ws.contextExtensionList);
     });
   }
 
   return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);
 }
 
-export function populateContext(tokenPath, context, editor, includeAutoComplete, components) {
+export function populateContext(
+  tokenPath: Array<string | string[]>,
+  context: AutoCompleteContext | PartialAutoCompleteContext,
+  editor: CoreEditor | null,
+  includeAutoComplete: Term[] | null | undefined,
+  components: SharedComponent[]
+) {
   let walkStates = walkTokenPath(
     tokenPath,
     [new WalkingState('ROOT', components, [])],
@@ -140,7 +172,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     editor
   );
   if (includeAutoComplete) {
-    let autoCompleteSet = [];
+    let autoCompleteSet: Term[] = [];
     _.each(walkStates, function (ws) {
       const contextForState = passThroughContext(context, ws.contextExtensionList);
       _.each(ws.components, function (component) {
@@ -167,6 +199,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     });
 
     if (!wsToUse && walkStates.length > 1 && !includeAutoComplete) {
+      // eslint-disable-next-line no-console
       console.info(
         "more then one context active for current path, but autocomplete isn't requested",
         walkStates

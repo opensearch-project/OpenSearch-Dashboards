@@ -28,33 +28,14 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { SharedComponent } from './shared_component';
-export class ConstantComponent extends SharedComponent {
-  constructor(name, parent, options) {
-    super(name, parent);
-    if (_.isString(options)) {
-      options = [options];
-    }
-    this.options = options || [name];
-  }
-  getTerms() {
-    return this.options;
-  }
+import { getTemplates } from '../../mappings/mappings';
+import { ListComponent } from './list_component';
 
-  addOption(options) {
-    if (!Array.isArray(options)) {
-      options = [options];
-    }
-
-    [].push.apply(this.options, options);
-    this.options = _.uniq(this.options);
+export class TemplateAutocompleteComponent extends ListComponent {
+  constructor(name: string, parent: ListComponent) {
+    super(name, getTemplates, parent, true, true);
   }
-  match(token, context, editor) {
-    if (token !== this.name) {
-      return null;
-    }
-
-    return super.match(token, context, editor);
+  getContextKey() {
+    return 'template';
   }
 }

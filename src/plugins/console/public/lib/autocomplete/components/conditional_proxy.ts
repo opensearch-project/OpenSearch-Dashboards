@@ -28,15 +28,36 @@
  * under the License.
  */
 
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext } from '../types';
+import { AutocompleteComponent } from './autocomplete_component';
 import { SharedComponent } from './shared_component';
-export class SimpleParamComponent extends SharedComponent {
-  constructor(name, parent) {
-    super(name, parent);
+
+type PredicateFunction = (context: AutoCompleteContext, editor: CoreEditor) => boolean;
+
+export class ConditionalProxy extends SharedComponent {
+  predicate: PredicateFunction;
+  delegate: AutocompleteComponent;
+
+  constructor(predicate: PredicateFunction, delegate: AutocompleteComponent) {
+    super('__condition');
+    this.predicate = predicate;
+    this.delegate = delegate;
   }
-  match(token, context, editor) {
-    const result = super.match(token, context, editor);
-    result.context_values = result.context_values || {};
-    result.context_values[this.name] = token;
-    return result;
+
+  getTerms(context: AutoCompleteContext, editor: CoreEditor) {
+    if (this.predicate(context, editor)) {
+      return this.delegate.getTerms(context, editor);
+    } else {
+      return null;
+    }
+  }
+
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    if (this.predicate(context, editor)) {
+      return this.delegate.match(token, context, editor);
+    } else {
+      return false;
+    }
   }
 }

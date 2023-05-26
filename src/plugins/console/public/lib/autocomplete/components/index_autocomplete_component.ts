@@ -28,27 +28,28 @@
  * under the License.
  */
 
-import { SharedComponent } from './shared_component';
-export class ConditionalProxy extends SharedComponent {
-  constructor(predicate, delegate) {
-    super('__condition');
-    this.predicate = predicate;
-    this.delegate = delegate;
+import _ from 'lodash';
+import { getIndices } from '../../mappings/mappings';
+import { ListComponent } from './list_component';
+function nonValidIndexType(token: string) {
+  return !(token === '_all' || token[0] !== '_');
+}
+export class IndexAutocompleteComponent extends ListComponent {
+  constructor(name: string, parent: ListComponent, multiValued: boolean) {
+    super(name, getIndices, parent, multiValued);
   }
-
-  getTerms(context, editor) {
-    if (this.predicate(context, editor)) {
-      return this.delegate.getTerms(context, editor);
-    } else {
-      return null;
-    }
-  }
-
-  match(token, context, editor) {
-    if (this.predicate(context, editor)) {
-      return this.delegate.match(token, context, editor);
-    } else {
+  validateTokens(tokens: string[]) {
+    if (!this.multiValued && tokens.length > 1) {
       return false;
     }
+    return !_.find(tokens, nonValidIndexType);
+  }
+
+  getDefaultTermMeta() {
+    return 'index';
+  }
+
+  getContextKey() {
+    return 'indices';
   }
 }

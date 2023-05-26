@@ -28,27 +28,30 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { AutocompleteComponent } from './autocomplete_component';
-export class SharedComponent extends AutocompleteComponent {
-  constructor(name, parent) {
-    super(name);
-    this._nextDict = {};
-    if (parent) {
-      parent.addComponent(this);
-    }
-    // for debugging purposes
-    this._parent = parent;
-  }
-  /* return the first component with a given name */
-  getComponent(name) {
-    return (this._nextDict[name] || [undefined])[0];
+import { SharedComponent } from './shared_component';
+import { AutoCompleteContext } from '../types';
+export class GlobalOnlyComponent extends SharedComponent {
+  getTerms() {
+    return null;
   }
 
-  addComponent(component) {
-    const current = this._nextDict[component.name] || [];
-    current.push(component);
-    this._nextDict[component.name] = current;
-    this.next = [].concat.apply([], _.values(this._nextDict));
+  match(token: string, context: AutoCompleteContext) {
+    const result = {
+      next: [] as SharedComponent[],
+    };
+
+    // try to link to GLOBAL rules
+    const globalRules = context.globalComponentResolver(token, false);
+    if (globalRules) {
+      result.next.push.apply(result.next, globalRules);
+    }
+
+    if (result.next.length) {
+      return result;
+    }
+    // just loop back to us
+    result.next = [this];
+
+    return result;
   }
 }
