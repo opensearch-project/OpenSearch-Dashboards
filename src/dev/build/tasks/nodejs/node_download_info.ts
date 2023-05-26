@@ -37,7 +37,7 @@ import { Config, Platform } from '../../lib';
 const NODE_RANGE_CACHE: { [key: string]: string } = {};
 
 export async function getNodeDownloadInfo(config: Config, platform: Platform) {
-  const version = await getLatestNodeVersion(config);
+  const version = getRequiredVersion(config);
   const arch = platform.getNodeArch();
 
   const downloadName = platform.isWindows()
@@ -76,3 +76,7 @@ export async function getLatestNodeVersion(config: Config) {
 
   return maxVersion;
 }
+
+export const getRequiredVersion = (config: Config) => {
+  return config.getNodeVersion();
+};

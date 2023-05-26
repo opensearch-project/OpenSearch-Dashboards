@@ -25,13 +25,13 @@ env:
   TEST_OPENSEARCH_TRANSPORT_PORT: 9403
   TEST_OPENSEARCH_PORT: 9400
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  # Version 112.0.5615.0
-  CHROME_VERSION: 1109208
+  NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
 
 jobs:
   build-lint-test:
     name: Build and Verify on ${{ matrix.name }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         include:
@@ -136,22 +136,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
-
-      - name: Setup Chrome
-        id: setup-chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: ${{ env.CHROME_VERSION }}
-
-      - name: Set Chrome Path
-        if: matrix.os != 'windows-latest'
-        run: |
-          echo "TEST_BROWSER_BINARY_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
-
-      - name: Set Chrome Path (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "TEST_BROWSER_BINARY_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $env:GITHUB_ENV
 
       - name: Configure git's autocrlf (Windows only)
         if: matrix.os == 'windows-latest'
@@ -403,6 +387,7 @@ jobs:
         with:
           name: ${{ matrix.version }}-test-failures
           path: |
-            ./artifacts/bwc_tmp/test/cypress/videos/without-security/*
-            ./artifacts/bwc_tmp/test/cypress/screenshots/without-security/*
+            ./artifacts/bwc_tmp/test/cypress/videos/*
+            ./artifacts/bwc_tmp/test/cypress/screenshots/*
+            ./artifacts/bwc_tmp/test/cypress/results/*
           retention-days: 1
