@@ -22,6 +22,27 @@ jest.mock('src/plugins/vis_augmenter/public/view_events_flyout/flyout_state', ()
   };
 });
 
+// Mocking the UISettings service. This is needed when making eligibility checks for the actions,
+// which does UISettings checks to ensure the feature is enabled.
+jest.mock('src/plugins/vis_augmenter/public/services.ts', () => {
+  return {
+    getUISettings: () => {
+      return {
+        get: (config: string) => {
+          switch (config) {
+            case 'visualization:enablePluginAugmentation':
+              return true;
+            case 'visualization:enablePluginAugmentation.maxPluginObjects':
+              return 10;
+            default:
+              throw new Error(`Accessing ${config} is not supported in the mock.`);
+          }
+        },
+      };
+    },
+  };
+});
+
 let coreStart: CoreStart;
 
 beforeEach(async () => {

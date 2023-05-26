@@ -47,6 +47,9 @@ describe('helpers', function () {
 
   describe('setupConfig()', function () {
     it('check all legend positions', function () {
+      const visAugmenterConfig = {
+        some: 'config',
+      };
       const baseConfig = {
         view: {
           stroke: null,
@@ -59,13 +62,15 @@ describe('helpers', function () {
         },
         kibana: {
           hideWarnings: true,
+          visAugmenterConfig,
         },
       };
       const positions = ['top', 'right', 'left', 'bottom'];
       positions.forEach((position) => {
         const visParams = { legendPosition: position };
         baseConfig.legend.orient = position;
-        expect(setupConfig(visParams)).toStrictEqual(baseConfig);
+        baseConfig.legend.offset = position === 'top' || position === 'bottom' ? 0 : 18;
+        expect(setupConfig(visParams, visAugmenterConfig)).toStrictEqual(baseConfig);
       });
     });
   });
