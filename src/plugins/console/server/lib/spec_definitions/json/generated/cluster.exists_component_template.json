@@ -1,0 +1,14 @@
+{
+  "cluster.exists_component_template": {
+    "url_params": {
+      "local": "__flag__"
+    },
+    "methods": [
+      "HEAD"
+    ],
+    "patterns": [
+      "_component_template/{name}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/index-templates/#retrieve-a-template"
+  }
+}

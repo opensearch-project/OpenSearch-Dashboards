@@ -10,6 +10,6 @@
     "patterns": [
       "_snapshot/{repository}/_cleanup"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/snapshot-restore/"
+    "documentation": "https://opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/"
   }
 }
