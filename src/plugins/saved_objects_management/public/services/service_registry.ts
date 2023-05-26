@@ -32,7 +32,7 @@ import { SavedObjectLoader } from '../../../saved_objects/public';
 
 export interface SavedObjectsManagementServiceRegistryEntry {
   id: string;
-  service: SavedObjectLoader | any;
+  service: SavedObjectLoader | unknown;
   title: string;
 }
 

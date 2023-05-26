@@ -5,9 +5,9 @@
 
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Action, IncompatibleActionError } from '../../../ui_actions/public';
 import { getSavedAugmentVisLoader } from '../services';
-import { VisLayerErrorTypes, isVisLayerWithError } from '../types';
 import { PluginResourceDeleteContext } from '../ui_actions_bootstrap';
 import { cleanupStaleObjects } from '../utils';
 
@@ -18,13 +18,14 @@ export class PluginResourceDeleteAction implements Action<PluginResourceDeleteCo
   public readonly id = PLUGIN_RESOURCE_DELETE_ACTION;
   public order = 1;
 
-  public getIconType() {
-    return undefined;
+  public getIconType(): EuiIconType {
+    return `trash`;
   }
 
   public getDisplayName() {
     return i18n.translate('dashboard.actions.deleteSavedObject.name', {
-      defaultMessage: 'Clean up augment-vis saved objects associated to a deleted vis',
+      defaultMessage:
+        'Clean up all augment-vis saved objects associated to the deleted visualization',
     });
   }
 

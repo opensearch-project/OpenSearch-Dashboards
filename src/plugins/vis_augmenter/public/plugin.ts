@@ -69,7 +69,6 @@ export class VisAugmenterPlugin
     setVisualizations(visualizations);
     setCore(core);
     setFlyoutState(VIEW_EVENTS_FLYOUT_STATE.CLOSED);
-
     const savedAugmentVisLoader = createSavedAugmentVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,

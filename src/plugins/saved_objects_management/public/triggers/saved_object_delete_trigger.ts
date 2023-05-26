@@ -13,6 +13,6 @@ export const savedObjectDeleteTrigger: Trigger<'SAVED_OBJECT_DELETE_TRIGGER'> = 
     defaultMessage: 'Saved object delete',
   }),
   description: i18n.translate('savedObjectsManagement.triggers.savedObjectDeleteDescription', {
-    defaultMessage: 'Delete augment-vis saved objs associated to the deleted saved object',
+    defaultMessage: 'Perform additional actions after deleting a saved object',
   }),
 };

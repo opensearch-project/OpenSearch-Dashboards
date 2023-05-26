@@ -5,6 +5,7 @@
 
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Action, IncompatibleActionError } from '../../../ui_actions/public';
 import { getAllAugmentVisSavedObjs } from '../utils';
 import { getSavedAugmentVisLoader } from '../services';
@@ -17,8 +18,8 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
   public readonly id = SAVED_OBJECT_DELETE_ACTION;
   public order = 1;
 
-  public getIconType() {
-    return undefined;
+  public getIconType(): EuiIconType {
+    return `trash`;
   }
 
   public getDisplayName() {
