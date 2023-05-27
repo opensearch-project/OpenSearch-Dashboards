@@ -19,6 +19,9 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs)       | Amazon      |
 | Tao Liu                   | [Flyingliuhub](https://github.com/Flyingliuhub)     | Amazon      |
 | Zilong Xia                | [ZilongX](https://github.com/ZilongX)               | Amazon      |
+| Ashish Agrawal            | [lezzago](https://github.com/lezzago)               | Amazon      |
+| Tyler Ohlsen              | [ohltyler](https://github.com/ohltyler)             | Amazon      |
+| Amardeepsingh Siglani     | [amsiglan](https://github.com/amsiglan)             | Amazon      |
 
 ## Emeritus
 
