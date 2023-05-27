@@ -13,6 +13,7 @@ import { cleanupStaleObjects } from '../utils';
 
 export const PLUGIN_RESOURCE_DELETE_ACTION = 'PLUGIN_RESOURCE_DELETE_ACTION';
 
+// TODO: add tests for this action
 export class PluginResourceDeleteAction implements Action<PluginResourceDeleteContext> {
   public readonly type = PLUGIN_RESOURCE_DELETE_ACTION;
   public readonly id = PLUGIN_RESOURCE_DELETE_ACTION;
