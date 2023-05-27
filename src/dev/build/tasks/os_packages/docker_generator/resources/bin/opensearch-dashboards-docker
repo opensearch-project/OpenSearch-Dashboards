@@ -135,7 +135,6 @@ opensearch_dashboards_vars=(
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
-    timeline.enabled
     vega.enableExternalUrls
     apm_oss.apmAgentConfigurationIndex
     apm_oss.indexPattern

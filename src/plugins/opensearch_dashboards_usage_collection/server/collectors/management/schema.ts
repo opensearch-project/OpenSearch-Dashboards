@@ -47,11 +47,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'timelion:max_buckets': { type: 'long' },
   'timelion:es.timefield': { type: 'keyword' },
   'timelion:min_interval': { type: 'keyword' },
-  'timelion:default_rows': { type: 'long' },
-  'timelion:default_columns': { type: 'long' },
   'timelion:quandl.key': { type: 'keyword' },
   'timelion:es.default_index': { type: 'keyword' },
-  'timelion:showTutorial': { type: 'boolean' },
   'securitySolution:timeDefaults': { type: 'keyword' },
   'securitySolution:defaultAnomalyScore': { type: 'long' },
   'securitySolution:defaultIndex': { type: 'keyword' }, // it's an array
