@@ -28,13 +28,15 @@
  * under the License.
  */
 
-import { basename } from 'path';
+import { basename, resolve } from 'path';
 import fetch from 'node-fetch';
 import semver from 'semver';
 
 import { Config, Platform } from '../../lib';
 
 const NODE_RANGE_CACHE: { [key: string]: string } = {};
+
+export const NODE14_FALLBACK_VERSION = '14.21.3';
 
 export async function getNodeDownloadInfo(config: Config, platform: Platform) {
   const version = getRequiredVersion(config);
@@ -47,6 +49,29 @@ export async function getNodeDownloadInfo(config: Config, platform: Platform) {
   const url = `https://mirrors.nodejs.org/dist/v${version}/${downloadName}`;
   const downloadPath = config.resolveFromRepo('.node_binaries', version, basename(downloadName));
   const extractDir = config.resolveFromRepo('.node_binaries', version, arch);
+
+  return {
+    url,
+    downloadName,
+    downloadPath,
+    extractDir,
+    version,
+  };
+}
+
+export async function getNodeVersionDownloadInfo(
+  version: string,
+  architecture: string,
+  isWindows: boolean,
+  repoRoot: string
+) {
+  const downloadName = isWindows
+    ? `node-v${version}-win-x64.zip`
+    : `node-v${version}-${architecture}.tar.gz`;
+
+  const url = `https://mirrors.nodejs.org/dist/v${version}/${downloadName}`;
+  const downloadPath = resolve(repoRoot, '.node_binaries', version, basename(downloadName));
+  const extractDir = resolve(repoRoot, '.node_binaries', version, architecture);
 
   return {
     url,
