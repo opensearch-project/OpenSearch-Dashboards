@@ -46,7 +46,6 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
       require.resolve('./apps/status_page'),
-      require.resolve('./apps/timeline'),
       require.resolve('./apps/visualize'),
       require.resolve('./apps/vis_builder'),
     ],
@@ -106,9 +105,6 @@ export default async function ({ readConfigFile }) {
       /** @obsolete "management" should be instead of "settings" **/
       settings: {
         pathname: '/app/management',
-      },
-      timeline: {
-        pathname: '/app/timeline',
       },
       console: {
         pathname: '/app/dev_tools',
