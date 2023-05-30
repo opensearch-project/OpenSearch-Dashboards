@@ -36,20 +36,28 @@ const createTestAction = ({
   type,
   dispayName,
   order,
+  grouping,
 }: {
   type?: string;
   dispayName: string;
   order?: number;
+  grouping?: any[];
 }) =>
   createAction({
     type: type as any, // mapping doesn't matter for this test
     getDisplayName: () => dispayName,
     order,
     execute: async () => {},
+    grouping,
   });
 
 const resultMapper = (panel: EuiContextMenuPanelDescriptor) => ({
-  items: panel.items ? panel.items.map((item) => ({ name: item.name })) : [],
+  items: panel.items
+    ? panel.items.map((item) => ({
+        ...(item.name ? { name: item.name } : {}),
+        ...(item.isSeparator ? { isSeparator: true } : {}),
+      }))
+    : [],
 });
 
 test('sorts items in DESC order by "order" field first, then by display name', async () => {
@@ -242,6 +250,198 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
           },
           Object {
             "name": "Foo 5",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('flattening of group with only one action', async () => {
+  const grouping1 = [
+    {
+      id: 'test-group',
+      getDisplayName: () => 'Test group',
+      getIconType: () => 'bell',
+    },
+  ];
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Bar 1',
+      grouping: grouping1,
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Bar 1",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Bar 1",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('grouping with only two actions', async () => {
+  const grouping1 = [
+    {
+      id: 'test-group',
+      getDisplayName: () => 'Test group',
+      getIconType: () => 'bell',
+    },
+  ];
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Bar 1',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Bar 2',
+      grouping: grouping1,
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Bar 1",
+          },
+          Object {
+            "name": "Bar 2",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('groups with deep nesting', async () => {
+  const grouping1 = [
+    {
+      id: 'test-group',
+      getDisplayName: () => 'Test group',
+      getIconType: () => 'bell',
+    },
+  ];
+  const grouping2 = [
+    {
+      id: 'test-group-2',
+      getDisplayName: () => 'Test group 2',
+      getIconType: () => 'bell',
+    },
+    {
+      id: 'test-group-3',
+      getDisplayName: () => 'Test group 3',
+      getIconType: () => 'bell',
+    },
+  ];
+
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Bar 1',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Bar 2',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Qux 1',
+      grouping: grouping2,
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group 3",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Bar 1",
+          },
+          Object {
+            "name": "Bar 2",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Test group 3",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Qux 1",
           },
         ],
       },
