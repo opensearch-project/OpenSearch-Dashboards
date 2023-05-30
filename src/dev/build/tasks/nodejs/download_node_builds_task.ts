@@ -30,7 +30,12 @@
 
 import { download, GlobalTask } from '../../lib';
 import { getNodeShasums } from './node_shasums';
-import { getNodeDownloadInfo, getRequiredVersion } from './node_download_info';
+import {
+  getNodeDownloadInfo,
+  getNodeVersionDownloadInfo,
+  getRequiredVersion,
+  NODE14_FALLBACK_VERSION,
+} from './node_download_info';
 
 export const DownloadNodeBuilds: GlobalTask = {
   global: true,
@@ -38,8 +43,12 @@ export const DownloadNodeBuilds: GlobalTask = {
   async run(config, log) {
     const requiredNodeVersion = getRequiredVersion(config);
     const shasums = await getNodeShasums(log, requiredNodeVersion);
-    await Promise.all(
-      config.getTargetPlatforms().map(async (platform) => {
+
+    // ToDo [NODE14]: Remove this Node.js 14 fallback download
+    const node14ShaSums = await getNodeShasums(log, NODE14_FALLBACK_VERSION);
+
+    await Promise.all([
+      ...config.getTargetPlatforms().map(async (platform) => {
         const { url, downloadPath, downloadName } = await getNodeDownloadInfo(config, platform);
         await download({
           log,
@@ -48,7 +57,23 @@ export const DownloadNodeBuilds: GlobalTask = {
           destination: downloadPath,
           retries: 3,
         });
-      })
-    );
+      }),
+      // ToDo [NODE14]: Remove this Node.js 14 fallback download
+      ...config.getTargetPlatforms().map(async (platform) => {
+        const { url, downloadPath, downloadName } = await getNodeVersionDownloadInfo(
+          NODE14_FALLBACK_VERSION,
+          platform.getNodeArch(),
+          platform.isWindows(),
+          config.resolveFromRepo()
+        );
+        await download({
+          log,
+          url,
+          sha256: node14ShaSums[downloadName],
+          destination: downloadPath,
+          retries: 3,
+        });
+      }),
+    ]);
   },
 };
