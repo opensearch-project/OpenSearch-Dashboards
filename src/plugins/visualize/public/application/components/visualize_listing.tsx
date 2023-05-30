@@ -136,21 +136,25 @@ export const VisualizeListing = () => {
 
   const deleteItems = useCallback(
     async (selectedItems: object[]) => {
-      await Promise.all(
-        selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
-      ).catch((error) => {
-        toastNotifications.addError(error, {
-          title: i18n.translate('visualize.visualizeListingDeleteErrorTitle', {
-            defaultMessage: 'Error deleting visualization',
-          }),
-        });
-      });
       const uiActions = getUiActions();
-      selectedItems.forEach((item: any) => {
-        uiActions
-          .getTrigger(SAVED_OBJECT_DELETE_TRIGGER)
-          .exec({ type: 'visualization', savedObjectId: get(item, 'id', '') });
-      });
+      await Promise.all(
+        selectedItems.map((item: any) =>
+          savedObjects.client
+            .delete(item.savedObjectType, item.id)
+            .then(() => {
+              uiActions
+                .getTrigger(SAVED_OBJECT_DELETE_TRIGGER)
+                .exec({ type: item.savedObjectType, savedObjectId: item.id });
+            })
+            .catch((error) => {
+              toastNotifications.addError(error, {
+                title: i18n.translate('visualize.visualizeListingDeleteErrorTitle', {
+                  defaultMessage: 'Error deleting visualization',
+                }),
+              });
+            })
+        )
+      );
     },
     [savedObjects.client, toastNotifications]
   );

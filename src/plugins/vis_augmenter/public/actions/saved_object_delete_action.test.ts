@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { coreMock } from '../../../../core/public/mocks';
-import { CoreStart } from 'opensearch-dashboards/public';
 import { SavedObjectDeleteAction } from './saved_object_delete_action';
 import services from '../services';
 
@@ -21,14 +19,6 @@ jest.mock('src/plugins/vis_augmenter/public/services.ts', () => {
       };
     },
   };
-});
-
-let coreStart: CoreStart;
-beforeEach(async () => {
-  coreStart = coreMock.createStart();
-});
-afterEach(async () => {
-  jest.clearAllMocks();
 });
 
 describe('SavedObjectDeleteAction', () => {
