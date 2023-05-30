@@ -35,15 +35,12 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeBreadcrumb } from '../../chrome_service';
 
-import './header_breadcrumbs.scss';
-
 interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  isDarkMode?: boolean;
 }
 
-export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$, isDarkMode }: Props) {
+export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
   let crumbs = breadcrumbs;
