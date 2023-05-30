@@ -44,6 +44,8 @@ export const ContextMenuExamples: React.FC = () => {
       <p>
         Below examples show how context menu panels look with varying number of actions and how the
         actions can be grouped into different panels using <EuiCode>grouping</EuiCode> field.
+        Grouping can only be one layer deep. A group needs to have at least two items for grouping
+        to work. A separator is automatically added between groups.
       </p>
 
       <EuiFlexGroup>
