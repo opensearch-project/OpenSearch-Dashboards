@@ -20,6 +20,7 @@ import {
 } from '../';
 import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { getUISettings } from '../services';
+import { IUiSettingsClient } from '../../../../core/public';
 
 export const isEligibleForVisLayers = (vis: Vis): boolean => {
   // Only support date histogram and ensure there is only 1 x-axis and it has to be on the bottom.
@@ -53,9 +54,11 @@ export const isEligibleForVisLayers = (vis: Vis): boolean => {
  */
 export const getAugmentVisSavedObjs = async (
   visId: string | undefined,
-  loader: SavedAugmentVisLoader | undefined
+  loader: SavedAugmentVisLoader | undefined,
+  uiSettings?: IUiSettingsClient | undefined
 ): Promise<ISavedAugmentVis[]> => {
-  const config = getUISettings();
+  // Using optional services provided, or the built-in services from this plugin
+  const config = uiSettings !== undefined ? uiSettings : getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   if (!isAugmentationEnabled) {
     throw new Error(
