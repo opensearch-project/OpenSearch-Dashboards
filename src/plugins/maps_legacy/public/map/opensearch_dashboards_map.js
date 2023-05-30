@@ -41,7 +41,6 @@ import { i18n } from '@osd/i18n';
 import { ORIGIN } from '../common/constants/origin';
 import { getToasts } from '../opensearch_dashboards_services';
 import { L } from '../leaflet';
-import './_legend.scss';
 
 function makeFitControl(fitContainer, opensearchDashboardsMap) {
   // eslint-disable-next-line no-undef
