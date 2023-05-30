@@ -114,7 +114,7 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
-  const { useExpandedHeader = true, darkMode } = branding;
+  const { useExpandedHeader = true } = branding;
 
   return (
     <>
@@ -202,7 +202,6 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
-              isDarkMode={darkMode}
             />
 
             <EuiHeaderSectionItem border="none">

@@ -38,11 +38,7 @@ describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const wrapper = mount(
-      <HeaderBreadcrumbs
-        appTitle$={new BehaviorSubject('')}
-        breadcrumbs$={breadcrumbs$}
-        isDarkMode={false}
-      />
+      <HeaderBreadcrumbs appTitle$={new BehaviorSubject('')} breadcrumbs$={breadcrumbs$} />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 
