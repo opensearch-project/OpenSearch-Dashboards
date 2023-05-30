@@ -348,7 +348,6 @@
     "angular-mocks": "^1.8.2",
     "angular-recursion": "^1.0.5",
     "angular-route": "^1.8.0",
-    "angular-sortable-view": "^0.0.17",
     "archiver": "^5.3.0",
     "axe-core": "^4.0.2",
     "babel-eslint": "^10.0.3",

@@ -4445,11 +4445,6 @@ angular-sanitize@^1.8.0:
   resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.8.2.tgz#ae78040f00c5e2ce1c63780bcc47fa14a1698296"
   integrity sha512-OB6Goa+QN3byf5asQ7XRl7DKZejm/F/ZOqa9z1skqYVOWA2hoBxoCmt9E7+i7T/TbxZP5zYzKxNZVVJNu860Hg==
 
-angular-sortable-view@^0.0.17:
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/angular-sortable-view/-/angular-sortable-view-0.0.17.tgz#99e2679951a86b6ee6ff27b099022943c683fb4f"
-  integrity sha512-2WkhM0Lt/wyMyrX/+7ve9ejSegBd7A4eRBNHEIJz8XMBIOjt+3oM1WpcAm+qNThkmNmmQaDeaYv0TQZw/WDMBw==
-
 angular@>=1.0.6, angular@^1.8.2:
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.8.2.tgz#5983bbb5a9fa63e213cb7749199e0d352de3a2f1"
