@@ -241,7 +241,7 @@ export interface DashboardServices extends CoreStart {
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
-  dashboardProviders?: () => { [key: string]: DashboardProvider };
+  dashboardProviders: () => { [key: string]: DashboardProvider } | undefined;
   dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
   dashboardCapabilities: DashboardCapabilities;
   embeddableCapabilities: {

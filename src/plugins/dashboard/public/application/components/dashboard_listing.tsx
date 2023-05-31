@@ -55,7 +55,8 @@ export const DashboardListing = () => {
   const dashboardProvidersForListing = dashboardProviders() || {};
 
   const dashboardListTypes = Object.keys(dashboardProvidersForListing);
-  const initialPageSize = savedObjectsPublic.settings.getListingLimit();
+  const initialPageSize = savedObjectsPublic.settings.getPerPage();
+  const listingLimit = savedObjectsPublic.settings.getListingLimit();
 
   const mapListAttributesToDashboardProvider = (obj: any) => {
     const provider = dashboardProvidersForListing[obj.type];
@@ -138,7 +139,7 @@ export const DashboardListing = () => {
       deleteItems={hideWriteControls ? undefined : deleteItems}
       editItem={hideWriteControls ? undefined : editItem}
       tableColumns={tableColumns}
-      listingLimit={savedObjectsPublic.settings.getListingLimit()}
+      listingLimit={listingLimit}
       initialFilter={''}
       initialPageSize={initialPageSize}
       noItemsFragment={noItemsFragment}
