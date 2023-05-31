@@ -10,6 +10,7 @@ import {
   VIEW_EVENTS_OPTION_ACTION,
 } from './view_events_flyout';
 import { CONTEXT_MENU_TRIGGER, EmbeddableContext } from '../../embeddable/public';
+import { SAVED_OBJECT_DELETE_TRIGGER } from '../../saved_objects_management/public';
 import {
   externalActionTrigger,
   EXTERNAL_ACTION_TRIGGER,
@@ -24,7 +25,6 @@ import {
   SavedObjectDeleteAction,
 } from './actions';
 import { PLUGIN_RESOURCE_DELETE_TRIGGER, pluginResourceDeleteTrigger } from './triggers';
-import { SAVED_OBJECT_DELETE_TRIGGER } from '../../saved_objects_management/public';
 
 export interface AugmentVisContext {
   savedObjectId: string;
