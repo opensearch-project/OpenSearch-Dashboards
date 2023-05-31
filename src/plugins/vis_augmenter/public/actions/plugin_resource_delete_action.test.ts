@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { createPointInTimeEventsVisLayer } from '../mocks';
 import { generateAugmentVisSavedObject } from '../saved_augment_vis';
-import { VisLayerTypes } from '../types';
-import { generateVisLayer } from '../utils';
 import { PluginResourceDeleteAction } from './plugin_resource_delete_action';
 
 const sampleSavedObj = generateAugmentVisSavedObject(
@@ -23,7 +22,7 @@ const sampleSavedObj = generateAugmentVisSavedObject(
   }
 );
 
-const sampleVisLayer = generateVisLayer(VisLayerTypes.PointInTimeEvents);
+const sampleVisLayer = createPointInTimeEventsVisLayer();
 
 describe('SavedObjectDeleteAction', () => {
   it('is incompatible with invalid saved obj list', async () => {

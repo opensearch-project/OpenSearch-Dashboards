@@ -23,8 +23,7 @@ import {
   SavedObjectLoaderAugmentVis,
 } from '../';
 import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
-import { AggConfigs, AggTypesRegistryStart, IndexPattern } from '../../../data/common';
-import { mockAggTypesRegistry } from '../../../data/common/search/aggs/test_helpers';
+import { AggConfigs } from '../../../data/common';
 import { uiSettingsServiceMock } from '../../../../core/public/mocks';
 import { setUISettings } from '../services';
 import {
@@ -33,6 +32,7 @@ import {
   VALID_AGGS,
   VALID_CONFIG_STATES,
   VALID_VIS,
+  createPointInTimeEventsVisLayer,
   createVisLayer,
 } from '../mocks';
 
@@ -467,16 +467,16 @@ describe('utils', () => {
       name: 'resource-2',
       urlPath: 'test-path',
     } as PluginResource;
-    const validVisLayer1 = generateVisLayer(VisLayerTypes.PointInTimeEvents, false, '', resource1);
+    const validVisLayer1 = createPointInTimeEventsVisLayer(originPlugin, resource1, 1, false);
     const staleVisLayer1 = {
-      ...generateVisLayer(VisLayerTypes.PointInTimeEvents, true, '', resource1),
+      ...createPointInTimeEventsVisLayer(originPlugin, resource1, 0, true),
       error: {
         type: VisLayerErrorTypes.RESOURCE_DELETED,
         message: 'resource is deleted',
       },
     };
     const staleVisLayer2 = {
-      ...generateVisLayer(VisLayerTypes.PointInTimeEvents, true, '', resource2),
+      ...createPointInTimeEventsVisLayer(originPlugin, resource2, 0, true),
       error: {
         type: VisLayerErrorTypes.RESOURCE_DELETED,
         message: 'resource is deleted',

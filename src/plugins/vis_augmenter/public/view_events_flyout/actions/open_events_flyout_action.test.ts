@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'opensearch-dashboards/public';
 import { OpenEventsFlyoutAction } from './open_events_flyout_action';
 import flyoutStateModule from '../flyout_state';
+import servicesModule from '../../services';
 
 // Mocking the flyout state service. Defaulting to CLOSED. May override
 // getFlyoutState() in below individual tests to test out different scenarios.
@@ -21,37 +20,46 @@ jest.mock('src/plugins/vis_augmenter/public/view_events_flyout/flyout_state', ()
   };
 });
 
-let coreStart: CoreStart;
-beforeEach(async () => {
-  coreStart = coreMock.createStart();
+// Mocking core service as needed when making calls to the core's overlays service
+jest.mock('src/plugins/vis_augmenter/public/services.ts', () => {
+  return {
+    getCore: () => {
+      return {
+        overlays: {
+          openFlyout: () => {},
+        },
+      };
+    },
+  };
 });
+
 afterEach(async () => {
   jest.clearAllMocks();
 });
 
 describe('OpenEventsFlyoutAction', () => {
   it('is incompatible with null saved obj id', async () => {
-    const action = new OpenEventsFlyoutAction(coreStart);
+    const action = new OpenEventsFlyoutAction();
     const savedObjectId = null;
     // @ts-ignore
     expect(await action.isCompatible({ savedObjectId })).toBe(false);
   });
 
   it('is incompatible with undefined saved obj id', async () => {
-    const action = new OpenEventsFlyoutAction(coreStart);
+    const action = new OpenEventsFlyoutAction();
     const savedObjectId = undefined;
     // @ts-ignore
     expect(await action.isCompatible({ savedObjectId })).toBe(false);
   });
 
   it('is incompatible with empty saved obj id', async () => {
-    const action = new OpenEventsFlyoutAction(coreStart);
+    const action = new OpenEventsFlyoutAction();
     const savedObjectId = '';
     expect(await action.isCompatible({ savedObjectId })).toBe(false);
   });
 
   it('execute throws error if incompatible saved obj id', async () => {
-    const action = new OpenEventsFlyoutAction(coreStart);
+    const action = new OpenEventsFlyoutAction();
     async function check(id: any) {
       await action.execute({ savedObjectId: id });
     }
@@ -64,10 +72,13 @@ describe('OpenEventsFlyoutAction', () => {
     const getFlyoutStateSpy = jest
       .spyOn(flyoutStateModule, 'getFlyoutState')
       .mockImplementation(() => 'CLOSED');
+    // openFlyout exists within core.overlays service. We spy on the initial getCore() fn call indicating
+    // that openFlyout is getting called.
+    const openFlyoutStateSpy = jest.spyOn(servicesModule, 'getCore');
     const savedObjectId = 'test-id';
-    const action = new OpenEventsFlyoutAction(coreStart);
+    const action = new OpenEventsFlyoutAction();
     await action.execute({ savedObjectId });
-    expect(coreStart.overlays.openFlyout).toHaveBeenCalledTimes(1);
+    expect(openFlyoutStateSpy).toHaveBeenCalledTimes(1);
     expect(getFlyoutStateSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -75,20 +86,21 @@ describe('OpenEventsFlyoutAction', () => {
     const getFlyoutStateSpy = jest
       .spyOn(flyoutStateModule, 'getFlyoutState')
       .mockImplementation(() => 'OPEN');
+    const openFlyoutStateSpy = jest.spyOn(servicesModule, 'getCore');
     const savedObjectId = 'test-id';
-    const action = new OpenEventsFlyoutAction(coreStart);
+    const action = new OpenEventsFlyoutAction();
     await action.execute({ savedObjectId });
-    expect(coreStart.overlays.openFlyout).toHaveBeenCalledTimes(0);
+    expect(openFlyoutStateSpy).toHaveBeenCalledTimes(0);
     expect(getFlyoutStateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('Returns display name', async () => {
-    const action = new OpenEventsFlyoutAction(coreStart);
+    const action = new OpenEventsFlyoutAction();
     expect(action.getDisplayName()).toBeDefined();
   });
 
   it('Returns undefined icon type', async () => {
-    const action = new OpenEventsFlyoutAction(coreStart);
+    const action = new OpenEventsFlyoutAction();
     expect(action.getIconType()).toBeUndefined();
   });
 });

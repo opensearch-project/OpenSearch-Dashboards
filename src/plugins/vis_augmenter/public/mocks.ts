@@ -90,6 +90,7 @@ const PLUGIN_RESOURCE = {
 } as PluginResource;
 const EVENT_COUNT = 3;
 const ERROR_MESSAGE = 'test-error-message';
+const EVENT_TYPE = 'test-event-type';
 
 export const createPluginResource = (
   type: string = PLUGIN_RESOURCE.type,
@@ -171,6 +172,7 @@ export const createPointInTimeEventsVisLayer = (
     type: VisLayerTypes.PointInTimeEvents,
     pluginResource,
     events,
+    pluginEventType: EVENT_TYPE,
     error: error
       ? {
           type: VisLayerErrorTypes.FETCH_FAILURE,
