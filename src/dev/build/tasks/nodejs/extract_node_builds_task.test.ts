@@ -123,11 +123,39 @@ it('runs expected fs operations', async () => {
             "strip": 1,
           },
         ],
+        Array [
+          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/14.21.3/linux-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/14.21.3/linux-arm64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-darwin-x64.tar.gz,
+          <absolute path>/.node_binaries/14.21.3/darwin-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
       ],
       "unzip": Array [
         Array [
           <absolute path>/.node_binaries/<node version>/node-v<node version>-win-x64.zip,
           <absolute path>/.node_binaries/<node version>/win32-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-win-x64.zip,
+          <absolute path>/.node_binaries/14.21.3/win32-x64,
           Object {
             "strip": 1,
           },
