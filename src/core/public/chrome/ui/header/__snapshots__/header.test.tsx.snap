@@ -3594,7 +3594,6 @@ exports[`Header handles visibility and lock changes 1`] = `
                 "thrownError": null,
               }
             }
-            isDarkMode={false}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
@@ -8842,7 +8841,6 @@ exports[`Header renders condensed header 1`] = `
                 "thrownError": null,
               }
             }
-            isDarkMode={false}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
