@@ -146,6 +146,7 @@ export async function buildContextMenuForActions({
   closeMenu = () => {},
 }: BuildContextMenuParams): Promise<EuiContextMenuPanelDescriptor[]> {
   const panels: Record<string, PanelDescriptor> = {
+    // This is the first panel which links out to all others via items property
     mainMenu: {
       id: 'mainMenu',
       title,
@@ -157,35 +158,51 @@ export async function buildContextMenuForActions({
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
     const isCompatible = await item.action.isCompatible(context);
     if (!isCompatible) return;
-    let parentPanel = '';
-    let currentPanel = '';
+
+    // Reference to the last/parent/upper group.
+    // Groups are provided in order of parent to children.
+    let parentGroupId = '';
+
     if (action.grouping) {
       for (let i = 0; i < action.grouping.length; i++) {
         const group = action.grouping[i];
-        currentPanel = group.id;
-        if (!panels[currentPanel]) {
+        const groupId = group.id;
+
+        // If a panel does not exist for the current group, then create it
+        if (!panels[groupId]) {
           const name = group.getDisplayName ? group.getDisplayName(context) : group.id;
-          panels[currentPanel] = {
-            id: currentPanel,
+
+          // Create panel for group
+          panels[groupId] = {
+            id: groupId,
             title: name,
             items: [],
             _level: i,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
           };
-          if (parentPanel) {
-            panels[parentPanel].items!.push({
+
+          // If there are multiple groups and this is not the first group,
+          // then add an item to the parent group relating to this group
+          if (parentGroupId) {
+            panels[parentGroupId].items!.push({
               name,
-              panel: currentPanel,
+              panel: groupId,
               icon: group.getIconType ? group.getIconType(context) : 'empty',
               _order: group.order || 0,
               _title: group.getDisplayName ? group.getDisplayName(context) : '',
             });
           }
         }
-        parentPanel = currentPanel;
+
+        // Save the current group, because it will be used as the parent group
+        // for adding items to it for any additional groups in the array
+        parentGroupId = groupId;
       }
     }
-    panels[parentPanel || 'mainMenu'].items!.push({
+
+    // Add a context menu item for this action so it shows up on a context menu panel.
+    // We add this within the parent group or default to the mainMenu panel.
+    panels[parentGroupId || 'mainMenu'].items!.push({
       name: action.MenuItem
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
@@ -197,8 +214,10 @@ export async function buildContextMenuForActions({
       _title: action.getDisplayName(context),
     });
   });
+
   await Promise.all(promises);
 
+  // For each panel, sort items by order and title
   for (const panel of Object.values(panels)) {
     const items = panel.items.filter(Boolean) as ItemDescriptor[];
     panel.items = _.sortBy(
@@ -208,13 +227,23 @@ export async function buildContextMenuForActions({
     );
   }
 
+  // On the mainMenu, before adding in items for other groups, the first 4 items are shown.
+  // Any additional items are hidden behind a "more" item
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
   for (const panel of Object.values(panels)) {
+    // If the panel is a root-level panel, such as the parent of a group,
+    // then create mainMenu item for this panel
     if (panel._level === 0) {
-      // TODO: Add separator line here once it is available in EUI.
-      // See https://github.com/elastic/eui/pull/4018
-      if (panel.items.length > 3) {
+      // Add separator with unique key if needed
+      if (panels.mainMenu.items.length) {
+        panels.mainMenu.items.push({ isSeparator: true, key: `${panel.id}separator` });
+      }
+
+      // If a panel has more than one child, then allow items to be grouped
+      // and link to it in the mainMenu. Otherwise, flatten the group.
+      // Note: this only happens on the root level panels, not for inner groups.
+      if (panel.items.length > 1) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
           icon: panel._icon || 'empty',

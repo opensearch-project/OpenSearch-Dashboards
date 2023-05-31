@@ -29,21 +29,39 @@
  */
 
 import { untar, unzip, GlobalTask } from '../../lib';
-import { getNodeDownloadInfo } from './node_download_info';
+import {
+  getNodeDownloadInfo,
+  getNodeVersionDownloadInfo,
+  NODE14_FALLBACK_VERSION,
+} from './node_download_info';
 
 export const ExtractNodeBuilds: GlobalTask = {
   global: true,
   description: 'Extracting node.js builds for all platforms',
   async run(config) {
-    await Promise.all(
-      config.getTargetPlatforms().map(async (platform) => {
+    await Promise.all([
+      ...config.getTargetPlatforms().map(async (platform) => {
         const { downloadPath, extractDir } = await getNodeDownloadInfo(config, platform);
         if (platform.isWindows()) {
           await unzip(downloadPath, extractDir, { strip: 1 });
         } else {
           await untar(downloadPath, extractDir, { strip: 1 });
         }
-      })
-    );
+      }),
+      // ToDo [NODE14]: Remove this Node.js 14 fallback download
+      ...config.getTargetPlatforms().map(async (platform) => {
+        const { downloadPath, extractDir } = await getNodeVersionDownloadInfo(
+          NODE14_FALLBACK_VERSION,
+          platform.getNodeArch(),
+          platform.isWindows(),
+          config.resolveFromRepo()
+        );
+        if (platform.isWindows()) {
+          await unzip(downloadPath, extractDir, { strip: 1 });
+        } else {
+          await untar(downloadPath, extractDir, { strip: 1 });
+        }
+      }),
+    ]);
   },
 };
