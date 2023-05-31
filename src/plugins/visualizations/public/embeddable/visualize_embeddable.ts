@@ -72,12 +72,8 @@ import {
   getAugmentVisSavedObjs,
   buildPipelineFromAugmentVisSavedObjs,
   getAnyErrors,
-  VisLayerErrorTypes,
   AugmentVisContext,
-  cleanupStaleObjects,
-  PointInTimeEventsVisLayer,
   VisLayer,
-  VisLayerTypes,
   VisAugmenterEmbeddableConfig,
   PLUGIN_RESOURCE_DELETE_TRIGGER,
 } from '../../../vis_augmenter/public';
@@ -519,11 +515,6 @@ export class VisualizeEmbeddable
    * Collects any VisLayers from plugin expressions functions
    * by fetching all AugmentVisSavedObjects that match the vis
    * saved object ID.
-   *
-   * TODO: final eligibility will be defined as part of a separate effort.
-   * Right now we have a placeholder function isEligibleForVisLayers() which
-   * is used below. For more details, see
-   * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
    */
   fetchVisLayers = async (): Promise<VisLayers> => {
     try {

@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-<<<<<<< HEAD
-import { CoreStart } from 'opensearch-dashboards/public';
 import {
   OpenEventsFlyoutAction,
   ViewEventsOptionAction,
@@ -12,19 +10,12 @@ import {
   VIEW_EVENTS_OPTION_ACTION,
 } from './view_events_flyout';
 import { CONTEXT_MENU_TRIGGER, EmbeddableContext } from '../../embeddable/public';
-import { getUiActions } from './services';
-
 import {
   externalActionTrigger,
   EXTERNAL_ACTION_TRIGGER,
   UiActionsSetup,
 } from '../../ui_actions/public';
-import { AugmentVisSavedObject, ISavedAugmentVis } from './saved_augment_vis';
-// import { CONTEXT_MENU_TRIGGER, EmbeddableContext } from '../../embeddable/public';
-=======
-import { UiActionsStart } from '../../ui_actions/public';
 import { ISavedAugmentVis } from './saved_augment_vis';
->>>>>>> b7ccf0cb29 (Remove comments in bootstrap file)
 import { VisLayer } from './types';
 import {
   PLUGIN_RESOURCE_DELETE_ACTION,
@@ -67,24 +58,21 @@ declare module '../../ui_actions/public' {
 }
 
 export const bootstrapUiActions = (uiActions: UiActionsSetup) => {
-  // TODO: change so core isn't needed, or if needed then add a fn arg.
   const openEventsFlyoutAction = new OpenEventsFlyoutAction();
   const viewEventsOptionAction = new ViewEventsOptionAction();
+  const savedObjectDeleteAction = new SavedObjectDeleteAction();
+  const pluginResourceDeleteAction = new PluginResourceDeleteAction();
 
   uiActions.registerAction(openEventsFlyoutAction);
   uiActions.registerAction(viewEventsOptionAction);
-  uiActions.registerTrigger(externalActionTrigger);
-
-  // Opening View Events flyout from the chart
-  uiActions.addTriggerAction(EXTERNAL_ACTION_TRIGGER, openEventsFlyoutAction);
-  // Opening View Events flyout from the context menu
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, viewEventsOptionAction);
-
-  const savedObjectDeleteAction = new SavedObjectDeleteAction();
-  const pluginResourceDeleteAction = new PluginResourceDeleteAction();
   uiActions.registerAction(savedObjectDeleteAction);
   uiActions.registerAction(pluginResourceDeleteAction);
+
+  uiActions.registerTrigger(externalActionTrigger);
   uiActions.registerTrigger(pluginResourceDeleteTrigger);
+
+  uiActions.addTriggerAction(EXTERNAL_ACTION_TRIGGER, openEventsFlyoutAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, viewEventsOptionAction);
   uiActions.addTriggerAction(SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteAction);
   uiActions.addTriggerAction(PLUGIN_RESOURCE_DELETE_TRIGGER, pluginResourceDeleteAction);
 };

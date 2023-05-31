@@ -8,7 +8,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { visLayers } from './expressions';
 import { setSavedAugmentVisLoader, setUISettings } from './services';
 import { createSavedAugmentVisLoader, SavedAugmentVisLoader } from './saved_augment_vis';
-import { UiActionsStart, UiActionsSetup } from '../../ui_actions/public';
+import { UiActionsStart } from '../../ui_actions/public';
 import {
   setUiActions,
   setEmbeddable,
@@ -20,8 +20,6 @@ import { EmbeddableStart } from '../../embeddable/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VIEW_EVENTS_FLYOUT_STATE, setFlyoutState } from './view_events_flyout';
-import { PluginResourceDeleteAction, SavedObjectDeleteAction } from './actions';
-import { pluginResourceDeleteTrigger } from './triggers';
 import { bootstrapUiActions } from './ui_actions_bootstrap';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -49,11 +47,10 @@ export class VisAugmenterPlugin
 
   public setup(
     core: CoreSetup<VisAugmenterStartDeps, VisAugmenterStart>,
-    { data, expressions }: VisAugmenterSetupDeps
+    { expressions }: VisAugmenterSetupDeps
   ): VisAugmenterSetup {
     expressions.registerType(visLayers);
     setUISettings(core.uiSettings);
-
     expressions.registerType(visLayers);
 
     return {};
@@ -69,6 +66,7 @@ export class VisAugmenterPlugin
     setVisualizations(visualizations);
     setCore(core);
     setFlyoutState(VIEW_EVENTS_FLYOUT_STATE.CLOSED);
+
     const savedAugmentVisLoader = createSavedAugmentVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,

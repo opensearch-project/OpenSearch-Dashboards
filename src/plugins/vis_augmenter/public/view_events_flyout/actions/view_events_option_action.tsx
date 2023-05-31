@@ -21,7 +21,7 @@ export class ViewEventsOptionAction implements Action<EmbeddableContext> {
   public readonly id = VIEW_EVENTS_OPTION_ACTION;
   public order = 1;
 
-  constructor(private core: CoreStart) {}
+  constructor() {}
 
   public getIconType(): EuiIconType {
     return 'apmTrace';
@@ -52,7 +52,6 @@ export class ViewEventsOptionAction implements Action<EmbeddableContext> {
     // re-opening it.
     if (getFlyoutState() === VIEW_EVENTS_FLYOUT_STATE.CLOSED) {
       openViewEventsFlyout({
-        core: this.core,
         savedObjectId,
       });
     }
