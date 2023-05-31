@@ -59,6 +59,6 @@
       "{indices}/_update_by_query",
       "{indices}/{type}/_update_by_query"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/update-by-query/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/document-apis/update-by-query/"
   }
 }
