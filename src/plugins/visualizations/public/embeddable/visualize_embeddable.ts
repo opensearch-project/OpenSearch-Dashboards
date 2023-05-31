@@ -72,16 +72,12 @@ import {
   getAugmentVisSavedObjs,
   buildPipelineFromAugmentVisSavedObjs,
   getAnyErrors,
-  VisLayerErrorTypes,
   AugmentVisContext,
+  VisLayer,
+  VisAugmenterEmbeddableConfig,
+  PLUGIN_RESOURCE_DELETE_TRIGGER,
 } from '../../../vis_augmenter/public';
 import { VisSavedObject } from '../types';
-import {
-  PointInTimeEventsVisLayer,
-  VisLayer,
-  VisLayerTypes,
-  VisAugmenterEmbeddableConfig,
-} from '../../../vis_augmenter/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -519,11 +515,6 @@ export class VisualizeEmbeddable
    * Collects any VisLayers from plugin expressions functions
    * by fetching all AugmentVisSavedObjects that match the vis
    * saved object ID.
-   *
-   * TODO: final eligibility will be defined as part of a separate effort.
-   * Right now we have a placeholder function isEligibleForVisLayers() which
-   * is used below. For more details, see
-   * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
    */
   fetchVisLayers = async (): Promise<VisLayers> => {
     try {
@@ -558,6 +549,15 @@ export class VisualizeEmbeddable
           expressionParams as Record<string, unknown>
         )) as ExprVisLayers;
         const visLayers = exprVisLayers.layers;
+
+        // There may be some stale saved objs if any plugin resources have been deleted since last time
+        // data was fetched from them via the expression functions. Execute this trigger so any listening
+        // action can perform cleanup.
+        getUiActions().getTrigger(PLUGIN_RESOURCE_DELETE_TRIGGER).exec({
+          savedObjs: augmentVisSavedObjs,
+          visLayers,
+        });
+
         const err = getAnyErrors(visLayers, this.vis.title);
         // This is only true when one or more VisLayers has an error
         if (err !== undefined) {

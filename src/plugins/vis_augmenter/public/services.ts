@@ -17,6 +17,7 @@ export const [getSavedAugmentVisLoader, setSavedAugmentVisLoader] = createGetter
 >('savedAugmentVisLoader');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+
 export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UIActions');
 
 export const [getEmbeddable, setEmbeddable] = createGetterSetter<EmbeddableStart>('embeddable');
@@ -30,3 +31,15 @@ export const [getVisualizations, setVisualizations] = createGetterSetter<Visuali
 );
 
 export const [getCore, setCore] = createGetterSetter<CoreStart>('Core');
+
+// This is primarily used for mocking this module and each of its fns in tests.
+// eslint-disable-next-line import/no-default-export
+export default {
+  getSavedAugmentVisLoader,
+  getUISettings,
+  getUiActions,
+  getEmbeddable,
+  getQueryService,
+  getVisualizations,
+  getCore,
+};

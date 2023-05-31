@@ -25,7 +25,7 @@ export class OpenEventsFlyoutAction implements Action<AugmentVisContext> {
   public readonly id = OPEN_EVENTS_FLYOUT_ACTION;
   public order = 1;
 
-  constructor(private core: CoreStart) {}
+  constructor() {}
 
   public getIconType() {
     return undefined;
@@ -53,7 +53,6 @@ export class OpenEventsFlyoutAction implements Action<AugmentVisContext> {
     // re-opening it.
     if (getFlyoutState() === VIEW_EVENTS_FLYOUT_STATE.CLOSED) {
       openViewEventsFlyout({
-        core: this.core,
         savedObjectId,
       });
     }

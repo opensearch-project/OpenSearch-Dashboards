@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["management", "data"],
+  "requiredPlugins": ["management", "data", "uiActions"],
   "optionalPlugins": [
     "dashboard",
     "visualizations",

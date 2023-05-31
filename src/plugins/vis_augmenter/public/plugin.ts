@@ -8,7 +8,6 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { visLayers } from './expressions';
 import { setSavedAugmentVisLoader, setUISettings } from './services';
 import { createSavedAugmentVisLoader, SavedAugmentVisLoader } from './saved_augment_vis';
-import { registerTriggersAndActions } from './ui_actions_bootstrap';
 import { UiActionsStart } from '../../ui_actions/public';
 import {
   setUiActions,
@@ -21,6 +20,7 @@ import { EmbeddableStart } from '../../embeddable/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VIEW_EVENTS_FLYOUT_STATE, setFlyoutState } from './view_events_flyout';
+import { bootstrapUiActions } from './ui_actions_bootstrap';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterSetup {}
@@ -51,6 +51,7 @@ export class VisAugmenterPlugin
   ): VisAugmenterSetup {
     expressions.registerType(visLayers);
     setUISettings(core.uiSettings);
+
     return {};
   }
 
@@ -65,8 +66,6 @@ export class VisAugmenterPlugin
     setCore(core);
     setFlyoutState(VIEW_EVENTS_FLYOUT_STATE.CLOSED);
 
-    registerTriggersAndActions(core);
-
     const savedAugmentVisLoader = createSavedAugmentVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
@@ -75,6 +74,10 @@ export class VisAugmenterPlugin
       overlays: core.overlays,
     });
     setSavedAugmentVisLoader(savedAugmentVisLoader);
+
+    // sets up the context mappings and registers any triggers/actions for the plugin
+    bootstrapUiActions(uiActions);
+
     return { savedAugmentVisLoader };
   }
 

@@ -11,12 +11,14 @@ import {
   buildExpression,
   ExpressionAstFunctionBuilder,
 } from '../../../../plugins/expressions/public';
+import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import {
   ISavedAugmentVis,
   SavedAugmentVisLoader,
   VisLayerFunctionDefinition,
   VisLayer,
   isVisLayerWithError,
+  VisLayerErrorTypes,
 } from '../';
 import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { getUISettings } from '../services';
@@ -48,9 +50,8 @@ export const isEligibleForVisLayers = (vis: Vis): boolean => {
 };
 
 /**
- * Using a SavedAugmentVisLoader, fetch all saved objects that are of 'augment-vis' type
- * and filter out to return the ones associated to the particular vis via
- * matching vis ID.
+ * Using a SavedAugmentVisLoader, fetch all saved objects that are of 'augment-vis' type.
+ * Filter by vis ID.
  */
 export const getAugmentVisSavedObjs = async (
   visId: string | undefined,
@@ -66,9 +67,22 @@ export const getAugmentVisSavedObjs = async (
     );
   }
   try {
-    const resp = await loader?.findAll();
-    const allSavedObjects = (get(resp, 'hits', []) as any[]) as ISavedAugmentVis[];
+    const allSavedObjects = await getAllAugmentVisSavedObjs(loader);
     return allSavedObjects.filter((hit: ISavedAugmentVis) => hit.visId === visId);
+  } catch (e) {
+    return [] as ISavedAugmentVis[];
+  }
+};
+
+/**
+ * Using a SavedAugmentVisLoader, fetch all saved objects that are of 'augment-vis' type.
+ */
+export const getAllAugmentVisSavedObjs = async (
+  loader: SavedAugmentVisLoader | undefined
+): Promise<ISavedAugmentVis[]> => {
+  try {
+    const resp = await loader?.findAll();
+    return (get(resp, 'hits', []) as any[]) as ISavedAugmentVis[];
   } catch (e) {
     return [] as ISavedAugmentVis[];
   }
@@ -128,5 +142,38 @@ export const getAnyErrors = (visLayers: VisLayer[], visTitle: string): Error | u
     return err;
   } else {
     return undefined;
+  }
+};
+
+/**
+ * Cleans up any stale saved objects caused by plugin resources being deleted. Kicks
+ * off an async call to delete the stale objs.
+ *
+ * @param augmentVisSavedObs the original augment-vis saved objs for this particular vis
+ * @param visLayers the produced VisLayers containing details if the resource has been deleted
+ * @param visualizationsLoader the visualizations saved object loader to handle deletion
+ */
+
+export const cleanupStaleObjects = (
+  augmentVisSavedObjs: ISavedAugmentVis[],
+  visLayers: VisLayer[],
+  loader: SavedAugmentVisLoader | undefined
+): void => {
+  const staleVisLayers = visLayers
+    .filter((visLayer) => isVisLayerWithError(visLayer))
+    .filter(
+      (visLayerWithError) => visLayerWithError.error?.type === VisLayerErrorTypes.RESOURCE_DELETED
+    );
+  if (!isEmpty(staleVisLayers)) {
+    const objIdsToDelete = [] as string[];
+    staleVisLayers.forEach((staleVisLayer) => {
+      // Match the VisLayer to its origin saved obj to extract the to-be-deleted saved obj ID
+      const deletedPluginResourceId = staleVisLayer.pluginResource.id;
+      const savedObjId = augmentVisSavedObjs.find(
+        (savedObj) => savedObj.pluginResource.id === deletedPluginResourceId
+      )?.id;
+      if (savedObjId !== undefined) objIdsToDelete.push(savedObjId);
+    });
+    loader?.delete(objIdsToDelete);
   }
 };
