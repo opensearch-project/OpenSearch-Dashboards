@@ -48,9 +48,12 @@ type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
   spec: string;
+  savedObjectId: string;
 }
 
-export type VisParams = Required<Arguments>;
+export interface VisParams {
+  spec: string;
+}
 
 export type VegaExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'vega',
@@ -81,6 +84,11 @@ export const createVegaFn = (
       default: '',
       help: '',
     },
+    savedObjectId: {
+      types: ['string'],
+      default: '',
+      help: '',
+    },
   },
   async fn(input, args, context) {
     const vegaRequestHandler = createVegaRequestHandler(dependencies, context);
@@ -100,6 +108,7 @@ export const createVegaFn = (
         visType: 'vega',
         visConfig: {
           spec: args.spec,
+          savedObjectId: args.savedObjectId,
         },
       },
     };

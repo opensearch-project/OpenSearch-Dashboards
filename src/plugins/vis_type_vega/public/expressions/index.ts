@@ -5,3 +5,4 @@
 
 export { LineVegaSpecExpressionFunctionDefinition } from './line_vega_spec_fn';
 export { VegaExpressionFunctionDefinition } from './vega_fn';
+export { YAxisConfig } from './helpers';

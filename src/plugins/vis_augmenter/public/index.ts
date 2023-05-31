@@ -22,7 +22,11 @@ export {
   PointInTimeEventsVisLayer,
   isPointInTimeEventsVisLayer,
   isVisLayerWithError,
+  VisAugmenterEmbeddableConfig,
+  VisFlyoutContext,
 } from './types';
+
+export { AugmentVisContext } from './ui_actions_bootstrap';
 
 export * from './expressions';
 export * from './utils';

@@ -6,6 +6,7 @@
 import moment from 'moment';
 import { cloneDeep, isEmpty, get } from 'lodash';
 import { Item } from 'vega';
+import { YAxisConfig } from 'src/plugins/vis_type_vega/public';
 import {
   OpenSearchDashboardsDatatable,
   OpenSearchDashboardsDatatableColumn,
@@ -20,11 +21,13 @@ import {
   EVENT_MARK_SIZE_ENLARGED,
   EVENT_MARK_SHAPE,
   EVENT_TIMELINE_HEIGHT,
+  EVENT_TOOLTIP_CENTER_ON_MARK,
   HOVER_PARAM,
   VisLayer,
   VisLayers,
   VisLayerTypes,
-  EVENT_TOOLTIP_CENTER_ON_MARK,
+  VisAugmenterEmbeddableConfig,
+  VisFlyoutContext,
 } from '../';
 import { VisAnnotationType } from './constants';
 
@@ -354,13 +357,14 @@ export const addPointInTimeEventsLayersToSpec = (
     mark: {
       type: 'point',
       shape: EVENT_MARK_SHAPE,
-      color: EVENT_COLOR,
-      filled: true,
-      opacity: 1,
-      tooltip: true,
+      fill: EVENT_COLOR,
+      stroke: EVENT_COLOR,
+      strokeOpacity: 1,
+      fillOpacity: 1,
       // This style is only used to locate this mark when trying to add signals in the compiled vega spec.
       // @see @method vega_parser._compileVegaLite
       style: [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`],
+      tooltip: true,
     },
     transform: [
       { filter: generateVisLayerFilterString(visLayerColumnIds) },
@@ -395,4 +399,100 @@ export const addPointInTimeEventsLayersToSpec = (
 
 export const isPointInTimeAnnotation = (item?: Item | null) => {
   return item?.datum?.annotationType === VisAnnotationType.POINT_IN_TIME_ANNOTATION;
+};
+
+// This is the total y-axis padding such that if this is added to the "padding" value of the view, if there is no axis,
+// it will align values on the x-axis
+export const calculateYAxisPadding = (config: YAxisConfig): number => {
+  // TODO: figure out where this value is coming from
+  const defaultPadding = 3;
+  return (
+    get(config, 'minExtent', 0) +
+    get(config, 'offset', 0) +
+    get(config, 'translate', 0) +
+    get(config, 'domainWidth', 0) +
+    get(config, 'labelPadding', 0) +
+    get(config, 'titlePadding', 0) +
+    get(config, 'tickOffset', 0) +
+    get(config, 'tickSize', 0) +
+    defaultPadding
+  );
+};
+
+// Parse the vis augmenter config to apply different visual changes to the event chart spec.
+// This includes potentially removing the original vis data, hiding axes, moving the legend, etc.
+// Primarily used within the view events flyout to render the charts in different ways, and to
+// ensure the stacked event charts are aligned with the base vis chart.
+export const augmentEventChartSpec = (
+  config: VisAugmenterEmbeddableConfig,
+  origSpec: object
+): {} => {
+  const inFlyout = get(config, 'inFlyout', false) as boolean;
+  const flyoutContext = get(config, 'flyoutContext', VisFlyoutContext.BASE_VIS);
+
+  const newVconcat = [] as Array<{}>;
+  // @ts-ignore
+  const newConfig = origSpec?.config;
+  const visChart = get(origSpec, 'vconcat[0]', {});
+  const eventChart = get(origSpec, 'vconcat[1]', {});
+
+  if (inFlyout) {
+    switch (flyoutContext) {
+      case VisFlyoutContext.BASE_VIS:
+        newConfig.legend = {
+          ...newConfig.legend,
+          orient: 'top',
+          // need to set offset to 0 so we don't cut off the chart canvas within the embeddable
+          offset: 0,
+        };
+        break;
+
+      case VisFlyoutContext.EVENT_VIS:
+        eventChart.encoding.x.axis = {
+          domain: true,
+          grid: false,
+          ticks: false,
+          labels: false,
+          title: null,
+        };
+        eventChart.mark.fillOpacity = 0;
+        break;
+
+      case VisFlyoutContext.TIMELINE_VIS:
+        eventChart.transform = [
+          {
+            filter: 'false',
+          },
+        ];
+        break;
+    }
+
+    // if coming from view events page, need to standardize the y axis padding values so we can
+    // align all of the charts correctly
+    newConfig.axisY = {
+      // We need minExtent and maxExtent to be the same. We cannot calculate these on-the-fly
+      // so we need to force a static value. We choose 40 as a good middleground for sufficient
+      // axis space without taking up too much actual chart space.
+      minExtent: 40,
+      maxExtent: 40,
+      offset: 0,
+      translate: 0,
+      domainWidth: 1,
+      labelPadding: 2,
+      titlePadding: 2,
+      tickOffset: 0,
+      tickSize: 5,
+    } as YAxisConfig;
+  }
+
+  if (flyoutContext === VisFlyoutContext.BASE_VIS) {
+    newVconcat.push(visChart);
+  }
+  newVconcat.push(eventChart);
+
+  return {
+    ...cloneDeep(origSpec),
+    config: newConfig,
+    vconcat: newVconcat,
+  };
 };

@@ -72,8 +72,16 @@ import {
   getAugmentVisSavedObjs,
   buildPipelineFromAugmentVisSavedObjs,
   getAnyErrors,
+  VisLayerErrorTypes,
+  AugmentVisContext,
 } from '../../../vis_augmenter/public';
 import { VisSavedObject } from '../types';
+import {
+  PointInTimeEventsVisLayer,
+  VisLayer,
+  VisLayerTypes,
+  VisAugmenterEmbeddableConfig,
+} from '../../../vis_augmenter/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -92,6 +100,7 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  visAugmenterConfig?: VisAugmenterEmbeddableConfig;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -123,7 +132,7 @@ export class VisualizeEmbeddable
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
-  private vis: Vis;
+  public vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private autoRefreshFetchSubscription: Subscription;
@@ -137,6 +146,8 @@ export class VisualizeEmbeddable
   >;
   private savedVisualizationsLoader?: SavedVisualizationsLoader;
   private savedAugmentVisLoader?: SavedAugmentVisLoader;
+  public visLayers?: VisLayer[];
+  private visAugmenterConfig?: VisAugmenterEmbeddableConfig;
 
   constructor(
     timefilter: TimefilterContract,
@@ -172,6 +183,7 @@ export class VisualizeEmbeddable
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
     this.savedAugmentVisLoader = savedAugmentVisLoader;
+    this.visAugmenterConfig = initialInput.visAugmenterConfig;
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
       .subscribe(this.updateHandler.bind(this));
@@ -347,6 +359,10 @@ export class VisualizeEmbeddable
               timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
               ...event.data,
             };
+          } else if (triggerId === VIS_EVENT_TO_TRIGGER.externalAction) {
+            context = {
+              savedObjectId: this.vis.id,
+            } as AugmentVisContext;
           } else {
             context = {
               embeddable: this,
@@ -405,13 +421,15 @@ export class VisualizeEmbeddable
     this.abortController = new AbortController();
     const abortController = this.abortController;
 
-    const visLayers = await this.fetchVisLayers(expressionParams, abortController);
+    // By waiting for this to complete, this.visLayers will be populated
+    await this.populateVisLayers();
 
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
-      visLayers,
+      visLayers: this.visLayers,
+      visAugmenterConfig: this.visAugmenterConfig,
     });
 
     if (this.handler && !abortController.signal.aborted) {
@@ -482,6 +500,22 @@ export class VisualizeEmbeddable
   };
 
   /**
+   * Fetches any VisLayers, and filters out to only include ones in the list of
+   * input resource IDs, if specified. Assigns them to this.visLayers.
+   * Note this fn is public so we can fetch vislayers on demand when needed,
+   * e.g., generating other vis embeddables in the view events flyout.
+   */
+  public async populateVisLayers(): Promise<void> {
+    const visLayers = await this.fetchVisLayers();
+    this.visLayers =
+      this.visAugmenterConfig?.visLayerResourceIds === undefined
+        ? visLayers
+        : visLayers.filter((visLayer) =>
+            this.visAugmenterConfig?.visLayerResourceIds?.includes(visLayer.pluginResource.id)
+          );
+  }
+
+  /**
    * Collects any VisLayers from plugin expressions functions
    * by fetching all AugmentVisSavedObjects that match the vis
    * saved object ID.
@@ -491,20 +525,24 @@ export class VisualizeEmbeddable
    * is used below. For more details, see
    * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3268
    */
-  fetchVisLayers = async (
-    expressionParams: IExpressionLoaderParams,
-    abortController: AbortController
-  ): Promise<VisLayers> => {
+  fetchVisLayers = async (): Promise<VisLayers> => {
     try {
+      const expressionParams: IExpressionLoaderParams = {
+        searchContext: {
+          timeRange: this.timeRange,
+          query: this.input.query,
+          filters: this.input.filters,
+        },
+        uiState: this.vis.uiState,
+        inspectorAdapters: this.inspectorAdapters,
+      };
+      const aborted = get(this.abortController, 'signal.aborted', false) as boolean;
       const augmentVisSavedObjs = await getAugmentVisSavedObjs(
         this.vis.id,
         this.savedAugmentVisLoader
       );
-      if (
-        !isEmpty(augmentVisSavedObjs) &&
-        !abortController.signal.aborted &&
-        isEligibleForVisLayers(this.vis)
-      ) {
+
+      if (!isEmpty(augmentVisSavedObjs) && !aborted && isEligibleForVisLayers(this.vis)) {
         const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
         // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
         // expression functions are ran, they will incrementally append their generated VisLayers to it.
