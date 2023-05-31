@@ -53,6 +53,7 @@ interface SavedObjectEditionProps {
   capabilities: Capabilities;
   overlays: OverlayStart;
   notifications: NotificationsStart;
+  uiActions: UiActionsStart;
   notFoundType?: string;
   savedObjectsClient: SavedObjectsClientContract;
   history: ScopedHistory;
@@ -170,8 +171,9 @@ export class SavedObjectEdition extends Component<
       }
     );
     if (confirmed) {
-      const uiActions = this.props.serviceRegistry.get('uiActions')?.service as UiActionsStart;
-      uiActions.getTrigger(SAVED_OBJECT_DELETE_TRIGGER).exec({ type, savedObjectId: id });
+      this.props.uiActions
+        .getTrigger(SAVED_OBJECT_DELETE_TRIGGER)
+        .exec({ type, savedObjectId: id });
       await savedObjectsClient.delete(type, id);
 
       notifications.toasts.addSuccess(`Deleted ${this.formatTitle(object)} ${type} object`);

@@ -38,7 +38,7 @@ export const registerServices = async (
 ) => {
   const [
     ,
-    { dashboard, visualizations, visAugmenter, discover, visBuilder, uiActions },
+    { dashboard, visualizations, visAugmenter, discover, visBuilder },
   ] = await getStartServices();
 
   if (dashboard) {
@@ -78,14 +78,6 @@ export const registerServices = async (
       id: 'savedVisBuilder',
       title: 'visBuilder',
       service: visBuilder.savedVisBuilderLoader,
-    });
-  }
-
-  if (uiActions) {
-    registry.register({
-      id: 'uiActions',
-      title: 'uiActions',
-      service: uiActions,
     });
   }
 };

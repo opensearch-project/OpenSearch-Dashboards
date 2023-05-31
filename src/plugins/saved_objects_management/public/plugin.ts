@@ -67,7 +67,6 @@ export interface SavedObjectsManagementPluginStart {
   actions: SavedObjectsManagementActionServiceStart;
   columns: SavedObjectsManagementColumnServiceStart;
   namespaces: SavedObjectsManagementNamespaceServiceStart;
-  uiActions: UiActionsStart;
 }
 
 export interface SetupDependencies {
@@ -164,7 +163,6 @@ export class SavedObjectsManagementPlugin
       actions: actionStart,
       columns: columnStart,
       namespaces: namespaceStart,
-      uiActions,
     };
   }
 }
