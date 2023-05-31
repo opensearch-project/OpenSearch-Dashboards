@@ -38,14 +38,13 @@ import { opensearchFilters } from '../../../../data/public';
 export function updateSavedDashboard(
   savedDashboard: SavedObjectDashboard,
   appState: DashboardAppState,
-  timeFilter: TimefilterContract,
-  toJson: <T>(object: T) => string
+  timeFilter: TimefilterContract
 ) {
   savedDashboard.title = appState.title;
   savedDashboard.description = appState.description;
   savedDashboard.timeRestore = appState.timeRestore;
-  savedDashboard.panelsJSON = toJson(appState.panels);
-  savedDashboard.optionsJSON = toJson(appState.options);
+  savedDashboard.panelsJSON = JSON.stringify(appState.panels);
+  savedDashboard.optionsJSON = JSON.stringify(appState.options);
 
   savedDashboard.timeFrom = savedDashboard.timeRestore
     ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().from)
