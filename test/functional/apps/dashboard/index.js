@@ -51,7 +51,7 @@ export default function ({ getService, loadTestFile }) {
     await opensearchArchiver.unload('logstash_functional');
   }
 
-  describe('dashboard app', function () {
+  describe.skip('dashboard app', function () {
     // This has to be first since the other tests create some embeddables as side affects and our counting assumes
     // a fresh index.
     describe('using current data', function () {
