@@ -13,7 +13,7 @@
 
 ### 🐛 Bug Fixes
 
-- [BUG] Docked navigation impacts visibility of bottom bar component ([#3978](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3978))
+- [BUG] Fix bottom bar visibility using createPortal ([#3978](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3978))
 
 ### 🚞 Infrastructure
 
