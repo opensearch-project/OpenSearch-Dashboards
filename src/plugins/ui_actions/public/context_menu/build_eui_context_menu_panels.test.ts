@@ -501,6 +501,10 @@ test('groups with categories and order', async () => {
       dispayName: 'Qux 2',
       grouping: grouping2,
     }),
+    // It is expected that, because there is only 1 action within this group,
+    // it will be added to the mainMenu as a single item, but next to other
+    // groups of the same category. When a group has a category, but only one
+    // item, we just add that single item; otherwise, we add a link to the group
     createTestAction({
       dispayName: 'Waldo 1',
       grouping: grouping3,
