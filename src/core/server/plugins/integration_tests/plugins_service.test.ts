@@ -57,7 +57,6 @@ describe('PluginsService', () => {
       disabled = false,
       version = 'some-version',
       requiredPlugins = [],
-      requiredOpenSearchPlugins = [],
       requiredBundles = [],
       optionalPlugins = [],
       opensearchDashboardsVersion = '7.0.0',
@@ -69,7 +68,6 @@ describe('PluginsService', () => {
       disabled?: boolean;
       version?: string;
       requiredPlugins?: string[];
-      requiredOpenSearchPlugins?: string[];
       requiredBundles?: string[];
       optionalPlugins?: string[];
       opensearchDashboardsVersion?: string;
@@ -86,7 +84,6 @@ describe('PluginsService', () => {
         configPath: `${configPath}${disabled ? '-disabled' : ''}`,
         opensearchDashboardsVersion,
         requiredPlugins,
-        requiredOpenSearchPlugins,
         requiredBundles,
         optionalPlugins,
         server,
