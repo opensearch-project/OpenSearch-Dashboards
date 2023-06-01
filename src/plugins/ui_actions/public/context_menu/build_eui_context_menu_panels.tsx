@@ -241,54 +241,60 @@ export async function buildContextMenuForActions({
   const categories = {};
 
   for (const panel of Object.values(panels)) {
-    // If the panel is a root-level panel, such as the parent of a group,
-    // then create mainMenu item for this panel
-    if (panel._level === 0) {
-      // If a category is specified, store either a link to the panel or the
-      // item within. We will deal with it after looping through all panels.
-      if (panel._category) {
-        // Create array to store category items
-        if (!categories[panel._category]) {
-          categories[panel._category] = [];
-        }
+    // Do nothing if not root-level panel, such as the parent of a group
+    if (panel._level !== 0) {
+      continue;
+    }
 
-        // If multiple items in the panel, store a link to this panel into the category.
-        // Otherwise, just store the single item into the category.
-        if (panel.items.length > 1) {
-          categories[panel._category].push({
-            order: panel._order,
-            items: [
-              {
-                name: panel.title || panel.id,
-                icon: panel._icon || 'empty',
-                panel: panel.id,
-              },
-            ],
-          });
-        } else {
-          categories[panel._category].push({
-            order: panel._order || 0,
-            items: panel.items,
-          });
-        }
+    // Proceed to create mainMenu item for this panel
+
+    // If a category is specified, store either a link to the panel or the
+    // item within to that category. We will deal with the category after
+    // looping through all panels.
+    if (panel._category) {
+      // Create array to store category items
+      if (!categories[panel._category]) {
+        categories[panel._category] = [];
+      }
+
+      // If multiple items in the panel, store a link to this panel into the category.
+      // Otherwise, just store the single item into the category.
+      if (panel.items.length > 1) {
+        categories[panel._category].push({
+          order: panel._order,
+          items: [
+            {
+              name: panel.title || panel.id,
+              icon: panel._icon || 'empty',
+              panel: panel.id,
+            },
+          ],
+        });
       } else {
-        // Add separator with unique key if needed
-        if (panels.mainMenu.items.length) {
-          panels.mainMenu.items.push({ isSeparator: true, key: `${panel.id}separator` });
-        }
+        categories[panel._category].push({
+          order: panel._order || 0,
+          items: panel.items,
+        });
+      }
+    } else {
+      // If no category, continue with adding items to the mainMenu
 
-        // If a panel has more than one child, then allow items to be grouped
-        // and link to it in the mainMenu. Otherwise, flatten the group.
-        // Note: this only happens on the root level panels, not for inner groups.
-        if (panel.items.length > 1) {
-          panels.mainMenu.items.push({
-            name: panel.title || panel.id,
-            icon: panel._icon || 'empty',
-            panel: panel.id,
-          });
-        } else {
-          panels.mainMenu.items.push(...panel.items);
-        }
+      // Add separator with unique key if needed
+      if (panels.mainMenu.items.length) {
+        panels.mainMenu.items.push({ isSeparator: true, key: `${panel.id}separator` });
+      }
+
+      // If a panel has more than one child, then allow items to be grouped
+      // and link to it in the mainMenu. Otherwise, link to the single item.
+      // Note: this only happens on the root level panels, not for inner groups.
+      if (panel.items.length > 1) {
+        panels.mainMenu.items.push({
+          name: panel.title || panel.id,
+          icon: panel._icon || 'empty',
+          panel: panel.id,
+        });
+      } else {
+        panels.mainMenu.items.push(...panel.items);
       }
     }
   }
