@@ -78,6 +78,7 @@ const createPlugin = (
     disabled = false,
     version = 'some-version',
     requiredPlugins = [],
+    requiredOpenSearchPlugins = [],
     requiredBundles = [],
     optionalPlugins = [],
     opensearchDashboardsVersion = '7.0.0',
@@ -89,6 +90,7 @@ const createPlugin = (
     disabled?: boolean;
     version?: string;
     requiredPlugins?: string[];
+    requiredOpenSearchPlugins?: string[];
     requiredBundles?: string[];
     optionalPlugins?: string[];
     opensearchDashboardsVersion?: string;
@@ -105,6 +107,7 @@ const createPlugin = (
       configPath: `${configPath}${disabled ? '-disabled' : ''}`,
       opensearchDashboardsVersion,
       requiredPlugins,
+      requiredOpenSearchPlugins,
       requiredBundles,
       optionalPlugins,
       server,
