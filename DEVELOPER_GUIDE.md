@@ -229,10 +229,7 @@ $ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plu
 Note - if you add the [`security` plugin](https://github.com/opensearch-project/security), you'll also need to [configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security).
 
 ### Plugin development
-The osd-plugin-generator tool simplifies the process of creating an OpenSearch Dashboards plugin by setting up the initial project structure and providing build scripts. It enables developers to focus on the core functionality and customization of their plugins, thereby enhancing the data visualization and management capabilities of OpenSearch Dashboards.
-
-The osd-plugin-generator is a tool available in the OpenSearch Dashboards repository. It allows you to generate an OpenSearch Dashboards plugin. OpenSearch Dashboards is an open-source project that provides a web interface for data visualization and management in the OpenSearch ecosystem.
-[osd-plugin-generator](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator)
+The osd-plugin-generator tool makes it easier to create a plugin for OpenSearch Dashboards. It sets up the basic structure of the project and provides scripts to build it. Refer to [osd-plugin-generator](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator) for more details.
 
 
 #### Other snapshot configuration options
