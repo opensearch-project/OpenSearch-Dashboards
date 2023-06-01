@@ -49,7 +49,6 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { IBasePath } from 'src/core/public';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata, SavedObjectRelation } from '../../../types';
-import './relationships.scss';
 
 export interface RelationshipsProps {
   basePath: IBasePath;
@@ -338,7 +337,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
       <EuiFlyout onClose={close}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 className="savedObjectsManagementRelationships__title">
+            <h2 className="eui-textTruncate">
               <EuiToolTip position="top" content={getSavedObjectLabel(savedObject.type)}>
                 <EuiIcon
                   aria-label={getSavedObjectLabel(savedObject.type)}
