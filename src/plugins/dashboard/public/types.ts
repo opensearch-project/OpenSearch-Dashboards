@@ -39,10 +39,9 @@ import {
   ChromeStart,
   ScopedHistory,
   AppMountParameters,
-  SavedObjectsStart,
 } from 'src/core/public';
-import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
-import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
+import { IOsdUrlStateStorage, Storage } from 'src/plugins/opensearch_dashboards_utils/public';
+import { SavedObjectLoader, SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
@@ -242,9 +241,9 @@ export interface DashboardServices extends CoreStart {
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
-  dashboardProviders: () => { [key: string]: DashboardProvider };
+  dashboardProviders: () => { [key: string]: DashboardProvider } | undefined;
   dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
-  dashboardCapabilities: any;
+  dashboardCapabilities: DashboardCapabilities;
   embeddableCapabilities: {
     visualizeCapabilities: any;
     mapsCapabilities: any;
