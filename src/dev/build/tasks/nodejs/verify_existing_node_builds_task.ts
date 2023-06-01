@@ -29,15 +29,15 @@
  */
 
 import { getFileHash, GlobalTask } from '../../lib';
-import { getNodeDownloadInfo, getLatestNodeVersion } from './node_download_info';
+import { getNodeDownloadInfo, getRequiredVersion } from './node_download_info';
 import { getNodeShasums } from './node_shasums';
 
 export const VerifyExistingNodeBuilds: GlobalTask = {
   global: true,
   description: 'Verifying previously downloaded node.js build for all platforms',
   async run(config, log) {
-    const latestNodeVersion = await getLatestNodeVersion(config);
-    const shasums = await getNodeShasums(log, latestNodeVersion);
+    const requiredNodeVersion = getRequiredVersion(config);
+    const shasums = await getNodeShasums(log, requiredNodeVersion);
 
     await Promise.all(
       config.getTargetPlatforms().map(async (platform) => {

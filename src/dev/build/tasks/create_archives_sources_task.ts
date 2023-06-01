@@ -29,7 +29,7 @@
  */
 
 import { scanCopy, Task } from '../lib';
-import { getNodeDownloadInfo } from './nodejs';
+import { getNodeDownloadInfo, getNodeVersionDownloadInfo, NODE14_FALLBACK_VERSION } from './nodejs';
 
 export const CreateArchivesSources: Task = {
   description: 'Creating platform-specific archive source directories',
@@ -52,6 +52,20 @@ export const CreateArchivesSources: Task = {
         await scanCopy({
           source: (await getNodeDownloadInfo(config, platform)).extractDir,
           destination: build.resolvePathForPlatform(platform, 'node'),
+        });
+
+        // ToDo [NODE14]: Remove this Node.js 14 fallback download
+        // Copy the Node.js 14 binaries into node/fallback to be used by `use_node`
+        await scanCopy({
+          source: (
+            await getNodeVersionDownloadInfo(
+              NODE14_FALLBACK_VERSION,
+              platform.getNodeArch(),
+              platform.isWindows(),
+              config.resolveFromRepo()
+            )
+          ).extractDir,
+          destination: build.resolvePathForPlatform(platform, 'node', 'fallback'),
         });
 
         log.debug('Node.js copied into', platform.getNodeArch(), 'specific build directory');

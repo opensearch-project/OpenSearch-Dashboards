@@ -150,7 +150,7 @@ export function initDashboardApp(app, deps) {
               type: $scope.dashboardListTypes,
               search: search ? `${search}*` : undefined,
               fields: ['title', 'type', 'description', 'updated_at'],
-              perPage: $scope.initialPageSize,
+              perPage: $scope.listingLimit,
               page: 1,
               searchFields: ['title^3', 'type', 'description'],
               defaultSearchOperator: 'AND',
@@ -163,11 +163,19 @@ export function initDashboardApp(app, deps) {
             };
           };
 
-          $scope.editItem = ({ editUrl }) => {
-            history.push(editUrl);
+          $scope.editItem = ({ appId, editUrl }) => {
+            if (appId === 'dashboard') {
+              history.push(editUrl);
+            } else {
+              deps.core.application.navigateToUrl(editUrl);
+            }
           };
-          $scope.viewItem = ({ viewUrl }) => {
-            history.push(deps.addBasePath(viewUrl));
+          $scope.viewItem = ({ appId, viewUrl }) => {
+            if (appId === 'dashboard') {
+              history.push(viewUrl);
+            } else {
+              deps.core.application.navigateToUrl(viewUrl);
+            }
           };
           $scope.delete = (dashboards) => {
             const ids = dashboards.map((d) => ({ id: d.id, appId: d.appId }));
