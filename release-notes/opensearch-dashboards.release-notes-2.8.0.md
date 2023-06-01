@@ -2,7 +2,7 @@
 
 ### 🛡 Security
 
-- [CVE-2023-2251] Bump yaml to 2.2.2 ([#3947](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3947))
+- [CVE-2023-2251] Bump yaml to `2.2.2` ([#3947](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3947))
 
 ### 📈 Features/Enhancements
 
