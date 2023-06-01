@@ -56,7 +56,6 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     configPath: 'path',
     opensearchDashboardsVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
-    requiredOpenSearchPlugins: ['some-backend-plugin'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
     server: true,
