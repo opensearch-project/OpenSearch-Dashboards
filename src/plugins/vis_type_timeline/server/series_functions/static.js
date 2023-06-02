@@ -31,7 +31,6 @@
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import Datasource from '../lib/classes/datasource';
-import Bluebird from 'bluebird';
 
 export default new Datasource('static', {
   aliases: ['value'],
@@ -73,7 +72,7 @@ export default new Datasource('static', {
       });
     }
 
-    return Bluebird.resolve({
+    return Promise.resolve({
       type: 'seriesList',
       list: [
         {
