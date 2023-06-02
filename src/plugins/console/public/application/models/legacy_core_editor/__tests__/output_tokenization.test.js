@@ -29,6 +29,7 @@
  */
 
 import '../legacy_core_editor.test.mocks';
+import $ from 'jquery';
 import RowParser from '../../../../lib/row_parser';
 import ace from 'brace';
 import { createReadOnlyAceEditor } from '../create_readonly';
@@ -38,11 +39,11 @@ const tokenIterator = ace.acequire('ace/token_iterator');
 describe('Output Tokenization', () => {
   beforeEach(() => {
     output = createReadOnlyAceEditor(document.querySelector('#ConAppOutput'));
-    output.container.style.display = '';
+    $(output.container).show();
   });
 
   afterEach(() => {
-    output.container.style.display = 'none';
+    $(output.container).hide();
   });
 
   function tokensAsList() {

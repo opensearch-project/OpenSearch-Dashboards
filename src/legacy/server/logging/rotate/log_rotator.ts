@@ -97,7 +97,7 @@ export class LogRotator {
     await this._startLogFileSizeMonitor();
   }
 
-  stop = () => {
+  async stop() {
     if (!this.running) {
       return;
     }
@@ -106,10 +106,10 @@ export class LogRotator {
     this._deleteExitListener();
 
     // stop log file size monitor
-    this._stopLogFileSizeMonitor();
+    await this._stopLogFileSizeMonitor();
 
     this.running = false;
-  };
+  }
 
   async _shouldUsePolling() {
     try {
@@ -202,12 +202,12 @@ export class LogRotator {
     await this.throttledRotate();
   };
 
-  _stopLogFileSizeMonitor() {
+  async _stopLogFileSizeMonitor() {
     if (!this.stalker) {
       return;
     }
 
-    this.stalker.close();
+    await this.stalker.close();
 
     if (this.stalkerUsePollingPolicyTestTimeout) {
       clearTimeout(this.stalkerUsePollingPolicyTestTimeout);

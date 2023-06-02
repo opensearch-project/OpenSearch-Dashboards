@@ -158,11 +158,43 @@ export class PluginsSystem {
         timeout: 30 * Sec,
         errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
       });
-
       contracts.set(pluginName, contract);
     }
+    await this.healthCheckOpenSearchPlugins(deps);
 
     return contracts;
+  }
+
+  private async healthCheckOpenSearchPlugins(deps: PluginsServiceStartDeps) {
+    // make _cat/plugins?format=json call to the OpenSearch instance
+    const opensearchPlugins = await this.getOpenSearchPlugins(deps);
+    for (const pluginName of this.satupPlugins) {
+      this.log.debug(`For plugin "${pluginName}"...`);
+      const plugin = this.plugins.get(pluginName)!;
+      const pluginBackendDeps = new Set([...plugin.requiredOpenSearchPlugins]);
+      pluginBackendDeps.forEach((opensearchPlugin) => {
+        if (!opensearchPlugins.find((obj) => obj.component === opensearchPlugin)) {
+          this.log.warn(
+            `OpenSearch plugin "${opensearchPlugin}" is not installed on the cluster for the OpenSearch Dashboards plugin to function as expected.`
+          );
+        }
+      });
+    }
+  }
+
+  private async getOpenSearchPlugins(deps: PluginsServiceStartDeps) {
+    // Makes cat.plugin api call to fetch list of OpenSearch plugins installed on the cluster
+    try {
+      const { body } = await deps.opensearch.client.asInternalUser.cat.plugins<any[]>({
+        format: 'JSON',
+      });
+      return body;
+    } catch (error) {
+      this.log.warn(
+        `Cat API call to OpenSearch to get list of plugins installed on the cluster has failed: ${error}`
+      );
+      return [];
+    }
   }
 
   public async stopPlugins() {
