@@ -29,4 +29,4 @@ function check_dashboards_status {
   cd "$DIR"
   check_status $DASHBOARDS_PATH "$DASHBOARDS_MSG" $DASHBOARDS_URL "$OPENSEARCH_ARGS" >> /dev/null 2>&1
   echo "OpenSearch Dashboards is up!"
-} 
+}
