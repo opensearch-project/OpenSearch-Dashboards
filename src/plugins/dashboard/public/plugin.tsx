@@ -422,6 +422,7 @@ export class DashboardPlugin
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsPublic: savedObjects,
           restorePreviousUrl,
+          toastNotifications: coreStart.notifications.toasts,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
@@ -435,7 +436,8 @@ export class DashboardPlugin
       },
     };
 
-    initAngularBootstrap();
+    // TODO: need to add UI bootstrap
+    // initAngularBootstrap();
 
     core.application.register(app);
     urlForwarding.forwardApp(
