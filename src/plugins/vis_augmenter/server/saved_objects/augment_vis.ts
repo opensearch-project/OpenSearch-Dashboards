@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { get } from 'lodash';
 import { SavedObjectsType } from 'opensearch-dashboards/server';
 
 export const augmentVisSavedObjectType: SavedObjectsType = {
@@ -12,7 +13,7 @@ export const augmentVisSavedObjectType: SavedObjectsType = {
   management: {
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.title;
+      return `augment-vis-${get(obj, 'attributes.originPlugin')}`;
     },
     getEditUrl(obj) {
       return `/management/opensearch-dashboards/objects/savedAugmentVis/${encodeURIComponent(
