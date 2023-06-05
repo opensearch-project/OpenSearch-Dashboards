@@ -37,7 +37,6 @@ import {
 } from '../../saved_objects_type_registry';
 import { OpenSearchDashboardsRequest } from '../../../http';
 import { ISavedObjectsRepository } from './repository';
-import { OpenSearchClient } from '../../../opensearch';
 import { IOpenSearchDashboardsMigrator } from '../../migrations';
 
 /**
@@ -48,7 +47,6 @@ export interface SavedObjectsRepositoryOptions {
   migrator: IOpenSearchDashboardsMigrator;
   typeRegistry: SavedObjectTypeRegistry;
   includedHiddenTypes: string[];
-  client?: OpenSearchClient;
 }
 
 /**
