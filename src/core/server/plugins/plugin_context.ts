@@ -204,6 +204,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
       getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
+      setRepositoryFactoryProvider: deps.savedObjects.setRepositoryFactoryProvider,
     },
     status: {
       core$: deps.status.core$,
