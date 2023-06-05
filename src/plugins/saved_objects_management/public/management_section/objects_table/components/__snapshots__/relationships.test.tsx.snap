@@ -10,10 +10,9 @@ exports[`Relationships from legacy app should render dashboards normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="dashboard"
           delay="regular"
           position="top"
@@ -24,8 +23,12 @@ exports[`Relationships from legacy app should render dashboards normally 1`] = `
             type="dashboardApp"
           />
         </EuiToolTip>
-          
-        MyDashboard
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MyDashboard
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -171,10 +174,9 @@ exports[`Relationships from legacy app should render errors 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="dashboard"
           delay="regular"
           position="top"
@@ -185,8 +187,12 @@ exports[`Relationships from legacy app should render errors 1`] = `
             type="dashboardApp"
           />
         </EuiToolTip>
-          
-        MyDashboard
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MyDashboard
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -217,10 +223,9 @@ exports[`Relationships from legacy app should render index patterns normally 1`]
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="index patterns"
           delay="regular"
           position="top"
@@ -231,8 +236,12 @@ exports[`Relationships from legacy app should render index patterns normally 1`]
             type="indexPatternApp"
           />
         </EuiToolTip>
-          
-        MyIndexPattern*
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MyIndexPattern*
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -383,10 +392,9 @@ exports[`Relationships from legacy app should render searches normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="search"
           delay="regular"
           position="top"
@@ -397,8 +405,12 @@ exports[`Relationships from legacy app should render searches normally 1`] = `
             type="search"
           />
         </EuiToolTip>
-          
-        MySearch
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MySearch
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -549,10 +561,9 @@ exports[`Relationships from legacy app should render visualizations normally 1`]
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="visualization"
           delay="regular"
           position="top"
@@ -563,8 +574,12 @@ exports[`Relationships from legacy app should render visualizations normally 1`]
             type="visualizeApp"
           />
         </EuiToolTip>
-          
-        MyViz
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MyViz
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -710,10 +725,9 @@ exports[`Relationships should render dashboards normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="dashboard"
           delay="regular"
           position="top"
@@ -724,8 +738,12 @@ exports[`Relationships should render dashboards normally 1`] = `
             type="dashboardApp"
           />
         </EuiToolTip>
-          
-        MyDashboard
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MyDashboard
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -871,10 +889,9 @@ exports[`Relationships should render errors 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="dashboard"
           delay="regular"
           position="top"
@@ -885,8 +902,12 @@ exports[`Relationships should render errors 1`] = `
             type="dashboardApp"
           />
         </EuiToolTip>
-          
-        MyDashboard
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MyDashboard
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -917,10 +938,9 @@ exports[`Relationships should render index patterns normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="index patterns"
           delay="regular"
           position="top"
@@ -931,8 +951,12 @@ exports[`Relationships should render index patterns normally 1`] = `
             type="indexPatternApp"
           />
         </EuiToolTip>
-          
-        MyIndexPattern*
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MyIndexPattern*
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -1083,10 +1107,9 @@ exports[`Relationships should render searches normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="search"
           delay="regular"
           position="top"
@@ -1097,8 +1120,12 @@ exports[`Relationships should render searches normally 1`] = `
             type="search"
           />
         </EuiToolTip>
-          
-        MySearch
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MySearch
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -1249,10 +1276,9 @@ exports[`Relationships should render visualizations normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2
-        className="eui-textTruncate"
-      >
+      <h2>
         <EuiToolTip
+          anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
           content="visualization"
           delay="regular"
           position="top"
@@ -1263,8 +1289,12 @@ exports[`Relationships should render visualizations normally 1`] = `
             type="visualizeApp"
           />
         </EuiToolTip>
-          
-        MyViz
+        <p
+          className="savedObjectsManagementRelationships__title"
+        >
+            
+          MyViz
+        </p>
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>

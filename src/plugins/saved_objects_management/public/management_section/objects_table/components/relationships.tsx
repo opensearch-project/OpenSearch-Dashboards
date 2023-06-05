@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import './relationships.scss';
 import React, { Component } from 'react';
 import {
   EuiTitle,
@@ -337,16 +338,21 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
       <EuiFlyout onClose={close}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 className="eui-textTruncate">
-              <EuiToolTip position="top" content={getSavedObjectLabel(savedObject.type)}>
+            <h2>
+              <EuiToolTip
+                position="top"
+                content={getSavedObjectLabel(savedObject.type)}
+                anchorClassName="savedObjectsManagementRelationships__tooltipAnchor"
+              >
                 <EuiIcon
                   aria-label={getSavedObjectLabel(savedObject.type)}
                   size="m"
                   type={savedObject.meta.icon || 'apps'}
                 />
               </EuiToolTip>
-              &nbsp;&nbsp;
-              {savedObject.meta.title || getDefaultTitle(savedObject)}
+              <p className="savedObjectsManagementRelationships__title">
+                &nbsp;&nbsp;{savedObject.meta.title || getDefaultTitle(savedObject)}
+              </p>
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
