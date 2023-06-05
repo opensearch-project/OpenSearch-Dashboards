@@ -23,7 +23,7 @@ export class ViewEventsOptionAction implements Action<EmbeddableContext> {
   constructor() {}
 
   public getIconType(): EuiIconType {
-    return 'apmTrace';
+    return 'inspect';
   }
 
   public getDisplayName() {
