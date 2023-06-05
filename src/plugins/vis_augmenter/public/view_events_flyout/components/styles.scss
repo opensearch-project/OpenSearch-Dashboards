@@ -1,4 +1,4 @@
-$vis-description-width: 150px;
+$vis-description-width: 200px;
 $event-vis-height: 55px;
 $timeline-panel-height: 100px;
 $content-padding-top: 110px; // Padding needed within view events flyout content to sit comfortably below flyout header
@@ -22,6 +22,7 @@ $base-vis-min-height: 25vh; // Visualizations require the container to have a va
   &__visDescription {
     min-width: $vis-description-width;
     max-width: $vis-description-width;
+    word-break: break-word;
   }
 
   &__content {

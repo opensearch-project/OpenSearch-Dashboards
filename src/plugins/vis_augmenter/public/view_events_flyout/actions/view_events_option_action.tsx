@@ -5,8 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { get } from 'lodash';
-import { CoreStart } from 'opensearch-dashboards/public';
+import { get, isEmpty } from 'lodash';
 import { VisualizeEmbeddable } from '../../../../visualizations/public';
 import { EmbeddableContext } from '../../../../embeddable/public';
 import { Action, IncompatibleActionError } from '../../../../ui_actions/public';
@@ -24,7 +23,7 @@ export class ViewEventsOptionAction implements Action<EmbeddableContext> {
   constructor() {}
 
   public getIconType(): EuiIconType {
-    return 'apmTrace';
+    return 'inspect';
   }
 
   public getDisplayName() {
@@ -35,7 +34,11 @@ export class ViewEventsOptionAction implements Action<EmbeddableContext> {
 
   public async isCompatible({ embeddable }: EmbeddableContext) {
     const vis = (embeddable as VisualizeEmbeddable).vis;
-    return vis !== undefined && isEligibleForVisLayers(vis);
+    return (
+      vis !== undefined &&
+      isEligibleForVisLayers(vis) &&
+      !isEmpty((embeddable as VisualizeEmbeddable).visLayers)
+    );
   }
 
   public async execute({ embeddable }: EmbeddableContext) {

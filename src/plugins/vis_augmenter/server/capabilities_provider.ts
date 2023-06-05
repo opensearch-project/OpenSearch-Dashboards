@@ -5,7 +5,7 @@
 
 export const capabilitiesProvider = () => ({
   visAugmenter: {
-    show: true,
+    show: false,
     delete: true,
     save: true,
     saveQuery: true,
