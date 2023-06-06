@@ -11,7 +11,6 @@ import {
   buildExpression,
   ExpressionAstFunctionBuilder,
 } from '../../../../plugins/expressions/public';
-import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import {
   ISavedAugmentVis,
   SavedAugmentVisLoader,
@@ -41,8 +40,9 @@ export const isEligibleForVisLayers = (vis: Vis): boolean => {
     vis.data.aggs?.bySchemaName('metric').length > 0 &&
     vis.data.aggs?.bySchemaName('metric').length === vis.data.aggs?.aggs.length - 1;
   const hasOnlyLineSeries =
-    vis.params.seriesParams.every((seriesParam: { type: string }) => seriesParam.type === 'line') &&
-    vis.params.type === 'line';
+    vis.params.seriesParams?.every(
+      (seriesParam: { type: string }) => seriesParam.type === 'line'
+    ) && vis.params.type === 'line';
   // Checks if the augmentation setting is enabled
   const config = getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
