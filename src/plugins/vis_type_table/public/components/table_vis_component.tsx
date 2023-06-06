@@ -104,7 +104,7 @@ export const TableVisComponent = ({
   return (
     <>
       {title && (
-        <EuiTitle size="xs" className="visTable__component__title">
+        <EuiTitle size="xs" className="eui-textCenter">
           <h3>{title}</h3>
         </EuiTitle>
       )}
