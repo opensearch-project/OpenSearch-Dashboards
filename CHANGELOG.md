@@ -26,6 +26,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - [Chore] Update deprecated url methods (url.parse(), url.format()) ([#2910](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2910))
 - Cleanup unused url ([#3847](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3847))
+- Fix `i18n` generation scripts ([#4252](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4252))
 
 ### 🚞 Infrastructure
 
