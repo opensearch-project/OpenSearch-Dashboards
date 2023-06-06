@@ -36,3 +36,5 @@ export * from './saved_augment_vis';
 export * from './test_constants';
 export * from './triggers';
 export * from './actions';
+export { fetchVisEmbeddable } from './view_events_flyout';
+export { setUISettings } from './services'; // Needed for plugin tests related to the CRUD saved object functions
