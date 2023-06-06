@@ -98,7 +98,7 @@ export async function fetchVisEmbeddableWithSetters(
 ): Promise<void> {
   try {
     const embeddable = await fetchVisEmbeddable(savedObjectId);
-    setTimeRange(embeddable.timeRange);
+    setTimeRange(getQueryService().timefilter.timefilter.getTime());
     setVisEmbeddable(embeddable);
   } catch (err: any) {
     setErrorMessage(String(err));

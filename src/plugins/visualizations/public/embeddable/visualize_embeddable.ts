@@ -122,7 +122,7 @@ export class VisualizeEmbeddable
   implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
-  public timeRange?: TimeRange;
+  private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
