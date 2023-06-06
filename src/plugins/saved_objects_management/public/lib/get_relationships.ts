@@ -47,7 +47,7 @@ export async function getRelationships(
         savedObjectTypes,
       },
     });
-  } catch (respError) {
+  } catch (respError: any) {
     const respBody = get(respError, 'data', {}) as any;
     const err = new Error(respBody.message || respBody.error || `${respError.status} Response`);
 

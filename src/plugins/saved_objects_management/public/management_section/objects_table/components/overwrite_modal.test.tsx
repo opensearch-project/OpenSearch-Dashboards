@@ -31,7 +31,7 @@
 import React from 'react';
 import { shallowWithI18nProvider, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { OverwriteModalProps, OverwriteModal } from './overwrite_modal';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from 'test_utils/helpers';
 
 describe('OverwriteModal', () => {
   const obj = { type: 'foo', id: 'bar', meta: { title: 'baz' } };

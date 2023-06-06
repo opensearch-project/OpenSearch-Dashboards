@@ -32,6 +32,11 @@ import { schema } from '@osd/config-schema';
 import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
 import { findAll } from '../lib';
 
+interface Counts {
+  type: Record<string, number>;
+  namespaces: Record<string, number>;
+}
+
 export const registerScrollForCountRoute = (router: IRouter) => {
   router.post(
     {
@@ -46,8 +51,9 @@ export const registerScrollForCountRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { client } = context.core.savedObjects;
-      const counts = {
+      const counts: Counts = {
         type: {},
+        namespaces: {},
       };
 
       const findOptions: SavedObjectsFindOptions = {

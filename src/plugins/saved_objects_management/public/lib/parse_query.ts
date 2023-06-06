@@ -33,6 +33,7 @@ import { Query } from '@elastic/eui';
 interface ParsedQuery {
   queryText?: string;
   visibleTypes?: string[];
+  visibleNamespaces?: string[];
 }
 
 export function parseQuery(query: Query): ParsedQuery {

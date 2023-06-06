@@ -29,7 +29,7 @@ export interface SavedObjectsManagementNamespaceServiceStart {
 
 export class SavedObjectsManagementNamespaceService {
   private readonly namespaces = new Map<string, SavedObjectsManagementNamespace<unknown>>();
-  private readonly alias;
+  private alias: string = '';
 
   setup(): SavedObjectsManagementNamespaceServiceSetup {
     return {

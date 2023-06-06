@@ -55,6 +55,7 @@ import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementNamespaceServiceStart,
 } from '../../../services';
 
 export interface TableProps {
@@ -77,12 +78,12 @@ export interface TableProps {
   items: SavedObjectWithMetadata[];
   itemId: string | (() => string);
   totalItemCount: number;
-  onQueryChange: (query: any, filterFields: string[]) => void;
+  onQueryChange: (query: any, filterFields?: string[]) => void;
   onTableChange: (table: any) => void;
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
-  dateFormat: string;
+  dateFormat?: string;
 }
 
 interface TableState {
@@ -175,7 +176,6 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
-      namespaceRegistry,
       dateFormat,
     } = this.props;
 
