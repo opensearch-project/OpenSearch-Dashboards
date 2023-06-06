@@ -47,13 +47,6 @@ const experimentalLabel = i18n.translate('timeline.uiSettings.experimentalLabel'
   defaultMessage: 'experimental',
 });
 
-/**
- * Describes public Timeline plugin contract returned at the `setup` stage.
- */
-export interface PluginSetupContract {
-  uiEnabled: boolean;
-}
-
 export interface TimelinePluginStartDeps {
   data: PluginStart;
 }
@@ -64,7 +57,7 @@ export interface TimelinePluginStartDeps {
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup(core: CoreSetup): void {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof configSchema>>()
       .pipe(first())
@@ -193,8 +186,6 @@ export class Plugin {
         schema: schema.string(),
       },
     });
-
-    return deepFreeze({ uiEnabled: config.ui.enabled });
   }
 
   public start() {
