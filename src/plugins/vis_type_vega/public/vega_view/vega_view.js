@@ -91,7 +91,11 @@ export class VegaView extends VegaBaseView {
           // to align the data / events. We do this by checking if padding is needed on the left
           // and/or right, and adding padding based on the y axis config.
           left:
-            leftValueAxisPadding && flyoutContext === VisFlyoutContext.EVENT_VIS ? yAxisPadding : 0,
+            leftValueAxisPadding &&
+            (flyoutContext === VisFlyoutContext.EVENT_VIS ||
+              flyoutContext === VisFlyoutContext.TIMELINE_VIS)
+              ? yAxisPadding
+              : 0,
           right:
             rightValueAxisPadding && flyoutContext === VisFlyoutContext.EVENT_VIS
               ? yAxisPadding
