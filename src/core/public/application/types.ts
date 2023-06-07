@@ -47,6 +47,7 @@ import { IUiSettingsClient } from '../ui_settings';
 import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory, WorkspaceTemplate } from '../../types';
 import { ScopedHistory } from './scoped_history';
+import { WorkspacesStart } from '../workspace';
 
 /**
  * Accessibility status of an application.
@@ -340,6 +341,8 @@ export interface AppMountContext {
     injectedMetadata: {
       getInjectedVar: (name: string, defaultValue?: any) => unknown;
     };
+    /** {@link WorkspacesService} */
+    workspaces: WorkspacesStart;
   };
 }
 
