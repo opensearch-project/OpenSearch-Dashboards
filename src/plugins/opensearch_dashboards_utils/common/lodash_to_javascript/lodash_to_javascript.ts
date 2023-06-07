@@ -1,12 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-export default function isFunction(func: string | any) {
-
-  if (typeof func === 'string') {
-    return typeof func === "function";
-  } else if (Array.isArray(func)) {
-    return typeof func === "function";
-  } else {
-    return typeof func === "function";
-  }
-
+export function isFunction(func: string | any) {
+  return typeof func === 'function';
 }
