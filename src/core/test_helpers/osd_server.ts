@@ -52,6 +52,7 @@ export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 const DEFAULTS_SETTINGS = {
   server: {
     autoListen: true,
+    host: '0.0.0.0',
     // Use the ephemeral port to make sure that tests use the first available
     // port and aren't affected by the timing issues in test environment.
     port: 0,

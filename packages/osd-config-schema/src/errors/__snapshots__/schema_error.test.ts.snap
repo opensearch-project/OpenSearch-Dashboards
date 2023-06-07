@@ -1,8 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`includes stack 1`] = `
-"Error: test
-    at new SchemaError (packages/osd-config-schema/src/errors/schema_error.ts:35:5)
-    at Object.<anonymous> (packages/osd-config-schema/src/errors/schema_error.test.ts:59:11)
+"SchemaError: test
+    at Object.<anonymous> (packages/osd-config-schema/src/errors/schema_error.test.ts:67:11)
     at new Promise (<anonymous>)"
 `;

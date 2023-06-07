@@ -36,6 +36,7 @@ const createLangWorkerConfig = (lang) => ({
   output: {
     path: path.resolve(__dirname, 'target/public'),
     filename: `${lang}.editor.worker.js`,
+    hashFunction: 'Xxh64',
   },
   resolve: {
     modules: ['node_modules'],

@@ -154,7 +154,7 @@ export function initDashboardApp(app, deps) {
               type: $scope.dashboardListTypes,
               search: search ? `${search}*` : undefined,
               fields: ['title', 'type', 'description', 'updated_at'],
-              perPage: $scope.initialPageSize,
+              perPage: $scope.listingLimit,
               page: 1,
               searchFields: ['title^3', 'type', 'description'],
               defaultSearchOperator: 'AND',

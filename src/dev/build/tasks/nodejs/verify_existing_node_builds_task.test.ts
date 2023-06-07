@@ -43,7 +43,9 @@ jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
 
 const { getNodeShasums } = jest.requireMock('./node_shasums');
-const { getNodeDownloadInfo, getLatestNodeVersion } = jest.requireMock('./node_download_info');
+const { getNodeDownloadInfo, getLatestNodeVersion, getRequiredVersion } = jest.requireMock(
+  './node_download_info'
+);
 const { getFileHash } = jest.requireMock('../../lib/fs');
 
 const log = new ToolingLog();
@@ -82,6 +84,8 @@ async function setup(actualShaSums?: Record<string, string>) {
   });
 
   getLatestNodeVersion.mockReturnValue('<node version>');
+
+  getRequiredVersion.mockReturnValue('<node version>');
 
   getFileHash.mockImplementation((downloadPath: string) => {
     if (actualShaSums?.[downloadPath]) {
