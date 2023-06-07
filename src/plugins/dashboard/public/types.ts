@@ -40,7 +40,11 @@ import {
   ScopedHistory,
   AppMountParameters,
 } from 'src/core/public';
-import { IOsdUrlStateStorage, Storage } from 'src/plugins/opensearch_dashboards_utils/public';
+import {
+  IOsdUrlStateStorage,
+  ReduxLikeStateContainer,
+  Storage,
+} from 'src/plugins/opensearch_dashboards_utils/public';
 import { SavedObjectLoader, SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
 import { SharePluginStart } from 'src/plugins/share/public';
@@ -54,6 +58,8 @@ import { SavedDashboardPanel730ToLatest } from '../common';
 export interface DashboardCapabilities {
   showWriteControls: boolean;
   createNew: boolean;
+  showSavedQuery: boolean;
+  saveQuery: boolean;
 }
 
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
@@ -148,6 +154,11 @@ export interface DashboardAppStateTransitions {
     value: DashboardAppState['options'][T]
   ) => DashboardAppState;
 }
+
+export type DashboardAppStateContainer = ReduxLikeStateContainer<
+  DashboardAppState,
+  DashboardAppStateTransitions
+>;
 
 export interface SavedDashboardPanelMap {
   [key: string]: SavedDashboardPanel;
