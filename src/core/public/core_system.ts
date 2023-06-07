@@ -54,6 +54,7 @@ import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { WorkspacesService } from './workspace';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -110,6 +111,7 @@ export class CoreSystem {
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
+  private readonly workspaces: WorkspacesService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -138,6 +140,7 @@ export class CoreSystem {
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
+    this.workspaces = new WorkspacesService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
@@ -199,6 +202,7 @@ export class CoreSystem {
       const uiSettings = await this.uiSettings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = await this.http.start();
+      const workspaces = await this.workspaces.start({ http });
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const fatalErrors = await this.fatalErrors.start();
@@ -242,6 +246,7 @@ export class CoreSystem {
         overlays,
         savedObjects,
         uiSettings,
+        workspaces,
       }));
 
       const core: InternalCoreStart = {
@@ -256,6 +261,7 @@ export class CoreSystem {
         overlays,
         uiSettings,
         fatalErrors,
+        workspaces,
       };
 
       await this.plugins.start(core);

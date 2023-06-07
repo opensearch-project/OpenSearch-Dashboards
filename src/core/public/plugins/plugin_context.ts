@@ -168,5 +168,6 @@ export function createPluginStartContext<
       getBranding: deps.injectedMetadata.getBranding,
     },
     fatalErrors: deps.fatalErrors,
+    workspaces: deps.workspaces,
   };
 }

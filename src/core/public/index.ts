@@ -87,6 +87,7 @@ import {
   HandlerParameters,
 } from './context';
 import { Branding } from '../types';
+import { WorkspacesStart } from './workspace';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -294,6 +295,8 @@ export interface CoreStart {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
     getBranding: () => Branding;
   };
+  /** {@link WorkspacesStart} */
+  workspaces: WorkspacesStart;
 }
 
 export {
