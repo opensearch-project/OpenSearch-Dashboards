@@ -61,6 +61,13 @@ export class WorkspacesClient {
     };
   }
 
+  public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
+    return {
+      success: false,
+      error: 'Unimplement',
+    };
+  }
+
   public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttribute>> {
     return {
       success: false,
