@@ -239,6 +239,22 @@ describe('utils', () => {
       } as unknown) as Vis;
       expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
+    it('vis is ineligible with no seriesParams', async () => {
+      const invalidVis = ({
+        params: {
+          type: 'pie',
+          categoryAxes: [
+            {
+              position: 'bottom',
+            },
+          ],
+        },
+        data: {
+          aggs: VALID_AGGS,
+        },
+      } as unknown) as Vis;
+      expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
+    });
     it('vis is ineligible with valid type and disabled setting', async () => {
       uiSettingsMock.get.mockImplementation((key: string) => {
         return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;

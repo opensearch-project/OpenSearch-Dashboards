@@ -11,7 +11,6 @@ import {
   buildExpression,
   ExpressionAstFunctionBuilder,
 } from '../../../../plugins/expressions/public';
-import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import {
   ISavedAugmentVis,
   SavedAugmentVisLoader,
@@ -28,7 +27,7 @@ export const isEligibleForVisLayers = (vis: Vis): boolean => {
   // Only support date histogram and ensure there is only 1 x-axis and it has to be on the bottom.
   // Additionally to have a valid x-axis, there needs to be a segment aggregation
   const hasValidXaxis =
-    vis.data.aggs !== undefined &&
+    vis.data?.aggs !== undefined &&
     vis.data.aggs?.byTypeName('date_histogram').length === 1 &&
     vis.params.categoryAxes.length === 1 &&
     vis.params.categoryAxes[0].position === 'bottom' &&
@@ -37,12 +36,13 @@ export const isEligibleForVisLayers = (vis: Vis): boolean => {
   // multiple supported yaxis only. If there are other aggregation types, this is not
   // valid for augmentation
   const hasCorrectAggregationCount =
-    vis.data.aggs !== undefined &&
+    vis.data?.aggs !== undefined &&
     vis.data.aggs?.bySchemaName('metric').length > 0 &&
     vis.data.aggs?.bySchemaName('metric').length === vis.data.aggs?.aggs.length - 1;
   const hasOnlyLineSeries =
-    vis.params.seriesParams.every((seriesParam: { type: string }) => seriesParam.type === 'line') &&
-    vis.params.type === 'line';
+    vis.params?.seriesParams?.every(
+      (seriesParam: { type: string }) => seriesParam.type === 'line'
+    ) && vis.params?.type === 'line';
   // Checks if the augmentation setting is enabled
   const config = getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
