@@ -64,6 +64,8 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   _level?: number;
   _icon?: string;
   items: ItemDescriptor[];
+  _category?: string;
+  _order?: number;
 };
 
 const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
@@ -125,7 +127,7 @@ const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemD
 const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
   const euiPanels: EuiContextMenuPanelDescriptor[] = [];
   for (const panel of panels) {
-    const { _level: omit, _icon: omit2, ...rest } = panel;
+    const { _level: omit, _icon: omit2, _category: omit3, _order: omit4, ...rest } = panel;
     euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
   }
   return euiPanels;
@@ -179,6 +181,8 @@ export async function buildContextMenuForActions({
             items: [],
             _level: i,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
+            _category: group.category,
+            _order: group.order,
           };
 
           // If there are multiple groups and this is not the first group,
@@ -231,17 +235,57 @@ export async function buildContextMenuForActions({
   // Any additional items are hidden behind a "more" item
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
+  // This will be used to store items that eventually are placed into the
+  // mainMenu panel. Specifying a category allows for placing groups into the
+  // mainMenu so they appear without the separator between them.
+  const categories = {};
+
   for (const panel of Object.values(panels)) {
-    // If the panel is a root-level panel, such as the parent of a group,
-    // then create mainMenu item for this panel
-    if (panel._level === 0) {
+    // Do nothing if not root-level panel, such as the parent of a group
+    if (panel._level !== 0) {
+      continue;
+    }
+
+    // Proceed to create mainMenu item for this panel
+
+    // If a category is specified, store either a link to the panel or the
+    // item within to that category. We will deal with the category after
+    // looping through all panels.
+    if (panel._category) {
+      // Create array to store category items
+      if (!categories[panel._category]) {
+        categories[panel._category] = [];
+      }
+
+      // If multiple items in the panel, store a link to this panel into the category.
+      // Otherwise, just store the single item into the category.
+      if (panel.items.length > 1) {
+        categories[panel._category].push({
+          order: panel._order,
+          items: [
+            {
+              name: panel.title || panel.id,
+              icon: panel._icon || 'empty',
+              panel: panel.id,
+            },
+          ],
+        });
+      } else {
+        categories[panel._category].push({
+          order: panel._order || 0,
+          items: panel.items,
+        });
+      }
+    } else {
+      // If no category, continue with adding items to the mainMenu
+
       // Add separator with unique key if needed
       if (panels.mainMenu.items.length) {
         panels.mainMenu.items.push({ isSeparator: true, key: `${panel.id}separator` });
       }
 
       // If a panel has more than one child, then allow items to be grouped
-      // and link to it in the mainMenu. Otherwise, flatten the group.
+      // and link to it in the mainMenu. Otherwise, link to the single item.
       // Note: this only happens on the root level panels, not for inner groups.
       if (panel.items.length > 1) {
         panels.mainMenu.items.push({
@@ -255,6 +299,27 @@ export async function buildContextMenuForActions({
     }
   }
 
+  // For each category, add a separator before each one and then add category items.
+  // This is for the mainMenu panel.
+  Object.keys(categories).forEach((key) => {
+    // Get the items sorted by group order, allowing for groups within categories
+    // to be ordered. A category consists of an order and its items.
+    // Higher orders are sorted to the top.
+    const sortedEntries = categories[key].sort((a, b) => b.order - a.order);
+    const sortedItems = sortedEntries.reduce(
+      (items, category) => [...items, ...category.items],
+      []
+    );
+
+    // Add separator with unique key if needed
+    if (panels.mainMenu.items.length) {
+      panels.mainMenu.items.push({ isSeparator: true, key: `${key}separator` });
+    }
+
+    panels.mainMenu.items.push(...sortedItems);
+  });
+
   const panelList = Object.values(panels);
+
   return removePanelMetaFields(panelList);
 }

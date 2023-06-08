@@ -56,6 +56,7 @@ import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/r
 import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
+  SavedObjectRepositoryFactoryProvider,
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
@@ -166,6 +167,14 @@ export interface SavedObjectsServiceSetup {
    * Returns the maximum number of objects allowed for import or export operations.
    */
   getImportExportObjectLimit: () => number;
+
+  /**
+   * Set the default {@link SavedObjectRepositoryFactoryProvider | factory provider} for creating Saved Objects repository.
+   * Only one repository can be set, subsequent calls to this method will fail.
+   */
+  setRepositoryFactoryProvider: (
+    respositoryFactoryProvider: SavedObjectRepositoryFactoryProvider
+  ) => void;
 }
 
 /**
@@ -291,6 +300,8 @@ export class SavedObjectsService
   private typeRegistry = new SavedObjectTypeRegistry();
   private started = false;
 
+  private respositoryFactoryProvider?: SavedObjectRepositoryFactoryProvider;
+
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
   }
@@ -348,6 +359,15 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getImportExportObjectLimit: () => this.config!.maxImportExportSize,
+      setRepositoryFactoryProvider: (repositoryProvider) => {
+        if (this.started) {
+          throw new Error('cannot call `setRepositoryFactoryProvider` after service startup.');
+        }
+        if (this.respositoryFactoryProvider) {
+          throw new Error('custom repository factory is already set, and can only be set once');
+        }
+        this.respositoryFactoryProvider = repositoryProvider;
+      },
     };
   }
 
@@ -422,13 +442,21 @@ export class SavedObjectsService
       opensearchClient: OpenSearchClient,
       includedHiddenTypes: string[] = []
     ) => {
-      return SavedObjectsRepository.createRepository(
-        migrator,
-        this.typeRegistry,
-        opensearchDashboardsConfig.index,
-        opensearchClient,
-        includedHiddenTypes
-      );
+      if (this.respositoryFactoryProvider) {
+        return this.respositoryFactoryProvider({
+          migrator,
+          typeRegistry: this.typeRegistry,
+          includedHiddenTypes,
+        });
+      } else {
+        return SavedObjectsRepository.createRepository(
+          migrator,
+          this.typeRegistry,
+          opensearchDashboardsConfig.index,
+          opensearchClient,
+          includedHiddenTypes
+        );
+      }
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
