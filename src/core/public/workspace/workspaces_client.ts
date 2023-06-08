@@ -21,11 +21,15 @@ const join = (...uriComponents: Array<string | undefined>) =>
     .map(encodeURIComponent)
     .join('/');
 
-interface IResponse<T> {
-  result: T;
-  success: boolean;
-  error?: string;
-}
+type IResponse<T> =
+  | {
+      result: T;
+      success: true;
+    }
+  | {
+      success: false;
+      error?: string;
+    };
 
 /**
  * Workspaces is OpenSearchDashboards's visualize mechanism allowing admins to
@@ -35,7 +39,6 @@ interface IResponse<T> {
  */
 export class WorkspacesClient {
   private http: HttpStart;
-  /** @internal */
   constructor(http: HttpStart) {
     this.http = http;
   }
@@ -44,25 +47,22 @@ export class WorkspacesClient {
     return resolveUrl(`${WORKSPACES_API_BASE_URL}/`, join(...path));
   }
 
-  public async enterWorkspace(id: string): Promise<IResponse<boolean>> {
+  public async enterWorkspace(id: string): Promise<IResponse<null>> {
     return {
-      result: false,
       success: false,
       error: 'Unimplement',
     };
   }
 
-  public async exitWorkspace(): Promise<IResponse<boolean>> {
+  public async exitWorkspace(): Promise<IResponse<null>> {
     return {
-      result: false,
       success: false,
       error: 'Unimplement',
     };
   }
 
-  public async getCurrentWorkspace(): Promise<IResponse<boolean>> {
+  public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttribute>> {
     return {
-      result: false,
       success: false,
       error: 'Unimplement',
     };
@@ -74,7 +74,9 @@ export class WorkspacesClient {
    * @param attributes
    * @returns
    */
-  public create = (attributes: Omit<WorkspaceAttribute, 'id'>): Promise<WorkspaceAttribute> => {
+  public create = (
+    attributes: Omit<WorkspaceAttribute, 'id'>
+  ): Promise<IResponse<WorkspaceAttribute>> => {
     if (!attributes) {
       return Promise.reject(new Error('requires attributes'));
     }
@@ -95,7 +97,7 @@ export class WorkspacesClient {
    * @param id
    * @returns
    */
-  public delete = (id: string): Promise<{ success: boolean }> => {
+  public delete = (id: string): Promise<IResponse<null>> => {
     if (!id) {
       return Promise.reject(new Error('requires id'));
     }
@@ -118,11 +120,13 @@ export class WorkspacesClient {
   public list = (
     options?: WorkspaceFindOptions
   ): Promise<
-    WorkspaceAttribute & {
-      total: number;
-      perPage: number;
-      page: number;
-    }
+    IResponse<
+      WorkspaceAttribute & {
+        total: number;
+        perPage: number;
+        page: number;
+      }
+    >
   > => {
     const path = this.getPath(['_list']);
     return this.http.fetch(path, {
@@ -137,7 +141,7 @@ export class WorkspacesClient {
    * @param {string} id
    * @returns The workspace for the given id.
    */
-  public get = (id: string): Promise<WorkspaceAttribute> => {
+  public get = (id: string): Promise<IResponse<WorkspaceAttribute>> => {
     if (!id) {
       return Promise.reject(new Error('requires id'));
     }
@@ -151,17 +155,11 @@ export class WorkspacesClient {
   /**
    * Updates a workspace
    *
-   * @param {string} type
    * @param {string} id
    * @param {object} attributes
    * @returns
    */
-  public update(
-    id: string,
-    attributes: Partial<WorkspaceAttribute>
-  ): Promise<{
-    success: boolean;
-  }> {
+  public update(id: string, attributes: Partial<WorkspaceAttribute>): Promise<IResponse<boolean>> {
     if (!id || !attributes) {
       return Promise.reject(new Error('requires id and attributes'));
     }
@@ -178,6 +176,7 @@ export class WorkspacesClient {
       })
       .then((resp: WorkspaceAttribute) => {
         return {
+          result: true,
           success: true,
         };
       });
