@@ -4,6 +4,7 @@
  */
 import { resolve as resolveUrl } from 'url';
 import type { PublicMethodsOf } from '@osd/utility-types';
+import { WORKSPACES_API_BASE_URL } from '../../server/types';
 import { HttpStart } from '../http';
 import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
 
@@ -14,13 +15,17 @@ import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
  */
 export type WorkspacesClientContract = PublicMethodsOf<WorkspacesClient>;
 
-const API_BASE_URL = '/api/workspaces/';
-
 const join = (...uriComponents: Array<string | undefined>) =>
   uriComponents
     .filter((comp): comp is string => Boolean(comp))
     .map(encodeURIComponent)
     .join('/');
+
+interface IResponse<T> {
+  result: T;
+  success: boolean;
+  error?: string;
+}
 
 /**
  * Workspaces is OpenSearchDashboards's visualize mechanism allowing admins to
@@ -35,16 +40,32 @@ export class WorkspacesClient {
     this.http = http;
   }
 
-  private async performBulkGet(objects: Array<{ id: string }>): Promise<WorkspaceAttribute[]> {
-    const path = this.getPath(['_bulk_get']);
-    return this.http.fetch(path, {
-      method: 'POST',
-      body: JSON.stringify(objects),
-    });
+  private getPath(path: Array<string | undefined>): string {
+    return resolveUrl(`${WORKSPACES_API_BASE_URL}/`, join(...path));
   }
 
-  private getPath(path: Array<string | undefined>): string {
-    return resolveUrl(API_BASE_URL, join(...path));
+  public async enterWorkspace(id: string): Promise<IResponse<boolean>> {
+    return {
+      result: false,
+      success: false,
+      error: 'Unimplement',
+    };
+  }
+
+  public async exitWorkspace(): Promise<IResponse<boolean>> {
+    return {
+      result: false,
+      success: false,
+      error: 'Unimplement',
+    };
+  }
+
+  public async getCurrentWorkspace(): Promise<IResponse<boolean>> {
+    return {
+      result: false,
+      success: false,
+      error: 'Unimplement',
+    };
   }
 
   /**
@@ -121,12 +142,9 @@ export class WorkspacesClient {
       return Promise.reject(new Error('requires id'));
     }
 
-    return this.performBulkGet([{ id }]).then((res) => {
-      if (res.length) {
-        return res[0];
-      }
-
-      return Promise.reject('No workspace can be found');
+    const path = this.getPath([id]);
+    return this.http.fetch(path, {
+      method: 'GET',
     });
   };
 
