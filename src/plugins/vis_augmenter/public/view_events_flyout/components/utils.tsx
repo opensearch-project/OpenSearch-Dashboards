@@ -47,48 +47,58 @@ function getValueAxisPositions(embeddable: VisualizeEmbeddable): { left: boolean
  * Fetching the base vis to show in the flyout, based on the saved object ID. Add constraints
  * such that it is static and won't auto-refresh within the flyout.
  * @param savedObjectId the saved object id of the base vis
+ */
+export async function fetchVisEmbeddable(savedObjectId: string): Promise<VisualizeEmbeddable> {
+  const embeddableVisFactory = getEmbeddable().getEmbeddableFactory('visualization');
+  const contextInput = {
+    filters: getQueryService().filterManager.getFilters(),
+    query: getQueryService().queryString.getQuery(),
+    timeRange: getQueryService().timefilter.timefilter.getTime(),
+  };
+
+  const embeddable = (await embeddableVisFactory?.createFromSavedObject(savedObjectId, {
+    ...contextInput,
+    visAugmenterConfig: {
+      inFlyout: true,
+      flyoutContext: VisFlyoutContext.BASE_VIS,
+    },
+  } as VisualizeInput)) as VisualizeEmbeddable | ErrorEmbeddable;
+
+  if (embeddable instanceof ErrorEmbeddable) {
+    throw getErrorMessage(embeddable);
+  }
+
+  embeddable.updateInput({
+    // @ts-ignore
+    refreshConfig: {
+      value: 0,
+      pause: true,
+    },
+  });
+
+  // By waiting for this to complete, embeddable.visLayers will be populated
+  await embeddable.populateVisLayers();
+
+  return embeddable;
+}
+
+/**
+ * Fetching the base vis to show in the flyout, based on the saved object ID. Add constraints
+ * such that it is static and won't auto-refresh within the flyout.
+ * @param savedObjectId the saved object id of the base vis
  * @param setTimeRange custom hook used in base component
  * @param setVisEmbeddable custom hook used in base component
  * @param setErrorMessage custom hook used in base component
  */
-export async function fetchVisEmbeddable(
+export async function fetchVisEmbeddableWithSetters(
   savedObjectId: string,
   setTimeRange: Function,
   setVisEmbeddable: Function,
   setErrorMessage: Function
 ): Promise<void> {
-  const embeddableVisFactory = getEmbeddable().getEmbeddableFactory('visualization');
   try {
-    const contextInput = {
-      filters: getQueryService().filterManager.getFilters(),
-      query: getQueryService().queryString.getQuery(),
-      timeRange: getQueryService().timefilter.timefilter.getTime(),
-    };
-    setTimeRange(contextInput.timeRange);
-
-    const embeddable = (await embeddableVisFactory?.createFromSavedObject(savedObjectId, {
-      ...contextInput,
-      visAugmenterConfig: {
-        inFlyout: true,
-        flyoutContext: VisFlyoutContext.BASE_VIS,
-      },
-    } as VisualizeInput)) as VisualizeEmbeddable | ErrorEmbeddable;
-
-    if (embeddable instanceof ErrorEmbeddable) {
-      throw getErrorMessage(embeddable);
-    }
-
-    embeddable.updateInput({
-      // @ts-ignore
-      refreshConfig: {
-        value: 0,
-        pause: true,
-      },
-    });
-
-    // By waiting for this to complete, embeddable.visLayers will be populated
-    await embeddable.populateVisLayers();
-
+    const embeddable = await fetchVisEmbeddable(savedObjectId);
+    setTimeRange(getQueryService().timefilter.timefilter.getTime());
     setVisEmbeddable(embeddable);
   } catch (err: any) {
     setErrorMessage(String(err));

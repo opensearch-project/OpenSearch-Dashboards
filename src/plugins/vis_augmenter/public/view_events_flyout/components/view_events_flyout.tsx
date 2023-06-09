@@ -22,7 +22,11 @@ import { LoadingFlyoutBody } from './loading_flyout_body';
 import { ErrorFlyoutBody } from './error_flyout_body';
 import { EventsPanel } from './events_panel';
 import { TimelinePanel } from './timeline_panel';
-import { fetchVisEmbeddable, createEventEmbeddables, createTimelineEmbeddable } from './utils';
+import {
+  fetchVisEmbeddableWithSetters,
+  createEventEmbeddables,
+  createTimelineEmbeddable,
+} from './utils';
 import { EventVisEmbeddablesMap } from './types';
 
 interface Props {
@@ -56,7 +60,12 @@ export function ViewEventsFlyout(props: Props) {
   }
 
   useEffect(() => {
-    fetchVisEmbeddable(props.savedObjectId, setTimeRange, setVisEmbeddable, setErrorMessage);
+    fetchVisEmbeddableWithSetters(
+      props.savedObjectId,
+      setTimeRange,
+      setVisEmbeddable,
+      setErrorMessage
+    );
     // adding all of the values to the deps array cause a circular re-render. we don't want
     // to keep re-fetching the visEmbeddable after it is set.
     /* eslint-disable react-hooks/exhaustive-deps */

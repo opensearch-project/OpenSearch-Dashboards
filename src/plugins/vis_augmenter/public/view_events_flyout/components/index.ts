@@ -5,3 +5,4 @@
 
 export { ViewEventsFlyout } from './view_events_flyout';
 export { EventVisEmbeddablesMap, EventVisEmbeddableItem } from './types';
+export { fetchVisEmbeddable } from './utils';
