@@ -309,7 +309,6 @@ export class DiscoverPlugin
     core.application.register({
       id: 'discoverLegacy',
       title: 'Discover Legacy',
-      updater$: this.appStateUpdater.asObservable(),
       defaultPath: '#/',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
@@ -376,9 +375,6 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
-    // This is needed because the navLinkStatus property on the app registration function does not respect this value if the appStateUpdater is set
-    this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
-
     // we need to register the application service at setup, but to render it
     // there are some start dependencies necessary, for this reason
     // initializeInnerAngular + initializeServices are assigned at start and used
