@@ -1,12 +1,16 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useEffect } from 'react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
-import { matchPath, Route, Switch, useLocation } from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 
 import { ROUTES } from './routes';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { ChromeBreadcrumb } from '../../../../core/public';
-import { WORKSPACE_APP_NAME } from '../../common/constants';
+import { createBreadcrumbsFromPath } from './utils/breadcrumbs';
 
 export const WorkspaceApp = ({ appBasePath }: { appBasePath: string }) => {
   const {
@@ -18,30 +22,9 @@ export const WorkspaceApp = ({ appBasePath }: { appBasePath: string }) => {
    * map the current pathname to breadcrumbs
    */
   useEffect(() => {
-    let pathname = location.pathname;
-    const breadcrumbs: ChromeBreadcrumb[] = [];
-
-    while (pathname !== '/') {
-      const matchedRoute = ROUTES.find((route) =>
-        matchPath(pathname, { path: route.path, exact: true })
-      );
-      if (matchedRoute) {
-        if (breadcrumbs.length === 0) {
-          breadcrumbs.unshift({ text: matchedRoute.label });
-        } else {
-          breadcrumbs.unshift({
-            text: matchedRoute.label,
-            href: `${appBasePath}${matchedRoute.path}`,
-          });
-        }
-      }
-      const pathArr = pathname.split('/');
-      pathArr.pop();
-      pathname = pathArr.join('/') ? pathArr.join('/') : '/';
-    }
-    breadcrumbs.unshift({ text: WORKSPACE_APP_NAME, href: appBasePath });
+    const breadcrumbs = createBreadcrumbsFromPath(location.pathname, ROUTES, appBasePath);
     chrome?.setBreadcrumbs(breadcrumbs);
-  }, [appBasePath, location.pathname, chrome?.setBreadcrumbs]);
+  }, [appBasePath, location.pathname, chrome]);
 
   return (
     <I18nProvider>
