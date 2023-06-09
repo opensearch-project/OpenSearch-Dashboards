@@ -45,7 +45,7 @@ import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
 import { SavedObjectsStart } from '../saved_objects';
-import { AppCategory } from '../../types';
+import { AppCategory, WorkspaceTemplate } from '../../types';
 import { ScopedHistory } from './scoped_history';
 
 /**
@@ -122,6 +122,12 @@ export interface App<HistoryLocationState = unknown> {
    * See DEFAULT_APP_CATEGORIES for more reference
    */
   category?: AppCategory;
+
+  /**
+   * The template definition of features belongs to
+   * See {@link WorkspaceTemplate}
+   */
+  workspaceTemplate?: WorkspaceTemplate[];
 
   /**
    * The initial status of the application.
