@@ -1,7 +1,7 @@
 {
-  "id": "discover",
+  "id": "discoverLegacy",
   "version": "opensearchDashboards",
-  "server": true,
+  "server": false,
   "ui": true,
   "requiredPlugins": [
     "charts",

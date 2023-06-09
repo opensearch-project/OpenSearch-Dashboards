@@ -81,7 +81,6 @@ import {
   getServices,
 } from './opensearch_dashboards_services';
 import { createSavedSearchesLoader } from './saved_searches';
-import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import {
   DiscoverUrlGeneratorState,
@@ -89,6 +88,7 @@ import {
   DiscoverUrlGenerator,
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
+import { AppNavLinkStatus } from '../../../core/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -195,9 +195,6 @@ export class DiscoverPlugin
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
-    plugins.urlForwarding.forwardApp('discover', 'discover-legacy', (path) => {
-      return path;
-    });
     const baseUrl = core.http.basePath.prepend('/app/discover');
 
     if (plugins.share) {
@@ -286,7 +283,7 @@ export class DiscoverPlugin
       getHistory: getScopedHistory,
       baseUrl,
       defaultSubUrl: '#/',
-      storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
+      storageKey: `lastUrl:${core.http.basePath.get()}:discover_legacy`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
@@ -311,13 +308,11 @@ export class DiscoverPlugin
 
     this.docViewsRegistry.setAngularInjectorGetter(this.getEmbeddableInjector);
     core.application.register({
-      id: 'discover',
-      title: 'Discover',
+      id: 'discoverLegacy',
+      title: 'Discover Legacy',
       updater$: this.appStateUpdater.asObservable(),
-      order: 1000,
-      euiIconType: 'inputOutput',
-      defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      // defaultPath: '#/',
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
@@ -331,13 +326,7 @@ export class DiscoverPlugin
         appMounted();
         const {
           plugins: { data: dataStart },
-          core: {
-            application: { navigateToApp },
-          },
         } = await this.initializeServices();
-
-        const path = window.location.hash;
-        navigateToApp('discoverLegacy', { replace: true, path });
         await this.initializeInnerAngular();
 
         // make sure the index pattern list is up to date
@@ -353,33 +342,29 @@ export class DiscoverPlugin
       },
     });
 
-    // plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
-    //   return `#${path}`;
-    // });
-    // plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
-    //   const urlParts = path.split('/');
-    //   // take care of urls containing legacy url, those split in the following way
-    //   // ["", "context", indexPatternId, _type, id + params]
-    //   if (urlParts[4]) {
-    //     // remove _type part
-    //     const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
-    //     return `#${newPath}`;
-    //   }
-    //   return `#${path}`;
-    // });
-    // plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
-    //   const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
-    //   if (!id) {
-    //     return `#${path.replace('/discover', '') || '/'}`;
-    //   }
-    //   return `#/view/${id}${tail || ''}`;
-    // });
+    plugins.urlForwarding.forwardApp('doc', 'discoverLegacy', (path) => {
+      return `#${path}`;
+    });
+    plugins.urlForwarding.forwardApp('context', 'discoverLegacy', (path) => {
+      const urlParts = path.split('/');
+      // take care of urls containing legacy url, those split in the following way
+      // ["", "context", indexPatternId, _type, id + params]
+      if (urlParts[4]) {
+        // remove _type part
+        const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
+        return `#${newPath}`;
+      }
+      return `#${path}`;
+    });
+    plugins.urlForwarding.forwardApp('discoverLegacy', 'discoverLegacy', (path) => {
+      const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
+      if (!id) {
+        return `#${path.replace('/discover', '') || '/'}`;
+      }
+      return `#/view/${id}${tail || ''}`;
+    });
 
-    // if (plugins.home) {
-    //   registerFeature(plugins.home);
-    // }
-
-    // this.registerEmbeddable(core, plugins);
+    this.registerEmbeddable(core, plugins);
 
     return {
       docViews: {
