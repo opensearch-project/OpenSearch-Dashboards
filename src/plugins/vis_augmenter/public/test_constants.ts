@@ -480,7 +480,7 @@ export const TEST_VIS_LAYERS_MULTIPLE = [
 ];
 
 const TEST_RULE_LAYER_SINGLE_VIS_LAYER = {
-  mark: { type: 'rule', color: 'red', opacity: 1 },
+  mark: { type: 'rule', color: EVENT_COLOR, opacity: 1 },
   transform: [{ filter: `datum['${TEST_PLUGIN_EVENT_TYPE}'] > 0` }],
   encoding: {
     x: { field: TEST_X_AXIS_ID, type: 'temporal' },
