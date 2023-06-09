@@ -59,7 +59,6 @@ import rison from 'rison-node';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { createOsdUrlTracker, url } from '../../opensearch_dashboards_utils/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
@@ -311,7 +310,7 @@ export class DiscoverPlugin
       id: 'discoverLegacy',
       title: 'Discover Legacy',
       updater$: this.appStateUpdater.asObservable(),
-      // defaultPath: '#/',
+      defaultPath: '#/',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
@@ -377,6 +376,9 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
+    // This is needed because the navLinkStatus property on the app registration function does not respect this value if the appStateUpdater is set
+    this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+
     // we need to register the application service at setup, but to render it
     // there are some start dependencies necessary, for this reason
     // initializeInnerAngular + initializeServices are assigned at start and used

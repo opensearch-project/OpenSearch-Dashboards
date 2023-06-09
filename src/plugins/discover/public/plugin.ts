@@ -71,7 +71,6 @@ import {
   setDocViewsRegistry,
   setDocViewsLinksRegistry,
   setUrlTracker,
-  setAngularModule,
   setServices,
   setHeaderActionMenuMounter,
   setUiActions,
@@ -81,7 +80,6 @@ import {
   getServices,
 } from './opensearch_dashboards_services';
 import { createSavedSearchesLoader } from './saved_searches';
-import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import {
   DiscoverUrlGeneratorState,
@@ -89,6 +87,7 @@ import {
   DiscoverUrlGenerator,
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
+import { DISCOVER_LEGACY_TOGGLE } from '../common';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -166,7 +165,6 @@ export interface DiscoverStartPlugins {
   visualizations: VisualizationsStart;
 }
 
-const innerAngularName = 'app/discover';
 const embeddableAngularName = 'app/discoverEmbeddable';
 
 /**
@@ -184,20 +182,10 @@ export class DiscoverPlugin
   private embeddableInjector: auto.IInjectorService | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
-  private innerAngularInitialized: boolean = false;
   private urlGenerator?: DiscoverStart['urlGenerator'];
-
-  /**
-   * why are those functions public? they are needed for some mocha tests
-   * can be removed once all is Jest
-   */
-  public initializeInnerAngular?: () => void;
-  public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
+  private initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
-    plugins.urlForwarding.forwardApp('discover', 'discover-legacy', (path) => {
-      return path;
-    });
     const baseUrl = core.http.basePath.prepend('/app/discover');
 
     if (plugins.share) {
@@ -322,37 +310,33 @@ export class DiscoverPlugin
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
         }
-        if (!this.initializeInnerAngular) {
-          throw Error('Discover plugin method initializeInnerAngular is undefined');
-        }
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
         const {
-          plugins: { data: dataStart },
           core: {
             application: { navigateToApp },
           },
         } = await this.initializeServices();
 
         const path = window.location.hash;
-        navigateToApp('discoverLegacy', { replace: true, path });
-        await this.initializeInnerAngular();
+        const enableLegacyMode = await core.uiSettings.get<boolean>(DISCOVER_LEGACY_TOGGLE);
+        navigateToApp(enableLegacyMode ? 'discoverLegacy' : 'dataExplorer', {
+          replace: true,
+          path,
+        });
 
+        // TODO: Carry this over to the view
         // make sure the index pattern list is up to date
-        await dataStart.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
-        params.element.classList.add('dscAppWrapper');
-        const unmount = await renderApp(innerAngularName, params.element);
+        // await dataStart.indexPatterns.clearCache();
         return () => {
-          params.element.classList.remove('dscAppWrapper');
-          unmount();
           appUnMounted();
         };
       },
     });
 
+    // TODO: These routes need to be handled for Discover 2.0 to support legacy saved URLS's
     // plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
     //   return `#${path}`;
     // });
@@ -392,26 +376,6 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
-    // we need to register the application service at setup, but to render it
-    // there are some start dependencies necessary, for this reason
-    // initializeInnerAngular + initializeServices are assigned at start and used
-    // when the application/embeddable is mounted
-    this.initializeInnerAngular = async () => {
-      if (this.innerAngularInitialized) {
-        return;
-      }
-      // this is used by application mount and tests
-      const { getInnerAngularModule } = await import('./get_inner_angular');
-      const module = getInnerAngularModule(
-        innerAngularName,
-        core,
-        plugins,
-        this.initializerContext
-      );
-      setAngularModule(module);
-      this.innerAngularInitialized = true;
-    };
-
     setUiActions(plugins.uiActions);
 
     this.initializeServices = async () => {
@@ -448,6 +412,7 @@ export class DiscoverPlugin
     }
   }
 
+  // TODO: Use this registration when legacy discover is removed
   /**
    * register embeddable with a slimmer embeddable version of inner angular
    */
