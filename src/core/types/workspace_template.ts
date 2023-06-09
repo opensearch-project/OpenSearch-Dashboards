@@ -25,7 +25,7 @@ export interface WorkspaceTemplate {
   description: string;
 
   /**
-   * Sample screenshot image location
+   * template coverage image location
    */
   coverImage?: string;
 }
