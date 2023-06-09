@@ -27,5 +27,5 @@ export interface WorkspaceTemplate {
   /**
    * Sample screenshot image location
    */
-  screenshot?: string;
+  coverImage?: string;
 }
