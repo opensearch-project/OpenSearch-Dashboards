@@ -1,5 +1,16 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { i18n } from '@osd/i18n';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  AppNavLinkStatus,
+} from '../../../core/public';
 import {
   DataExplorerPluginSetup,
   DataExplorerPluginStart,
@@ -14,6 +25,7 @@ export class DataExplorerPlugin
     core.application.register({
       id: 'dataExplorer',
       title: PLUGIN_NAME,
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');

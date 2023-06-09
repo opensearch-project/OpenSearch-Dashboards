@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { NavigationPublicPluginStart } from '../../navigation/public';
 
 export interface DataExplorerPluginSetup {
