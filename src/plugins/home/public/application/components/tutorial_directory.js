@@ -248,7 +248,7 @@ class TutorialDirectoryUi extends React.Component {
               <h1>
                 <FormattedMessage
                   id="home.tutorial.addDataToOpenSearchDashboardsTitle"
-                  defaultMessage="Add sample data"
+                  defaultMessage="Add sample data to data source"
                 />
               </h1>
             </EuiTitle>

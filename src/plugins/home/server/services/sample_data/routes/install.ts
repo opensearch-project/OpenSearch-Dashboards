@@ -103,13 +103,20 @@ export function createInstallRoute(
     {
       path: '/api/sample_data/{id}',
       validate: {
-        params: schema.object({ id: schema.string() }),
+        params: schema.object({
+          id: schema.string(),
+        }),
         // TODO validate now as date
-        query: schema.object({ now: schema.maybe(schema.string()) }),
+        query: schema.object({
+          now: schema.maybe(schema.string()),
+          data_source_id: schema.maybe(schema.string()),
+        }),
       },
     },
     async (context, req, res) => {
       const { params, query } = req;
+      const dataSourceId = query.data_source_id;
+
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {
         return res.notFound();
@@ -118,13 +125,17 @@ export function createInstallRoute(
       const now = query.now ? new Date(query.now) : new Date();
       const nowReference = dateToIso8601IgnoringTime(now);
       const counts = {};
+      const caller = dataSourceId
+        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
+        : context.core.opensearch.legacy.client.callAsCurrentUser;
+
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         // clean up any old installation of dataset
         try {
-          await context.core.opensearch.legacy.client.callAsCurrentUser('indices.delete', {
+          await caller('indices.delete', {
             index,
           });
         } catch (err) {
@@ -139,10 +150,7 @@ export function createInstallRoute(
               mappings: { properties: dataIndexConfig.fields },
             },
           };
-          await context.core.opensearch.legacy.client.callAsCurrentUser(
-            'indices.create',
-            createIndexParams
-          );
+          await caller('indices.create', createIndexParams);
         } catch (err) {
           const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
           logger.warn(errMsg);
@@ -167,6 +175,7 @@ export function createInstallRoute(
 
       let createResults;
       try {
+        // todo: double check on data source id
         createResults = await context.core.savedObjects.client.bulkCreate(
           sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }

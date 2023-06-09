@@ -36,8 +36,9 @@ function clearIndexPatternsCache() {
   getServices().indexPatternService.clearCache();
 }
 
-export async function listSampleDataSets() {
-  return await getServices().http.get(sampleDataUrl);
+export async function listSampleDataSets(dataSourceId) {
+  const query = buildQuery(dataSourceId);
+  return await getServices().http.get(sampleDataUrl, { query });
 }
 
 export async function installSampleDataSet(id, sampleDataDefaultIndex) {
@@ -63,4 +64,14 @@ export async function uninstallSampleDataSet(id, sampleDataDefaultIndex) {
   }
 
   clearIndexPatternsCache();
+}
+
+function buildQuery(dataSourceId) {
+  const query = {};
+
+  if (dataSourceId) {
+    query.data_source = dataSourceId;
+  }
+
+  return query;
 }

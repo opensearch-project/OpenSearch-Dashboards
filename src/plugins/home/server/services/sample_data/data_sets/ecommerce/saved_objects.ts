@@ -33,6 +33,7 @@
 import { i18n } from '@osd/i18n';
 import { SavedObject } from 'opensearch-dashboards/server';
 
+// todo: add dataSourceId in id
 export const getSavedObjects = (): SavedObject[] => [
   {
     id: '37cc8650-b882-11e8-a6d9-e546fe2bba5f',

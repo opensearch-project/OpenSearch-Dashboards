@@ -49,7 +49,7 @@ export const ecommerceSpecProvider = function (): SampleDatasetSchema {
     description: ecommerceDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard_dark.png',
-    overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+    overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f', // todo: add dataSourceId
     appLinks: initialAppLinks,
     defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
     savedObjects: getSavedObjects(),
