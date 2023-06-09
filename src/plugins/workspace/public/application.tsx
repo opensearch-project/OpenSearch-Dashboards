@@ -11,11 +11,9 @@ import { AppMountParameters, CoreStart } from '../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../plugins/opensearch_dashboards_react/public';
 import { WorkspaceApp } from './components/workspace_app';
 
-interface Service extends CoreStart {}
-
 export const renderApp = (
   { element, history, appBasePath }: AppMountParameters,
-  services: Service
+  services: CoreStart
 ) => {
   ReactDOM.render(
     <Router history={history}>

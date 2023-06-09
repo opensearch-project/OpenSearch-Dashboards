@@ -1,10 +1,15 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { WorkspaceCreator } from './workspace_creator';
 
 export const paths = {
   create: '/create',
 };
 
-interface RouteConfig {
+export interface RouteConfig {
   path: string;
   Component: React.ComponentType<any>;
   label: string;
