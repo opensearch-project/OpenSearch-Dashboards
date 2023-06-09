@@ -4,29 +4,32 @@
  */
 
 import { ApplicationStart, PublicAppInfo } from 'opensearch-dashboards/public';
+import { useObservable } from 'react-use';
+import { useMemo } from 'react';
 import { WorkspaceTemplate } from '../../../core/types';
 
 export function useWorkspaceTemplate(application: ApplicationStart) {
-  let workspaceTemplates = [] as WorkspaceTemplate[];
-  const templateFeatureMap = new Map<string, PublicAppInfo[]>();
+  const applications = useObservable(application.applications$);
 
-  application.applications$.subscribe((applications) =>
-    applications.forEach((app) => {
-      const { workspaceTemplate: templates = [] } = app;
-      workspaceTemplates.push(...templates);
-      for (const template of templates) {
-        const features = templateFeatureMap.get(template.id) || [];
-        features.push(app);
-        templateFeatureMap.set(template.id, features);
-      }
-    })
-  );
+  return useMemo(() => {
+    let workspaceTemplates = [] as WorkspaceTemplate[];
+    const templateFeatureMap = new Map<string, PublicAppInfo[]>();
 
-  workspaceTemplates.sort((a, b) => (a.order || 0) - (b.order || 0));
-  workspaceTemplates = [...new Set(workspaceTemplates)];
+    if (applications) {
+      applications.forEach((app) => {
+        const { workspaceTemplate: templates = [] } = app;
+        workspaceTemplates.push(...templates);
+        for (const template of templates) {
+          const features = templateFeatureMap.get(template.id) || [];
+          features.push(app);
+          templateFeatureMap.set(template.id, features);
+        }
+      });
 
-  return {
-    workspaceTemplates,
-    templateFeatureMap,
-  };
+      workspaceTemplates = [...new Set(workspaceTemplates)];
+      workspaceTemplates.sort((a, b) => (a.order || 0) - (b.order || 0));
+    }
+
+    return { workspaceTemplates, templateFeatureMap };
+  }, [applications]);
 }
