@@ -93,7 +93,10 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
         }
         try {
           // todo: prepend dataSourceId
-          await context.core.savedObjects.client.get('dashboard', sampleDataset.overviewDashboard);
+          const dashboardId = dataSourceId
+            ? `${dataSourceId}_${sampleDataset.overviewDashboard}`
+            : sampleDataset.overviewDashboard;
+          await context.core.savedObjects.client.get('dashboard', dashboardId);
         } catch (err) {
           if (context.core.savedObjects.client.errors.isNotFoundError(err)) {
             sampleDataset.status = NOT_INSTALLED;

@@ -30,6 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
+import { data } from 'jquery';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -44,7 +45,7 @@ const insertDataIntoIndex = (
   dataIndexConfig: any,
   index: string,
   nowReference: string,
-  context: RequestHandlerContext,
+  caller: (endpoint: string, clientParams?: Record<string, any>, options?: any) => Promise<any>,
   logger: Logger
 ) => {
   function updateTimestamps(doc: any) {
@@ -73,7 +74,8 @@ const insertDataIntoIndex = (
       bulk.push(insertCmd);
       bulk.push(updateTimestamps(doc));
     });
-    const resp = await context.core.opensearch.legacy.client.callAsCurrentUser('bulk', {
+
+    const resp = await caller('bulk', {
       body: bulk,
     });
     if (resp.errors) {
@@ -162,7 +164,7 @@ export function createInstallRoute(
             dataIndexConfig,
             index,
             nowReference,
-            context,
+            caller,
             logger
           );
           (counts as any)[index] = count;
@@ -174,10 +176,11 @@ export function createInstallRoute(
       }
 
       let createResults;
+      const savedObjectsList = sampleDataset.savedObjects(dataSourceId);
       try {
         // todo: double check on data source id
         createResults = await context.core.savedObjects.client.bulkCreate(
-          sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
+          savedObjectsList.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }
         );
       } catch (err) {
@@ -201,7 +204,7 @@ export function createInstallRoute(
       return res.ok({
         body: {
           opensearchIndicesCreated: counts,
-          opensearchDashboardsSavedObjectsLoaded: sampleDataset.savedObjects.length,
+          opensearchDashboardsSavedObjectsLoaded: savedObjectsList.length,
         },
       });
     }

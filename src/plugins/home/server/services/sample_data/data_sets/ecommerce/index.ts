@@ -33,6 +33,7 @@ import { i18n } from '@osd/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
+import { getSavedObjectsWithDataSource } from '../util';
 
 const ecommerceName = i18n.translate('home.sampleData.ecommerceSpecTitle', {
   defaultMessage: 'Sample eCommerce orders',
@@ -52,7 +53,8 @@ export const ecommerceSpecProvider = function (): SampleDatasetSchema {
     overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f', // todo: add dataSourceId
     appLinks: initialAppLinks,
     defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-    savedObjects: getSavedObjects(),
+    savedObjects: (dataSourceId: string) =>
+      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId),
     dataIndices: [
       {
         id: 'ecommerce',

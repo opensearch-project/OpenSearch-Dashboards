@@ -78,8 +78,8 @@ export function createUninstallRoute(
         }
       }
 
-      // todo: dataSourceId
-      const deletePromises = sampleDataset.savedObjects.map(({ type, id }) =>
+      const savedObjectsList = sampleDataset.savedObjects(dataSourceId);
+      const deletePromises = savedObjectsList.map(({ type, id }) =>
         context.core.savedObjects.client.delete(type, id)
       );
 

@@ -95,7 +95,7 @@ export interface SampleDatasetSchema<T = unknown> {
 
   // OpenSearch Dashboards saved objects (index patter, visualizations, dashboard, ...)
   // Should provide a nice demo of OpenSearch Dashboards's functionality with the sample data set
-  savedObjects: Array<SavedObject<T>>;
+  savedObjects: (dataSourceId?: string) => Array<SavedObject<T>>;
   dataIndices: DataIndexSchema[];
   status?: string | undefined;
   statusMsg?: unknown;

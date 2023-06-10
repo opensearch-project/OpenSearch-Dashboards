@@ -33,6 +33,7 @@ import { i18n } from '@osd/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
+import { getSavedObjectsWithDataSource } from '../util';
 
 const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
   defaultMessage: 'Sample web logs',
@@ -52,7 +53,8 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
     appLinks: initialAppLinks,
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
-    savedObjects: getSavedObjects(),
+    savedObjects: (dataSourceId: string) =>
+      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId),
     dataIndices: [
       {
         id: 'logs',
