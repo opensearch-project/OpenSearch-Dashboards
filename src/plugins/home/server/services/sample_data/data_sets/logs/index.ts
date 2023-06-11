@@ -43,6 +43,8 @@ const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
+const DEFAULT_INDEX = '90943e30-9a47-11e8-b64d-95841ca0b247';
+
 export const logsSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'logs',
@@ -52,9 +54,10 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard_dark.png',
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
     appLinks: initialAppLinks,
-    defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
-    savedObjects: (dataSourceId: string) =>
-      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId),
+    defaultIndex: (dataSourceId?: string) =>
+      dataSourceId ? `${dataSourceId}_` + DEFAULT_INDEX : DEFAULT_INDEX,
+    savedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
+      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
     dataIndices: [
       {
         id: 'logs',

@@ -84,12 +84,12 @@ export class SampleDataRegistry {
         }
         const defaultIndexSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
           return (
-            savedObjectJson.type === 'index-pattern' && savedObjectJson.id === value.defaultIndex
+            savedObjectJson.type === 'index-pattern' && savedObjectJson.id === value.defaultIndex()
           );
         });
         if (!defaultIndexSavedObjectJson) {
           throw new Error(
-            `Unable to register sample dataset spec, defaultIndex: "${value.defaultIndex}" does not exist in savedObjects list.`
+            `Unable to register sample dataset spec, defaultIndex: "${value.defaultIndex()}" does not exist in savedObjects list.`
           );
         }
 

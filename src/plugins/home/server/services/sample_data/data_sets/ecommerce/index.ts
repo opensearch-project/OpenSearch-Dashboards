@@ -43,6 +43,8 @@ const ecommerceDescription = i18n.translate('home.sampleData.ecommerceSpecDescri
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
+const DEFAULT_INDEX = 'ff959d40-b880-11e8-a6d9-e546fe2bba5f';
+
 export const ecommerceSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'ecommerce',
@@ -50,11 +52,12 @@ export const ecommerceSpecProvider = function (): SampleDatasetSchema {
     description: ecommerceDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard_dark.png',
-    overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f', // todo: add dataSourceId
+    overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
     appLinks: initialAppLinks,
-    defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-    savedObjects: (dataSourceId: string) =>
-      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId),
+    defaultIndex: (dataSourceId?: string) =>
+      dataSourceId ? `${dataSourceId}_` + DEFAULT_INDEX : DEFAULT_INDEX,
+    savedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
+      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
     dataIndices: [
       {
         id: 'ecommerce',

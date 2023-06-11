@@ -46,6 +46,8 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
       },
     },
     async (context, req, res) => {
+      const dataSourceId = req.query.data_source_id;
+
       const registeredSampleDatasets = sampleDatasets.map((sampleDataset) => {
         return {
           id: sampleDataset.id,
@@ -55,15 +57,13 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
           overviewDashboard: sampleDataset.overviewDashboard,
           appLinks: sampleDataset.appLinks,
-          defaultIndex: sampleDataset.defaultIndex,
+          defaultIndex: sampleDataset.defaultIndex(dataSourceId),
           dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
           status: sampleDataset.status,
           statusMsg: sampleDataset.statusMsg,
         };
       });
       const isInstalledPromises = registeredSampleDatasets.map(async (sampleDataset) => {
-        const dataSourceId = req.query.data_source_id;
-
         const caller = dataSourceId
           ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
           : context.core.opensearch.legacy.client.callAsCurrentUser;
@@ -73,6 +73,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
           try {
             const indexExists = await caller('indices.exists', { index });
+
             if (!indexExists) {
               sampleDataset.status = NOT_INSTALLED;
               return;
@@ -81,6 +82,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
             const { count } = await caller('count', {
               index,
             });
+
             if (count === 0) {
               sampleDataset.status = NOT_INSTALLED;
               return;
@@ -92,10 +94,11 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           }
         }
         try {
-          // todo: prepend dataSourceId
+          // todo: change to function provider accept dataSourceId
           const dashboardId = dataSourceId
             ? `${dataSourceId}_${sampleDataset.overviewDashboard}`
             : sampleDataset.overviewDashboard;
+
           await context.core.savedObjects.client.get('dashboard', dashboardId);
         } catch (err) {
           if (context.core.savedObjects.client.errors.isNotFoundError(err)) {

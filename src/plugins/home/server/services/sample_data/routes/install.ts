@@ -148,7 +148,9 @@ export function createInstallRoute(
           const createIndexParams = {
             index,
             body: {
-              settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
+              settings: dataSourceId
+                ? { index: { number_of_shards: 1 } }
+                : { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
               mappings: { properties: dataIndexConfig.fields },
             },
           };
@@ -175,10 +177,25 @@ export function createInstallRoute(
         }
       }
 
+      let dataSourceTitle;
+      if (dataSourceId) {
+        const dataSource = await context.core.savedObjects.client
+          .get('data-source', dataSourceId)
+          .then((response) => {
+            const attributes: any = response?.attributes || {};
+            return {
+              id: response.id,
+              title: attributes.title,
+            };
+          });
+
+        dataSourceTitle = dataSource.title;
+      }
+
       let createResults;
-      const savedObjectsList = sampleDataset.savedObjects(dataSourceId);
+      const savedObjectsList = sampleDataset.savedObjects(dataSourceId, dataSourceTitle);
+
       try {
-        // todo: double check on data source id
         createResults = await context.core.savedObjects.client.bulkCreate(
           savedObjectsList.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }

@@ -43,6 +43,8 @@ const flightsDescription = i18n.translate('home.sampleData.flightsSpecDescriptio
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
+const DEFAULT_INDEX = 'd3d7af60-4c81-11e8-b3d7-01146121b73d';
+
 export const flightsSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'flights',
@@ -52,9 +54,10 @@ export const flightsSpecProvider = function (): SampleDatasetSchema {
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.png',
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     appLinks: initialAppLinks,
-    defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-    savedObjects: (dataSourceId: string) =>
-      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId),
+    defaultIndex: (dataSourceId?: string) =>
+      dataSourceId ? `${dataSourceId}_` + DEFAULT_INDEX : DEFAULT_INDEX,
+    savedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
+      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
     dataIndices: [
       {
         id: 'flights',
