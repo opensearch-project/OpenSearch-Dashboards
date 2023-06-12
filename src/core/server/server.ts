@@ -62,6 +62,7 @@ import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
+import { WorkspacesService } from './workspaces';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -86,6 +87,7 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly auditTrail: AuditTrailService;
   private readonly coreUsageData: CoreUsageDataService;
+  private readonly workspaces: WorkspacesService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -118,6 +120,7 @@ export class Server {
     this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
+    this.workspaces = new WorkspacesService(core);
   }
 
   public async setup() {
@@ -172,6 +175,11 @@ export class Server {
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
+    const workspacesSetup = await this.workspaces.setup({
+      http: httpSetup,
+      savedObject: savedObjectsSetup,
+    });
+
     const statusSetup = await this.status.setup({
       opensearch: opensearchServiceSetup,
       pluginDependencies: pluginTree.asNames,
@@ -212,6 +220,7 @@ export class Server {
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
+      workspaces: workspacesSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -253,6 +262,9 @@ export class Server {
       opensearch: opensearchStart,
       savedObjects: savedObjectsStart,
     });
+    const workspacesStart = await this.workspaces.start({
+      savedObjects: savedObjectsStart,
+    });
 
     this.coreStart = {
       capabilities: capabilitiesStart,
@@ -263,6 +275,7 @@ export class Server {
       uiSettings: uiSettingsStart,
       auditTrail: auditTrailStart,
       coreUsageData: coreUsageDataStart,
+      workspaces: workspacesStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -295,6 +308,7 @@ export class Server {
     await this.status.stop();
     await this.logging.stop();
     await this.auditTrail.stop();
+    await this.workspaces.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
