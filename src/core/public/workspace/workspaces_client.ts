@@ -175,16 +175,9 @@ export class WorkspacesClient {
       attributes,
     };
 
-    return this.http
-      .fetch(path, {
-        method: 'PUT',
-        body: JSON.stringify(body),
-      })
-      .then((resp: WorkspaceAttribute) => {
-        return {
-          result: true,
-          success: true,
-        };
-      });
+    return this.http.fetch(path, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
   }
 }
