@@ -32,7 +32,11 @@ import { EuiButton, EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
-export const AppNotFound = ({ onClickGoHome }: any) => (
+const goToHomePage = () => {
+  window.location.href = '/';
+};
+
+export const AppNotFound = () => (
   <EuiPage style={{ minHeight: '100%' }} data-test-subj="appNotFoundPageContent">
     <EuiPageBody component="main">
       <EuiPageContent verticalPosition="center" horizontalPosition="center">
@@ -58,7 +62,7 @@ export const AppNotFound = ({ onClickGoHome }: any) => (
               <EuiEmptyPrompt
                 actions={
                   <EuiButton
-                    onClick={onClickGoHome}
+                    onClick={goToHomePage}
                     fill
                     data-test-subj="createVisualizationPromptButton"
                   >

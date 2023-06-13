@@ -36,9 +36,8 @@ import React, {
   useState,
   MutableRefObject,
 } from 'react';
-import { EuiLoadingSpinner, EuiButton, EuiFlexItem} from '@elastic/eui';
+import { EuiLoadingSpinner, EuiButton, EuiFlexItem } from '@elastic/eui';
 import type { MountPoint } from '../../types';
-import { useHistory } from 'react-router-dom';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
@@ -127,15 +126,9 @@ export const AppContainer: FunctionComponent<Props> = ({
     setIsMounting,
   ]);
 
-const history = useHistory();
-
-const goToHomePage = () => {
-  history.push('/app/home#/');
-}
-
   return (
     <Fragment>
-      {appNotFound && <AppNotFound goToHomePage={goToHomePage}/>}
+      {appNotFound && <AppNotFound />}
       {showSpinner && (
         <div className="appContainer__loading">
           <EuiLoadingSpinner aria-label="Loading application" size="xl" />
