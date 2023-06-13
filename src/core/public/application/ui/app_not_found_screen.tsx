@@ -64,10 +64,10 @@ export const AppNotFound = () => (
                   <EuiButton
                     onClick={goToHomePage}
                     fill
-                    data-test-subj="createVisualizationPromptButton"
+                    data-test-subj="noAppDefaultPageButton"
                   >
                     <FormattedMessage
-                      id="visualize.listing.createNew.createButtonLabel"
+                      id="core.application.listing.appNotFound.defaultPageButton"
                       defaultMessage="Go to Default Page"
                     />
                   </EuiButton>
