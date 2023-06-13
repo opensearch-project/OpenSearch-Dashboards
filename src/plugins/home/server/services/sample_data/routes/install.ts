@@ -29,8 +29,7 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
-import { data } from 'jquery';
+import { IRouter, Logger } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -105,9 +104,7 @@ export function createInstallRoute(
     {
       path: '/api/sample_data/{id}',
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
+        params: schema.object({ id: schema.string() }),
         // TODO validate now as date
         query: schema.object({
           now: schema.maybe(schema.string()),
@@ -130,6 +127,25 @@ export function createInstallRoute(
       const caller = dataSourceId
         ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
         : context.core.opensearch.legacy.client.callAsCurrentUser;
+
+      let dataSourceTitle;
+      try {
+        if (dataSourceId) {
+          const dataSource = await context.core.savedObjects.client
+            .get('data-source', dataSourceId)
+            .then((response) => {
+              const attributes: any = response?.attributes || {};
+              return {
+                id: response.id,
+                title: attributes.title,
+              };
+            });
+
+          dataSourceTitle = dataSource.title;
+        }
+      } catch (err) {
+        return res.internalError({ body: err });
+      }
 
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
@@ -175,21 +191,6 @@ export function createInstallRoute(
           logger.warn(errMsg);
           return res.internalError({ body: errMsg });
         }
-      }
-
-      let dataSourceTitle;
-      if (dataSourceId) {
-        const dataSource = await context.core.savedObjects.client
-          .get('data-source', dataSourceId)
-          .then((response) => {
-            const attributes: any = response?.attributes || {};
-            return {
-              id: response.id,
-              title: attributes.title,
-            };
-          });
-
-        dataSourceTitle = dataSource.title;
       }
 
       let createResults;
