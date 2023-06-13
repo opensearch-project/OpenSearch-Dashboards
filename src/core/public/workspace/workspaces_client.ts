@@ -48,31 +48,38 @@ export class WorkspacesClient {
   }
 
   public async enterWorkspace(id: string): Promise<IResponse<null>> {
-    return {
-      success: false,
-      error: 'Unimplement',
-    };
+    return this.http.post(this.getPath(['_enter', id]));
   }
 
   public async exitWorkspace(): Promise<IResponse<null>> {
-    return {
-      success: false,
-      error: 'Unimplement',
-    };
+    return this.http.post(this.getPath(['_exit']));
   }
 
   public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
-    return {
-      success: false,
-      error: 'Unimplement',
-    };
+    const currentWorkspaceIdResp = await this.http.get(this.getPath(['_current']));
+    if (currentWorkspaceIdResp.success) {
+      if (!currentWorkspaceIdResp.result) {
+        return {
+          success: false,
+          error: 'You are not in any workspace yet.',
+        };
+      }
+    }
+
+    return currentWorkspaceIdResp;
   }
 
   public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttribute>> {
-    return {
-      success: false,
-      error: 'Unimplement',
-    };
+    const currentWorkspaceIdResp = await this.getCurrentWorkspaceId();
+    if (currentWorkspaceIdResp.success) {
+      const currentWorkspaceResp = await this.get(currentWorkspaceIdResp.result);
+      return currentWorkspaceResp;
+    } else {
+      return {
+        success: false,
+        error: currentWorkspaceIdResp.error || '',
+      };
+    }
   }
 
   /**
