@@ -235,7 +235,6 @@ Note - if you add the [`security` plugin](https://github.com/opensearch-project/
 ### Plugin development
 The osd-plugin-generator tool makes it easier to create a plugin for OpenSearch Dashboards. It sets up the basic structure of the project and provides scripts to build it. Refer to [osd-plugin-generator](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator) for more details.
 
-
 #### Other snapshot configuration options
 
 Additional options can be passed after `yarn opensearch snapshot` to further configure the cluster snapshot.
