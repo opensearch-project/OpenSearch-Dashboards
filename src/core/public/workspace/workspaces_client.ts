@@ -57,13 +57,11 @@ export class WorkspacesClient {
 
   public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
     const currentWorkspaceIdResp = await this.http.get(this.getPath(['_current']));
-    if (currentWorkspaceIdResp.success) {
-      if (!currentWorkspaceIdResp.result) {
-        return {
-          success: false,
-          error: 'You are not in any workspace yet.',
-        };
-      }
+    if (currentWorkspaceIdResp.success && !currentWorkspaceIdResp.result) {
+      return {
+        success: false,
+        error: 'You are not in any workspace yet.',
+      };
     }
 
     return currentWorkspaceIdResp;
@@ -75,10 +73,7 @@ export class WorkspacesClient {
       const currentWorkspaceResp = await this.get(currentWorkspaceIdResp.result);
       return currentWorkspaceResp;
     } else {
-      return {
-        success: false,
-        error: currentWorkspaceIdResp.error || '',
-      };
+      return currentWorkspaceIdResp;
     }
   }
 
