@@ -3,14 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { NavigationPublicPluginStart } from '../../navigation/public';
+import { CoreStart } from 'opensearch-dashboards/public';
+import { ViewService } from './services/view_service';
 
 export interface DataExplorerPluginSetup {
-  getGreeting: () => string;
+  registerView: ViewService['registerView'];
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataExplorerPluginStart {}
 
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
+export interface ViewRedirectParams {
+  view: string;
+  path?: string;
+}
+
+export interface DataExplorerServices extends CoreStart {
+  viewRegistry: ReturnType<ViewService['start']>;
 }

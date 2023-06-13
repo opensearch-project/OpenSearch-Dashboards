@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export const PLUGIN_ID = 'discover';
 export const DISCOVER_LEGACY_TOGGLE = 'discover:legacyToggle';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';

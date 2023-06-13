@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import {
   AppMountParameters,
   CoreSetup,
@@ -11,41 +10,39 @@ import {
   Plugin,
   AppNavLinkStatus,
 } from '../../../core/public';
-import {
-  DataExplorerPluginSetup,
-  DataExplorerPluginStart,
-  AppPluginStartDependencies,
-} from './types';
-import { PLUGIN_NAME } from '../common';
+import { DataExplorerPluginSetup, DataExplorerPluginStart, DataExplorerServices } from './types';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { ViewService } from './services/view_service';
 
 export class DataExplorerPlugin
   implements Plugin<DataExplorerPluginSetup, DataExplorerPluginStart> {
+  private viewService = new ViewService();
+
   public setup(core: CoreSetup): DataExplorerPluginSetup {
+    const viewService = this.viewService;
     // Register an application into the side navigation menu
     core.application.register({
-      id: 'dataExplorer',
+      id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
+        const [coreStart, depsStart] = await core.getStartServices();
+
+        const services: DataExplorerServices = {
+          ...coreStart,
+          viewRegistry: viewService.start(),
+        };
+
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services as specified in opensearch_dashboards.json
-        const [coreStart, depsStart] = await core.getStartServices();
         // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        return renderApp(coreStart, services, params);
       },
     });
 
-    // Return methods that should be available to other plugins
     return {
-      getGreeting() {
-        return i18n.translate('dataExplorer.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
-      },
+      ...this.viewService.setup(),
     };
   }
 

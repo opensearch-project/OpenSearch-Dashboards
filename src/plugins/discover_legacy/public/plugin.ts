@@ -354,7 +354,7 @@ export class DiscoverPlugin
       }
       return `#${path}`;
     });
-    plugins.urlForwarding.forwardApp('discoverLegacy', 'discoverLegacy', (path) => {
+    plugins.urlForwarding.forwardApp('discover', 'discoverLegacy', (path) => {
       const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
       if (!id) {
         return `#${path.replace('/discover', '') || '/'}`;

@@ -3,5 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const PLUGIN_ID = 'dataExplorer';
-export const PLUGIN_NAME = 'dataExplorer';
+export const PLUGIN_ID = 'data-explorer';
+export const PLUGIN_NAME = 'Data Explorer';

@@ -1,1 +1,5 @@
-/* stylelint-disable no-empty-source */
+$osdHeaderOffset: $euiHeaderHeightCompensation;
+
+.dePageTemplate {
+  height: calc(100vh - #{$osdHeaderOffset});
+}

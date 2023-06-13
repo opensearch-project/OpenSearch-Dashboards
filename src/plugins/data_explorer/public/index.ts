@@ -12,4 +12,4 @@ import { DataExplorerPlugin } from './plugin';
 export function plugin() {
   return new DataExplorerPlugin();
 }
-export { DataExplorerPluginSetup, DataExplorerPluginStart } from './types';
+export { DataExplorerPluginSetup, DataExplorerPluginStart, ViewRedirectParams } from './types';
