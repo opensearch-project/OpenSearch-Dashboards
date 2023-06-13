@@ -346,3 +346,12 @@ export {
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
+
+export {
+  WorkspacesClientContract,
+  WorkspacesClient,
+  WorkspacesStart,
+  WorkspacesService,
+  WorkspaceAttribute,
+  WorkspaceFindOptions,
+} from './workspace';
