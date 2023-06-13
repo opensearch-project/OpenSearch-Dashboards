@@ -52,7 +52,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     name: i18n.translate('discover.advancedSettings.legacyToggleTitle', {
       defaultMessage: 'Disable new discover app',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('discover.advancedSettings.legacyToggleText', {
       defaultMessage: 'Disabling the new discover app will redirect to the legacy app.',
     }),
