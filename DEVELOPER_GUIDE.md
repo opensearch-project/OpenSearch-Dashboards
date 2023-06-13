@@ -210,6 +210,10 @@ $ yarn start --run-examples
 - [Project testing guidelines](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/TESTING.md)
 - [Plugin conventions](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/CONVENTIONS.md#technical-conventions)
 
+#### Join the discussion
+
+See the [communication guide](COMMUNICATION.md)for information on how to join our slack workspace, forum, or developer office hours.
+
 ## Alternative development installations
 
 Although the [getting started guide](#getting-started-guide) covers the recommended development environment setup, there are several alternatives worth being aware of.

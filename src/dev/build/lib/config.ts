@@ -31,6 +31,7 @@
 import { dirname, resolve, relative } from 'path';
 import os from 'os';
 import loadJsonFile from 'load-json-file';
+import { readFile } from 'fs/promises';
 
 import { getVersionInfo, VersionInfo } from './version_info';
 import {
@@ -67,11 +68,15 @@ export class Config {
     const pkgPath = resolve(__dirname, '../../../../package.json');
     const pkg: Package = loadJsonFile.sync(pkgPath);
 
+    const nvmrcPath = resolve(__dirname, '../../../../.nvmrc');
+    const nvmrcContent = (await readFile(nvmrcPath, 'utf8'))?.trim?.();
+
     return new Config(
       targetAllPlatforms,
       targetPlatforms,
       pkg,
       pkg.engines.node,
+      nvmrcContent,
       dirname(pkgPath),
       await getVersionInfo({
         isRelease,
@@ -87,6 +92,7 @@ export class Config {
     private readonly targetPlatforms: TargetPlatforms,
     private readonly pkg: Package,
     private readonly nodeRange: string,
+    private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
     public readonly isRelease: boolean
@@ -100,10 +106,17 @@ export class Config {
   }
 
   /**
-   * Get the node version required by OpenSearch Dashboards
+   * Get the node version range compatible with OpenSearch Dashboards
    */
   getNodeRange() {
     return this.nodeRange;
+  }
+
+  /**
+   * Get the node version required by OpenSearch Dashboards
+   */
+  getNodeVersion() {
+    return this.nodeVersion;
   }
 
   /**

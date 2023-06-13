@@ -5,7 +5,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { access, rmdir, mkdir, writeFile, symlink } from 'fs/promises';
+import { access, rm, mkdir, writeFile, symlink } from 'fs/promises';
 
 import {
   resolveToFullNameSync,
@@ -43,9 +43,9 @@ describe('Cross Platform', () => {
           try {
             // If leftover artifacts were found, get rid of them
             await access(tmpTestFolder);
-            await rmdir(tmpTestFolder, { recursive: true });
+            await rm(tmpTestFolder, { recursive: true });
           } catch (ex) {
-            // Do nothing; if `rmdir` failed, let the `mkdir` below throw the error
+            // Do nothing; if `rm` failed, let the `mkdir` below throw the error
           }
 
           await mkdir(tmpTestFolder);
@@ -60,7 +60,7 @@ describe('Cross Platform', () => {
 
         afterAll(async () => {
           try {
-            await rmdir(tmpTestFolder, { recursive: true });
+            await rm(tmpTestFolder, { recursive: true });
           } catch (ex) {
             // Do nothing
           }
