@@ -228,6 +228,17 @@ export const addPointInTimeEventsLayersToTable = (
     if (isEmpty(visLayer.events)) return;
     const visLayerColumnId = `${visLayer.pluginEventType}`;
 
+    // Add placeholder values of 0 for every event value. This is so the tooltip
+    // can render correctly without showing the 'undefined' string
+    let row = 0;
+    while (row < augmentedTable.rows.length) {
+      augmentedTable.rows[row] = {
+        ...augmentedTable.rows[row],
+        [visLayerColumnId]: 0,
+      };
+      row++;
+    }
+
     // if only one row / one datapoint, put all events into this bucket
     if (augmentedTable.rows.length === 1) {
       augmentedTable.rows[0] = {
