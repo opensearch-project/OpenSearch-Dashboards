@@ -36,6 +36,7 @@ import { PanelViewWithSharingLong } from './panel_view_with_sharing_long';
 import { PanelEdit } from './panel_edit';
 import { PanelEditWithDrilldowns } from './panel_edit_with_drilldowns';
 import { PanelEditWithDrilldownsAndContextActions } from './panel_edit_with_drilldowns_and_context_actions';
+import { PanelGroupOptionsAndContextActions } from './panel_group_options_and_context_actions';
 
 export const ContextMenuExamples: React.FC = () => {
   return (
@@ -59,7 +60,6 @@ export const ContextMenuExamples: React.FC = () => {
           <PanelViewWithSharingLong />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiFlexGroup>
         <EuiFlexItem>
           <PanelEdit />
@@ -69,6 +69,11 @@ export const ContextMenuExamples: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <PanelEditWithDrilldownsAndContextActions />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <PanelGroupOptionsAndContextActions />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>
