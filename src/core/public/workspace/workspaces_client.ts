@@ -127,13 +127,12 @@ export class WorkspacesClient {
   public list = (
     options?: WorkspaceFindOptions
   ): Promise<
-    IResponse<
-      WorkspaceAttribute & {
-        total: number;
-        perPage: number;
-        page: number;
-      }
-    >
+    IResponse<{
+      workspaces: WorkspaceAttribute[];
+      total: number;
+      per_page: number;
+      page: number;
+    }>
   > => {
     const path = this.getPath(['_list']);
     return this.http.fetch(path, {
