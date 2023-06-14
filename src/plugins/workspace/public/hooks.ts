@@ -8,6 +8,17 @@ import { useObservable } from 'react-use';
 import { useMemo } from 'react';
 import { WorkspaceTemplate } from '../../../core/types';
 
+export function useApplications(application: ApplicationStart) {
+  const applications = useObservable(application.applications$);
+  return useMemo(() => {
+    const apps: PublicAppInfo[] = [];
+    applications?.forEach((app) => {
+      apps.push(app);
+    });
+    return apps;
+  }, [applications]);
+}
+
 export function useWorkspaceTemplate(application: ApplicationStart) {
   const applications = useObservable(application.applications$);
 
