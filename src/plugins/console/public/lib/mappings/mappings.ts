@@ -74,6 +74,8 @@ interface IndexAliases {
   };
 }
 
+type IndicesOrAliases = string | string[] | null;
+
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
 const POLL_INTERVAL = 60000;
@@ -84,8 +86,8 @@ let perAliasIndices: { [alias: string]: string[] } = {};
 let templates: string[] = [];
 
 export function expandAliases(
-  indicesOrAliases: string | string[] | null | undefined
-): string | string[] | null | undefined {
+  indicesOrAliases: IndicesOrAliases | undefined
+): IndicesOrAliases | undefined {
   // takes a list of indices or aliases or a string which may be either and returns a list of indices
   // returns a list for multiple values or a string for a single.
 
@@ -120,10 +122,7 @@ export function getTemplates() {
   return [...templates];
 }
 
-export function getFields(
-  indices?: string | string[] | null,
-  types?: string | string[] | null
-): Field[] {
+export function getFields(indices?: IndicesOrAliases, types?: IndicesOrAliases): Field[] {
   // get fields for indices and types. Both can be a list, a string or null (meaning all).
   let ret: Array<Field | Field[]> = [];
   indices = expandAliases(indices);
@@ -157,7 +156,7 @@ export function getFields(
   return _.uniqBy(_.flatten(ret), (f: Field) => f.name + ':' + f.type);
 }
 
-export function getTypes(indices?: string | string[] | null) {
+export function getTypes(indices?: IndicesOrAliases) {
   let ret: string[] = [];
   indices = expandAliases(indices);
   if (typeof indices === 'string') {
