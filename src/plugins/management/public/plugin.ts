@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { ManagementSetup, ManagementStart } from './types';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import { HomePublicPluginSetup } from '../../home/public';
 import {
   CoreSetup,
   CoreStart,
@@ -49,9 +49,15 @@ import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
+import { PluginPages } from '../../../core/types';
+import { ManagementOverViewPluginStart } from '../../management_overview/public';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
+}
+
+interface ManagementStartDependencies {
+  managementOverview?: ManagementOverViewPluginStart;
 }
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
@@ -66,29 +72,12 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
 
-    if (home) {
-      home.featureCatalogue.register({
-        id: 'stack-management',
-        title: i18n.translate('management.stackManagement.managementLabel', {
-          defaultMessage: 'Stack Management',
-        }),
-        description: i18n.translate('management.stackManagement.managementDescription', {
-          defaultMessage: 'Your center console for managing the OpenSearch Stack.',
-        }),
-        icon: 'managementApp',
-        path: '/app/management',
-        showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
-        visible: () => this.hasAnyEnabledApps,
-      });
-    }
-
     core.application.register({
       id: MANAGEMENT_APP_ID,
       title: i18n.translate('management.stackManagement.title', {
-        defaultMessage: 'Stack Management',
+        defaultMessage: 'Dashboard Management',
       }),
-      order: 9040,
+      order: 9030,
       icon: '/plugins/home/assets/logos/opensearch_mark_default.svg',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
@@ -109,7 +98,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { managementOverview }: ManagementStartDependencies) {
     this.managementSections.start({ capabilities: core.application.capabilities });
     this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()
@@ -122,6 +111,31 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           navLinkStatus: AppNavLinkStatus.hidden,
         };
       });
+    }
+
+    if (managementOverview) {
+      const enabledSections = getSectionsServiceStartPrivate().getSectionsEnabled();
+      const pluginPages: PluginPages[] = enabledSections
+        .map((section) => section.apps)
+        .flat()
+        .map((app) => {
+          return {
+            title: app.title,
+            url: app.basePath,
+            order: app.order,
+          };
+        });
+
+      if (pluginPages) {
+        managementOverview.register({
+          id: MANAGEMENT_APP_ID,
+          title: i18n.translate('management.stackManagement.title', {
+            defaultMessage: 'Dashboard Management',
+          }),
+          order: 9030,
+          pages: pluginPages,
+        });
+      }
     }
 
     return {};

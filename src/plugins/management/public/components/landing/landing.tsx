@@ -61,7 +61,7 @@ export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLan
             <h1>
               <FormattedMessage
                 id="management.landing.header"
-                defaultMessage="Welcome to Stack Management {version}"
+                defaultMessage="Welcome to Dashboard Management {version}"
                 values={{ version }}
               />
             </h1>
@@ -69,7 +69,7 @@ export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLan
           <EuiText>
             <FormattedMessage
               id="management.landing.subhead"
-              defaultMessage="Manage your indices, index patterns, saved objects, OpenSearch Dashboards settings, and more."
+              defaultMessage="Manage your index patterns, saved objects, OpenSearch Dashboards settings, and more."
             />
           </EuiText>
         </div>

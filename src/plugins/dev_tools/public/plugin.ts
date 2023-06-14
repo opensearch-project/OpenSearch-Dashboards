@@ -29,7 +29,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'src/core/public';
 import { AppUpdater } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
@@ -40,10 +40,17 @@ import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
+import { PluginPages } from '../../../core/types';
+import { ManagementOverViewPluginStart } from '../../management_overview/public';
 
 export interface DevToolsSetupDependencies {
   dataSource?: DataSourcePluginStart;
 }
+
+export interface DevToolsStartDependencies {
+  managementOverview?: ManagementOverViewPluginStart;
+}
+
 export interface DevToolsSetup {
   /**
    * Register a developer tool. It will be available
@@ -79,7 +86,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       }),
       updater$: this.appStateUpdater,
       icon: '/plugins/home/public/assets/logos/opensearch_mark_default.svg',
-      order: 9010,
+      order: 9070,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const { element, history } = params;
@@ -109,9 +116,26 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     };
   }
 
-  public start() {
+  public start(core: CoreStart, { managementOverview }: DevToolsStartDependencies) {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+    } else {
+      const features: PluginPages[] = this.getSortedDevTools().map((devApp) => {
+        return {
+          title: devApp.title,
+          url: `#/${devApp.id}`,
+          order: devApp.order,
+        };
+      });
+
+      managementOverview?.register({
+        id: 'dev_tools',
+        title: i18n.translate('devTools.devToolsTitle', {
+          defaultMessage: 'Dev Tools',
+        }),
+        order: 9070,
+        pages: features,
+      });
     }
   }
 

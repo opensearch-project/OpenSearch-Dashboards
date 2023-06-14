@@ -1,0 +1,8 @@
+{
+  "id": "managementOverview",
+  "version": "opensearchDashboards",
+  "ui": true,
+  "server": false,
+  "requiredPlugins": ["navigation", "home"],
+  "optionalPlugins": []
+}
