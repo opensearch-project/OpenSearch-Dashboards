@@ -95,12 +95,12 @@ export class SampleDataRegistry {
 
         const dashboardSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
           return (
-            savedObjectJson.type === 'dashboard' && savedObjectJson.id === value.overviewDashboard
+            savedObjectJson.type === 'dashboard' && savedObjectJson.id === value.overviewDashboard()
           );
         });
         if (!dashboardSavedObjectJson) {
           throw new Error(
-            `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObject list.`
+            `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard()}" does not exist in savedObject list.`
           );
         }
         this.sampleDatasets.push(value);

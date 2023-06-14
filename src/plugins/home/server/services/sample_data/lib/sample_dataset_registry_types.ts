@@ -87,7 +87,7 @@ export interface SampleDatasetSchema<T = unknown> {
   darkPreviewImagePath: string;
 
   // saved object id of main dashboard for sample data set
-  overviewDashboard: string;
+  overviewDashboard: (dataSourceId?: string) => string;
   appLinks: AppLinkSchema[];
 
   // saved object id of default index-pattern for sample data set

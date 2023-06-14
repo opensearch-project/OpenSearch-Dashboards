@@ -5,6 +5,10 @@
 
 import { SavedObject } from 'opensearch-dashboards/server';
 
+export const appendDataSourceId = (id: string) => {
+  return (dataSourceId?: string) => (dataSourceId ? `${dataSourceId}_` + id : id);
+};
+
 export const getSavedObjectsWithDataSource = (
   saveObjectList: SavedObject[],
   dataSourceId?: string,

@@ -55,7 +55,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           description: sampleDataset.description,
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
-          overviewDashboard: sampleDataset.overviewDashboard,
+          overviewDashboard: sampleDataset.overviewDashboard(dataSourceId),
           appLinks: sampleDataset.appLinks,
           defaultIndex: sampleDataset.defaultIndex(dataSourceId),
           dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
@@ -94,12 +94,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           }
         }
         try {
-          // todo: change to function provider accept dataSourceId
-          const dashboardId = dataSourceId
-            ? `${dataSourceId}_${sampleDataset.overviewDashboard}`
-            : sampleDataset.overviewDashboard;
-
-          await context.core.savedObjects.client.get('dashboard', dashboardId);
+          await context.core.savedObjects.client.get('dashboard', sampleDataset.overviewDashboard);
         } catch (err) {
           if (context.core.savedObjects.client.errors.isNotFoundError(err)) {
             sampleDataset.status = NOT_INSTALLED;

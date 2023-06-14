@@ -29,7 +29,7 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, Logger } from 'src/core/server';
+import { IRouter, LegacyCallAPIOptions, Logger } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -44,7 +44,11 @@ const insertDataIntoIndex = (
   dataIndexConfig: any,
   index: string,
   nowReference: string,
-  caller: (endpoint: string, clientParams?: Record<string, any>, options?: any) => Promise<any>,
+  caller: (
+    endpoint: string,
+    clientParams?: Record<string, any>,
+    options?: LegacyCallAPIOptions
+  ) => Promise<any>,
   logger: Logger
 ) => {
   function updateTimestamps(doc: any) {
