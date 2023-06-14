@@ -61,6 +61,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     version: true,
     configPath: true,
     requiredPlugins: true,
+    requiredOpenSearchPlugins: true,
     optionalPlugins: true,
     ui: true,
     server: true,
@@ -156,6 +157,28 @@ export async function parseManifest(
     );
   }
 
+  if (
+    manifest.requiredOpenSearchPlugins !== undefined &&
+    (!Array.isArray(manifest.requiredOpenSearchPlugins) ||
+      !manifest.requiredOpenSearchPlugins.every((plugin) => typeof plugin === 'string'))
+  ) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `The "requiredOpenSearchPlugins" in plugin manifest for "${manifest.id}" should be an array of strings.`
+      )
+    );
+  }
+
+  if (
+    Array.isArray(manifest.requiredOpenSearchPlugins) &&
+    manifest.requiredOpenSearchPlugins.length > 0
+  ) {
+    log.info(
+      `Plugin ${manifest.id} has a dependency on following OpenSearch plugin(s): "${manifest.requiredOpenSearchPlugins}".`
+    );
+  }
+
   const expectedOpenSearchDashboardsVersion =
     typeof manifest.opensearchDashboardsVersion === 'string' && manifest.opensearchDashboardsVersion
       ? manifest.opensearchDashboardsVersion
@@ -198,6 +221,9 @@ export async function parseManifest(
     opensearchDashboardsVersion: expectedOpenSearchDashboardsVersion,
     configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
+    requiredOpenSearchPlugins: Array.isArray(manifest.requiredOpenSearchPlugins)
+      ? manifest.requiredOpenSearchPlugins
+      : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
     requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
     ui: includesUiPlugin,
