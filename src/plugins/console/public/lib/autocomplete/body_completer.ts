@@ -335,20 +335,17 @@ export function globalsOnlyAutocompleteComponents() {
 /**
  * @param endpointId id of the endpoint being compiled.
  * @param description a json dict describing the endpoint
- * @param endpointComponentResolver a function (endpoint,context,editor) which should resolve an endpoint
- *        to it's list of compiled components.
- * @param parametrizedComponentFactories a dict of the following structure
- * that will be used as a fall back for pattern keys (i.e.: {type} ,resolved without the $s)
+ * @param parametrizedComponentFactories an object containing factories for different types of autocomplete components.
+ * It is used as a fallback for pattern keys (e.g., `{type}`, resolved without the `$s`)
+ * and has the following structure:
  * {
- *   TYPE: function (part, parent, endpoint) {
- *      return new SharedComponent(part, parent)
- *   }
+ *   TYPE: (part, parent) => new SharedComponent(part, parent)
  * }
  */
 export function compileBodyDescription(
   endpointId: string,
   description: Description,
-  parametrizedComponentFactories?: ParametrizedComponentFactories
+  parametrizedComponentFactories: ParametrizedComponentFactories
 ) {
   return compileDescription(
     description,
