@@ -31,7 +31,7 @@
 import _ from 'lodash';
 import { UrlParams } from '../../autocomplete/url_params';
 import { populateContext } from '../../autocomplete/engine';
-import { AutoCompleteContext, Term } from '../types';
+import { Term } from '../types';
 import { PartialAutoCompleteContext } from '../components/autocomplete_component';
 import { SharedComponent } from '../components';
 
@@ -65,17 +65,17 @@ describe('Url params', () => {
         expectedContext.autoCompleteSet = _.sortBy(expectedContext.autoCompleteSet, 'name');
       }
 
-      const context = {};
+      const context: PartialAutoCompleteContext = {};
 
       populateContext(
         tokenPath,
         context,
         null,
-        expectedContext.autoCompleteSet,
+        expectedContext.autoCompleteSet ? true : false,
         urlParams.getTopLevelComponents() as SharedComponent[]
       );
 
-      const populatedContext = context as AutoCompleteContext;
+      const populatedContext = context;
 
       if (populatedContext.autoCompleteSet) {
         populatedContext.autoCompleteSet = _.sortBy(populatedContext.autoCompleteSet, 'name');
@@ -85,21 +85,18 @@ describe('Url params', () => {
     });
   }
 
-  function t(name: string, meta?: string, insertValue?: string) {
-    let r: string | Term = name;
+  function createTerm(name: string, meta?: string, insertValue?: string) {
+    const term: Term = { name };
     if (meta) {
-      r = { name, meta };
+      term.meta = meta;
       if (meta === 'param' && !insertValue) {
         insertValue = name + '=';
       }
     }
     if (insertValue) {
-      if (_.isString(r)) {
-        r = { name };
-      }
-      r.insertValue = insertValue;
+      term.insertValue = insertValue;
     }
-    return r as Term;
+    return term;
   }
 
   (function () {
@@ -110,25 +107,31 @@ describe('Url params', () => {
     paramTest('settings params', params, 'a/1', { a: ['1'] });
 
     paramTest('autocomplete top level', params, [], {
-      autoCompleteSet: [t('a', 'param'), t('b', 'flag')],
+      autoCompleteSet: [createTerm('a', 'param'), createTerm('b', 'flag')],
     });
 
     paramTest(
       'autocomplete top level, with defaults',
       params,
       [],
-      { autoCompleteSet: [t('a', 'param'), t('b', 'flag'), t('c', 'param')] },
+      {
+        autoCompleteSet: [
+          createTerm('a', 'param'),
+          createTerm('b', 'flag'),
+          createTerm('c', 'param'),
+        ],
+      },
       {
         c: [2],
       }
     );
 
     paramTest('autocomplete values', params, 'a', {
-      autoCompleteSet: [t('1', 'a'), t('2', 'a')],
+      autoCompleteSet: [createTerm('1', 'a'), createTerm('2', 'a')],
     });
 
     paramTest('autocomplete values flag', params, 'b', {
-      autoCompleteSet: [t('true', 'b'), t('false', 'b')],
+      autoCompleteSet: [createTerm('true', 'b'), createTerm('false', 'b')],
     });
   })();
 });

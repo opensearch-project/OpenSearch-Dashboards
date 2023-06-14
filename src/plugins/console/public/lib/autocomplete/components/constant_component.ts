@@ -46,7 +46,7 @@ export class ConstantComponent extends SharedComponent {
     return this.options;
   }
 
-  addOption(options: string | string[]) {
+  addOption(options: Term | Term[]) {
     if (!Array.isArray(options)) {
       options = [options];
     }

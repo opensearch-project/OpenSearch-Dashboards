@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { SharedComponent } from './shared_component';
 import { AutoCompleteContext, Endpoint } from '../types';
 import { CoreEditor } from '../../../types';
@@ -44,14 +43,14 @@ export class AcceptEndpointComponent extends SharedComponent {
     if (token !== URL_PATH_END_MARKER) {
       return null;
     }
-    if (this.endpoint.methods && -1 === _.indexOf(this.endpoint.methods, context.method)) {
+    if (this.endpoint.methods && !this.endpoint.methods.includes(context.method)) {
       return null;
     }
     const r = super.match(token, context, editor);
     if (r) {
       r.context_values = r.context_values || {};
       r.context_values.endpoint = this.endpoint;
-      if (_.isNumber(this.endpoint.priority)) {
+      if (typeof this.endpoint.priority === 'number') {
         r.priority = this.endpoint.priority;
       }
     }

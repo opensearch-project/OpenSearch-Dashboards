@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { AutocompleteComponent } from './autocomplete_component';
 export class SharedComponent extends AutocompleteComponent {
   _nextDict: { [key: string]: SharedComponent[] };
@@ -52,6 +51,6 @@ export class SharedComponent extends AutocompleteComponent {
     const current = this._nextDict[component.name] || [];
     current.push(component);
     this._nextDict[component.name] = current;
-    this.next = ([] as SharedComponent[]).concat.apply([], _.values(this._nextDict));
+    this.next = ([] as SharedComponent[]).concat(...Object.values(this._nextDict));
   }
 }

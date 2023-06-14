@@ -83,11 +83,12 @@ describe('Url autocomplete', () => {
       if (expectedContext.method) {
         context.method = expectedContext.method;
       }
+
       populateContext(
         tokenPath,
         context,
         null,
-        expectedContext.autoCompleteSet,
+        expectedContext.autoCompleteSet ? true : false,
         patternMatcher.getTopLevelComponents(context.method!)
       );
 

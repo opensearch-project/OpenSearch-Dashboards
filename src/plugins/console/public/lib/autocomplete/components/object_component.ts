@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { SharedComponent } from './index';
 import { ConstantComponent } from './constant_component';
 import { CoreEditor } from '../../../types';
@@ -52,14 +51,14 @@ export class ObjectComponent extends SharedComponent {
     this.patternsAndWildCards = patternsAndWildCards;
   }
   getTerms(context: AutoCompleteContext, editor: CoreEditor) {
-    const options: Array<string | Term> = [];
-    _.each(this.constants, function (component) {
-      options.push.apply(options, component.getTerms(context, editor));
+    const options: Term[] = [];
+    this.constants.forEach((component) => {
+      options.push(...component.getTerms(context, editor));
     });
-    _.each(this.patternsAndWildCards, function (component) {
+    this.patternsAndWildCards.forEach((component) => {
       const option = component.getTerms(context, editor);
       if (option) {
-        options.push.apply(options, option);
+        options.push(...option);
       }
     });
     return options;
@@ -71,10 +70,10 @@ export class ObjectComponent extends SharedComponent {
     } = {
       next: [],
     };
-    _.each(this.constants, function (component) {
+    this.constants.forEach((component) => {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
+        result.next.push(...componentResult.next);
       }
     });
 
@@ -87,10 +86,10 @@ export class ObjectComponent extends SharedComponent {
     if (result.next.length) {
       return result;
     }
-    _.each(this.patternsAndWildCards, function (component) {
+    this.patternsAndWildCards.forEach((component) => {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
+        result.next.push(...componentResult.next);
       }
     });
 

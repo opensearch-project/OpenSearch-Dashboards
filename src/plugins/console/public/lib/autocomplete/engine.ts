@@ -29,14 +29,14 @@
  */
 
 import _ from 'lodash';
-import { AutoCompleteContext, Term } from './types';
+import { AutoCompleteContext, Template, Term } from './types';
 import { CoreEditor } from '../../types';
 import { PartialAutoCompleteContext } from './components/autocomplete_component';
 import { SharedComponent } from './components';
 
 export function wrapComponentWithDefaults(
   component: SharedComponent,
-  defaults: Record<string, unknown>
+  defaults: { template: Template }
 ) {
   const originalGetTerms = component.getTerms;
   component.getTerms = function (context, editor) {
@@ -44,11 +44,11 @@ export function wrapComponentWithDefaults(
     if (!result) {
       return result;
     }
-    result = _.map(result, (term) => {
-      if (!_.isObject(term)) {
+    result = result.map((term) => {
+      if (typeof term !== 'object') {
         term = { name: term };
       }
-      return _.defaults(term, defaults);
+      return { ...defaults, ...term };
     });
     return result;
   };
@@ -68,7 +68,7 @@ function passThroughContext(
 ) {
   const result = Object.create(context) as AutoCompleteContext;
   if (extensionList) {
-    _.assign(result, ...extensionList);
+    Object.assign(result, ...extensionList);
   }
   return result;
 }
@@ -110,12 +110,12 @@ export function walkTokenPath(
 
   tracer('starting token evaluation [' + token + ']');
 
-  _.each(walkingStates, function (ws) {
+  walkingStates.forEach((ws) => {
     const contextForState = passThroughContext(context, ws.contextExtensionList);
-    _.each(ws.components, function (component) {
+    ws.components.forEach((component) => {
       tracer('evaluating [' + token + '] with [' + component.name + ']', component);
       const result = component.match(token, contextForState, editor);
-      if (result && !_.isEmpty(result)) {
+      if (result && Object.keys(result).length !== 0) {
         tracer('matched [' + token + '] with:', result);
         let next;
         let extensionList: PartialAutoCompleteContext[];
@@ -133,8 +133,8 @@ export function walkTokenPath(
         }
 
         let priority = ws.priority;
-        if (_.isNumber(result.priority)) {
-          if (_.isNumber(priority)) {
+        if (typeof result.priority === 'number') {
+          if (typeof priority === 'number') {
             priority = Math.min(priority, result.priority);
           } else {
             priority = result.priority;
@@ -150,9 +150,7 @@ export function walkTokenPath(
 
   if (nextWalkingStates.length === 0) {
     // no where to go, still return context variables returned so far..
-    return _.map(walkingStates, function (ws) {
-      return new WalkingState(ws.name ?? '', [], ws.contextExtensionList);
-    });
+    return walkingStates.map((ws) => new WalkingState(ws.name ?? '', [], ws.contextExtensionList));
   }
 
   return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);
@@ -162,7 +160,7 @@ export function populateContext(
   tokenPath: Array<string | string[]>,
   context: AutoCompleteContext | PartialAutoCompleteContext,
   editor: CoreEditor | null,
-  includeAutoComplete: Term[] | null | undefined,
+  includeAutoComplete: boolean,
   components: SharedComponent[]
 ) {
   let walkStates = walkTokenPath(
@@ -173,18 +171,21 @@ export function populateContext(
   );
   if (includeAutoComplete) {
     let autoCompleteSet: Term[] = [];
-    _.each(walkStates, function (ws) {
+    walkStates.forEach((ws) => {
       const contextForState = passThroughContext(context, ws.contextExtensionList);
-      _.each(ws.components, function (component) {
-        _.each(component.getTerms(contextForState, editor), function (term) {
-          if (!_.isObject(term)) {
-            term = { name: term };
-          }
-          autoCompleteSet.push(term);
-        });
+      ws.components.forEach((component) => {
+        const terms = component.getTerms(contextForState, editor);
+        if (terms) {
+          terms.forEach((term) => {
+            if (typeof term !== 'object') {
+              term = { name: term };
+            }
+            autoCompleteSet.push(term);
+          });
+        }
       });
     });
-    autoCompleteSet = _.uniq(autoCompleteSet);
+    autoCompleteSet = [...new Set(autoCompleteSet)];
     context.autoCompleteSet = autoCompleteSet;
   }
 

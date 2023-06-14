@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { ConstantComponent, ListComponent, ParamComponent, SharedComponent } from './components';
 
 export class UrlParams {
@@ -37,16 +36,15 @@ export class UrlParams {
   constructor(description: Record<string, unknown>, defaults?: Record<string, unknown>) {
     // This is not really a component, just a handy container to make iteration logic simpler
     this.rootComponent = new SharedComponent('ROOT');
-    if (_.isUndefined(defaults)) {
+    if (defaults === undefined) {
       defaults = {
         pretty: '__flag__',
         format: ['json', 'yaml'],
         filter_path: '',
       };
     }
-    description = _.clone(description || {});
-    _.defaults(description, defaults);
-    _.each(description, (pDescription, param) => {
+    description = { ...(description || {}), ...defaults };
+    Object.entries(description).forEach(([param, pDescription]) => {
       const component = new ParamComponent(
         param,
         this.rootComponent as ConstantComponent,
