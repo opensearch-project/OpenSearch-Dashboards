@@ -121,6 +121,7 @@ export function createPluginSetupContext<
       getBranding: deps.injectedMetadata.getBranding,
     },
     getStartServices: () => plugin.startDependencies,
+    workspaces: deps.workspaces,
   };
 }
 

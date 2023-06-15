@@ -175,7 +175,7 @@ export class Server {
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
-    const workspacesSetup = await this.workspaces.setup({
+    await this.workspaces.setup({
       http: httpSetup,
       savedObject: savedObjectsSetup,
     });
@@ -220,7 +220,6 @@ export class Server {
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
-      workspaces: workspacesSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -262,7 +261,7 @@ export class Server {
       opensearch: opensearchStart,
       savedObjects: savedObjectsStart,
     });
-    const workspacesStart = await this.workspaces.start({
+    await this.workspaces.start({
       savedObjects: savedObjectsStart,
     });
 
@@ -275,7 +274,6 @@ export class Server {
       uiSettings: uiSettingsStart,
       auditTrail: auditTrailStart,
       coreUsageData: coreUsageDataStart,
-      workspaces: workspacesStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);

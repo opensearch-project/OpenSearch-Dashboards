@@ -19,11 +19,11 @@ export interface WorkspaceAttribute {
 
 export interface WorkspaceFindOptions {
   page?: number;
-  per_page?: number;
+  perPage?: number;
   search?: string;
-  search_fields?: string[];
-  sort_field?: string;
-  sort_order?: string;
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: string;
 }
 
 export interface IRequestDetail {
@@ -67,7 +67,3 @@ export type IResponse<T> =
       success: false;
       error?: string;
     };
-
-export const WORKSPACES_API_BASE_URL = '/api/workspaces';
-
-export const WORKSPACE_ID_COOKIE_NAME = 'trinity_workspace_id';
