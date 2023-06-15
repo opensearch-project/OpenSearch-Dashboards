@@ -95,9 +95,11 @@ export class RenderingService {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
-        const darkMode = settings.user?.['theme:darkMode']?.userValue
-          ? Boolean(settings.user['theme:darkMode'].userValue)
-          : false;
+        // Cannot use `uiSettings.get()` since a user might not be authenticated
+        const darkMode =
+          (settings.user?.['theme:darkMode']?.userValue ??
+            uiSettings.getOverrideOrDefault('theme:darkMode')) ||
+          false;
 
         const brandingAssignment = await this.assignBrandingConfig(
           darkMode,
