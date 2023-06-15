@@ -44,7 +44,7 @@ interface WorkspaceFeatureGroup {
   features: WorkspaceFeature[];
 }
 
-interface WorkspaceFormData {
+export interface WorkspaceFormData {
   name: string;
   description?: string;
   features: string[];
