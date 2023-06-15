@@ -520,7 +520,7 @@ describe('http service', () => {
       });
 
       const coreStart = await root.start();
-      opensearch = coreStart.opensearch;
+      opensearch = coreStart?.opensearch;
 
       const { header } = await osdTestServer.request.get(root, '/new-platform/').expect(401);
 
@@ -556,7 +556,7 @@ describe('http service', () => {
       });
 
       const coreStart = await root.start();
-      opensearch = coreStart.opensearch;
+      opensearch = coreStart?.opensearch;
 
       const { header } = await osdTestServer.request.get(root, '/new-platform/').expect(401);
 

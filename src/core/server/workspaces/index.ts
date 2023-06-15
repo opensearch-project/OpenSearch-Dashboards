@@ -10,4 +10,4 @@ export {
   InternalWorkspacesServiceStart,
 } from './workspaces_service';
 
-export { WorkspaceAttribute, WorkspaceFindOptions, WORKSPACES_API_BASE_URL } from './types';
+export { WorkspaceAttribute, WorkspaceFindOptions } from './types';

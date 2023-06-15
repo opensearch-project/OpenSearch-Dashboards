@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { parse } from 'querystring';
 import {
   CoreSetup,
   CoreStart,
@@ -11,10 +12,71 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
 } from '../../../core/public';
-import { WORKSPACE_APP_ID } from '../common/constants';
+import { WORKSPACE_APP_ID, WORKSPACE_ID_IN_SESSION_STORAGE } from '../common/constants';
+import { WORKSPACE_ID_QUERYSTRING_NAME } from '../../../core/public';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
-  public setup(core: CoreSetup) {
+  private core?: CoreSetup;
+  private addWorkspaceListener() {
+    this.core?.workspaces.client.currentWorkspaceId$.subscribe((newWorkspaceId) => {
+      try {
+        sessionStorage.setItem(WORKSPACE_ID_IN_SESSION_STORAGE, newWorkspaceId);
+      } catch (e) {
+        /**
+         * in incognize mode, this method may throw an error
+         * */
+      }
+    });
+  }
+  private getWorkpsaceIdFromQueryString(): string {
+    const querystringObject = parse(window.location.search.replace(/^\??/, ''));
+    return querystringObject[WORKSPACE_ID_QUERYSTRING_NAME] as string;
+  }
+  private getWorkpsaceIdFromSessionStorage(): string {
+    try {
+      return sessionStorage.getItem(WORKSPACE_ID_IN_SESSION_STORAGE) || '';
+    } catch (e) {
+      /**
+       * in incognize mode, this method may throw an error
+       * */
+      return '';
+    }
+  }
+  private clearWorkspaceIdFromSessionStorage(): void {
+    try {
+      sessionStorage.removeItem(WORKSPACE_ID_IN_SESSION_STORAGE);
+    } catch (e) {
+      /**
+       * in incognize mode, this method may throw an error
+       * */
+    }
+  }
+  public async setup(core: CoreSetup) {
+    this.core = core;
+    /**
+     * register a listener
+     */
+    this.addWorkspaceListener();
+
+    /**
+     * Retrive workspace id from url or sessionstorage
+     * url > sessionstorage
+     */
+    const workspaceId =
+      this.getWorkpsaceIdFromQueryString() || this.getWorkpsaceIdFromSessionStorage();
+
+    if (workspaceId) {
+      const result = await core.workspaces.client.enterWorkspace(workspaceId);
+      if (!result.success) {
+        this.clearWorkspaceIdFromSessionStorage();
+        core.fatalErrors.add(
+          result.error ||
+            i18n.translate('workspace.error.setup', {
+              defaultMessage: 'Workspace init failed',
+            })
+        );
+      }
+    }
     core.application.register({
       id: WORKSPACE_APP_ID,
       title: i18n.translate('workspace.settings.title', {

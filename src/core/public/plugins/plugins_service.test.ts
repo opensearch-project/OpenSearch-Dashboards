@@ -50,7 +50,10 @@ import { applicationServiceMock } from '../application/application_service.mock'
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
+import {
+  fatalErrorsServiceMock,
+  workspacesServiceMock,
+} from '../fatal_errors/fatal_errors_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -108,6 +111,7 @@ describe('PluginsService', () => {
       injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
+      workspaces: workspacesServiceMock.createSetupContractMock(),
     };
     mockSetupContext = {
       ...mockSetupDeps,
@@ -127,6 +131,7 @@ describe('PluginsService', () => {
       uiSettings: uiSettingsServiceMock.createStartContract(),
       savedObjects: savedObjectsServiceMock.createStartContract(),
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
     };
     mockStartContext = {
       ...mockStartDeps,
