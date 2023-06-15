@@ -32,8 +32,6 @@
 import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { MapsLegacyPlugin } from './plugin';
 // @ts-ignore
-import * as colorUtil from './map/color_util';
-// @ts-ignore
 import { OpenSearchDashboardsMapLayer } from './map/opensearch_dashboards_map_layer';
 // @ts-ignore
 import { convertToGeoJson } from './map/convert_to_geojson';
@@ -59,7 +57,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export {
   getPrecision,
   geoContains,
-  colorUtil,
   convertToGeoJson,
   IServiceSettings,
   OpenSearchDashboardsMapLayer,
