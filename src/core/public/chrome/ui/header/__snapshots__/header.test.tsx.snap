@@ -2798,6 +2798,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                 >
                                   <span
                                     data-euiicon-type="menu"
+                                    title="Menu"
                                   />
                                 </span>
                               </span>
@@ -2842,11 +2843,13 @@ exports[`Header handles visibility and lock changes 1`] = `
                               >
                                 <EuiIcon
                                   size="m"
+                                  title="Menu"
                                   type="menu"
                                 >
                                   <span
                                     data-euiicon-type="menu"
                                     size="m"
+                                    title="Menu"
                                   />
                                 </EuiIcon>
                               </span>
@@ -5414,6 +5417,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                           >
                             <EuiIcon
                               size="m"
+                              title="Help"
                               type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
@@ -5466,6 +5470,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
+                                              title="Help"
                                             />
                                           </span>
                                         </span>
@@ -5507,11 +5512,13 @@ exports[`Header handles visibility and lock changes 1`] = `
                                         >
                                           <EuiIcon
                                             size="m"
+                                            title="Help"
                                             type="questionInCircle"
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
                                               size="m"
+                                              title="Help"
                                             />
                                           </EuiIcon>
                                         </span>
@@ -8117,6 +8124,7 @@ exports[`Header renders condensed header 1`] = `
                                 >
                                   <span
                                     data-euiicon-type="menu"
+                                    title="Menu"
                                   />
                                 </span>
                               </span>
@@ -8161,11 +8169,13 @@ exports[`Header renders condensed header 1`] = `
                               >
                                 <EuiIcon
                                   size="m"
+                                  title="Menu"
                                   type="menu"
                                 >
                                   <span
                                     data-euiicon-type="menu"
                                     size="m"
+                                    title="Menu"
                                   />
                                 </EuiIcon>
                               </span>
@@ -10650,6 +10660,7 @@ exports[`Header renders condensed header 1`] = `
                           >
                             <EuiIcon
                               size="m"
+                              title="Help"
                               type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
@@ -10702,6 +10713,7 @@ exports[`Header renders condensed header 1`] = `
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
+                                              title="Help"
                                             />
                                           </span>
                                         </span>
@@ -10743,11 +10755,13 @@ exports[`Header renders condensed header 1`] = `
                                         >
                                           <EuiIcon
                                             size="m"
+                                            title="Help"
                                             type="questionInCircle"
                                           >
                                             <span
                                               data-euiicon-type="questionInCircle"
                                               size="m"
+                                              title="Help"
                                             />
                                           </EuiIcon>
                                         </span>

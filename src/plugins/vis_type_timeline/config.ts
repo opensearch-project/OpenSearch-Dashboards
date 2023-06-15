@@ -30,15 +30,10 @@
 
 import { schema, TypeOf } from '@osd/config-schema';
 
-export const configSchema = schema.object(
-  {
-    enabled: schema.boolean({ defaultValue: true }),
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteAllowedUrls: schema.maybe(schema.arrayOf(schema.string())),
-    graphiteBlockedIPs: schema.maybe(schema.arrayOf(schema.string())),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timeline plugin.
-  { unknowns: 'allow' }
-);
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  graphiteAllowedUrls: schema.maybe(schema.arrayOf(schema.string())),
+  graphiteBlockedIPs: schema.maybe(schema.arrayOf(schema.string())),
+});
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

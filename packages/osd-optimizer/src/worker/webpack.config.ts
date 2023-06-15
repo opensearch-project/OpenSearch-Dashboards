@@ -50,7 +50,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
   const commonConfig: webpack.Configuration = {
     node: { fs: 'empty' },
-    context: bundle.contextDir,
+    context: Path.normalize(bundle.contextDir),
     cache: true,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
@@ -69,6 +69,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           info.absoluteResourcePath
         )}${info.query}`,
       jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
+      hashFunction: 'Xxh64',
     },
 
     optimization: {
@@ -176,12 +177,11 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                       )};\n${content}`;
                     },
                     webpackImporter: false,
-                    implementation: require('sass'),
+                    implementation: require('node-sass'),
                     sassOptions: {
                       outputStyle: 'compressed',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                      fiber: require('fibers'),
                     },
                   },
                 },

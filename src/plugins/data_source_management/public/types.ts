@@ -16,6 +16,7 @@ import {
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { SavedObjectAttributes } from 'src/core/types';
 import { i18n } from '@osd/i18n';
+import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -78,6 +79,21 @@ export const credentialSourceOptions = [
   },
 ];
 
+export const sigV4ServiceOptions = [
+  {
+    value: SigV4ServiceName.OpenSearch,
+    text: i18n.translate('dataSourceManagement.SigV4ServiceOptions.OpenSearch', {
+      defaultMessage: 'Amazon OpenSearch Service',
+    }),
+  },
+  {
+    value: SigV4ServiceName.OpenSearchServerless,
+    text: i18n.translate('dataSourceManagement.SigV4ServiceOptions.OpenSearchServerless', {
+      defaultMessage: 'Amazon OpenSearch Serverless',
+    }),
+  },
+];
+
 export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
   description?: string;
@@ -97,4 +113,5 @@ export interface SigV4Content extends SavedObjectAttributes {
   accessKey: string;
   secretKey: string;
   region: string;
+  service?: SigV4ServiceName;
 }

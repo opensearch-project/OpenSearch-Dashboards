@@ -64,6 +64,8 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   _level?: number;
   _icon?: string;
   items: ItemDescriptor[];
+  _category?: string;
+  _order?: number;
 };
 
 const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
@@ -125,7 +127,7 @@ const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemD
 const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
   const euiPanels: EuiContextMenuPanelDescriptor[] = [];
   for (const panel of panels) {
-    const { _level: omit, _icon: omit2, ...rest } = panel;
+    const { _level: omit, _icon: omit2, _category: omit3, _order: omit4, ...rest } = panel;
     euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
   }
   return euiPanels;
@@ -146,6 +148,7 @@ export async function buildContextMenuForActions({
   closeMenu = () => {},
 }: BuildContextMenuParams): Promise<EuiContextMenuPanelDescriptor[]> {
   const panels: Record<string, PanelDescriptor> = {
+    // This is the first panel which links out to all others via items property
     mainMenu: {
       id: 'mainMenu',
       title,
@@ -157,35 +160,53 @@ export async function buildContextMenuForActions({
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
     const isCompatible = await item.action.isCompatible(context);
     if (!isCompatible) return;
-    let parentPanel = '';
-    let currentPanel = '';
+
+    // Reference to the last/parent/upper group.
+    // Groups are provided in order of parent to children.
+    let parentGroupId = '';
+
     if (action.grouping) {
       for (let i = 0; i < action.grouping.length; i++) {
         const group = action.grouping[i];
-        currentPanel = group.id;
-        if (!panels[currentPanel]) {
+        const groupId = group.id;
+
+        // If a panel does not exist for the current group, then create it
+        if (!panels[groupId]) {
           const name = group.getDisplayName ? group.getDisplayName(context) : group.id;
-          panels[currentPanel] = {
-            id: currentPanel,
+
+          // Create panel for group
+          panels[groupId] = {
+            id: groupId,
             title: name,
             items: [],
             _level: i,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
+            _category: group.category,
+            _order: group.order,
           };
-          if (parentPanel) {
-            panels[parentPanel].items!.push({
+
+          // If there are multiple groups and this is not the first group,
+          // then add an item to the parent group relating to this group
+          if (parentGroupId) {
+            panels[parentGroupId].items!.push({
               name,
-              panel: currentPanel,
+              panel: groupId,
               icon: group.getIconType ? group.getIconType(context) : 'empty',
               _order: group.order || 0,
               _title: group.getDisplayName ? group.getDisplayName(context) : '',
             });
           }
         }
-        parentPanel = currentPanel;
+
+        // Save the current group, because it will be used as the parent group
+        // for adding items to it for any additional groups in the array
+        parentGroupId = groupId;
       }
     }
-    panels[parentPanel || 'mainMenu'].items!.push({
+
+    // Add a context menu item for this action so it shows up on a context menu panel.
+    // We add this within the parent group or default to the mainMenu panel.
+    panels[parentGroupId || 'mainMenu'].items!.push({
       name: action.MenuItem
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
@@ -197,8 +218,10 @@ export async function buildContextMenuForActions({
       _title: action.getDisplayName(context),
     });
   });
+
   await Promise.all(promises);
 
+  // For each panel, sort items by order and title
   for (const panel of Object.values(panels)) {
     const items = panel.items.filter(Boolean) as ItemDescriptor[];
     panel.items = _.sortBy(
@@ -208,13 +231,63 @@ export async function buildContextMenuForActions({
     );
   }
 
+  // On the mainMenu, before adding in items for other groups, the first 4 items are shown.
+  // Any additional items are hidden behind a "more" item
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
+  // This will be used to store items that eventually are placed into the
+  // mainMenu panel. Specifying a category allows for placing groups into the
+  // mainMenu so they appear without the separator between them.
+  const categories = {};
+
   for (const panel of Object.values(panels)) {
-    if (panel._level === 0) {
-      // TODO: Add separator line here once it is available in EUI.
-      // See https://github.com/elastic/eui/pull/4018
-      if (panel.items.length > 3) {
+    // Do nothing if not root-level panel, such as the parent of a group
+    if (panel._level !== 0) {
+      continue;
+    }
+
+    // Proceed to create mainMenu item for this panel
+
+    // If a category is specified, store either a link to the panel or the
+    // item within to that category. We will deal with the category after
+    // looping through all panels.
+    if (panel._category) {
+      // Create array to store category items
+      if (!categories[panel._category]) {
+        categories[panel._category] = [];
+      }
+
+      // If multiple items in the panel, store a link to this panel into the category.
+      // Otherwise, just store the single item into the category.
+      if (panel.items.length > 1) {
+        categories[panel._category].push({
+          order: panel._order,
+          items: [
+            {
+              name: panel.title || panel.id,
+              icon: panel._icon || 'empty',
+              panel: panel.id,
+            },
+          ],
+        });
+      } else {
+        categories[panel._category].push({
+          order: panel._order || 0,
+          items: panel.items,
+        });
+      }
+    } else {
+      // If no category, continue with adding items to the mainMenu
+
+      // Add separator with unique key if needed
+      if (panels.mainMenu.items.length) {
+        panels.mainMenu.items.push({ isSeparator: true, key: `${panel.id}separator` });
+      }
+
+      // If a panel has more than one child, then allow items to be grouped
+      // and link to it in the mainMenu. Otherwise, link to the single item.
+      // Note: this only happens on the root level panels, not for inner groups.
+      if (panel.items.length > 1) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
           icon: panel._icon || 'empty',
@@ -226,6 +299,27 @@ export async function buildContextMenuForActions({
     }
   }
 
+  // For each category, add a separator before each one and then add category items.
+  // This is for the mainMenu panel.
+  Object.keys(categories).forEach((key) => {
+    // Get the items sorted by group order, allowing for groups within categories
+    // to be ordered. A category consists of an order and its items.
+    // Higher orders are sorted to the top.
+    const sortedEntries = categories[key].sort((a, b) => b.order - a.order);
+    const sortedItems = sortedEntries.reduce(
+      (items, category) => [...items, ...category.items],
+      []
+    );
+
+    // Add separator with unique key if needed
+    if (panels.mainMenu.items.length) {
+      panels.mainMenu.items.push({ isSeparator: true, key: `${key}separator` });
+    }
+
+    panels.mainMenu.items.push(...sortedItems);
+  });
+
   const panelList = Object.values(panels);
+
   return removePanelMetaFields(panelList);
 }

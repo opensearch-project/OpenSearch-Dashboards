@@ -28,9 +28,11 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import fs from 'fs';
-import del from 'del';
+import fs from 'fs/promises';
+import { rmSync } from 'fs';
+
+jest.mock('fs');
+jest.mock('fs/promises');
 
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { Logger } from '../lib/logger';
@@ -41,105 +43,116 @@ describe('opensearchDashboards cli', function () {
       const settings = {
         workingPath: 'dummy',
       };
+      const logger = new Logger(settings);
 
       describe('cleanPrevious', function () {
-        let errorStub;
-        let logger;
-
-        beforeEach(function () {
-          errorStub = sinon.stub();
-          logger = new Logger(settings);
-          sinon.stub(logger, 'log');
-          sinon.stub(logger, 'error');
-        });
-
         afterEach(function () {
-          logger.log.restore();
-          logger.error.restore();
-          fs.statSync.restore();
-          del.sync.restore();
+          jest.resetAllMocks();
         });
 
-        it('should resolve if the working path does not exist', function () {
-          sinon.stub(del, 'sync');
-          sinon.stub(fs, 'statSync').callsFake(() => {
-            const error = new Error('ENOENT');
-            error.code = 'ENOENT';
-            throw error;
+        it('should resolve if the working path does not exist', async () => {
+          fs.access.mockImplementation(() => {
+            const notFoundError = new Error('ENOENT');
+            notFoundError.code = 'ENOENT';
+            throw notFoundError;
           });
 
-          return cleanPrevious(settings, logger)
-            .catch(errorStub)
-            .then(function () {
-              expect(errorStub.called).toBe(false);
-            });
+          const exceptionCatcher = jest.fn();
+
+          try {
+            await cleanPrevious(settings, logger);
+          } catch (e) {
+            exceptionCatcher();
+          }
+
+          expect(fs.rm).not.toHaveBeenCalled();
+          expect(exceptionCatcher).not.toHaveBeenCalled();
         });
 
-        it('should rethrow any exception except ENOENT from fs.statSync', function () {
-          sinon.stub(del, 'sync');
-          sinon.stub(fs, 'statSync').throws(new Error('An Unhandled Error'));
+        it('should rethrow any exceptions from accessing the folders except ENOENT', async () => {
+          fs.access.mockImplementation(() => {
+            const noAccessError = new Error('EACCES');
+            noAccessError.code = 'EACCES';
+            throw noAccessError;
+          });
 
-          errorStub = sinon.stub();
-          return cleanPrevious(settings, logger)
-            .catch(errorStub)
-            .then(function () {
-              expect(errorStub.called).toBe(true);
-            });
+          const exceptionCatcher = jest.fn();
+
+          try {
+            await cleanPrevious(settings, logger);
+          } catch (e) {
+            exceptionCatcher();
+          }
+
+          expect(fs.rm).not.toHaveBeenCalled();
+          expect(exceptionCatcher).toHaveBeenCalled();
         });
 
-        it('should log a message if there was a working directory', function () {
-          sinon.stub(del, 'sync');
-          sinon.stub(fs, 'statSync');
+        it('should log a message if there was a working directory', async () => {
+          jest.spyOn(logger, 'log');
+          const exceptionCatcher = jest.fn();
 
-          return cleanPrevious(settings, logger)
-            .catch(errorStub)
-            .then(function () {
-              expect(logger.log.calledWith('Found previous install attempt. Deleting...')).toBe(
-                true
-              );
-            });
+          try {
+            await cleanPrevious(settings, logger);
+          } catch (e) {
+            exceptionCatcher();
+          }
+
+          expect(logger.log).toHaveBeenCalledWith('Found previous install attempt. Deleting...');
+          expect(fs.rm).toHaveBeenCalled();
+          expect(exceptionCatcher).not.toHaveBeenCalled();
         });
 
-        it('should rethrow any exception from del.sync', function () {
-          sinon.stub(fs, 'statSync');
-          sinon.stub(del, 'sync').throws(new Error('I am an error thrown by del'));
+        it('should rethrow any exception from deleting the folder', async () => {
+          fs.rm.mockImplementation(() => {
+            const dummyError = new Error('EDUMMY');
+            dummyError.code = 'EDUMMY';
+            throw dummyError;
+          });
 
-          errorStub = sinon.stub();
-          return cleanPrevious(settings, logger)
-            .catch(errorStub)
-            .then(function () {
-              expect(errorStub.called).toBe(true);
-            });
+          const exceptionCatcher = jest.fn();
+
+          try {
+            await cleanPrevious(settings, logger);
+          } catch (e) {
+            exceptionCatcher();
+          }
+
+          expect(fs.rm).toHaveBeenCalled();
+          expect(exceptionCatcher).toHaveBeenCalled();
         });
 
-        it('should resolve if the working path is deleted', function () {
-          sinon.stub(del, 'sync');
-          sinon.stub(fs, 'statSync');
+        it('should resolve if the working path is deleted', async () => {
+          const exceptionCatcher = jest.fn();
 
-          return cleanPrevious(settings, logger)
-            .catch(errorStub)
-            .then(function () {
-              expect(errorStub.called).toBe(false);
-            });
+          try {
+            await cleanPrevious(settings, logger);
+          } catch (e) {
+            exceptionCatcher();
+          }
+
+          expect(fs.rm).toHaveBeenCalled();
+          expect(exceptionCatcher).not.toHaveBeenCalled();
         });
       });
 
       describe('cleanArtifacts', function () {
-        beforeEach(function () {});
-
         afterEach(function () {
-          del.sync.restore();
+          jest.resetAllMocks();
         });
 
-        it('should attempt to delete the working directory', function () {
-          sinon.stub(del, 'sync');
-
+        it('should attempt to delete the working directory', () => {
           cleanArtifacts(settings);
-          expect(del.sync.calledWith(settings.workingPath)).toBe(true);
+
+          expect(rmSync).toHaveBeenCalledWith(settings.workingPath, expect.anything());
         });
 
-        it('should swallow any errors thrown by del.sync', function () {
-          sinon.stub(del, 'sync').throws(new Error('Something bad happened.'));
+        it('should swallow any errors thrown by del.sync', () => {
+          rmSync.mockImplementation(() => {
+            const dummyError = new Error('EDUMMY');
+            dummyError.code = 'EDUMMY';
+            throw dummyError;
+          });
 
           expect(() => cleanArtifacts(settings)).not.toThrow();
         });

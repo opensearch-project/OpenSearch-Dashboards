@@ -330,7 +330,14 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         })}
         onClick={this.onMenuButtonClick}
       >
-        <EuiIcon type="questionInCircle" size="m" />
+        <EuiIcon
+          type="questionInCircle"
+          size="m"
+          title={intl.formatMessage({
+            id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonTitle',
+            defaultMessage: 'Help',
+          })}
+        />
       </EuiHeaderSectionItemButton>
     );
 

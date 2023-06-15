@@ -1624,6 +1624,7 @@ exports[`Header help menu hides survey link 1`] = `
         >
           <EuiIcon
             size="m"
+            title="Help"
             type="questionInCircle"
           />
         </EuiHeaderSectionItemButton>
@@ -1676,6 +1677,7 @@ exports[`Header help menu hides survey link 1`] = `
                         >
                           <span
                             data-euiicon-type="questionInCircle"
+                            title="Help"
                           />
                         </span>
                       </span>
@@ -1717,11 +1719,13 @@ exports[`Header help menu hides survey link 1`] = `
                       >
                         <EuiIcon
                           size="m"
+                          title="Help"
                           type="questionInCircle"
                         >
                           <span
                             data-euiicon-type="questionInCircle"
                             size="m"
+                            title="Help"
                           />
                         </EuiIcon>
                       </span>
@@ -3780,6 +3784,7 @@ exports[`Header help menu renders survey link 1`] = `
         >
           <EuiIcon
             size="m"
+            title="Help"
             type="questionInCircle"
           />
         </EuiHeaderSectionItemButton>
@@ -3832,6 +3837,7 @@ exports[`Header help menu renders survey link 1`] = `
                         >
                           <span
                             data-euiicon-type="questionInCircle"
+                            title="Help"
                           />
                         </span>
                       </span>
@@ -3873,11 +3879,13 @@ exports[`Header help menu renders survey link 1`] = `
                       >
                         <EuiIcon
                           size="m"
+                          title="Help"
                           type="questionInCircle"
                         >
                           <span
                             data-euiicon-type="questionInCircle"
                             size="m"
+                            title="Help"
                           />
                         </EuiIcon>
                       </span>

@@ -10,14 +10,14 @@
   },
   "dependencies": {
     "@elastic/charts": "31.1.0",
-    "@elastic/eui": "npm:@opensearch-project/oui@1.0.0",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.1.1",
     "@elastic/numeral": "^2.5.0",
     "@osd/i18n": "1.0.0",
     "@osd/monaco": "1.0.0",
     "abortcontroller-polyfill": "^1.4.0",
     "angular": "^1.8.2",
     "axios": "^0.27.2",
-    "compression-webpack-plugin": "^4.0.0",
+    "compression-webpack-plugin": "npm:@amoo-miki/compression-webpack-plugin@4.0.1-rc.1",
     "core-js": "^3.6.5",
     "custom-event-polyfill": "^0.3.0",
     "jquery": "^3.5.0",
@@ -38,6 +38,7 @@
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
+    "@node-rs/xxhash": "^1.3.0",
     "@osd/babel-preset": "1.0.0",
     "@osd/dev-utils": "1.0.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
@@ -45,6 +46,6 @@
     "del": "^6.1.1",
     "loader-utils": "^2.0.4",
     "val-loader": "^2.1.2",
-    "webpack": "^4.41.5"
+    "webpack": "npm:@amoo-miki/webpack@4.46.0-rc.2"
   }
 }
