@@ -7,6 +7,21 @@ import { createPointInTimeEventsVisLayer } from '../mocks';
 import { generateAugmentVisSavedObject } from '../saved_augment_vis';
 import { PluginResourceDeleteAction } from './plugin_resource_delete_action';
 
+jest.mock('src/plugins/vis_augmenter/public/services.ts', () => {
+  return {
+    getSavedAugmentVisLoader: () => {
+      return {
+        delete: () => {},
+        findAll: () => {
+          return {
+            hits: [],
+          };
+        },
+      };
+    },
+  };
+});
+
 const sampleSavedObj = generateAugmentVisSavedObject(
   'test-id',
   {

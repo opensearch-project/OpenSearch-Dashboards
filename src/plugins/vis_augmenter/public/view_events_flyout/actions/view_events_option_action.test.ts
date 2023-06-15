@@ -47,6 +47,16 @@ jest.mock('src/plugins/vis_augmenter/public/services.ts', () => {
         },
       };
     },
+    getSavedAugmentVisLoader: () => {
+      return {
+        delete: () => {},
+        findAll: () => {
+          return {
+            hits: [],
+          };
+        },
+      };
+    },
   };
 });
 
@@ -63,6 +73,13 @@ describe('ViewEventsOptionAction', () => {
 
   it('is incompatible with VisualizeEmbeddable with invalid vis', async () => {
     const visEmbeddable = createMockVisEmbeddable('test-saved-obj-id', 'test-title', false);
+    const action = new ViewEventsOptionAction();
+    expect(await action.isCompatible({ embeddable: visEmbeddable })).toBe(false);
+  });
+
+  it('is incompatible with VisualizeEmbeddable with valid vis and no vislayers', async () => {
+    const visEmbeddable = createMockVisEmbeddable('test-saved-obj-id', 'test-title');
+    visEmbeddable.visLayers = [];
     const action = new ViewEventsOptionAction();
     expect(await action.isCompatible({ embeddable: visEmbeddable })).toBe(false);
   });
