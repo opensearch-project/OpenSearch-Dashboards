@@ -52,45 +52,7 @@ interface Package {
   >;
 }
 
-/* Process for updating URLs and checksums after bumping the version of `re2` or NodeJS:
- *   1. Match the `version` with the version in the yarn.lock file.
- *   2. Match the module version, the digits at the end of the filename, with the output of
- *      `node -p process.versions.modules`.
- *   3. Confirm that the URLs exist for each platform-architecture combo on
- *      https://github.com/uhop/node-re2/releases/tag/[VERSION]; reach out to maintainers for ARM
- *      releases of `re2` as they currently don't have an official ARM release.
- *   4. Generate new checksums for each artifact by downloading each one and calling
- *      `shasum -a 256` or `sha256sum` on the downloaded file.
- */
-const packages: Package[] = [
-  {
-    name: 're2',
-    version: '1.17.4',
-    destinationPath: 'node_modules/re2/build/Release/re2.node',
-    extractMethod: 'gunzip',
-    archives: {
-      'darwin-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.17.4/darwin-x64-83.gz',
-        sha256: '9112ed93c1544ecc6397f7ff20bd2b28f3b04c7fbb54024e10f9a376a132a87d',
-      },
-      'linux-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.17.4/linux-x64-83.gz',
-        sha256: '86e03540783a18c41f81df0aec320b1f64aca6cbd3a87fc1b7a9b4109c5f5986',
-      },
-      'linux-arm64': {
-        url:
-          'https://d1v1sj258etie.cloudfront.net/node-re2/releases/download/1.17.4/linux-arm64-83.tar.gz',
-        sha256: 'd86ced75b794fbf518b90908847b3c09a50f3ff5a2815aa30f53080f926a2873',
-        overriddenExtractMethod: 'untar',
-        overriddenDestinationPath: 'node_modules/re2/build/Release',
-      },
-      'win32-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.17.4/win32-x64-83.gz',
-        sha256: '2f842d9757288afd4bd5dec0e7b370a4c3e89ac98050598b17abb9e8e00e3294',
-      },
-    },
-  },
-];
+export const packages: Package[] = [];
 
 async function getInstalledVersion(config: Config, packageName: string) {
   const packageJSONPath = config.resolveFromRepo(
@@ -145,15 +107,20 @@ async function patchModule(
   }
 }
 
-export const PatchNativeModules: Task = {
-  description: 'Patching platform-specific native modules',
-  async run(config, log, build) {
-    for (const pkg of packages) {
-      await Promise.all(
-        config.getTargetPlatforms().map(async (platform) => {
-          await patchModule(config, log, build, platform, pkg);
-        })
-      );
-    }
-  },
-};
+export function createPatchNativeModulesTask(customPackages?: Package[]): Task {
+  return {
+    description: 'Patching platform-specific native modules',
+    async run(config, log, build) {
+      const targetPackages = customPackages || packages;
+      for (const pkg of targetPackages) {
+        await Promise.all(
+          config.getTargetPlatforms().map(async (platform) => {
+            await patchModule(config, log, build, platform, pkg);
+          })
+        );
+      }
+    },
+  };
+}
+
+export const PatchNativeModules = createPatchNativeModulesTask();
