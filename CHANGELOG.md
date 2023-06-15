@@ -25,7 +25,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛠 Maintenance
 
-- [Version] Increment to 1.3.11 ([#4282](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4282))
+- [Version] Increment version to 1.3.11 ([#4282](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4282))
 
 ### 🪛 Refactoring
 
