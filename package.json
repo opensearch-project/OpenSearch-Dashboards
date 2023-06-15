@@ -49,7 +49,7 @@
     "test:jest:ci": "scripts/use_node scripts/jest --ci --colors --runInBand",
     "test:jest:ci:coverage": "scripts/use_node scripts/jest --ci --colors --runInBand --coverage",
     "test:jest_integration": "scripts/use_node scripts/jest_integration",
-    "test:jest_integration:ci": "scripts/use_node scripts/jest_integration --ci --colors --max-old-space-size=5120",
+    "test:jest_integration:ci": "scripts/use_node scripts/jest_integration --ci --colors",
     "test:mocha": "scripts/use_node scripts/mocha",
     "test:mocha:coverage": "yarn nyc --reporter=text-summary --reporter=lcov --report-dir=./target/opensearch-dashboards-coverage/mocha scripts/use_node scripts/mocha",
     "test:ftr": "scripts/use_node scripts/functional_tests",
@@ -81,7 +81,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
-    "**/@types/node": "^14.17.32",
+    "**/@types/node": "~18.7.0",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
     "**/d3-color": "^3.1.0",
@@ -97,6 +97,7 @@
     "**/unset-value": "^2.0.1",
     "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
     "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1",
+    "**/set-value": "^4.1.0",
     "**/xml2js": "^0.5.0",
     "**/yaml": "^2.2.2"
   },
@@ -136,7 +137,7 @@
     "@hapi/podium": "^4.1.3",
     "@hapi/vision": "^6.1.0",
     "@hapi/wreck": "^17.1.0",
-    "@opensearch-project/opensearch": "^2.1.0",
+    "@opensearch-project/opensearch": "^2.2.0",
     "@osd/ace": "1.0.0",
     "@osd/analytics": "1.0.0",
     "@osd/apm-config-loader": "1.0.0",
@@ -167,9 +168,9 @@
     "deep-freeze-strict": "^1.1.1",
     "del": "^6.1.1",
     "dns-sync": "^0.2.1",
-    "elastic-apm-node": "^3.7.0",
+    "elastic-apm-node": "^3.43.0",
     "elasticsearch": "^16.7.0",
-    "http-aws-es": "6.0.0",
+    "http-aws-es": "npm:@zhongnansu/http-aws-es@6.0.1",
     "execa": "^4.0.2",
     "expiry-js": "0.1.7",
     "fast-deep-equal": "^3.1.1",
@@ -177,7 +178,7 @@
     "getos": "^3.2.1",
     "glob": "^7.1.7",
     "glob-all": "^3.2.1",
-    "globby": "^8.0.1",
+    "globby": "^11.1.0",
     "handlebars": "4.7.7",
     "hjson": "3.2.1",
     "http-proxy-agent": "^2.1.0",
@@ -211,6 +212,7 @@
     "rison-node": "1.0.2",
     "rxjs": "^6.5.5",
     "semver": "^5.7.0",
+    "set-value": "^4.1.0",
     "source-map-support": "^0.5.19",
     "symbol-observable": "^1.2.0",
     "tar": "^6.1.11",
@@ -301,7 +303,7 @@
     "@types/mock-fs": "^4.10.0",
     "@types/moment-timezone": "^0.5.12",
     "@types/mustache": "^0.8.31",
-    "@types/node": "^14.17.32",
+    "@types/node": "~18.7.0",
     "@types/node-forge": "^1.0.1",
     "@types/normalize-path": "^3.0.0",
     "@types/pegjs": "^0.10.1",
@@ -342,7 +344,6 @@
     "angular-mocks": "^1.8.2",
     "angular-recursion": "^1.0.5",
     "angular-route": "^1.8.0",
-    "angular-sortable-view": "^0.0.17",
     "archiver": "^5.3.0",
     "axe-core": "^4.0.2",
     "babel-eslint": "^10.0.3",
@@ -396,7 +397,7 @@
     "immer": "^9.0.6",
     "intl-messageformat-parser": "^1.4.0",
     "jest": "^27.5.1",
-    "jest-canvas-mock": "^2.3.1",
+    "jest-canvas-mock": "^2.5.1",
     "jest-raw-loader": "^1.0.1",
     "jimp": "^0.14.0",
     "jquery": "^3.5.0",
@@ -468,7 +469,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "^14.20.1",
+    "node": ">=14.20.1 <19",
     "yarn": "^1.22.10"
   }
 }
