@@ -36,7 +36,7 @@ import React, {
   useState,
   MutableRefObject,
 } from 'react';
-import { EuiLoadingSpinner, EuiButton, EuiFlexItem } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { MountPoint } from '../../types';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
@@ -65,7 +65,6 @@ export const AppContainer: FunctionComponent<Props> = ({
   appStatus,
   setIsMounting,
 }: Props) => {
-  const [showGoToDefault, setShowGoToDefault] = useState(true);
   const [showSpinner, setShowSpinner] = useState(false);
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
