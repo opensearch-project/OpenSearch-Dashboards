@@ -148,6 +148,7 @@ export const createMockVisEmbeddable = (
     mockVisualizeInput
   );
   mockVisEmbeddable.getTitle = () => title;
+  mockVisEmbeddable.visLayers = [createPointInTimeEventsVisLayer()];
   return mockVisEmbeddable;
 };
 
