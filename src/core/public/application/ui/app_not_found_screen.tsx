@@ -61,11 +61,7 @@ export const AppNotFound = () => (
               </p>
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
-                    onClick={goToHomePage}
-                    fill
-                    data-test-subj="noAppDefaultPageButton"
-                  >
+                  <EuiButton onClick={goToHomePage} fill data-test-subj="noAppDefaultPageButton">
                     <FormattedMessage
                       id="core.application.listing.appNotFound.defaultPageButton"
                       defaultMessage="Go to Default Page"
