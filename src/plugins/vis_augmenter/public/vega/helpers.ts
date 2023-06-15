@@ -234,7 +234,7 @@ export const addPointInTimeEventsLayersToTable = (
     while (row < augmentedTable.rows.length) {
       augmentedTable.rows[row] = {
         ...augmentedTable.rows[row],
-        [visLayerColumnId]: get(augmentedTable.rows[0], visLayerColumnId, 0) as number,
+        [visLayerColumnId]: get(augmentedTable.rows[row], visLayerColumnId, 0) as number,
       };
       row++;
     }
