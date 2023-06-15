@@ -7,9 +7,7 @@ import { InternalHttpServiceSetup } from '../../http';
 import { Logger } from '../../logging';
 import { IWorkspaceDBImpl } from '../types';
 
-export const WORKSPACES_API_BASE_URL = '/api/workspaces';
-
-export const WORKSPACE_ID_QUERYSTRING_NAME = '_workspace_id_';
+const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
 export function registerRoutes({
   client,
@@ -71,7 +69,7 @@ export function registerRoutes({
   );
   router.post(
     {
-      path: '/',
+      path: '',
       validate: {
         body: schema.object({
           attributes: schema.object({
@@ -98,7 +96,7 @@ export function registerRoutes({
   );
   router.put(
     {
-      path: '/{id}',
+      path: '/{id?}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -130,7 +128,7 @@ export function registerRoutes({
   );
   router.delete(
     {
-      path: '/{id}',
+      path: '/{id?}',
       validate: {
         params: schema.object({
           id: schema.string(),

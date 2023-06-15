@@ -2,12 +2,11 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { resolve as resolveUrl } from 'url';
 import type { PublicContract } from '@osd/utility-types';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { HttpFetchError, HttpFetchOptions, HttpSetup } from '../http';
 import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
-import { WORKSPACES_API_BASE_URL } from './consts';
+import { WORKSPACES_API_BASE_URL, WORKSPACE_ERROR_REASON_MAP } from './consts';
 
 /**
  * WorkspacesClientContract as implemented by the {@link WorkspacesClient}
@@ -40,27 +39,25 @@ type IResponse<T> =
  */
 export class WorkspacesClient {
   private http: HttpSetup;
-  private currentWorkspaceId = '';
-  public currentWorkspaceId$ = new Subject<string>();
-  public workspaceList$ = new Subject<WorkspaceAttribute[]>();
+  public currentWorkspaceId$ = new BehaviorSubject<string>('');
+  public workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
   constructor(http: HttpSetup) {
     this.http = http;
-    this.currentWorkspaceId$.subscribe(
-      (currentWorkspaceId) => (this.currentWorkspaceId = currentWorkspaceId)
-    );
     /**
      * Add logic to check if current workspace id is still valid
      * If not, remove the current workspace id and notify other subscribers
      */
     this.workspaceList$.subscribe(async (workspaceList) => {
-      const currentWorkspaceId = this.currentWorkspaceId;
+      const currentWorkspaceId = this.currentWorkspaceId$.getValue();
       if (currentWorkspaceId) {
         const findItem = workspaceList.find((item) => item.id === currentWorkspaceId);
         if (!findItem) {
           /**
            * Current workspace is staled
            */
-          this.currentWorkspaceId$.next('');
+          this.currentWorkspaceId$.error({
+            reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+          });
         }
       }
     });
@@ -71,29 +68,39 @@ export class WorkspacesClient {
     this.updateWorkspaceListAndNotify();
   }
 
-  private catchedFetch = async <T extends IResponse<any>>(
+  /**
+   * Add a non-throw-error fetch method for internal use.
+   */
+  private safeFetch = async <T = any>(
     path: string,
     options: HttpFetchOptions
-  ) => {
+  ): Promise<IResponse<T>> => {
     try {
-      return await this.http.fetch<T>(path, options);
+      return await this.http.fetch<IResponse<T>>(path, options);
     } catch (error: unknown) {
-      if (error instanceof HttpFetchError || error instanceof Error) {
+      if (error instanceof HttpFetchError) {
+        return {
+          success: false,
+          error: error.body?.message || error.body?.error || error.message,
+        };
+      }
+
+      if (error instanceof Error) {
         return {
           success: false,
           error: error.message,
-        } as T;
+        };
       }
 
       return {
         success: false,
         error: 'Unknown error',
-      } as T;
+      };
     }
   };
 
   private getPath(path: Array<string | undefined>): string {
-    return resolveUrl(`${WORKSPACES_API_BASE_URL}/`, join(...path));
+    return [WORKSPACES_API_BASE_URL, join(...path)].filter((item) => item).join('/');
   }
 
   private async updateWorkspaceListAndNotify(): Promise<void> {
@@ -128,7 +135,7 @@ export class WorkspacesClient {
   }
 
   public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
-    const currentWorkspaceId = this.currentWorkspaceId;
+    const currentWorkspaceId = this.currentWorkspaceId$.getValue();
     if (!currentWorkspaceId) {
       return {
         success: false,
@@ -161,16 +168,9 @@ export class WorkspacesClient {
   public async create(
     attributes: Omit<WorkspaceAttribute, 'id'>
   ): Promise<IResponse<WorkspaceAttribute>> {
-    if (!attributes) {
-      return {
-        success: false,
-        error: 'Workspace attributes is required',
-      };
-    }
-
     const path = this.getPath([]);
 
-    const result = await this.catchedFetch<IResponse<WorkspaceAttribute>>(path, {
+    const result = await this.safeFetch<WorkspaceAttribute>(path, {
       method: 'POST',
       body: JSON.stringify({
         attributes,
@@ -191,14 +191,7 @@ export class WorkspacesClient {
    * @returns
    */
   public async delete(id: string): Promise<IResponse<null>> {
-    if (!id) {
-      return {
-        success: false,
-        error: 'Id is required.',
-      };
-    }
-
-    const result = await this.catchedFetch(this.getPath([id]), { method: 'DELETE' });
+    const result = await this.safeFetch<null>(this.getPath([id]), { method: 'DELETE' });
 
     if (result.success) {
       this.updateWorkspaceListAndNotify();
@@ -230,7 +223,7 @@ export class WorkspacesClient {
     }>
   > => {
     const path = this.getPath(['_list']);
-    return this.catchedFetch(path, {
+    return this.safeFetch(path, {
       method: 'POST',
       body: JSON.stringify(options || {}),
     });
@@ -243,15 +236,8 @@ export class WorkspacesClient {
    * @returns The workspace for the given id.
    */
   public async get(id: string): Promise<IResponse<WorkspaceAttribute>> {
-    if (!id) {
-      return {
-        success: false,
-        error: 'Id is required.',
-      };
-    }
-
     const path = this.getPath([id]);
-    return this.catchedFetch(path, {
+    return this.safeFetch(path, {
       method: 'GET',
     });
   }
@@ -267,19 +253,12 @@ export class WorkspacesClient {
     id: string,
     attributes: Partial<WorkspaceAttribute>
   ): Promise<IResponse<boolean>> {
-    if (!id || !attributes) {
-      return {
-        success: false,
-        error: 'Id and attributes are required.',
-      };
-    }
-
     const path = this.getPath([id]);
     const body = {
       attributes,
     };
 
-    const result = await this.catchedFetch(path, {
+    const result = await this.safeFetch(path, {
       method: 'PUT',
       body: JSON.stringify(body),
     });

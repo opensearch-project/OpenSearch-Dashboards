@@ -6,3 +6,7 @@
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
 export const WORKSPACE_ID_QUERYSTRING_NAME = '_workspace_id_';
+
+export enum WORKSPACE_ERROR_REASON_MAP {
+  WORKSPACE_STALED = 'WORKSPACE_STALED',
+}
