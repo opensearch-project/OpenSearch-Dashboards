@@ -53,9 +53,16 @@ function createPlugin(
   {
     required = [],
     optional = [],
+    requiredOSPlugin = [],
     server = true,
     ui = true,
-  }: { required?: string[]; optional?: string[]; server?: boolean; ui?: boolean } = {}
+  }: {
+    required?: string[];
+    optional?: string[];
+    requiredOSPlugin?: string[];
+    server?: boolean;
+    ui?: boolean;
+  } = {}
 ) {
   return new PluginWrapper({
     path: 'some-path',
@@ -65,6 +72,7 @@ function createPlugin(
       configPath: 'path',
       opensearchDashboardsVersion: '7.0.0',
       requiredPlugins: required,
+      requiredOpenSearchPlugins: requiredOSPlugin,
       optionalPlugins: optional,
       requiredBundles: [],
       server,
@@ -187,7 +195,7 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   }
   const plugins = new Map([
     [
-      createPlugin('order-4', { required: ['order-2'] }),
+      createPlugin('order-4', { required: ['order-2'], requiredOSPlugin: ['test-plugin'] }),
       {
         setup: { 'order-2': 'added-as-2' },
         start: { 'order-2': 'started-as-2' },
@@ -243,6 +251,17 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   mockCreatePluginStartContext.mockImplementation((context, deps, plugin) =>
     startContextMap.get(plugin.name)
   );
+
+  const opensearch = startDeps.opensearch;
+  opensearch.client.asInternalUser.cat.plugins.mockResolvedValue({
+    body: [
+      {
+        name: 'node-1',
+        component: 'test-plugin',
+        version: 'v1',
+      },
+    ],
+  } as any);
 
   expect([...(await pluginsSystem.setupPlugins(setupDeps))]).toMatchInlineSnapshot(`
     Array [
@@ -484,6 +503,16 @@ describe('start', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
+  const opensearch = startDeps.opensearch;
+  opensearch.client.asInternalUser.cat.plugins.mockResolvedValue({
+    body: [
+      {
+        name: 'node-1',
+        component: 'test-plugin',
+        version: 'v1',
+      },
+    ],
+  } as any);
   it('throws timeout error if "start" was not completed in 30 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
@@ -516,5 +545,49 @@ describe('start', () => {
     await pluginsSystem.startPlugins(startDeps);
     const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
+  });
+
+  it('validates opensearch plugin installation when dependency is fulfilled', async () => {
+    [
+      createPlugin('order-1', { requiredOSPlugin: ['test-plugin'] }),
+      createPlugin('order-2'),
+    ].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const pluginsStart = await pluginsSystem.startPlugins(startDeps);
+    expect(pluginsStart).toBeInstanceOf(Map);
+    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
+  });
+
+  it('validates opensearch plugin installation and does not error out when plugin is not installed', async () => {
+    [
+      createPlugin('id-1', { requiredOSPlugin: ['missing-opensearch-dep'] }),
+      createPlugin('id-2'),
+    ].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const pluginsStart = await pluginsSystem.startPlugins(startDeps);
+    expect(pluginsStart).toBeInstanceOf(Map);
+    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
+  });
+
+  it('validates opensearch plugin installation and does not error out when there is no dependency', async () => {
+    [createPlugin('id-1'), createPlugin('id-2')].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+    await pluginsSystem.setupPlugins(setupDeps);
+    const pluginsStart = await pluginsSystem.startPlugins(startDeps);
+    expect(pluginsStart).toBeInstanceOf(Map);
+    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
   });
 });

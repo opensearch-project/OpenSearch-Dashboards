@@ -448,3 +448,123 @@ test('groups with deep nesting', async () => {
     ]
   `);
 });
+
+// Tests with:
+// a regular action
+// a group with 2 actions uncategorized
+// a group with 2 actions with a category of "test-category" and low order of 10
+// a group with 1 actions with a category of "test-category" and high order of 20
+test('groups with categories and order', async () => {
+  const grouping1 = [
+    {
+      id: 'test-group',
+      getDisplayName: () => 'Test group',
+      getIconType: () => 'bell',
+    },
+  ];
+  const grouping2 = [
+    {
+      id: 'test-group-2',
+      getDisplayName: () => 'Test group 2',
+      getIconType: () => 'bell',
+      category: 'test-category',
+      order: 10,
+    },
+  ];
+  const grouping3 = [
+    {
+      id: 'test-group-3',
+      getDisplayName: () => 'Test group 3',
+      getIconType: () => 'bell',
+      category: 'test-category',
+      order: 20,
+    },
+  ];
+
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Bar 1',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Bar 2',
+      grouping: grouping1,
+    }),
+    createTestAction({
+      dispayName: 'Qux 1',
+      grouping: grouping2,
+    }),
+    createTestAction({
+      dispayName: 'Qux 2',
+      grouping: grouping2,
+    }),
+    // It is expected that, because there is only 1 action within this group,
+    // it will be added to the mainMenu as a single item, but next to other
+    // groups of the same category. When a group has a category, but only one
+    // item, we just add that single item; otherwise, we add a link to the group
+    createTestAction({
+      dispayName: 'Waldo 1',
+      grouping: grouping3,
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Test group",
+          },
+          Object {
+            "isSeparator": true,
+          },
+          Object {
+            "name": "Waldo 1",
+          },
+          Object {
+            "name": "Test group 2",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Bar 1",
+          },
+          Object {
+            "name": "Bar 2",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Qux 1",
+          },
+          Object {
+            "name": "Qux 2",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Waldo 1",
+          },
+        ],
+      },
+    ]
+  `);
+});
