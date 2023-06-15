@@ -1,0 +1,18 @@
+{
+  "background-color": {
+    "button": [
+      {
+        "approved": "$euiColorPrimary",
+        "rejected": [
+          "blue"
+        ]
+      },
+      {
+        "approved": "$euiColorWarning",
+        "rejected": [
+          "red"
+        ]
+      }
+    ]
+  }
+}

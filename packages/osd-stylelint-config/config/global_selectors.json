@@ -1,0 +1,12 @@
+{
+  "#opensearch-dashboards-body": {
+    "approved": [
+      "src/core/public/rendering/_base.scss"
+    ]
+  },
+  ".app-wrapper": {
+    "approved": [
+      "src/core/public/rendering/_base.scss"
+    ]
+  }
+}
