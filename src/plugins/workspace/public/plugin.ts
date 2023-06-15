@@ -4,7 +4,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { parse } from 'querystring';
 import {
   CoreSetup,
   CoreStart,
@@ -28,9 +27,9 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       }
     });
   }
-  private getWorkpsaceIdFromQueryString(): string {
-    const querystringObject = parse(window.location.search.replace(/^\??/, ''));
-    return querystringObject[WORKSPACE_ID_QUERYSTRING_NAME] as string;
+  private getWorkpsaceIdFromQueryString(): string | null {
+    const searchParams = new URLSearchParams(window.location.search);
+    return searchParams.get(WORKSPACE_ID_QUERYSTRING_NAME);
   }
   private getWorkpsaceIdFromSessionStorage(): string {
     try {
@@ -54,11 +53,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   public async setup(core: CoreSetup) {
     this.core = core;
     /**
-     * register a listener
-     */
-    this.addWorkspaceListener();
-
-    /**
      * Retrive workspace id from url or sessionstorage
      * url > sessionstorage
      */
@@ -77,6 +71,12 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
         );
       }
     }
+
+    /**
+     * register a listener
+     */
+    this.addWorkspaceListener();
+
     core.application.register({
       id: WORKSPACE_APP_ID,
       title: i18n.translate('workspace.settings.title', {
