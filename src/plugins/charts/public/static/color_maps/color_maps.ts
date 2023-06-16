@@ -121,7 +121,12 @@ export const vislibColorMaps: ColorMap = {
       defaultMessage: 'Yellow to Red',
     }),
     value: convertColorPaletteToColorMap(
-      ouiColorPalette([euiThemeVars.euiColorWarning, euiThemeVars.euiColorDanger], COLOR_MAP_LENGTH)
+      ouiColorPalette(
+        [euiThemeVars.euiColorWarning, euiThemeVars.euiColorDanger],
+        COLOR_MAP_LENGTH,
+        false,
+        true
+      )
     ),
   },
 
@@ -131,7 +136,12 @@ export const vislibColorMaps: ColorMap = {
       defaultMessage: 'Green to Red',
     }),
     value: convertColorPaletteToColorMap(
-      ouiColorPalette([euiThemeVars.euiColorSuccess, euiThemeVars.euiColorDanger], COLOR_MAP_LENGTH)
+      ouiColorPalette(
+        [euiThemeVars.euiColorSuccess, euiThemeVars.euiColorWarning, euiThemeVars.euiColorDanger],
+        COLOR_MAP_LENGTH,
+        false,
+        true
+      )
     ),
   },
 };
