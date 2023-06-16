@@ -40,7 +40,6 @@ import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
-import { PluginPages } from '../../../core/types';
 import { ManagementOverViewPluginStart } from '../../management_overview/public';
 
 export interface DevToolsSetupDependencies {
@@ -73,6 +72,10 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
+  private title = i18n.translate('devTools.devToolsTitle', {
+    defaultMessage: 'Dev Tools',
+  });
+
   public setup(
     coreSetup: CoreSetup<DevToolsSetupDependencies>,
     { urlForwarding }: { urlForwarding: UrlForwardingSetup }
@@ -81,9 +84,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
 
     applicationSetup.register({
       id: 'dev_tools',
-      title: i18n.translate('devTools.devToolsTitle', {
-        defaultMessage: 'Dev Tools',
-      }),
+      title: this.title,
       updater$: this.appStateUpdater,
       icon: '/plugins/home/public/assets/logos/opensearch_mark_default.svg',
       order: 9070,
@@ -120,21 +121,14 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     } else {
-      const features: PluginPages[] = this.getSortedDevTools().map((devApp) => {
-        return {
-          title: devApp.title,
-          url: `#/${devApp.id}`,
-          order: devApp.order,
-        };
-      });
-
       managementOverview?.register({
         id: 'dev_tools',
-        title: i18n.translate('devTools.devToolsTitle', {
-          defaultMessage: 'Dev Tools',
+        title: this.title,
+        description: i18n.translate('devTools.devToolsDescription', {
+          defaultMessage:
+            'Use the console to set up and troubleshoot your OpenSearch environment with REST API.',
         }),
         order: 9070,
-        pages: features,
       });
     }
   }

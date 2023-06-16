@@ -4,12 +4,11 @@
  */
 
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@osd/i18n/react';
+import { I18nProvider, FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
+import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ApplicationStart, CoreStart } from '../../../core/public';
-import { OverviewApp } from './overview_app';
+import { OverviewApp } from '.';
 import { OverviewCard } from './components/overview_card';
 
 export interface ManagementOverviewProps {
@@ -20,31 +19,29 @@ export interface ManagementOverviewProps {
 function ManagementOverviewWrapper(props: ManagementOverviewProps) {
   const { application, overviewApps } = props;
 
-  const onClick = (appId: string) => {
-    return (url: string) => {
-      const pageUrl = application.getUrlForApp(appId, { path: url });
-      application.navigateToUrl(pageUrl);
-    };
-  };
-
-  const title = i18n.translate('core.ui.managementNavList.label', {
-    defaultMessage: 'Management',
-  });
-
   return (
-    <EuiPanel style={{ padding: '20px' }}>
-      <EuiTitle size="l">
-        <h1>{title}</h1>
-      </EuiTitle>
-      <EuiSpacer />
-      <EuiFlexGrid columns={3}>
-        {overviewApps?.map((app) => (
-          <EuiFlexItem key={app.title}>
-            <OverviewCard title={app.title} pages={app.pages || []} onClick={onClick(app.id)} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-    </EuiPanel>
+    <EuiPage restrictWidth={1200}>
+      <EuiPageBody component="main">
+        <EuiTitle size="l">
+          <h1>
+            <FormattedMessage id="home.directory.directoryTitle" defaultMessage="Overview" />
+          </h1>
+        </EuiTitle>
+        <EuiSpacer />
+        <EuiFlexGrid columns={3}>
+          {overviewApps?.map((app) => (
+            <EuiFlexItem key={app.id}>
+              <OverviewCard
+                {...app}
+                onClick={() => {
+                  application.navigateToApp(app.id);
+                }}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiPageBody>
+    </EuiPage>
   );
 }
 

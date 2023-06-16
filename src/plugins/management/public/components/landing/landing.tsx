@@ -46,7 +46,7 @@ interface ManagementLandingPageProps {
   setBreadcrumbs: () => void;
 }
 
-export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLandingPageProps) => {
+export const ManagementLandingPage = ({ setBreadcrumbs }: ManagementLandingPageProps) => {
   useMount(() => {
     setBreadcrumbs();
   });
@@ -61,8 +61,7 @@ export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLan
             <h1>
               <FormattedMessage
                 id="management.landing.header"
-                defaultMessage="Welcome to Dashboard Management {version}"
-                values={{ version }}
+                defaultMessage="Welcome to Dashboard Management"
               />
             </h1>
           </EuiTitle>

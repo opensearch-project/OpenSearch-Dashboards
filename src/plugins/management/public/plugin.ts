@@ -49,7 +49,6 @@ import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
-import { PluginPages } from '../../../core/types';
 import { ManagementOverViewPluginStart } from '../../management_overview/public';
 
 interface ManagementSetupDependencies {
@@ -69,14 +68,16 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
+  private title = i18n.translate('management.dashboardManagement.title', {
+    defaultMessage: 'Dashboard Management',
+  });
+
   public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
 
     core.application.register({
       id: MANAGEMENT_APP_ID,
-      title: i18n.translate('management.stackManagement.title', {
-        defaultMessage: 'Dashboard Management',
-      }),
+      title: this.title,
       order: 9030,
       icon: '/plugins/home/assets/logos/opensearch_mark_default.svg',
       category: DEFAULT_APP_CATEGORIES.management,
@@ -113,29 +114,16 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       });
     }
 
-    if (managementOverview) {
-      const enabledSections = getSectionsServiceStartPrivate().getSectionsEnabled();
-      const pluginPages: PluginPages[] = enabledSections
-        .map((section) => section.apps)
-        .flat()
-        .map((app) => {
-          return {
-            title: app.title,
-            url: app.basePath,
-            order: app.order,
-          };
-        });
-
-      if (pluginPages) {
-        managementOverview.register({
-          id: MANAGEMENT_APP_ID,
-          title: i18n.translate('management.stackManagement.title', {
-            defaultMessage: 'Dashboard Management',
-          }),
-          order: 9030,
-          pages: pluginPages,
-        });
-      }
+    if (managementOverview && this.hasAnyEnabledApps) {
+      managementOverview.register({
+        id: MANAGEMENT_APP_ID,
+        title: this.title,
+        description: i18n.translate('management.dashboardManagement.description', {
+          defaultMessage:
+            'Manage Dashboards saved objects and data source connections.You can also modify advanced settings for Dashboards.',
+        }),
+        order: 9030,
+      });
     }
 
     return {};

@@ -2,113 +2,31 @@
 
 exports[`OverviewCard should render normally 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable"
+  data-test-subj="link-test-id"
 >
-  <h5
-    class="euiTitle euiTitle--small"
+  <div
+    class="euiCard__content"
   >
-    Dev Tools
-  </h5>
-  <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-  />
-  <ul
-    class="euiListGroup euiListGroup-maxWidthDefault"
-  >
-    <li
-      class="euiListGroupItem euiListGroupItem--small euiListGroupItem--primary euiListGroupItem-isClickable"
+    <h3
+      class="euiTitle euiTitle--xsmall euiCard__title"
+      id="generated-idTitle"
     >
       <button
-        class="euiListGroupItem__button"
-        type="button"
+        aria-describedby=" generated-idDescription"
+        class="euiCard__titleButton"
       >
-        <span
-          class="euiListGroupItem__label"
-          title="Dev tools"
-        >
-          Dev tools
-        </span>
+        Dev Tools
       </button>
-    </li>
-  </ul>
-</div>
-`;
-
-exports[`OverviewCard should render normally for more than 4 pages 1`] = `
-<div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
->
-  <h5
-    class="euiTitle euiTitle--small"
-  >
-    Dev Tools
-  </h5>
-  <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-  />
-  <ul
-    class="euiListGroup euiListGroup-maxWidthDefault"
-  >
-    <li
-      class="euiListGroupItem euiListGroupItem--small euiListGroupItem--primary euiListGroupItem-isClickable"
+    </h3>
+    <div
+      class="euiText euiText--small euiCard__description"
+      id="generated-idDescription"
     >
-      <button
-        class="euiListGroupItem__button"
-        type="button"
-      >
-        <span
-          class="euiListGroupItem__label"
-          title="Dev tools-1"
-        >
-          Dev tools-1
-        </span>
-      </button>
-    </li>
-    <li
-      class="euiListGroupItem euiListGroupItem--small euiListGroupItem--primary euiListGroupItem-isClickable"
-    >
-      <button
-        class="euiListGroupItem__button"
-        type="button"
-      >
-        <span
-          class="euiListGroupItem__label"
-          title="Dev tools-2"
-        >
-          Dev tools-2
-        </span>
-      </button>
-    </li>
-    <li
-      class="euiListGroupItem euiListGroupItem--small euiListGroupItem--primary euiListGroupItem-isClickable"
-    >
-      <button
-        class="euiListGroupItem__button"
-        type="button"
-      >
-        <span
-          class="euiListGroupItem__label"
-          title="Dev tools-3"
-        >
-          Dev tools-3
-        </span>
-      </button>
-    </li>
-    <li
-      class="euiListGroupItem euiListGroupItem--small euiListGroupItem--primary euiListGroupItem-isClickable"
-    >
-      <button
-        class="euiListGroupItem__button"
-        type="button"
-      >
-        <span
-          class="euiListGroupItem__label"
-          title="View more..."
-        >
-          View more...
-        </span>
-      </button>
-    </li>
-  </ul>
+      <p>
+        Dev tools description
+      </p>
+    </div>
+  </div>
 </div>
 `;
