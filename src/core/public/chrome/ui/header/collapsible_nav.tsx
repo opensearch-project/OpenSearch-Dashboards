@@ -51,6 +51,7 @@ import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
+import { WorkspaceAttribute } from '../../../workspace';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -102,6 +103,7 @@ interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
+  currentWorkspace$: Rx.BehaviorSubject<WorkspaceAttribute | null>;
 }
 
 export function CollapsibleNav({
@@ -122,11 +124,14 @@ export function CollapsibleNav({
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
   const customNavLink = useObservable(observables.customNavLink$, undefined);
   const appId = useObservable(observables.appId$, '');
+  const currentWorkspace = useObservable(observables.currentWorkspace$);
   const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
-  const categoryDictionary = getAllCategories(allCategorizedLinks);
-  const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+  const filterdLinks = getFilterLinks(currentWorkspace, allCategorizedLinks);
+  const categoryDictionary = getAllCategories(filterdLinks);
+  const orderedCategories = getOrderedCategories(filterdLinks, categoryDictionary);
+
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
@@ -144,6 +149,24 @@ export function CollapsibleNav({
   const darkMode = branding.darkMode;
   const markDefault = branding.mark?.defaultUrl;
   const markDarkMode = branding.mark?.darkModeUrl;
+
+  function getFilterLinks(
+    workspace: WorkspaceAttribute | null | undefined,
+    categorizedLinks: Record<string, ChromeNavLink[]>
+  ) {
+    // plugins are in this dictionary
+    const pluginsDictionary = categorizedLinks.opensearch;
+    if (!pluginsDictionary) return categorizedLinks;
+
+    const features = workspace?.features ?? [];
+    const newPluginsDictionary = pluginsDictionary.filter((item) => features.indexOf(item.id) > -1);
+    if (newPluginsDictionary.length === 0) {
+      delete categorizedLinks.opensearch;
+    } else {
+      categorizedLinks.opensearch = newPluginsDictionary;
+    }
+    return categorizedLinks;
+  }
 
   /**
    * Use branding configurations to check which URL to use for rendering

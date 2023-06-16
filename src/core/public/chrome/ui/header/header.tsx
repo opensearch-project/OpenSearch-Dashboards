@@ -42,7 +42,7 @@ import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -63,6 +63,7 @@ import { HomeLoader } from './home_loader';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
+import { WorkspaceAttribute } from '../../../workspace';
 
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
@@ -90,6 +91,7 @@ export interface HeaderProps {
   onIsLockedUpdate: OnIsLockedUpdate;
   branding: ChromeBranding;
   survey: string | undefined;
+  currentWorkspace$: BehaviorSubject<WorkspaceAttribute | null>;
 }
 
 export function Header({
@@ -255,6 +257,7 @@ export function Header({
           }}
           customNavLink$={observables.customNavLink$}
           branding={branding}
+          currentWorkspace$={observables.currentWorkspace$}
         />
       </header>
     </>
