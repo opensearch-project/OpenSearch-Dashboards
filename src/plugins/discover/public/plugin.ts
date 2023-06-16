@@ -11,6 +11,7 @@ import {
   AppUpdater,
   CoreSetup,
   CoreStart,
+  DEFAULT_WORKSPACE_TEMPLATES,
   Plugin,
   PluginInitializerContext,
 } from 'opensearch-dashboards/public';
@@ -251,6 +252,10 @@ export class DiscoverPlugin
       euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      workspaceTemplate: [
+        DEFAULT_WORKSPACE_TEMPLATES.search,
+        DEFAULT_WORKSPACE_TEMPLATES.general_analysis,
+      ],
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
