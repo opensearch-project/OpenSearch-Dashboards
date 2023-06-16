@@ -48,7 +48,7 @@ import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { Branding } from '../';
+import { Branding, WorkspacesStart } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
 
@@ -96,6 +96,7 @@ interface StartDeps {
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
+  workspaces: WorkspacesStart;
 }
 
 /** @internal */
@@ -149,6 +150,7 @@ export class ChromeService {
     injectedMetadata,
     notifications,
     uiSettings,
+    workspaces,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -262,6 +264,7 @@ export class ChromeService {
           branding={injectedMetadata.getBranding()}
           logos={logos}
           survey={injectedMetadata.getSurvey()}
+          currentWorkspace$={workspaces.client.currentWorkspace$}
         />
       ),
 
