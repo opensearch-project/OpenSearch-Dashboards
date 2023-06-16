@@ -52,7 +52,7 @@ const getComplianceRule = (
     return undefined;
   }
 
-  const ruleObject = rule.some((object) => {
+  const ruleObject = rule.find((object) => {
     if (object.approved.includes(nodeInfo.value) || object.rejected.includes(nodeInfo.value)) {
       return object;
     }
