@@ -13,6 +13,7 @@ import {
 } from '../../../core/public';
 import { WORKSPACE_APP_ID, WORKSPACE_ID_IN_SESSION_STORAGE } from '../common/constants';
 import { WORKSPACE_ID_QUERYSTRING_NAME } from '../../../core/public';
+import { mountDropdownList } from './mount';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
   private core?: CoreSetup;
@@ -100,6 +101,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   }
 
   public start(core: CoreStart) {
+    mountDropdownList(core);
     return {};
   }
 }
