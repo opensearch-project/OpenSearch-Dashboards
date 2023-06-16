@@ -38,6 +38,7 @@ import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
 import { getLogos } from '../../../../common';
+import { workspacesServiceMock } from '../../../fatal_errors/fatal_errors_service.mock';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -95,6 +96,7 @@ function mockProps(branding = {}) {
     customNavLink$: new BehaviorSubject(undefined),
     branding,
     logos: getLogos(branding, mockBasePath.serverBasePath),
+    currentWorkspace$: workspacesServiceMock.createStartContract().client.currentWorkspace$,
   };
 }
 
