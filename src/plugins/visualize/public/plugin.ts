@@ -37,12 +37,10 @@ import {
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_WORKSPACE_TEMPLATES,
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
 } from 'opensearch-dashboards/public';
-
 import {
   Storage,
   createOsdUrlTracker,
@@ -57,7 +55,7 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import { VisualizeServices } from './application/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DEFAULT_APP_CATEGORIES, DEFAULT_WORKSPACE_TEMPLATES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
