@@ -37,6 +37,7 @@ import {
   AppUpdater,
   CoreSetup,
   CoreStart,
+  DEFAULT_WORKSPACE_TEMPLATES,
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
@@ -157,6 +158,10 @@ export class VisualizePlugin
       euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      workspaceTemplate: [
+        DEFAULT_WORKSPACE_TEMPLATES.search,
+        DEFAULT_WORKSPACE_TEMPLATES.general_analysis,
+      ],
       updater$: this.appStateUpdater.asObservable(),
       // remove all references to visualize
       mount: async (params: AppMountParameters) => {

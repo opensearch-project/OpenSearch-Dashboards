@@ -372,7 +372,12 @@ export class DashboardPlugin
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      workspaceTemplate: [DEFAULT_WORKSPACE_TEMPLATES.search],
+      workspaceTemplate: [
+        DEFAULT_WORKSPACE_TEMPLATES.search,
+        DEFAULT_WORKSPACE_TEMPLATES.general_analysis,
+        DEFAULT_WORKSPACE_TEMPLATES.observability,
+        DEFAULT_WORKSPACE_TEMPLATES.security_analytics,
+      ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;
