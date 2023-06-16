@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import type { PublicContract } from '@osd/utility-types';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { isEqual } from 'lodash';
 import { HttpFetchError, HttpFetchOptions, HttpSetup } from '../http';
 import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
 import { WORKSPACES_API_BASE_URL, WORKSPACE_ERROR_REASON_MAP } from './consts';
@@ -41,31 +42,54 @@ export class WorkspacesClient {
   private http: HttpSetup;
   public currentWorkspaceId$ = new BehaviorSubject<string>('');
   public workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
+  public currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
   constructor(http: HttpSetup) {
     this.http = http;
-    /**
-     * Add logic to check if current workspace id is still valid
-     * If not, remove the current workspace id and notify other subscribers
-     */
-    this.workspaceList$.subscribe(async (workspaceList) => {
-      const currentWorkspaceId = this.currentWorkspaceId$.getValue();
-      if (currentWorkspaceId) {
-        const findItem = workspaceList.find((item) => item.id === currentWorkspaceId);
-        if (!findItem) {
+
+    combineLatest([this.workspaceList$, this.currentWorkspaceId$]).subscribe(
+      ([workspaceList, currentWorkspaceId]) => {
+        const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
+
+        /**
+         * Do a simple idempotent verification here
+         */
+        if (!isEqual(currentWorkspace, this.currentWorkspace$.getValue())) {
+          this.currentWorkspace$.next(currentWorkspace);
+        }
+
+        if (currentWorkspaceId && !currentWorkspace?.id) {
           /**
            * Current workspace is staled
            */
           this.currentWorkspaceId$.error({
             reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
           });
+          this.currentWorkspace$.error({
+            reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+          });
         }
       }
-    });
+    );
 
     /**
      * Initialize workspace list
      */
     this.updateWorkspaceListAndNotify();
+  }
+
+  private findWorkspace(payload: [WorkspaceAttribute[], string]): WorkspaceAttribute | null {
+    const [workspaceList, currentWorkspaceId] = payload;
+    if (!currentWorkspaceId || !workspaceList || !workspaceList.length) {
+      return null;
+    }
+
+    const findItem = workspaceList.find((item) => item?.id === currentWorkspaceId);
+
+    if (!findItem) {
+      return null;
+    }
+
+    return findItem;
   }
 
   /**
