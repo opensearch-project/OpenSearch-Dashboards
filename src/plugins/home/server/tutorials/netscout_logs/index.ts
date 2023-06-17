@@ -57,7 +57,7 @@ export function netscoutLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-netscout.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/netscout.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/netscout.svg',
     artifacts: {
       dashboards: [],
       application: {
