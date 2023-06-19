@@ -15,7 +15,6 @@ export const mountDropdownList = (core: CoreStart) => {
       ReactDOM.render(
         <WorkspaceDropdownList
           coreStart={core}
-          onCreateWorkspace={() => alert('create')}
           onSwitchWorkspace={async (id: string) => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
             alert(`switch to workspace ${id}`);
