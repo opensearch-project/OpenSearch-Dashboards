@@ -12,7 +12,6 @@ import { Action, IncompatibleActionError } from '../../../../ui_actions/public';
 import { openViewEventsFlyout } from './open_events_flyout';
 import { isEligibleForVisLayers } from '../../utils';
 import { VIEW_EVENTS_FLYOUT_STATE, getFlyoutState } from '../flyout_state';
-import { APM_TRACE } from '../../../../../../plugins/anomaly-detection-dashboards-plugin/public/utils/constants';
 
 export const VIEW_EVENTS_OPTION_ACTION = 'VIEW_EVENTS_OPTION_ACTION';
 
