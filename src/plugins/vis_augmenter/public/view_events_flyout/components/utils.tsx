@@ -4,7 +4,7 @@
  */
 
 import { get } from 'lodash';
-import { ErrorEmbeddable } from '../../../../embeddable/public';
+import { EmbeddableStart, ErrorEmbeddable } from '../../../../embeddable/public';
 import { VisualizeEmbeddable, VisualizeInput } from '../../../../visualizations/public';
 import { getEmbeddable, getQueryService } from '../../services';
 import {
@@ -47,9 +47,14 @@ function getValueAxisPositions(embeddable: VisualizeEmbeddable): { left: boolean
  * Fetching the base vis to show in the flyout, based on the saved object ID. Add constraints
  * such that it is static and won't auto-refresh within the flyout.
  * @param savedObjectId the saved object id of the base vis
+ * @param embeddableStart Optional EmbeddableStart passed in for plugins to utilize the function
  */
-export async function fetchVisEmbeddable(savedObjectId: string): Promise<VisualizeEmbeddable> {
-  const embeddableVisFactory = getEmbeddable().getEmbeddableFactory('visualization');
+export async function fetchVisEmbeddable(
+  savedObjectId: string,
+  embeddableStart?: EmbeddableStart
+): Promise<VisualizeEmbeddable> {
+  const embeddableLoader = embeddableStart !== undefined ? embeddableStart : getEmbeddable();
+  const embeddableVisFactory = embeddableLoader.getEmbeddableFactory('visualization');
   const contextInput = {
     filters: getQueryService().filterManager.getFilters(),
     query: getQueryService().queryString.getQuery(),

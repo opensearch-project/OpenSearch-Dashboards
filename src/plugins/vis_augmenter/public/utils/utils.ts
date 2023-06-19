@@ -23,7 +23,7 @@ import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { getUISettings } from '../services';
 import { IUiSettingsClient } from '../../../../core/public';
 
-export const isEligibleForVisLayers = (vis: Vis): boolean => {
+export const isEligibleForVisLayers = (vis: Vis, uiSettingsClient?: IUiSettingsClient): boolean => {
   // Only support date histogram and ensure there is only 1 x-axis and it has to be on the bottom.
   // Additionally to have a valid x-axis, there needs to be a segment aggregation
   const hasValidXaxis =
@@ -45,8 +45,9 @@ export const isEligibleForVisLayers = (vis: Vis): boolean => {
       (seriesParam: { type: string }) => seriesParam.type === 'line'
     ) &&
     vis.params?.type === 'line';
+
   // Checks if the augmentation setting is enabled
-  const config = getUISettings();
+  const config = uiSettingsClient !== undefined ? uiSettingsClient : getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   return isAugmentationEnabled && hasValidXaxis && hasCorrectAggregationCount && hasOnlyLineSeries;
 };

@@ -55,7 +55,7 @@ import {
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setDataActions, setOpenSearchDashboardsLegacy } from './services';
+import { setFormatService, setDataActions, setOpenSearchDashboardsLegacy, setUISettings } from './services';
 import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 
 export interface VisTypeVislibDependencies {
@@ -91,6 +91,7 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
       uiSettings: core.uiSettings,
       charts,
     };
+    setUISettings(core.uiSettings);
     const vislibTypes = [
       createHistogramVisTypeDefinition,
       createLineVisTypeDefinition,

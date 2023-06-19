@@ -12,6 +12,7 @@ import { Action, IncompatibleActionError } from '../../../../ui_actions/public';
 import { openViewEventsFlyout } from './open_events_flyout';
 import { isEligibleForVisLayers } from '../../utils';
 import { VIEW_EVENTS_FLYOUT_STATE, getFlyoutState } from '../flyout_state';
+import { APM_TRACE } from '../../../../../../plugins/anomaly-detection-dashboards-plugin/public/utils/constants';
 
 export const VIEW_EVENTS_OPTION_ACTION = 'VIEW_EVENTS_OPTION_ACTION';
 
@@ -19,6 +20,16 @@ export class ViewEventsOptionAction implements Action<EmbeddableContext> {
   public readonly type = VIEW_EVENTS_OPTION_ACTION;
   public readonly id = VIEW_EVENTS_OPTION_ACTION;
   public order = 1;
+
+  public grouping: Action['grouping'] = [
+    {
+      id: VIEW_EVENTS_OPTION_ACTION,
+      getDisplayName: this.getDisplayName,
+      getIconType: this.getIconType,
+      category: 'vis_augmenter',
+      order: 10,
+    },
+  ];
 
   constructor() {}
 
