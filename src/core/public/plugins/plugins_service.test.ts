@@ -84,6 +84,7 @@ function createManifest(
     version: 'some-version',
     configPath: ['path'],
     requiredPlugins: required,
+    requiredOpenSearchPlugins: optional,
     optionalPlugins: optional,
     requiredBundles: [],
   };
