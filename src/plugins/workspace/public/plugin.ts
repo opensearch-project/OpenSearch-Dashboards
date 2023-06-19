@@ -11,7 +11,7 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
 } from '../../../core/public';
-import { WORKSPACE_APP_ID, WORKSPACE_ID_IN_SESSION_STORAGE } from '../common/constants';
+import { WORKSPACE_APP_ID, WORKSPACE_ID_IN_SESSION_STORAGE, PATHS } from '../common/constants';
 import { WORKSPACE_ID_QUERYSTRING_NAME } from '../../../core/public';
 import { mountDropdownList } from './mount';
 
@@ -102,6 +102,12 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
 
   public start(core: CoreStart) {
     mountDropdownList(core);
+
+    core.chrome.setCustomNavLink({
+      title: i18n.translate('workspace.nav.title', { defaultMessage: 'Workspace Overview' }),
+      baseUrl: core.http.basePath.get(),
+      href: core.application.getUrlForApp(WORKSPACE_APP_ID, { path: PATHS.overview }),
+    });
     return {};
   }
 }
