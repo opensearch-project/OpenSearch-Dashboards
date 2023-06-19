@@ -12,7 +12,6 @@ import {
   LineVegaSpecExpressionFunctionDefinition,
 } from '../../vis_type_vega/public';
 import { isEligibleForVisLayers, VisAugmenterEmbeddableConfig } from '../../vis_augmenter/public';
-import { getUISettings } from './services';
 
 export const toExpressionAst = async (vis: Vis, params: any) => {
   // Construct the existing expr fns that are ran for vislib line chart, up until the render fn.
@@ -33,7 +32,7 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
   if (
     params.visLayers == null ||
     Object.keys(params.visLayers).length === 0 ||
-    !isEligibleForVisLayers(vis, getUISettings())
+    !isEligibleForVisLayers(vis)
   ) {
     // Render using vislib instead of vega-lite
     const visConfig = { ...vis.params, dimensions };

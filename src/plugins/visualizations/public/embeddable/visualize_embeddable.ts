@@ -57,7 +57,7 @@ import {
 } from '../../../expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getNotifications, getUiActions, getUISettings } from '../services';
+import { getExpressions, getNotifications, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
@@ -533,7 +533,7 @@ export class VisualizeEmbeddable
         this.savedAugmentVisLoader
       );
 
-      if (!isEmpty(augmentVisSavedObjs) && !aborted && isEligibleForVisLayers(this.vis, getUISettings())) {
+      if (!isEmpty(augmentVisSavedObjs) && !aborted && isEligibleForVisLayers(this.vis)) {
         const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
         // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
         // expression functions are ran, they will incrementally append their generated VisLayers to it.

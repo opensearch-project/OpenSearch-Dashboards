@@ -31,7 +31,6 @@
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
-import { IUiSettingsClient } from 'opensearch-dashboards/public';
 
 export const [getDataActions, setDataActions] = createGetterSetter<
   DataPublicPluginStart['actions']
@@ -44,5 +43,3 @@ export const [getFormatService, setFormatService] = createGetterSetter<
 export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<
   OpenSearchDashboardsLegacyStart
 >('vislib opensearchDashboardsLegacy');
-
-export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
