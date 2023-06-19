@@ -53,7 +53,7 @@ export async function fetchVisEmbeddable(
   savedObjectId: string,
   embeddableStart?: EmbeddableStart
 ): Promise<VisualizeEmbeddable> {
-  const embeddableLoader = embeddableStart !== undefined ? embeddableStart : getEmbeddable();
+  const embeddableLoader = embeddableStart ?? getEmbeddable();
   const embeddableVisFactory = embeddableLoader.getEmbeddableFactory('visualization');
   const contextInput = {
     filters: getQueryService().filterManager.getFilters(),

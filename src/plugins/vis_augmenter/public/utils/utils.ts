@@ -47,7 +47,7 @@ export const isEligibleForVisLayers = (vis: Vis, uiSettingsClient?: IUiSettingsC
     vis.params?.type === 'line';
 
   // Checks if the augmentation setting is enabled
-  const config = uiSettingsClient !== undefined ? uiSettingsClient : getUISettings();
+  const config = uiSettingsClient ?? getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   return isAugmentationEnabled && hasValidXaxis && hasCorrectAggregationCount && hasOnlyLineSeries;
 };
