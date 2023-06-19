@@ -69,7 +69,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private title = i18n.translate('management.dashboardManagement.title', {
-    defaultMessage: 'Dashboard Management',
+    defaultMessage: 'Dashboards Management',
   });
 
   public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {

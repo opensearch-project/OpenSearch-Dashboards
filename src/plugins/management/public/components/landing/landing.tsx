@@ -61,7 +61,7 @@ export const ManagementLandingPage = ({ setBreadcrumbs }: ManagementLandingPageP
             <h1>
               <FormattedMessage
                 id="management.landing.header"
-                defaultMessage="Welcome to Dashboard Management"
+                defaultMessage="Welcome to Dashboards Management"
               />
             </h1>
           </EuiTitle>
