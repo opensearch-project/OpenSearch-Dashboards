@@ -20,6 +20,16 @@ export class ViewEventsOptionAction implements Action<EmbeddableContext> {
   public readonly id = VIEW_EVENTS_OPTION_ACTION;
   public order = 1;
 
+  public grouping: Action['grouping'] = [
+    {
+      id: VIEW_EVENTS_OPTION_ACTION,
+      getDisplayName: this.getDisplayName,
+      getIconType: this.getIconType,
+      category: 'vis_augmenter',
+      order: 10,
+    },
+  ];
+
   constructor() {}
 
   public getIconType(): EuiIconType {
