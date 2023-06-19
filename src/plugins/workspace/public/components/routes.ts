@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WorkspaceCreator } from './workspace_creator';
+import { PATHS } from '../../common/constants';
 
-export const paths = {
-  create: '/create',
-};
+import { WorkspaceCreator } from './workspace_creator';
+import { WorkspaceOverview } from './workspace_overview';
 
 export interface RouteConfig {
   path: string;
@@ -18,8 +17,13 @@ export interface RouteConfig {
 
 export const ROUTES: RouteConfig[] = [
   {
-    path: paths.create,
+    path: PATHS.create,
     Component: WorkspaceCreator,
     label: 'Create',
+  },
+  {
+    path: PATHS.overview,
+    Component: WorkspaceOverview,
+    label: 'Overview',
   },
 ];
