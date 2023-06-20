@@ -11,7 +11,12 @@
 
 import stylelint from 'stylelint';
 import { NAMESPACE } from '../..';
-import { getNotCompliantMessage, getRulesFromConfig, isValidOptions } from '../../utils';
+import {
+  getNotCompliantMessage,
+  getRulesFromConfig,
+  isValidOptions,
+  getSelectorRule,
+} from '../../utils';
 
 const { ruleMessages, report } = stylelint.utils;
 
@@ -36,7 +41,7 @@ const ruleFunction = (
     const isAutoFixing = Boolean(context.fix);
 
     postcssRoot.walkRules((rule: any) => {
-      const selectorRule = rules[rule.selector];
+      const selectorRule = getSelectorRule(rules, rule);
       if (!selectorRule) {
         return;
       }

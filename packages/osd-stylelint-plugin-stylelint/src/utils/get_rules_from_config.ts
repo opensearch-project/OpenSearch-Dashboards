@@ -11,8 +11,19 @@
 
 import path from 'path';
 import { readFileSync } from 'fs';
+import { matches } from './matches';
 
 export const getRulesFromConfig = (configPath: string) => {
   const filePath = path.resolve(__dirname, configPath);
   return JSON.parse(readFileSync(filePath, 'utf-8'));
+};
+
+export const getSelectorRule = (rules: any, rule: any) => {
+  for (const configRule of Object.keys(rules)) {
+    if (matches(configRule, rule.selector)) {
+      return rules[configRule];
+    }
+  }
+
+  return undefined;
 };
