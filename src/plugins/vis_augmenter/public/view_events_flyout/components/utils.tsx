@@ -14,6 +14,7 @@ import {
   VisLayer,
 } from '../../types';
 import { EventVisEmbeddableItem, EventVisEmbeddablesMap } from './types';
+import { QueryStart } from '../../../../data/public';
 
 export function getErrorMessage(errorEmbeddable: ErrorEmbeddable): string {
   return errorEmbeddable.error instanceof Error
@@ -48,17 +49,20 @@ function getValueAxisPositions(embeddable: VisualizeEmbeddable): { left: boolean
  * such that it is static and won't auto-refresh within the flyout.
  * @param savedObjectId the saved object id of the base vis
  * @param embeddableStart Optional EmbeddableStart passed in for plugins to utilize the function
+ * @param queryServiceLoader Optional QueryStart passed in for plugins to utilize the function
  */
 export async function fetchVisEmbeddable(
   savedObjectId: string,
-  embeddableStart?: EmbeddableStart
+  embeddableStart?: EmbeddableStart,
+  queryStart?: QueryStart
 ): Promise<VisualizeEmbeddable> {
   const embeddableLoader = embeddableStart ?? getEmbeddable();
   const embeddableVisFactory = embeddableLoader.getEmbeddableFactory('visualization');
+  const queryService = queryStart ?? getQueryService();
   const contextInput = {
-    filters: getQueryService().filterManager.getFilters(),
-    query: getQueryService().queryString.getQuery(),
-    timeRange: getQueryService().timefilter.timefilter.getTime(),
+    filters: queryService.filterManager.getFilters(),
+    query: queryService.queryString.getQuery(),
+    timeRange: queryService.timefilter.timefilter.getTime(),
   };
 
   const embeddable = (await embeddableVisFactory?.createFromSavedObject(savedObjectId, {
