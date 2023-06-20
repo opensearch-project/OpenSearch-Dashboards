@@ -1,0 +1,20 @@
+{
+  "cat.cluster_manager": {
+    "url_params": {
+      "format": "",
+      "local": "__flag__",
+      "cluster_manager_timeout": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/cluster_manager"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-cluster_manager/"
+  }
+}

@@ -69,6 +69,6 @@
       "{indices}/_search",
       "{indices}/{type}/_search"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/ux/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/search/"
   }
 }
