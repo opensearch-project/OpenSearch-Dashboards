@@ -10,7 +10,9 @@
  */
 
 export * as ComplianceEngine from './compliance_engine';
+export * from './extract_regex';
 export * from './get_message';
 export * from './get_rules_from_config';
 export * from './is_color_property';
 export * from './is_valid_options';
+export * from './matches';
