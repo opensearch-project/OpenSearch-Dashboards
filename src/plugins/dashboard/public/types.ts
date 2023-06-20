@@ -60,6 +60,7 @@ export interface DashboardCapabilities {
   createNew: boolean;
   showSavedQuery: boolean;
   saveQuery: boolean;
+  createShortUrl: boolean;
 }
 
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
