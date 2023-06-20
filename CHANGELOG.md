@@ -37,6 +37,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - [Doc] Add COMMUNICATIONS.md with info about Slack, forum, office hours ([#3837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3837))
 - [Saved Object Service] Adds design doc for new Saved Object Service Interface for Custom Repository [#3954](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3954)
+- Add plugin development section in DEVELOPER_GUIDE.md ([#778](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3989))
 
 ### 🛠 Maintenance
 
