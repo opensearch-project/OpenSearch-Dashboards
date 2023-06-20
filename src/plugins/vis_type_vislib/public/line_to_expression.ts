@@ -65,7 +65,6 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
     // spec via 'line_vega_spec' fn, then set as the arg for the final 'vega' fn
     const vegaFn = buildExpressionFunction<VegaExpressionFunctionDefinition>('vega', {
       spec: vegaSpecFnExpressionBuilder,
-      savedObjectId: get(vis, 'id', ''),
     });
     const ast = buildExpression([opensearchaggsFn, vegaFn]);
     return ast.toAst();

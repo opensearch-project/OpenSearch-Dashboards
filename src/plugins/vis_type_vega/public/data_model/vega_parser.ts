@@ -203,7 +203,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
     // top-level height/width values.
     // See limitations: https://vega.github.io/vega-lite/docs/size.html#limitations
     const showPointInTimeEvents =
-      this.visibleVisLayers.get(VisLayerTypes.PointInTimeEvents) === true;
+      this.visibleVisLayers?.get(VisLayerTypes.PointInTimeEvents) === true;
 
     let autosize = this.spec.autosize;
     let useResize = true;

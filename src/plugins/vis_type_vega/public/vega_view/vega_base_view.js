@@ -86,7 +86,6 @@ export class VegaBaseView {
     this._destroyHandlers = [];
     this._initialized = false;
     this._enableExternalUrls = getEnableExternalUrls();
-    this._visInput = opts.visInput;
   }
 
   async init() {
