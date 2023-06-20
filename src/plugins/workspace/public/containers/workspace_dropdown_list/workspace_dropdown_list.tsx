@@ -7,7 +7,6 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { i18n } from '@osd/i18n';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
 import { WORKSPACE_APP_ID, PATHS } from '../../../common/constants';
 
@@ -15,7 +14,6 @@ type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
 interface WorkspaceDropdownListProps {
   coreStart: CoreStart;
-  onSwitchWorkspace: (workspaceId: string) => Promise<void>;
 }
 
 function workspaceToOption(workspace: WorkspaceAttribute): WorkspaceOption {
@@ -28,7 +26,8 @@ export function getErrorMessage(err: any) {
 }
 
 export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
-  const { coreStart, onSwitchWorkspace } = props;
+  const { coreStart } = props;
+
   const workspaceList = useObservable(coreStart.workspaces.client.workspaceList$, []);
   const currentWorkspace = useObservable(coreStart.workspaces.client.currentWorkspace$, null);
 
@@ -53,22 +52,19 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
     [allWorkspaceOptions]
   );
 
-  const onChange = (workspaceOption: WorkspaceOption[]) => {
-    /** switch the workspace */
-    setLoading(true);
-    onSwitchWorkspace(workspaceOption[0].key!)
-      .catch((err) =>
-        coreStart.notifications.toasts.addDanger({
-          title: i18n.translate('workspace.dropdownList.switchWorkspaceErrorTitle', {
-            defaultMessage: 'some error happens when switching workspace',
-          }),
-          text: getErrorMessage(err),
-        })
-      )
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  const onChange = useCallback(
+    (workspaceOption: WorkspaceOption[]) => {
+      /** switch the workspace */
+      setLoading(true);
+      const id = workspaceOption[0].key!;
+      const newUrl = coreStart.workspaces?.formatUrlWithWorkspaceId(window.location.href, id);
+      if (newUrl) {
+        window.location.href = newUrl;
+      }
+      setLoading(false);
+    },
+    [coreStart.workspaces]
+  );
 
   const onCreateWorkspaceClick = () => {
     coreStart.application.navigateToApp(WORKSPACE_APP_ID, { path: PATHS.create });

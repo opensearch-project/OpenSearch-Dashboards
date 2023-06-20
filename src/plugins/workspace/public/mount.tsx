@@ -12,17 +12,7 @@ export const mountDropdownList = (core: CoreStart) => {
   core.chrome.navControls.registerLeft({
     order: 0,
     mount: (element) => {
-      ReactDOM.render(
-        <WorkspaceDropdownList
-          coreStart={core}
-          onSwitchWorkspace={async (id: string) => {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            alert(`switch to workspace ${id}`);
-          }}
-          // onSwitchWorkspace={(id: string) => alert(`switch to workspace ${id}`)}
-        />,
-        element
-      );
+      ReactDOM.render(<WorkspaceDropdownList coreStart={core} />, element);
       return () => {
         ReactDOM.unmountComponentAtNode(element);
       };
