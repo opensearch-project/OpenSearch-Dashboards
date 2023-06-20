@@ -60,7 +60,7 @@ export const configureLegacyClient = async (
       dataSourceId
     );
   } catch (error: any) {
-    logger.error(
+    logger.debug(
       `Failed to get data source client for dataSourceId: [${dataSourceId}]. ${error}: ${error.stack}`
     );
     // Re-throw as DataSourceError
