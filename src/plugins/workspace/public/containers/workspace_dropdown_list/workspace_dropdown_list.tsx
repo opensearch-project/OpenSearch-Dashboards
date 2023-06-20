@@ -7,6 +7,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@osd/i18n';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
 import { WORKSPACE_APP_ID, PATHS } from '../../../common/constants';
 
@@ -21,24 +22,26 @@ function workspaceToOption(workspace: WorkspaceAttribute): WorkspaceOption {
   return { label: workspace.name, key: workspace.id, value: workspace };
 }
 
+export function getErrorMessage(err: any) {
+  if (err && err.message) return err.message;
+  return '';
+}
+
 export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
   const { coreStart, onSwitchWorkspace } = props;
   const workspaceList = useObservable(coreStart.workspaces.client.workspaceList$, []);
-  const currentWorkspaceId = useObservable(coreStart.workspaces.client.currentWorkspaceId$, '');
+  const currentWorkspace = useObservable(coreStart.workspaces.client.currentWorkspace$, null);
 
   const [loading, setLoading] = useState(false);
   const [workspaceOptions, setWorkspaceOptions] = useState([] as WorkspaceOption[]);
 
   const currentWorkspaceOption = useMemo(() => {
-    const workspace = workspaceList.find((item) => item.id === currentWorkspaceId);
-    if (!workspace) {
-      coreStart.notifications.toasts.addDanger(
-        `can not get current workspace of id [${currentWorkspaceId}]`
-      );
-      return [workspaceToOption({ id: currentWorkspaceId, name: '' })];
+    if (!currentWorkspace) {
+      return [];
+    } else {
+      return [workspaceToOption(currentWorkspace)];
     }
-    return [workspaceToOption(workspace)];
-  }, [workspaceList, currentWorkspaceId, coreStart]);
+  }, [currentWorkspace]);
   const allWorkspaceOptions = useMemo(() => {
     return workspaceList.map(workspaceToOption);
   }, [workspaceList]);
@@ -55,7 +58,12 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
     setLoading(true);
     onSwitchWorkspace(workspaceOption[0].key!)
       .catch((err) =>
-        coreStart.notifications.toasts.addDanger('some error happens in workspace service')
+        coreStart.notifications.toasts.addDanger({
+          title: i18n.translate('workspace.dropdownList.switchWorkspaceErrorTitle', {
+            defaultMessage: 'some error happens when switching workspace',
+          }),
+          text: getErrorMessage(err),
+        })
       )
       .finally(() => {
         setLoading(false);
