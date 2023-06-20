@@ -23,28 +23,26 @@ export const useSavedDashboardInstance = (
   isChromeVisible: boolean | undefined,
   dashboardIdFromUrl: string | undefined
 ) => {
-  const [state, setState] = useState<{
-    savedDashboardInstance?: any;
-  }>({});
-
+  const [savedDashboardInstance, setSavedDashboardInstance] = useState<any>();
   const dashboardId = useRef('');
 
   useEffect(() => {
+    const {
+      application: { navigateToApp },
+      chrome,
+      history,
+      http: { basePath },
+      notifications,
+      savedDashboards,
+    } = services;
+
     const getSavedDashboardInstance = async () => {
-      const {
-        application: { navigateToApp },
-        chrome,
-        history,
-        http: { basePath },
-        notifications,
-        savedDashboards,
-      } = services;
       try {
         console.log('trying to get saved dashboard');
-        let savedDashboardInstance: any;
+        let savedDashboard: any;
         if (history.location.pathname === '/create') {
           try {
-            savedDashboardInstance = await savedDashboards.get();
+            savedDashboard = await savedDashboards.get();
           } catch {
             redirectWhenMissing({
               history,
@@ -58,13 +56,13 @@ export const useSavedDashboardInstance = (
           }
         } else if (dashboardIdFromUrl) {
           try {
-            savedDashboardInstance = await savedDashboards.get(dashboardIdFromUrl);
+            savedDashboard = await savedDashboards.get(dashboardIdFromUrl);
             chrome.recentlyAccessed.add(
-              savedDashboardInstance.getFullPath(),
-              savedDashboardInstance.title,
+              savedDashboard.getFullPath(),
+              savedDashboard.title,
               dashboardIdFromUrl
             );
-            console.log('saved dashboard', savedDashboardInstance);
+            console.log('saved dashboard', savedDashboard);
           } catch (error) {
             // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
             // See https://github.com/elastic/kibana/issues/10951 for more context.
@@ -91,7 +89,7 @@ export const useSavedDashboardInstance = (
           }
         }
 
-        setState({ savedDashboardInstance });
+        setSavedDashboardInstance(savedDashboard);
       } catch (error) {}
     };
 
@@ -106,15 +104,13 @@ export const useSavedDashboardInstance = (
     } else if (
       dashboardIdFromUrl &&
       dashboardId.current !== dashboardIdFromUrl &&
-      state.savedDashboardInstance?.id !== dashboardIdFromUrl
+      savedDashboardInstance?.id !== dashboardIdFromUrl
     ) {
       dashboardId.current = dashboardIdFromUrl;
-      setState({});
+      setSavedDashboardInstance({});
       getSavedDashboardInstance();
     }
-  }, [eventEmitter, isChromeVisible, services, state.savedDashboardInstance, dashboardIdFromUrl]);
+  }, [eventEmitter, isChromeVisible, services, savedDashboardInstance, dashboardIdFromUrl]);
 
-  return {
-    ...state,
-  };
+  return savedDashboardInstance;
 };
