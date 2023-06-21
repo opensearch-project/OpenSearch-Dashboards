@@ -43,19 +43,13 @@ export default function ({ getService, getPageObjects }) {
 
   describe('create and add embeddables', () => {
     before(async () => {
-      console.log('1');
       await opensearchArchiver.load('dashboard/current/opensearch_dashboards');
-      console.log('2');
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      console.log('3');
       await PageObjects.common.navigateToApp('dashboard');
-      console.log('4');
       await PageObjects.dashboard.preserveCrossAppState();
-      console.log('5');
       await PageObjects.dashboard.loadSavedDashboard('few panels');
-      console.log('6');
     });
 
     describe('add new visualization link', () => {
