@@ -34,11 +34,11 @@ export const useSavedDashboardInstance = (
       http: { basePath },
       notifications,
       savedDashboards,
+      toastNotifications,
     } = services;
 
     const getSavedDashboardInstance = async () => {
       try {
-        console.log('trying to get saved dashboard');
         let savedDashboard: any;
         if (history.location.pathname === '/create') {
           try {
@@ -62,7 +62,6 @@ export const useSavedDashboardInstance = (
               savedDashboard.title,
               dashboardIdFromUrl
             );
-            console.log('saved dashboard', savedDashboard);
           } catch (error) {
             // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
             // See https://github.com/elastic/kibana/issues/10951 for more context.
@@ -90,7 +89,14 @@ export const useSavedDashboardInstance = (
         }
 
         setSavedDashboardInstance(savedDashboard);
-      } catch (error) {}
+      } catch (error) {
+        toastNotifications.addWarning({
+          title: i18n.translate('dashboard.createDashboard.failedToLoadErrorMessage', {
+            defaultMessage: 'Failed to load the dashboard',
+          }),
+        });
+        history.replace(DashboardConstants.LANDING_PAGE_PATH);
+      }
     };
 
     if (isChromeVisible === undefined) {

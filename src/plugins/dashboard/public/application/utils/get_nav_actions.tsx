@@ -79,12 +79,10 @@ export const getNavActions = (
   const appState = stateContainer.getState();
   navActions[TopNavIds.FULL_SCREEN] = () => {
     stateContainer.transitions.set('fullScreenMode', true);
-    // updateNavBar();
   };
   navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(ViewMode.VIEW);
   navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(ViewMode.EDIT);
   navActions[TopNavIds.SAVE] = () => {
-    console.log('inside save top nav!');
     const currentTitle = appState.title;
     const currentDescription = appState.description;
     const currentTimeRestore = appState.timeRestore;
@@ -362,12 +360,9 @@ export const getNavActions = (
           revertChangesAndExitEditMode();
         }
       });
-
-    // updateNavBar();
   }
 
   async function save(saveOptions: SavedObjectSaveOpts) {
-    console.log('in the save function!');
     const timefilter = queryService.timefilter.timefilter;
     try {
       const id = await saveDashboard(timefilter, stateContainer, savedDashboard, saveOptions);
@@ -381,11 +376,6 @@ export const getNavActions = (
           'data-test-subj': 'saveDashboardSuccess',
         });
 
-        const appPath = `${createDashboardEditUrl(id)}`;
-
-        // Manually insert a new url so the back button will open the saved visualization.
-        history.replace(appPath);
-        // setActiveUrl(appPath);
         chrome.docTitle.change(savedDashboard.lastSavedTitle);
         stateContainer.transitions.set('viewMode', ViewMode.VIEW);
       }
