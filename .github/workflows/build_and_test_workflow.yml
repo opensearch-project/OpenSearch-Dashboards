@@ -25,7 +25,7 @@ env:
   TEST_OPENSEARCH_TRANSPORT_PORT: 9403
   TEST_OPENSEARCH_PORT: 9400
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
+  NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
 
 jobs:
   build-lint-test:
@@ -126,8 +126,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        group: [2]
+        os: [ubuntu-latest, windows-latest]
+        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         include:
           - os: ubuntu-latest
             name: Linux
