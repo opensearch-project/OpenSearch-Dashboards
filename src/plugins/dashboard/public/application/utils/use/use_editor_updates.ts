@@ -17,7 +17,7 @@ export const useEditorUpdates = (
 ) => {
   const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
   const [currentAppState, setCurrentAppState] = useState<DashboardAppState>();
-  const dom = document.getElementById('dashboardViewport');
+  const dashboardDom = document.getElementById('dashboardViewport');
 
   const {
     timefilter: { timefilter },
@@ -33,7 +33,14 @@ export const useEditorUpdates = (
 
       const unsubscribeStateUpdates = appState.subscribe((state) => {
         setCurrentAppState(state);
-        dashboardContainer.reload();
+        if (dashboardContainer.getChangesFromAppStateForContainerState) {
+          const changes = dashboardContainer.getChangesFromAppStateForContainerState(
+            dashboardContainer
+          );
+          if (changes) {
+            dashboardContainer.updateInput(changes);
+          }
+        }
       });
 
       return () => {
@@ -47,20 +54,19 @@ export const useEditorUpdates = (
     services,
     dashboardContainer,
     isEmbeddableRendered,
-    currentAppState,
   ]);
 
   useEffect(() => {
-    if (!dom || !dashboardContainer) {
+    if (!dashboardDom || !dashboardContainer) {
       return;
     }
-    dashboardContainer.render(dom);
+    dashboardContainer.render(dashboardDom);
     setIsEmbeddableRendered(true);
 
     return () => {
       setIsEmbeddableRendered(false);
     };
-  }, [appState, dashboardInstance, currentAppState, dashboardContainer, state$, dom]);
+  }, [dashboardContainer, dashboardDom]);
 
   return { isEmbeddableRendered, currentAppState };
 };
