@@ -39,6 +39,7 @@ import {
   ChromeStart,
   ScopedHistory,
   AppMountParameters,
+  ToastsStart,
 } from 'src/core/public';
 import {
   IOsdUrlStateStorage,
@@ -274,4 +275,5 @@ export interface DashboardServices extends CoreStart {
   savedObjectsPublic: SavedObjectsStart;
   restorePreviousUrl: () => void;
   addBasePath?: (url: string) => string;
+  toastNotifications: ToastsStart;
 }
