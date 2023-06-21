@@ -10,6 +10,7 @@ import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 
 import { WorkspaceForm, WorkspaceFormData } from './workspace_form';
+import { WORKSPACE_OP_TYPE_CREATE } from '../../../common/constants';
 
 export const WorkspaceCreator = () => {
   const {
@@ -61,7 +62,11 @@ export const WorkspaceCreator = () => {
           style={{ width: '100%', maxWidth: 1000 }}
         >
           {application && (
-            <WorkspaceForm application={application} onSubmit={handleWorkspaceFormSubmit} />
+            <WorkspaceForm
+              application={application}
+              onSubmit={handleWorkspaceFormSubmit}
+              opType={WORKSPACE_OP_TYPE_CREATE}
+            />
           )}
         </EuiPageContent>
       </EuiPageBody>

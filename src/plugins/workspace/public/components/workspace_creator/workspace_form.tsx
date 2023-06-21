@@ -32,6 +32,7 @@ import {
 import { WorkspaceTemplate } from '../../../../../core/types';
 import { AppNavLinkStatus, ApplicationStart } from '../../../../../core/public';
 import { useApplications, useWorkspaceTemplate } from '../../hooks';
+import { WORKSPACE_OP_TYPE_CREATE, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
 
 interface WorkspaceFeature {
   id: string;
@@ -62,8 +63,14 @@ interface WorkspaceFormProps {
   application: ApplicationStart;
   onSubmit?: (formData: WorkspaceFormData) => void;
   defaultValues?: WorkspaceFormData;
+  opType?: string;
 }
-export const WorkspaceForm = ({ application, onSubmit, defaultValues }: WorkspaceFormProps) => {
+export const WorkspaceForm = ({
+  application,
+  onSubmit,
+  defaultValues,
+  opType,
+}: WorkspaceFormProps) => {
   const { workspaceTemplates, templateFeatureMap } = useWorkspaceTemplate(application);
   const applications = useApplications(application);
 
@@ -199,7 +206,7 @@ export const WorkspaceForm = ({ application, onSubmit, defaultValues }: Workspac
         </EuiTitle>
         <EuiSpacer />
         <EuiFormRow label="Name" isInvalid={!!formErrors.name} error={formErrors.name}>
-          <EuiFieldText onChange={handleNameInputChange} />
+          <EuiFieldText value={name} onChange={handleNameInputChange} />
         </EuiFormRow>
         <EuiFormRow
           label={
@@ -208,7 +215,7 @@ export const WorkspaceForm = ({ application, onSubmit, defaultValues }: Workspac
             </>
           }
         >
-          <EuiFieldText onChange={handleDescriptionInputChange} />
+          <EuiFieldText value={description} onChange={handleDescriptionInputChange} />
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
@@ -329,9 +336,16 @@ export const WorkspaceForm = ({ application, onSubmit, defaultValues }: Workspac
       </EuiPanel>
       <EuiSpacer />
       <EuiText textAlign="right">
-        <EuiButton form={formIdRef.current} type="submit" fill>
-          Create workspace
-        </EuiButton>
+        {opType === WORKSPACE_OP_TYPE_CREATE && (
+          <EuiButton form={formIdRef.current} type="submit" fill>
+            Create workspace
+          </EuiButton>
+        )}
+        {opType === WORKSPACE_OP_TYPE_UPDATE && (
+          <EuiButton form={formIdRef.current} type="submit" fill>
+            Update workspace
+          </EuiButton>
+        )}
       </EuiText>
     </EuiForm>
   );

@@ -10,4 +10,7 @@ export const WORKSPACE_ID_IN_SESSION_STORAGE = '_workspace_id_';
 export const PATHS = {
   create: '/create',
   overview: '/overview',
+  update: '/update',
 };
+export const WORKSPACE_OP_TYPE_CREATE = 'create';
+export const WORKSPACE_OP_TYPE_UPDATE = 'update';
