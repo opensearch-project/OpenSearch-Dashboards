@@ -62,7 +62,7 @@ import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
-import { AttributeService } from '../../../dashboard/public';
+import { AttributeService, DASHBOARD_CONTAINER_TYPE } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import {
   SavedAugmentVisLoader,
@@ -417,8 +417,13 @@ export class VisualizeEmbeddable
     this.abortController = new AbortController();
     const abortController = this.abortController;
 
-    // By waiting for this to complete, this.visLayers will be populated
-    await this.populateVisLayers();
+    // By waiting for this to complete, this.visLayers will be populated.
+    // Note we only fetch when in the context of a dashboard - we do not
+    // show events or have event functionality when in the vis edit view.
+    const isInDashboard = this.parent?.type === DASHBOARD_CONTAINER_TYPE;
+    if (isInDashboard) {
+      await this.populateVisLayers();
+    }
 
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
