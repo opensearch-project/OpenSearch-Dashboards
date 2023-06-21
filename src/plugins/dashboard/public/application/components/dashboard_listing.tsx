@@ -31,7 +31,6 @@ export const DashboardListing = () => {
       notifications,
       savedDashboards,
       dashboardProviders,
-      addBasePath,
     },
   } = useOpenSearchDashboards<DashboardServices>();
 
@@ -90,22 +89,26 @@ export const DashboardListing = () => {
   };
 
   const editItem = useCallback(
-    ({ editUrl }: any) => {
-      if (addBasePath) {
-        history.push(addBasePath(editUrl));
+    ({ appId, editUrl }: any) => {
+      if (appId === 'dashboard') {
+        history.push(editUrl);
+      } else {
+        application.navigateToUrl(editUrl);
       }
     },
-    [history, addBasePath]
+    [history, application]
   );
 
-  const viewItem = useCallback(
-    ({ viewUrl }: any) => {
-      if (addBasePath) {
-        history.push(addBasePath(viewUrl));
-      }
-    },
-    [history, addBasePath]
-  );
+  // const viewItem = useCallback(
+  //   ({ appId, viewUrl }: any) => {
+  //     if (appId === 'dashboard') {
+  //       history.push(viewUrl);
+  //     } else {
+  //       application.navigateToUrl(viewUrl);
+  //     }
+  //   },
+  //   [history, application]
+  // );
 
   const deleteItems = useCallback(
     (dashboards: object[]) => {
