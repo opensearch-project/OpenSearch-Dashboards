@@ -16,6 +16,6 @@
     "@osd/babel-preset": "1.0.0",
     "raw-loader": "^4.0.2",
     "typescript": "4.0.2",
-    "webpack": "^4.41.5"
+    "webpack": "npm:@amoo-miki/webpack@4.46.0-rc.2"
   }
 }

@@ -17,6 +17,8 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Kristen Tian              | [kristenTian](https://github.com/kristenTian)       | Amazon      |
 | Zhongnan Su               | [zhongnansu](https://github.com/zhongnansu)         | Amazon      |
 | Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs)       | Amazon      |
+| Tao Liu                   | [Flyingliuhub](https://github.com/Flyingliuhub)     | Amazon      |
+| Zilong Xia                | [ZilongX](https://github.com/ZilongX)               | Amazon      |
 
 ## Emeritus
 

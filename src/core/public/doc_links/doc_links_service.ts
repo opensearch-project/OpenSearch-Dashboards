@@ -421,7 +421,6 @@ export class DocLinksService {
           visualize: {
             // https://opensearch.org/docs/latest/dashboards/visualize/viz-index/
             guide: `${OPENSEARCH_WEBSITE_DOCS}visualize/viz-index/`,
-            timelineDeprecation: `${OPENSEARCH_WEBSITE_DOCS}`,
           },
         },
         noDocumentation: {
@@ -571,7 +570,6 @@ export class DocLinksService {
           reIndex: {
             rethrottle: `${OPENSEARCH_WEBSITE_DOCS}`,
           },
-          timelineDeprecation: `${OPENSEARCH_WEBSITE_DOCS}`,
           apmServer: `${OPENSEARCH_WEBSITE_DOCS}`,
           tutorial: {
             loadDataTutorial: `${OPENSEARCH_WEBSITE_DOCS}`,
@@ -919,7 +917,6 @@ export interface DocLinksStart {
       readonly reIndex: {
         readonly rethrottle: string;
       };
-      readonly timelineDeprecation: string;
       readonly apmServer: string;
       readonly tutorial: {
         readonly loadDataTutorial: string;

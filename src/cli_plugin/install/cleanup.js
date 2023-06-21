@@ -28,33 +28,29 @@
  * under the License.
  */
 
-import del from 'del';
-import fs from 'fs';
+import { rm, access } from 'fs/promises';
+import { rmSync, constants } from 'fs';
 
-export function cleanPrevious(settings, logger) {
-  return new Promise(function (resolve, reject) {
-    try {
-      fs.statSync(settings.workingPath);
+const exists = async (loc) => {
+  try {
+    await access(loc, constants.W_OK);
+    return true;
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+  }
+};
+export const cleanPrevious = async (settings, logger) => {
+  const workingPathExists = await exists(settings.workingPath);
 
-      logger.log('Found previous install attempt. Deleting...');
-      try {
-        del.sync(settings.workingPath, { force: true });
-      } catch (e) {
-        reject(e);
-      }
-      resolve();
-    } catch (e) {
-      if (e.code !== 'ENOENT') reject(e);
-
-      resolve();
-    }
-  });
-}
+  if (workingPathExists) {
+    logger.log('Found previous install attempt. Deleting...');
+    return await rm(settings.workingPath, { recursive: true });
+  }
+};
 
 export function cleanArtifacts(settings) {
-  // delete the working directory.
-  // At this point we're bailing, so swallow any errors on delete.
+  // Delete the working directory; at this point we're bailing, so swallow any errors on delete.
   try {
-    del.sync(settings.workingPath);
+    rmSync(settings.workingPath, { recursive: true, force: true });
   } catch (e) {} // eslint-disable-line no-empty
 }

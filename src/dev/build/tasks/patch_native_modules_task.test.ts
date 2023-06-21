@@ -9,8 +9,8 @@ import {
   createAnyInstanceSerializer,
   createAbsolutePathSerializer,
 } from '@osd/dev-utils';
-import { Build, Config } from '../lib';
-import { PatchNativeModules } from './patch_native_modules_task';
+import { Build, Config, read, download, untar, gunzip } from '../lib';
+import { createPatchNativeModulesTask } from './patch_native_modules_task';
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
@@ -19,16 +19,16 @@ expect.addSnapshotSerializer(createAnyInstanceSerializer(Config));
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-jest.mock('../lib/download');
-jest.mock('../lib/fs', () => ({
-  ...jest.requireActual('../lib/fs'),
-  untar: jest.fn(),
-  gunzip: jest.fn(),
-}));
-
-const { untar } = jest.requireMock('../lib/fs');
-const { gunzip } = jest.requireMock('../lib/fs');
-const { download } = jest.requireMock('../lib/download');
+jest.mock('../lib', () => {
+  const originalModule = jest.requireActual('../lib');
+  return {
+    ...originalModule,
+    download: jest.fn(),
+    gunzip: jest.fn(),
+    untar: jest.fn(),
+    read: jest.fn(),
+  };
+});
 
 async function setup() {
   const config = await Config.create({
@@ -38,14 +38,15 @@ async function setup() {
       linux: false,
       linuxArm: false,
       darwin: false,
+      windows: false,
     },
   });
 
   const build = new Build(config);
 
-  download.mockImplementation(() => {});
-  untar.mockImplementation(() => {});
-  gunzip.mockImplementation(() => {});
+  (read as jest.MockedFunction<typeof read>).mockImplementation(async () => {
+    return JSON.stringify({ version: mockPackage.version });
+  });
 
   return { config, build };
 }
@@ -55,38 +56,77 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-it('patch native modules task downloads the correct platform package', async () => {
-  const { config, build } = await setup();
-  config.targetPlatforms.linuxArm = true;
-  await PatchNativeModules.run(config, log, build);
-  expect(download.mock.calls.length).toBe(1);
-  expect(download.mock.calls).toMatchInlineSnapshot(`
+const mockPackage = {
+  name: 'mock-native-module',
+  version: '1.0.0',
+  destinationPath: 'path/to/destination',
+  extractMethod: 'untar',
+  archives: {
+    'linux-arm64': {
+      url: 'https://example.com/mock-native-module/linux-arm64.tar.gz',
+      sha256: 'mock-sha256',
+    },
+    'linux-x64': {
+      url: 'https://example.com/mock-native-module/linux-x64.gz',
+      sha256: 'mock-sha256',
+    },
+  },
+};
+
+describe('patch native modules task', () => {
+  it('patch native modules task downloads the correct platform package', async () => {
+    const { config, build } = await setup();
+    config.targetPlatforms.linuxArm = true;
+    const PatchNativeModulesWithMock = createPatchNativeModulesTask([mockPackage]);
+    await PatchNativeModulesWithMock.run(config, log, build);
+    expect((download as jest.MockedFunction<typeof download>).mock.calls.length).toBe(1);
+    expect((download as jest.MockedFunction<typeof download>).mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
         Object {
-          "destination": <absolute path>/.native_modules/re2/linux-arm64-83.tar.gz,
+          "destination": <absolute path>/.native_modules/mock-native-module/linux-arm64.tar.gz,
           "log": <ToolingLog>,
           "retries": 3,
-          "sha256": "d86ced75b794fbf518b90908847b3c09a50f3ff5a2815aa30f53080f926a2873",
-          "url": "https://d1v1sj258etie.cloudfront.net/node-re2/releases/download/1.17.4/linux-arm64-83.tar.gz",
+          "sha256": "mock-sha256",
+          "url": "https://example.com/mock-native-module/linux-arm64.tar.gz",
         },
       ],
     ]
   `);
-});
+  });
 
-it('for .tar.gz artifact, patch native modules task unzip it via untar', async () => {
-  const { config, build } = await setup();
-  config.targetPlatforms.linuxArm = true;
-  await PatchNativeModules.run(config, log, build);
-  expect(untar.mock.calls.length).toBe(1);
-  expect(gunzip.mock.calls.length).toBe(0);
-});
+  it('for .tar.gz artifact, patch native modules task unzip it via untar', async () => {
+    const { config, build } = await setup();
+    config.targetPlatforms.linuxArm = true;
+    const PatchNativeModulesWithMock = createPatchNativeModulesTask([mockPackage]);
+    await PatchNativeModulesWithMock.run(config, log, build);
+    expect(untar).toHaveBeenCalled();
+    expect(gunzip).not.toHaveBeenCalled();
+  });
 
-it('for .gz artifact, patch native modules task unzip it via gunzip', async () => {
-  const { config, build } = await setup();
-  config.targetPlatforms.linux = true;
-  await PatchNativeModules.run(config, log, build);
-  expect(untar.mock.calls.length).toBe(0);
-  expect(gunzip.mock.calls.length).toBe(1);
+  it('for .gz artifact, patch native modules task unzip it via gunzip', async () => {
+    const mockPackageGZ = {
+      ...mockPackage,
+      extractMethod: 'gunzip',
+    };
+    const { config, build } = await setup();
+    config.targetPlatforms.linux = true;
+    const PatchNativeModulesWithMock = createPatchNativeModulesTask([mockPackageGZ]);
+    await PatchNativeModulesWithMock.run(config, log, build);
+    expect(gunzip).toHaveBeenCalled();
+    expect(untar).not.toHaveBeenCalled();
+  });
+
+  it('throws error for unsupported extract methods', async () => {
+    const mockPackageUnsupported = {
+      ...mockPackage,
+      extractMethod: 'unsupported',
+    };
+    const { config, build } = await setup();
+    config.targetPlatforms.linux = true;
+    const PatchNativeModulesWithMock = createPatchNativeModulesTask([mockPackageUnsupported]);
+    await expect(PatchNativeModulesWithMock.run(config, log, build)).rejects.toThrow(
+      'Extract method of unsupported is not supported'
+    );
+  });
 });
