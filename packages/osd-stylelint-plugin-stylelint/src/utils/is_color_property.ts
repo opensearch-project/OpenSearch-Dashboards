@@ -48,6 +48,13 @@ const COLOR_PROPERTIES = [
   'mask-border-source',
 ];
 
+/**
+ * This is intended to check a list of defined properties
+ * within a style and see if it's potentially modifying a property
+ * that can have a color. Stylelint crawls styles and will check
+ * each one, therefore this is to optimize the linter to
+ * skip any property that does not impact colors.
+ */
 export const isColorProperty = (prop: string) => {
   return COLOR_PROPERTIES.includes(prop);
 };
