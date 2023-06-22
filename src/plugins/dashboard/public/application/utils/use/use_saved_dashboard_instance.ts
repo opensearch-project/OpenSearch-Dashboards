@@ -57,6 +57,23 @@ export const useSavedDashboardInstance = (
         } else if (dashboardIdFromUrl) {
           try {
             savedDashboard = await savedDashboards.get(dashboardIdFromUrl);
+
+            // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
+            // We should only set the time filter according to time restore once when we are loading the dashboard
+            if (savedDashboard && savedDashboard.timeRestore) {
+              if (savedDashboard.timeFrom && savedDashboard.timeTo) {
+                services.data.query.timefilter.timefilter.setTime({
+                  from: savedDashboard.timeFrom,
+                  to: savedDashboard.timeTo,
+                });
+              }
+              if (savedDashboard.refreshInterval) {
+                services.data.query.timefilter.timefilter.setRefreshInterval(
+                  savedDashboard.refreshInterval
+                );
+              }
+            }
+
             chrome.recentlyAccessed.add(
               savedDashboard.getFullPath(),
               savedDashboard.title,
