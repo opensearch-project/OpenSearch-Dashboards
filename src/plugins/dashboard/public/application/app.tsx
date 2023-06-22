@@ -9,6 +9,7 @@
  * GitHub history for details.
  */
 
+import './app.scss';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
