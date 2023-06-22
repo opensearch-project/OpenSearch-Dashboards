@@ -28,18 +28,26 @@ import {
 } from '../../embeddable';
 import {
   ContainerOutput,
+  EmbeddableFactoryNotFoundError,
   EmbeddableInput,
   ErrorEmbeddable,
   ViewMode,
   isErrorEmbeddable,
+  openAddPanelFlyout,
 } from '../../../embeddable_plugin';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from '../../lib/embeddable_saved_object_converters';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from '../../dashboard_empty_screen';
-import { DashboardAppStateContainer, DashboardServices, SavedDashboardPanel } from '../../../types';
+import {
+  DashboardAppState,
+  DashboardAppStateContainer,
+  DashboardServices,
+  SavedDashboardPanel,
+} from '../../../types';
 import { migrateLegacyQuery } from '../../lib/migrate_legacy_query';
+import { getSavedObjectFinder } from '../../../../../saved_objects/public';
 import { DashboardConstants } from '../../../dashboard_constants';
 
 export const useDashboardContainer = (
@@ -111,59 +119,82 @@ const createDashboardEmbeddable = (
     http,
     dashboardConfig,
     embeddableCapabilities,
+    notifications,
+    overlays,
+    savedObjects,
   } = dashboardServices;
   const { query: queryService } = data;
   const filterManager = queryService.filterManager;
   const timefilter = queryService.timefilter.timefilter;
   const queryStringManager = queryService.queryString;
   const { visualizeCapabilities, mapsCapabilities } = embeddableCapabilities;
-  // const dashboardDom = document.getElementById('dashboardViewport');
   const dashboardFactory = embeddable.getEmbeddableFactory<
     DashboardContainerInput,
     ContainerOutput,
     DashboardContainer
   >(DASHBOARD_CONTAINER_TYPE);
 
-  const getShouldShowEditHelp = () => {
+  const getShouldShowEditHelp = (appStateData: DashboardAppState) => {
     return (
-      !savedDash.panels.length &&
-      savedDash.viewMode === ViewMode.EDIT &&
+      !appStateData.panels.length &&
+      appStateData.viewMode === ViewMode.EDIT &&
       !dashboardConfig.getHideWriteControls()
     );
   };
 
-  const getShouldShowViewHelp = () => {
+  const getShouldShowViewHelp = (appStateData: DashboardAppState) => {
     return (
-      !savedDash.panels.length &&
-      savedDash.viewMode === ViewMode.VIEW &&
+      !appStateData.panels.length &&
+      appStateData.viewMode === ViewMode.VIEW &&
       !dashboardConfig.getHideWriteControls()
     );
   };
 
-  const shouldShowUnauthorizedEmptyState = () => {
+  const shouldShowUnauthorizedEmptyState = (appStateData: DashboardAppState) => {
     const readonlyMode =
-      !savedDash.panels.length &&
-      !getShouldShowEditHelp() &&
-      !getShouldShowViewHelp() &&
+      !appStateData.panels.length &&
+      !getShouldShowEditHelp(appStateData) &&
+      !getShouldShowViewHelp(appStateData) &&
       dashboardConfig.getHideWriteControls();
     const userHasNoPermissions =
-      !savedDash.panels.length && !visualizeCapabilities.save && !mapsCapabilities.save;
+      !appStateData.panels.length && !visualizeCapabilities.save && !mapsCapabilities.save;
     return readonlyMode || userHasNoPermissions;
   };
 
   const getEmptyScreenProps = (
     shouldShowEditHelp: boolean,
-    isEmptyInReadOnlyMode: boolean
+    isEmptyInReadOnlyMode: boolean,
+    stateContainer: DashboardAppStateContainer
   ): DashboardEmptyScreenProps => {
     const emptyScreenProps: DashboardEmptyScreenProps = {
-      onLinkClick: () => {}, // TODO
+      onLinkClick: () => {
+        if (shouldShowEditHelp) {
+          if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
+            openAddPanelFlyout({
+              embeddable: dashboardContainer,
+              getAllFactories: embeddable.getEmbeddableFactories,
+              getFactory: embeddable.getEmbeddableFactory,
+              notifications,
+              overlays,
+              SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
+            });
+          }
+        } else {
+          stateContainer.transitions.set('viewMode', ViewMode.EDIT);
+        }
+      },
       showLinkToVisualize: shouldShowEditHelp,
       uiSettings,
       http,
     };
     if (shouldShowEditHelp) {
-      emptyScreenProps.onVisualizeClick = () => {
-        alert('click'); // TODO
+      emptyScreenProps.onVisualizeClick = async () => {
+        const type = 'visualization';
+        const factory = embeddable.getEmbeddableFactory(type);
+        if (!factory) {
+          throw new EmbeddableFactoryNotFoundError(type);
+        }
+        await factory.create({} as EmbeddableInput, dashboardContainer);
       };
     }
     if (isEmptyInReadOnlyMode) {
@@ -174,7 +205,6 @@ const createDashboardEmbeddable = (
 
   const getDashboardInput = () => {
     const appStateData = appState.getState();
-
     const embeddablesMap: {
       [key: string]: DashboardPanelState;
     } = {};
@@ -194,8 +224,10 @@ const createDashboardEmbeddable = (
       panels: embeddablesMap,
       isFullScreenMode: appStateData.fullScreenMode,
       isEmbeddedExternally: false, // TODO
-      // isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
-      isEmptyState: false, // TODO
+      isEmptyState:
+        getShouldShowEditHelp(appStateData) ||
+        getShouldShowViewHelp(appStateData) ||
+        shouldShowUnauthorizedEmptyState(appStateData),
       useMargins: appStateData.options.useMargins,
       lastReloadRequestTime, // TODO
       title: appStateData.title,
@@ -212,13 +244,14 @@ const createDashboardEmbeddable = (
           dashboardContainer = container;
 
           dashboardContainer.renderEmpty = () => {
-            const shouldShowEditHelp = getShouldShowEditHelp();
-            const shouldShowViewHelp = getShouldShowViewHelp();
-            const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState();
+            const appStateData = appState.getState();
+            const shouldShowEditHelp = getShouldShowEditHelp(appStateData);
+            const shouldShowViewHelp = getShouldShowViewHelp(appStateData);
+            const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState(appStateData);
             const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
             return isEmptyState ? (
               <DashboardEmptyScreen
-                {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode)}
+                {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode, appState)}
               />
             ) : null;
           };
