@@ -211,7 +211,7 @@
     "require-in-the-middle": "^5.0.2",
     "rison-node": "1.0.2",
     "rxjs": "^6.5.5",
-    "semver": "^5.7.0",
+    "semver": "^7.5.2",
     "set-value": "^4.1.0",
     "source-map-support": "^0.5.19",
     "symbol-observable": "^1.2.0",
