@@ -49,7 +49,7 @@ import { LegendItem } from './models';
 
 // starting from the default categorical colors, we generate 6 additional variants,
 // 3 lighter and 3 darker
-const legendColors = euiPaletteColorBlind({ rotations: 7, direction: 'both' });
+export const legendColors = euiPaletteColorBlind({ rotations: 7, direction: 'both' });
 
 interface Props {
   item: LegendItem;
