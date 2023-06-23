@@ -251,6 +251,8 @@
     "@osd/optimizer": "1.0.0",
     "@osd/plugin-generator": "1.0.0",
     "@osd/pm": "1.0.0",
+    "@osd/stylelint-config": "1.0.0",
+    "@osd/stylelint-plugin-stylelint": "1.0.0",
     "@osd/telemetry-tools": "1.0.0",
     "@osd/test": "1.0.0",
     "@osd/test-subj-selector": "0.2.1",

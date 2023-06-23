@@ -1,0 +1,18 @@
+{
+  "background-color": {
+    "buttonTODOTHISANEXAMPLE": [
+      {
+        "approved": "$euiColorPrimary",
+        "rejected": [
+          "blueTODOTHISANEXAMPLE"
+        ]
+      },
+      {
+        "approved": "$euiColorWarning",
+        "rejected": [
+          "redTODOTHISANEXAMPLE"
+        ]
+      }
+    ]
+  }
+}
