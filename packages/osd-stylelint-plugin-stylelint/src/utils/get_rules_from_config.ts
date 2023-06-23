@@ -28,10 +28,10 @@ export const getSelectorRule = (rules: Record<string, { approved?: string[] }>, 
   return undefined;
 };
 
-export const getPropertyRule = (arr: Record<string, { approved?: string[] }>, decl: any) => {
-  for (const key of Object.keys(arr)) {
+export const getPropertyRule = (rules: Record<string, { approved?: string[] }>, decl: any) => {
+  for (const key of Object.keys(rules)) {
     if (matches(key, decl.prop)) {
-      return arr[key];
+      return rules[key];
     }
   }
 
