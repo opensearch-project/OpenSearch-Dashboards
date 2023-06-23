@@ -10,6 +10,7 @@ import {
   getPropertyRule,
   getRulesFromConfig,
   isValidOptions,
+  FileBasedConfig,
 } from '../../utils';
 
 const { ruleMessages, report } = stylelint.utils;
@@ -30,7 +31,7 @@ const ruleFunction = (
       return;
     }
 
-    const rules = getRulesFromConfig(primaryOption.config);
+    const rules: FileBasedConfig = getRulesFromConfig(primaryOption.config);
 
     const isAutoFixing = Boolean(context.fix);
 

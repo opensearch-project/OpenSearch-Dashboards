@@ -19,6 +19,7 @@ import {
   getRulesFromConfig,
   isColorProperty,
   isValidOptions,
+  ValueBasedConfig,
 } from '../../utils';
 
 const isOuiAuditEnabled = Boolean(process.env.OUI_AUDIT_ENABLED);
@@ -42,7 +43,7 @@ const ruleFunction = (
       return;
     }
 
-    const rules = getRulesFromConfig(primaryOption.config);
+    const rules: ValueBasedConfig = getRulesFromConfig(primaryOption.config);
 
     const isAutoFixing = Boolean(context.fix);
 
@@ -84,7 +85,7 @@ const ruleFunction = (
 
       shouldReport = !ruleObject.isComplaint;
 
-      if (shouldReport && isAutoFixing) {
+      if (shouldReport && isAutoFixing && ruleObject.expected) {
         decl.value = ruleObject.expected;
         return;
       }
