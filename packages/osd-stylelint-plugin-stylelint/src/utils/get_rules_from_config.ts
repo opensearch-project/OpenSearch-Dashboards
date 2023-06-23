@@ -18,10 +18,20 @@ export const getRulesFromConfig = (configPath: string) => {
   return JSON.parse(readFileSync(filePath, 'utf-8'));
 };
 
-export const getSelectorRule = (rules: any, rule: any) => {
+export const getSelectorRule = (rules: Record<string, { approved?: string[] }>, rule: any) => {
   for (const configRule of Object.keys(rules)) {
     if (matches(configRule, rule.selector)) {
       return rules[configRule];
+    }
+  }
+
+  return undefined;
+};
+
+export const getPropertyRule = (arr: Record<string, { approved?: string[] }>, decl: any) => {
+  for (const key of Object.keys(arr)) {
+    if (matches(key, decl.prop)) {
+      return arr[key];
     }
   }
 
