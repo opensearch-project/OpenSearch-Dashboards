@@ -58,6 +58,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Table Visualization] Remove custom styling for text-align:center in favor of OUI utility class. ([#4164](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4164))
 - Replace the use of `bluebird` in `saved_objects` plugin ([#4026](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4026))
 - [Vis Colors] Update default color in TSVB to use `ouiPaletteColorBlind()[0]`([#4363](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4363))
+- [Vis Colors] Replace vis_type_timeline colors with `ouiPaletteColorBlind()` ([#4366](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4366))
 
 ### 🔩 Tests
 
