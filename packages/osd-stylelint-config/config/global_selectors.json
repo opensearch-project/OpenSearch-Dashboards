@@ -1,0 +1,30 @@
+{
+  "#opensearch-dashboards-body": {
+    "approved": [
+      "src/core/public/rendering/_base.scss"
+    ]
+  },
+  ".app-wrapper": {
+    "approved": [
+      "src/core/public/rendering/_base.scss"
+    ]
+  },
+  "/\\.[eo]ui/": {
+    "approved": [
+      "examples/expressions_example/public/index.scss",
+      "src/core/public/styles/_base.scss",
+      "src/plugins/vis_default_editor/public/_sidebar.scss",
+      "src/core/public/core_app/styles/_mixins.scss",
+      "src/core/public/chrome/ui/header/_index.scss",
+      "src/core/public/chrome/ui/header/header_breadcrumbs.scss",
+      "src/core/public/chrome/ui/header/home_loader.scss",
+      "src/plugins/data/public/ui/filter_bar/_global_filter_item.scss",
+      "src/plugins/home/public/application/components/_synopsis.scss",
+      "src/plugins/vis_builder/public/application/components/searchable_dropdown.scss",
+      "src/plugins/vis_builder/public/application/components/side_nav.scss",
+      "packages/osd-ui-framework/src/components/button/button_group/_button_group.scss",
+      "src/plugins/discover/public/application/components/sidebar/discover_sidebar.scss",
+      "src/plugins/discover/public/application/angular/doc_table/components/table_row/_open.scss"
+    ]
+  }
+}
