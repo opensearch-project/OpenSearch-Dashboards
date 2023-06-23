@@ -15,7 +15,7 @@ import {
   getNotCompliantMessage,
   getRulesFromConfig,
   isValidOptions,
-  getSelectorRule,
+  getRuleFromConfig,
   FileBasedConfig,
 } from '../../utils';
 
@@ -42,7 +42,7 @@ const ruleFunction = (
     const isAutoFixing = Boolean(context.fix);
 
     postcssRoot.walkRules((rule: any) => {
-      const selectorRule = getSelectorRule(rules, rule);
+      const selectorRule = getRuleFromConfig(rules, rule.selector);
       if (!selectorRule) {
         return;
       }

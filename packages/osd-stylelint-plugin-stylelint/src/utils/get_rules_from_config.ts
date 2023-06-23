@@ -24,19 +24,9 @@ export const getRulesFromConfig = (configPath: string) => {
   return JSON.parse(readFileSync(filePath, 'utf-8'));
 };
 
-export const getSelectorRule = (rules: FileBasedConfig, rule: any) => {
-  for (const configRule of Object.keys(rules)) {
-    if (matches(configRule, rule.selector)) {
-      return rules[configRule];
-    }
-  }
-
-  return undefined;
-};
-
-export const getPropertyRule = (rules: FileBasedConfig, decl: any) => {
+export const getRuleFromConfig = (rules: FileBasedConfig, value: string) => {
   for (const key of Object.keys(rules)) {
-    if (matches(key, decl.prop)) {
+    if (matches(key, value)) {
       return rules[key];
     }
   }

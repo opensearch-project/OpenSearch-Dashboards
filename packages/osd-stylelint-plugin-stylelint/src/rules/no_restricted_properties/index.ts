@@ -7,7 +7,7 @@ import stylelint from 'stylelint';
 import { NAMESPACE } from '../..';
 import {
   getNotCompliantMessage,
-  getPropertyRule,
+  getRuleFromConfig,
   getRulesFromConfig,
   isValidOptions,
   FileBasedConfig,
@@ -36,7 +36,7 @@ const ruleFunction = (
     const isAutoFixing = Boolean(context.fix);
 
     postcssRoot.walkDecls((decl: any) => {
-      const propertyRule = getPropertyRule(rules, decl);
+      const propertyRule = getRuleFromConfig(rules, decl.prop);
       if (!propertyRule) {
         return;
       }
