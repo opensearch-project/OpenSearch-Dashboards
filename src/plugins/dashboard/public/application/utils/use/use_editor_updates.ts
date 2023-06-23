@@ -5,6 +5,7 @@
 
 import EventEmitter from 'events';
 import { useEffect, useState } from 'react';
+import { merge } from 'rxjs';
 import { DashboardAppState, DashboardAppStateContainer, DashboardServices } from '../../../types';
 import { DashboardContainer } from '../../embeddable';
 
@@ -21,9 +22,6 @@ export const useEditorUpdates = (
 
   const {
     timefilter: { timefilter },
-    filterManager,
-    queryString,
-    state$,
   } = services.data.query;
 
   useEffect(() => {
@@ -31,8 +29,7 @@ export const useEditorUpdates = (
       const initialState = appState.getState();
       setCurrentAppState(initialState);
 
-      const unsubscribeStateUpdates = appState.subscribe((state) => {
-        setCurrentAppState(state);
+      const refreshDashboardContainer = () => {
         if (dashboardContainer.getChangesFromAppStateForContainerState) {
           const changes = dashboardContainer.getChangesFromAppStateForContainerState(
             dashboardContainer
@@ -41,6 +38,23 @@ export const useEditorUpdates = (
             dashboardContainer.updateInput(changes);
           }
         }
+      };
+
+      const unsubscribeStateUpdates = appState.subscribe((state) => {
+        setCurrentAppState(state);
+        refreshDashboardContainer();
+      });
+
+      // Need to add subscription for time filter specifically because app state is not tracking time filters
+      // since they are part of the global state, not app state
+      // However, we still need to update the dashboard container with the correct time filters because dashboard
+      // container embeddable needs them to correctly pass them down and update its child visualization embeddables
+      const timeFilterChange$ = merge(
+        timefilter.getRefreshIntervalUpdate$(),
+        timefilter.getTimeUpdate$()
+      );
+      timeFilterChange$.subscribe(() => {
+        refreshDashboardContainer();
       });
 
       return () => {
@@ -54,6 +68,7 @@ export const useEditorUpdates = (
     services,
     dashboardContainer,
     isEmbeddableRendered,
+    timefilter,
   ]);
 
   useEffect(() => {
