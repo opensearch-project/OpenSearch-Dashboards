@@ -61,8 +61,11 @@ export function updateSavedDashboard(
   savedDashboard.refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
 
   // save only unpinned filters
-  const unpinnedFilters = savedDashboard
-    .getFilters()
-    .filter((filter) => !opensearchFilters.isFilterPinned(filter));
+  const unpinnedFilters = appState.filters.filter(
+    (filter) => !opensearchFilters.isFilterPinned(filter)
+  );
   savedDashboard.searchSource.setField('filter', unpinnedFilters);
+
+  // save the queries
+  savedDashboard.searchSource.setField('query', appState.query);
 }
