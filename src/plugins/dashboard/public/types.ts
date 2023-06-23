@@ -270,7 +270,7 @@ export interface DashboardServices extends CoreStart {
   usageCollection?: UsageCollectionSetup;
   navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
   navigateToLegacyOpenSearchDashboardsUrl: UrlForwardingStart['navigateToLegacyOpenSearchDashboardsUrl'];
-  scopedHistory: () => ScopedHistory;
+  scopedHistory: ScopedHistory;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsPublic: SavedObjectsStart;
   restorePreviousUrl: () => void;
