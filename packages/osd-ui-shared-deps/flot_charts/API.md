@@ -575,7 +575,7 @@ In Python you can get it with something like:
 calendar.timegm(datetime_object.timetuple()) * 1000
 ```
 In Ruby you can get it using the `#to_i` method on the
-[`Time`] object. If you're using the
+`Time` object. If you're using the
 `active_support` gem (default for Ruby on Rails applications) `#to_i` is also
 available on the `DateTime` and `ActiveSupport::TimeWithZone` objects. You
 simply need to multiply the result by 1000:
