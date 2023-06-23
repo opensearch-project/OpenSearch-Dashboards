@@ -333,6 +333,25 @@ describe('ui settings', () => {
     });
   });
 
+  describe('#getOverrideOrDefault()', () => {
+    it('returns the non-overridden default settings passed within the constructor', () => {
+      const value = chance.word();
+      const defaults = { key: { value } };
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.getOverrideOrDefault('key')).toEqual(value);
+      expect(uiSettings.getOverrideOrDefault('unknown')).toBeUndefined();
+    });
+
+    it('returns the overridden settings passed within the constructor', () => {
+      const value = chance.word();
+      const override = chance.word();
+      const defaults = { key: { value } };
+      const overrides = { key: { value: override } };
+      const { uiSettings } = setup({ defaults, overrides });
+      expect(uiSettings.getOverrideOrDefault('key')).toEqual(override);
+    });
+  });
+
   describe('#getUserProvided()', () => {
     it('pulls user configuration from OpenSearch', async () => {
       const { uiSettings, savedObjectsClient } = setup();
