@@ -15,7 +15,7 @@ import {
 
 const { ruleMessages, report } = stylelint.utils;
 
-const ruleName = 'invalid_properties';
+const ruleName = 'no_restricted_properties';
 const messages = ruleMessages(ruleName, {
   expected: (message) => `${message}`,
 });

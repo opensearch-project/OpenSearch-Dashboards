@@ -15,9 +15,9 @@ module.exports = {
   ],
 
   rules: {
-    '@osd/stylelint/invalid_properties': [
+    '@osd/stylelint/no_restricted_properties': [
       {
-        config: "./../../../osd-stylelint-config/config/properties.json"
+        config: "./../../../osd-stylelint-config/config/restricted_properties.json"
       },
       {
         severity: "error"

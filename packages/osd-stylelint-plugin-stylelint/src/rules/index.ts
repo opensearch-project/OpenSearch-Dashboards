@@ -9,13 +9,13 @@
  * GitHub history for details.
  */
 
-import invalidProperties from './invalid_properties';
+import noRestrictedProperties from './no_restricted_properties';
 import noCustomColors from './no_custom_colors';
 import noModifyingGlobalSelectors from './no_modifying_global_selectors';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  invalid_properties: invalidProperties,
   no_custom_colors: noCustomColors,
   no_modifying_global_selectors: noModifyingGlobalSelectors,
+  no_restricted_properties: noRestrictedProperties,
 };
