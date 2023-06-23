@@ -86,7 +86,7 @@ export const useDashboardContainer = (
 
   useEffect(() => {
     const incomingEmbeddable = services.embeddable
-      .getStateTransfer(services.scopedHistory())
+      .getStateTransfer(services.scopedHistory)
       .getIncomingEmbeddablePackage();
 
     if (

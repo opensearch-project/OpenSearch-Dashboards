@@ -385,6 +385,12 @@ export class DashboardPlugin
           savedObjects,
         } = pluginsStart;
 
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
+
         const history = createHashHistory(); // need more research
         const services: DashboardServices = {
           ...coreStart,
@@ -418,7 +424,7 @@ export class DashboardPlugin
           },
           localStorage: new Storage(localStorage),
           usageCollection,
-          scopedHistory: () => this.currentHistory!,
+          scopedHistory: params.history,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsPublic: savedObjects,
           restorePreviousUrl,
@@ -430,6 +436,8 @@ export class DashboardPlugin
         const { renderApp } = await import('./application');
         const unmount = renderApp(params, services);
         return () => {
+          params.element.classList.remove('dshAppContainer');
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };
