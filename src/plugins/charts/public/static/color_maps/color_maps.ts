@@ -71,8 +71,7 @@ function convertColorPaletteToColorMap(colorPalette: string[]): RawColorSchema['
     const color = colorPalette[i];
     const regex = /#([0-9a-zA-Z]{2})([0-9a-zA-Z]{2})([0-9a-zA-Z]{2})/;
 
-    // @ts-ignore
-    const [, rawRed, rawGreen, rawBlue] = regex.exec(color);
+    const [, rawRed, rawGreen, rawBlue] = regex.exec(color)!;
     const [red, green, blue] = [
       parseInt(rawRed, 16) / 255,
       parseInt(rawGreen, 16) / 255,
