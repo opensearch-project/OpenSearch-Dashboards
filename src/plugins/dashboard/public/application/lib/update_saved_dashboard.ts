@@ -29,7 +29,7 @@
  */
 
 import _ from 'lodash';
-import { RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
+import { Query, RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
 import { FilterUtils } from './filter_utils';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { DashboardAppState } from '../../types';
@@ -67,5 +67,5 @@ export function updateSavedDashboard(
   savedDashboard.searchSource.setField('filter', unpinnedFilters);
 
   // save the queries
-  savedDashboard.searchSource.setField('query', appState.query);
+  savedDashboard.searchSource.setField('query', appState.query as Query);
 }

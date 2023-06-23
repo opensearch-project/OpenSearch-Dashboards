@@ -444,8 +444,8 @@ export class DashboardPlugin
       },
     };
 
-    // TODO: need to add UI bootstrap
-    // initAngularBootstrap();
+    // TODO: delete this when discover de-angular is completed
+    initAngularBootstrap();
 
     core.application.register(app);
     urlForwarding.forwardApp(

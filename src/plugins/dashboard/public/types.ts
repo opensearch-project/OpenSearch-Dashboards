@@ -123,7 +123,7 @@ export interface DashboardAppState {
     hidePanelTitles: boolean;
     useMargins: boolean;
   };
-  query: Query;
+  query: Query | string;
   filters: Filter[];
   viewMode: ViewMode;
   expandedPanelId?: string;

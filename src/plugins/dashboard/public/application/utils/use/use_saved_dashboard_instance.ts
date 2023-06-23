@@ -60,7 +60,7 @@ export const useSavedDashboardInstance = (
 
             // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
             // We should only set the time filter according to time restore once when we are loading the dashboard
-            if (savedDashboard && savedDashboard.timeRestore) {
+            if (savedDashboard.timeRestore) {
               if (savedDashboard.timeFrom && savedDashboard.timeTo) {
                 services.data.query.timefilter.timefilter.setTime({
                   from: savedDashboard.timeFrom,
