@@ -55,6 +55,7 @@ export const DashboardEditor = () => {
 
   console.log('savedDashboardInstance', savedDashboardInstance);
   console.log('appState', appState);
+  console.log('appStateData', appState?.getState());
   console.log('currentAppState', currentAppState);
   console.log('isEmbeddableRendered', isEmbeddableRendered);
   console.log('dashboardContainer', dashboardContainer);
