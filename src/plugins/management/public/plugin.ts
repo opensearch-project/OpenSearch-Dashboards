@@ -120,7 +120,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         title: this.title,
         description: i18n.translate('management.dashboardManagement.description', {
           defaultMessage:
-            'Manage Dashboards saved objects and data source connections.You can also modify advanced settings for Dashboards.',
+            'Manage Dashboards saved objects and data source connections. You can also modify advanced settings for Dashboards.',
         }),
         order: 9030,
       });

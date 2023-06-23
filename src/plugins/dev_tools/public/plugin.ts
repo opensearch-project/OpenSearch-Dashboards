@@ -126,7 +126,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         title: this.title,
         description: i18n.translate('devTools.devToolsDescription', {
           defaultMessage:
-            'Use the console to set up and troubleshoot your OpenSearch environment with REST API.',
+            'Use the console to set up and troubleshoot your OpenSearch environment with the REST API.',
         }),
         order: 9070,
       });
