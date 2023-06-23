@@ -29,14 +29,7 @@ import { saveDashboard } from '../lib';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
-
-enum UrlParams {
-  SHOW_TOP_MENU = 'show-top-menu',
-  SHOW_QUERY_INPUT = 'show-query-input',
-  SHOW_TIME_FILTER = 'show-time-filter',
-  SHOW_FILTER_BAR = 'show-filter-bar',
-  HIDE_FILTER_BAR = 'hide-filter-bar',
-}
+import { UrlParams } from '../components/dashboard_top_nav';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
