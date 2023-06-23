@@ -9,7 +9,7 @@ import {
   OpenSearchDashboardsDatatableRow,
 } from '../../../expressions/public';
 import { VislibDimensions, VisParams } from '../../../visualizations/public';
-import { isVisLayerColumn } from '../../../vis_augmenter/public';
+import { isVisLayerColumn, VisAugmenterEmbeddableConfig } from '../../../vis_augmenter/public';
 
 // TODO: move this to the visualization plugin that has VisParams once all of these parameters have been better defined
 interface ValueAxis {
@@ -34,6 +34,18 @@ interface ValueAxis {
   type: string;
 }
 
+export interface YAxisConfig {
+  minExtent: number;
+  maxExtent: number;
+  offset: number;
+  translate: number;
+  domainWidth: number;
+  labelPadding: number;
+  titlePadding: number;
+  tickOffset: number;
+  tickSize: number;
+}
+
 // Get the first xaxis field as only 1 setup of X Axis will be supported and
 // there won't be support for split series and split chart
 const getXAxisId = (dimensions: any, columns: OpenSearchDashboardsDatatableColumn[]): string => {
@@ -43,6 +55,15 @@ const getXAxisId = (dimensions: any, columns: OpenSearchDashboardsDatatableColum
 export const cleanString = (rawString: string): string => {
   return rawString.replaceAll('"', '');
 };
+
+// When using autosize features of vega-lite, the chart is expected to reposition
+// correctly such that there is space for the chart and legend within the canvas.
+// This works for horizontal positions (left/right), but breaks for vertical positions
+// (top/bottom). To make up for this, we set the offset to 0 for these positions such that
+// the chart will not get truncated or potentially cut off within the canvas.
+export const calculateLegendOffset = (legendPosition: string): number =>
+  // 18 is the default offset as of vega lite 5
+  legendPosition === 'top' || legendPosition === 'bottom' ? 0 : 18;
 
 export const formatDatatable = (
   datatable: OpenSearchDashboardsDatatable
@@ -67,7 +88,7 @@ export const formatDatatable = (
   return datatable;
 };
 
-export const setupConfig = (visParams: VisParams) => {
+export const setupConfig = (visParams: VisParams, config: VisAugmenterEmbeddableConfig) => {
   const legendPosition = visParams.legendPosition;
   return {
     view: {
@@ -78,12 +99,14 @@ export const setupConfig = (visParams: VisParams) => {
     },
     legend: {
       orient: legendPosition,
+      offset: calculateLegendOffset(legendPosition),
     },
     // This is parsed in the VegaParser and hides unnecessary warnings.
     // For example, 'infinite extent' warnings that cover the chart
     // when there is empty data for a time series
     kibana: {
       hideWarnings: true,
+      visAugmenterConfig: config,
     },
   };
 };
@@ -148,7 +171,8 @@ const isXAxisColumn = (column: OpenSearchDashboardsDatatableColumn): boolean => 
 export const createSpecFromDatatable = (
   datatable: OpenSearchDashboardsDatatable,
   visParams: VisParams,
-  dimensions: VislibDimensions
+  dimensions: VislibDimensions,
+  config: VisAugmenterEmbeddableConfig
 ): object => {
   // TODO: we can try to use VegaSpec type but it is currently very outdated, where many
   // of the fields and sub-fields don't have other optional params that we want for customizing.
@@ -159,7 +183,7 @@ export const createSpecFromDatatable = (
   spec.data = {
     values: datatable.rows,
   };
-  spec.config = setupConfig(visParams);
+  spec.config = setupConfig(visParams, config);
 
   // Get the valueAxes data and generate a map to easily fetch the different valueAxes data
   const valueAxis = new Map();

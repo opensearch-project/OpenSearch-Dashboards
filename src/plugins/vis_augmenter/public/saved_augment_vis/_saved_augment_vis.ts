@@ -24,9 +24,23 @@ export function createSavedAugmentVisClass(services: SavedObjectOpenSearchDashbo
 
   class SavedAugmentVis extends SavedObjectClass {
     public static type: string = name;
-    public static mapping: AugmentVisSavedObjectAttributes;
+    public static mapping: Record<string, string> = {
+      title: 'text',
+      description: 'text',
+      originPlugin: 'text',
+      pluginResource: 'object',
+      visLayerExpressionFn: 'object',
+      visId: 'keyword,',
+      version: 'integer',
+    };
 
-    constructor(opts: AugmentVisSavedObjectAttributes) {
+    constructor(opts: Record<string, unknown> | string = {}) {
+      // The default delete() fn from the saved object loader will only
+      // pass a string ID. To handle that case here, we embed it within
+      // an opts object.
+      if (typeof opts !== 'object') {
+        opts = { id: opts };
+      }
       super({
         type: SavedAugmentVis.type,
         mapping: SavedAugmentVis.mapping,

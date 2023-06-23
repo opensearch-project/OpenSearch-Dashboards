@@ -43,6 +43,8 @@ import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
 import { canViewInApp } from '../../lib';
 import { SubmittedFormData } from '../types';
+import { UiActionsStart } from '../../../../ui_actions/public';
+import { SAVED_OBJECT_DELETE_TRIGGER } from '../../triggers';
 
 interface SavedObjectEditionProps {
   id: string;
@@ -51,6 +53,7 @@ interface SavedObjectEditionProps {
   capabilities: Capabilities;
   overlays: OverlayStart;
   notifications: NotificationsStart;
+  uiActions: UiActionsStart;
   notFoundType?: string;
   savedObjectsClient: SavedObjectsClientContract;
   history: ScopedHistory;
@@ -168,7 +171,11 @@ export class SavedObjectEdition extends Component<
       }
     );
     if (confirmed) {
+      this.props.uiActions
+        .getTrigger(SAVED_OBJECT_DELETE_TRIGGER)
+        .exec({ type, savedObjectId: id });
       await savedObjectsClient.delete(type, id);
+
       notifications.toasts.addSuccess(`Deleted ${this.formatTitle(object)} ${type} object`);
       this.redirectToListing();
     }

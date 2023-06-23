@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { cloneDeep, isEmpty } from 'lodash';
+import { cloneDeep, isEmpty, get } from 'lodash';
 import { i18n } from '@osd/i18n';
 import {
   ExpressionFunctionDefinition,
@@ -19,6 +19,7 @@ import {
   addPointInTimeEventsLayersToSpec,
   enableVisLayersInSpecConfig,
   addVisEventSignalsToSpecConfig,
+  augmentEventChartSpec,
 } from '../../../vis_augmenter/public';
 import { formatDatatable, createSpecFromDatatable } from './helpers';
 import { VegaVisualizationDependencies } from '../plugin';
@@ -30,6 +31,7 @@ interface Arguments {
   visLayers: string | null;
   visParams: string;
   dimensions: string;
+  visAugmenterConfig: string;
 }
 
 export type LineVegaSpecExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -64,6 +66,11 @@ export const createLineVegaSpecFn = (
       default: '""',
       help: '',
     },
+    visAugmenterConfig: {
+      types: ['string'],
+      default: '""',
+      help: '',
+    },
   },
   async fn(input, args, context) {
     let table = formatDatatable(cloneDeep(input));
@@ -71,6 +78,7 @@ export const createLineVegaSpecFn = (
     const visParams = JSON.parse(args.visParams) as VisParams;
     const dimensions = JSON.parse(args.dimensions) as VislibDimensions;
     const allVisLayers = (args.visLayers ? JSON.parse(args.visLayers) : []) as VisLayers;
+    const visAugmenterConfig = JSON.parse(args.visAugmenterConfig);
 
     // currently only supporting PointInTimeEventsVisLayer type
     const pointInTimeEventsVisLayers = allVisLayers.filter((visLayer: VisLayer) =>
@@ -81,13 +89,19 @@ export const createLineVegaSpecFn = (
       table = addPointInTimeEventsLayersToTable(table, dimensions, pointInTimeEventsVisLayers);
     }
 
-    let spec = createSpecFromDatatable(table, visParams, dimensions);
+    let spec = createSpecFromDatatable(table, visParams, dimensions, visAugmenterConfig);
 
     if (!isEmpty(pointInTimeEventsVisLayers) && dimensions.x !== null) {
       spec = addPointInTimeEventsLayersToSpec(table, dimensions, spec);
+      // @ts-ignore
       spec.config = enableVisLayersInSpecConfig(spec, pointInTimeEventsVisLayers);
+      // @ts-ignore
       spec.config = addVisEventSignalsToSpecConfig(spec);
     }
+
+    // Apply other formatting changes to the spec (show vis data, hide axes, etc.) based on the
+    // vis augmenter config. Mostly used for customizing the views on the view events flyout.
+    spec = augmentEventChartSpec(visAugmenterConfig, spec);
     return JSON.stringify(spec);
   },
 });

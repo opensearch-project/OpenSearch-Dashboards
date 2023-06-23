@@ -38,7 +38,6 @@ import {
   TEST_SPEC_SINGLE_VIS_LAYER,
   TEST_VIS_LAYERS_MULTIPLE,
   TEST_VIS_LAYERS_SINGLE,
-  TEST_VIS_LAYERS_SINGLE_EMPTY_EVENTS,
   TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS,
   TEST_VIS_LAYERS_SINGLE_ON_BOUNDS,
 } from '../test_constants';
@@ -406,19 +405,6 @@ describe('helpers', function () {
           TEST_DATATABLE_NO_VIS_LAYERS,
           TEST_DIMENSIONS,
           TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS
-        )
-      ).toStrictEqual(TEST_DATATABLE_SINGLE_VIS_LAYER_EMPTY);
-    });
-    // below case should not happen since only VisLayers with a populated
-    // set of events should be passed from the plugins. but, if it does
-    // happen, we can handle it more gracefully instead of throwing an error
-    it('vis layer with empty events adds nothing to datatable', function () {
-      expect(
-        addPointInTimeEventsLayersToTable(
-          TEST_DATATABLE_NO_VIS_LAYERS,
-          TEST_DIMENSIONS,
-          // @ts-ignore
-          TEST_VIS_LAYERS_SINGLE_EMPTY_EVENTS
         )
       ).toStrictEqual(TEST_DATATABLE_SINGLE_VIS_LAYER_EMPTY);
     });

@@ -22,7 +22,11 @@ export {
   PointInTimeEventsVisLayer,
   isPointInTimeEventsVisLayer,
   isVisLayerWithError,
+  VisAugmenterEmbeddableConfig,
+  VisFlyoutContext,
 } from './types';
+
+export { AugmentVisContext } from './ui_actions_bootstrap';
 
 export * from './expressions';
 export * from './utils';
@@ -30,3 +34,7 @@ export * from './constants';
 export * from './vega';
 export * from './saved_augment_vis';
 export * from './test_constants';
+export * from './triggers';
+export * from './actions';
+export { fetchVisEmbeddable } from './view_events_flyout';
+export { setUISettings } from './services'; // Needed for plugin tests related to the CRUD saved object functions

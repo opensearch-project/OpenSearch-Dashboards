@@ -12,7 +12,7 @@ export const augmentVisSavedObjectType: SavedObjectsType = {
   management: {
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.title;
+      return `augment-vis-${obj?.attributes?.originPlugin}`;
     },
     getEditUrl(obj) {
       return `/management/opensearch-dashboards/objects/savedAugmentVis/${encodeURIComponent(

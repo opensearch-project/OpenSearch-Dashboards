@@ -38,6 +38,7 @@ import {
   UsernameAutocompleteComponent,
 } from '../autocomplete/components';
 
+import $ from 'jquery';
 import _ from 'lodash';
 
 import Api from './api';
@@ -173,19 +174,20 @@ function loadApisFromJson(
 // like this, it looks like a minor security issue.
 export function setActiveApi(api) {
   if (!api) {
-    fetch('../api/console/api_server', {
-      method: 'GET',
+    $.ajax({
+      url: '../api/console/api_server',
+      dataType: 'json', // disable automatic guessing
       headers: {
         'osd-xsrf': 'opensearch-dashboards',
       },
-    })
-      .then(function (response) {
-        response.json();
-      })
-      .then(function (data) {
+    }).then(
+      function (data) {
         setActiveApi(loadApisFromJson(data));
-      })
-      .catch((error) => console.log(`failed to load API '${api}': ${error}`));
+      },
+      function (jqXHR) {
+        console.log("failed to load API '" + api + "': " + jqXHR.responseText);
+      }
+    );
     return;
   }
 

@@ -50,7 +50,9 @@ interface Arguments {
   spec: string;
 }
 
-export type VisParams = Required<Arguments>;
+export interface VisParams {
+  spec: string;
+}
 
 export type VegaExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'vega',

@@ -274,9 +274,6 @@ There are no real life examples showcasing this, it may not even be really neede
 the thinking being that it would support any type of rendering of child embeddables - whether in a "snap to grid" style like dashboard,
 or in a free form layout like canvas.
 
-The only real implementation of a container in production code at the time this is written is Dashboard however, with no plans to migrate
-Canvas over to use it (this was the original impetus for an abstraction). The container code is quite complicated with child management, 
-so it makes creating a new container very easy, as you can see in the developer examples of containers. But, it's possible this layer was
- an over abstraction without a real prod use case (I can say that because I wrote it, I'm only insulting myself!) :).
+The only real implementation of a container in production code at the time is written in the Dashboard plugin, however, with no plans to migrate over to Canvas (this was the original impetus for an abstraction). The container code is quite complicated with child management, so it makes creating a new container very easy, as you can see in the developer examples of containers. But, it's possible this layer was an over abstraction without a real prod use case (I can say that because I wrote it, I'm only insulting myself!) :).
 
 Be sure to read [Common mistakes with embeddable containers and inherited input state](./containers_and_inherited_state.md) next!

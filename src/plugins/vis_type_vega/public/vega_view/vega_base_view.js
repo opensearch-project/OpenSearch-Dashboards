@@ -270,11 +270,14 @@ export class VegaBaseView {
   // space and leave enough space to show the bottom view (the events vis).
   // Ref: https://vega.github.io/vega-lite/docs/size.html#limitations
   addPointInTimeEventPadding(view) {
-    // TODO: 100 is enough padding for now. May need to adjust once the current scrolling/overflow
-    // issue is handled. See https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3501
+    // This value represents the pixel height of the event canvas. It is determined
+    // based on the event mark size, such that there is sufficient but minimal space
+    // needed to render the event marks.
     const eventVisHeight = 100;
     const height = Math.max(0, this._$container.height()) - eventVisHeight;
-    view._signals.concat_0_height.value = height;
+    if (view._signals.concat_0_height !== undefined) {
+      view._signals.concat_0_height.value = height;
+    }
   }
 
   setView(view) {

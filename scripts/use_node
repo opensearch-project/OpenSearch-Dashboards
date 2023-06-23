@@ -57,11 +57,17 @@ elif [ ! -z "$NODE_HOME" ]; then
   NODE_ERROR_MSG="in NODE_HOME"
   NODE_ERROR_SHOW=true
 else
+  # Set these variables outside, as catchalls, to show meaningful errors if needed
   NODE="$OSD_HOME/node/bin/node"
   NODE_ERROR_MSG="bundled with OpenSearch Dashboards"
   # A bin folder at the root is only present in release builds that have a bundled Node.js binary
-  if [ -x "OSD_HOME/bin" ]; then
+  if [ -d "${OSD_HOME}/bin" ]; then
     NODE_ERROR_SHOW=true
+    # Not all operating systems can run the latest Node.js and the fallback is for them
+    "${NODE}" -v > /dev/null 2>&1
+    if [ $? -ne 0 ] && [ -d "${OSD_HOME}/node/fallback" ]; then
+      NODE="$OSD_HOME/node/fallback/bin/node"
+    fi
   fi
 fi
 
@@ -75,7 +81,7 @@ else
 fi
 
 if [ ! -x "$NODE" ]; then
-  # Irrespective of NODE_ERROR_SHOW, show the error
+  # Irrespective of NODE_ERROR_SHOW, if NODE is not found or executable, show the error
   echo "Could not find a Node.js runtime binary $NODE_ERROR_MSG or on the system" >&2
   exit 1
 fi
@@ -91,7 +97,7 @@ fi
 
 # If a file path was provided for execution, prefix with OSD_HOME; use relative paths to avoid the need for this.
 if [ ! -z "$OSD_USE_NODE_JS_FILE_PATH" ]; then
-  NODE_OPTIONS="$OSD_NODE_OPTS_PREFIX $OSD_NODE_OPTS $NODE_OPTIONS" "${NODE}" "${OSD_HOME}${OSD_USE_NODE_JS_FILE_PATH}" "${@}"
+  NODE_OPTIONS="$OSD_NODE_OPTS_PREFIX $OSD_NODE_OPTS $NODE_OPTIONS" exec "${NODE}" "${OSD_HOME}${OSD_USE_NODE_JS_FILE_PATH}" "${@}"
 elif [ $# -ne 0 ]; then
-  NODE_OPTIONS="$OSD_NODE_OPTS_PREFIX $OSD_NODE_OPTS $NODE_OPTIONS" "${NODE}" "${@}"
+  NODE_OPTIONS="$OSD_NODE_OPTS_PREFIX $OSD_NODE_OPTS $NODE_OPTIONS" exec "${NODE}" "${@}"
 fi

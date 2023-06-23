@@ -182,6 +182,14 @@ export class VisualizationsPlugin
     { data, expressions, uiActions, embeddable, dashboard }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
+    const savedAugmentVisLoader = createSavedAugmentVisLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+    setSavedAugmentVisLoader(savedAugmentVisLoader);
     setI18n(core.i18n);
     setTypes(types);
     setEmbeddable(embeddable);
@@ -205,6 +213,7 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
       visualizationTypes: types,
+      savedAugmentVisLoader,
     });
     setSavedVisualizationsLoader(savedVisualizationsLoader);
     const savedSearchLoader = createSavedSearchesLoader({
@@ -214,14 +223,6 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
-    const savedAugmentVisLoader = createSavedAugmentVisLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome: core.chrome,
-      overlays: core.overlays,
-    });
-    setSavedAugmentVisLoader(savedAugmentVisLoader);
     setSavedSearchLoader(savedSearchLoader);
     setNotifications(core.notifications);
     return {

@@ -4,8 +4,16 @@
  */
 
 import { OpenSearchDashboardsDatatable } from '../../expressions/public';
-import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, HOVER_PARAM } from './';
 import { VisAnnotationType } from './vega/constants';
+import {
+  VIS_LAYER_COLUMN_TYPE,
+  VisLayerTypes,
+  HOVER_PARAM,
+  EVENT_MARK_SIZE,
+  EVENT_MARK_SIZE_ENLARGED,
+  EVENT_COLOR,
+  EVENT_MARK_SHAPE,
+} from './';
 
 const TEST_X_AXIS_ID = 'test-x-axis-id';
 const TEST_X_AXIS_ID_DIRTY = 'test.x.axis.id';
@@ -31,17 +39,17 @@ const TEST_VALUES_SINGLE_ROW_SINGLE_VIS_LAYER = [
 ];
 
 const TEST_VALUES_ONLY_VIS_LAYERS = [
-  { [TEST_X_AXIS_ID]: 0 },
+  { [TEST_X_AXIS_ID]: 0, [TEST_PLUGIN_EVENT_TYPE]: 0 },
   { [TEST_X_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 2 },
-  { [TEST_X_AXIS_ID]: 10 },
-  { [TEST_X_AXIS_ID]: 15 },
-  { [TEST_X_AXIS_ID]: 20 },
-  { [TEST_X_AXIS_ID]: 25 },
-  { [TEST_X_AXIS_ID]: 30 },
+  { [TEST_X_AXIS_ID]: 10, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 15, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 20, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 25, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 30, [TEST_PLUGIN_EVENT_TYPE]: 0 },
   { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 1 },
-  { [TEST_X_AXIS_ID]: 40 },
-  { [TEST_X_AXIS_ID]: 45 },
-  { [TEST_X_AXIS_ID]: 50 },
+  { [TEST_X_AXIS_ID]: 40, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 45, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 50, [TEST_PLUGIN_EVENT_TYPE]: 0 },
 ];
 
 const TEST_VALUES_NO_VIS_LAYERS = [
@@ -56,6 +64,20 @@ const TEST_VALUES_NO_VIS_LAYERS = [
   { [TEST_X_AXIS_ID]: 40 },
   { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3 },
   { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5 },
+];
+
+const TEST_VALUES_SINGLE_VIS_LAYER_EMPTY = [
+  { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 5, [TEST_VALUE_AXIS_ID]: 10, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 20, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 25, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 30, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 40, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 0 },
 ];
 
 const TEST_VALUES_NO_VIS_LAYERS_DIRTY = [
@@ -73,50 +95,80 @@ const TEST_VALUES_NO_VIS_LAYERS_DIRTY = [
 ];
 
 const TEST_VALUES_SINGLE_VIS_LAYER = [
-  { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5 },
+  { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 0 },
   { [TEST_X_AXIS_ID]: 5, [TEST_VALUE_AXIS_ID]: 10, [TEST_PLUGIN_EVENT_TYPE]: 2 },
-  { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6 },
-  { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4 },
-  { [TEST_X_AXIS_ID]: 20, [TEST_VALUE_AXIS_ID]: 5 },
-  { [TEST_X_AXIS_ID]: 25 },
-  { [TEST_X_AXIS_ID]: 30 },
+  { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 20, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 25, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 30, [TEST_PLUGIN_EVENT_TYPE]: 0 },
   { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 1 },
-  { [TEST_X_AXIS_ID]: 40 },
-  { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3 },
-  { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5 },
+  { [TEST_X_AXIS_ID]: 40, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 0 },
 ];
 
 const TEST_VALUES_SINGLE_VIS_LAYER_ON_BOUNDS = [
   { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 2 },
-  { [TEST_X_AXIS_ID]: 5, [TEST_VALUE_AXIS_ID]: 10 },
-  { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6 },
-  { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4 },
-  { [TEST_X_AXIS_ID]: 20, [TEST_VALUE_AXIS_ID]: 5 },
-  { [TEST_X_AXIS_ID]: 25 },
-  { [TEST_X_AXIS_ID]: 30 },
-  { [TEST_X_AXIS_ID]: 35 },
-  { [TEST_X_AXIS_ID]: 40 },
-  { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3 },
+  { [TEST_X_AXIS_ID]: 5, [TEST_VALUE_AXIS_ID]: 10, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 20, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 25, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 30, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 40, [TEST_PLUGIN_EVENT_TYPE]: 0 },
+  { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3, [TEST_PLUGIN_EVENT_TYPE]: 0 },
   { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE]: 1 },
 ];
 
 const TEST_VALUES_MULTIPLE_VIS_LAYERS = [
-  { [TEST_X_AXIS_ID]: 0, [TEST_VALUE_AXIS_ID]: 5 },
+  {
+    [TEST_X_AXIS_ID]: 0,
+    [TEST_VALUE_AXIS_ID]: 5,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
   {
     [TEST_X_AXIS_ID]: 5,
     [TEST_VALUE_AXIS_ID]: 10,
     [TEST_PLUGIN_EVENT_TYPE]: 2,
     [TEST_PLUGIN_EVENT_TYPE_2]: 1,
   },
-  { [TEST_X_AXIS_ID]: 10, [TEST_VALUE_AXIS_ID]: 6 },
-  { [TEST_X_AXIS_ID]: 15, [TEST_VALUE_AXIS_ID]: 4, [TEST_PLUGIN_EVENT_TYPE_2]: 1 },
-  { [TEST_X_AXIS_ID]: 20, [TEST_VALUE_AXIS_ID]: 5 },
-  { [TEST_X_AXIS_ID]: 25 },
-  { [TEST_X_AXIS_ID]: 30 },
-  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 1 },
-  { [TEST_X_AXIS_ID]: 40 },
-  { [TEST_X_AXIS_ID]: 45, [TEST_VALUE_AXIS_ID]: 3 },
-  { [TEST_X_AXIS_ID]: 50, [TEST_VALUE_AXIS_ID]: 5, [TEST_PLUGIN_EVENT_TYPE_2]: 2 },
+  {
+    [TEST_X_AXIS_ID]: 10,
+    [TEST_VALUE_AXIS_ID]: 6,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+  {
+    [TEST_X_AXIS_ID]: 15,
+    [TEST_VALUE_AXIS_ID]: 4,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 1,
+  },
+  {
+    [TEST_X_AXIS_ID]: 20,
+    [TEST_VALUE_AXIS_ID]: 5,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+  { [TEST_X_AXIS_ID]: 25, [TEST_PLUGIN_EVENT_TYPE]: 0, [TEST_PLUGIN_EVENT_TYPE_2]: 0 },
+  { [TEST_X_AXIS_ID]: 30, [TEST_PLUGIN_EVENT_TYPE]: 0, [TEST_PLUGIN_EVENT_TYPE_2]: 0 },
+  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 1, [TEST_PLUGIN_EVENT_TYPE_2]: 0 },
+  { [TEST_X_AXIS_ID]: 40, [TEST_PLUGIN_EVENT_TYPE]: 0, [TEST_PLUGIN_EVENT_TYPE_2]: 0 },
+  {
+    [TEST_X_AXIS_ID]: 45,
+    [TEST_VALUE_AXIS_ID]: 3,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+  {
+    [TEST_X_AXIS_ID]: 50,
+    [TEST_VALUE_AXIS_ID]: 5,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 2,
+  },
 ];
 
 export const TEST_COLUMNS_NO_VIS_LAYERS = [
@@ -196,6 +248,7 @@ export const TEST_DATATABLE_NO_VIS_LAYERS_DIRTY = {
 export const TEST_DATATABLE_SINGLE_VIS_LAYER_EMPTY = {
   ...TEST_DATATABLE_NO_VIS_LAYERS,
   columns: TEST_COLUMNS_SINGLE_VIS_LAYER,
+  rows: TEST_VALUES_SINGLE_VIS_LAYER_EMPTY,
 } as OpenSearchDashboardsDatatable;
 
 export const TEST_DATATABLE_SINGLE_VIS_LAYER = {
@@ -382,20 +435,6 @@ export const TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS = [
   },
 ];
 
-export const TEST_VIS_LAYERS_SINGLE_EMPTY_EVENTS = [
-  {
-    originPlugin: TEST_PLUGIN,
-    type: VisLayerTypes.PointInTimeEvents,
-    pluginResource: {
-      type: TEST_PLUGIN_RESOURCE_TYPE,
-      id: TEST_PLUGIN_RESOURCE_ID,
-      name: TEST_PLUGIN_RESOURCE_NAME,
-      urlPath: TEST_PLUGIN_RESOURCE_PATH,
-    },
-    pluginEventType: TEST_PLUGIN_EVENT_TYPE,
-  },
-];
-
 export const TEST_VIS_LAYERS_SINGLE_ON_BOUNDS = [
   {
     originPlugin: TEST_PLUGIN,
@@ -472,7 +511,7 @@ export const TEST_VIS_LAYERS_MULTIPLE = [
 ];
 
 const TEST_RULE_LAYER_SINGLE_VIS_LAYER = {
-  mark: { type: 'rule', color: 'red', opacity: 1 },
+  mark: { type: 'rule', color: EVENT_COLOR, opacity: 1 },
   transform: [{ filter: `datum['${TEST_PLUGIN_EVENT_TYPE}'] > 0` }],
   encoding: {
     x: { field: TEST_X_AXIS_ID, type: 'temporal' },
@@ -493,10 +532,11 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
   height: 25,
   mark: {
     type: 'point',
-    shape: 'triangle-up',
-    color: 'red',
-    filled: true,
-    opacity: 1,
+    shape: EVENT_MARK_SHAPE,
+    fill: EVENT_COLOR,
+    fillOpacity: 1,
+    stroke: EVENT_COLOR,
+    strokeOpacity: 1,
     style: [`${VisAnnotationType.POINT_IN_TIME_ANNOTATION}`],
     tooltip: true,
   },
@@ -539,7 +579,10 @@ const TEST_EVENTS_LAYER_SINGLE_VIS_LAYER = {
         ],
       },
     },
-    size: { condition: { empty: false, param: HOVER_PARAM, value: 140 }, value: 100 },
+    size: {
+      condition: { empty: false, param: HOVER_PARAM, value: EVENT_MARK_SIZE_ENLARGED },
+      value: EVENT_MARK_SIZE,
+    },
     tooltip: [{ field: TEST_PLUGIN_EVENT_TYPE }],
   },
 };

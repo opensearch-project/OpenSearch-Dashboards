@@ -17,15 +17,17 @@ import {
   VisLayerFunctionDefinition,
   VisLayer,
   isVisLayerWithError,
+  VisLayerErrorTypes,
 } from '../';
 import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { getUISettings } from '../services';
+import { IUiSettingsClient } from '../../../../core/public';
 
-export const isEligibleForVisLayers = (vis: Vis): boolean => {
+export const isEligibleForVisLayers = (vis: Vis, uiSettingsClient?: IUiSettingsClient): boolean => {
   // Only support date histogram and ensure there is only 1 x-axis and it has to be on the bottom.
   // Additionally to have a valid x-axis, there needs to be a segment aggregation
   const hasValidXaxis =
-    vis.data.aggs !== undefined &&
+    vis.data?.aggs !== undefined &&
     vis.data.aggs?.byTypeName('date_histogram').length === 1 &&
     vis.params.categoryAxes.length === 1 &&
     vis.params.categoryAxes[0].position === 'bottom' &&
@@ -34,28 +36,33 @@ export const isEligibleForVisLayers = (vis: Vis): boolean => {
   // multiple supported yaxis only. If there are other aggregation types, this is not
   // valid for augmentation
   const hasCorrectAggregationCount =
-    vis.data.aggs !== undefined &&
+    vis.data?.aggs !== undefined &&
     vis.data.aggs?.bySchemaName('metric').length > 0 &&
     vis.data.aggs?.bySchemaName('metric').length === vis.data.aggs?.aggs.length - 1;
   const hasOnlyLineSeries =
-    vis.params.seriesParams.every((seriesParam: { type: string }) => seriesParam.type === 'line') &&
-    vis.params.type === 'line';
+    vis.params?.seriesParams !== undefined &&
+    vis.params?.seriesParams?.every(
+      (seriesParam: { type: string }) => seriesParam.type === 'line'
+    ) &&
+    vis.params?.type === 'line';
+
   // Checks if the augmentation setting is enabled
-  const config = getUISettings();
+  const config = uiSettingsClient ?? getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   return isAugmentationEnabled && hasValidXaxis && hasCorrectAggregationCount && hasOnlyLineSeries;
 };
 
 /**
- * Using a SavedAugmentVisLoader, fetch all saved objects that are of 'augment-vis' type
- * and filter out to return the ones associated to the particular vis via
- * matching vis ID.
+ * Using a SavedAugmentVisLoader, fetch all saved objects that are of 'augment-vis' type.
+ * Filter by vis ID.
  */
 export const getAugmentVisSavedObjs = async (
   visId: string | undefined,
-  loader: SavedAugmentVisLoader | undefined
+  loader: SavedAugmentVisLoader | undefined,
+  uiSettings?: IUiSettingsClient | undefined
 ): Promise<ISavedAugmentVis[]> => {
-  const config = getUISettings();
+  // Using optional services provided, or the built-in services from this plugin
+  const config = uiSettings !== undefined ? uiSettings : getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   if (!isAugmentationEnabled) {
     throw new Error(
@@ -63,9 +70,22 @@ export const getAugmentVisSavedObjs = async (
     );
   }
   try {
-    const resp = await loader?.findAll();
-    const allSavedObjects = (get(resp, 'hits', []) as any[]) as ISavedAugmentVis[];
+    const allSavedObjects = await getAllAugmentVisSavedObjs(loader);
     return allSavedObjects.filter((hit: ISavedAugmentVis) => hit.visId === visId);
+  } catch (e) {
+    return [] as ISavedAugmentVis[];
+  }
+};
+
+/**
+ * Using a SavedAugmentVisLoader, fetch all saved objects that are of 'augment-vis' type.
+ */
+export const getAllAugmentVisSavedObjs = async (
+  loader: SavedAugmentVisLoader | undefined
+): Promise<ISavedAugmentVis[]> => {
+  try {
+    const resp = await loader?.findAll();
+    return (get(resp, 'hits', []) as any[]) as ISavedAugmentVis[];
   } catch (e) {
     return [] as ISavedAugmentVis[];
   }
@@ -125,5 +145,38 @@ export const getAnyErrors = (visLayers: VisLayer[], visTitle: string): Error | u
     return err;
   } else {
     return undefined;
+  }
+};
+
+/**
+ * Cleans up any stale saved objects caused by plugin resources being deleted. Kicks
+ * off an async call to delete the stale objs.
+ *
+ * @param augmentVisSavedObs the original augment-vis saved objs for this particular vis
+ * @param visLayers the produced VisLayers containing details if the resource has been deleted
+ * @param visualizationsLoader the visualizations saved object loader to handle deletion
+ */
+
+export const cleanupStaleObjects = (
+  augmentVisSavedObjs: ISavedAugmentVis[],
+  visLayers: VisLayer[],
+  loader: SavedAugmentVisLoader | undefined
+): void => {
+  const staleVisLayers = visLayers
+    .filter((visLayer) => isVisLayerWithError(visLayer))
+    .filter(
+      (visLayerWithError) => visLayerWithError.error?.type === VisLayerErrorTypes.RESOURCE_DELETED
+    );
+  if (!isEmpty(staleVisLayers)) {
+    const objIdsToDelete = [] as string[];
+    staleVisLayers.forEach((staleVisLayer) => {
+      // Match the VisLayer to its origin saved obj to extract the to-be-deleted saved obj ID
+      const deletedPluginResourceId = staleVisLayer.pluginResource.id;
+      const savedObjId = augmentVisSavedObjs.find(
+        (savedObj) => savedObj.pluginResource.id === deletedPluginResourceId
+      )?.id;
+      if (savedObjId !== undefined) objIdsToDelete.push(savedObjId);
+    });
+    loader?.delete(objIdsToDelete);
   }
 };

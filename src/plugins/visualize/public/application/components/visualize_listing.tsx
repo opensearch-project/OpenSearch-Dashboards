@@ -29,7 +29,7 @@
  */
 
 import './visualize_listing.scss';
-
+import { get } from 'lodash';
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { useUnmount, useMount } from 'react-use';
@@ -43,6 +43,8 @@ import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
+import { getUiActions } from '../../services';
+import { SAVED_OBJECT_DELETE_TRIGGER } from '../../../../saved_objects_management/public';
 
 export const VisualizeListing = () => {
   const {
@@ -134,15 +136,25 @@ export const VisualizeListing = () => {
 
   const deleteItems = useCallback(
     async (selectedItems: object[]) => {
+      const uiActions = getUiActions();
       await Promise.all(
-        selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
-      ).catch((error) => {
-        toastNotifications.addError(error, {
-          title: i18n.translate('visualize.visualizeListingDeleteErrorTitle', {
-            defaultMessage: 'Error deleting visualization',
-          }),
-        });
-      });
+        selectedItems.map((item: any) =>
+          savedObjects.client
+            .delete(item.savedObjectType, item.id)
+            .then(() => {
+              uiActions
+                .getTrigger(SAVED_OBJECT_DELETE_TRIGGER)
+                .exec({ type: item.savedObjectType, savedObjectId: item.id });
+            })
+            .catch((error) => {
+              toastNotifications.addError(error, {
+                title: i18n.translate('visualize.visualizeListingDeleteErrorTitle', {
+                  defaultMessage: 'Error deleting visualization',
+                }),
+              });
+            })
+        )
+      );
     },
     [savedObjects.client, toastNotifications]
   );

@@ -4,21 +4,27 @@
  */
 
 import { get } from 'lodash';
-import { getSavedAugmentVisLoader, getUISettings } from '../../services';
 import { ISavedAugmentVis } from '../types';
 import {
   PLUGIN_AUGMENTATION_ENABLE_SETTING,
   PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING,
 } from '../../../common/constants';
+import { SavedAugmentVisLoader } from '../saved_augment_vis';
+import { getSavedAugmentVisLoader, getUISettings } from '../../services';
+import { IUiSettingsClient } from '../../../../../core/public';
 
 /**
  * Create an augment vis saved object given an object that
  * implements the ISavedAugmentVis interface
  */
-export const createAugmentVisSavedObject = async (AugmentVis: ISavedAugmentVis): Promise<any> => {
-  const loader = getSavedAugmentVisLoader();
-  const config = getUISettings();
-
+export const createAugmentVisSavedObject = async (
+  AugmentVis: ISavedAugmentVis,
+  savedObjLoader?: SavedAugmentVisLoader,
+  uiSettings?: IUiSettingsClient
+): Promise<any> => {
+  // Using optional services provided, or the built-in services from this plugin
+  const loader = savedObjLoader !== undefined ? savedObjLoader : getSavedAugmentVisLoader();
+  const config = uiSettings !== undefined ? uiSettings : getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
   if (!isAugmentationEnabled) {
     throw new Error(
