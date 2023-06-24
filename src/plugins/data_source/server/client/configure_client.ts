@@ -74,7 +74,7 @@ export const configureClient = async (
       requireDecryption
     );
   } catch (error: any) {
-    logger.error(
+    logger.debug(
       `Failed to get data source client for dataSourceId: [${dataSourceId}]. ${error}: ${error.stack}`
     );
     // Re-throw as DataSourceError
