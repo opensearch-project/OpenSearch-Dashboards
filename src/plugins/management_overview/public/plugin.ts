@@ -69,7 +69,7 @@ export class ManagementOverViewPlugin
 
     application.register({
       id: MANAGEMENT_OVERVIEW_PLUGIN_ID,
-      title: i18n.translate('management.overviewTitle', {
+      title: i18n.translate('management.overview.overviewTitle', {
         defaultMessage: 'Overview',
       }),
       icon: '/plugins/home/public/assets/logos/opensearch_mark_default.svg',

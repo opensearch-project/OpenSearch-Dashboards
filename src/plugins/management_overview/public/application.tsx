@@ -24,7 +24,7 @@ function ManagementOverviewWrapper(props: ManagementOverviewProps) {
       <EuiPageBody component="main">
         <EuiTitle size="l">
           <h1>
-            <FormattedMessage id="home.directory.directoryTitle" defaultMessage="Overview" />
+            <FormattedMessage id="management.overview.overviewTitle" defaultMessage="Overview" />
           </h1>
         </EuiTitle>
         <EuiSpacer />
