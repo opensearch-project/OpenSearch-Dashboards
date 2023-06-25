@@ -100,6 +100,16 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     return {};
   }
 
+  private async _changeSavedObjectCurrentWorkspace() {
+    const startServices = await this.core?.getStartServices();
+    if (startServices) {
+      const coreStart = startServices[0];
+      coreStart.workspaces.client.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
+        coreStart.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+      });
+    }
+  }
+
   public start(core: CoreStart) {
     mountDropdownList(core);
 
@@ -108,6 +118,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       baseUrl: core.http.basePath.get(),
       href: core.application.getUrlForApp(WORKSPACE_APP_ID, { path: PATHS.overview }),
     });
+    this._changeSavedObjectCurrentWorkspace();
     return {};
   }
 }

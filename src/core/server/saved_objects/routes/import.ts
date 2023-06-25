@@ -34,7 +34,7 @@ import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { createSavedObjectsStreamFromNdJson } from './utils';
+import { createSavedObjectsStreamFromNdJson, formatWorkspaces, workspacesValidator } from './utils';
 
 interface FileStream extends Readable {
   hapi: {
@@ -60,6 +60,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
           {
             overwrite: schema.boolean({ defaultValue: false }),
             createNewCopies: schema.boolean({ defaultValue: false }),
+            workspaces: workspacesValidator,
           },
           {
             validate: (object) => {
@@ -91,6 +92,8 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         });
       }
 
+      const workspaces = formatWorkspaces(req.query.workspaces);
+
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,
         typeRegistry: context.core.savedObjects.typeRegistry,
@@ -98,6 +101,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         objectLimit: maxImportExportSize,
         overwrite,
         createNewCopies,
+        workspaces,
       });
 
       return res.ok({ body: result });

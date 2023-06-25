@@ -128,6 +128,35 @@ function getClauseForType(
   };
 }
 
+/**
+ *  Gets the clause that will filter for the workspace.
+ */
+function getClauseForWorkspace(workspace: string) {
+  if (workspace === '*') {
+    return {
+      bool: {
+        must: {
+          match_all: {},
+        },
+      },
+    };
+  }
+
+  if (workspace === 'public') {
+    return {
+      bool: {
+        must_not: [{ exists: { field: 'workspaces' } }],
+      },
+    };
+  }
+
+  return {
+    bool: {
+      must: [{ term: { workspaces: workspace } }],
+    },
+  };
+}
+
 interface HasReferenceQueryParams {
   type: string;
   id: string;
@@ -144,6 +173,7 @@ interface QueryParams {
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
+  workspaces?: string[];
 }
 
 export function getClauseForReference(reference: HasReferenceQueryParams) {
@@ -200,6 +230,7 @@ export function getQueryParams({
   defaultSearchOperator,
   hasReference,
   kueryNode,
+  workspaces,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -223,6 +254,17 @@ export function getQueryParams({
       },
     ],
   };
+
+  if (workspaces) {
+    bool.filter.push({
+      bool: {
+        should: workspaces.map((workspace) => {
+          return getClauseForWorkspace(workspace);
+        }),
+        minimum_should_match: 1,
+      },
+    });
+  }
 
   if (search) {
     const useMatchPhrasePrefix = shouldUseMatchPhrasePrefix(search);

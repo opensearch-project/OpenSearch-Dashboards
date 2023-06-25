@@ -30,6 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { formatWorkspaces, workspacesValidator } from './utils';
 
 export const registerBulkCreateRoute = (router: IRouter) => {
   router.post(
@@ -38,6 +39,7 @@ export const registerBulkCreateRoute = (router: IRouter) => {
       validate: {
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),
+          workspaces: workspacesValidator,
         }),
         body: schema.arrayOf(
           schema.object({
@@ -62,7 +64,11 @@ export const registerBulkCreateRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { overwrite } = req.query;
-      const result = await context.core.savedObjects.client.bulkCreate(req.body, { overwrite });
+      const workspaces = formatWorkspaces(req.query.workspaces);
+      const result = await context.core.savedObjects.client.bulkCreate(req.body, {
+        overwrite,
+        workspaces,
+      });
       return res.ok({ body: result });
     })
   );
