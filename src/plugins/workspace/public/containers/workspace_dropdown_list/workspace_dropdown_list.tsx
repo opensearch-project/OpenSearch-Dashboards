@@ -59,7 +59,7 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
       const id = workspaceOption[0].key!;
       const newUrl = coreStart.workspaces?.formatUrlWithWorkspaceId(
         coreStart.application.getUrlForApp(WORKSPACE_APP_ID, {
-          path: PATHS.overview,
+          path: PATHS.update,
           absolute: true,
         }),
         id
