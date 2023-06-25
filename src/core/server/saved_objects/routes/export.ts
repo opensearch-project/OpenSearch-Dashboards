@@ -57,12 +57,20 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
           search: schema.maybe(schema.string()),
           includeReferencesDeep: schema.boolean({ defaultValue: false }),
           excludeExportDetails: schema.boolean({ defaultValue: false }),
+          workspaces: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const savedObjectsClient = context.core.savedObjects.client;
-      const { type, objects, search, excludeExportDetails, includeReferencesDeep } = req.body;
+      const {
+        type,
+        objects,
+        search,
+        excludeExportDetails,
+        includeReferencesDeep,
+        workspaces,
+      } = req.body;
       const types = typeof type === 'string' ? [type] : type;
 
       // need to access the registry for type validation, can't use the schema for this
@@ -98,6 +106,7 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
         exportSizeLimit: maxImportExportSize,
         includeReferencesDeep,
         excludeExportDetails,
+        workspaces,
       });
 
       const docsToExport: string[] = await createPromiseFromStreams([

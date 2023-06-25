@@ -27,7 +27,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { schema } from '@osd/config-schema';
 import { Readable } from 'stream';
 import { SavedObject, SavedObjectsExportResultDetails } from 'src/core/server';
 import {
@@ -73,4 +73,20 @@ export function validateObjects(
       .map((obj) => `${obj.type}:${obj.id}`)
       .join(', ')}`;
   }
+}
+
+export const workspacesValidator = schema.maybe(
+  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+);
+
+export function formatWorkspaces(workspaces?: string | string[]): string[] | undefined {
+  if (Array.isArray(workspaces)) {
+    return workspaces;
+  }
+
+  if (!workspaces) {
+    return undefined;
+  }
+
+  return [workspaces];
 }

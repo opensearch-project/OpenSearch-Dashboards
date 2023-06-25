@@ -175,6 +175,9 @@ function defaultMapping(): IndexMapping {
           },
         },
       },
+      workspaces: {
+        type: 'keyword',
+      },
     },
   };
 }
