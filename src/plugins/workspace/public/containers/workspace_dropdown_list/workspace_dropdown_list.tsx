@@ -57,13 +57,19 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
       /** switch the workspace */
       setLoading(true);
       const id = workspaceOption[0].key!;
-      const newUrl = coreStart.workspaces?.formatUrlWithWorkspaceId(window.location.href, id);
+      const newUrl = coreStart.workspaces?.formatUrlWithWorkspaceId(
+        coreStart.application.getUrlForApp(WORKSPACE_APP_ID, {
+          path: PATHS.overview,
+          absolute: true,
+        }),
+        id
+      );
       if (newUrl) {
         window.location.href = newUrl;
       }
       setLoading(false);
     },
-    [coreStart.workspaces]
+    [coreStart.workspaces, coreStart.application]
   );
 
   const onCreateWorkspaceClick = () => {
