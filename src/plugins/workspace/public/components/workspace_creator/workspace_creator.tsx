@@ -10,7 +10,7 @@ import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 
 import { WorkspaceForm, WorkspaceFormData } from './workspace_form';
-import { WORKSPACE_OP_TYPE_CREATE } from '../../../common/constants';
+import { PATHS, WORKSPACE_APP_ID, WORKSPACE_OP_TYPE_CREATE } from '../../../common/constants';
 
 export const WorkspaceCreator = () => {
   const {
@@ -37,6 +37,15 @@ export const WorkspaceCreator = () => {
             defaultMessage: 'Create workspace successfully',
           }),
         });
+        if (application && workspaces) {
+          window.location.href = workspaces.formatUrlWithWorkspaceId(
+            application.getUrlForApp(WORKSPACE_APP_ID, {
+              path: PATHS.overview,
+              absolute: true,
+            }),
+            result.result.id
+          );
+        }
         return;
       }
       notifications?.toasts.addDanger({
@@ -46,7 +55,7 @@ export const WorkspaceCreator = () => {
         text: result?.error,
       });
     },
-    [notifications?.toasts, workspaces?.client]
+    [notifications?.toasts, workspaces, application]
   );
 
   return (
