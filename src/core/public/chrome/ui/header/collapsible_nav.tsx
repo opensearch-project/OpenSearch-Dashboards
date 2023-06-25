@@ -126,11 +126,11 @@ export function CollapsibleNav({
   const appId = useObservable(observables.appId$, '');
   const currentWorkspace = useObservable(observables.currentWorkspace$);
   const lockRef = useRef<HTMLButtonElement>(null);
-  const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
+  const filterdLinks = getFilterLinks(currentWorkspace, navLinks);
+  const groupedNavLinks = groupBy(filterdLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
-  const filterdLinks = getFilterLinks(currentWorkspace, allCategorizedLinks);
-  const categoryDictionary = getAllCategories(filterdLinks);
-  const orderedCategories = getOrderedCategories(filterdLinks, categoryDictionary);
+  const categoryDictionary = getAllCategories(allCategorizedLinks);
+  const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
 
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
@@ -152,20 +152,13 @@ export function CollapsibleNav({
 
   function getFilterLinks(
     workspace: WorkspaceAttribute | null | undefined,
-    categorizedLinks: Record<string, ChromeNavLink[]>
+    allNavLinks: ChromeNavLink[]
   ) {
-    // plugins are in this dictionary
-    const pluginsDictionary = categorizedLinks.opensearch;
-    if (!pluginsDictionary) return categorizedLinks;
+    if (!workspace) return allNavLinks;
 
-    const features = workspace?.features ?? [];
-    const newPluginsDictionary = pluginsDictionary.filter((item) => features.indexOf(item.id) > -1);
-    if (newPluginsDictionary.length === 0) {
-      delete categorizedLinks.opensearch;
-    } else {
-      categorizedLinks.opensearch = newPluginsDictionary;
-    }
-    return categorizedLinks;
+    const features = workspace.features ?? [];
+    const links = allNavLinks.filter((item) => features.indexOf(item.id) > -1);
+    return links;
   }
 
   /**
