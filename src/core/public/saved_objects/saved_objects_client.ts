@@ -42,7 +42,6 @@ import {
 
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
-import { WorkspacesStart } from '../workspace';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
