@@ -46,7 +46,7 @@ const overrides = {
   overrideBaz: 'baz',
 };
 
-const defaults = {
+const defaults: Record<string, any> = {
   foo: {
     name: 'foo',
     value: 'bar',
@@ -96,6 +96,21 @@ describe('uiSettings', () => {
           `"uiSettings for the key [foo] has been already registered"`
         );
       });
+    });
+
+    it('fails if configured default was not previously defined', async () => {
+      const coreContext = mockCoreContext.create();
+      coreContext.configService.atPath.mockReturnValueOnce(
+        new BehaviorSubject({
+          defaults: {
+            foo: 'configured',
+          },
+        })
+      );
+      const customizedService = new UiSettingsService(coreContext);
+      await expect(customizedService.setup(setupDeps)).rejects.toMatchInlineSnapshot(
+        `[Error: [ui settings defaults [foo]: expected key to be have been registered]`
+      );
     });
   });
 
@@ -167,6 +182,31 @@ describe('uiSettings', () => {
         expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
+      });
+
+      it('passes configured defaults to UiSettingsClient', async () => {
+        const defaultsClone: Record<string, any> = {};
+        Object.keys(defaults).forEach((key: string) => {
+          defaultsClone[key] = { ...defaults[key] };
+        });
+
+        getCoreSettingsMock.mockReturnValue(defaultsClone);
+        const coreContext = mockCoreContext.create();
+        coreContext.configService.atPath.mockReturnValueOnce(
+          new BehaviorSubject({
+            defaults: {
+              foo: 'configured',
+            },
+          })
+        );
+        const customizedService = new UiSettingsService(coreContext);
+        await customizedService.setup(setupDeps);
+        const start = await customizedService.start();
+        start.asScopedToClient(savedObjectsClient);
+        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults?.foo?.value).toEqual(
+          'configured'
+        );
       });
     });
   });
