@@ -43,7 +43,11 @@ const ruleFunction: stylelint.Rule = (
 
       let shouldReport = false;
 
-      const file = postcssRoot.source!.input.file!;
+      const file = postcssRoot.source?.input.file;
+      if (!file) {
+        return;
+      }
+
       const approvedFiles = propertyRule.approved;
 
       const reportInfo = {
