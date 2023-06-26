@@ -476,7 +476,7 @@
     "regenerate": "^1.4.0",
     "reselect": "^4.0.0",
     "resize-observer-polyfill": "^1.5.0",
-    "sass-lint": "^1.12.1",
+    "sass-lint": "1.13.0",
     "selenium-webdriver": "^4.0.0-alpha.7",
     "simple-git": "^3.16.0",
     "sinon": "^7.4.2",
