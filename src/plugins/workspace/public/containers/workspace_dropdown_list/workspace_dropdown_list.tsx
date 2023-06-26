@@ -90,7 +90,12 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
         selectedOptions={currentWorkspaceOption}
         singleSelection={{ asPlainText: true }}
         onSearchChange={onSearchChange}
-        append={<EuiButton onClick={onCreateWorkspaceClick}>Create workspace</EuiButton>}
+        isClearable={false}
+        append={
+          <EuiButton onClick={onCreateWorkspaceClick} style={{ width: '500px' }}>
+            Create workspace
+          </EuiButton>
+        }
       />
     </>
   );
