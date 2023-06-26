@@ -20,12 +20,12 @@ const messages = ruleMessages(ruleName, {
   expected: (message) => `${message}`,
 });
 
-const ruleFunction = (
+const ruleFunction: stylelint.Rule = (
   primaryOption: Record<string, any>,
   secondaryOptionObject: Record<string, any>,
   context
 ) => {
-  return (postcssRoot: any, postcssResult: any) => {
+  return (postcssRoot, postcssResult) => {
     const validOptions = isValidOptions(postcssResult, ruleName, primaryOption);
     if (!validOptions) {
       return;
@@ -35,7 +35,7 @@ const ruleFunction = (
 
     const isAutoFixing = Boolean(context.fix);
 
-    postcssRoot.walkDecls((decl: any) => {
+    postcssRoot.walkDecls((decl) => {
       const propertyRule = getRuleFromConfig(rules, decl.prop);
       if (!propertyRule) {
         return;
@@ -43,7 +43,7 @@ const ruleFunction = (
 
       let shouldReport = false;
 
-      const file = postcssRoot.source.input.file;
+      const file = postcssRoot.source!.input.file!;
       const approvedFiles = propertyRule.approved;
 
       const reportInfo = {
