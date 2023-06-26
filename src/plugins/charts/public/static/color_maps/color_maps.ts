@@ -64,6 +64,7 @@ export interface ColorMap {
 
 const COLOR_MAP_LENGTH = 512;
 
+// TODO: replace with on demand palette generation: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4400
 function convertColorPaletteToColorMap(colorPalette: string[]): RawColorSchema['value'] {
   const colorMap: RawColorSchema['value'] = [];
 
