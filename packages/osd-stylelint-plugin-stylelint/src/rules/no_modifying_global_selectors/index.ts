@@ -48,8 +48,11 @@ const ruleFunction: stylelint.Rule = (
 
       let shouldReport = false;
 
-      // We can safely unwrap these possibly undefined variables because we get these values from Stylelint, which grabs them from source files.
-      const file = postcssRoot.source!.input.file!;
+      const file = postcssRoot.source?.input.file;
+      if (!file) {
+        return;
+      }
+
       const approvedFiles = selectorRule.approved;
 
       const reportInfo = {
