@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+import { Rule, Declaration } from 'postcss';
+
 const COLOR_PROPERTIES = [
   'all',
   'animation',
@@ -57,4 +59,12 @@ const COLOR_PROPERTIES = [
  */
 export const isColorProperty = (prop: string) => {
   return COLOR_PROPERTIES.includes(prop);
+};
+
+export const getColorPropertyParent = (decl: Declaration) => {
+  if (!isColorProperty(decl.prop)) {
+    return undefined;
+  }
+
+  return decl.parent as Rule;
 };

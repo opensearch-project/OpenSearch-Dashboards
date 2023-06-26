@@ -10,7 +10,6 @@
  */
 
 import stylelint from 'stylelint';
-import { Rule } from 'postcss';
 import { NAMESPACE } from '../..';
 import {
   ComplianceEngine,
@@ -18,7 +17,7 @@ import {
   getUntrackedMessage,
   getNotCompliantMessage,
   getRulesFromConfig,
-  isColorProperty,
+  getColorPropertyParent,
   isValidOptions,
 } from '../../utils';
 
@@ -48,12 +47,10 @@ const ruleFunction: stylelint.Rule = (
     const isAutoFixing = Boolean(context.fix);
 
     postcssRoot.walkDecls((decl) => {
-      if (!isColorProperty(decl.prop)) {
+      const parent = getColorPropertyParent(decl);
+      if (!parent) {
         return;
       }
-
-      // We know this is a rule, because we discriminate the property in the conditional above. This means we only have 1 choice on its type.
-      const parent = decl.parent as Rule;
 
       let shouldReport = false;
 
