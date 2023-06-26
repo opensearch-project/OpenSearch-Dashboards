@@ -41,6 +41,7 @@ import { i18n } from '@osd/i18n';
 import { ORIGIN } from '../common/constants/origin';
 import { getToasts } from '../opensearch_dashboards_services';
 import { L } from '../leaflet';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 function makeFitControl(fitContainer, opensearchDashboardsMap) {
   // eslint-disable-next-line no-undef
@@ -474,7 +475,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
   }
 
   addDrawControl() {
-    const drawColor = '#000';
+    const drawColor = euiThemeVars.euiColorInk;
     const drawOptions = {
       draw: {
         polyline: false,
