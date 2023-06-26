@@ -10,6 +10,7 @@
  */
 
 import stylelint from 'stylelint';
+import { Rule } from 'postcss';
 import { NAMESPACE } from '../..';
 import {
   ComplianceEngine,
@@ -31,12 +32,12 @@ const messages = ruleMessages(ruleName, {
   expected: (message) => `${message}`,
 });
 
-const ruleFunction = (
+const ruleFunction: stylelint.Rule = (
   primaryOption: Record<string, any>,
   secondaryOptionObject: Record<string, any>,
   context
 ) => {
-  return (postcssRoot: any, postcssResult: any) => {
+  return (postcssRoot, postcssResult) => {
     const validOptions = isValidOptions(postcssResult, ruleName, primaryOption);
     if (!validOptions) {
       return;
@@ -46,15 +47,18 @@ const ruleFunction = (
 
     const isAutoFixing = Boolean(context.fix);
 
-    postcssRoot.walkDecls((decl: any) => {
+    postcssRoot.walkDecls((decl) => {
       if (!isColorProperty(decl.prop)) {
         return;
       }
 
+      // We know this is a rule, because we discriminate the property in the conditional above. This means we only have 1 choice on its type.
+      const parent = decl.parent as Rule;
+
       let shouldReport = false;
 
       const nodeInfo = {
-        selector: decl.parent.selector,
+        selector: parent.selector,
         prop: decl.prop,
         value: decl.value,
       };
