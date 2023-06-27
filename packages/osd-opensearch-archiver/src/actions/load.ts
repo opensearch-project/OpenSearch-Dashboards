@@ -32,7 +32,7 @@ import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import { ToolingLog, OsdClient } from '@osd/dev-utils';
-import { Client } from 'elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 
 import { createPromiseFromStreams, concatStreamProviders } from '../lib/streams';
 
@@ -114,7 +114,7 @@ export async function loadAction({
 
   await client.indices.refresh({
     index: '_all',
-    allowNoIndices: true,
+    allow_no_indices: true,
   });
 
   // If we affected the OpenSearch Dashboards index, we need to ensure it's migrated...

@@ -1,0 +1,14 @@
+{
+  "name": "opensearch-dashboards",
+  "version": "1.0.0",
+  "private": "true",
+  "dependencies": {
+    "foo": "1.0.0",
+    "@scoped/baz": "file:../other-plugins/baz"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  }
+}
