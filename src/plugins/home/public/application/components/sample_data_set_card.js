@@ -57,11 +57,11 @@ export class SampleDataSetCard extends React.Component {
   };
 
   install = () => {
-    this.props.onInstall(this.props.id);
+    this.props.onInstall(this.props.id, this.props.dataSourceId);
   };
 
   uninstall = () => {
-    this.props.onUninstall(this.props.id);
+    this.props.onUninstall(this.props.id, this.props.dataSourceId);
   };
 
   renderBtn = () => {
