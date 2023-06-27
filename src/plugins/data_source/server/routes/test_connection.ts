@@ -9,6 +9,7 @@ import { AuthType, DataSourceAttributes, SigV4ServiceName } from '../../common/d
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
 import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
+
 export const registerTestConnectionRoute = (
   router: IRouter,
   dataSourceServiceSetup: DataSourceServiceSetup,
