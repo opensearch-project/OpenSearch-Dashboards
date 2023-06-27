@@ -301,9 +301,11 @@ export const WorkspaceForm = ({
                         ? handleFeatureGroupChange
                         : handleFeatureCheckboxChange
                     }
-                    label={`${featureOrGroup.name}${
-                      features.length > 0 ? `(${selectedIds.length}/${features.length})` : ''
-                    }`}
+                    label={`${
+                      featureOrGroup.name === 'OpenSearch Plugins'
+                        ? 'OpenSearch Features'
+                        : featureOrGroup.name
+                    }${features.length > 0 ? `(${selectedIds.length}/${features.length})` : ''}`}
                     checked={selectedIds.length > 0}
                     indeterminate={
                       isWorkspaceFeatureGroup(featureOrGroup) &&
