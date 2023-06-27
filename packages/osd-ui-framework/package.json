@@ -23,7 +23,7 @@
     "enzyme-adapter-react-16": "^1.9.1"
   },
   "devDependencies": {
-    "@elastic/eui": "npm:@opensearch-project/oui@1.1.1",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.1.2",
     "@osd/babel-preset": "1.0.0",
     "@osd/optimizer": "1.0.0",
     "grunt": "^1.5.2",
