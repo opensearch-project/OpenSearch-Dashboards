@@ -155,11 +155,11 @@ describe('Vislib Gauge Chart Test Suite', function () {
       fills.push(this.style.fill);
     });
     expect(fills).toEqual([
-      'rgb(165,0,38)',
-      'rgb(255,255,190)',
-      'rgb(255,255,190)',
-      'rgb(0,104,55)',
-      'rgb(0,104,55)',
+      'rgb(189,39,30)',
+      'rgb(245,167,0)',
+      'rgb(245,167,0)',
+      'rgb(1,125,115)',
+      'rgb(1,125,115)',
     ]);
   });
 
@@ -175,11 +175,11 @@ describe('Vislib Gauge Chart Test Suite', function () {
       fills.push(this.style.fill);
     });
     expect(fills).toEqual([
-      'rgb(8,48,107)',
-      'rgb(107,174,214)',
-      'rgb(107,174,214)',
-      'rgb(247,251,255)',
-      'rgb(247,251,255)',
+      'rgb(96,146,192)',
+      'rgb(178,199,223)',
+      'rgb(178,199,223)',
+      'rgb(255,255,255)',
+      'rgb(255,255,255)',
     ]);
   });
 });
