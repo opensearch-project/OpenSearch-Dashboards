@@ -32,8 +32,8 @@ import _ from 'lodash';
 
 import { CoreSetup } from 'opensearch-dashboards/public';
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { MappedColors } from './mapped_colors';
-import { seedColors } from './seed_colors';
 
 /**
  * Accepts an array of strings or numbers that are used to create a
@@ -44,7 +44,7 @@ import { seedColors } from './seed_colors';
 export class ColorsService {
   private _mappedColors?: MappedColors;
 
-  public readonly seedColors = seedColors;
+  public readonly seedColors = euiPaletteColorBlind();
 
   public get mappedColors() {
     if (!this._mappedColors) {
