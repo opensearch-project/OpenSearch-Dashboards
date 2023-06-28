@@ -31,6 +31,7 @@
 import { coreMock } from '../../../../../core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { euiPaletteColorBlind } from '@elastic/eui';
+
 import { ColorsService } from './colors';
 
 // Local state for config
