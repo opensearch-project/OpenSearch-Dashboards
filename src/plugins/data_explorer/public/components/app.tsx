@@ -35,7 +35,7 @@ export const DataExplorerApp = ({ basename, history }: DataExplorerAppDeps) => {
       restrictWidth={false}
       paddingSize="none"
     >
-      {view.ui.canvas}
+      <React.Suspense fallback={<div>Loading...</div>}>{view.ui.canvas}</React.Suspense>
     </EuiPageTemplate>
   );
 };

@@ -4,7 +4,14 @@
  */
 
 import React from 'react';
+import { DiscoverCanvas } from './discover_canvas';
 
 export const createCanvas = () => {
-  return <div>Test Canvas</div>;
+  const LazyDiscoverCanvas = React.lazy(DiscoverCanvas);
+
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <LazyDiscoverCanvas />
+    </React.Suspense>
+  );
 };
