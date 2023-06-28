@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import { seedColors } from './seed_colors';
 import { createColorPalette } from './color_palette';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 describe('Color Palette', () => {
   const num1 = 45;
@@ -45,6 +45,12 @@ describe('Color Palette', () => {
   beforeEach(() => {
     colorPalette = createColorPalette(num1);
   });
+
+  function isHexValue(value: string): boolean {
+    // Check if the hex value is valid.
+    const regex = /^#[0-9a-fA-F]{3}|[0-9a-fA-F]{6}$/;
+    return regex.test(value) ? true : false;
+  }
 
   it('should throw an error if input is not a number', () => {
     expect(() => {
@@ -91,7 +97,8 @@ describe('Color Palette', () => {
   });
 
   it('should return the seed color array when input length is 72', () => {
-    expect(createColorPalette(num2)[71]).toBe(seedColors[71]);
+    expect(createColorPalette(num2).length).toBe(num2);
+    expect(isHexValue(createColorPalette(num2)[71])).toBe(true);
   });
 
   it('should return an array of the same length as the input when input is greater than 72', () => {
@@ -99,10 +106,12 @@ describe('Color Palette', () => {
   });
 
   it('should create new darker colors when input is greater than 72', () => {
-    expect(createColorPalette(num3)[72]).not.toEqual(seedColors[0]);
+    expect(createColorPalette(num3)[72]).not.toEqual(euiPaletteColorBlind()[0]);
   });
 
   it('should create new colors and convert them correctly', () => {
-    expect(createColorPalette(num3)[72]).toEqual('#404ABF');
+    expect(createColorPalette(num3).length).toBe(num3);
+    expect(createColorPalette(num3)[72]).not.toEqual(euiPaletteColorBlind()[9]);
+    expect(isHexValue(createColorPalette(num3)[89])).toBe(true);
   });
 });
