@@ -47,9 +47,11 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         expect(params).to.have.property('index', 'logstash-*');
         expect(params).to.have.property('size', 1000);
         return {
-          hits: {
-            total: 0,
-            hits: [],
+          body: {
+            hits: {
+              total: 0,
+              hits: [],
+            },
           },
         };
       },
@@ -74,9 +76,11 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         expect(params).to.have.property('scroll', '1m');
         expect(params).to.have.property('rest_total_hits_as_int', true);
         return {
-          hits: {
-            total: 0,
-            hits: [],
+          body: {
+            hits: {
+              total: 0,
+              hits: [],
+            },
           },
         };
       },
@@ -101,17 +105,19 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         expect(params).to.have.property('index', 'index1');
         await delay(200);
         return {
-          _scroll_id: 'index1ScrollId',
-          hits: { total: 2, hits: [{ _id: 1, _index: '.opensearch_dashboards_1' }] },
+          body: {
+            _scroll_id: 'index1ScrollId',
+            hits: { total: 2, hits: [{ _id: 1, _index: '.opensearch_dashboards_1' }] },
+          },
         };
       },
       async (name, params) => {
         expect(name).to.be('scroll');
-        expect(params).to.have.property('scrollId', 'index1ScrollId');
+        expect(params).to.have.property('scroll_id', 'index1ScrollId');
         expect(Date.now() - checkpoint).to.not.be.lessThan(200);
         checkpoint = Date.now();
         await delay(200);
-        return { hits: { total: 2, hits: [{ _id: 2, _index: 'foo' }] } };
+        return { body: { hits: { total: 2, hits: [{ _id: 2, _index: 'foo' }] } } };
       },
       async (name, params) => {
         expect(name).to.be('search');
@@ -119,7 +125,7 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         expect(Date.now() - checkpoint).to.not.be.lessThan(200);
         checkpoint = Date.now();
         await delay(200);
-        return { hits: { total: 0, hits: [] } };
+        return { body: { hits: { total: 0, hits: [] } } };
       },
     ]);
 

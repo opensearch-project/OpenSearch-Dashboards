@@ -31,7 +31,7 @@
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { Client } from 'elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 import { ToolingLog } from '@osd/dev-utils';
 
 import { Stats } from '../stats';
