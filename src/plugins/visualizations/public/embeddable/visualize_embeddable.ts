@@ -418,10 +418,12 @@ export class VisualizeEmbeddable
     const abortController = this.abortController;
 
     // By waiting for this to complete, this.visLayers will be populated.
-    // Note we only fetch when in the context of a dashboard - we do not
-    // show events or have event functionality when in the vis edit view.
-    const isInDashboard = this.parent?.type === DASHBOARD_CONTAINER_TYPE;
-    if (isInDashboard) {
+    // Note we only fetch when in the context of a dashboard or in the view
+    // events flyout - we do not show events or have event functionality when
+    // in the vis edit view.
+    const shouldFetchVisLayers =
+      this.parent?.type === DASHBOARD_CONTAINER_TYPE || this.visAugmenterConfig?.inFlyout;
+    if (shouldFetchVisLayers) {
       await this.populateVisLayers();
     }
 
