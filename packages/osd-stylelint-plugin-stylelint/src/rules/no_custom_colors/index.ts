@@ -17,7 +17,7 @@ import {
   getUntrackedMessage,
   getNotCompliantMessage,
   getRulesFromConfig,
-  isColorProperty,
+  getColorPropertyParent,
   isValidOptions,
   ValueBasedConfig,
 } from '../../utils';
@@ -32,12 +32,12 @@ const messages = ruleMessages(ruleName, {
   expected: (message) => `${message}`,
 });
 
-const ruleFunction = (
+const ruleFunction: stylelint.Rule = (
   primaryOption: Record<string, any>,
   secondaryOptionObject: Record<string, any>,
   context
 ) => {
-  return (postcssRoot: any, postcssResult: any) => {
+  return (postcssRoot, postcssResult) => {
     const validOptions = isValidOptions(postcssResult, ruleName, primaryOption);
     if (!validOptions) {
       return;
@@ -47,15 +47,16 @@ const ruleFunction = (
 
     const isAutoFixing = Boolean(context.fix);
 
-    postcssRoot.walkDecls((decl: any) => {
-      if (!isColorProperty(decl.prop)) {
+    postcssRoot.walkDecls((decl) => {
+      const parent = getColorPropertyParent(decl);
+      if (!parent) {
         return;
       }
 
       let shouldReport = false;
 
       const nodeInfo = {
-        selector: decl.parent.selector,
+        selector: parent.selector,
         prop: decl.prop,
         value: decl.value,
       };
