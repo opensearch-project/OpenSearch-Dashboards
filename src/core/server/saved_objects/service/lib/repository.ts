@@ -280,6 +280,18 @@ export class SavedObjectsRepository {
       }
     }
 
+    let savedObjectWorkspaces;
+
+    if (id && overwrite) {
+      // do not overwrite workspaces
+      const currentItem = await this.get(type, id);
+      if (currentItem && currentItem.workspaces) {
+        savedObjectWorkspaces = currentItem.workspaces;
+      }
+    } else {
+      savedObjectWorkspaces = workspaces;
+    }
+
     const migrated = this._migrator.migrateDocument({
       id,
       type,
@@ -290,7 +302,7 @@ export class SavedObjectsRepository {
       migrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
-      ...(Array.isArray(workspaces) && { workspaces }),
+      ...(Array.isArray(savedObjectWorkspaces) && { workspaces: savedObjectWorkspaces }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
