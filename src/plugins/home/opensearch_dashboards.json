@@ -6,6 +6,6 @@
   "requiredPlugins": ["data", "urlForwarding"],
   "optionalPlugins": ["usageCollection", "telemetry", "dataSource"],
   "requiredBundles": [
-    "opensearchDashboardsReact"
+    "opensearchDashboardsReact", "dataSourceManagement"
   ]
 }
