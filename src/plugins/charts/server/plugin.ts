@@ -41,7 +41,7 @@ export class ChartsServerPlugin implements Plugin<object, object> {
           defaultMessage: 'Color mapping',
         }),
         value: JSON.stringify({
-          Count: '#00A69B',
+          Count: '#54B399',
         }),
         type: 'json',
         description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
