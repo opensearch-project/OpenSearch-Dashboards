@@ -88,7 +88,7 @@ export const WorkspaceUpdater = () => {
         text: result?.error,
       });
     },
-    [notifications?.toasts, workspaces, currentWorkspace, application]
+    [notifications?.toasts, workspaces?.client, currentWorkspace, application]
   );
 
   if (!currentWorkspaceFormData.name) {
