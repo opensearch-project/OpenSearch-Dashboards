@@ -9,14 +9,16 @@
  * GitHub history for details.
  */
 
+import { ValueBasedConfig } from './get_rules_from_config';
+
 export interface ComplianceRule {
   isComplaint: boolean;
   actual: string;
-  expected: string;
+  expected: string | undefined;
   message: string;
 }
 
-const getRule = (rules: JSON, nodeInfo: { selector: string; prop: string }) => {
+const getRule = (rules: ValueBasedConfig, nodeInfo: { selector: string; prop: string }) => {
   const rule = rules[nodeInfo.prop];
   if (!rule) {
     return undefined;
@@ -38,12 +40,12 @@ const getRule = (rules: JSON, nodeInfo: { selector: string; prop: string }) => {
   return rule[ruleKey];
 };
 
-const isTracked = (rules: JSON, nodeInfo: { selector: string; prop: string }) => {
+const isTracked = (rules: ValueBasedConfig, nodeInfo: { selector: string; prop: string }) => {
   return getRule(rules, nodeInfo) !== undefined;
 };
 
 const getComplianceRule = (
-  rules: JSON,
+  rules: ValueBasedConfig,
   nodeInfo: { selector: string; prop: string; value: string }
 ): ComplianceRule | undefined => {
   const rule = getRule(rules, nodeInfo);
@@ -53,7 +55,7 @@ const getComplianceRule = (
   }
 
   const ruleObject = rule.find((object) => {
-    if (object.approved.includes(nodeInfo.value) || object.rejected.includes(nodeInfo.value)) {
+    if (object.approved?.includes(nodeInfo.value) || object.rejected?.includes(nodeInfo.value)) {
       return object;
     }
   });
@@ -63,7 +65,7 @@ const getComplianceRule = (
   }
 
   return {
-    isComplaint: !ruleObject.rejected.includes(nodeInfo.value),
+    isComplaint: !ruleObject.rejected?.includes(nodeInfo.value),
     actual: nodeInfo.value,
     expected: ruleObject.approved,
     message: `${nodeInfo.selector} expected: ${ruleObject.approved} - actual: ${nodeInfo.value}`,
