@@ -58,10 +58,9 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   public async setup(core: CoreSetup) {
     this.core = core;
     /**
-     * Retrive workspace id from url or sessionstorage
-     * url > sessionstorage
+     * Retrive workspace id from url
      */
-    const workspaceId = await this.getWorkpsaceId();
+    const workspaceId = this.getWorkpsaceIdFromQueryString();
 
     if (workspaceId) {
       const result = await core.workspaces.client.enterWorkspace(workspaceId);
@@ -76,7 +75,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     }
 
     /**
-     * listen to application change and patch workspace id
+     * listen to application change and patch workspace id in querystring
      */
     this.listenToApplicationChange();
 
