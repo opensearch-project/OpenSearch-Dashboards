@@ -26,7 +26,6 @@ import {
   VisBuilderOutput,
   VISBUILDER_EMBEDDABLE,
 } from './vis_builder_embeddable';
-import visBuilderIcon from '../assets/vis_builder_icon.svg';
 import { getStateFromSavedObject } from '../saved_visualizations/transforms';
 import {
   getHttp,
@@ -55,7 +54,7 @@ export class VisBuilderEmbeddableFactory
     name: PLUGIN_NAME,
     includeFields: ['visualizationState'],
     type: VISBUILDER_SAVED_OBJECT,
-    getIconForSavedObject: () => visBuilderIcon,
+    getIconForSavedObject: () => 'visBuilder',
   };
 
   // TODO: Would it be better to explicitly declare start service dependencies?
