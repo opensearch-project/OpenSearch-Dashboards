@@ -223,7 +223,6 @@ const createDashboardEmbeddable = (
       viewMode: appStateData.viewMode,
       panels: embeddablesMap,
       isFullScreenMode: appStateData.fullScreenMode,
-      isEmbeddedExternally: false, // TODO
       isEmptyState:
         getShouldShowEditHelp(appStateData) ||
         getShouldShowViewHelp(appStateData) ||

@@ -7,6 +7,7 @@ import { uniqBy } from 'lodash';
 import React, { memo, useState, useEffect } from 'react';
 import { Filter, IndexPattern } from 'src/plugins/data/public';
 import { useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig } from '../top_nav/get_top_nav_config';
 import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from '../../types';
@@ -23,7 +24,7 @@ interface DashboardTopNavProps {
   dashboardContainer?: DashboardContainer;
 }
 
-enum UrlParams {
+export enum UrlParams {
   SHOW_TOP_MENU = 'show-top-menu',
   SHOW_QUERY_INPUT = 'show-query-input',
   SHOW_TIME_FILTER = 'show-time-filter',
@@ -49,6 +50,9 @@ const TopNav = ({
   const { data, dashboardConfig, setHeaderActionMenu } = services;
   const { query: queryService } = data;
 
+  const location = useLocation();
+  const queryParameters = new URLSearchParams(location.search);
+
   const handleRefresh = useCallback(
     (_payload: any, isUpdate?: boolean) => {
       if (!isUpdate && dashboardContainer) {
@@ -58,15 +62,14 @@ const TopNav = ({
     [dashboardContainer]
   );
 
-  // TODO: this should base on URL
-  const isEmbeddedExternally = false;
+  const isEmbeddedExternally = Boolean(queryParameters.get('embed'));
 
-  // TODO: should use URL params
-  const shouldForceDisplay = (param: string): boolean => {
-    // const [searchParams] = useSearchParams();
-    return false;
-  };
+  // url param rules should only apply when embedded (e.g. url?embed=true)
+  const shouldForceDisplay = (param: string): boolean =>
+    isEmbeddedExternally && Boolean(queryParameters.get(param));
 
+  // When in full screen mode, none of the nav bar components can be forced show
+  // Only in embed mode, the nav bar components can be forced show base on URL params
   const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
     (forceShow || isChromeVisible) && !currentAppState?.fullScreenMode;
 
@@ -145,14 +148,13 @@ const TopNav = ({
   const showFilterBar = shouldShowFilterBar(forceHideFilterBar);
   const showSearchBar = showQueryBar || showFilterBar;
 
-  return isChromeVisible ? (
+  return (
     <TopNavMenu
       appName={'dashboard'}
       savedQueryId={currentAppState?.savedQuery}
       config={showTopNavMenu ? topNavMenu : undefined}
       className={isFullScreenMode ? 'osdTopNavMenu-isFullScreen' : undefined}
       screenTitle={currentAppState.title}
-      // showTopNavMenu={showTopNavMenu}
       showSearchBar={showSearchBar}
       showQueryBar={showQueryBar}
       showQueryInput={showQueryInput}
@@ -166,7 +168,7 @@ const TopNav = ({
       onQuerySubmit={handleRefresh}
       setMenuMountPoint={isEmbeddedExternally ? undefined : setHeaderActionMenu}
     />
-  ) : null;
+  );
 };
 
 export const DashboardTopNav = memo(TopNav);
