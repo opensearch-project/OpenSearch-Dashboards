@@ -87,10 +87,6 @@ export interface ErrorToastOptions extends ToastOptions {
    * message will still be shown in the detailed error modal.
    */
   toastMessage?: string;
-  /**
-   * Unique ID for the toast. Can be used to prevent duplicate toasts on re-renders.
-   */
-  id?: string;
 }
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
