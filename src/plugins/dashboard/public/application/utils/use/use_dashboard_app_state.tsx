@@ -14,6 +14,8 @@ import { DashboardServices } from '../../../types';
 import { DashboardAppStateContainer } from '../../../types';
 import { migrateAppState, getAppStateDefaults } from '../../lib';
 import { createDashboardAppState } from '../create_dashboard_app_state';
+import { SavedObjectDashboard } from '../../../saved_dashboards';
+import { Dashboard, DashboardParams } from '../../../dashboard';
 
 /**
  * This effect is responsible for instantiating the dashboard app state container,
@@ -22,7 +24,7 @@ import { createDashboardAppState } from '../create_dashboard_app_state';
 export const useDashboardAppState = (
   services: DashboardServices,
   eventEmitter: EventEmitter,
-  instance: any
+  instance?: SavedObjectDashboard
 ) => {
   const [appState, setAppState] = useState<DashboardAppStateContainer | undefined>();
 

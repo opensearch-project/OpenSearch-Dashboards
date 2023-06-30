@@ -21,7 +21,7 @@ export const DashboardEditor = () => {
   const isChromeVisible = useChromeVisibility(services.chrome);
   const [eventEmitter] = useState(new EventEmitter());
 
-  const savedDashboardInstance = useSavedDashboardInstance(
+  const { savedDashboard: savedDashboardInstance, dashboard } = useSavedDashboardInstance(
     services,
     eventEmitter,
     isChromeVisible,
@@ -54,6 +54,7 @@ export const DashboardEditor = () => {
   }, [eventEmitter]);
 
   console.log('savedDashboardInstance', savedDashboardInstance);
+  console.log('dashboard', dashboard);
   console.log('appState', appState);
   console.log('appStateData', appState?.getState());
   console.log('currentAppState', currentAppState);

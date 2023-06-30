@@ -49,12 +49,13 @@ import {
 import { migrateLegacyQuery } from '../../lib/migrate_legacy_query';
 import { getSavedObjectFinder } from '../../../../../saved_objects/public';
 import { DashboardConstants } from '../../../dashboard_constants';
+import { SavedObjectDashboard } from '../../../saved_dashboards';
 
 export const useDashboardContainer = (
   services: DashboardServices,
   isChromeVisible: boolean,
   eventEmitter: EventEmitter,
-  savedDashboardInstance?: any,
+  savedDashboardInstance?: SavedObjectDashboard,
   appState?: DashboardAppStateContainer
 ) => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
