@@ -72,7 +72,6 @@ export type DocViewRenderFn = (
 
 export interface DocViewInput {
   component?: DocViewerComponent;
-  directive?: AngularDirective;
   order: number;
   render?: DocViewRenderFn;
   shouldShow?: (hit: OpenSearchSearchHit) => boolean;
