@@ -38,8 +38,8 @@ import Path from 'path';
 import readline from 'readline';
 
 import { RunWithCommands, createFlagError } from '@osd/dev-utils';
+import { Client, ClientOptions } from '@opensearch-project/opensearch';
 import { readConfigFile } from '@osd/test';
-import legacyElasticsearch from 'elasticsearch';
 
 import { OpenSearchArchiver } from './opensearch_archiver';
 
@@ -56,7 +56,7 @@ export function runCli() {
                              default: ${defaultConfigPath}
         --opensearch-url           url for OpenSearch, prefer the --config flag
         --opensearch-dashboards-url       url for OpenSearch Dashboards, prefer the --config flag
-        --dir              where arechives are stored, prefer the --config flag
+        --dir              where archives are stored, prefer the --config flag
       `,
     },
     async extendContext({ log, flags, addCleanupTask }) {
@@ -99,10 +99,11 @@ export function runCli() {
         throw createFlagError('--dir or --config must be defined');
       }
 
-      const client = new legacyElasticsearch.Client({
-        host: opensearchUrl,
-        log: flags.verbose ? 'trace' : [],
-      });
+      const clientOptions: ClientOptions = {
+        node: opensearchUrl.toString(),
+      };
+
+      const client = new Client(clientOptions);
       addCleanupTask(() => client.close());
 
       const opensearchArchiver = new OpenSearchArchiver({

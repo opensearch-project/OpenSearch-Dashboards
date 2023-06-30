@@ -30,6 +30,8 @@
 
 // @ts-expect-error published types are worthless
 import { parse as parseLockfile } from '@yarnpkg/lockfile';
+import { standardize } from '@osd/cross-platform';
+import { resolve, isAbsolute } from 'path';
 
 import { readFile } from '../utils/fs';
 import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
@@ -62,7 +64,7 @@ export async function readYarnLock(osd: OpenSearchDashboards): Promise<YarnLock>
     const yarnLock = parseLockfile(contents);
 
     if (yarnLock.type === 'success') {
-      return yarnLock.object;
+      return fixFileLinks(yarnLock.object, osd.getAbsolute());
     }
 
     throw new Error('unable to read yarn.lock file, please run `yarn osd bootstrap`');
@@ -73,6 +75,33 @@ export async function readYarnLock(osd: OpenSearchDashboards): Promise<YarnLock>
   }
 
   return {};
+}
+
+/**
+ * Converts relative `file:` paths to absolute paths
+ * Yarn parsing method converts all file URIs to relative paths and this
+ * breaks the single-version requirement as dependencies to the same path
+ * would differ in their URIs across OSD and packages.
+ */
+function fixFileLinks(yarnLock: YarnLock, projectRoot: string): YarnLock {
+  const fileLinkDelimiter = '@file:';
+
+  const linkedKeys = Object.keys(yarnLock).filter((key) => key.includes(fileLinkDelimiter));
+
+  if (linkedKeys.length === 0) return yarnLock;
+
+  const updatedYarnLock = { ...yarnLock };
+  for (const key of linkedKeys) {
+    const [keyName, keyPath, ...rest] = key.split(fileLinkDelimiter);
+    if (!isAbsolute(keyPath)) {
+      const updatedKeyName = [keyName, standardize(resolve(projectRoot, keyPath)), ...rest].join(
+        fileLinkDelimiter
+      );
+      updatedYarnLock[updatedKeyName] = updatedYarnLock[key];
+    }
+  }
+
+  return updatedYarnLock;
 }
 
 /**
