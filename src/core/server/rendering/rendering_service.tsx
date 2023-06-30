@@ -101,6 +101,12 @@ export class RenderingService {
             uiSettings.getOverrideOrDefault('theme:darkMode')) ||
           false;
 
+        // At the very least, the schema should define a default theme; the '' will be unreachable
+        const themeVersion =
+          (settings.user?.['theme:version']?.userValue ??
+            uiSettings.getOverrideOrDefault('theme:version')) ||
+          '';
+
         const brandingAssignment = await this.assignBrandingConfig(
           darkMode,
           opensearchDashboardsConfig as OpenSearchDashboardsConfigType
@@ -113,6 +119,7 @@ export class RenderingService {
           i18n: i18n.translate,
           locale: i18n.getLocale(),
           darkMode,
+          themeVersion,
           injectedMetadata: {
             version: env.packageInfo.version,
             buildNumber: env.packageInfo.buildNum,

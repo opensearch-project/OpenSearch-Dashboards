@@ -12,6 +12,8 @@
 
     background-color: $euiColorLightestShade;
     color: $euiTextColor;
+    /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
+    font-family: var(--font-code);
 
     .ace_scrollbar {
       @include euiScrollBar;
