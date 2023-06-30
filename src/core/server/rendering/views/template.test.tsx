@@ -17,6 +17,7 @@ function mockProps() {
     uiPublicUrl: `${http.basePath}/ui`,
     locale: '',
     darkMode: true,
+    themeVersion: 'v7',
     i18n: () => '',
     bootstrapScriptUrl: `${http.basePath}/bootstrap.js`,
     strictCsp: true,
