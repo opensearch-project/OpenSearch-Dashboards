@@ -643,21 +643,10 @@ exports[`Relationships should render augment-vis objects normally 1`] = `
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="augment-vis"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="augment-vis"
-            size="m"
-            type="savedObject"
-          />
-        </EuiToolTip>
-          
         MyAugmentVisObject
       </h2>
     </EuiTitle>
