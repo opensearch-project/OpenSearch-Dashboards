@@ -19,7 +19,6 @@
     "@babel/preset-env": "^7.11.0",
     "@babel/preset-typescript": "^7.10.4",
     "@types/cmd-shim": "^2.0.0",
-    "@types/cpy": "^5.1.0",
     "@types/dedent": "^0.7.0",
     "@types/getopts": "^2.0.1",
     "@types/glob": "^7.1.3",
