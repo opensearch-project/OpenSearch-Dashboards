@@ -17,18 +17,19 @@ import { cloneDeep } from 'lodash';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../../data/public';
 import { DashboardPanelState } from './application';
 import { EmbeddableInput } from './embeddable_plugin';
+import { SavedDashboardPanel } from './types';
 
-export interface SerializedPanels {
-  [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
-}
+// export interface SerializedPanels {
+//   [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
+// }
 
 export interface SerializedDashboard {
   id?: string;
-  timeRestore?: boolean;
+  timeRestore: boolean;
   timeTo?: string;
   timeFrom?: string;
   description?: string;
-  panels?: SerializedPanels;
+  panels: SavedDashboardPanel[];
   options?: {
     hidePanelTitles: boolean;
     useMargins: boolean;
@@ -37,8 +38,8 @@ export interface SerializedDashboard {
   lastSavedTitle: string; // TODO: DO WE STILL NEED THIS?
   refreshInterval?: RefreshInterval; // TODO: SHOULD THIS NOT BE OPTIONAL?
   searchSource?: ISearchSource;
-  query?: Query;
-  filters?: Filter[];
+  query: Query;
+  filters: Filter[];
   title?: string;
 }
 
@@ -50,22 +51,27 @@ type PartialDashboardState = Partial<SerializedDashboard>;
 
 export class Dashboard<TDashboardParams = DashboardParams> {
   public id?: string;
-  public timeRestore?: boolean;
+  public timeRestore: boolean;
   public timeTo: string = '';
   public timeFrom: string = '';
   public description: string = '';
-  public panels?: SerializedPanels;
+  public panels?: SavedDashboardPanel[];
   public options: Record<string, any> = {};
   public uiState: string = '';
   public refreshInterval?: RefreshInterval;
   public searchSource?: ISearchSource;
-  public query?: Query;
-  public filters?: Filter[];
+  public query: Query;
+  public filters: Filter[];
   public title?: string;
   // TODO: dashboardNew - pass version to dashboard class
   public version = '3.0.0';
+  public isDirty = false;
 
-  constructor(dashboardState: SerializedDashboard = {} as any) {}
+  constructor(dashboardState: SerializedDashboard = {} as any) {
+    this.timeRestore = dashboardState.timeRestore;
+    this.query = cloneDeep(dashboardState.query);
+    this.filters = cloneDeep(dashboardState.filters);
+  }
 
   async setState(state: PartialDashboardState) {
     if (state.id) {
@@ -84,7 +90,9 @@ export class Dashboard<TDashboardParams = DashboardParams> {
       this.description = state.description;
     }
     if (state.panels) {
-      this.panels = this.getPanels(state.panels);
+      // this panels is only JSON.parse() panels, we should convert them into the same type as app state panels
+      // app state store only JSON.parse() panels too
+      this.panels = cloneDeep(state.panels);
     }
     if (state.options) {
       this.options = state.options;
@@ -101,29 +109,33 @@ export class Dashboard<TDashboardParams = DashboardParams> {
     if (state.searchSource) {
       this.searchSource = state.searchSource;
     }
-    if (state.query) {
-      this.query = this.getQuery(state.query);
-    }
-    if (state.filters) {
-      this.filters = this.getFilters(state.filters);
-    }
+    // if (state.query) {
+    //   this.query = this.getQuery(state.query);
+    // }
+    // if (state.filters) {
+    //   this.filters = this.getFilters(state.filters);
+    // }
+  }
+
+  public setIsDirty(value: boolean) {
+    this.isDirty = value;
   }
 
   private getRefreshInterval(refreshInterval: RefreshInterval) {
     return cloneDeep(refreshInterval ?? {});
   }
 
-  private getQuery(query: Query): Query {
-    return cloneDeep(query ?? ({} as Query));
-  }
+  // private getQuery(query: Query): Query {
+  //   return cloneDeep(query ?? ({} as Query));
+  // }
 
-  private getFilters(filters: Filter[]) {
-    return cloneDeep(filters ?? ({} as Filter[]));
-  }
+  // private getFilters(filters: Filter[]) {
+  //   return cloneDeep(filters ?? ({} as Filter[]));
+  // }
 
-  private getPanels(panels?: SerializedPanels) {
-    return cloneDeep(panels ?? ({} as SerializedPanels));
-  }
+  // private getPanels(panels?: SerializedPanels) {
+  //   return cloneDeep(panels ?? ({} as SerializedPanels));
+  // }
 
   /* clone() {
     const serializedDashboard = this.serialize();

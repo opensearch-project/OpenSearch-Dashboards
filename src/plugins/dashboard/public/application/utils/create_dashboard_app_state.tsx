@@ -53,6 +53,7 @@ export const createDashboardAppState = ({
         [option]: value,
       },
     }),
+    // setDashboard: (state)
   } as DashboardAppStateTransitions;
   /*
      make sure url ('_a') matches initial state

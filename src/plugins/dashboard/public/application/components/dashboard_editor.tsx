@@ -34,6 +34,7 @@ export const DashboardEditor = () => {
     services,
     isChromeVisible,
     eventEmitter,
+    dashboard,
     savedDashboardInstance,
     appState
   );
@@ -41,6 +42,7 @@ export const DashboardEditor = () => {
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
     eventEmitter,
+    dashboard,
     savedDashboardInstance,
     dashboardContainer,
     appState
@@ -59,21 +61,27 @@ export const DashboardEditor = () => {
   console.log('appStateData', appState?.getState());
   console.log('currentAppState', currentAppState);
   console.log('isEmbeddableRendered', isEmbeddableRendered);
+  console.log('app state isDirty', appState?.getState().isDirty);
   console.log('dashboardContainer', dashboardContainer);
 
   return (
     <div>
       <div>
-        {savedDashboardInstance && appState && dashboardContainer && currentAppState && (
-          <DashboardTopNav
-            isChromeVisible={isChromeVisible}
-            savedDashboardInstance={savedDashboardInstance}
-            stateContainer={appState}
-            currentAppState={currentAppState}
-            isEmbeddableRendered={isEmbeddableRendered}
-            dashboardContainer={dashboardContainer}
-          />
-        )}
+        {savedDashboardInstance &&
+          appState &&
+          dashboardContainer &&
+          currentAppState &&
+          dashboard && (
+            <DashboardTopNav
+              isChromeVisible={isChromeVisible}
+              savedDashboardInstance={savedDashboardInstance}
+              stateContainer={appState}
+              dashboard={dashboard}
+              currentAppState={currentAppState}
+              isEmbeddableRendered={isEmbeddableRendered}
+              dashboardContainer={dashboardContainer}
+            />
+          )}
       </div>
     </div>
   );

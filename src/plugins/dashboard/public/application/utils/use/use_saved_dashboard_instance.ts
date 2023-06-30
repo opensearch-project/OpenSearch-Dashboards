@@ -44,10 +44,10 @@ export const useSavedDashboardInstance = (
 
     const getSavedDashboardInstance = async () => {
       try {
-        let savedDashboardInstanceWithClass: any;
+        let savedDashboardInstance: any;
         if (history.location.pathname === '/create') {
           try {
-            savedDashboardInstanceWithClass = await getDashboardInstance(services);
+            savedDashboardInstance = await getDashboardInstance(services);
           } catch {
             redirectWhenMissing({
               history,
@@ -61,11 +61,11 @@ export const useSavedDashboardInstance = (
           }
         } else if (dashboardIdFromUrl) {
           try {
-            savedDashboardInstanceWithClass = await getDashboardInstance(
+            savedDashboardInstance = await getDashboardInstance(
               services,
               dashboardIdFromUrl
             );
-            const { savedDashboard } = savedDashboardInstanceWithClass;
+            const { savedDashboard } = savedDashboardInstance;
             // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
             // We should only set the time filter according to time restore once when we are loading the dashboard
             if (savedDashboard.timeRestore) {
