@@ -26,7 +26,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { Fragment, useState } from 'react';
 import { ImportMode, ImportModeControl } from './import_mode_control';
-import { useEditorReadContext, useServicesContext } from '../contexts';
+import { useServicesContext } from '../contexts';
 import { TextObject } from '../../../common/text_object';
 import { OverwriteModal } from './overwrite_modal';
 
@@ -37,9 +37,14 @@ interface ImportFlyoutProps {
   refresh: () => void;
 }
 
-const getErrorMessage = () => {
+const getErrorMessage = (e: any) => {
+  const errorMessage =
+    e.body?.error && e.body?.message ? `${e.body.error}: ${e.body.message}` : e.message;
   return i18n.translate('console.ImportFlyout.importFileErrorMessage', {
-    defaultMessage: 'The file could not be processed due to error.',
+    defaultMessage: 'The file could not be processed due to error: "{error}"',
+    values: {
+      error: errorMessage,
+    },
   });
 };
 
@@ -61,7 +66,6 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
       notifications: { toasts },
     },
   } = useServicesContext();
-  const { currentTextObject } = useEditorReadContext();
 
   const dateFormat = uiSettings.get<string>('dateFormat');
 
@@ -161,6 +165,8 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
     setStatus('loading');
     setError(undefined);
     try {
+      const results = await objectStorageClient.text.findAll();
+      const currentText = results.sort((a, b) => a.createdAt - b.createdAt)[0];
       if (jsonData && jsonData.text) {
         if (importMode.overwrite) {
           if (!isOverwriteConfirmed) {
@@ -173,9 +179,9 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
               updatedAt: Date.now(),
               text: jsonData.text,
             };
-            if (currentTextObject) {
+            if (results.length) {
               await objectStorageClient.text.update({
-                ...currentTextObject,
+                ...currentText,
                 ...newObject,
               });
             } else {
@@ -187,13 +193,13 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
           toasts.addSuccess('Queries overwritten.');
         } else {
           setLoadingMessage('Importing queries and merging with existing ones...');
-          if (currentTextObject) {
+          if (results.length) {
             await objectStorageClient.text.update({
-              ...currentTextObject,
+              ...currentText,
               createdAt: Date.now(),
               updatedAt: Date.now(),
-              text: currentTextObject.text.concat(
-                `\n#Imported on ${moment(Date.now()).format(dateFormat)}\n\n${jsonData.text}`
+              text: currentText.text.concat(
+                `\n\n#Imported on ${moment(Date.now()).format(dateFormat)}\n\n${jsonData.text}`
               ),
             });
             toasts.addSuccess('Queries merged.');
@@ -214,8 +220,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
       }
     } catch (e) {
       setStatus('error');
-      setError(getErrorMessage());
-      return;
+      setError(getErrorMessage(e));
     }
   };
 

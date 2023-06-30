@@ -31,7 +31,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
-import { DEFAULT_INPUT_VALUE } from '../../containers/editor/legacy/console_editor/editor';
+
+const DEFAULT_INPUT_VALUE = `GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}`;
 
 export const useDataInit = () => {
   const [error, setError] = useState<Error | null>(null);
