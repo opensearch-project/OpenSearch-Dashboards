@@ -17,8 +17,9 @@ import {
   getUntrackedMessage,
   getNotCompliantMessage,
   getRulesFromConfig,
-  isColorProperty,
+  getColorPropertyParent,
   isValidOptions,
+  ValueBasedConfig,
 } from '../../utils';
 
 const isOuiAuditEnabled = Boolean(process.env.OUI_AUDIT_ENABLED);
@@ -31,30 +32,31 @@ const messages = ruleMessages(ruleName, {
   expected: (message) => `${message}`,
 });
 
-const ruleFunction = (
+const ruleFunction: stylelint.Rule = (
   primaryOption: Record<string, any>,
   secondaryOptionObject: Record<string, any>,
   context
 ) => {
-  return (postcssRoot: any, postcssResult: any) => {
+  return (postcssRoot, postcssResult) => {
     const validOptions = isValidOptions(postcssResult, ruleName, primaryOption);
     if (!validOptions) {
       return;
     }
 
-    const rules = getRulesFromConfig(primaryOption.config);
+    const rules: ValueBasedConfig = getRulesFromConfig(primaryOption.config);
 
     const isAutoFixing = Boolean(context.fix);
 
-    postcssRoot.walkDecls((decl: any) => {
-      if (!isColorProperty(decl.prop)) {
+    postcssRoot.walkDecls((decl) => {
+      const parent = getColorPropertyParent(decl);
+      if (!parent) {
         return;
       }
 
       let shouldReport = false;
 
       const nodeInfo = {
-        selector: decl.parent.selector,
+        selector: parent.selector,
         prop: decl.prop,
         value: decl.value,
       };
@@ -84,7 +86,7 @@ const ruleFunction = (
 
       shouldReport = !ruleObject.isComplaint;
 
-      if (shouldReport && isAutoFixing) {
+      if (shouldReport && isAutoFixing && ruleObject.expected) {
         decl.value = ruleObject.expected;
         return;
       }
