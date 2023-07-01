@@ -59,15 +59,18 @@ export const DashboardListing = () => {
           if (matchingDashboards.length === 1) {
             history.replace(createDashboardEditUrl(matchingDashboards[0].id));
           } else {
-            history.push(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
+            history.replace(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
             setInitialFilter(title);
+            // Reload here is needed since we are using a URL param to render the table
+            // Previously, they called $route.reload() on angular routing
+            history.go(0);
           }
           return new Promise(() => {});
         }
       } catch (e) {
         notifications.toasts.addWarning(
           i18n.translate('dashboard.listing. savedObjectWarning', {
-            defaultMessage: 'Uble to filter by title',
+            defaultMessage: 'Unable to filter by title',
           })
         );
       }
