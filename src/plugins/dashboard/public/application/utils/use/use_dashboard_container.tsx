@@ -19,6 +19,7 @@ import deepEqual from 'fast-deep-equal';
 import { EventEmitter } from 'stream';
 import { useEffect } from 'react';
 import { i18n } from '@osd/i18n';
+import _ from 'lodash';
 import { IndexPattern, opensearchFilters } from '../../../../../data/public';
 import {
   DASHBOARD_CONTAINER_TYPE,
@@ -49,12 +50,15 @@ import {
 import { migrateLegacyQuery } from '../../lib/migrate_legacy_query';
 import { getSavedObjectFinder } from '../../../../../saved_objects/public';
 import { DashboardConstants } from '../../../dashboard_constants';
+import { SavedObjectDashboard } from '../../../saved_dashboards';
+import { Dashboard } from '../../../dashboard';
 
 export const useDashboardContainer = (
   services: DashboardServices,
   isChromeVisible: boolean,
   eventEmitter: EventEmitter,
-  savedDashboardInstance?: any,
+  dashboard?: Dashboard,
+  savedDashboardInstance?: SavedObjectDashboard,
   appState?: DashboardAppStateContainer
 ) => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
@@ -62,11 +66,12 @@ export const useDashboardContainer = (
   useEffect(() => {
     const getDashboardContainer = async () => {
       try {
-        if (savedDashboardInstance && appState) {
+        if (savedDashboardInstance && appState && dashboard) {
           const dashboardContainerEmbeddable = await createDashboardEmbeddable(
             savedDashboardInstance,
             services,
-            appState
+            appState,
+            dashboard
           );
 
           setDashboardContainer(dashboardContainerEmbeddable);
@@ -82,7 +87,7 @@ export const useDashboardContainer = (
     };
 
     getDashboardContainer();
-  }, [savedDashboardInstance, appState, services]);
+  }, [savedDashboardInstance, appState, services, dashboard]);
 
   useEffect(() => {
     const incomingEmbeddable = services.embeddable
@@ -106,7 +111,8 @@ export const useDashboardContainer = (
 const createDashboardEmbeddable = (
   savedDash: any,
   dashboardServices: DashboardServices,
-  appState: DashboardAppStateContainer
+  appState: DashboardAppStateContainer,
+  dashboard: Dashboard
 ) => {
   let dashboardContainer: DashboardContainer;
   let inputSubscription: Subscription | undefined;
@@ -342,7 +348,7 @@ const createDashboardEmbeddable = (
               appState.transitions.set('query', queryStringManager.getQuery());
             }
             // triggered when dashboard embeddable container has changes, and update the appState
-            handleDashboardContainerChanges(container, appState, dashboardServices);
+            handleDashboardContainerChanges(container, appState, dashboardServices, dashboard);
           });
           return dashboardContainer;
         }
@@ -354,7 +360,8 @@ const createDashboardEmbeddable = (
 const handleDashboardContainerChanges = (
   dashboardContainer: DashboardContainer,
   appState: DashboardAppStateContainer,
-  dashboardServices: DashboardServices
+  dashboardServices: DashboardServices,
+  dashboard: Dashboard
 ) => {
   let dirty = false;
   let dirtyBecauseOfInitialStateMigration = false;
@@ -370,6 +377,7 @@ const handleDashboardContainerChanges = (
       dirty = true;
     }
   });
+
   const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
   Object.values(input.panels).forEach((panelState) => {
     if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
@@ -396,8 +404,8 @@ const handleDashboardContainerChanges = (
   });
   if (dirty) {
     appState.transitions.set('panels', Object.values(convertedPanelStateMap));
-    if (dirtyBecauseOfInitialStateMigration) {
-      // this.saveState({ replace: true });
+    if (!dirtyBecauseOfInitialStateMigration) {
+      appState.transitions.set('isDirty', true);
     }
   }
   if (input.isFullScreenMode !== appStateData.fullScreenMode) {
