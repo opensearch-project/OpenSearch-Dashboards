@@ -574,6 +574,12 @@ export class DashboardPlugin
 
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
+      // createDashboard: async (dashboardState: SerializedDashboard) => {
+      //   const dashboard = new Dashboard(dashboardState);
+      //   await dashboard.setState(dashboardState);
+      //   return dashboard;
+      // },
+      // convertToSerializedDashboard,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,

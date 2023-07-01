@@ -30,6 +30,7 @@ import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { UrlParams } from '../components/dashboard_top_nav';
+import { Dashboard } from '../../dashboard';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
@@ -46,6 +47,7 @@ export const getNavActions = (
   stateContainer: DashboardAppStateContainer,
   savedDashboard: any,
   services: DashboardServices,
+  dashboard: Dashboard,
   dashboardContainer?: DashboardContainer
 ) => {
   const {
@@ -292,40 +294,50 @@ export const getNavActions = (
   function onChangeViewMode(newMode: ViewMode) {
     const isPageRefresh = newMode === appState.viewMode;
     const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
-    // TODO: check if any query and filter changed
-    const willLoseChanges = isLeavingEditMode;
+    const willLoseChanges = isLeavingEditMode && stateContainer.getState().isDirty === true;
 
+    // If there are no changes, do not show the discard window
     if (!willLoseChanges) {
       stateContainer.transitions.set('viewMode', newMode);
       return;
     }
 
+    // If there are changes, show the discard window, and reset the states to original
     function revertChangesAndExitEditMode() {
-      stateContainer.transitions.set('viewMode', ViewMode.VIEW);
       const pathname = savedDashboard.id
         ? createDashboardEditUrl(savedDashboard.id)
         : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
       history.push(pathname);
 
-      /* dashboardStateManager.resetState();
-          // This is only necessary for new dashboards, which will default to Edit mode.
-          updateViewMode(ViewMode.VIEW);
-  
-          // We need to do a hard reset of the timepicker. appState will not reload like
-          // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
-          // reload will cause it not to sync.
-          if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-            dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
-            dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
-          }
-  
-          // Angular's $location skips this update because of history updates from syncState which happen simultaneously
-          // when calling osdUrl.change() angular schedules url update and when angular finally starts to process it,
-          // the update is considered outdated and angular skips it
-          // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
-          dashboardStateManager.changeDashboardUrl(
-            dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
-          );*/
+      // This is only necessary for new dashboards, which will default to Edit mode.
+      stateContainer.transitions.set('viewMode', ViewMode.VIEW);
+
+      // We need to reset the app state to its original state
+      if (dashboard.panels) {
+        stateContainer.transitions.set('panels', dashboard.panels);
+      }
+
+      stateContainer.transitions.set('filters', dashboard.filters);
+      stateContainer.transitions.set('query', dashboard.query);
+      stateContainer.transitions.setOption('hidePanelTitles', dashboard.options.hidePanelTitles);
+      stateContainer.transitions.setOption('useMargins', dashboard.options.useMargins);
+
+      // Need to see if needed
+      stateContainer.transitions.set('timeRestore', dashboard.timeRestore);
+
+      // Since time filters are not tracked by app state, we need to manually reset it
+      if (stateContainer.getState().timeRestore) {
+        queryService.timefilter.timefilter.setTime({
+          from: dashboard.timeFrom,
+          to: dashboard.timeTo,
+        });
+        if (dashboard.refreshInterval) {
+          queryService.timefilter.timefilter.setRefreshInterval(dashboard.refreshInterval);
+        }
+      }
+
+      // Set the isDirty flag back to false since we discard all the changes
+      stateContainer.transitions.set('isDirty', false);
     }
 
     overlays

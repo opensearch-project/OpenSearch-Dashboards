@@ -12,6 +12,9 @@ import {
 } from '../../../../../opensearch_dashboards_utils/public';
 import { DashboardConstants } from '../../../dashboard_constants';
 import { DashboardServices } from '../../../types';
+import { getDashboardInstance } from '../get_dashboard_instance';
+import { SavedObjectDashboard } from '../../../saved_dashboards';
+import { Dashboard, DashboardParams } from '../../../dashboard';
 
 /**
  * This effect is responsible for instantiating a saved dashboard or creating a new one
@@ -23,7 +26,10 @@ export const useSavedDashboardInstance = (
   isChromeVisible: boolean | undefined,
   dashboardIdFromUrl: string | undefined
 ) => {
-  const [savedDashboardInstance, setSavedDashboardInstance] = useState<any>();
+  const [savedDashboardInstance, setSavedDashboardInstance] = useState<{
+    savedDashboard?: SavedObjectDashboard;
+    dashboard?: Dashboard<DashboardParams>;
+  }>({});
   const dashboardId = useRef('');
 
   useEffect(() => {
@@ -33,16 +39,15 @@ export const useSavedDashboardInstance = (
       history,
       http: { basePath },
       notifications,
-      savedDashboards,
       toastNotifications,
     } = services;
 
     const getSavedDashboardInstance = async () => {
       try {
-        let savedDashboard: any;
+        let savedDashboardInstance: any;
         if (history.location.pathname === '/create') {
           try {
-            savedDashboard = await savedDashboards.get();
+            savedDashboardInstance = await getDashboardInstance(services);
           } catch {
             redirectWhenMissing({
               history,
@@ -56,8 +61,11 @@ export const useSavedDashboardInstance = (
           }
         } else if (dashboardIdFromUrl) {
           try {
-            savedDashboard = await savedDashboards.get(dashboardIdFromUrl);
-
+            savedDashboardInstance = await getDashboardInstance(
+              services,
+              dashboardIdFromUrl
+            );
+            const { savedDashboard } = savedDashboardInstance;
             // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
             // We should only set the time filter according to time restore once when we are loading the dashboard
             if (savedDashboard.timeRestore) {
@@ -105,7 +113,7 @@ export const useSavedDashboardInstance = (
           }
         }
 
-        setSavedDashboardInstance(savedDashboard);
+        setSavedDashboardInstance(savedDashboardInstance);
       } catch (error) {
         toastNotifications.addWarning({
           title: i18n.translate('dashboard.createDashboard.failedToLoadErrorMessage', {
@@ -127,7 +135,7 @@ export const useSavedDashboardInstance = (
     } else if (
       dashboardIdFromUrl &&
       dashboardId.current !== dashboardIdFromUrl &&
-      savedDashboardInstance?.id !== dashboardIdFromUrl
+      savedDashboardInstance?.savedDashboard?.id !== dashboardIdFromUrl
     ) {
       dashboardId.current = dashboardIdFromUrl;
       setSavedDashboardInstance({});

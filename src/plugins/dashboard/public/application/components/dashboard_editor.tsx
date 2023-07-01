@@ -21,7 +21,7 @@ export const DashboardEditor = () => {
   const isChromeVisible = useChromeVisibility(services.chrome);
   const [eventEmitter] = useState(new EventEmitter());
 
-  const savedDashboardInstance = useSavedDashboardInstance(
+  const { savedDashboard: savedDashboardInstance, dashboard } = useSavedDashboardInstance(
     services,
     eventEmitter,
     isChromeVisible,
@@ -34,6 +34,7 @@ export const DashboardEditor = () => {
     services,
     isChromeVisible,
     eventEmitter,
+    dashboard,
     savedDashboardInstance,
     appState
   );
@@ -41,6 +42,7 @@ export const DashboardEditor = () => {
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
     eventEmitter,
+    dashboard,
     savedDashboardInstance,
     dashboardContainer,
     appState
@@ -54,25 +56,32 @@ export const DashboardEditor = () => {
   }, [eventEmitter]);
 
   console.log('savedDashboardInstance', savedDashboardInstance);
+  console.log('dashboard', dashboard);
   console.log('appState', appState);
   console.log('appStateData', appState?.getState());
   console.log('currentAppState', currentAppState);
   console.log('isEmbeddableRendered', isEmbeddableRendered);
+  console.log('app state isDirty', appState?.getState().isDirty);
   console.log('dashboardContainer', dashboardContainer);
 
   return (
     <div>
       <div>
-        {savedDashboardInstance && appState && dashboardContainer && currentAppState && (
-          <DashboardTopNav
-            isChromeVisible={isChromeVisible}
-            savedDashboardInstance={savedDashboardInstance}
-            stateContainer={appState}
-            currentAppState={currentAppState}
-            isEmbeddableRendered={isEmbeddableRendered}
-            dashboardContainer={dashboardContainer}
-          />
-        )}
+        {savedDashboardInstance &&
+          appState &&
+          dashboardContainer &&
+          currentAppState &&
+          dashboard && (
+            <DashboardTopNav
+              isChromeVisible={isChromeVisible}
+              savedDashboardInstance={savedDashboardInstance}
+              stateContainer={appState}
+              dashboard={dashboard}
+              currentAppState={currentAppState}
+              isEmbeddableRendered={isEmbeddableRendered}
+              dashboardContainer={dashboardContainer}
+            />
+          )}
       </div>
     </div>
   );

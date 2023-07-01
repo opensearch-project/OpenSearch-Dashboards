@@ -14,11 +14,13 @@ import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from
 import { getNavActions } from '../utils/get_nav_actions';
 import { DashboardContainer } from '../embeddable';
 import { isErrorEmbeddable } from '../../embeddable_plugin';
+import { Dashboard } from '../../dashboard';
 
 interface DashboardTopNavProps {
   isChromeVisible: boolean;
   savedDashboardInstance: any;
   stateContainer: DashboardAppStateContainer;
+  dashboard: Dashboard;
   currentAppState: DashboardAppState;
   isEmbeddableRendered: boolean;
   dashboardContainer?: DashboardContainer;
@@ -36,6 +38,7 @@ const TopNav = ({
   isChromeVisible,
   savedDashboardInstance,
   stateContainer,
+  dashboard,
   currentAppState,
   isEmbeddableRendered,
   dashboardContainer,
@@ -83,6 +86,7 @@ const TopNav = ({
         stateContainer,
         savedDashboardInstance,
         services,
+        dashboard,
         dashboardContainer
       );
       setTopNavMenu(
@@ -101,6 +105,7 @@ const TopNav = ({
     savedDashboardInstance,
     stateContainer,
     isEmbeddableRendered,
+    dashboard
   ]);
 
   useEffect(() => {
