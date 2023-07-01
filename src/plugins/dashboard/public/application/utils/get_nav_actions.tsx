@@ -113,6 +113,9 @@ export const getNavActions = (
           stateContainer.transitions.set('description', currentDescription);
           stateContainer.transitions.set('timeRestore', currentTimeRestore);
         }
+
+        // If the save was successfull, then set the app state isDirty back to false
+        stateContainer.transitions.set('isDirty', false);
         return response;
       });
     };
