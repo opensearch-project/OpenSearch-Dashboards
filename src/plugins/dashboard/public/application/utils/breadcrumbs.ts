@@ -17,7 +17,7 @@ export function getLandingBreadcrumbs() {
   return [
     {
       text: i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-        defaultMessage: 'Dashboard',
+        defaultMessage: 'Dashboards',
       }),
       href: `#${DashboardConstants.LANDING_PAGE_PATH}`,
     },
