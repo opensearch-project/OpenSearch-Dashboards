@@ -14,10 +14,15 @@ import { DashboardServices } from '../../types';
 import { useDashboardAppState } from '../utils/use/use_dashboard_app_state';
 import { useDashboardContainer } from '../utils/use/use_dashboard_container';
 import { useEditorUpdates } from '../utils/use/use_editor_updates';
+import {
+  setBreadcrumbsForExistingDashboard,
+  setBreadcrumbsForNewDashboard,
+} from '../utils/breadcrumbs';
 
 export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
+  const { chrome } = services;
   const isChromeVisible = useChromeVisibility(services.chrome);
   const [eventEmitter] = useState(new EventEmitter());
 
@@ -47,6 +52,25 @@ export const DashboardEditor = () => {
     dashboardContainer,
     appState
   );
+
+  useEffect(() => {
+    if (appState) {
+      if (savedDashboardInstance?.id) {
+        chrome.setBreadcrumbs(
+          setBreadcrumbsForExistingDashboard(
+            savedDashboardInstance.title,
+            appState?.getState().viewMode,
+            appState?.getState().isDirty
+          )
+        );
+        chrome.docTitle.change(savedDashboardInstance.title);
+      } else {
+        chrome.setBreadcrumbs(
+          setBreadcrumbsForNewDashboard(appState?.getState().viewMode, appState?.getState().isDirty)
+        );
+      }
+    }
+  }, [appState?.getState(), savedDashboardInstance, chrome]);
 
   useEffect(() => {
     // clean up all registered listeners if any is left
