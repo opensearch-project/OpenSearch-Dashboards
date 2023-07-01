@@ -19,7 +19,7 @@ import deepEqual from 'fast-deep-equal';
 import { useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
-import { IndexPattern, opensearchFilters } from '../../../../../data/public';
+import { opensearchFilters } from '../../../../../data/public';
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
