@@ -56,7 +56,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ibmmq.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/ibmmq.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/ibmmq.svg',
     isBeta: true,
     artifacts: {
       application: {
