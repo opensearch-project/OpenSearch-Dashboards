@@ -67,15 +67,15 @@ export const useEditorUpdates = (
       // since they are part of the global state, not app state
       // However, we still need to update the dashboard container with the correct time filters because dashboard
       // container embeddable needs them to correctly pass them down and update its child visualization embeddables
-      const timeFilterChange$ = merge(
+      const subscriptions = merge(
         timefilter.getRefreshIntervalUpdate$(),
         timefilter.getTimeUpdate$()
-      );
-      timeFilterChange$.subscribe(() => {
+      ).subscribe(() => {
         refreshDashboardContainer();
       });
 
       return () => {
+        subscriptions.unsubscribe();
         unsubscribeStateUpdates();
       };
     }
