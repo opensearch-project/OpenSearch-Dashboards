@@ -461,7 +461,7 @@
     "nyc": "^14.1.1",
     "pixelmatch": "^5.1.0",
     "pngjs": "^3.4.0",
-    "postcss": "^8.2.10",
+    "postcss": "^8.2.13",
     "prettier": "^2.1.1",
     "prop-types": "^15.7.2",
     "react-grid-layout": "^0.16.2",
