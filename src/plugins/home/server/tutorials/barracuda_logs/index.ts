@@ -57,7 +57,7 @@ export function barracudaLogsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-barracuda.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/barracuda.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/barracuda.svg',
     artifacts: {
       dashboards: [],
       application: {
