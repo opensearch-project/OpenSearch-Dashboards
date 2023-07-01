@@ -8,15 +8,21 @@ import { useEffect, useState } from 'react';
 import { merge } from 'rxjs';
 import { DashboardAppState, DashboardAppStateContainer, DashboardServices } from '../../../types';
 import { DashboardContainer } from '../../embeddable';
+import { Dashboard } from '../../../dashboard';
 
 export const useEditorUpdates = (
   services: DashboardServices,
   eventEmitter: EventEmitter,
+  dashboard?: Dashboard,
   dashboardInstance?: any,
   dashboardContainer?: DashboardContainer,
   appState?: DashboardAppStateContainer
 ) => {
   const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
+  // We only mark dirty when there is changes in the panels, query, and filters
+  // We do not mark dirty for embed mode, view mode, full screen and etc
+  // The specific behaviors need to check the functional tests and previous dashboard
+  // const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [currentAppState, setCurrentAppState] = useState<DashboardAppState>();
   const dashboardDom = document.getElementById('dashboardViewport');
 
@@ -25,7 +31,7 @@ export const useEditorUpdates = (
   } = services.data.query;
 
   useEffect(() => {
-    if (appState && dashboardInstance && dashboardContainer) {
+    if (appState && dashboardInstance && dashboardContainer && dashboard) {
       const initialState = appState.getState();
       setCurrentAppState(initialState);
 
@@ -36,11 +42,17 @@ export const useEditorUpdates = (
           );
           if (changes) {
             dashboardContainer.updateInput(changes);
+
+            if (changes.filters || changes.query || changes.timeRange || changes.refreshConfig) {
+              appState.transitions.set('isDirty', true);
+            }
           }
         }
       };
 
       const unsubscribeStateUpdates = appState.subscribe((state) => {
+        // If app state is changes, then set unsaved changes to true
+        // the only thing app state is not tracking is the time filter, need to check the previous dashboard if they count time filter change or not
         setCurrentAppState(state);
         refreshDashboardContainer();
       });
@@ -69,6 +81,7 @@ export const useEditorUpdates = (
     dashboardContainer,
     isEmbeddableRendered,
     timefilter,
+    dashboard,
   ]);
 
   useEffect(() => {
