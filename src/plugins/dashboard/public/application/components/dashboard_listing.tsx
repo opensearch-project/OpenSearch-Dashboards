@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useMount } from 'react-use';
+import { useLocation } from 'react-router-dom';
 import {
   useOpenSearchDashboards,
   TableListView,
 } from '../../../../opensearch_dashboards_react/public';
 import { CreateButton } from '../listing/create_button';
-import { DashboardConstants } from '../../dashboard_constants';
+import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
 import { DashboardServices } from '../../types';
 import { getTableColumns } from '../utils/get_table_columns';
 import { getNoItemsMessage } from '../utils/get_no_items_message';
@@ -33,6 +34,49 @@ export const DashboardListing = () => {
       dashboardProviders,
     },
   } = useOpenSearchDashboards<DashboardServices>();
+
+  const location = useLocation();
+  const queryParameters = new URLSearchParams(location.search);
+  const initialFiltersFromURL = queryParameters.get('filter');
+  const [initialFilter, setInitialFilter] = useState<string | null>(initialFiltersFromURL);
+
+  useEffect(() => {
+    const getDashboardsBasedOnUrl = async () => {
+      const title = queryParameters.get('title');
+
+      try {
+        if (title) {
+          const results = await savedObjectsClient.find<any>({
+            search: `"${title}"`,
+            searchFields: ['title'],
+            type: 'dashboard',
+          });
+
+          const matchingDashboards = results.savedObjects.filter(
+            (dashboard) => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
+          );
+
+          if (matchingDashboards.length === 1) {
+            history.replace(createDashboardEditUrl(matchingDashboards[0].id));
+          } else {
+            history.replace(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
+            setInitialFilter(title);
+            // Reload here is needed since we are using a URL param to render the table
+            // Previously, they called $route.reload() on angular routing
+            history.go(0);
+          }
+          return new Promise(() => {});
+        }
+      } catch (e) {
+        notifications.toasts.addWarning(
+          i18n.translate('dashboard.listing. savedObjectWarning', {
+            defaultMessage: 'Unable to filter by title',
+          })
+        );
+      }
+    };
+    getDashboardsBasedOnUrl();
+  }, [savedObjectsClient, history, notifications.toasts, queryParameters]);
 
   const hideWriteControls = dashboardConfig.getHideWriteControls();
 
@@ -143,7 +187,7 @@ export const DashboardListing = () => {
       editItem={hideWriteControls ? undefined : editItem}
       tableColumns={tableColumns}
       listingLimit={listingLimit}
-      initialFilter={''}
+      initialFilter={initialFilter ?? ''}
       initialPageSize={initialPageSize}
       noItemsFragment={noItemsFragment}
       entityName={i18n.translate('dashboard.listing.table.entityName', {
