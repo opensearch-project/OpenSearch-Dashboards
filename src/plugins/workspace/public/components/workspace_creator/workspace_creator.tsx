@@ -38,7 +38,7 @@ export const WorkspaceCreator = () => {
           }),
         });
         if (application && workspaces) {
-          window.location.href = await workspaces.formatUrlWithWorkspaceId(
+          window.location.href = workspaces.formatUrlWithWorkspaceId(
             application.getUrlForApp(WORKSPACE_APP_ID, {
               path: PATHS.overview,
               absolute: true,
