@@ -99,7 +99,7 @@ export const getNavActions = (
       stateContainer.transitions.set('title', newTitle);
       stateContainer.transitions.set('description', newDescription);
       stateContainer.transitions.set('timeRestore', newTimeRestore);
-      // dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
+      savedDashboard.copyOnSave = newCopyOnSave;
 
       const saveOptions = {
         confirmOverwrite: false,
