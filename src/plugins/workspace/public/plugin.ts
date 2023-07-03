@@ -36,9 +36,9 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
 
     return '';
   }
-  private getPatchedUrl = async (
+  private getPatchedUrl = (
     url: string,
-    workspaceId?: string,
+    workspaceId: string,
     options?: {
       jumpable?: boolean;
     }
@@ -47,7 +47,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     /**
      * Patch workspace id into hash
      */
-    const currentWorkspaceId = workspaceId || (await this.getWorkpsaceId());
+    const currentWorkspaceId = workspaceId;
     const searchParams = newUrl.hashSearchParams;
     if (currentWorkspaceId) {
       searchParams.set(WORKSPACE_ID_QUERYSTRING_NAME, currentWorkspaceId);
@@ -72,7 +72,8 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       'hashchange',
       debounce(async (e) => {
         if (this.shouldPatchUrl()) {
-          this.URLChange$.next(await this.getPatchedUrl(window.location.href));
+          const workspaceId = await this.getWorkpsaceId();
+          this.URLChange$.next(this.getPatchedUrl(window.location.href, workspaceId));
         }
       }, 150)
     );
@@ -96,16 +97,19 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       combineLatest([
         this.core?.workspaces.client.currentWorkspaceId$,
         startService[0].application.currentAppId$,
-      ]).subscribe(async ([currentWorkspaceId]) => {
+      ]).subscribe(async ([]) => {
         if (this.shouldPatchUrl()) {
-          this.URLChange$.next(await this.getPatchedUrl(window.location.href));
+          const currentWorkspaceId = await this.getWorkpsaceId();
+          this.URLChange$.next(this.getPatchedUrl(window.location.href, currentWorkspaceId));
         }
       });
     }
   }
   public async setup(core: CoreSetup) {
     this.core = core;
-    this.core?.workspaces.setFormatUrlWithWorkspaceId(this.getPatchedUrl);
+    this.core?.workspaces.setFormatUrlWithWorkspaceId((url, id, options) =>
+      this.getPatchedUrl(url, id, options)
+    );
     /**
      * Retrive workspace id from url
      */

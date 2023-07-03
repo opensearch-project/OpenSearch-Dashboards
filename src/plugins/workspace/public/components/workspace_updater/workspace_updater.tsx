@@ -77,13 +77,13 @@ export const WorkspaceUpdater = () => {
           }),
         });
         window.location.href =
-          (await workspaces?.formatUrlWithWorkspaceId(
+          workspaces?.formatUrlWithWorkspaceId(
             application.getUrlForApp(WORKSPACE_APP_ID, {
               path: PATHS.overview,
               absolute: true,
             }),
             currentWorkspace.id
-          )) || '';
+          ) || '';
         return;
       }
       notifications?.toasts.addDanger({
