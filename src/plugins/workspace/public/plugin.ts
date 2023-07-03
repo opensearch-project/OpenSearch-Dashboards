@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { i18n } from '@osd/i18n';
+import { debounce } from 'lodash';
 import {
   CoreSetup,
   CoreStart,
@@ -15,16 +16,18 @@ import {
 import { WORKSPACE_APP_ID, PATHS } from '../common/constants';
 import { WORKSPACE_ID_QUERYSTRING_NAME } from '../../../core/public';
 import { mountDropdownList } from './mount';
+import { HashURL } from './components/utils/hash_url';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
   private core?: CoreSetup;
-  private getWorkpsaceIdFromQueryString(): string | null {
-    const searchParams = new URLSearchParams(window.location.search);
-    return searchParams.get(WORKSPACE_ID_QUERYSTRING_NAME);
+  private URLChange$ = new BehaviorSubject('');
+  private getWorkpsaceIdFromURL(): string | null {
+    const hashUrl = new HashURL(window.location.href);
+    return hashUrl.hashSearchParams.get(WORKSPACE_ID_QUERYSTRING_NAME) || null;
   }
   private async getWorkpsaceId(): Promise<string> {
-    if (this.getWorkpsaceIdFromQueryString()) {
-      return this.getWorkpsaceIdFromQueryString() || '';
+    if (this.getWorkpsaceIdFromURL()) {
+      return this.getWorkpsaceIdFromURL() || '';
     }
 
     const currentWorkspaceIdResp = await this.core?.workspaces.client.getCurrentWorkspaceId();
@@ -34,24 +37,56 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
 
     return '';
   }
+  private async getPatchedUrl(url: string) {
+    const newUrl = new HashURL(url, window.location.href);
+    /**
+     * Patch workspace id into hash
+     */
+    const currentWorkspaceId = await this.getWorkpsaceId();
+    const searchParams = newUrl.hashSearchParams;
+    if (currentWorkspaceId) {
+      searchParams.set(WORKSPACE_ID_QUERYSTRING_NAME, currentWorkspaceId);
+    } else {
+      searchParams.delete(WORKSPACE_ID_QUERYSTRING_NAME);
+    }
+
+    newUrl.hashSearchParams = searchParams;
+
+    return newUrl.toString();
+  }
+  private async listenToHashChange(): Promise<void> {
+    window.addEventListener(
+      'hashchange',
+      debounce(async (e) => {
+        if (this.shouldPatchUrl()) {
+          this.URLChange$.next(await this.getPatchedUrl(window.location.href));
+        }
+      }, 150)
+    );
+  }
+  private shouldPatchUrl(): boolean {
+    const currentWorkspaceId = this.core?.workspaces.client.currentWorkspaceId$.getValue();
+    const workspaceIdFromURL = this.getWorkpsaceIdFromURL();
+    if (!currentWorkspaceId && !workspaceIdFromURL) {
+      return false;
+    }
+
+    if (currentWorkspaceId === workspaceIdFromURL) {
+      return false;
+    }
+
+    return true;
+  }
   private async listenToApplicationChange(): Promise<void> {
     const startService = await this.core?.getStartServices();
     if (startService) {
       combineLatest([
         this.core?.workspaces.client.currentWorkspaceId$,
         startService[0].application.currentAppId$,
-      ]).subscribe(async ([]) => {
-        const newUrl = new URL(window.location.href);
-        /**
-         * Patch workspace id into querystring
-         */
-        const currentWorkspaceId = await this.getWorkpsaceId();
-        if (currentWorkspaceId) {
-          newUrl.searchParams.set(WORKSPACE_ID_QUERYSTRING_NAME, currentWorkspaceId);
-        } else {
-          newUrl.searchParams.delete(WORKSPACE_ID_QUERYSTRING_NAME);
+      ]).subscribe(async ([currentWorkspaceId]) => {
+        if (this.shouldPatchUrl()) {
+          this.URLChange$.next(await this.getPatchedUrl(window.location.href));
         }
-        history.replaceState(history.state, '', newUrl.toString());
       });
     }
   }
@@ -60,7 +95,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     /**
      * Retrive workspace id from url
      */
-    const workspaceId = this.getWorkpsaceIdFromQueryString();
+    const workspaceId = this.getWorkpsaceIdFromURL();
 
     if (workspaceId) {
       const result = await core.workspaces.client.enterWorkspace(workspaceId);
@@ -75,9 +110,20 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     }
 
     /**
-     * listen to application change and patch workspace id in querystring
+     * listen to application change and patch workspace id in hash
      */
     this.listenToApplicationChange();
+
+    /**
+     * listen to application internal hash change and patch workspace id in hash
+     */
+    this.listenToHashChange();
+
+    this.URLChange$.subscribe(
+      debounce(async (url) => {
+        history.replaceState(history.state, '', url);
+      }, 500)
+    );
 
     core.application.register({
       id: WORKSPACE_APP_ID,
