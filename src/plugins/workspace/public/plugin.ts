@@ -13,8 +13,7 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
 } from '../../../core/public';
-import { WORKSPACE_APP_ID, PATHS } from '../common/constants';
-import { WORKSPACE_ID_QUERYSTRING_NAME } from '../../../core/public';
+import { WORKSPACE_APP_ID, PATHS, WORKSPACE_ID_QUERYSTRING_NAME } from '../common/constants';
 import { mountDropdownList } from './mount';
 import { HashURL } from './components/utils/hash_url';
 
@@ -37,12 +36,18 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
 
     return '';
   }
-  private async getPatchedUrl(url: string) {
+  private getPatchedUrl = async (
+    url: string,
+    workspaceId?: string,
+    options?: {
+      jumpable?: boolean;
+    }
+  ) => {
     const newUrl = new HashURL(url, window.location.href);
     /**
      * Patch workspace id into hash
      */
-    const currentWorkspaceId = await this.getWorkpsaceId();
+    const currentWorkspaceId = workspaceId || (await this.getWorkpsaceId());
     const searchParams = newUrl.hashSearchParams;
     if (currentWorkspaceId) {
       searchParams.set(WORKSPACE_ID_QUERYSTRING_NAME, currentWorkspaceId);
@@ -50,10 +55,18 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       searchParams.delete(WORKSPACE_ID_QUERYSTRING_NAME);
     }
 
+    if (options?.jumpable && currentWorkspaceId) {
+      /**
+       * When in hash, window.location.href won't make browser to reload
+       * append a querystring.
+       */
+      newUrl.searchParams.set(WORKSPACE_ID_QUERYSTRING_NAME, currentWorkspaceId);
+    }
+
     newUrl.hashSearchParams = searchParams;
 
     return newUrl.toString();
-  }
+  };
   private async listenToHashChange(): Promise<void> {
     window.addEventListener(
       'hashchange',
@@ -92,6 +105,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   }
   public async setup(core: CoreSetup) {
     this.core = core;
+    this.core?.workspaces.setFormatUrlWithWorkspaceId(this.getPatchedUrl);
     /**
      * Retrive workspace id from url
      */
