@@ -73,7 +73,7 @@ export class Dashboard<TDashboardParams = DashboardParams> {
     this.filters = cloneDeep(dashboardState.filters);
   }
 
-  async setState(state: PartialDashboardState) {
+  setState(state: PartialDashboardState) {
     if (state.id) {
       this.id = state.id;
     }
@@ -109,12 +109,12 @@ export class Dashboard<TDashboardParams = DashboardParams> {
     if (state.searchSource) {
       this.searchSource = state.searchSource;
     }
-    // if (state.query) {
-    //   this.query = this.getQuery(state.query);
-    // }
-    // if (state.filters) {
-    //   this.filters = this.getFilters(state.filters);
-    // }
+    if (state.query) {
+      this.query = state.query;
+    }
+    if (state.filters) {
+      this.filters = state.filters;
+    }
   }
 
   public setIsDirty(value: boolean) {
