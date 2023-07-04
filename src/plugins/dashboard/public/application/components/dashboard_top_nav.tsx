@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { uniqBy } from 'lodash';
 import React, { memo, useState, useEffect } from 'react';
 import { Filter, IndexPattern } from 'src/plugins/data/public';
 import { useCallback } from 'react';
@@ -13,7 +12,6 @@ import { getTopNavConfig } from '../top_nav/get_top_nav_config';
 import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from '../../types';
 import { getNavActions } from '../utils/get_nav_actions';
 import { DashboardContainer } from '../embeddable';
-import { isErrorEmbeddable } from '../../embeddable_plugin';
 import { Dashboard } from '../../dashboard';
 
 interface DashboardTopNavProps {
@@ -23,6 +21,7 @@ interface DashboardTopNavProps {
   dashboard: Dashboard;
   currentAppState: DashboardAppState;
   isEmbeddableRendered: boolean;
+  indexPatterns: IndexPattern []
   dashboardContainer?: DashboardContainer;
 }
 
@@ -42,11 +41,11 @@ const TopNav = ({
   currentAppState,
   isEmbeddableRendered,
   dashboardContainer,
+  indexPatterns
 }: DashboardTopNavProps) => {
   const [filters, setFilters] = useState<Filter[]>([]);
   const [topNavMenu, setTopNavMenu] = useState<any>();
   const [isFullScreenMode, setIsFullScreenMode] = useState<any>();
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>();
 
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { TopNavMenu } = services.navigation.ui;
@@ -111,33 +110,6 @@ const TopNav = ({
   useEffect(() => {
     setIsFullScreenMode(currentAppState?.fullScreenMode);
   }, [currentAppState, services]);
-
-  useEffect(() => {
-    const asyncSetIndexPattern = async () => {
-      if (dashboardContainer) {
-        let panelIndexPatterns: IndexPattern[] = [];
-        dashboardContainer.getChildIds().forEach((id) => {
-          const embeddableInstance = dashboardContainer.getChild(id);
-          if (isErrorEmbeddable(embeddableInstance)) return;
-          const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
-          if (!embeddableIndexPatterns) return;
-          panelIndexPatterns.push(...embeddableIndexPatterns);
-        });
-        panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
-
-        if (panelIndexPatterns.length > 0) {
-          setIndexPatterns(panelIndexPatterns);
-        } else {
-          const defaultIndex = await services.data.indexPatterns.getDefault();
-          if (defaultIndex) {
-            setIndexPatterns([defaultIndex]);
-          }
-        }
-      }
-    };
-
-    asyncSetIndexPattern();
-  }, [dashboardContainer, stateContainer, currentAppState, services.data.indexPatterns]);
 
   const shouldShowFilterBar = (forceHide: boolean): boolean =>
     !forceHide && (currentAppState.filters!.length > 0 || !currentAppState?.fullScreenMode);
