@@ -373,7 +373,13 @@ export const getNavActions = (
   async function save(saveOptions: SavedObjectSaveOpts) {
     const timefilter = queryService.timefilter.timefilter;
     try {
-      const id = await saveDashboard(timefilter, stateContainer, savedDashboard, saveOptions);
+      const id = await saveDashboard(
+        timefilter,
+        stateContainer,
+        savedDashboard,
+        saveOptions,
+        dashboard
+      );
 
       if (id) {
         notifications.toasts.addSuccess({
