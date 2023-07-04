@@ -120,7 +120,6 @@ const createDashboardEmbeddable = (
   let dashboardContainer: DashboardContainer;
   let inputSubscription: Subscription | undefined;
   let outputSubscription: Subscription | undefined;
-  let panelIndexPatterns: IndexPattern[] = [];
 
   const {
     embeddable,
@@ -254,8 +253,8 @@ const createDashboardEmbeddable = (
       panelIndexPatterns.push(...embeddableIndexPatterns);
     });
     panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
-    return panelIndexPatterns
-  }
+    return panelIndexPatterns;
+  };
 
   const updateIndexPatternsOperator = pipe(
     filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
@@ -270,22 +269,19 @@ const createDashboardEmbeddable = (
     switchMap((panelIndexPatterns: IndexPattern[]) => {
       return new Observable((observer) => {
         if (panelIndexPatterns && panelIndexPatterns.length > 0) {
-        
-            if (observer.closed) return;
-            setIndexPatterns(panelIndexPatterns)
-            observer.complete();
-      
+          if (observer.closed) return;
+          setIndexPatterns(panelIndexPatterns);
+          observer.complete();
         } else {
           data.indexPatterns.getDefault().then((defaultIndexPattern) => {
             if (observer.closed) return;
-            setIndexPatterns([defaultIndexPattern as IndexPattern])
+            setIndexPatterns([defaultIndexPattern as IndexPattern]);
             observer.complete();
-          })
+          });
         }
-        })
-      })
-  )
-
+      });
+    })
+  );
 
   if (dashboardFactory) {
     return dashboardFactory

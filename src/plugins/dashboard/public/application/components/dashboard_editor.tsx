@@ -93,7 +93,7 @@ export const DashboardEditor = () => {
     console.log('isDirty', dashboard.isDirty);
   }
   console.log('dashboardContainer', dashboardContainer);
-  console.log('indexPatterns', indexPatterns)
+  console.log('indexPatterns', indexPatterns);
 
   return (
     <div>

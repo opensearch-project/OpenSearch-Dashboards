@@ -21,7 +21,7 @@ interface DashboardTopNavProps {
   dashboard: Dashboard;
   currentAppState: DashboardAppState;
   isEmbeddableRendered: boolean;
-  indexPatterns: IndexPattern []
+  indexPatterns: IndexPattern[];
   dashboardContainer?: DashboardContainer;
 }
 
@@ -41,16 +41,14 @@ const TopNav = ({
   currentAppState,
   isEmbeddableRendered,
   dashboardContainer,
-  indexPatterns
+  indexPatterns,
 }: DashboardTopNavProps) => {
-  const [filters, setFilters] = useState<Filter[]>([]);
   const [topNavMenu, setTopNavMenu] = useState<any>();
   const [isFullScreenMode, setIsFullScreenMode] = useState<any>();
 
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { TopNavMenu } = services.navigation.ui;
-  const { data, dashboardConfig, setHeaderActionMenu } = services;
-  const { query: queryService } = data;
+  const { dashboardConfig, setHeaderActionMenu } = services;
 
   const location = useLocation();
   const queryParameters = new URLSearchParams(location.search);
@@ -74,10 +72,6 @@ const TopNav = ({
   // Only in embed mode, the nav bar components can be forced show base on URL params
   const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
     (forceShow || isChromeVisible) && !currentAppState?.fullScreenMode;
-
-  useEffect(() => {
-    setFilters(queryService.filterManager.getFilters());
-  }, [services, queryService]);
 
   useEffect(() => {
     if (isEmbeddableRendered) {
@@ -128,7 +122,6 @@ const TopNav = ({
   return (
     <TopNavMenu
       appName={'dashboard'}
-      savedQueryId={currentAppState?.savedQuery}
       config={showTopNavMenu ? topNavMenu : undefined}
       className={isFullScreenMode ? 'osdTopNavMenu-isFullScreen' : undefined}
       screenTitle={currentAppState.title}
@@ -141,7 +134,10 @@ const TopNav = ({
       indexPatterns={indexPatterns}
       showSaveQuery={services.dashboardCapabilities.saveQuery as boolean}
       savedQuery={undefined}
-      onSavedQueryIdChange={() => {}}
+      onSavedQueryIdChange={(savedQueryId?: string) => {
+        stateContainer.transitions.set('savedQuery', savedQueryId);
+      }}
+      savedQueryId={currentAppState?.savedQuery}
       onQuerySubmit={handleRefresh}
       setMenuMountPoint={isEmbeddedExternally ? undefined : setHeaderActionMenu}
     />
