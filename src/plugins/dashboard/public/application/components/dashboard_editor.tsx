@@ -11,7 +11,7 @@ import { useChromeVisibility } from '../utils/use/use_chrome_visibility';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { useSavedDashboardInstance } from '../utils/use/use_saved_dashboard_instance';
 import { DashboardServices } from '../../types';
-import { useDashboardAppState } from '../utils/use/use_dashboard_app_state';
+import { useDashboardAppAndGlobalState } from '../utils/use/use_dashboard_app_state';
 import { useDashboardContainer } from '../utils/use/use_dashboard_container';
 import { useEditorUpdates } from '../utils/use/use_editor_updates';
 import {
@@ -33,7 +33,11 @@ export const DashboardEditor = () => {
     dashboardIdFromUrl
   );
 
-  const { appState } = useDashboardAppState(services, eventEmitter, savedDashboardInstance);
+  const { appState } = useDashboardAppAndGlobalState(
+    services,
+    eventEmitter,
+    savedDashboardInstance
+  );
 
   const { dashboardContainer } = useDashboardContainer(
     services,
@@ -54,19 +58,19 @@ export const DashboardEditor = () => {
   );
 
   useEffect(() => {
-    if (appState) {
+    if (appState && dashboard) {
       if (savedDashboardInstance?.id) {
         chrome.setBreadcrumbs(
           setBreadcrumbsForExistingDashboard(
             savedDashboardInstance.title,
             appState?.getState().viewMode,
-            appState?.getState().isDirty
+            dashboard.isDirty
           )
         );
         chrome.docTitle.change(savedDashboardInstance.title);
       } else {
         chrome.setBreadcrumbs(
-          setBreadcrumbsForNewDashboard(appState?.getState().viewMode, appState?.getState().isDirty)
+          setBreadcrumbsForNewDashboard(appState?.getState().viewMode, dashboard.isDirty)
         );
       }
     }
@@ -85,7 +89,9 @@ export const DashboardEditor = () => {
   console.log('appStateData', appState?.getState());
   console.log('currentAppState', currentAppState);
   console.log('isEmbeddableRendered', isEmbeddableRendered);
-  console.log('app state isDirty', appState?.getState().isDirty);
+  if (dashboard) {
+    console.log('isDirty', dashboard.isDirty);
+  }
   console.log('dashboardContainer', dashboardContainer);
 
   return (

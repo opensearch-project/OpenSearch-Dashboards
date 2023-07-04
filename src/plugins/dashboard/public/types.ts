@@ -128,7 +128,6 @@ export interface DashboardAppState {
   viewMode: ViewMode;
   expandedPanelId?: string;
   savedQuery?: string;
-  isDirty: boolean;
 }
 
 export type DashboardAppStateDefaults = DashboardAppState & {
