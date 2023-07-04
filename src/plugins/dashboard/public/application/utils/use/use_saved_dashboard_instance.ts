@@ -61,11 +61,9 @@ export const useSavedDashboardInstance = (
           }
         } else if (dashboardIdFromUrl) {
           try {
-            savedDashboardInstance = await getDashboardInstance(
-              services,
-              dashboardIdFromUrl
-            );
+            savedDashboardInstance = await getDashboardInstance(services, dashboardIdFromUrl);
             const { savedDashboard } = savedDashboardInstance;
+
             // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
             // We should only set the time filter according to time restore once when we are loading the dashboard
             if (savedDashboard.timeRestore) {
@@ -107,7 +105,7 @@ export const useSavedDashboardInstance = (
             } else {
               // E.g. a corrupt or deleted dashboard
               notifications.toasts.addDanger(error.message);
-              history.push(DashboardConstants.LANDING_PAGE_PATH);
+              history.replace(DashboardConstants.LANDING_PAGE_PATH);
               return new Promise(() => {});
             }
           }

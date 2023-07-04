@@ -52,17 +52,18 @@ export function convertPanelStateToSavedDashboardPanel(
   panelState: DashboardPanelState,
   version: string
 ): SavedDashboardPanel {
-  const customTitle: string | undefined = panelState.explicitInput.title
-    ? (panelState.explicitInput.title as string)
-    : undefined;
+  const customTitle: string | undefined =
+    panelState.explicitInput.title !== undefined
+      ? (panelState.explicitInput.title as string)
+      : undefined;
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
     version,
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
-    embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId']),
-    ...(customTitle && { title: customTitle }),
+    embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
+    ...(customTitle !== undefined && { title: customTitle }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
   };
 }

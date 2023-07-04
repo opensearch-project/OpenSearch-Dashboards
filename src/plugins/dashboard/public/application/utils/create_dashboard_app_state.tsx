@@ -17,8 +17,9 @@ import {
 } from '../../types';
 import { ViewMode } from '../../embeddable_plugin';
 import { getDashboardIdFromUrl } from '../lib';
+import { syncQueryStateWithUrl } from '../../../../data/public';
 
-const STATE_STORAGE_KEY = '_a';
+const APP_STATE_STORAGE_KEY = '_a';
 
 interface Arguments {
   osdUrlStateStorage: IOsdUrlStateStorage;
@@ -27,14 +28,27 @@ interface Arguments {
   instance: any;
 }
 
-export const createDashboardAppState = ({
+export const createDashboardGlobalAndAppState = ({
   stateDefaults,
   osdUrlStateStorage,
   services,
   instance,
 }: Arguments) => {
-  const urlState = osdUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY);
-  const { opensearchDashboardsVersion, usageCollection, history } = services;
+  const urlState = osdUrlStateStorage.get<DashboardAppState>(APP_STATE_STORAGE_KEY);
+  const {
+    opensearchDashboardsVersion,
+    usageCollection,
+    history,
+    data: { query },
+  } = services;
+
+  /* 
+  Function migrateAppState() does two things
+  1. Migrate panel before version 7.3.0 to the 7.3.0 panel structure.
+     There are no changes to the panel structure after version 7.3.0 to the current 
+     OpenSearch version so no need to migrate panels that are version 7.3.0 or higher
+  2. Update the version number on each panel to the current version.
+  */
   const initialState = migrateAppState(
     {
       ...stateDefaults,
@@ -55,14 +69,6 @@ export const createDashboardAppState = ({
     }),
     // setDashboard: (state)
   } as DashboardAppStateTransitions;
-  /*
-     make sure url ('_a') matches initial state
-     Initializing appState does two things - first it translates the defaults into AppState,
-     second it updates appState based on the url (the url trumps the defaults). This means if
-     we update the state format at all and want to handle BWC, we must not only migrate the
-     data stored with saved vis, but also any old state in the url.
-   */
-  osdUrlStateStorage.set(STATE_STORAGE_KEY, initialState, { replace: true });
 
   const stateContainer = createStateContainer<DashboardAppState, DashboardAppStateTransitions>(
     initialState,
@@ -78,7 +84,7 @@ export const createDashboardAppState = ({
   };
 
   const { start: startStateSync, stop: stopStateSync } = syncState({
-    storageKey: STATE_STORAGE_KEY,
+    storageKey: APP_STATE_STORAGE_KEY,
     stateContainer: {
       ...stateContainer,
       get: () => toUrlState(stateContainer.get()),
@@ -112,7 +118,27 @@ export const createDashboardAppState = ({
     stateStorage: osdUrlStateStorage,
   });
 
+  // starts syncing `_g` portion of url with query services
+  // it is important to start this syncing after we set the time filter if timeRestore = true
+  // otherwise it will case redundant browser history records and browser navigation like going back will not work correctly
+  const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+    query,
+    osdUrlStateStorage
+  );
+
+  /*
+     make sure url ('_a') matches initial state
+     Initializing appState does two things - first it translates the defaults into AppState,
+     second it updates appState based on the url (the url trumps the defaults). This means if
+     we update the state format at all and want to handle BWC, we must not only migrate the
+     data stored with saved vis, but also any old state in the url.
+   */
+  osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(initialState), { replace: true });
+
+  // immediately forces scheduled updates and changes location
+  osdUrlStateStorage.flush({ replace: true });
+
   // start syncing the appState with the ('_a') url
   startStateSync();
-  return { stateContainer, stopStateSync };
+  return { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl };
 };
