@@ -138,7 +138,7 @@ export function MathAgg(props) {
                       target="_blank"
                     >
                       <FormattedMessage
-                        id="visTypeTimeseries.math.expressionDescription.mathjsLinkText"
+                        id="visTypeTimeseries.math.expressionDescription.linkText"
                         defaultMessage="Math.js"
                       />
                     </EuiLink>
