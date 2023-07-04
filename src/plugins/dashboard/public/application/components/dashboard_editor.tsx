@@ -39,7 +39,7 @@ export const DashboardEditor = () => {
     savedDashboardInstance
   );
 
-  const { dashboardContainer } = useDashboardContainer(
+  const { dashboardContainer, indexPatterns } = useDashboardContainer(
     services,
     isChromeVisible,
     eventEmitter,
@@ -93,6 +93,7 @@ export const DashboardEditor = () => {
     console.log('isDirty', dashboard.isDirty);
   }
   console.log('dashboardContainer', dashboardContainer);
+  console.log('indexPatterns', indexPatterns);
 
   return (
     <div>
@@ -109,6 +110,7 @@ export const DashboardEditor = () => {
               dashboard={dashboard}
               currentAppState={currentAppState}
               isEmbeddableRendered={isEmbeddableRendered}
+              indexPatterns={indexPatterns}
               dashboardContainer={dashboardContainer}
             />
           )}

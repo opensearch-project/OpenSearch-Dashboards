@@ -33,6 +33,7 @@ import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { updateSavedDashboard } from './update_saved_dashboard';
 
 import { DashboardAppStateContainer } from '../../types';
+import { Dashboard } from '../../dashboard';
 
 /**
  * Saves the dashboard.
@@ -43,11 +44,12 @@ export function saveDashboard(
   timeFilter: TimefilterContract,
   stateContainer: DashboardAppStateContainer,
   savedDashboard: any,
-  saveOptions: SavedObjectSaveOpts
+  saveOptions: SavedObjectSaveOpts,
+  dashboard: Dashboard
 ): Promise<string> {
   const appState = stateContainer.getState();
 
-  updateSavedDashboard(savedDashboard, appState, timeFilter);
+  updateSavedDashboard(savedDashboard, appState, timeFilter, dashboard);
 
   return savedDashboard.save(saveOptions).then((id: string) => {
     if (id) {

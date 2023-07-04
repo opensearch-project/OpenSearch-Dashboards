@@ -34,11 +34,13 @@ import { FilterUtils } from './filter_utils';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { DashboardAppState } from '../../types';
 import { opensearchFilters } from '../../../../data/public';
+import { Dashboard } from '../../dashboard';
 
 export function updateSavedDashboard(
   savedDashboard: SavedObjectDashboard,
   appState: DashboardAppState,
-  timeFilter: TimefilterContract
+  timeFilter: TimefilterContract,
+  dashboard: Dashboard
 ) {
   savedDashboard.title = appState.title;
   savedDashboard.description = appState.description;
@@ -46,19 +48,23 @@ export function updateSavedDashboard(
   savedDashboard.panelsJSON = JSON.stringify(appState.panels);
   savedDashboard.optionsJSON = JSON.stringify(appState.options);
 
-  savedDashboard.timeFrom = savedDashboard.timeRestore
+  const timeFrom = savedDashboard.timeRestore
     ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().from)
     : undefined;
-  savedDashboard.timeTo = savedDashboard.timeRestore
+  const timeTo = savedDashboard.timeRestore
     ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().to)
     : undefined;
+
   const timeRestoreObj: RefreshInterval = _.pick(timeFilter.getRefreshInterval(), [
     'display',
     'pause',
     'section',
     'value',
   ]) as RefreshInterval;
-  savedDashboard.refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
+  const refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
+  savedDashboard.timeFrom = timeFrom;
+  savedDashboard.timeTo = timeTo;
+  savedDashboard.refreshInterval = refreshInterval;
 
   // save only unpinned filters
   const unpinnedFilters = appState.filters.filter(
@@ -68,4 +74,17 @@ export function updateSavedDashboard(
 
   // save the queries
   savedDashboard.searchSource.setField('query', appState.query as Query);
+
+  dashboard.setState({
+    title: appState.title,
+    description: appState.description,
+    timeRestore: appState.timeRestore,
+    panels: appState.panels,
+    options: appState.options,
+    timeFrom,
+    timeTo,
+    refreshInterval,
+    query: appState.query as Query,
+    filters: unpinnedFilters,
+  });
 }

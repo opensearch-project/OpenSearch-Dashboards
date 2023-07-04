@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual, uniqBy } from 'lodash';
 import { EMPTY, Observable, Subscription, merge, of, pipe } from 'rxjs';
 import {
   catchError,
@@ -62,6 +62,7 @@ export const useDashboardContainer = (
   appState?: DashboardAppStateContainer
 ) => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
+  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   useEffect(() => {
     const getDashboardContainer = async () => {
@@ -71,7 +72,8 @@ export const useDashboardContainer = (
             savedDashboardInstance,
             services,
             appState,
-            dashboard
+            dashboard,
+            setIndexPatterns
           );
 
           setDashboardContainer(dashboardContainerEmbeddable);
@@ -105,14 +107,15 @@ export const useDashboardContainer = (
     }
   }, [dashboardContainer, services]);
 
-  return { dashboardContainer };
+  return { dashboardContainer, indexPatterns };
 };
 
 const createDashboardEmbeddable = (
   savedDash: any,
   dashboardServices: DashboardServices,
   appState: DashboardAppStateContainer,
-  dashboard: Dashboard
+  dashboard: Dashboard,
+  setIndexPatterns: React.Dispatch<React.SetStateAction<IndexPattern[]>>
 ) => {
   let dashboardContainer: DashboardContainer;
   let inputSubscription: Subscription | undefined;
@@ -240,6 +243,45 @@ const createDashboardEmbeddable = (
       expandedPanelId: appStateData.expandedPanelId,
     };
   };
+  const setCurrentIndexPatterns = () => {
+    let panelIndexPatterns: IndexPattern[] = [];
+    dashboardContainer.getChildIds().forEach((id) => {
+      const embeddableInstance = dashboardContainer.getChild(id);
+      if (isErrorEmbeddable(embeddableInstance)) return;
+      const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
+      if (!embeddableIndexPatterns) return;
+      panelIndexPatterns.push(...embeddableIndexPatterns);
+    });
+    panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+    return panelIndexPatterns;
+  };
+
+  const updateIndexPatternsOperator = pipe(
+    filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
+    map(setCurrentIndexPatterns),
+    distinctUntilChanged((a, b) =>
+      deepEqual(
+        a.map((ip) => ip.id),
+        b.map((ip) => ip.id)
+      )
+    ),
+    // using switchMap for previous task cancellation
+    switchMap((panelIndexPatterns: IndexPattern[]) => {
+      return new Observable((observer) => {
+        if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+          if (observer.closed) return;
+          setIndexPatterns(panelIndexPatterns);
+          observer.complete();
+        } else {
+          data.indexPatterns.getDefault().then((defaultIndexPattern) => {
+            if (observer.closed) return;
+            setIndexPatterns([defaultIndexPattern as IndexPattern]);
+            observer.complete();
+          });
+        }
+      });
+    })
+  );
 
   if (dashboardFactory) {
     return dashboardFactory
@@ -321,7 +363,8 @@ const createDashboardEmbeddable = (
           )
             .pipe(
               mapTo(dashboardContainer),
-              startWith(dashboardContainer) // to trigger initial index pattern update
+              startWith(dashboardContainer), // to trigger initial index pattern update
+              updateIndexPatternsOperator
             )
             .subscribe();
 
