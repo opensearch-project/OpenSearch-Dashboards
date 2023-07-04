@@ -364,7 +364,6 @@ const handleDashboardContainerChanges = (
   dashboard: Dashboard
 ) => {
   let dirty = false;
-  let dirtyBecasuseOfInitialization = false;
   const appStateData = appState.getState();
   const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
   const { opensearchDashboardsVersion } = dashboardServices;
@@ -397,25 +396,11 @@ const handleDashboardContainerChanges = (
       // Do not need to care about initial migration here because the version update
       // is already handled in migrateAppState() when we create state container
       dirty = true;
-
-      const oldVersionVis =
-        savedDashboardPanelMap[panelState.explicitInput.id].embeddableConfig?.vis;
-      const newVersionVis =
-        convertedPanelStateMap[panelState.explicitInput.id].embeddableConfig?.vis;
-
-      // Some visualizations' embeddable config will get initialized after render is completed
-      // Ex. update embeddable: {} to embeddable: { vis: null }
-      // We add this flag to make sure we do not mark dirty because of this initialization
-      if (oldVersionVis === undefined && newVersionVis === null) {
-        dirtyBecasuseOfInitialization = true;
-      }
     }
   });
   if (dirty) {
     appState.transitions.set('panels', Object.values(convertedPanelStateMap));
-    if (!dirtyBecasuseOfInitialization) {
-      appState.transitions.set('isDirty', true);
-    }
+    dashboard.isDirty = true;
   }
   if (input.isFullScreenMode !== appStateData.fullScreenMode) {
     appState.transitions.set('fullScreenMode', input.isFullScreenMode);

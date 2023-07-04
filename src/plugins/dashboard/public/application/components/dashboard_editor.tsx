@@ -58,19 +58,19 @@ export const DashboardEditor = () => {
   );
 
   useEffect(() => {
-    if (appState) {
+    if (appState && dashboard) {
       if (savedDashboardInstance?.id) {
         chrome.setBreadcrumbs(
           setBreadcrumbsForExistingDashboard(
             savedDashboardInstance.title,
             appState?.getState().viewMode,
-            appState?.getState().isDirty
+            dashboard.isDirty
           )
         );
         chrome.docTitle.change(savedDashboardInstance.title);
       } else {
         chrome.setBreadcrumbs(
-          setBreadcrumbsForNewDashboard(appState?.getState().viewMode, appState?.getState().isDirty)
+          setBreadcrumbsForNewDashboard(appState?.getState().viewMode, dashboard.isDirty)
         );
       }
     }
@@ -89,7 +89,9 @@ export const DashboardEditor = () => {
   console.log('appStateData', appState?.getState());
   console.log('currentAppState', currentAppState);
   console.log('isEmbeddableRendered', isEmbeddableRendered);
-  console.log('app state isDirty', appState?.getState().isDirty);
+  if (dashboard) {
+    console.log('isDirty', dashboard.isDirty);
+  }
   console.log('dashboardContainer', dashboardContainer);
 
   return (
