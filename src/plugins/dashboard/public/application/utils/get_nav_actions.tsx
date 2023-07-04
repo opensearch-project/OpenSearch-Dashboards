@@ -99,7 +99,7 @@ export const getNavActions = (
       stateContainer.transitions.set('title', newTitle);
       stateContainer.transitions.set('description', newDescription);
       stateContainer.transitions.set('timeRestore', newTimeRestore);
-      // dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
+      savedDashboard.copyOnSave = newCopyOnSave;
 
       const saveOptions = {
         confirmOverwrite: false,
@@ -114,8 +114,8 @@ export const getNavActions = (
           stateContainer.transitions.set('timeRestore', currentTimeRestore);
         }
 
-        // If the save was successfull, then set the app state isDirty back to false
-        stateContainer.transitions.set('isDirty', false);
+        // If the save was successfull, then set the dashboard isDirty back to false
+        dashboard.isDirty = false;
         return response;
       });
     };
@@ -283,7 +283,7 @@ export const getNavActions = (
         sharingData: {
           title: savedDashboard.title,
         },
-        isDirty: false, // TODO
+        isDirty: dashboard.isDirty,
         embedUrlParamExtensions: [
           {
             paramName: 'embed',
@@ -297,7 +297,7 @@ export const getNavActions = (
   function onChangeViewMode(newMode: ViewMode) {
     const isPageRefresh = newMode === appState.viewMode;
     const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
-    const willLoseChanges = isLeavingEditMode && stateContainer.getState().isDirty === true;
+    const willLoseChanges = isLeavingEditMode && dashboard.isDirty === true;
 
     // If there are no changes, do not show the discard window
     if (!willLoseChanges) {
@@ -340,7 +340,7 @@ export const getNavActions = (
       }
 
       // Set the isDirty flag back to false since we discard all the changes
-      stateContainer.transitions.set('isDirty', false);
+      dashboard.isDirty = false;
     }
 
     overlays
