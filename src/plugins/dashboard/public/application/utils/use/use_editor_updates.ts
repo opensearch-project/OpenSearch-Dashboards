@@ -43,7 +43,13 @@ export const useEditorUpdates = (
           if (changes) {
             dashboardContainer.updateInput(changes);
 
-            if (changes.filters || changes.query || changes.timeRange || changes.refreshConfig) {
+            if (changes.timeRange || changes.refreshConfig) {
+              if (dashboardInstance.timeRestore) {
+                dashboard.isDirty = true;
+              }
+            }
+
+            if (changes.filters || changes.query) {
               dashboard.isDirty = true;
             }
           }
