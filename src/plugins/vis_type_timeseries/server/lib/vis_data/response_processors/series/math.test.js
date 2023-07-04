@@ -145,7 +145,7 @@ describe('math(resp, panel, series)', () => {
     );
   });
 
-  test('throws on actual tinymath expression errors', () => {
+  test('throws on actual math.js expression errors', () => {
     series.metrics[2].script = 'notExistingFn(params.a)';
     expect(() =>
       stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
