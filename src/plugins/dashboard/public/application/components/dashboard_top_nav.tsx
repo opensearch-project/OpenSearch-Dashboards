@@ -105,7 +105,7 @@ const TopNav = ({
     savedDashboardInstance,
     stateContainer,
     isEmbeddableRendered,
-    dashboard
+    dashboard,
   ]);
 
   useEffect(() => {
@@ -140,7 +140,7 @@ const TopNav = ({
   }, [dashboardContainer, stateContainer, currentAppState, services.data.indexPatterns]);
 
   const shouldShowFilterBar = (forceHide: boolean): boolean =>
-    !forceHide && (filters!.length > 0 || !currentAppState?.fullScreenMode);
+    !forceHide && (currentAppState.filters!.length > 0 || !currentAppState?.fullScreenMode);
 
   const forceShowTopNavMenu = shouldForceDisplay(UrlParams.SHOW_TOP_MENU);
   const forceShowQueryInput = shouldForceDisplay(UrlParams.SHOW_QUERY_INPUT);

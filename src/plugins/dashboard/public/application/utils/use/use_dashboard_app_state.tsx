@@ -13,14 +13,14 @@ import { DashboardServices } from '../../../types';
 
 import { DashboardAppStateContainer } from '../../../types';
 import { migrateAppState, getAppStateDefaults } from '../../lib';
-import { createDashboardAppState } from '../create_dashboard_app_state';
+import { createDashboardGlobalAndAppState } from '../create_dashboard_app_state';
 import { SavedObjectDashboard } from '../../../saved_dashboards';
 
 /**
- * This effect is responsible for instantiating the dashboard app state container,
- * which is in sync with "_a" url param
+ * This effect is responsible for instantiating the dashboard app and global state container,
+ * which is in sync with "_a" and "_g" url param
  */
-export const useDashboardAppState = (
+export const useDashboardAppAndGlobalState = (
   services: DashboardServices,
   eventEmitter: EventEmitter,
   instance?: SavedObjectDashboard
@@ -37,7 +37,11 @@ export const useDashboardAppState = (
         usageCollection
       );
 
-      const { stateContainer, stopStateSync } = createDashboardAppState({
+      const {
+        stateContainer,
+        stopStateSync,
+        stopSyncingQueryServiceStateWithUrl,
+      } = createDashboardGlobalAndAppState({
         stateDefaults,
         osdUrlStateStorage: services.osdUrlStateStorage,
         services,
@@ -80,6 +84,7 @@ export const useDashboardAppState = (
       return () => {
         stopStateSync();
         stopSyncingAppFilters();
+        stopSyncingQueryServiceStateWithUrl();
       };
     }
   }, [eventEmitter, instance, services]);

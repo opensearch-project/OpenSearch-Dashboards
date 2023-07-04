@@ -16,6 +16,7 @@ import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_cons
 import { DashboardServices } from '../../types';
 import { getTableColumns } from '../utils/get_table_columns';
 import { getNoItemsMessage } from '../utils/get_no_items_message';
+import { syncQueryStateWithUrl } from '../../../../data/public';
 
 export const EMPTY_FILTER = '';
 
@@ -32,6 +33,8 @@ export const DashboardListing = () => {
       notifications,
       savedDashboards,
       dashboardProviders,
+      data: { query },
+      osdUrlStateStorage,
     },
   } = useOpenSearchDashboards<DashboardServices>();
 
@@ -39,6 +42,16 @@ export const DashboardListing = () => {
   const queryParameters = new URLSearchParams(location.search);
   const initialFiltersFromURL = queryParameters.get('filter');
   const [initialFilter, setInitialFilter] = useState<string | null>(initialFiltersFromURL);
+
+  useEffect(() => {
+    // syncs `_g` portion of url with query services
+    const { stop } = syncQueryStateWithUrl(query, osdUrlStateStorage);
+
+    return () => stop();
+
+    // this effect should re-run when pathname is changed to preserve querystring part,
+    // so the global state is always preserved
+  }, [query, osdUrlStateStorage, location]);
 
   useEffect(() => {
     const getDashboardsBasedOnUrl = async () => {

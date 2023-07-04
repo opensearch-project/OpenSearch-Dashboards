@@ -44,7 +44,7 @@ export const useEditorUpdates = (
             dashboardContainer.updateInput(changes);
 
             if (changes.filters || changes.query || changes.timeRange || changes.refreshConfig) {
-              appState.transitions.set('isDirty', true);
+              dashboard.isDirty = true;
             }
           }
         }
