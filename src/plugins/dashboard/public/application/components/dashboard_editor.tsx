@@ -11,7 +11,7 @@ import { useChromeVisibility } from '../utils/use/use_chrome_visibility';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { useSavedDashboardInstance } from '../utils/use/use_saved_dashboard_instance';
 import { DashboardServices } from '../../types';
-import { useDashboardAppState } from '../utils/use/use_dashboard_app_state';
+import { useDashboardAppAndGlobalState } from '../utils/use/use_dashboard_app_state';
 import { useDashboardContainer } from '../utils/use/use_dashboard_container';
 import { useEditorUpdates } from '../utils/use/use_editor_updates';
 import {
@@ -33,7 +33,11 @@ export const DashboardEditor = () => {
     dashboardIdFromUrl
   );
 
-  const { appState } = useDashboardAppState(services, eventEmitter, savedDashboardInstance);
+  const { appState } = useDashboardAppAndGlobalState(
+    services,
+    eventEmitter,
+    savedDashboardInstance
+  );
 
   const { dashboardContainer } = useDashboardContainer(
     services,

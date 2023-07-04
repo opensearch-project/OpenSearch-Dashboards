@@ -364,7 +364,6 @@ const handleDashboardContainerChanges = (
   dashboard: Dashboard
 ) => {
   let dirty = false;
-  let dirtyBecauseOfInitialStateMigration = false;
   const appStateData = appState.getState();
   const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
   const { opensearchDashboardsVersion } = dashboardServices;
@@ -394,19 +393,14 @@ const handleDashboardContainerChanges = (
       )
     ) {
       // A panel was changed
+      // Do not need to care about initial migration here because the version update
+      // is already handled in migrateAppState() when we create state container
       dirty = true;
-      const oldVersion = savedDashboardPanelMap[panelState.explicitInput.id]?.version;
-      const newVersion = convertedPanelStateMap[panelState.explicitInput.id]?.version;
-      if (oldVersion && newVersion && oldVersion !== newVersion) {
-        dirtyBecauseOfInitialStateMigration = true;
-      }
     }
   });
   if (dirty) {
     appState.transitions.set('panels', Object.values(convertedPanelStateMap));
-    if (!dirtyBecauseOfInitialStateMigration) {
-      appState.transitions.set('isDirty', true);
-    }
+    appState.transitions.set('isDirty', true);
   }
   if (input.isFullScreenMode !== appStateData.fullScreenMode) {
     appState.transitions.set('fullScreenMode', input.isFullScreenMode);
