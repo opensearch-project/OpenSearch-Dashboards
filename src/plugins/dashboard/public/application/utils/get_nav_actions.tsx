@@ -48,6 +48,7 @@ export const getNavActions = (
   savedDashboard: any,
   services: DashboardServices,
   dashboard: Dashboard,
+  dashboardIdFromUrl?: string,
   dashboardContainer?: DashboardContainer
 ) => {
   const {
@@ -390,7 +391,11 @@ export const getNavActions = (
           'data-test-subj': 'saveDashboardSuccess',
         });
 
-        chrome.docTitle.change(savedDashboard.lastSavedTitle);
+        if (id !== dashboardIdFromUrl) {
+          history.replace(createDashboardEditUrl(id));
+        }
+
+        chrome.docTitle.change(savedDashboard.title);
         stateContainer.transitions.set('viewMode', ViewMode.VIEW);
       }
       return { id };
