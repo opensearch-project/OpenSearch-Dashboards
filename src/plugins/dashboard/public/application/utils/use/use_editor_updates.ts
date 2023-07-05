@@ -5,13 +5,11 @@
 
 import EventEmitter from 'events';
 import { useEffect, useState } from 'react';
-import { merge } from 'rxjs';
-import { DashboardAppState, DashboardAppStateContainer, DashboardServices } from '../../../types';
+import { DashboardAppState, DashboardAppStateContainer } from '../../../types';
 import { DashboardContainer } from '../../embeddable';
 import { Dashboard } from '../../../dashboard';
 
 export const useEditorUpdates = (
-  services: DashboardServices,
   eventEmitter: EventEmitter,
   dashboard?: Dashboard,
   dashboardInstance?: any,
@@ -19,88 +17,39 @@ export const useEditorUpdates = (
   appState?: DashboardAppStateContainer
 ) => {
   const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
+  const [currentAppState, setCurrentAppState] = useState<DashboardAppState>();
   // We only mark dirty when there is changes in the panels, query, and filters
   // We do not mark dirty for embed mode, view mode, full screen and etc
   // The specific behaviors need to check the functional tests and previous dashboard
   // const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [currentAppState, setCurrentAppState] = useState<DashboardAppState>();
-  const dashboardDom = document.getElementById('dashboardViewport');
-
-  const {
-    timefilter: { timefilter },
-  } = services.data.query;
-
   useEffect(() => {
-    if (appState && dashboardInstance && dashboardContainer && dashboard) {
-      const initialState = appState.getState();
-      setCurrentAppState(initialState);
-
-      const refreshDashboardContainer = () => {
-        if (dashboardContainer.getChangesFromAppStateForContainerState) {
-          const changes = dashboardContainer.getChangesFromAppStateForContainerState(
-            dashboardContainer
-          );
-          if (changes) {
-            dashboardContainer.updateInput(changes);
-
-            if (changes.timeRange || changes.refreshConfig) {
-              if (dashboardInstance.timeRestore) {
-                dashboard.isDirty = true;
-              }
-            }
-
-            if (changes.filters || changes.query) {
-              dashboard.isDirty = true;
-            }
-          }
-        }
-      };
-
-      const unsubscribeStateUpdates = appState.subscribe((state) => {
-        // If app state is changes, then set unsaved changes to true
-        // the only thing app state is not tracking is the time filter, need to check the previous dashboard if they count time filter change or not
-        setCurrentAppState(state);
-        refreshDashboardContainer();
-      });
-
-      // Need to add subscription for time filter specifically because app state is not tracking time filters
-      // since they are part of the global state, not app state
-      // However, we still need to update the dashboard container with the correct time filters because dashboard
-      // container embeddable needs them to correctly pass them down and update its child visualization embeddables
-      const subscriptions = merge(
-        timefilter.getRefreshIntervalUpdate$(),
-        timefilter.getTimeUpdate$()
-      ).subscribe(() => {
-        refreshDashboardContainer();
-      });
-
-      return () => {
-        subscriptions.unsubscribe();
-        unsubscribeStateUpdates();
-      };
-    }
-  }, [
-    appState,
-    eventEmitter,
-    dashboardInstance,
-    services,
-    dashboardContainer,
-    isEmbeddableRendered,
-    timefilter,
-    dashboard,
-  ]);
-
-  useEffect(() => {
-    if (!dashboardDom || !dashboardContainer) {
+    if (!appState || !dashboardContainer || !dashboardInstance || !dashboard) {
       return;
     }
-    dashboardContainer.render(dashboardDom);
+
+    const initialState = appState.getState();
+    setCurrentAppState(initialState);
     setIsEmbeddableRendered(true);
 
+    const reloadDashboardContainer = () => {
+      const dashboardDom = document.getElementById('dashboardViewport');
+      if (!dashboardDom) {
+        return;
+      }
+      dashboardContainer.render(dashboardDom);
+    };
+
+    const unsubscribeStateUpdates = appState.subscribe((state) => {
+      setCurrentAppState(state);
+      reloadDashboardContainer();
+    });
+
+    reloadDashboardContainer();
     return () => {
       setIsEmbeddableRendered(false);
+      unsubscribeStateUpdates();
     };
-  }, [dashboardContainer, dashboardDom]);
+  }, [dashboardContainer, appState, dashboardInstance, dashboard, eventEmitter]);
 
   return { isEmbeddableRendered, currentAppState };
 };

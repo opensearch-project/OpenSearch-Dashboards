@@ -7,7 +7,8 @@ import EventEmitter from 'events';
 import { useEffect, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { map } from 'rxjs/operators';
-import { connectToQueryState, opensearchFilters } from '../../../../../data/public';
+import { Subscription, merge } from 'rxjs';
+import { IndexPattern, connectToQueryState, opensearchFilters } from '../../../../../data/public';
 import { migrateLegacyQuery } from '../../lib/migrate_legacy_query';
 import { DashboardServices } from '../../../types';
 
@@ -15,6 +16,14 @@ import { DashboardAppStateContainer } from '../../../types';
 import { migrateAppState, getAppStateDefaults } from '../../lib';
 import { createDashboardGlobalAndAppState } from '../create_dashboard_app_state';
 import { SavedObjectDashboard } from '../../../saved_dashboards';
+import {
+  createDashboardContainer,
+  handleDashboardContainerInputs,
+  handleDashboardContainerOutputs,
+  refreshDashboardContainer,
+} from '../create_dashboard_container';
+import { DashboardContainer } from '../../embeddable';
+import { Dashboard } from '../../../dashboard';
 
 /**
  * This effect is responsible for instantiating the dashboard app and global state container,
@@ -23,12 +32,19 @@ import { SavedObjectDashboard } from '../../../saved_dashboards';
 export const useDashboardAppAndGlobalState = (
   services: DashboardServices,
   eventEmitter: EventEmitter,
-  instance?: SavedObjectDashboard
+  instance?: SavedObjectDashboard,
+  dashboard?: Dashboard
 ) => {
-  const [appState, setAppState] = useState<DashboardAppStateContainer | undefined>();
+  const [appStateContainer, setAppStateContainer] = useState<
+    DashboardAppStateContainer | undefined
+  >();
+  const [currentContainer, setCurrentContainer] = useState<DashboardContainer | undefined>();
+  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   useEffect(() => {
-    if (instance) {
+    if (instance && dashboard) {
+      let unsubscribeFromDashboardContainer: () => void;
+
       const { dashboardConfig, usageCollection, opensearchDashboardsVersion } = services;
       const hideWriteControls = dashboardConfig.getHideWriteControls();
       const stateDefaults = migrateAppState(
@@ -48,7 +64,11 @@ export const useDashboardAppAndGlobalState = (
         instance,
       });
 
-      const { filterManager, queryString } = services.data.query;
+      const {
+        filterManager,
+        queryString,
+        timefilter: { timefilter },
+      } = services.data.query;
 
       // sync initial app state from state container to managers
       filterManager.setAppFilters(cloneDeep(stateContainer.getState().filters));
@@ -59,8 +79,10 @@ export const useDashboardAppAndGlobalState = (
         services.data.query,
         {
           set: ({ filters, query }) => {
-            stateContainer.transitions.set('filters', filters || []);
-            stateContainer.transitions.set('query', query || queryString.getDefaultQuery());
+            stateContainer.transitions.setDashboard({
+              filters: filters || [],
+              query: query || queryString.getDefaultQuery(),
+            });
           },
           get: () => ({
             filters: stateContainer.getState().filters,
@@ -79,15 +101,83 @@ export const useDashboardAppAndGlobalState = (
         }
       );
 
-      setAppState(stateContainer);
+      const getDashboardContainer = async () => {
+        const subscriptions = new Subscription();
+        const dashboardContainer = await createDashboardContainer(
+          services,
+          instance,
+          stateContainer
+        );
+        setCurrentContainer(dashboardContainer);
+
+        if (!dashboardContainer) {
+          return;
+        }
+
+        const stopSyncingDashboardContainerOutputs = handleDashboardContainerOutputs(
+          services,
+          dashboardContainer,
+          setIndexPatterns
+        );
+
+        const stopSyncingDashboardContainerInputs = handleDashboardContainerInputs(
+          services,
+          dashboardContainer,
+          stateContainer,
+          dashboard
+        );
+
+        // If app state is changes, then set unsaved changes to true
+        // the only thing app state is not tracking is the time filter, need to check the previous dashboard if they count time filter change or not
+        const stopSyncingFromAppState = stateContainer.subscribe((state) => {
+          refreshDashboardContainer(
+            dashboardContainer,
+            services,
+            dashboardContainer.id,
+            dashboard,
+            state
+          );
+        });
+
+        subscriptions.add(stopSyncingFromAppState);
+
+        // Need to add subscription for time filter specifically because app state is not tracking time filters
+        // since they are part of the global state, not app state
+        // However, we still need to update the dashboard container with the correct time filters because dashboard
+        // container embeddable needs them to correctly pass them down and update its child visualization embeddables
+        const stopSyncingFromTimeFilters = merge(
+          timefilter.getRefreshIntervalUpdate$(),
+          timefilter.getTimeUpdate$()
+        ).subscribe(() => {
+          refreshDashboardContainer(
+            dashboardContainer,
+            services,
+            dashboardContainer.id,
+            dashboard,
+            stateContainer.getState()
+          );
+        });
+
+        subscriptions.add(stopSyncingFromTimeFilters);
+
+        unsubscribeFromDashboardContainer = () => {
+          stopSyncingDashboardContainerInputs();
+          stopSyncingDashboardContainerOutputs();
+          subscriptions.unsubscribe();
+        };
+      };
+
+      getDashboardContainer();
+      setAppStateContainer(stateContainer);
 
       return () => {
         stopStateSync();
         stopSyncingAppFilters();
         stopSyncingQueryServiceStateWithUrl();
+        unsubscribeFromDashboardContainer?.();
       };
     }
-  }, [eventEmitter, instance, services]);
+  }, [dashboard, eventEmitter, instance, services]);
 
-  return { appState };
+  return { appStateContainer, currentContainer, indexPatterns };
 };

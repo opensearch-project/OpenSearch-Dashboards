@@ -37,6 +37,7 @@ import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/publ
 import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import uuid from 'uuid';
+import { useContext, createContext } from 'react';
 import { UiActionsStart } from '../../ui_actions_plugin';
 import {
   Container,

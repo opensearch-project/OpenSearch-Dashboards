@@ -49,7 +49,7 @@ export const getNavActions = (
   services: DashboardServices,
   dashboard: Dashboard,
   dashboardIdFromUrl?: string,
-  dashboardContainer?: DashboardContainer
+  currentContainer?: DashboardContainer
 ) => {
   const {
     history,
@@ -97,9 +97,11 @@ export const getNavActions = (
       isTitleDuplicateConfirmed: boolean;
       onTitleDuplicate: () => void;
     }) => {
-      stateContainer.transitions.set('title', newTitle);
-      stateContainer.transitions.set('description', newDescription);
-      stateContainer.transitions.set('timeRestore', newTimeRestore);
+      stateContainer.transitions.setDashboard({
+        title: newTitle,
+        description: newDescription,
+        timeRestore: newTimeRestore,
+      });
       savedDashboard.copyOnSave = newCopyOnSave;
 
       const saveOptions = {
@@ -110,9 +112,11 @@ export const getNavActions = (
       return save(saveOptions).then((response: SaveResult) => {
         // If the save wasn't successful, put the original values back.
         if (!(response as { id: string }).id) {
-          stateContainer.transitions.set('title', currentTitle);
-          stateContainer.transitions.set('description', currentDescription);
-          stateContainer.transitions.set('timeRestore', currentTimeRestore);
+          stateContainer.transitions.setDashboard({
+            title: currentTitle,
+            description: currentDescription,
+            timeRestore: currentTimeRestore,
+          });
         }
 
         // If the save was successfull, then set the dashboard isDirty back to false
@@ -161,9 +165,9 @@ export const getNavActions = (
   };
 
   navActions[TopNavIds.ADD_EXISTING] = () => {
-    if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
+    if (currentContainer && !isErrorEmbeddable(currentContainer)) {
       openAddPanelFlyout({
-        embeddable: dashboardContainer,
+        embeddable: currentContainer,
         getAllFactories: embeddable.getEmbeddableFactories,
         getFactory: embeddable.getEmbeddableFactory,
         notifications,
@@ -179,7 +183,7 @@ export const getNavActions = (
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
-    await factory.create({} as EmbeddableInput, dashboardContainer);
+    await factory.create({} as EmbeddableInput, currentContainer);
   };
 
   navActions[TopNavIds.OPTIONS] = (anchorElement) => {
@@ -314,18 +318,20 @@ export const getNavActions = (
 
       dashboardContainer?.updateAppStateUrl?.(pathname, false);
 
+      const newStateContainer: { [key: string]: any } = {};
       // This is only necessary for new dashboards, which will default to Edit mode.
-      stateContainer.transitions.set('viewMode', ViewMode.VIEW);
+      newStateContainer.viewMode = ViewMode.VIEW;
 
       // We need to reset the app state to its original state
       if (dashboard.panels) {
-        stateContainer.transitions.set('panels', dashboard.panels);
+        newStateContainer.panels = dashboard.panels;
       }
 
-      stateContainer.transitions.set('filters', dashboard.filters);
-      stateContainer.transitions.set('query', dashboard.query);
-      stateContainer.transitions.setOption('hidePanelTitles', dashboard.options.hidePanelTitles);
-      stateContainer.transitions.setOption('useMargins', dashboard.options.useMargins);
+      newStateContainer.filters = dashboard.filters;
+      newStateContainer.query = dashboard.query;
+      stateContainer.transitions.setDashboard(newStateContainer);
+      newStateContainer.transitions.setOption('hidePanelTitles', dashboard.options.hidePanelTitles);
+      newStateContainer.transitions.setOption('useMargins', dashboard.options.useMargins);
 
       // Need to see if needed
       stateContainer.transitions.set('timeRestore', dashboard.timeRestore);
@@ -401,8 +407,6 @@ export const getNavActions = (
       }
       return { id };
     } catch (error) {
-      // eslint-disable-next-line
-            console.error(error);
       notifications.toasts.addDanger({
         title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
           defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,

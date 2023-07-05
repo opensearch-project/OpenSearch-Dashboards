@@ -67,7 +67,10 @@ export const createDashboardGlobalAndAppState = ({
         [option]: value,
       },
     }),
-    // setDashboard: (state)
+    setDashboard: (state) => (dashboard) => ({
+      ...state,
+      ...dashboard,
+    }),
   } as DashboardAppStateTransitions;
 
   const stateContainer = createStateContainer<DashboardAppState, DashboardAppStateTransitions>(

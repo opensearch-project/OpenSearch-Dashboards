@@ -155,6 +155,9 @@ export interface DashboardAppStateTransitions {
     prop: T,
     value: DashboardAppState['options'][T]
   ) => DashboardAppState;
+  setDashboard: (
+    state: DashboardAppState
+  ) => (dashboard: Partial<DashboardAppState>) => DashboardAppState;
 }
 
 export type DashboardAppStateContainer = ReduxLikeStateContainer<
