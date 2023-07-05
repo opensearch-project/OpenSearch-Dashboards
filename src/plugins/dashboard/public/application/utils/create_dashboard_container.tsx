@@ -506,6 +506,10 @@ export const refreshDashboardContainer = (
     dashboardContainer.updateInput(changes);
 
     if (changes.timeRange || changes.refreshConfig) {
+              if (currentDashboardInput.timeRestore) {
+                dashboard.isDirty = true;
+              }
+            }
       if (currentDashboardInput.refreshConfig) {
         dashboard.isDirty = true;
       }
