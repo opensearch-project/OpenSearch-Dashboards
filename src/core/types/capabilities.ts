@@ -48,5 +48,5 @@ export interface Capabilities {
   catalogue: Record<string, boolean>;
 
   /** Custom capabilities, registered by plugins. */
-  [key: string]: Record<string, boolean | Record<string, boolean>>;
+  [key: string]: Record<string, boolean | string[] | Record<string, boolean | string[]>>;
 }

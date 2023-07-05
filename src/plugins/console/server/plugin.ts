@@ -55,6 +55,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       dev_tools: {
         show: true,
         save: true,
+        hide_for_read_only: ['save'],
       },
     }));
 

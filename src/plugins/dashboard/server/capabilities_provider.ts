@@ -34,5 +34,6 @@ export const capabilitiesProvider = () => ({
     show: true,
     showWriteControls: true,
     saveQuery: true,
+    hide_for_read_only: ['createNew', 'showWriteControls', 'saveQuery'],
   },
 });

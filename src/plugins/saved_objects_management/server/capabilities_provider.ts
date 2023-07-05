@@ -33,5 +33,6 @@ export const capabilitiesProvider = () => ({
     delete: true,
     edit: true,
     read: true,
+    hide_for_read_only: ['delete', 'edit'],
   },
 });

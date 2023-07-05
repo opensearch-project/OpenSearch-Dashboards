@@ -32,5 +32,6 @@ export const capabilitiesProvider = () => ({
   advancedSettings: {
     show: true,
     save: true,
+    hide_for_read_only: ['save'],
   },
 });
