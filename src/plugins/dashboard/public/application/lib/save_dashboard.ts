@@ -51,6 +51,7 @@ export function saveDashboard(
 
   updateSavedDashboard(savedDashboard, appState, timeFilter, dashboard);
 
+  // TODO: should update Dashboard class in the if(id) block
   return savedDashboard.save(saveOptions).then((id: string) => {
     if (id) {
       return id;

@@ -112,6 +112,7 @@ export const DashboardEditor = () => {
               isEmbeddableRendered={isEmbeddableRendered}
               indexPatterns={indexPatterns}
               dashboardContainer={dashboardContainer}
+              dashboardIdFromUrl={dashboardIdFromUrl}
             />
           )}
       </div>
