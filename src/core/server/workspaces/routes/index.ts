@@ -9,6 +9,15 @@ import { IWorkspaceDBImpl } from '../types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
+const workspaceAttributesSchema = schema.object({
+  description: schema.maybe(schema.string()),
+  name: schema.string(),
+  features: schema.maybe(schema.arrayOf(schema.string())),
+  color: schema.maybe(schema.string()),
+  icon: schema.maybe(schema.string()),
+  defaultVISTheme: schema.maybe(schema.string()),
+});
+
 export function registerRoutes({
   client,
   logger,
@@ -72,11 +81,7 @@ export function registerRoutes({
       path: '',
       validate: {
         body: schema.object({
-          attributes: schema.object({
-            description: schema.maybe(schema.string()),
-            name: schema.string(),
-            features: schema.maybe(schema.arrayOf(schema.string())),
-          }),
+          attributes: workspaceAttributesSchema,
         }),
       },
     },
@@ -102,11 +107,7 @@ export function registerRoutes({
           id: schema.string(),
         }),
         body: schema.object({
-          attributes: schema.object({
-            description: schema.maybe(schema.string()),
-            name: schema.string(),
-            features: schema.maybe(schema.arrayOf(schema.string())),
-          }),
+          attributes: workspaceAttributesSchema,
         }),
       },
     },

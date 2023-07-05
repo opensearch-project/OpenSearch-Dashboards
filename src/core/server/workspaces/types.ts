@@ -15,6 +15,9 @@ export interface WorkspaceAttribute {
   name: string;
   description?: string;
   features?: string[];
+  color?: string;
+  icon?: string;
+  defaultVISTheme?: string;
 }
 
 export interface WorkspaceFindOptions {
