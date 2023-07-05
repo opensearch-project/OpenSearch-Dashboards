@@ -41,6 +41,15 @@ export const workspace: SavedObjectsType = {
       features: {
         type: 'text',
       },
+      color: {
+        type: 'text',
+      },
+      icon: {
+        type: 'text',
+      },
+      defaultVISTheme: {
+        type: 'text',
+      },
     },
   },
 };

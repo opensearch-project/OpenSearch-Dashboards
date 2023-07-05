@@ -20,19 +20,23 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiImage,
-  EuiAccordion,
   EuiCheckbox,
   EuiCheckboxGroup,
   EuiCheckableCardProps,
   EuiCheckboxGroupProps,
   EuiCheckboxProps,
   EuiFieldTextProps,
+  EuiColorPicker,
+  EuiColorPickerProps,
+  EuiComboBox,
+  EuiComboBoxProps,
 } from '@elastic/eui';
 
 import { WorkspaceTemplate } from '../../../../../core/types';
 import { AppNavLinkStatus, ApplicationStart } from '../../../../../core/public';
 import { useApplications, useWorkspaceTemplate } from '../../hooks';
 import { WORKSPACE_OP_TYPE_CREATE, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
+import { WorkspaceIconSelector } from './workspace_icon_selector';
 
 interface WorkspaceFeature {
   id: string;
@@ -49,6 +53,9 @@ export interface WorkspaceFormData {
   name: string;
   description?: string;
   features: string[];
+  color?: string;
+  icon?: string;
+  defaultVISTheme?: string;
 }
 
 type WorkspaceFormErrors = { [key in keyof WorkspaceFormData]?: string };
@@ -58,6 +65,8 @@ const isWorkspaceFeatureGroup = (
 ): featureOrGroup is WorkspaceFeatureGroup => 'features' in featureOrGroup;
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
+
+const defaultVISThemeOptions = [{ label: 'Categorical', value: 'categorical' }];
 
 interface WorkspaceFormProps {
   application: ApplicationStart;
@@ -76,6 +85,10 @@ export const WorkspaceForm = ({
 
   const [name, setName] = useState(defaultValues?.name);
   const [description, setDescription] = useState(defaultValues?.description);
+  const [color, setColor] = useState(defaultValues?.color);
+  const [icon, setIcon] = useState(defaultValues?.icon);
+  const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
+
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const [selectedFeatureIds, setSelectedFeatureIds] = useState(defaultValues?.features || []);
   const selectedTemplate = workspaceTemplates.find(
@@ -87,6 +100,9 @@ export const WorkspaceForm = ({
     name,
     description,
     features: selectedFeatureIds,
+    color,
+    icon,
+    defaultVISTheme,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
@@ -119,6 +135,11 @@ export const WorkspaceForm = ({
       ];
     }, []);
   }, [applications]);
+
+  const selectedDefaultVISThemeOptions = useMemo(
+    () => defaultVISThemeOptions.filter((item) => item.value === defaultVISTheme),
+    [defaultVISTheme]
+  );
 
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
@@ -198,6 +219,20 @@ export const WorkspaceForm = ({
     setDescription(e.target.value);
   }, []);
 
+  const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {
+    setColor(text);
+  }, []);
+
+  const handleIconChange = useCallback((newIcon: string) => {
+    setIcon(newIcon);
+  }, []);
+
+  const handleDefaultVISThemeInputChange = useCallback<
+    Required<EuiComboBoxProps<string>>['onChange']
+  >((options) => {
+    setDefaultVISTheme(options[0]?.value);
+  }, []);
+
   return (
     <EuiForm id={formIdRef.current} onSubmit={handleFormSubmit} component="form">
       <EuiPanel>
@@ -216,6 +251,25 @@ export const WorkspaceForm = ({
           }
         >
           <EuiFieldText value={description} onChange={handleDescriptionInputChange} />
+        </EuiFormRow>
+        <EuiFormRow label="Color" isInvalid={!!formErrors.color} error={formErrors.color}>
+          <EuiColorPicker color={color} onChange={handleColorChange} />
+        </EuiFormRow>
+        <EuiFormRow label="Icon" isInvalid={!!formErrors.icon} error={formErrors.icon}>
+          <WorkspaceIconSelector value={icon} onChange={handleIconChange} color={color} />
+        </EuiFormRow>
+        <EuiFormRow
+          label="Default VIS Theme"
+          isInvalid={!!formErrors.defaultVISTheme}
+          error={formErrors.defaultVISTheme}
+        >
+          <EuiComboBox
+            options={defaultVISThemeOptions}
+            singleSelection
+            onChange={handleDefaultVISThemeInputChange}
+            selectedOptions={selectedDefaultVISThemeOptions}
+            isClearable={false}
+          />
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
@@ -267,74 +321,65 @@ export const WorkspaceForm = ({
             <EuiSpacer />
           </>
         )}
-        <EuiAccordion
-          id={workspaceHtmlIdGenerator()}
-          buttonContent={
-            <>
-              <EuiTitle size="xs">
-                <h3>Advanced Options</h3>
-              </EuiTitle>
-            </>
-          }
-        >
-          <EuiFlexGrid style={{ paddingLeft: 20, paddingTop: 20 }} columns={2}>
-            {featureOrGroups.map((featureOrGroup) => {
-              const features = isWorkspaceFeatureGroup(featureOrGroup)
+      </EuiPanel>
+      <EuiSpacer />
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h2>Workspace features</h2>
+        </EuiTitle>
+        <EuiFlexGrid style={{ paddingLeft: 20, paddingTop: 20 }} columns={2}>
+          {featureOrGroups.map((featureOrGroup) => {
+            const features = isWorkspaceFeatureGroup(featureOrGroup) ? featureOrGroup.features : [];
+            const selectedIds = selectedFeatureIds.filter((id) =>
+              (isWorkspaceFeatureGroup(featureOrGroup)
                 ? featureOrGroup.features
-                : [];
-              const selectedIds = selectedFeatureIds.filter((id) =>
-                (isWorkspaceFeatureGroup(featureOrGroup)
-                  ? featureOrGroup.features
-                  : [featureOrGroup]
-                ).find((item) => item.id === id)
-              );
-              return (
-                <EuiFlexItem key={featureOrGroup.name}>
-                  <EuiCheckbox
-                    id={
-                      isWorkspaceFeatureGroup(featureOrGroup)
-                        ? featureOrGroup.name
-                        : featureOrGroup.id
-                    }
-                    onChange={
-                      isWorkspaceFeatureGroup(featureOrGroup)
-                        ? handleFeatureGroupChange
-                        : handleFeatureCheckboxChange
-                    }
-                    label={`${
-                      featureOrGroup.name === 'OpenSearch Plugins'
-                        ? 'OpenSearch Features'
-                        : featureOrGroup.name
-                    }${features.length > 0 ? `(${selectedIds.length}/${features.length})` : ''}`}
-                    checked={selectedIds.length > 0}
-                    indeterminate={
-                      isWorkspaceFeatureGroup(featureOrGroup) &&
-                      selectedIds.length > 0 &&
-                      selectedIds.length < features.length
-                    }
+                : [featureOrGroup]
+              ).find((item) => item.id === id)
+            );
+            return (
+              <EuiFlexItem key={featureOrGroup.name}>
+                <EuiCheckbox
+                  id={
+                    isWorkspaceFeatureGroup(featureOrGroup)
+                      ? featureOrGroup.name
+                      : featureOrGroup.id
+                  }
+                  onChange={
+                    isWorkspaceFeatureGroup(featureOrGroup)
+                      ? handleFeatureGroupChange
+                      : handleFeatureCheckboxChange
+                  }
+                  label={`${featureOrGroup.name}${
+                    features.length > 0 ? `(${selectedIds.length}/${features.length})` : ''
+                  }`}
+                  checked={selectedIds.length > 0}
+                  indeterminate={
+                    isWorkspaceFeatureGroup(featureOrGroup) &&
+                    selectedIds.length > 0 &&
+                    selectedIds.length < features.length
+                  }
+                />
+                {isWorkspaceFeatureGroup(featureOrGroup) && (
+                  <EuiCheckboxGroup
+                    options={featureOrGroup.features.map((item) => ({
+                      id: item.id,
+                      label: item.name,
+                    }))}
+                    idToSelectedMap={selectedIds.reduce(
+                      (previousValue, currentValue) => ({
+                        ...previousValue,
+                        [currentValue]: true,
+                      }),
+                      {}
+                    )}
+                    onChange={handleFeatureChange}
+                    style={{ marginLeft: 40 }}
                   />
-                  {isWorkspaceFeatureGroup(featureOrGroup) && (
-                    <EuiCheckboxGroup
-                      options={featureOrGroup.features.map((item) => ({
-                        id: item.id,
-                        label: item.name,
-                      }))}
-                      idToSelectedMap={selectedIds.reduce(
-                        (previousValue, currentValue) => ({
-                          ...previousValue,
-                          [currentValue]: true,
-                        }),
-                        {}
-                      )}
-                      onChange={handleFeatureChange}
-                      style={{ marginLeft: 40 }}
-                    />
-                  )}
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGrid>
-        </EuiAccordion>
+                )}
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGrid>
       </EuiPanel>
       <EuiSpacer />
       <EuiText textAlign="right">
