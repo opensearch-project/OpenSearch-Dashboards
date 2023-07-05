@@ -32,6 +32,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import d3 from 'd3';
 import { i18n } from '@osd/i18n';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import * as topojson from 'topojson-client';
 import { getNotifications } from './opensearch_dashboards_services';
 import { colorUtil, OpenSearchDashboardsMapLayer } from '../../maps_legacy/public';
@@ -46,7 +47,7 @@ import {
 const EMPTY_STYLE = {
   weight: 1,
   opacity: 0.6,
-  color: 'rgb(200,200,200)',
+  color: euiThemeVars.euiColorMediumShade,
   fillOpacity: 0,
 };
 
