@@ -57,7 +57,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-coredns.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/coredns.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/coredns.svg',
     artifacts: {
       dashboards: [
         {

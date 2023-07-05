@@ -36,7 +36,7 @@ While we'll always prioritize asynchronous communication, sometimes a community 
 
 1. Review a proposal or technical design for a new feature in OpenSearch Dashboards or an OpenSearch Dashboards plugin
 2. Learn more about how to build and extend OpenSearch Dashboards - which APIs, plugins, resources, and services are available to speed development
-3. Discuss OpenSearch Dashboard roadmap and technical initiatives
+3. Discuss OpenSearch Dashboards roadmap and technical initiatives
 
 Signing up isn't required to attend - all OpenSearch Dashboards contributors or interested developers are welcome as participants.
 

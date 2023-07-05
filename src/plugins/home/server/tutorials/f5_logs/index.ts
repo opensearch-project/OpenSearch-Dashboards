@@ -57,7 +57,7 @@ export function f5LogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-f5.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/f5.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/f5.svg',
     artifacts: {
       dashboards: [],
       application: {
