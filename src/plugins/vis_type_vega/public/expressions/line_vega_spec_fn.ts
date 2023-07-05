@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { cloneDeep, isEmpty, get } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
 import {
   ExpressionFunctionDefinition,
@@ -21,7 +21,7 @@ import {
   addVisEventSignalsToSpecConfig,
   augmentEventChartSpec,
 } from '../../../vis_augmenter/public';
-import { formatDatatable, createSpecFromDatatable } from './helpers';
+import { formatDatatable, createSpecFromXYChartDatatable } from './helpers';
 import { VegaVisualizationDependencies } from '../plugin';
 
 type Input = OpenSearchDashboardsDatatable;
@@ -89,7 +89,7 @@ export const createLineVegaSpecFn = (
       table = addPointInTimeEventsLayersToTable(table, dimensions, pointInTimeEventsVisLayers);
     }
 
-    let spec = createSpecFromDatatable(table, visParams, dimensions, visAugmenterConfig);
+    let spec = createSpecFromXYChartDatatable(table, visParams, dimensions, visAugmenterConfig);
 
     if (!isEmpty(pointInTimeEventsVisLayers) && dimensions.x !== null) {
       spec = addPointInTimeEventsLayersToSpec(table, dimensions, spec);

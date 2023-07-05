@@ -213,7 +213,6 @@ export class VisualizationsPlugin
       chrome: core.chrome,
       overlays: core.overlays,
       visualizationTypes: types,
-      savedAugmentVisLoader,
     });
     setSavedVisualizationsLoader(savedVisualizationsLoader);
     const savedSearchLoader = createSavedSearchesLoader({

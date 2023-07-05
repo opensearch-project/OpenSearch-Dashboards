@@ -518,7 +518,7 @@ export class VisualizeEmbeddable
       this.visAugmenterConfig?.visLayerResourceIds === undefined
         ? visLayers
         : visLayers.filter((visLayer) =>
-            this.visAugmenterConfig?.visLayerResourceIds?.includes(visLayer.pluginResource.id)
+            this.visAugmenterConfig.visLayerResourceIds.includes(visLayer.pluginResource.id)
           );
   }
 
