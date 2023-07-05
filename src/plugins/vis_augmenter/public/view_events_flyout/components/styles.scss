@@ -38,12 +38,9 @@ $base-vis-min-height: 25vh; // Visualizations require the container to have a va
 
     overflow: auto;
     overflow-x: hidden;
+    overflow-y: hidden;
     scrollbar-gutter: stable both-edges;
   }
-}
-
-.hide-y-scroll {
-  overflow-y: hidden;
 }
 
 .show-y-scroll {

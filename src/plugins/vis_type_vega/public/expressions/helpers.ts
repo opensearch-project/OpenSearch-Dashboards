@@ -168,7 +168,9 @@ const isXAxisColumn = (column: OpenSearchDashboardsDatatableColumn): boolean => 
   return column.meta?.aggConfigParams?.interval !== undefined;
 };
 
-export const createSpecFromDatatable = (
+// Given a chart's underlying datatable, generate a vega-lite spec.
+// Designed to be used with x-y / temporal visualizations only.
+export const createSpecFromXYChartDatatable = (
   datatable: OpenSearchDashboardsDatatable,
   visParams: VisParams,
   dimensions: VislibDimensions,

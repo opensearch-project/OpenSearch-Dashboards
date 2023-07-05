@@ -8,7 +8,7 @@ import {
   buildXAxis,
   buildYAxis,
   cleanString,
-  createSpecFromDatatable,
+  createSpecFromXYChartDatatable,
   formatDatatable,
   setupConfig,
 } from './helpers';
@@ -191,13 +191,13 @@ describe('helpers', function () {
     });
   });
 
-  describe('createSpecFromDatatable()', function () {
+  describe('createSpecFromXYChartDatatable()', function () {
     // Following 3 tests fail since they are persisting temporal data
     // which can cause snapshots to fail depending on the test env they are run on.
     it.skip('build simple line chart"', function () {
       expect(
         JSON.stringify(
-          createSpecFromDatatable(
+          createSpecFromXYChartDatatable(
             formatDatatable(JSON.parse(simpleDatatable)),
             JSON.parse(simpleVisParams),
             JSON.parse(simpleDimensions)
@@ -209,7 +209,7 @@ describe('helpers', function () {
     it.skip('build empty chart if no x-axis is defined"', function () {
       expect(
         JSON.stringify(
-          createSpecFromDatatable(
+          createSpecFromXYChartDatatable(
             formatDatatable(JSON.parse(simpleDatatable)),
             JSON.parse(simpleVisParams),
             JSON.parse(noXAxisDimensions)
@@ -221,7 +221,7 @@ describe('helpers', function () {
     it.skip('build complicated line chart"', function () {
       expect(
         JSON.stringify(
-          createSpecFromDatatable(
+          createSpecFromXYChartDatatable(
             formatDatatable(JSON.parse(complexDatatable)),
             JSON.parse(complexVisParams),
             JSON.parse(complexDimensions)

@@ -29,7 +29,6 @@
  */
 
 import './visualize_listing.scss';
-import { get } from 'lodash';
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { useUnmount, useMount } from 'react-use';

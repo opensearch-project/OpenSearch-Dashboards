@@ -123,12 +123,12 @@ export function ViewEventsFlyout(props: Props) {
           <EuiFlyoutBody>
             <EuiFlexGroup className="view-events-flyout__content" direction="column">
               <EuiFlexItem
-                className="view-events-flyout__contentPanel hide-y-scroll date-range-panel-height"
+                className="view-events-flyout__contentPanel date-range-panel-height"
                 grow={false}
               >
                 <DateRangeItem timeRange={timeRange as TimeRange} reload={reload} />
               </EuiFlexItem>
-              <EuiFlexItem className="view-events-flyout__contentPanel hide-y-scroll" grow={5}>
+              <EuiFlexItem className="view-events-flyout__contentPanel" grow={5}>
                 <BaseVisItem embeddable={visEmbeddable as VisualizeEmbeddable} />
               </EuiFlexItem>
               <EuiFlexItem className="view-events-flyout__contentPanel show-y-scroll" grow={5}>
@@ -137,7 +137,7 @@ export function ViewEventsFlyout(props: Props) {
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                className="view-events-flyout__contentPanel hide-y-scroll timeline-panel-height"
+                className="view-events-flyout__contentPanel timeline-panel-height"
                 grow={false}
               >
                 <TimelinePanel embeddable={timelineVisEmbeddable as VisualizeEmbeddable} />

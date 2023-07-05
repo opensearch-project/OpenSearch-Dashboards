@@ -191,7 +191,7 @@ export class SavedObjectEdition extends Component<
   };
 
   formatTitle = (object: SimpleSavedObject<any> | undefined) => {
-    return object?.attributes?.title ? `'${object.attributes.title}'` : '';
+    return object?.attributes?.title ?? '';
   };
 
   redirectToListing() {
