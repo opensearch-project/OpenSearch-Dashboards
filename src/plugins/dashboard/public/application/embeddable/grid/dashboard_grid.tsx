@@ -30,6 +30,7 @@
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
+import './_dashboard_grid.scss'
 
 // @ts-ignore
 import sizeMe from 'react-sizeme';
