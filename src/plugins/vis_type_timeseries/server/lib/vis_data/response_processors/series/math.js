@@ -34,34 +34,7 @@ import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
 import { getSplits } from '../../helpers/get_splits';
 import { mapBucket } from '../../helpers/map_bucket';
-import { create, all } from 'mathjs';
-
-const math = create(all);
-const evaluate = math.evaluate;
-
-math.import(
-  {
-    import: function () {
-      throw new Error('Function import is disabled');
-    },
-    createUnit: function () {
-      throw new Error('Function createUnit is disabled');
-    },
-    evaluate: function () {
-      throw new Error('Function evaluate is disabled');
-    },
-    parse: function () {
-      throw new Error('Function parse is disabled');
-    },
-    simplify: function () {
-      throw new Error('Function simplify is disabled');
-    },
-    derivative: function () {
-      throw new Error('Function derivative is disabled');
-    },
-  },
-  { override: true }
-);
+import { evaluate } from './evaluate';
 
 export function mathAgg(resp, panel, series, meta) {
   return (next) => (results) => {
