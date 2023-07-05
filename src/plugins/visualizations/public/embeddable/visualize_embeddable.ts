@@ -96,6 +96,10 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  // TODO: This config, along with other VisAugmenter-related fields (visLayers, savedAugmentVisLoader)
+  // can be decoupled from embeddables plugin entirely. It is only used for changing the underlying
+  // visualization. Instead, we can use ReactExpressionRenderer for handling the rendering.
+  // For details, see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4483
   visAugmenterConfig?: VisAugmenterEmbeddableConfig;
 }
 
