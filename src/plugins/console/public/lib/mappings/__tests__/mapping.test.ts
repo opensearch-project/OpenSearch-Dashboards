@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { Field } from '../mappings';
 import '../../../application/models/sense_editor/sense_editor.test.mocks';
 import * as mappings from '../mappings';
 
@@ -39,7 +40,7 @@ describe('Mappings', () => {
     mappings.clear();
   });
 
-  function fc(f1, f2) {
+  function fc(f1: Field, f2: Field) {
     if (f1.name < f2.name) {
       return -1;
     }
@@ -49,8 +50,8 @@ describe('Mappings', () => {
     return 0;
   }
 
-  function f(name, type) {
-    return { name: name, type: type || 'string' };
+  function f(name: string, type?: string) {
+    return { name, type: type || 'string' };
   }
 
   test('Multi fields 1.0 style', function () {
@@ -256,10 +257,37 @@ describe('Mappings', () => {
       'test_index2',
     ]);
     expect(mappings.getIndices(false).sort()).toEqual(['test_index1', 'test_index2']);
-    expect(mappings.expandAliases(['alias1', 'test_index2']).sort()).toEqual([
+    expect((mappings.expandAliases(['alias1', 'test_index2']) as string[]).sort()).toEqual([
       'test_index1',
       'test_index2',
     ]);
     expect(mappings.expandAliases('alias2')).toEqual('test_index2');
+  });
+
+  test('Multi types', function () {
+    mappings.loadMappings({
+      index: {
+        properties: {
+          name1: {
+            type: 'object',
+            path: 'just_name',
+            properties: {
+              first1: { type: 'string' },
+              last1: { type: 'string', index_name: 'i_last_1' },
+            },
+          },
+          name2: {
+            type: 'object',
+            path: 'full',
+            properties: {
+              first2: { type: 'string' },
+              last2: { type: 'string', index_name: 'i_last_2' },
+            },
+          },
+        },
+      },
+    });
+
+    expect(mappings.getTypes()).toEqual(['properties']);
   });
 });
