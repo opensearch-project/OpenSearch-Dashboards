@@ -23,6 +23,7 @@ interface DashboardTopNavProps {
   isEmbeddableRendered: boolean;
   indexPatterns: IndexPattern[];
   dashboardContainer?: DashboardContainer;
+  dashboardIdFromUrl?: string;
 }
 
 export enum UrlParams {
@@ -42,6 +43,7 @@ const TopNav = ({
   isEmbeddableRendered,
   dashboardContainer,
   indexPatterns,
+  dashboardIdFromUrl,
 }: DashboardTopNavProps) => {
   const [topNavMenu, setTopNavMenu] = useState<any>();
   const [isFullScreenMode, setIsFullScreenMode] = useState<any>();
@@ -80,6 +82,7 @@ const TopNav = ({
         savedDashboardInstance,
         services,
         dashboard,
+        dashboardIdFromUrl,
         dashboardContainer
       );
       setTopNavMenu(
@@ -99,6 +102,7 @@ const TopNav = ({
     stateContainer,
     isEmbeddableRendered,
     dashboard,
+    dashboardIdFromUrl
   ]);
 
   useEffect(() => {
