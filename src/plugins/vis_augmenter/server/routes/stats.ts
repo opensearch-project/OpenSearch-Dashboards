@@ -10,12 +10,8 @@ import {
   IRouter,
   SavedObjectsFindResponse,
 } from '../../../../core/server';
-import {
-  APP_API,
-  APP_PATH,
-  PER_PAGE_REQUEST_NUMBER,
-  AugmentVisSavedObjectAttributes,
-} from '../../common';
+import { APP_API, APP_PATH, AugmentVisSavedObjectAttributes } from '../../common';
+import { PER_PAGE_VALUE } from '../../../saved_objects/common';
 import { getAugmentVisSavedObjects, getStats } from './stats_helpers';
 
 export const registerStatsRoute = (router: IRouter, logger: Logger) => {
@@ -33,7 +29,7 @@ export const registerStatsRoute = (router: IRouter, logger: Logger) => {
         const savedObjectsClient = context.core.savedObjects.client;
         const augmentVisSavedObjects: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes> = await getAugmentVisSavedObjects(
           savedObjectsClient,
-          PER_PAGE_REQUEST_NUMBER
+          PER_PAGE_VALUE
         );
         const stats = getStats(augmentVisSavedObjects);
         return response.ok({
