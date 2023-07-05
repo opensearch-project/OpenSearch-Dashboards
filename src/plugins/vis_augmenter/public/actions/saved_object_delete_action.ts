@@ -29,7 +29,7 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
   }
 
   public async isCompatible({ type, savedObjectId }: SavedObjectDeleteContext) {
-    return type === 'visualization' && (savedObjectId ? true : false);
+    return type === 'visualization' && !!savedObjectId;
   }
 
   /**
