@@ -60,7 +60,7 @@ export function panwLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-panw.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/paloalto.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/paloalto.svg',
     artifacts: {
       dashboards: [
         {
