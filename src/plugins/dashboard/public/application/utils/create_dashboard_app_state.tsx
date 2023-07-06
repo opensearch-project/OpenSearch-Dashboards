@@ -70,6 +70,10 @@ export const createDashboardGlobalAndAppState = ({
     setDashboard: (state) => (dashboard) => ({
       ...state,
       ...dashboard,
+      options: {
+        ...state.options,
+        ...dashboard.options,
+      },
     }),
   } as DashboardAppStateTransitions;
 

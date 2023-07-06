@@ -329,12 +329,12 @@ export const getNavActions = (
 
       newStateContainer.filters = dashboard.filters;
       newStateContainer.query = dashboard.query;
+      newStateContainer.options = {
+        hidePanelTitles: dashboard.options.hidePanelTitles,
+        useMargins: dashboard.options.useMargins,
+      };
+      newStateContainer.timeRestore = dashboard.timeRestore;
       stateContainer.transitions.setDashboard(newStateContainer);
-      newStateContainer.transitions.setOption('hidePanelTitles', dashboard.options.hidePanelTitles);
-      newStateContainer.transitions.setOption('useMargins', dashboard.options.useMargins);
-
-      // Need to see if needed
-      stateContainer.transitions.set('timeRestore', dashboard.timeRestore);
 
       // Since time filters are not tracked by app state, we need to manually reset it
       if (stateContainer.getState().timeRestore) {

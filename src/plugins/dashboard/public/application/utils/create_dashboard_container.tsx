@@ -372,6 +372,7 @@ const getDashboardInputFromAppState = (
     title: appStateData.title,
     description: appStateData.description,
     expandedPanelId: appStateData.expandedPanelId,
+    timeRestore: appStateData.timeRestore,
   };
 };
 
@@ -483,8 +484,7 @@ const handleDashboardContainerChanges = (
 export const refreshDashboardContainer = (
   dashboardContainer: DashboardContainer,
   dashboardServices: DashboardServices,
-  savedDashboardId: string,
-  dashboard: Dashboard,
+  savedDashboard: Dashboard,
   appStateData?: DashboardAppState
 ) => {
   if (!appStateData) {
@@ -494,7 +494,7 @@ export const refreshDashboardContainer = (
   const currentDashboardInput = getDashboardInputFromAppState(
     appStateData,
     dashboardServices,
-    savedDashboardId
+    savedDashboard.id
   );
 
   const changes = getChangesForContainerStateFromAppState(
@@ -506,17 +506,13 @@ export const refreshDashboardContainer = (
     dashboardContainer.updateInput(changes);
 
     if (changes.timeRange || changes.refreshConfig) {
-              if (currentDashboardInput.timeRestore) {
-                dashboard.isDirty = true;
-              }
-            }
-      if (currentDashboardInput.refreshConfig) {
-        dashboard.isDirty = true;
+      if (appStateData.timeRestore) {
+        savedDashboard.isDirty = true;
       }
     }
 
     if (changes.filters || changes.query) {
-      dashboard.isDirty = true;
+      savedDashboard.isDirty = true;
     }
   }
 };

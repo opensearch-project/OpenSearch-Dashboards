@@ -47,7 +47,7 @@ export const useSavedDashboardInstance = (
         let dashboardInstance: any;
         if (history.location.pathname === '/create') {
           dashboardInstance = await getDashboardInstance(services);
-        } else {
+        } else if (dashboardIdFromUrl) {
           dashboardInstance = await getDashboardInstance(services, dashboardIdFromUrl);
           const { savedDashboard } = dashboardInstance;
           // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard

@@ -130,13 +130,7 @@ export const useDashboardAppAndGlobalState = (
         // If app state is changes, then set unsaved changes to true
         // the only thing app state is not tracking is the time filter, need to check the previous dashboard if they count time filter change or not
         const stopSyncingFromAppState = stateContainer.subscribe((state) => {
-          refreshDashboardContainer(
-            dashboardContainer,
-            services,
-            dashboardContainer.id,
-            dashboard,
-            state
-          );
+          refreshDashboardContainer(dashboardContainer, services, dashboard, state);
         });
 
         subscriptions.add(stopSyncingFromAppState);
@@ -152,7 +146,6 @@ export const useDashboardAppAndGlobalState = (
           refreshDashboardContainer(
             dashboardContainer,
             services,
-            dashboardContainer.id,
             dashboard,
             stateContainer.getState()
           );
