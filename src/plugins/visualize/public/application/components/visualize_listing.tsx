@@ -141,6 +141,10 @@ export const VisualizeListing = () => {
           savedObjects.client
             .delete(item.savedObjectType, item.id)
             .then(() => {
+              /**
+               * TODO: this should be automatically handled by the saved objects plugin. Tracking issue:
+               * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4499
+               */
               uiActions
                 .getTrigger(SAVED_OBJECT_DELETE_TRIGGER)
                 .exec({ type: item.savedObjectType, savedObjectId: item.id });

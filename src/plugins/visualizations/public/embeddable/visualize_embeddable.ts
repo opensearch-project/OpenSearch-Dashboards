@@ -561,9 +561,14 @@ export class VisualizeEmbeddable
         )) as ExprVisLayers;
         const visLayers = exprVisLayers.layers;
 
-        // There may be some stale saved objs if any plugin resources have been deleted since last time
-        // data was fetched from them via the expression functions. Execute this trigger so any listening
-        // action can perform cleanup.
+        /**
+         * There may be some stale saved objs if any plugin resources have been deleted since last time
+         * data was fetched from them via the expression functions. Execute this trigger so any listening
+         * action can perform cleanup.
+         *
+         * TODO: this should be automatically handled by the saved objects plugin. Tracking issue:
+         * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4499
+         */
         getUiActions().getTrigger(PLUGIN_RESOURCE_DELETE_TRIGGER).exec({
           savedObjs: augmentVisSavedObjs,
           visLayers,

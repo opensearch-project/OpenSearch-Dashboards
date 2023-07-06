@@ -36,6 +36,9 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
    * If deletion of a vis saved object has been triggered, we want to clean up
    * any augment-vis saved objects that have a reference to this vis since it
    * is now stale.
+   * TODO: this should be automatically handled by the saved objects plugin, instead
+   * of this specific scenario in the vis_augmenter plugin. Tracking issue:
+   * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4499
    */
   public async execute({ type, savedObjectId }: SavedObjectDeleteContext) {
     if (!(await this.isCompatible({ type, savedObjectId }))) {

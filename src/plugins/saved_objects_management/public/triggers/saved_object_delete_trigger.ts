@@ -7,11 +7,10 @@ import { i18n } from '@osd/i18n';
 import { Trigger } from '../../../ui_actions/public';
 
 /**
- * This action is currently being used behind-the-scenes in the vis_augmenter plugin
+ * TODO: This action is currently being used behind-the-scenes in the vis_augmenter plugin
  * to clean up related augment-vis saved objects when a visualization is deleted.
- * This could be improved upon by potentially moving and maintaining this in the
- * saved_objects plugin, expanding to other situations where automatic cleanup may
- * be helpful, and communicating this better on the UI (modals, callouts, etc.)
+ * This should be moved and maintained by the saved objects plugin. Tracking issue:
+ * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4499
  */
 export const SAVED_OBJECT_DELETE_TRIGGER = 'SAVED_OBJECT_DELETE_TRIGGER';
 export const savedObjectDeleteTrigger: Trigger<'SAVED_OBJECT_DELETE_TRIGGER'> = {
