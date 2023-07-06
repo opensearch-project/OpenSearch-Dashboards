@@ -7,17 +7,26 @@ import ReactDOM from 'react-dom';
 import { I18nProvider, FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { ApplicationStart, CoreStart } from '../../../core/public';
+import useObservable from 'react-use/lib/useObservable';
+import { ApplicationStart, ChromeStart, CoreStart } from '../../../core/public';
 import { OverviewApp } from '.';
 import { OverviewCard } from './components/overview_card';
 
 export interface ManagementOverviewProps {
   application: ApplicationStart;
+  chrome: ChromeStart;
   overviewApps?: OverviewApp[];
 }
 
 function ManagementOverviewWrapper(props: ManagementOverviewProps) {
-  const { application, overviewApps } = props;
+  const { chrome, application, overviewApps } = props;
+
+  const hiddenAppIds =
+    useObservable(chrome.navLinks.getNavLinks$())
+      ?.filter((link) => link.hidden)
+      .map((link) => link.id) || [];
+
+  const availableApps = overviewApps?.filter((app) => hiddenAppIds.indexOf(app.id) === -1);
 
   return (
     <EuiPage restrictWidth={1200}>
@@ -29,7 +38,7 @@ function ManagementOverviewWrapper(props: ManagementOverviewProps) {
         </EuiTitle>
         <EuiSpacer />
         <EuiFlexGrid columns={3}>
-          {overviewApps?.map((app) => (
+          {availableApps?.map((app) => (
             <EuiFlexItem key={app.id}>
               <OverviewCard
                 {...app}
@@ -52,7 +61,11 @@ export function renderApp(
 ) {
   ReactDOM.render(
     <I18nProvider>
-      <ManagementOverviewWrapper application={application} overviewApps={overviewApps} />
+      <ManagementOverviewWrapper
+        chrome={chrome}
+        application={application}
+        overviewApps={overviewApps}
+      />
     </I18nProvider>,
     element
   );

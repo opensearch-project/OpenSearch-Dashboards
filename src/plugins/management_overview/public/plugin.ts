@@ -22,27 +22,12 @@ interface ManagementOverviewSetupDeps {
 export interface ManagementOverViewPluginSetup {
   register: (overviewApp: OverviewApp) => void;
 }
-
-export type ManagementOverViewPluginStart = ManagementOverViewPluginSetup;
-
 /** @public */
-export class ManagementOverViewPlugin
-  implements Plugin<ManagementOverViewPluginSetup, ManagementOverViewPluginStart> {
+export class ManagementOverViewPlugin implements Plugin<ManagementOverViewPluginSetup, void> {
   private readonly overviewApps = new Map<string, OverviewApp>();
 
   private getSortedOverviewApps(): OverviewApp[] {
     return [...this.overviewApps.values()].sort((a, b) => a.order - b.order);
-  }
-
-  private getRegister() {
-    return (app: OverviewApp) => {
-      if (this.overviewApps.has(app.id)) {
-        throw new Error(
-          `Management overview App tool with id [${app.id}] has already been registered. Use a unique id.`
-        );
-      }
-      this.overviewApps.set(app.id, app);
-    };
   }
 
   public setup(
@@ -86,13 +71,16 @@ export class ManagementOverViewPlugin
     });
 
     return {
-      register: this.getRegister(),
+      register: (app: OverviewApp) => {
+        if (this.overviewApps.has(app.id)) {
+          throw new Error(
+            `Management overview App tool with id [${app.id}] has already been registered. Use a unique id.`
+          );
+        }
+        this.overviewApps.set(app.id, app);
+      },
     };
   }
 
-  public start(core: CoreStart): ManagementOverViewPluginStart {
-    return {
-      register: this.getRegister(),
-    };
-  }
+  public start(core: CoreStart): void {}
 }

@@ -29,25 +29,23 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
 import { AppUpdater } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 
-import { DataSourcePluginStart } from 'src/plugins/data_source/public';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
-import { ManagementOverViewPluginStart } from '../../management_overview/public';
+import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 
 export interface DevToolsSetupDependencies {
-  dataSource?: DataSourcePluginStart;
-}
-
-export interface DevToolsStartDependencies {
-  managementOverview?: ManagementOverViewPluginStart;
+  dataSource?: DataSourcePluginSetup;
+  urlForwarding: UrlForwardingSetup;
+  managementOverview?: ManagementOverViewPluginSetup;
 }
 
 export interface DevToolsSetup {
@@ -64,7 +62,7 @@ export interface DevToolsSetup {
   register: (devTool: CreateDevToolArgs) => DevToolApp;
 }
 
-export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
+export class DevToolsPlugin implements Plugin<DevToolsSetup> {
   private readonly devTools = new Map<string, DevToolApp>();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
@@ -76,11 +74,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     defaultMessage: 'Dev Tools',
   });
 
-  public setup(
-    coreSetup: CoreSetup<DevToolsSetupDependencies>,
-    { urlForwarding }: { urlForwarding: UrlForwardingSetup }
-  ) {
+  public setup(coreSetup: CoreSetup, deps: DevToolsSetupDependencies) {
     const { application: applicationSetup, getStartServices } = coreSetup;
+    const { urlForwarding, managementOverview } = deps;
 
     applicationSetup.register({
       id: 'dev_tools',
@@ -93,11 +89,21 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         const { element, history } = params;
         element.classList.add('devAppWrapper');
 
-        const [core, devSetup] = await getStartServices();
+        const [core] = await getStartServices();
 
         const { renderApp } = await import('./application');
-        return renderApp(core, element, history, this.getSortedDevTools(), devSetup);
+        return renderApp(core, element, history, this.getSortedDevTools(), deps);
       },
+    });
+
+    managementOverview?.register({
+      id: 'dev_tools',
+      title: this.title,
+      description: i18n.translate('devTools.devToolsDescription', {
+        defaultMessage:
+          'Use the console to set up and troubleshoot your OpenSearch environment with the REST API.',
+      }),
+      order: 9070,
     });
 
     urlForwarding.forwardApp('dev_tools', 'dev_tools');
@@ -117,19 +123,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     };
   }
 
-  public start(core: CoreStart, { managementOverview }: DevToolsStartDependencies) {
+  public start() {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
-    } else {
-      managementOverview?.register({
-        id: 'dev_tools',
-        title: this.title,
-        description: i18n.translate('devTools.devToolsDescription', {
-          defaultMessage:
-            'Use the console to set up and troubleshoot your OpenSearch environment with the REST API.',
-        }),
-        order: 9070,
-      });
     }
   }
 

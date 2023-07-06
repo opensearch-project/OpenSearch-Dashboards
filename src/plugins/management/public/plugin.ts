@@ -49,14 +49,11 @@ import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
-import { ManagementOverViewPluginStart } from '../../management_overview/public';
+import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
-}
-
-interface ManagementStartDependencies {
-  managementOverview?: ManagementOverViewPluginStart;
+  managementOverview?: ManagementOverViewPluginSetup;
 }
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
@@ -72,7 +69,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     defaultMessage: 'Dashboards Management',
   });
 
-  public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {
+  public setup(core: CoreSetup, { home, managementOverview }: ManagementSetupDependencies) {
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
 
     core.application.register({
@@ -94,12 +91,22 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       },
     });
 
+    managementOverview?.register({
+      id: MANAGEMENT_APP_ID,
+      title: this.title,
+      description: i18n.translate('management.dashboardManagement.description', {
+        defaultMessage:
+          'Manage Dashboards saved objects and data source connections. You can also modify advanced settings for Dashboards.',
+      }),
+      order: 9030,
+    });
+
     return {
       sections: this.managementSections.setup(),
     };
   }
 
-  public start(core: CoreStart, { managementOverview }: ManagementStartDependencies) {
+  public start(core: CoreStart) {
     this.managementSections.start({ capabilities: core.application.capabilities });
     this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()
@@ -111,18 +118,6 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           status: AppStatus.inaccessible,
           navLinkStatus: AppNavLinkStatus.hidden,
         };
-      });
-    }
-
-    if (managementOverview && this.hasAnyEnabledApps) {
-      managementOverview.register({
-        id: MANAGEMENT_APP_ID,
-        title: this.title,
-        description: i18n.translate('management.dashboardManagement.description', {
-          defaultMessage:
-            'Manage Dashboards saved objects and data source connections. You can also modify advanced settings for Dashboards.',
-        }),
-        order: 9030,
       });
     }
 
