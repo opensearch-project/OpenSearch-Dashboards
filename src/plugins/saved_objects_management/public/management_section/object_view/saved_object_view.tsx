@@ -170,6 +170,9 @@ export class SavedObjectEdition extends Component<
         buttonColor: 'danger',
       }
     );
+    // TODO: This trigger should be maintained and emitted by the saved objects plugin
+    // when an obj is deleted. Tracking issue:
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4499
     if (confirmed) {
       this.props.uiActions
         .getTrigger(SAVED_OBJECT_DELETE_TRIGGER)
