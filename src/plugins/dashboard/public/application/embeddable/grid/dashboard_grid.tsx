@@ -46,7 +46,6 @@ import { DashboardPanelState } from '../types';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
-import { DashboardGridItem } from './dashboard_grid_item';
 
 let lastValidGridSize = 0;
 
@@ -262,18 +261,34 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
-    return _.map(panelsInOrder, ({ explicitInput, type }) => (
-      <DashboardGridItem
-        expandedPanelId={expandedPanelId}
-        focusedPanelIndex={focusedPanelIndex}
-        id={explicitInput.id}
-        key={explicitInput.id}
-        type={type}
-        gridItems={this.gridItems}
-        container={this.props.container}
-        PanelComponent={this.props.PanelComponent}
-      />
-    ));
+    return _.map(panelsInOrder, (panel) => {
+      const expandPanel =
+        expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
+      const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
+      const classes = classNames({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'dshDashboardGrid__item--expanded': expandPanel,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'dshDashboardGrid__item--hidden': hidePanel,
+      });
+      return (
+        <div
+          style={{ zIndex: focusedPanelIndex === panel.explicitInput.id ? 2 : 'auto' }}
+          className={classes}
+          key={panel.explicitInput.id}
+          data-test-subj="dashboardPanel"
+          ref={(reactGridItem) => {
+            this.gridItems[panel.explicitInput.id] = reactGridItem;
+          }}
+        >
+          <EmbeddableChildPanel
+            embeddableId={panel.explicitInput.id}
+            container={this.props.container}
+            PanelComponent={this.props.PanelComponent}
+          />
+        </div>
+      );
+    });
   }
 
   public render() {

@@ -39,15 +39,6 @@ export const DashboardEditor = () => {
     dashboard
   );
 
-  // const { dashboardContainer } = useDashboardContainer(
-  //   services,
-  //   isChromeVisible,
-  //   eventEmitter,
-  //   dashboard,
-  //   savedDashboardInstance,
-  //   appState
-  // );
-
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     eventEmitter,
     dashboard,
