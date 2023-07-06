@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { cloneDeep, isEqual, uniqBy } from 'lodash';
-import { EMPTY, Observable, Subscription, merge, of, pipe } from 'rxjs';
+import { EMPTY, Observable, Subscription, merge, pipe } from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
@@ -16,7 +16,6 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import deepEqual from 'fast-deep-equal';
-import { EventEmitter } from 'stream';
 import { useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
@@ -55,8 +54,6 @@ import { Dashboard } from '../../../dashboard';
 
 export const useDashboardContainer = (
   services: DashboardServices,
-  isChromeVisible: boolean,
-  eventEmitter: EventEmitter,
   dashboard?: Dashboard,
   savedDashboardInstance?: SavedObjectDashboard,
   appState?: DashboardAppStateContainer
@@ -134,7 +131,6 @@ const createDashboardEmbeddable = (
   } = dashboardServices;
   const { query: queryService } = data;
   const filterManager = queryService.filterManager;
-  const timefilter = queryService.timefilter.timefilter;
   const queryStringManager = queryService.queryString;
   const { visualizeCapabilities, mapsCapabilities } = embeddableCapabilities;
   const dashboardFactory = embeddable.getEmbeddableFactory<
@@ -237,7 +233,7 @@ const createDashboardEmbeddable = (
         getShouldShowViewHelp(appStateData) ||
         shouldShowUnauthorizedEmptyState(appStateData),
       useMargins: appStateData.options.useMargins,
-      lastReloadRequestTime, // TODO
+      lastReloadRequestTime,
       title: appStateData.title,
       description: appStateData.description,
       expandedPanelId: appStateData.expandedPanelId,
@@ -339,8 +335,6 @@ const createDashboardEmbeddable = (
             return Object.values(differences).length === 0 ? undefined : cloneDeep(differences);
           };
 
-          // TODO: handle dashboard container input and output subsciptions
-          // issue:
           outputSubscription = merge(
             // output of dashboard container itself
             dashboardContainer.getOutput$(),
@@ -381,13 +375,6 @@ const createDashboardEmbeddable = (
             ) {
               // Add filters modifies the object passed to it, hence the clone deep.
               filterManager.addFilters(cloneDeep(container.getInput().filters));
-
-              // TODO: investigate if this is needed
-              /* dashboardStateManager.applyFilters(
-                  $scope.model.query,
-                  container.getInput().filters
-              );*/
-
               appState.transitions.set('query', queryStringManager.getQuery());
             }
             // triggered when dashboard embeddable container has changes, and update the appState
