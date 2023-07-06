@@ -24,6 +24,8 @@ export const DashboardEditor = () => {
   const { chrome } = services;
   const isChromeVisible = useChromeVisibility(chrome);
   const [eventEmitter] = useState(new EventEmitter());
+  const dashboardDom = document.getElementById('dashboardViewport');
+  const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
 
   const { savedDashboard: savedDashboardInstance, dashboard } = useSavedDashboardInstance(
     services,
@@ -39,7 +41,7 @@ export const DashboardEditor = () => {
     dashboard
   );
 
-  const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
+  const { currentAppState } = useEditorUpdates(
     eventEmitter,
     dashboard,
     savedDashboardInstance,
@@ -48,23 +50,35 @@ export const DashboardEditor = () => {
   );
 
   useEffect(() => {
-    if (appStateContainer && dashboard) {
+    if (currentAppState && dashboard) {
       if (savedDashboardInstance?.id) {
         chrome.setBreadcrumbs(
           setBreadcrumbsForExistingDashboard(
             savedDashboardInstance.title,
-            appStateContainer?.getState().viewMode,
+            currentAppState.viewMode,
             dashboard.isDirty
           )
         );
         chrome.docTitle.change(savedDashboardInstance.title);
       } else {
         chrome.setBreadcrumbs(
-          setBreadcrumbsForNewDashboard(appStateContainer?.getState().viewMode, dashboard.isDirty)
+          setBreadcrumbsForNewDashboard(currentAppState.viewMode, dashboard.isDirty)
         );
       }
     }
-  }, [savedDashboardInstance, chrome, appStateContainer, dashboard]);
+  }, [savedDashboardInstance, chrome, currentAppState, dashboard]);
+
+  useEffect(() => {
+    if (!currentContainer || !dashboardDom) {
+      return;
+    }
+    currentContainer.render(dashboardDom);
+    setIsEmbeddableRendered(true);
+
+    return () => {
+      setIsEmbeddableRendered(false);
+    };
+  }, [currentContainer, dashboardDom]);
 
   useEffect(() => {
     // clean up all registered listeners if any is left
@@ -76,19 +90,23 @@ export const DashboardEditor = () => {
   return (
     <div>
       <div>
-        {savedDashboardInstance && currentAppState && currentContainer && dashboard && (
-          <DashboardTopNav
-            isChromeVisible={isChromeVisible}
-            savedDashboardInstance={savedDashboardInstance}
-            appState={appStateContainer!}
-            dashboard={dashboard}
-            currentAppState={currentAppState}
-            isEmbeddableRendered={isEmbeddableRendered}
-            indexPatterns={indexPatterns}
-            currentContainer={currentContainer}
-            dashboardIdFromUrl={dashboardIdFromUrl}
-          />
-        )}
+        {savedDashboardInstance &&
+          isEmbeddableRendered &&
+          currentAppState &&
+          currentContainer &&
+          dashboard && (
+            <DashboardTopNav
+              isChromeVisible={isChromeVisible}
+              savedDashboardInstance={savedDashboardInstance}
+              appState={appStateContainer!}
+              dashboard={dashboard}
+              currentAppState={currentAppState}
+              isEmbeddableRendered={isEmbeddableRendered}
+              indexPatterns={indexPatterns}
+              currentContainer={currentContainer}
+              dashboardIdFromUrl={dashboardIdFromUrl}
+            />
+          )}
       </div>
     </div>
   );

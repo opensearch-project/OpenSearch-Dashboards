@@ -137,6 +137,7 @@ export const getNavActions = (
     );
     showSaveModal(dashboardSaveModal, I18nContext);
   };
+
   navActions[TopNavIds.CLONE] = () => {
     const currentTitle = appState.title;
     const onClone = (

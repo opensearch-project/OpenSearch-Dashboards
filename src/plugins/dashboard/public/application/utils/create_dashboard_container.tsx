@@ -55,7 +55,7 @@ export const createDashboardContainer = async (
   savedDashboard?: SavedObjectDashboard,
   appState?: DashboardAppStateContainer
 ) => {
-  const { embeddable, dashboardConfig } = services;
+  const { embeddable } = services;
 
   const dashboardFactory = embeddable.getEmbeddableFactory<
     DashboardContainerInput,
@@ -68,9 +68,13 @@ export const createDashboardContainer = async (
   }
 
   try {
-    if (savedDashboard && appState) {
+    if (appState) {
       const appStateData = appState.getState();
-      const initialInput = getDashboardInputFromAppState(appStateData, services, savedDashboard.id);
+      const initialInput = getDashboardInputFromAppState(
+        appStateData,
+        services,
+        savedDashboard?.id
+      );
 
       const incomingEmbeddable = services.embeddable
         .getStateTransfer(services.scopedHistory)
@@ -100,25 +104,6 @@ export const createDashboardContainer = async (
         dashboardContainerEmbeddable?.destroy();
         return undefined;
       }
-
-      dashboardContainerEmbeddable.renderEmpty = () => {
-        const shouldShowEditHelp = getShouldShowEditHelp(appStateData, dashboardConfig);
-        const shouldShowViewHelp = getShouldShowViewHelp(appStateData, dashboardConfig);
-        const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState(appStateData, services);
-        const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
-        return isEmptyState ? (
-          <DashboardEmptyScreen
-            {...getEmptyScreenProps(
-              shouldShowEditHelp,
-              isEmptyInReadOnlyMode,
-              appState,
-              dashboardContainerEmbeddable,
-              services
-            )}
-          />
-        ) : null;
-      };
-
       if (
         incomingEmbeddable &&
         !dashboardContainerEmbeddable?.getInput().panels[incomingEmbeddable.embeddableId!]
@@ -284,7 +269,7 @@ const shouldShowUnauthorizedEmptyState = (
 const getEmptyScreenProps = (
   shouldShowEditHelp: boolean,
   isEmptyInReadOnlyMode: boolean,
-  stateContainer: DashboardAppStateContainer,
+  // stateContainer: DashboardAppStateContainer,
   container: DashboardContainer,
   services: DashboardServices
 ): DashboardEmptyScreenProps => {
@@ -302,8 +287,6 @@ const getEmptyScreenProps = (
             SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
           });
         }
-      } else {
-        stateContainer.transitions.set('viewMode', ViewMode.EDIT);
       }
     },
     showLinkToVisualize: shouldShowEditHelp,
@@ -324,6 +307,23 @@ const getEmptyScreenProps = (
     emptyScreenProps.isReadonlyMode = true;
   }
   return emptyScreenProps;
+};
+
+export const renderEmpty = (
+  container: DashboardContainer,
+  appStateData: DashboardAppState,
+  services: DashboardServices
+) => {
+  const { dashboardConfig } = services;
+  const shouldShowEditHelp = getShouldShowEditHelp(appStateData, dashboardConfig);
+  const shouldShowViewHelp = getShouldShowViewHelp(appStateData, dashboardConfig);
+  const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState(appStateData, services);
+  const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
+  return isEmptyState ? (
+    <DashboardEmptyScreen
+      {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode, container, services)}
+    />
+  ) : null;
 };
 
 const setCurrentIndexPatterns = (dashboardContainer: DashboardContainer) => {
@@ -470,13 +470,14 @@ const handleDashboardContainerChanges = (
   if (input.expandedPanelId !== appStateData.expandedPanelId) {
     newAppState.expandedPanelId = input.expandedPanelId;
   }
+  if (input.viewMode !== appStateData.viewMode) {
+    newAppState.viewMode = input.viewMode;
+  }
   if (!isEqual(input.query, migrateLegacyQuery(appState.get().query))) {
     newAppState.query = input.query;
   }
 
-  if (Object.keys(newAppState).length > 0) {
-    appState.transitions.setDashboard({ ...newAppState });
-  }
+  appState.transitions.setDashboard(newAppState);
 
   // event emit dirty?
 };

@@ -16,40 +16,28 @@ export const useEditorUpdates = (
   dashboardContainer?: DashboardContainer,
   appState?: DashboardAppStateContainer
 ) => {
-  const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
   const [currentAppState, setCurrentAppState] = useState<DashboardAppState>();
   // We only mark dirty when there is changes in the panels, query, and filters
   // We do not mark dirty for embed mode, view mode, full screen and etc
   // The specific behaviors need to check the functional tests and previous dashboard
   // const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
   useEffect(() => {
-    if (!appState || !dashboardContainer || !dashboardInstance || !dashboard) {
+    if (!appState || !dashboardInstance || !dashboard) {
       return;
     }
 
     const initialState = appState.getState();
     setCurrentAppState(initialState);
-    setIsEmbeddableRendered(true);
-
-    const reloadDashboardContainer = () => {
-      const dashboardDom = document.getElementById('dashboardViewport');
-      if (!dashboardDom) {
-        return;
-      }
-      dashboardContainer.render(dashboardDom);
-    };
 
     const unsubscribeStateUpdates = appState.subscribe((state) => {
       setCurrentAppState(state);
-      reloadDashboardContainer();
     });
 
-    reloadDashboardContainer();
     return () => {
-      setIsEmbeddableRendered(false);
       unsubscribeStateUpdates();
     };
-  }, [dashboardContainer, appState, dashboardInstance, dashboard, eventEmitter]);
+  }, [appState, eventEmitter, dashboard, dashboardInstance]);
 
-  return { isEmbeddableRendered, currentAppState };
+  return { currentAppState };
 };

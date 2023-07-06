@@ -21,6 +21,7 @@ import {
   handleDashboardContainerInputs,
   handleDashboardContainerOutputs,
   refreshDashboardContainer,
+  renderEmpty,
 } from '../create_dashboard_container';
 import { DashboardContainer } from '../../embeddable';
 import { Dashboard } from '../../../dashboard';
@@ -113,6 +114,9 @@ export const useDashboardAppAndGlobalState = (
         if (!dashboardContainer) {
           return;
         }
+
+        dashboardContainer.renderEmpty = () =>
+          renderEmpty(dashboardContainer, stateContainer.getState(), services);
 
         const stopSyncingDashboardContainerOutputs = handleDashboardContainerOutputs(
           services,
