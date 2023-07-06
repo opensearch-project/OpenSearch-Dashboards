@@ -83,6 +83,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       title: this.title,
       updater$: this.appStateUpdater,
       icon: '/plugins/home/public/assets/logos/opensearch_mark_default.svg',
+      /* the order of dev tools, it shows as last item of management section */
       order: 9070,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
