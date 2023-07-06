@@ -31,7 +31,6 @@ export const DashboardListing = () => {
       history,
       uiSettings,
       notifications,
-      savedDashboards,
       dashboardProviders,
       data: { query },
       osdUrlStateStorage,
@@ -39,7 +38,7 @@ export const DashboardListing = () => {
   } = useOpenSearchDashboards<DashboardServices>();
 
   const location = useLocation();
-  const queryParameters = new URLSearchParams(location.search);
+  const queryParameters = useMemo(() => new URLSearchParams(location.search), [location]);
   const initialFiltersFromURL = queryParameters.get('filter');
   const [initialFilter, setInitialFilter] = useState<string | null>(initialFiltersFromURL);
 
@@ -168,10 +167,18 @@ export const DashboardListing = () => {
   // );
 
   const deleteItems = useCallback(
-    (dashboards: object[]) => {
-      return savedDashboards.delete(dashboards.map((d: any) => d.id));
+    async (dashboards: object[]) => {
+      await Promise.all(
+        dashboards.map((dashboard: any) => savedObjectsClient.delete(dashboard.appId, dashboard.id))
+      ).catch((error) => {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('dashboard.dashboardListingDeleteErrorTitle', {
+            defaultMessage: 'Error deleting dashboard',
+          }),
+        });
+      });
     },
-    [savedDashboards]
+    [savedObjectsClient, notifications]
   );
 
   useMount(() => {
