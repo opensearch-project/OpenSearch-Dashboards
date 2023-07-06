@@ -9,6 +9,7 @@ import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
 import { WORKSPACE_APP_ID, PATHS } from '../../../common/constants';
+import { switchWorkspace } from '../../components/utils/workspace';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
@@ -57,19 +58,10 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
       /** switch the workspace */
       setLoading(true);
       const id = workspaceOption[0].key!;
-      const newUrl = coreStart.workspaces?.formatUrlWithWorkspaceId(
-        coreStart.application.getUrlForApp(WORKSPACE_APP_ID, {
-          path: PATHS.update,
-          absolute: true,
-        }),
-        id
-      );
-      if (newUrl) {
-        window.location.href = newUrl;
-      }
+      switchWorkspace(coreStart, id);
       setLoading(false);
     },
-    [coreStart.workspaces, coreStart.application]
+    [coreStart]
   );
 
   const onCreateWorkspaceClick = () => {

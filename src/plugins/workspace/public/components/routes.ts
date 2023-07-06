@@ -8,6 +8,7 @@ import { PATHS } from '../../common/constants';
 import { WorkspaceCreator } from './workspace_creator';
 import { WorkspaceUpdater } from './workspace_updater';
 import { WorkspaceOverview } from './workspace_overview';
+import { WorkspaceList } from './workspace_list';
 
 export interface RouteConfig {
   path: string;
@@ -31,5 +32,10 @@ export const ROUTES: RouteConfig[] = [
     path: PATHS.update,
     Component: WorkspaceUpdater,
     label: 'Update',
+  },
+  {
+    path: PATHS.list,
+    Component: WorkspaceList,
+    label: 'List',
   },
 ];
