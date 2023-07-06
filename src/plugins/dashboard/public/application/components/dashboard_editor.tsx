@@ -23,7 +23,7 @@ export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { chrome } = services;
-  const isChromeVisible = useChromeVisibility(services.chrome);
+  const isChromeVisible = useChromeVisibility(chrome);
   const [eventEmitter] = useState(new EventEmitter());
 
   const { savedDashboard: savedDashboardInstance, dashboard } = useSavedDashboardInstance(
@@ -41,8 +41,6 @@ export const DashboardEditor = () => {
 
   const { dashboardContainer, indexPatterns } = useDashboardContainer(
     services,
-    isChromeVisible,
-    eventEmitter,
     dashboard,
     savedDashboardInstance,
     appState
@@ -58,23 +56,23 @@ export const DashboardEditor = () => {
   );
 
   useEffect(() => {
-    if (appState && dashboard) {
+    if (currentAppState && dashboard) {
       if (savedDashboardInstance?.id) {
         chrome.setBreadcrumbs(
           setBreadcrumbsForExistingDashboard(
             savedDashboardInstance.title,
-            appState?.getState().viewMode,
+            currentAppState.viewMode,
             dashboard.isDirty
           )
         );
         chrome.docTitle.change(savedDashboardInstance.title);
       } else {
         chrome.setBreadcrumbs(
-          setBreadcrumbsForNewDashboard(appState?.getState().viewMode, dashboard.isDirty)
+          setBreadcrumbsForNewDashboard(currentAppState.viewMode, dashboard.isDirty)
         );
       }
     }
-  }, [appState?.getState(), savedDashboardInstance, chrome]);
+  }, [currentAppState, savedDashboardInstance, chrome, dashboard]);
 
   useEffect(() => {
     // clean up all registered listeners if any is left
@@ -82,18 +80,6 @@ export const DashboardEditor = () => {
       eventEmitter.removeAllListeners();
     };
   }, [eventEmitter]);
-
-  console.log('savedDashboardInstance', savedDashboardInstance);
-  console.log('dashboard', dashboard);
-  console.log('appState', appState);
-  console.log('appStateData', appState?.getState());
-  console.log('currentAppState', currentAppState);
-  console.log('isEmbeddableRendered', isEmbeddableRendered);
-  if (dashboard) {
-    console.log('isDirty', dashboard.isDirty);
-  }
-  console.log('dashboardContainer', dashboardContainer);
-  console.log('indexPatterns', indexPatterns);
 
   return (
     <div>
