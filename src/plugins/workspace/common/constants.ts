@@ -11,6 +11,7 @@ export const PATHS = {
   create: '/create',
   overview: '/overview',
   update: '/update',
+  list: '/list',
 };
 export const WORKSPACE_OP_TYPE_CREATE = 'create';
 export const WORKSPACE_OP_TYPE_UPDATE = 'update';
