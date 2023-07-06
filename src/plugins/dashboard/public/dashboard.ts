@@ -16,6 +16,8 @@
 import { cloneDeep } from 'lodash';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../../data/public';
 import { SavedDashboardPanel } from './types';
+
+// TODO: This class can be revisited and clean up more
 export interface SerializedDashboard {
   id?: string;
   timeRestore: boolean;
