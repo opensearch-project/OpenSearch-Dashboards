@@ -10,17 +10,12 @@
  */
 
 import './app.scss';
-import { AppMountParameters } from 'opensearch-dashboards/public';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 import { DashboardEditor, DashboardListing, DashboardNoMatch } from './components';
 
-export interface DashboardAppProps {
-  onAppLeave: AppMountParameters['onAppLeave'];
-}
-
-export const DashboardApp = ({ onAppLeave }: DashboardAppProps) => {
+export const DashboardApp = () => {
   return (
     <Switch>
       <Route path={[DashboardConstants.CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl(':id')]}>

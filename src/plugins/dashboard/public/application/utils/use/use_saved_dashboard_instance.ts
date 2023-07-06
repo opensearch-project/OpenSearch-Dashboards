@@ -44,10 +44,10 @@ export const useSavedDashboardInstance = (
 
     const getSavedDashboardInstance = async () => {
       try {
-        let savedDashboardInstance: any;
+        let savedDashboardObject: any;
         if (history.location.pathname === '/create') {
           try {
-            savedDashboardInstance = await getDashboardInstance(services);
+            savedDashboardObject = await getDashboardInstance(services);
           } catch {
             redirectWhenMissing({
               history,
@@ -61,8 +61,8 @@ export const useSavedDashboardInstance = (
           }
         } else if (dashboardIdFromUrl) {
           try {
-            savedDashboardInstance = await getDashboardInstance(services, dashboardIdFromUrl);
-            const { savedDashboard } = savedDashboardInstance;
+            savedDashboardObject = await getDashboardInstance(services, dashboardIdFromUrl);
+            const { savedDashboard } = savedDashboardObject;
 
             // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
             // We should only set the time filter according to time restore once when we are loading the dashboard
@@ -111,7 +111,7 @@ export const useSavedDashboardInstance = (
           }
         }
 
-        setSavedDashboardInstance(savedDashboardInstance);
+        setSavedDashboardInstance(savedDashboardObject);
       } catch (error) {
         toastNotifications.addWarning({
           title: i18n.translate('dashboard.createDashboard.failedToLoadErrorMessage', {

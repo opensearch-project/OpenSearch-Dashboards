@@ -30,10 +30,11 @@ export const getDashboardInstance = async (
 
   // Get the existing dashboard/default new dashboard from saved object loader
   const savedDashboard: SavedObjectDashboard = await savedDashboards.get(opts);
+
   // Serialized the saved object dashboard
   const serializedDashboard = convertToSerializedDashboard(savedDashboard);
+
   // Create a Dashboard class using the serialized dashboard
-  // const dashboard = (await dashboards.createDashboard(serializedDashboard)) as Dashboard;
   const dashboard = new Dashboard(serializedDashboard);
   await dashboard.setState(serializedDashboard);
 

@@ -4,7 +4,7 @@
  */
 
 import React, { memo, useState, useEffect } from 'react';
-import { Filter, IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -102,7 +102,7 @@ const TopNav = ({
     stateContainer,
     isEmbeddableRendered,
     dashboard,
-    dashboardIdFromUrl
+    dashboardIdFromUrl,
   ]);
 
   useEffect(() => {
