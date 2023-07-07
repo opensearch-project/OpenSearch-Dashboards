@@ -75,14 +75,6 @@ export const createDashboardGlobalAndAppState = ({
     pureTransitions
   );
 
-  const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
-    if (state.viewMode === ViewMode.VIEW) {
-      const { panels, ...stateWithoutPanels } = state;
-      return stateWithoutPanels;
-    }
-    return state;
-  };
-
   const { start: startStateSync, stop: stopStateSync } = syncState({
     storageKey: APP_STATE_STORAGE_KEY,
     stateContainer: {
@@ -133,12 +125,37 @@ export const createDashboardGlobalAndAppState = ({
      we update the state format at all and want to handle BWC, we must not only migrate the
      data stored with saved vis, but also any old state in the url.
    */
-  osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(initialState), { replace: true });
+  const updateStateUrl = ({ state, replace }: { state: DashboardAppState; replace: boolean }) => {
+    osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
+    // immediately forces scheduled updates and changes location
+    return osdUrlStateStorage.flush({ replace });
+  };
 
-  // immediately forces scheduled updates and changes location
-  osdUrlStateStorage.flush({ replace: true });
+  updateStateUrl({ state: initialState, replace: true });
 
   // start syncing the appState with the ('_a') url
   startStateSync();
-  return { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl };
+  return { stateContainer, stopStateSync, updateStateUrl, stopSyncingQueryServiceStateWithUrl };
+};
+
+const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
+  if (state.viewMode === ViewMode.VIEW) {
+    const { panels, ...stateWithoutPanels } = state;
+    return stateWithoutPanels;
+  }
+  return state;
+};
+
+export const updateStateUrl = ({
+  osdUrlStateStorage,
+  state,
+  replace,
+}: {
+  osdUrlStateStorage: IOsdUrlStateStorage;
+  state: DashboardAppState;
+  replace: boolean;
+}) => {
+  osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
+  // immediately forces scheduled updates and changes location
+  return osdUrlStateStorage.flush({ replace });
 };
