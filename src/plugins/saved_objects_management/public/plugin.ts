@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
@@ -55,6 +55,13 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import {
+  LIBRARY_OVERVIEW_WORDINGS,
+  SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
+  SAVED_QUERIES_WORDINGS,
+  SAVED_SEARCHES_WORDINGS,
+} from './constants';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -136,12 +143,71 @@ export class SavedObjectsManagementPlugin
           core,
           serviceRegistry: this.serviceRegistry,
           mountParams,
+          title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
+            defaultMessage: 'Saved Objects',
+          }),
         });
       },
     });
 
     // sets up the context mappings and registers any triggers/actions for the plugin
     bootstrap(uiActions);
+    const mountWrapper = ({
+      title,
+      allowedObjectTypes,
+    }: {
+      title: string;
+      allowedObjectTypes?: string[];
+    }) => async (appMountParams: AppMountParameters) => {
+      const { mountManagementSection } = await import('./management_section');
+      return mountManagementSection({
+        core,
+        serviceRegistry: this.serviceRegistry,
+        appMountParams,
+        title,
+        allowedObjectTypes,
+        fullWidth: false,
+      });
+    };
+
+    /**
+     * Register saved objects overview & saved search & saved query here
+     */
+    core.application.register({
+      id: 'objects_overview',
+      appRoute: '/app/objects',
+      exactRoute: true,
+      title: LIBRARY_OVERVIEW_WORDINGS,
+      order: 10000,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      mount: mountWrapper({
+        title: SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
+      }),
+    });
+
+    core.application.register({
+      id: 'objects_searches',
+      appRoute: '/app/objects/search',
+      title: SAVED_SEARCHES_WORDINGS,
+      order: 8000,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      mount: mountWrapper({
+        title: SAVED_SEARCHES_WORDINGS,
+        allowedObjectTypes: ['search'],
+      }),
+    });
+
+    core.application.register({
+      id: 'objects_query',
+      appRoute: '/app/objects/query',
+      title: SAVED_QUERIES_WORDINGS,
+      order: 8001,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      mount: mountWrapper({
+        title: SAVED_QUERIES_WORDINGS,
+        allowedObjectTypes: ['query'],
+      }),
+    });
 
     // depends on `getStartServices`, should not be awaited
     registerServices(this.serviceRegistry, core.getStartServices);

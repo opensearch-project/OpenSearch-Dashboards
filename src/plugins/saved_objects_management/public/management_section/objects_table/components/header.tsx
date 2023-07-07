@@ -45,22 +45,19 @@ export const Header = ({
   onImport,
   onRefresh,
   filteredCount,
+  title,
 }: {
   onExportAll: () => void;
   onImport: () => void;
   onRefresh: () => void;
   filteredCount: number;
+  title: string;
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
         <EuiTitle>
-          <h1>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
-              defaultMessage="Saved Objects"
-            />
-          </h1>
+          <h1>{title}</h1>
         </EuiTitle>
       </EuiFlexItem>
 
