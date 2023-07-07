@@ -40,76 +40,100 @@ export const useSavedDashboardInstance = (
       http: { basePath },
       notifications,
       toastNotifications,
+      data: {
+        query: {
+          timefilter: { timefilter },
+        },
+      },
     } = services;
+
+    const handleErrorFromSavedDashboard = (error: any) => {
+      // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
+      // See https://github.com/elastic/kibana/issues/10951 for more context.
+      if (error instanceof SavedObjectNotFound && dashboardIdFromUrl === 'create') {
+        // Note preserve querystring part is necessary so the state is preserved through the redirect.
+        history.replace({
+          ...history.location, // preserve query,
+          pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+        });
+
+        notifications.toasts.addWarning(
+          i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
+            defaultMessage:
+              'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
+          })
+        );
+      } else {
+        // E.g. a corrupt or deleted dashboard
+        notifications.toasts.addDanger(error.message);
+        history.replace(DashboardConstants.LANDING_PAGE_PATH);
+      }
+      return new Promise(() => {});
+    };
+
+    const handleErrorFromCreateDashboard = () => {
+      redirectWhenMissing({
+        history,
+        basePath,
+        navigateToApp,
+        mapping: {
+          dashboard: DashboardConstants.LANDING_PAGE_PATH,
+        },
+        toastNotifications: notifications.toasts,
+      });
+    };
+
+    const handleError = () => {
+      toastNotifications.addWarning({
+        title: i18n.translate('dashboard.createDashboard.failedToLoadErrorMessage', {
+          defaultMessage: 'Failed to load the dashboard',
+        }),
+      });
+      history.replace(DashboardConstants.LANDING_PAGE_PATH);
+    };
 
     const getSavedDashboardInstance = async () => {
       try {
-        let dashboardInstance: any;
-        if (history.location.pathname === '/create') {
-          dashboardInstance = await getDashboardInstance(services);
-        } else if (dashboardIdFromUrl) {
-          dashboardInstance = await getDashboardInstance(services, dashboardIdFromUrl);
-          const { savedDashboard } = dashboardInstance;
-          // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
-          // We should only set the time filter according to time restore once when we are loading the dashboard
-          if (savedDashboard.timeRestore) {
-            if (savedDashboard.timeFrom && savedDashboard.timeTo) {
-              services.data.query.timefilter.timefilter.setTime({
-                from: savedDashboard.timeFrom,
-                to: savedDashboard.timeTo,
-              });
+        let dashboardInstance: {
+          savedDashboard: SavedObjectDashboard;
+          dashboard: Dashboard<DashboardParams>;
+        };
+        const options = history.location.pathname === '/create' ? {} : dashboardIdFromUrl ?? {};
+        try {
+          dashboardInstance = await getDashboardInstance(services, options);
+          if (dashboardIdFromUrl) {
+            const { savedDashboard } = dashboardInstance;
+            // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
+            // We should only set the time filter according to time restore once when we are loading the dashboard
+            if (savedDashboard.timeRestore) {
+              if (savedDashboard.timeFrom && savedDashboard.timeTo) {
+                timefilter.setTime({
+                  from: savedDashboard.timeFrom,
+                  to: savedDashboard.timeTo,
+                });
+              }
+              if (savedDashboard.refreshInterval) {
+                timefilter.setRefreshInterval(savedDashboard.refreshInterval);
+              }
             }
-            if (savedDashboard.refreshInterval) {
-              services.data.query.timefilter.timefilter.setRefreshInterval(
-                savedDashboard.refreshInterval
-              );
-            }
-          }
 
-          chrome.recentlyAccessed.add(
-            savedDashboard.getFullPath(),
-            savedDashboard.title,
-            dashboardIdFromUrl!
-          );
+            chrome.recentlyAccessed.add(
+              savedDashboard.getFullPath(),
+              savedDashboard.title,
+              dashboardIdFromUrl!
+            );
+          }
+        } catch (error: any) {
+          return handleErrorFromSavedDashboard(error);
         }
         setSavedDashboardInstance(dashboardInstance);
       } catch (error: any) {
-        if (history.location.pathname === '/create') {
-          redirectWhenMissing({
-            history,
-            basePath,
-            navigateToApp,
-            mapping: {
-              dashboard: DashboardConstants.LANDING_PAGE_PATH,
-            },
-            toastNotifications: notifications.toasts,
-          });
+        if (history.location.pathname !== '/create') {
+          handleErrorFromCreateDashboard();
+          return;
         }
 
-        // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
-        // See https://github.com/elastic/kibana/issues/10951 for more context.
-        if (error instanceof SavedObjectNotFound && dashboardIdFromUrl === 'create') {
-          // Note preserve querystring part is necessary so the state is preserved through the redirect.
-          history.replace({
-            ...history.location, // preserve query,
-            pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-          });
-
-          notifications.toasts.addWarning(
-            i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
-              defaultMessage:
-                'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
-            })
-          );
-          return new Promise(() => {});
-        } else {
-          toastNotifications.addWarning({
-            title: i18n.translate('dashboard.createDashboard.failedToLoadErrorMessage', {
-              defaultMessage: 'Failed to load the dashboard',
-            }),
-          });
-          history.replace(DashboardConstants.LANDING_PAGE_PATH);
-        }
+        handleError();
       }
     };
 
