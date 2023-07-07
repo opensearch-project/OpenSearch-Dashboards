@@ -4,12 +4,9 @@
  */
 
 import React from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
-
 import { CoreStart, ScopedHistory } from '../../../../core/public';
-import { Sidebar } from './sidebar';
 import { useView } from '../utils/use';
-import { NoView } from './no_view';
+import { AppContainer } from './app_container';
 
 interface DataExplorerAppDeps {
   basename: string;
@@ -18,24 +15,8 @@ interface DataExplorerAppDeps {
   history: ScopedHistory;
 }
 
-export const DataExplorerApp = ({ basename, history }: DataExplorerAppDeps) => {
+export const DataExplorerApp = (deps: DataExplorerAppDeps) => {
   const { view } = useView();
 
-  if (!view) {
-    return <NoView />;
-  }
-
-  // Render the application DOM.
-  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
-  return (
-    <EuiPageTemplate
-      pageSideBar={<Sidebar />}
-      className="dePageTemplate"
-      template="default"
-      restrictWidth={false}
-      paddingSize="none"
-    >
-      {view.ui.canvas}
-    </EuiPageTemplate>
-  );
+  return <AppContainer view={view} />;
 };

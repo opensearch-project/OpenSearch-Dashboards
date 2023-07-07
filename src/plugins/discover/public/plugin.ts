@@ -89,8 +89,6 @@ import {
 import { DISCOVER_LEGACY_TOGGLE, PLUGIN_ID } from '../common';
 import { DataExplorerPluginSetup, ViewRedirectParams } from '../../data_explorer/public';
 import { registerFeature } from './register_feature';
-import { createCanvas } from './application/view_components/canvas';
-import { createPanel } from './application/view_components/panel';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -105,7 +103,6 @@ export interface DiscoverSetup {
   docViews: {
     /**
      * Add new doc view shown along with table view and json view in the details of each document in Discover.
-     * Both react and angular doc views are supported.
      * @param docViewRaw
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
@@ -389,12 +386,20 @@ export class DiscoverPlugin
         },
       },
       ui: {
-        canvas: createCanvas(),
-        panel: createPanel(),
         defaults: {},
         reducer: () => ({}),
       },
       shouldShow: () => true,
+      mount: async (params) => {
+        const { renderCanvas, renderPanel } = await import('./application/view_components');
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const services = await buildServices(coreStart, pluginsStart, this.initializerContext);
+
+        renderCanvas(params, services);
+        renderPanel(params, services);
+
+        return () => {};
+      },
     });
 
     // this.registerEmbeddable(core, plugins);

@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, FC } from 'react';
 import { EuiPanel, EuiComboBox, EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { useView } from '../utils/use';
 
-export const Sidebar = () => {
+export const Sidebar: FC = ({ children }) => {
   const { view, viewRegistry } = useView();
   const views = viewRegistry.all();
   const viewOptions: EuiSelectOption[] = useMemo(
@@ -34,7 +34,7 @@ export const Sidebar = () => {
         />
         <EuiSelect options={viewOptions} value={view?.id} />
       </EuiPanel>
-      {view?.ui.panel}
+      {children}
     </>
   );
 };
