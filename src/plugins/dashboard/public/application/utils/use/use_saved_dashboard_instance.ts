@@ -40,11 +40,7 @@ export const useSavedDashboardInstance = (
       http: { basePath },
       notifications,
       toastNotifications,
-      data: {
-        query: {
-          timefilter: { timefilter },
-        },
-      },
+      data,
     } = services;
 
     const handleErrorFromSavedDashboard = (error: any) => {
@@ -98,44 +94,42 @@ export const useSavedDashboardInstance = (
           savedDashboard: SavedObjectDashboard;
           dashboard: Dashboard<DashboardParams>;
         };
-        const options =
-          history.location.pathname !== '/create' && dashboardIdFromUrl
-            ? dashboardIdFromUrl
-            : undefined;
-        try {
-          dashboardInstance = await getDashboardInstance(services, options);
-          if (dashboardIdFromUrl) {
+        if (history.location.pathname === '/create') {
+          try {
+            dashboardInstance = await getDashboardInstance(services);
+            setSavedDashboardInstance(dashboardInstance);
+          } catch {
+            handleErrorFromCreateDashboard();
+          }
+        } else if (dashboardIdFromUrl) {
+          try {
+            dashboardInstance = await getDashboardInstance(services, dashboardIdFromUrl);
             const { savedDashboard } = dashboardInstance;
             // Update time filter to match the saved dashboard if time restore has been set to true when saving the dashboard
             // We should only set the time filter according to time restore once when we are loading the dashboard
             if (savedDashboard.timeRestore) {
               if (savedDashboard.timeFrom && savedDashboard.timeTo) {
-                timefilter.setTime({
+                data.query.timefilter.timefilter.setTime({
                   from: savedDashboard.timeFrom,
                   to: savedDashboard.timeTo,
                 });
               }
               if (savedDashboard.refreshInterval) {
-                timefilter.setRefreshInterval(savedDashboard.refreshInterval);
+                data.query.timefilter.timefilter.setRefreshInterval(savedDashboard.refreshInterval);
               }
             }
 
             chrome.recentlyAccessed.add(
               savedDashboard.getFullPath(),
               savedDashboard.title,
-              dashboardIdFromUrl!
+              dashboardIdFromUrl
             );
+            setSavedDashboardInstance(dashboardInstance);
+          } catch (error: any) {
+            return handleErrorFromSavedDashboard(error);
           }
-        } catch (error: any) {
-          return handleErrorFromSavedDashboard(error);
         }
-        setSavedDashboardInstance(dashboardInstance);
       } catch (error: any) {
-        if (history.location.pathname !== '/create') {
-          handleErrorFromCreateDashboard();
-          return;
-        }
-
         handleError();
       }
     };
