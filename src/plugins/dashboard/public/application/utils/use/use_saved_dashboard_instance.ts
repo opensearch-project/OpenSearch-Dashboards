@@ -98,7 +98,10 @@ export const useSavedDashboardInstance = (
           savedDashboard: SavedObjectDashboard;
           dashboard: Dashboard<DashboardParams>;
         };
-        const options = history.location.pathname === '/create' ? {} : dashboardIdFromUrl ?? {};
+        const options =
+          history.location.pathname !== '/create' && dashboardIdFromUrl
+            ? dashboardIdFromUrl
+            : undefined;
         try {
           dashboardInstance = await getDashboardInstance(services, options);
           if (dashboardIdFromUrl) {

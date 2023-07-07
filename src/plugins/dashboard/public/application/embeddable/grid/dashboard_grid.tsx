@@ -282,6 +282,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           }}
         >
           <EmbeddableChildPanel
+            key={panel.type}
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
             PanelComponent={this.props.PanelComponent}
