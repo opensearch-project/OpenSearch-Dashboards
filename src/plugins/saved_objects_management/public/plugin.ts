@@ -127,7 +127,7 @@ export class SavedObjectsManagementPlugin
     opensearchDashboardsSection.registerApp({
       id: 'objects',
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
-        defaultMessage: 'Saved Objects',
+        defaultMessage: 'Saved objects',
       }),
       order: 1,
       mount: async (mountParams) => {
