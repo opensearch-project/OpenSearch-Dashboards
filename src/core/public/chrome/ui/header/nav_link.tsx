@@ -31,7 +31,12 @@
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
+import {
+  ChromeNavLink,
+  ChromeRecentlyAccessedHistoryItem,
+  CoreStart,
+  WorkspaceAttribute,
+} from '../../..';
 import { HttpStart } from '../../../http';
 import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
@@ -146,5 +151,36 @@ export function createRecentNavLink(
         navigateToUrl(href);
       }
     },
+  };
+}
+
+export interface WorkspaceNavLink {
+  label: string;
+  title: string;
+  'aria-label': string;
+}
+
+export function createWorkspaceNavLink(
+  href: string,
+  workspace: WorkspaceAttribute,
+  navLinks: ChromeNavLink[]
+): WorkspaceNavLink {
+  const label = workspace.name;
+  let titleAndAriaLabel = label;
+  const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
+  if (navLink) {
+    titleAndAriaLabel = i18n.translate('core.ui.workspaceLinks.linkItem.screenReaderLabel', {
+      defaultMessage: '{workspaceItemLinkName}, type: {pageType}',
+      values: {
+        workspaceItemLinkName: label,
+        pageType: navLink.title,
+      },
+    });
+  }
+
+  return {
+    label,
+    title: titleAndAriaLabel,
+    'aria-label': titleAndAriaLabel,
   };
 }

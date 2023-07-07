@@ -33,7 +33,6 @@ import {
   EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
@@ -41,17 +40,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { groupBy, sortBy } from 'lodash';
-import React, { Fragment, useRef } from 'react';
+import React, { useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
-import { InternalApplicationStart } from '../../../application/types';
+import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
+import { createEuiListItem, isModifiedOrPrevented, createWorkspaceNavLink } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { WorkspaceAttribute } from '../../../workspace';
+import { WORKSPACE_APP_ID, PATHS } from '../../constants';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -103,7 +103,10 @@ interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   branding: ChromeBranding;
+  exitWorkspace: () => void;
+  getWorkspaceUrl: (id: string) => string;
   currentWorkspace$: Rx.BehaviorSubject<WorkspaceAttribute | null>;
+  workspaceList$: Rx.BehaviorSubject<WorkspaceAttribute[]>;
 }
 
 export function CollapsibleNav({
@@ -114,6 +117,8 @@ export function CollapsibleNav({
   homeHref,
   storage = window.localStorage,
   onIsLockedUpdate,
+  exitWorkspace,
+  getWorkspaceUrl,
   closeNav,
   navigateToApp,
   navigateToUrl,
@@ -121,13 +126,12 @@ export function CollapsibleNav({
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
-  const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
-  const customNavLink = useObservable(observables.customNavLink$, undefined);
   const appId = useObservable(observables.appId$, '');
   const currentWorkspace = useObservable(observables.currentWorkspace$);
+  const workspaceList = useObservable(observables.workspaceList$, []).slice(0, 5);
   const lockRef = useRef<HTMLButtonElement>(null);
-  const filterdLinks = getFilterLinks(currentWorkspace, navLinks);
-  const groupedNavLinks = groupBy(filterdLinks, (link) => link?.category?.id);
+  const filteredLinks = getFilterLinks(currentWorkspace, navLinks);
+  const groupedNavLinks = groupBy(filteredLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
@@ -202,172 +206,235 @@ export function CollapsibleNav({
       onClose={closeNav}
       outsideClickCloses={false}
     >
-      {customNavLink && (
-        <Fragment>
-          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiCollapsibleNavGroup
-              background="light"
-              className="eui-yScroll"
-              style={{ maxHeight: '40vh' }}
-            >
-              <EuiListGroup
-                listItems={[
-                  createEuiListItem({
-                    link: customNavLink,
-                    basePath,
-                    navigateToApp,
-                    dataTestSubj: 'collapsibleNavCustomNavLink',
-                    onClick: closeNav,
-                    externalLink: true,
-                  }),
-                ]}
-                maxWidth="none"
-                color="text"
-                gutterSize="none"
-                size="s"
-              />
-            </EuiCollapsibleNavGroup>
-          </EuiFlexItem>
-
-          <EuiHorizontalRule margin="none" />
-        </Fragment>
-      )}
-
-      {/* Recently viewed */}
-      <EuiCollapsibleNavGroup
-        key="recentlyViewed"
-        background="light"
-        title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-        isCollapsible={true}
-        initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-        onToggle={(isCategoryOpen) => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
-        data-test-subj="collapsibleNavGroup-recentlyViewed"
-      >
-        {recentlyAccessed.length > 0 ? (
-          <EuiListGroup
-            aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
-              defaultMessage: 'Recently viewed links',
-            })}
-            listItems={recentlyAccessed.map((link) => {
-              // TODO #64541
-              // Can remove icon from recent links completely
-              const { iconType, onClick, ...hydratedLink } = createRecentNavLink(
-                link,
-                navLinks,
-                basePath,
-                navigateToUrl
-              );
-
-              return {
-                ...hydratedLink,
-                'data-test-subj': 'collapsibleNavAppLink--recent',
-                onClick: (event) => {
-                  if (!isModifiedOrPrevented(event)) {
-                    closeNav();
-                    onClick(event);
-                  }
-                },
-              };
-            })}
-            maxWidth="none"
-            color="subdued"
-            gutterSize="none"
-            size="s"
-            className="osdCollapsibleNav__recentsListGroup"
-          />
-        ) : (
-          <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-            <p>
-              {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                defaultMessage: 'No recently viewed items',
-              })}
-            </p>
-          </EuiText>
-        )}
-      </EuiCollapsibleNavGroup>
-
-      <EuiHorizontalRule margin="none" />
-
       <EuiFlexItem className="eui-yScroll">
-        {/* OpenSearchDashboards, Observability, Security, and Management sections */}
-        {orderedCategories.map((categoryName) => {
-          const category = categoryDictionary[categoryName]!;
-          const opensearchLinkLogo =
-            category.id === 'opensearchDashboards' ? customSideMenuLogo() : category.euiIconType;
-
-          return (
+        {/* Home, Alerts, Favorites, Projects and Admin outside workspace */}
+        {!currentWorkspace && (
+          <>
             <EuiCollapsibleNavGroup
-              key={category.id}
-              iconType={opensearchLinkLogo}
-              title={category.label}
+              onClick={async () => {
+                closeNav();
+                await navigateToApp('home');
+              }}
+              iconType={'logoOpenSearch'}
+              title={i18n.translate('core.ui.primaryNavSection.home', {
+                defaultMessage: 'Home',
+              })}
+            />
+            <EuiCollapsibleNavGroup
+              onClick={closeNav}
+              iconType={'bell'}
+              title={i18n.translate('core.ui.primaryNavSection.alerts', {
+                defaultMessage: 'Alerts',
+              })}
+            />
+            <EuiCollapsibleNavGroup
+              iconType={'starEmpty'}
+              title={i18n.translate('core.ui.primaryNavSection.favorites', {
+                defaultMessage: 'Favorites',
+              })}
               isCollapsible={true}
-              initialIsOpen={getIsCategoryOpen(category.id, storage)}
-              onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
-              data-test-subj={`collapsibleNavGroup-${category.id}`}
-              data-test-opensearch-logo={opensearchLinkLogo}
+              initialIsOpen={true}
             >
-              <EuiListGroup
-                aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
-                  defaultMessage: 'Primary navigation links, {category}',
-                  values: { category: category.label },
-                })}
-                listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
-                maxWidth="none"
-                color="subdued"
-                gutterSize="none"
-                size="s"
-              />
+              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+                <p>
+                  {i18n.translate('core.ui.EmptyFavoriteList', {
+                    defaultMessage: 'No Favorites',
+                  })}
+                </p>
+              </EuiText>
+              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+                <p>
+                  {i18n.translate('core.ui.SeeMoreFavorite', {
+                    defaultMessage: 'SEE MORE',
+                  })}
+                </p>
+              </EuiText>
             </EuiCollapsibleNavGroup>
-          );
-        })}
+            <EuiCollapsibleNavGroup
+              iconType={'folderClosed'}
+              title={i18n.translate('core.ui.primaryNavSection.workspaces', {
+                defaultMessage: 'Workspaces',
+              })}
+              isCollapsible={true}
+              initialIsOpen={true}
+            >
+              {workspaceList?.length > 0 ? (
+                <EuiListGroup
+                  aria-label={i18n.translate('core.ui.WorkspaceList', {
+                    defaultMessage: 'Workspace list links',
+                  })}
+                  listItems={workspaceList.map((workspace) => {
+                    const href = getWorkspaceUrl(workspace.id);
+                    const hydratedLink = createWorkspaceNavLink(href, workspace, navLinks);
+                    return {
+                      href,
+                      ...hydratedLink,
+                      'data-test-subj': 'collapsibleNavAppLink--workspace',
+                      onClick: async (event) => {
+                        if (!isModifiedOrPrevented(event)) {
+                          closeNav();
+                        }
+                      },
+                    };
+                  })}
+                  maxWidth="none"
+                  color="subdued"
+                  gutterSize="none"
+                  size="s"
+                />
+              ) : (
+                <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+                  <p>
+                    {i18n.translate('core.ui.EmptyWorkspaceList', {
+                      defaultMessage: 'No Workspaces',
+                    })}
+                  </p>
+                </EuiText>
+              )}
+              <EuiText
+                size="s"
+                color="subdued"
+                style={{ padding: '0 8px 8px' }}
+                onClick={async () => {
+                  await navigateToApp(WORKSPACE_APP_ID, {
+                    path: PATHS.list,
+                  });
+                }}
+              >
+                <p>
+                  {i18n.translate('core.ui.SeeMoreWorkspace', {
+                    defaultMessage: 'SEE MORE',
+                  })}
+                </p>
+              </EuiText>
+            </EuiCollapsibleNavGroup>
+            <EuiCollapsibleNavGroup
+              onClick={closeNav}
+              iconType={'managementApp'}
+              title={i18n.translate('core.ui.primaryNavSection.admin', {
+                defaultMessage: 'Admin',
+              })}
+            />
+          </>
+        )}
 
-        {/* Things with no category (largely for custom plugins) */}
-        {unknowns.map((link, i) => (
-          <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
-            <EuiListGroup flush>
-              <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
-            </EuiListGroup>
-          </EuiCollapsibleNavGroup>
-        ))}
+        {/* Workspace name and Overview inside workspace */}
+        {currentWorkspace && (
+          <>
+            <EuiCollapsibleNavGroup iconType={'folderClosed'} title={currentWorkspace.name} />
+            <EuiCollapsibleNavGroup
+              onClick={() => {
+                window.location.href = getWorkspaceUrl(currentWorkspace.id);
+              }}
+              iconType={'grid'}
+              title={i18n.translate('core.ui.primaryNavSection.overview', {
+                defaultMessage: 'Overview',
+              })}
+            />
+          </>
+        )}
 
-        {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={['l', 'xl']}>
-          <EuiCollapsibleNavGroup>
-            <EuiListGroup flush>
+        {/* OpenSearchDashboards, Observability, Security, and Management sections inside workspace */}
+        {currentWorkspace &&
+          orderedCategories.map((categoryName) => {
+            const category = categoryDictionary[categoryName]!;
+            const opensearchLinkLogo =
+              category.id === 'opensearchDashboards' ? customSideMenuLogo() : category.euiIconType;
+
+            return (
+              <EuiCollapsibleNavGroup
+                key={category.id}
+                iconType={opensearchLinkLogo}
+                title={category.label}
+                isCollapsible={true}
+                initialIsOpen={getIsCategoryOpen(category.id, storage)}
+                onToggle={(isCategoryOpen) =>
+                  setIsCategoryOpen(category.id, isCategoryOpen, storage)
+                }
+                data-test-subj={`collapsibleNavGroup-${category.id}`}
+                data-test-opensearch-logo={opensearchLinkLogo}
+              >
+                <EuiListGroup
+                  aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {
+                    defaultMessage: 'Primary navigation links, {category}',
+                    values: { category: category.label },
+                  })}
+                  listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
+                  maxWidth="none"
+                  color="subdued"
+                  gutterSize="none"
+                  size="s"
+                />
+              </EuiCollapsibleNavGroup>
+            );
+          })}
+
+        {/* Things with no category (largely for custom plugins) inside workspace */}
+        {currentWorkspace &&
+          unknowns.map((link, i) => (
+            <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
+              <EuiListGroup flush>
+                <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
+              </EuiListGroup>
+            </EuiCollapsibleNavGroup>
+          ))}
+
+        <EuiCollapsibleNavGroup>
+          <EuiListGroup flush>
+            {/* Exit workspace button only within a workspace*/}
+            {currentWorkspace && (
               <EuiListGroupItem
-                data-test-subj="collapsible-nav-lock"
-                buttonRef={lockRef}
+                data-test-subj="collapsible-nav-exit"
                 size="xs"
                 color="subdued"
-                label={
-                  isLocked
-                    ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
-                        defaultMessage: 'Undock navigation',
-                      })
-                    : i18n.translate('core.ui.primaryNavSection.dockLabel', {
-                        defaultMessage: 'Dock navigation',
-                      })
-                }
-                aria-label={
-                  isLocked
-                    ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
-                        defaultMessage: 'Undock primary navigation',
-                      })
-                    : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
-                        defaultMessage: 'Dock primary navigation',
-                      })
-                }
-                onClick={() => {
-                  onIsLockedUpdate(!isLocked);
-                  if (lockRef.current) {
-                    lockRef.current.focus();
-                  }
-                }}
-                iconType={isLocked ? 'lock' : 'lockOpen'}
+                label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
+                  defaultMessage: 'Exit workspace',
+                })}
+                aria-label={i18n.translate('core.ui.primaryNavSection.exitWorkspaceLabel', {
+                  defaultMessage: 'Exit workspace',
+                })}
+                onClick={exitWorkspace}
+                iconType={'exit'}
               />
-            </EuiListGroup>
-          </EuiCollapsibleNavGroup>
-        </EuiShowFor>
+            )}
+            {/* Docking button only for larger screens that can support it*/}
+            {
+              <EuiShowFor sizes={['l', 'xl']}>
+                <EuiListGroupItem
+                  data-test-subj="collapsible-nav-lock"
+                  buttonRef={lockRef}
+                  size="xs"
+                  color="subdued"
+                  label={
+                    isLocked
+                      ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
+                          defaultMessage: 'Undock navigation',
+                        })
+                      : i18n.translate('core.ui.primaryNavSection.dockLabel', {
+                          defaultMessage: 'Dock navigation',
+                        })
+                  }
+                  aria-label={
+                    isLocked
+                      ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
+                          defaultMessage: 'Undock primary navigation',
+                        })
+                      : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
+                          defaultMessage: 'Dock primary navigation',
+                        })
+                  }
+                  onClick={() => {
+                    onIsLockedUpdate(!isLocked);
+                    if (lockRef.current) {
+                      lockRef.current.focus();
+                    }
+                  }}
+                  iconType={isLocked ? 'lock' : 'lockOpen'}
+                />
+              </EuiShowFor>
+            }
+          </EuiListGroup>
+        </EuiCollapsibleNavGroup>
       </EuiFlexItem>
     </EuiCollapsibleNav>
   );

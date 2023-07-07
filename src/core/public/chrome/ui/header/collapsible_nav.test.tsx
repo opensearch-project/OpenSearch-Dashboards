@@ -80,8 +80,11 @@ function mockProps() {
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),
+    exitWorkspace: () => {},
+    getWorkspaceUrl: (id: string) => '',
     customNavLink$: new BehaviorSubject(undefined),
     currentWorkspace$: workspacesServiceMock.createStartContract().client.currentWorkspace$,
+    workspaceList$: workspacesServiceMock.createStartContract().client.workspaceList$,
     branding: {
       darkMode: false,
       mark: {

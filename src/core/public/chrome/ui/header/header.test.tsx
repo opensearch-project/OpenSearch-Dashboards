@@ -70,6 +70,8 @@ function mockProps() {
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
     onIsLockedUpdate: () => {},
+    exitWorkspace: () => {},
+    getWorkspaceUrl: (id: string) => '',
     branding: {
       darkMode: false,
       logo: { defaultUrl: '/' },
@@ -78,6 +80,7 @@ function mockProps() {
     },
     survey: '/',
     currentWorkspace$: workspacesServiceMock.createStartContract().client.currentWorkspace$,
+    workspaceList$: workspacesServiceMock.createStartContract().client.workspaceList$,
   };
 }
 
