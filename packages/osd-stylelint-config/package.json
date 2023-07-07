@@ -10,6 +10,6 @@
   },
   "peerDependencies": {
     "@osd/stylelint-plugin-stylelint": "1.0.0",
-    "stylelint": "^14.5.2"
+    "stylelint": "^15.10.1"
   }
 }

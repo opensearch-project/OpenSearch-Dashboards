@@ -14,7 +14,7 @@
   },
   "peerDependencies": {
     "postcss": "^8.4.12",
-    "stylelint": "^14.5.2"
+    "stylelint": "^15.10.1"
   },
   "devDependencies": {
     "typescript": "4.0.2",
