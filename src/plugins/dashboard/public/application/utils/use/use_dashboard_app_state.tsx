@@ -121,13 +121,15 @@ export const useDashboardAppAndGlobalState = (
         dashboardContainer.renderEmpty = () =>
           renderEmpty(dashboardContainer, stateContainer, services);
 
-        dashboardContainer.updateAppStateUrl = (pathname: string, replace: boolean) => {
+        dashboardContainer.updateAppStateUrl = (replace: boolean, pathname?: string) => {
           const updated = updateStateUrl({ state: stateContainer.getState(), replace });
 
-          history[updated ? 'replace' : 'push']({
-            ...history.location,
-            pathname,
-          });
+          if (pathname) {
+            history[updated ? 'replace' : 'push']({
+              ...history.location,
+              pathname,
+            });
+          }
         };
 
         const stopSyncingDashboardContainerOutputs = handleDashboardContainerOutputs(

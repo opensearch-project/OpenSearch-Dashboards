@@ -424,6 +424,7 @@ const handleDashboardContainerChanges = (
   dashboard: Dashboard
 ) => {
   let dirty = false;
+  let dirtyBecauseOfInitialStateMigration = false;
   if (!appState) {
     return;
   }
@@ -458,6 +459,12 @@ const handleDashboardContainerChanges = (
       // A panel was changed
       // Do not need to care about initial migration here because the version update
       // is already handled in migrateAppState() when we create state container
+      const oldVersion = savedDashboardPanelMap[panelState.explicitInput.id]?.version;
+      const newVersion = convertedPanelStateMap[panelState.explicitInput.id]?.version;
+      if (oldVersion && newVersion && oldVersion !== newVersion) {
+        dirtyBecauseOfInitialStateMigration = true;
+      }
+
       dirty = true;
     }
   });
@@ -465,7 +472,11 @@ const handleDashboardContainerChanges = (
   const newAppState: { [key: string]: any } = {};
   if (dirty) {
     newAppState.panels = Object.values(convertedPanelStateMap);
-    dashboard.isDirty = true;
+    if (dirtyBecauseOfInitialStateMigration) {
+      dashboardContainer.updateAppStateUrl?.(true);
+    } else {
+      dashboard.isDirty = true;
+    }
   }
   if (input.isFullScreenMode !== appStateData.fullScreenMode) {
     newAppState.fullScreenMode = input.isFullScreenMode;
