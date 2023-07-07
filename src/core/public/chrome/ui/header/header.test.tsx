@@ -71,9 +71,12 @@ function mockProps() {
     loadingCount$: new BehaviorSubject(0),
     onIsLockedUpdate: () => {},
     branding: {},
+    exitWorkspace: () => {},
+    getWorkspaceUrl: (id: string) => '',
     survey: '/',
     logos: chromeServiceMock.createStartContract().logos,
     currentWorkspace$: workspacesServiceMock.createStartContract().client.currentWorkspace$,
+    workspaceList$: workspacesServiceMock.createStartContract().client.workspaceList$,
   };
 }
 

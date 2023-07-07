@@ -93,10 +93,13 @@ function mockProps(branding = {}) {
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),
+    exitWorkspace: () => {},
+    getWorkspaceUrl: (id: string) => '',
     customNavLink$: new BehaviorSubject(undefined),
     branding,
     logos: getLogos(branding, mockBasePath.serverBasePath),
     currentWorkspace$: workspacesServiceMock.createStartContract().client.currentWorkspace$,
+    workspaceList$: workspacesServiceMock.createStartContract().client.workspaceList$,
   };
 }
 

@@ -34,6 +34,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { EuiLink } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
@@ -41,7 +42,7 @@ import { HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
-import { OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK } from './constants';
+import { OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK, WORKSPACE_APP_ID } from './constants';
 import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
@@ -176,6 +177,41 @@ export class ChromeService {
       docTitle.reset();
     });
 
+    const getWorkspaceUrl = (id: string) => {
+      return workspaces?.formatUrlWithWorkspaceId(
+        application.getUrlForApp(WORKSPACE_APP_ID, {
+          path: '/',
+          absolute: true,
+        }),
+        id
+      );
+    };
+
+    const exitWorkspace = async () => {
+      let result;
+      try {
+        result = await workspaces?.client.exitWorkspace();
+      } catch (error) {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('workspace.exit.failed', {
+            defaultMessage: 'Failed to exit workspace',
+          }),
+          text: error instanceof Error ? error.message : JSON.stringify(error),
+        });
+        return;
+      }
+      if (!result?.success) {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('workspace.exit.failed', {
+            defaultMessage: 'Failed to exit workspace',
+          }),
+          text: result?.error,
+        });
+        return;
+      }
+      await application.navigateToApp('home');
+    };
+
     const setIsNavDrawerLocked = (isLocked: boolean) => {
       isNavDrawerLocked$.next(isLocked);
       localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
@@ -244,7 +280,6 @@ export class ChromeService {
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-          customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           opensearchDashboardsDocLink={docLinks.links.opensearchDashboards.introduction}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
@@ -253,6 +288,7 @@ export class ChromeService {
           isVisible$={this.isVisible$}
           opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
           navLinks$={navLinks.getNavLinks$()}
+          customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           recentlyAccessed$={recentlyAccessed.get$()}
           navControlsLeft$={navControls.getLeft$()}
           navControlsCenter$={navControls.getCenter$()}
@@ -260,11 +296,14 @@ export class ChromeService {
           navControlsExpandedCenter$={navControls.getExpandedCenter$()}
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
+          exitWorkspace={exitWorkspace}
+          getWorkspaceUrl={getWorkspaceUrl}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
           logos={logos}
           survey={injectedMetadata.getSurvey()}
           currentWorkspace$={workspaces.client.currentWorkspace$}
+          workspaceList$={workspaces.client.workspaceList$}
         />
       ),
 

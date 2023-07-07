@@ -112,12 +112,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
 
   public start(core: CoreStart) {
     mountDropdownList(core);
-
-    core.chrome.setCustomNavLink({
-      title: i18n.translate('workspace.nav.title', { defaultMessage: 'Workspace Overview' }),
-      baseUrl: core.http.basePath.get(),
-      href: core.application.getUrlForApp(WORKSPACE_APP_ID, { path: PATHS.update }),
-    });
     this._changeSavedObjectCurrentWorkspace();
     return {};
   }
