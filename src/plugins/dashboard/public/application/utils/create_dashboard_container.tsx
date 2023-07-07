@@ -476,7 +476,7 @@ const handleDashboardContainerChanges = (
   if (input.viewMode !== appStateData.viewMode) {
     newAppState.viewMode = input.viewMode;
   }
-  if (!isEqual(input.query, migrateLegacyQuery(appState.get().query))) {
+  if (!isEqual(input.query, migrateLegacyQuery(appStateData.query))) {
     newAppState.query = input.query;
   }
 
