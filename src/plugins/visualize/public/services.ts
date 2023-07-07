@@ -32,6 +32,7 @@ import { ApplicationStart, IUiSettingsClient } from '../../../core/public';
 import { createGetterSetter } from '../../../plugins/opensearch_dashboards_utils/public';
 import { IndexPatternsContract, DataPublicPluginStart } from '../../../plugins/data/public';
 import { SharePluginStart } from '../../share/public';
+import { UiActionsStart } from '../../ui_actions/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -46,3 +47,5 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
 export const [getQueryService, setQueryService] = createGetterSetter<
   DataPublicPluginStart['query']
 >('Query');
+
+export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UIActions');

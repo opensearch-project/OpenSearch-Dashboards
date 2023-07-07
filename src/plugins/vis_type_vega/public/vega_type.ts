@@ -74,7 +74,7 @@ export const createVegaTypeDefinition = (
       showFilterBar: true,
     },
     getSupportedTriggers: () => {
-      return [VIS_EVENT_TO_TRIGGER.applyFilter];
+      return [VIS_EVENT_TO_TRIGGER.applyFilter, VIS_EVENT_TO_TRIGGER.externalAction];
     },
     getUsedIndexPattern: async (visParams) => {
       try {
