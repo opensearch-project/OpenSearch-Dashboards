@@ -51,6 +51,7 @@ import { getSavedObjectFinder } from '../../../../../saved_objects/public';
 import { DashboardConstants } from '../../../dashboard_constants';
 import { SavedObjectDashboard } from '../../../saved_dashboards';
 import { Dashboard } from '../../../dashboard';
+import { updateStateUrl } from '../create_dashboard_app_state';
 
 export const useDashboardContainer = (
   services: DashboardServices,
@@ -128,6 +129,8 @@ const createDashboardEmbeddable = (
     notifications,
     overlays,
     savedObjects,
+    history,
+    osdUrlStateStorage,
   } = dashboardServices;
   const { query: queryService } = data;
   const filterManager = queryService.filterManager;
@@ -297,6 +300,18 @@ const createDashboardEmbeddable = (
                 {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode, appState)}
               />
             ) : null;
+          };
+
+          dashboardContainer.updateAppStateUrl = (pathname: string, replace: boolean) => {
+            const updated = updateStateUrl({
+              osdUrlStateStorage,
+              state: appState.getState(),
+              replace,
+            });
+            history[updated ? 'replace' : 'push']({
+              ...history.location,
+              pathname,
+            });
           };
 
           dashboardContainer.getChangesFromAppStateForContainerState = (currentContainer: any) => {
