@@ -53,10 +53,13 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
     description: logsDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard_dark.png',
-    overviewDashboard: appendDataSourceId(DASHBOARD_ID),
+    overviewDashboard: DASHBOARD_ID,
+    getDataSourceIntegratedDashboard: appendDataSourceId(DASHBOARD_ID),
     appLinks: initialAppLinks,
-    defaultIndex: appendDataSourceId(DEFAULT_INDEX),
-    savedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
+    defaultIndex: DEFAULT_INDEX,
+    getDataSourceIntegratedDefaultIndex: appendDataSourceId(DEFAULT_INDEX),
+    savedObjects: getSavedObjects(),
+    getDataSourceIntegratedSavedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
       getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
     dataIndices: [
       {
