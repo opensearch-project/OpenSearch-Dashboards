@@ -116,7 +116,7 @@ export const useDashboardAppAndGlobalState = (
         }
 
         dashboardContainer.renderEmpty = () =>
-          renderEmpty(dashboardContainer, stateContainer.getState(), services);
+          renderEmpty(dashboardContainer, stateContainer, services);
 
         const stopSyncingDashboardContainerOutputs = handleDashboardContainerOutputs(
           services,

@@ -148,12 +148,6 @@ export const handleDashboardContainerInputs = (
       // Add filters modifies the object passed to it, hence the clone deep.
       filterManager.addFilters(cloneDeep(dashboardContainer.getInput().filters));
 
-      // TODO: investigate if this is needed
-      /* dashboardStateManager.applyFilters(
-          $scope.model.query,
-          container.getInput().filters
-      );*/
-
       appState.transitions.set('query', queryString.getQuery());
     }
     // triggered when dashboard embeddable container has changes, and update the appState
@@ -269,7 +263,7 @@ const shouldShowUnauthorizedEmptyState = (
 const getEmptyScreenProps = (
   shouldShowEditHelp: boolean,
   isEmptyInReadOnlyMode: boolean,
-  // stateContainer: DashboardAppStateContainer,
+  stateContainer: DashboardAppStateContainer,
   container: DashboardContainer,
   services: DashboardServices
 ): DashboardEmptyScreenProps => {
@@ -287,6 +281,8 @@ const getEmptyScreenProps = (
             SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
           });
         }
+      } else {
+        stateContainer.transitions.set('viewMode', ViewMode.EDIT);
       }
     },
     showLinkToVisualize: shouldShowEditHelp,
@@ -311,17 +307,24 @@ const getEmptyScreenProps = (
 
 export const renderEmpty = (
   container: DashboardContainer,
-  appStateData: DashboardAppState,
+  appStateContainer: DashboardAppStateContainer,
   services: DashboardServices
 ) => {
   const { dashboardConfig } = services;
+  const appStateData = appStateContainer.getState();
   const shouldShowEditHelp = getShouldShowEditHelp(appStateData, dashboardConfig);
   const shouldShowViewHelp = getShouldShowViewHelp(appStateData, dashboardConfig);
   const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState(appStateData, services);
   const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
   return isEmptyState ? (
     <DashboardEmptyScreen
-      {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode, container, services)}
+      {...getEmptyScreenProps(
+        shouldShowEditHelp,
+        isEmptyInReadOnlyMode,
+        appStateContainer,
+        container,
+        services
+      )}
     />
   ) : null;
 };
@@ -368,7 +371,7 @@ const getDashboardInputFromAppState = (
       getShouldShowViewHelp(appStateData, dashboardConfig) ||
       shouldShowUnauthorizedEmptyState(appStateData, services),
     useMargins: appStateData.options.useMargins,
-    lastReloadRequestTime, // TODO
+    lastReloadRequestTime,
     title: appStateData.title,
     description: appStateData.description,
     expandedPanelId: appStateData.expandedPanelId,
