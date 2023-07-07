@@ -317,7 +317,7 @@ export const getNavActions = (
         ? createDashboardEditUrl(savedDashboard.id)
         : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
 
-      dashboardContainer?.updateAppStateUrl?.(pathname, false);
+      currentContainer?.updateAppStateUrl?.(pathname, false);
 
       const newStateContainer: { [key: string]: any } = {};
       // This is only necessary for new dashboards, which will default to Edit mode.

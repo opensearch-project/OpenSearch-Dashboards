@@ -134,35 +134,13 @@ export const createDashboardGlobalAndAppState = ({
    */
   const updateStateUrl = ({ state, replace }: { state: DashboardAppState; replace: boolean }) => {
     osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
+
     // immediately forces scheduled updates and changes location
     return osdUrlStateStorage.flush({ replace });
   };
 
   updateStateUrl({ state: initialState, replace: true });
-
   // start syncing the appState with the ('_a') url
   startStateSync();
-  return { stateContainer, stopStateSync, updateStateUrl, stopSyncingQueryServiceStateWithUrl };
-};
-
-const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
-  if (state.viewMode === ViewMode.VIEW) {
-    const { panels, ...stateWithoutPanels } = state;
-    return stateWithoutPanels;
-  }
-  return state;
-};
-
-export const updateStateUrl = ({
-  osdUrlStateStorage,
-  state,
-  replace,
-}: {
-  osdUrlStateStorage: IOsdUrlStateStorage;
-  state: DashboardAppState;
-  replace: boolean;
-}) => {
-  osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
-  // immediately forces scheduled updates and changes location
-  return osdUrlStateStorage.flush({ replace });
+  return { stateContainer, updateStateUrl, stopStateSync, stopSyncingQueryServiceStateWithUrl };
 };

@@ -56,6 +56,7 @@ export const useDashboardAppAndGlobalState = (
 
       const {
         stateContainer,
+        updateStateUrl,
         stopStateSync,
         stopSyncingQueryServiceStateWithUrl,
       } = createDashboardGlobalAndAppState({
@@ -70,6 +71,8 @@ export const useDashboardAppAndGlobalState = (
         queryString,
         timefilter: { timefilter },
       } = services.data.query;
+
+      const { history } = services;
 
       // sync initial app state from state container to managers
       filterManager.setAppFilters(cloneDeep(stateContainer.getState().filters));
@@ -117,6 +120,15 @@ export const useDashboardAppAndGlobalState = (
 
         dashboardContainer.renderEmpty = () =>
           renderEmpty(dashboardContainer, stateContainer, services);
+
+        dashboardContainer.updateAppStateUrl = (pathname: string, replace: boolean) => {
+          const updated = updateStateUrl({ state: stateContainer.getState(), replace });
+
+          history[updated ? 'replace' : 'push']({
+            ...history.location,
+            pathname,
+          });
+        };
 
         const stopSyncingDashboardContainerOutputs = handleDashboardContainerOutputs(
           services,
