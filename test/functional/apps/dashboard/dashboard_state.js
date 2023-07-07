@@ -46,6 +46,7 @@ export default function ({ getService, getPageObjects }) {
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const screenshots = getService('screenshots');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
   const inspector = getService('inspector');
@@ -57,6 +58,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+      screenshots.take('1beforeall');
     });
 
     after(async function () {
@@ -65,44 +67,57 @@ export default function ({ getService, getPageObjects }) {
 
     it('Overriding colors on an area chart is preserved', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
+      screenshots.take('2overridecolors1');
 
       await PageObjects.dashboard.clickNewDashboard();
+      screenshots.take('2overridecolors2');
       await PageObjects.timePicker.setHistoricalDataRange();
+      screenshots.take('2overridecolors3');
 
       await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
+      screenshots.take('2overridecolors4');
       await PageObjects.dashboard.saveDashboard('Overridden colors');
+      screenshots.take('2overridecolors5');
 
       await PageObjects.dashboard.switchToEditMode();
+      screenshots.take('2overridecolors6');
 
       await PageObjects.visChart.openLegendOptionColors('Count');
+      screenshots.take('2overridecolors7');
       await PageObjects.visChart.selectNewLegendColorChoice('#EA6460');
-
+      screenshots.take('2overridecolors8');
       await PageObjects.dashboard.saveDashboard('Overridden colors');
+      screenshots.take('2overridecolors9');
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
+      screenshots.take('2overridecolors10');
       await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
+      screenshots.take('2overridecolors11');
       const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
         '#EA6460'
       );
+      screenshots.take('2overridecolors12');
 
       expect(colorChoiceRetained).to.be(true);
     });
 
     it('Saved search with no changes will update when the saved object changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
+      screenshots.take('3savedsearchwillupdate1');
 
       await PageObjects.header.clickDiscover();
       await PageObjects.timePicker.setHistoricalDataRange();
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
+      screenshots.take('3savedsearchwillupdate2');
       await PageObjects.header.clickDashboard();
       await PageObjects.dashboard.clickNewDashboard();
-
+      screenshots.take('3savedsearchwillupdate3');
       await dashboardAddPanel.addSavedSearch('my search');
+      screenshots.take('3savedsearchwillupdate4');
       await PageObjects.dashboard.saveDashboard('No local edits');
-
+      screenshots.take('3savedsearchwillupdate5');
       const inViewMode = await testSubjects.exists('dashboardEditMode');
       expect(inViewMode).to.be(true);
 
@@ -110,9 +125,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
+      screenshots.take('3savedsearchwillupdate6');
       await PageObjects.header.clickDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      screenshots.take('3savedsearchwillupdate7');
 
       const headers = await PageObjects.discover.getColumnHeaders();
       expect(headers.length).to.be(3);
@@ -122,17 +138,20 @@ export default function ({ getService, getPageObjects }) {
 
     it('Saved search with column changes will not update when the saved object changes', async () => {
       await PageObjects.discover.removeHeaderColumn('bytes');
+      screenshots.take('4savedsearchwithcolumnchanges1');
       await PageObjects.dashboard.switchToEditMode();
+      screenshots.take('4savedsearchwithcolumnchanges2');
       await PageObjects.dashboard.saveDashboard('Has local edits');
-
+      screenshots.take('4savedsearchwithcolumnchanges3');
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      screenshots.take('4savedsearchwithcolumnchanges4');
 
       await PageObjects.header.clickDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();
-
+      screenshots.take('4savedsearchwithcolumnchanges5');
       const headers = await PageObjects.discover.getColumnHeaders();
       expect(headers.length).to.be(2);
       expect(headers[1]).to.be('agent');
@@ -140,14 +159,17 @@ export default function ({ getService, getPageObjects }) {
 
     it('Saved search will update when the query is changed in the URL', async () => {
       const currentQuery = await queryBar.getQueryString();
+      screenshots.take('5savedsearchwillupdatewhenquerychangeinurl1');
       expect(currentQuery).to.equal('');
       const currentUrl = await browser.getCurrentUrl();
+      screenshots.take('5savedsearchwillupdatewhenquerychangeinurl2');
       const newUrl = currentUrl.replace('query:%27%27', 'query:%27abc12345678910%27');
       // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
       // soft refresh.
       await browser.get(newUrl.toString(), false);
+      screenshots.take('5savedsearchwillupdatewhenquerychangeinurl3');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
+      screenshots.take('5savedsearchwillupdatewhenquerychangeinurl4');
       const headers = await PageObjects.discover.getColumnHeaders();
       // will be zero because the query inserted in the url doesn't match anything
       expect(headers.length).to.be(0);
@@ -155,33 +177,46 @@ export default function ({ getService, getPageObjects }) {
 
     it('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
-
+      screenshots.take('6TILEMAP1');
       await PageObjects.dashboard.clickNewDashboard();
+      screenshots.take('6TILEMAP2');
       await PageObjects.timePicker.setHistoricalDataRange();
-
+      screenshots.take('6TILEMAP3');
       await dashboardAddPanel.addVisualization('Visualization TileMap');
+      screenshots.take('6TILEMAP4');
       await PageObjects.dashboard.saveDashboard('No local edits');
+      screenshots.take('6TILEMAP5');
 
       await dashboardPanelActions.openInspector();
+      screenshots.take('6TILEMAP6');
       const tileMapData = await inspector.getTableData();
+      screenshots.take('6TILEMAP7');
       await inspector.close();
-
+      screenshots.take('6TILEMAP8');
       await PageObjects.dashboard.switchToEditMode();
+      screenshots.take('6TILEMAP9');
       await dashboardPanelActions.openContextMenu();
+      screenshots.take('6TILEMAP10');
       await dashboardPanelActions.clickEdit();
-
+      screenshots.take('6TILEMAP11');
       await PageObjects.tileMap.clickMapZoomIn();
+      screenshots.take('6TILEMAP12');
       await PageObjects.tileMap.clickMapZoomIn();
+      screenshots.take('6TILEMAP13');
       await PageObjects.tileMap.clickMapZoomIn();
+      screenshots.take('6TILEMAP14');
       await PageObjects.tileMap.clickMapZoomIn();
-
+      screenshots.take('6TILEMAP15');
       await PageObjects.visualize.saveVisualizationExpectSuccess('Visualization TileMap');
-
+      screenshots.take('6TILEMAP16');
       await PageObjects.header.clickDashboard();
-
+      screenshots.take('6TILEMAP17');
       await dashboardPanelActions.openInspector();
+      screenshots.take('6TILEMAP18');
       const changedTileMapData = await inspector.getTableData();
+      screenshots.take('6TILEMAP19');
       await inspector.close();
+      screenshots.take('6TILEMAP20');
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
 

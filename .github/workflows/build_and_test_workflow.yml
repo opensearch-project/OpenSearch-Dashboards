@@ -207,7 +207,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: failure-artifacts-ci${{ matrix.group }}
+          name: failure-artifacts-ci${{ matrix.group }}-${{ matrix.os }}
           path: |
             test/*/failure_debug/
             test/*/screenshots/
