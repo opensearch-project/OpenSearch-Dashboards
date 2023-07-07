@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<LoadingFlyoutBody/> renders component 1`] = `
+<div>
+  <div
+    class="euiFlyoutBody"
+  >
+    <div
+      class="euiFlyoutBody__overflow"
+      tabindex="0"
+    >
+      <div
+        class="euiFlyoutBody__overflowContent"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <span
+              class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+              data-test-subj="loadingSpinner"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
