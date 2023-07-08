@@ -30,20 +30,23 @@ import { Dashboard } from '../../../dashboard';
  * This effect is responsible for instantiating the dashboard app and global state container,
  * which is in sync with "_a" and "_g" url param
  */
-export const useDashboardAppAndGlobalState = (
-  services: DashboardServices,
-  eventEmitter: EventEmitter,
-  instance?: SavedObjectDashboard,
-  dashboard?: Dashboard
-) => {
-  const [appStateContainer, setAppStateContainer] = useState<
-    DashboardAppStateContainer | undefined
-  >();
+export const useDashboardAppAndGlobalState = ({
+  services,
+  eventEmitter,
+  savedDashboardInstance,
+  dashboard,
+}: {
+  services: DashboardServices;
+  eventEmitter: EventEmitter;
+  savedDashboardInstance?: SavedObjectDashboard;
+  dashboard?: Dashboard;
+}) => {
+  const [appState, setAppState] = useState<DashboardAppStateContainer | undefined>();
   const [currentContainer, setCurrentContainer] = useState<DashboardContainer | undefined>();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   useEffect(() => {
-    if (instance && dashboard) {
+    if (savedDashboardInstance && dashboard) {
       let unsubscribeFromDashboardContainer: () => void;
 
       const {
@@ -54,7 +57,7 @@ export const useDashboardAppAndGlobalState = (
       } = services;
       const hideWriteControls = dashboardConfig.getHideWriteControls();
       const stateDefaults = migrateAppState(
-        getAppStateDefaults(instance, hideWriteControls),
+        getAppStateDefaults(savedDashboardInstance, hideWriteControls),
         opensearchDashboardsVersion,
         usageCollection
       );
@@ -67,7 +70,7 @@ export const useDashboardAppAndGlobalState = (
         stateDefaults,
         osdUrlStateStorage: services.osdUrlStateStorage,
         services,
-        instance,
+        savedDashboardInstance,
       });
 
       const {
@@ -87,10 +90,8 @@ export const useDashboardAppAndGlobalState = (
         services.data.query,
         {
           set: ({ filters, query }) => {
-            stateContainer.transitions.setDashboard({
-              filters: filters || [],
-              query: query || queryString.getDefaultQuery(),
-            });
+            stateContainer.transitions.set('filters', filters || []);
+            stateContainer.transitions.set('query', query || queryString.getDefaultQuery());
           },
           get: () => ({
             filters: stateContainer.getState().filters,
@@ -111,11 +112,11 @@ export const useDashboardAppAndGlobalState = (
 
       const getDashboardContainer = async () => {
         const subscriptions = new Subscription();
-        const dashboardContainer = await createDashboardContainer(
+        const dashboardContainer = await createDashboardContainer({
           services,
-          instance,
-          stateContainer
-        );
+          savedDashboard: savedDashboardInstance,
+          appState: stateContainer,
+        });
         setCurrentContainer(dashboardContainer);
 
         if (!dashboardContainer) {
@@ -161,8 +162,13 @@ export const useDashboardAppAndGlobalState = (
 
         // If app state is changes, then set unsaved changes to true
         // the only thing app state is not tracking is the time filter, need to check the previous dashboard if they count time filter change or not
-        const stopSyncingFromAppState = stateContainer.subscribe((state) => {
-          refreshDashboardContainer(dashboardContainer, services, dashboard, state);
+        const stopSyncingFromAppState = stateContainer.subscribe((appStateData) => {
+          refreshDashboardContainer({
+            dashboardContainer,
+            dashboardServices: services,
+            savedDashboard: dashboard,
+            appStateData,
+          });
         });
 
         subscriptions.add(stopSyncingFromAppState);
@@ -175,12 +181,12 @@ export const useDashboardAppAndGlobalState = (
           timefilter.getRefreshIntervalUpdate$(),
           timefilter.getTimeUpdate$()
         ).subscribe(() => {
-          refreshDashboardContainer(
+          refreshDashboardContainer({
+            dashboardServices: services,
             dashboardContainer,
-            services,
-            dashboard,
-            stateContainer.getState()
-          );
+            savedDashboard: dashboard,
+            appStateData: stateContainer.getState(),
+          });
         });
 
         subscriptions.add(stopSyncingFromTimeFilters);
@@ -193,7 +199,7 @@ export const useDashboardAppAndGlobalState = (
       };
 
       getDashboardContainer();
-      setAppStateContainer(stateContainer);
+      setAppState(stateContainer);
 
       return () => {
         stopStateSync();
@@ -202,7 +208,7 @@ export const useDashboardAppAndGlobalState = (
         unsubscribeFromDashboardContainer?.();
       };
     }
-  }, [dashboard, eventEmitter, instance, services]);
+  }, [dashboard, eventEmitter, savedDashboardInstance, services]);
 
-  return { appStateContainer, currentContainer, indexPatterns };
+  return { appState, currentContainer, indexPatterns };
 };

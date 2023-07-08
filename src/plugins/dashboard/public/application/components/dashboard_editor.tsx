@@ -18,52 +18,48 @@ export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { chrome } = services;
-  const isChromeVisible = useChromeVisibility(chrome);
+  const isChromeVisible = useChromeVisibility({ chrome });
   const [eventEmitter] = useState(new EventEmitter());
 
-  const { savedDashboard: savedDashboardInstance, dashboard } = useSavedDashboardInstance(
+  const { savedDashboard: savedDashboardInstance, dashboard } = useSavedDashboardInstance({
     services,
     eventEmitter,
     isChromeVisible,
-    dashboardIdFromUrl
-  );
+    dashboardIdFromUrl,
+  });
 
-  const { appStateContainer, currentContainer, indexPatterns } = useDashboardAppAndGlobalState(
+  const { appState, currentContainer, indexPatterns } = useDashboardAppAndGlobalState({
     services,
     eventEmitter,
     savedDashboardInstance,
-    dashboard
-  );
-
-  const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
-    eventEmitter,
-    services,
     dashboard,
+  });
+
+  const { isEmbeddableRendered, currentAppState } = useEditorUpdates({
+    services,
+    eventEmitter,
     savedDashboardInstance,
-    currentContainer,
-    appStateContainer
-  );
+    dashboard,
+    dashboardContainer: currentContainer,
+    appState,
+  });
 
   return (
     <div>
       <div>
-        {savedDashboardInstance &&
-          isEmbeddableRendered &&
-          currentAppState &&
-          currentContainer &&
-          dashboard && (
-            <DashboardTopNav
-              isChromeVisible={isChromeVisible}
-              savedDashboardInstance={savedDashboardInstance}
-              appState={appStateContainer!}
-              dashboard={dashboard}
-              currentAppState={currentAppState}
-              isEmbeddableRendered={isEmbeddableRendered}
-              indexPatterns={indexPatterns}
-              currentContainer={currentContainer}
-              dashboardIdFromUrl={dashboardIdFromUrl}
-            />
-          )}
+        {savedDashboardInstance && appState && currentAppState && currentContainer && dashboard && (
+          <DashboardTopNav
+            isChromeVisible={isChromeVisible}
+            savedDashboardInstance={savedDashboardInstance}
+            appState={appState!}
+            dashboard={dashboard}
+            currentAppState={currentAppState}
+            isEmbeddableRendered={isEmbeddableRendered}
+            indexPatterns={indexPatterns}
+            currentContainer={currentContainer}
+            dashboardIdFromUrl={dashboardIdFromUrl}
+          />
+        )}
       </div>
     </div>
   );

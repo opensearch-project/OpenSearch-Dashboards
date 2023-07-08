@@ -119,7 +119,7 @@ export const getNavActions = (
           });
         }
 
-        // If the save was successfull, then set the dashboard isDirty back to false
+        // If the save was successful, then set the dashboard isDirty back to false
         dashboard.isDirty = false;
         return response;
       });
@@ -400,7 +400,8 @@ export const getNavActions = (
         });
 
         if (id !== dashboardIdFromUrl) {
-          history.replace(createDashboardEditUrl(id));
+          const pathname = createDashboardEditUrl(id);
+          currentContainer?.updateAppStateUrl?.({ replace: false, pathname });
         }
 
         chrome.docTitle.change(savedDashboard.title);

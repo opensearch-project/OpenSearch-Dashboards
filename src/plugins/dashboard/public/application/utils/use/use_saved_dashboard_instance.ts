@@ -20,12 +20,17 @@ import { Dashboard, DashboardParams } from '../../../dashboard';
  * This effect is responsible for instantiating a saved dashboard or creating a new one
  * using url parameters, embedding and destroying it in DOM
  */
-export const useSavedDashboardInstance = (
-  services: DashboardServices,
-  eventEmitter: EventEmitter,
-  isChromeVisible: boolean | undefined,
-  dashboardIdFromUrl: string | undefined
-) => {
+export const useSavedDashboardInstance = ({
+  services,
+  eventEmitter,
+  isChromeVisible,
+  dashboardIdFromUrl,
+}: {
+  services: DashboardServices;
+  eventEmitter: EventEmitter;
+  isChromeVisible: boolean | undefined;
+  dashboardIdFromUrl: string | undefined;
+}) => {
   const [savedDashboardInstance, setSavedDashboardInstance] = useState<{
     savedDashboard?: SavedObjectDashboard;
     dashboard?: Dashboard<DashboardParams>;

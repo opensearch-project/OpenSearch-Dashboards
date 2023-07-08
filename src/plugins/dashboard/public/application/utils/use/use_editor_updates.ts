@@ -11,14 +11,21 @@ import { Dashboard } from '../../../dashboard';
 import { SavedObjectDashboard } from '../../../saved_dashboards';
 import { setBreadcrumbsForExistingDashboard, setBreadcrumbsForNewDashboard } from '../breadcrumbs';
 
-export const useEditorUpdates = (
-  eventEmitter: EventEmitter,
-  services: DashboardServices,
-  dashboard?: Dashboard,
-  savedDashboardInstance?: SavedObjectDashboard,
-  dashboardContainer?: DashboardContainer,
-  appState?: DashboardAppStateContainer
-) => {
+export const useEditorUpdates = ({
+  eventEmitter,
+  services,
+  dashboard,
+  savedDashboardInstance,
+  dashboardContainer,
+  appState,
+}: {
+  eventEmitter: EventEmitter;
+  services: DashboardServices;
+  dashboard?: Dashboard;
+  dashboardContainer?: DashboardContainer;
+  savedDashboardInstance?: SavedObjectDashboard;
+  appState?: DashboardAppStateContainer;
+}) => {
   const dashboardDom = document.getElementById('dashboardViewport');
   const [currentAppState, setCurrentAppState] = useState<DashboardAppState>();
   const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);

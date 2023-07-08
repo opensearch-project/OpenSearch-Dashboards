@@ -18,6 +18,7 @@ import {
 import { ViewMode } from '../../embeddable_plugin';
 import { getDashboardIdFromUrl } from '../lib';
 import { syncQueryStateWithUrl } from '../../../../data/public';
+import { SavedObjectDashboard } from '../../saved_dashboards';
 
 const APP_STATE_STORAGE_KEY = '_a';
 
@@ -25,14 +26,14 @@ interface Arguments {
   osdUrlStateStorage: IOsdUrlStateStorage;
   stateDefaults: DashboardAppState;
   services: DashboardServices;
-  instance: any;
+  savedDashboardInstance: SavedObjectDashboard;
 }
 
 export const createDashboardGlobalAndAppState = ({
   stateDefaults,
   osdUrlStateStorage,
   services,
-  instance,
+  savedDashboardInstance,
 }: Arguments) => {
   const urlState = osdUrlStateStorage.get<DashboardAppState>(APP_STATE_STORAGE_KEY);
   const {
@@ -97,7 +98,7 @@ export const createDashboardGlobalAndAppState = ({
           // is going to be destroyed soon and we shouldn't sync state anymore,
           // as it could potentially trigger further url updates
           const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
-          if (currentDashboardIdInUrl !== instance.id) return;
+          if (currentDashboardIdInUrl !== savedDashboardInstance.id) return;
 
           stateContainer.set({
             ...stateDefaults,

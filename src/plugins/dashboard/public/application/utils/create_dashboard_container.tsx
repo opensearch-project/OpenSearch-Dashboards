@@ -50,11 +50,15 @@ import { SavedObjectDashboard } from '../../saved_dashboards';
 import { migrateLegacyQuery } from '../lib/migrate_legacy_query';
 import { Dashboard } from '../../dashboard';
 
-export const createDashboardContainer = async (
-  services: DashboardServices,
-  savedDashboard?: SavedObjectDashboard,
-  appState?: DashboardAppStateContainer
-) => {
+export const createDashboardContainer = async ({
+  services,
+  savedDashboard,
+  appState,
+}: {
+  services: DashboardServices;
+  savedDashboard?: SavedObjectDashboard;
+  appState?: DashboardAppStateContainer;
+}) => {
   const { embeddable } = services;
 
   const dashboardFactory = embeddable.getEmbeddableFactory<
@@ -147,7 +151,6 @@ export const handleDashboardContainerInputs = (
     ) {
       // Add filters modifies the object passed to it, hence the clone deep.
       filterManager.addFilters(cloneDeep(dashboardContainer.getInput().filters));
-
       appState.transitions.set('query', queryString.getQuery());
     }
     // triggered when dashboard embeddable container has changes, and update the appState
@@ -307,11 +310,11 @@ const getEmptyScreenProps = (
 
 export const renderEmpty = (
   container: DashboardContainer,
-  appStateContainer: DashboardAppStateContainer,
+  appState: DashboardAppStateContainer,
   services: DashboardServices
 ) => {
   const { dashboardConfig } = services;
-  const appStateData = appStateContainer.getState();
+  const appStateData = appState.getState();
   const shouldShowEditHelp = getShouldShowEditHelp(appStateData, dashboardConfig);
   const shouldShowViewHelp = getShouldShowViewHelp(appStateData, dashboardConfig);
   const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState(appStateData, services);
@@ -321,7 +324,7 @@ export const renderEmpty = (
       {...getEmptyScreenProps(
         shouldShowEditHelp,
         isEmptyInReadOnlyMode,
-        appStateContainer,
+        appState,
         container,
         services
       )}
@@ -496,12 +499,17 @@ const handleDashboardContainerChanges = (
   // event emit dirty?
 };
 
-export const refreshDashboardContainer = (
-  dashboardContainer: DashboardContainer,
-  dashboardServices: DashboardServices,
-  savedDashboard: Dashboard,
-  appStateData?: DashboardAppState
-) => {
+export const refreshDashboardContainer = ({
+  dashboardContainer,
+  dashboardServices,
+  savedDashboard,
+  appStateData,
+}: {
+  dashboardContainer: DashboardContainer;
+  dashboardServices: DashboardServices;
+  savedDashboard: Dashboard;
+  appStateData?: DashboardAppState;
+}) => {
   if (!appStateData) {
     return;
   }
