@@ -46,7 +46,7 @@ export const useDashboardAppAndGlobalState = ({
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   useEffect(() => {
-    if (savedDashboardInstance && dashboard) {
+    if (savedDashboardInstance) {
       let unsubscribeFromDashboardContainer: () => void;
 
       const {
@@ -157,7 +157,7 @@ export const useDashboardAppAndGlobalState = ({
           services,
           dashboardContainer,
           stateContainer,
-          dashboard
+          dashboard!
         );
 
         // If app state is changes, then set unsaved changes to true
@@ -166,7 +166,7 @@ export const useDashboardAppAndGlobalState = ({
           refreshDashboardContainer({
             dashboardContainer,
             dashboardServices: services,
-            savedDashboard: dashboard,
+            savedDashboard: dashboard!,
             appStateData,
           });
         });
@@ -184,7 +184,7 @@ export const useDashboardAppAndGlobalState = ({
           refreshDashboardContainer({
             dashboardServices: services,
             dashboardContainer,
-            savedDashboard: dashboard,
+            savedDashboard: dashboard!,
             appStateData: stateContainer.getState(),
           });
         });

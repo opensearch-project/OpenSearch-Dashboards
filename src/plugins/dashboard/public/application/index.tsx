@@ -20,17 +20,14 @@ import { DashboardServices } from '../types';
 export * from './embeddable';
 export * from './actions';
 
-export const renderApp = (
-  { element, appBasePath, onAppLeave }: AppMountParameters,
-  services: DashboardServices
-) => {
+export const renderApp = ({ element }: AppMountParameters, services: DashboardServices) => {
   addHelpMenuToAppChrome(services.chrome, services.docLinks);
 
   const app = (
     <Router history={services.history}>
       <OpenSearchDashboardsContextProvider services={services}>
         <services.i18n.Context>
-          <DashboardApp onAppLeave={onAppLeave} />
+          <DashboardApp />
         </services.i18n.Context>
       </OpenSearchDashboardsContextProvider>
     </Router>

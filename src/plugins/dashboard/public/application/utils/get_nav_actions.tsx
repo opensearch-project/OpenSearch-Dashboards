@@ -52,7 +52,6 @@ export const getNavActions = (
   currentContainer?: DashboardContainer
 ) => {
   const {
-    history,
     embeddable,
     data: { query: queryService },
     notifications,
