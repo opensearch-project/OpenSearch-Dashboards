@@ -473,7 +473,7 @@ const handleDashboardContainerChanges = (
   if (dirty) {
     newAppState.panels = Object.values(convertedPanelStateMap);
     if (dirtyBecauseOfInitialStateMigration) {
-      dashboardContainer.updateAppStateUrl?.(true);
+      dashboardContainer.updateAppStateUrl?.({ replace: true });
     } else {
       dashboard.isDirty = true;
     }

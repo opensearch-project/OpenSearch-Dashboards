@@ -113,7 +113,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   public renderEmpty?: undefined | (() => React.ReactNode);
-  public updateAppStateUrl?: undefined | ((replace: boolean, pathname?: string) => void);
+  public updateAppStateUrl?:
+    | undefined
+    | (({ replace, pathname }: { replace: boolean; pathname?: string }) => void);
 
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
 

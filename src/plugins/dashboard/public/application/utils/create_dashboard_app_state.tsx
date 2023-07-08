@@ -125,22 +125,37 @@ export const createDashboardGlobalAndAppState = ({
     osdUrlStateStorage
   );
 
-  /*
-     make sure url ('_a') matches initial state
-     Initializing appState does two things - first it translates the defaults into AppState,
-     second it updates appState based on the url (the url trumps the defaults). This means if
-     we update the state format at all and want to handle BWC, we must not only migrate the
-     data stored with saved vis, but also any old state in the url.
-   */
-  const updateStateUrl = ({ state, replace }: { state: DashboardAppState; replace: boolean }) => {
-    osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
-
-    // immediately forces scheduled updates and changes location
-    return osdUrlStateStorage.flush({ replace });
-  };
-
-  updateStateUrl({ state: initialState, replace: true });
+  updateStateUrl({ osdUrlStateStorage, state: initialState, replace: true });
   // start syncing the appState with the ('_a') url
   startStateSync();
-  return { stateContainer, updateStateUrl, stopStateSync, stopSyncingQueryServiceStateWithUrl };
+  return { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl };
+};
+
+/**
+ * make sure url ('_a') matches initial state
+ * Initializing appState does two things - first it translates the defaults into AppState,
+ * second it updates appState based on the url (the url trumps the defaults). This means if
+ * we update the state format at all and want to handle BWC, we must not only migrate the
+ * data stored with saved vis, but also any old state in the url.
+ */
+export const updateStateUrl = ({
+  osdUrlStateStorage,
+  state,
+  replace,
+}: {
+  osdUrlStateStorage: IOsdUrlStateStorage;
+  state: DashboardAppState;
+  replace: boolean;
+}) => {
+  osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
+  // immediately forces scheduled updates and changes location
+  return osdUrlStateStorage.flush({ replace });
+};
+
+const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
+  if (state.viewMode === ViewMode.VIEW) {
+    const { panels, ...stateWithoutPanels } = state;
+    return stateWithoutPanels;
+  }
+  return state;
 };

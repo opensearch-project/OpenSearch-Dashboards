@@ -14,7 +14,7 @@ import { DashboardServices } from '../../../types';
 
 import { DashboardAppStateContainer } from '../../../types';
 import { migrateAppState, getAppStateDefaults } from '../../lib';
-import { createDashboardGlobalAndAppState } from '../create_dashboard_app_state';
+import { createDashboardGlobalAndAppState, updateStateUrl } from '../create_dashboard_app_state';
 import { SavedObjectDashboard } from '../../../saved_dashboards';
 import {
   createDashboardContainer,
@@ -46,7 +46,12 @@ export const useDashboardAppAndGlobalState = (
     if (instance && dashboard) {
       let unsubscribeFromDashboardContainer: () => void;
 
-      const { dashboardConfig, usageCollection, opensearchDashboardsVersion } = services;
+      const {
+        dashboardConfig,
+        usageCollection,
+        opensearchDashboardsVersion,
+        osdUrlStateStorage,
+      } = services;
       const hideWriteControls = dashboardConfig.getHideWriteControls();
       const stateDefaults = migrateAppState(
         getAppStateDefaults(instance, hideWriteControls),
@@ -56,7 +61,6 @@ export const useDashboardAppAndGlobalState = (
 
       const {
         stateContainer,
-        updateStateUrl,
         stopStateSync,
         stopSyncingQueryServiceStateWithUrl,
       } = createDashboardGlobalAndAppState({
@@ -121,8 +125,18 @@ export const useDashboardAppAndGlobalState = (
         dashboardContainer.renderEmpty = () =>
           renderEmpty(dashboardContainer, stateContainer, services);
 
-        dashboardContainer.updateAppStateUrl = (replace: boolean, pathname?: string) => {
-          const updated = updateStateUrl({ state: stateContainer.getState(), replace });
+        dashboardContainer.updateAppStateUrl = ({
+          replace,
+          pathname,
+        }: {
+          replace: boolean;
+          pathname?: string;
+        }) => {
+          const updated = updateStateUrl({
+            osdUrlStateStorage,
+            state: stateContainer.getState(),
+            replace,
+          });
 
           if (pathname) {
             history[updated ? 'replace' : 'push']({
