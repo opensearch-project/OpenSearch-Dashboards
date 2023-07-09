@@ -84,7 +84,7 @@ export const useEditorUpdates = ({
   }, [dashboardContainer, dashboardDom]);
 
   useEffect(() => {
-    // clean up all registered listeners if any is left
+    // clean up all registered listeners, if any are left
     return () => {
       eventEmitter.removeAllListeners();
     };
