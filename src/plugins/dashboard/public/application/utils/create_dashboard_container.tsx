@@ -478,7 +478,7 @@ const handleDashboardContainerChanges = (
     if (dirtyBecauseOfInitialStateMigration) {
       dashboardContainer.updateAppStateUrl?.({ replace: true });
     } else {
-      dashboard.isDirty = true;
+      dashboard.setIsDirty(true);
     }
   }
   if (input.isFullScreenMode !== appStateData.fullScreenMode) {
@@ -530,12 +530,12 @@ export const refreshDashboardContainer = ({
 
     if (changes.timeRange || changes.refreshConfig) {
       if (appStateData.timeRestore) {
-        savedDashboard.isDirty = true;
+        savedDashboard.setIsDirty(true);
       }
     }
 
     if (changes.filters || changes.query) {
-      savedDashboard.isDirty = true;
+      savedDashboard.setIsDirty(true);
     }
   }
 };

@@ -119,7 +119,7 @@ export const getNavActions = (
         }
 
         // If the save was successful, then set the dashboard isDirty back to false
-        dashboard.isDirty = false;
+        dashboard.setIsDirty(false);
         return response;
       });
     };
@@ -302,7 +302,7 @@ export const getNavActions = (
   function onChangeViewMode(newMode: ViewMode) {
     const isPageRefresh = newMode === appState.viewMode;
     const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
-    const willLoseChanges = isLeavingEditMode && dashboard.isDirty === true;
+    const willLoseChanges = isLeavingEditMode && dashboard.isDirty;
 
     // If there are no changes, do not show the discard window
     if (!willLoseChanges) {
@@ -348,7 +348,7 @@ export const getNavActions = (
       }
 
       // Set the isDirty flag back to false since we discard all the changes
-      dashboard.isDirty = false;
+      dashboard.setIsDirty(false);
     }
 
     overlays

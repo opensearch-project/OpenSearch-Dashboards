@@ -58,7 +58,6 @@ export class Dashboard<TDashboardParams = DashboardParams> {
   public query: Query;
   public filters: Filter[];
   public title?: string;
-  public version = '3.0.0';
   public isDirty = false;
 
   constructor(dashboardState: SerializedDashboard = {} as any) {
@@ -109,8 +108,8 @@ export class Dashboard<TDashboardParams = DashboardParams> {
     }
   }
 
-  public setIsDirty(value: boolean) {
-    this.isDirty = value;
+  public setIsDirty(isDirty: boolean) {
+    this.isDirty = isDirty;
   }
 
   private getRefreshInterval(refreshInterval: RefreshInterval) {
