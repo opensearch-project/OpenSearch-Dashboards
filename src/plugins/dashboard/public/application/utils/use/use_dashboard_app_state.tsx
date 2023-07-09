@@ -46,7 +46,7 @@ export const useDashboardAppAndGlobalState = ({
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   useEffect(() => {
-    if (savedDashboardInstance) {
+    if (savedDashboardInstance && dashboard) {
       let unsubscribeFromDashboardContainer: () => void;
 
       const {

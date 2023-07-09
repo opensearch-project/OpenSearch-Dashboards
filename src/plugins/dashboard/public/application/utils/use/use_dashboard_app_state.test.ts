@@ -59,7 +59,7 @@ describe('useDashboardAppAndGlobalState', () => {
     stopSyncingQueryServiceStateWithUrlMock.mockClear();
   });
 
-  it('should not create appState if dashboard instance is not ready', () => {
+  it('should not create appState if dashboard instance and dashboard is not ready', () => {
     const { result } = renderHook(() =>
       useDashboardAppAndGlobalState({ services: mockServices, eventEmitter })
     );
