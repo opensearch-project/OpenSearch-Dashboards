@@ -12,6 +12,8 @@ import { DashboardServices } from '../../../types';
 import { SavedObjectDashboard } from '../../../saved_dashboards';
 import { dashboardAppStateStub } from '../stubs';
 import { createDashboardServicesMock } from '../mocks';
+import { Dashboard } from '../../../dashboard';
+import { convertToSerializedDashboard } from '../../../saved_dashboards/_saved_dashboard';
 
 jest.mock('../create_dashboard_app_state');
 jest.mock('../create_dashboard_container.tsx');
@@ -28,7 +30,6 @@ describe('useDashboardAppAndGlobalState', () => {
     getState: stateContainerGetStateMock,
     state$: new Observable(),
     transitions: {
-      updateVisState: jest.fn(),
       set: jest.fn(),
     },
   };
@@ -49,6 +50,8 @@ describe('useDashboardAppAndGlobalState', () => {
       optionsJSON: JSON.stringify(dashboardAppStateStub.options),
     },
   } as unknown) as SavedObjectDashboard;
+  const dashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));
+
   let mockServices: jest.Mocked<DashboardServices>;
 
   beforeEach(() => {
@@ -77,6 +80,7 @@ describe('useDashboardAppAndGlobalState', () => {
         services: mockServices,
         eventEmitter,
         savedDashboardInstance,
+        dashboard,
       })
     );
 
@@ -106,6 +110,7 @@ describe('useDashboardAppAndGlobalState', () => {
         services: mockServices,
         eventEmitter,
         savedDashboardInstance,
+        dashboard,
       })
     );
 

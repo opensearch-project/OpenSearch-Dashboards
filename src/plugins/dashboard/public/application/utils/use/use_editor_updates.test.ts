@@ -75,8 +75,6 @@ describe('useEditorUpdates', () => {
   let appState: DashboardAppStateContainer;
   let savedDashboardInstance: SavedObjectDashboard;
   let dashboard: Dashboard;
-  let timeRange: any;
-  let mockFilters: any;
 
   beforeEach(() => {
     unsubscribeStateUpdatesMock = jest.fn();
@@ -98,15 +96,6 @@ describe('useEditorUpdates', () => {
       },
     } as unknown) as SavedObjectDashboard;
     dashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));
-    timeRange = {
-      from: 'now-15m',
-      to: 'now',
-    };
-    mockFilters = ['mockFilters'];
-    const mockQuery = {
-      query: '',
-      language: 'kuery',
-    };
   });
 
   test('should set up current app state and render the editor', () => {
