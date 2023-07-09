@@ -78,7 +78,9 @@ export function createUninstallRoute(
         }
       }
 
-      const savedObjectsList = sampleDataset.savedObjects(dataSourceId);
+      const savedObjectsList = dataSourceId
+        ? sampleDataset.getDataSourceIntegratedSavedObjects(dataSourceId)
+        : sampleDataset.savedObjects;
 
       const deletePromises = savedObjectsList.map(({ type, id }) =>
         context.core.savedObjects.client.delete(type, id)
