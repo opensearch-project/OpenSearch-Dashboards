@@ -60,7 +60,7 @@ export const getAugmentVisSavedObjs = async (
   visId: string | undefined,
   loader: SavedAugmentVisLoader | undefined,
   uiSettings?: IUiSettingsClient | undefined
-): Promise<ISavedAugmentVis[]> => {
+): Promise<ISavedAugmentVis[] | Error> => {
   // Using optional services provided, or the built-in services from this plugin
   const config = uiSettings !== undefined ? uiSettings : getUISettings();
   const isAugmentationEnabled = config.get(PLUGIN_AUGMENTATION_ENABLE_SETTING);
@@ -69,12 +69,8 @@ export const getAugmentVisSavedObjs = async (
       'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
     );
   }
-  try {
-    const allSavedObjects = await getAllAugmentVisSavedObjs(loader);
-    return allSavedObjects.filter((hit: ISavedAugmentVis) => hit.visId === visId);
-  } catch (e) {
-    return [] as ISavedAugmentVis[];
-  }
+  const allSavedObjects = await getAllAugmentVisSavedObjs(loader);
+  return allSavedObjects.filter((hit: ISavedAugmentVis) => hit.visId === visId);
 };
 
 /**
