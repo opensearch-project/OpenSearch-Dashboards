@@ -356,5 +356,4 @@ export {
   WorkspacesService,
   WorkspaceAttribute,
   WorkspaceFindOptions,
-  WORKSPACE_ID_QUERYSTRING_NAME,
 } from './workspace';

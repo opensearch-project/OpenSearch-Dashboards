@@ -38,6 +38,7 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { AppCategory, Branding } from '../';
+import { getWorkspaceIdFromUrl } from '../utils';
 
 export interface InjectedPluginMetadata {
   id: PluginName;
@@ -151,6 +152,15 @@ export class InjectedMetadataService {
       getSurvey: () => {
         return this.state.survey;
       },
+
+      getWorkspaceBasePath: () => {
+        const workspaceId = getWorkspaceIdFromUrl(window.location.href);
+        if (workspaceId) {
+          return `/w/${workspaceId}`;
+        }
+
+        return '';
+      },
     };
   }
 }
@@ -186,6 +196,7 @@ export interface InjectedMetadataSetup {
   };
   getBranding: () => Branding;
   getSurvey: () => string | undefined;
+  getWorkspaceBasePath: () => string;
 }
 
 /** @internal */
