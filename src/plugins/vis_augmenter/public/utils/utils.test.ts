@@ -316,6 +316,33 @@ describe('utils', () => {
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
       expect((await getAugmentVisSavedObjs(visId1, loader)).length).toEqual(0);
     });
+    it('throws error when feature setting is disabled', async () => {
+      uiSettingsMock.get.mockImplementation((key: string) => {
+        return false;
+      });
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      try {
+        await getAugmentVisSavedObjs(visId1, loader);
+      } catch (e: any) {
+        expect(
+          e.message.includes(
+            'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
+          )
+        );
+      }
+    });
+    it('returns no matching saved objs when loader throws error', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: {
+          findAll: () => {
+            return new Error();
+          },
+        },
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      expect((await getAugmentVisSavedObjs(visId3, loader)).length).toEqual(0);
+    });
     it('returns one matching saved obj', async () => {
       const loader = createSavedAugmentVisLoader({
         savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1]),
