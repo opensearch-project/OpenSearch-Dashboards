@@ -52,7 +52,8 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
     const opensearchDashboardsVersion = injectedMetadata.getOpenSearchDashboardsVersion();
     const basePath = new BasePath(
       injectedMetadata.getBasePath(),
-      injectedMetadata.getServerBasePath()
+      injectedMetadata.getServerBasePath(),
+      injectedMetadata.getWorkspaceBasePath()
     );
     const fetchService = new Fetch({ basePath, opensearchDashboardsVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });

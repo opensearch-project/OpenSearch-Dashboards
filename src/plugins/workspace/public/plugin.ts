@@ -11,59 +11,42 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
 } from '../../../core/public';
-import { WORKSPACE_APP_ID, WORKSPACE_ID_IN_SESSION_STORAGE, PATHS } from '../common/constants';
-import { WORKSPACE_ID_QUERYSTRING_NAME } from '../../../core/public';
+import { WORKSPACE_APP_ID, PATHS } from '../common/constants';
 import { mountDropdownList } from './mount';
+import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
   private core?: CoreSetup;
-  private addWorkspaceListener() {
-    this.core?.workspaces.client.currentWorkspaceId$.subscribe((newWorkspaceId) => {
-      try {
-        sessionStorage.setItem(WORKSPACE_ID_IN_SESSION_STORAGE, newWorkspaceId);
-      } catch (e) {
-        /**
-         * in incognize mode, this method may throw an error
-         * */
-      }
-    });
+  private getWorkpsaceIdFromURL(): string | null {
+    return getWorkspaceIdFromUrl(window.location.href);
   }
-  private getWorkpsaceIdFromQueryString(): string | null {
-    const searchParams = new URLSearchParams(window.location.search);
-    return searchParams.get(WORKSPACE_ID_QUERYSTRING_NAME);
-  }
-  private getWorkpsaceIdFromSessionStorage(): string {
-    try {
-      return sessionStorage.getItem(WORKSPACE_ID_IN_SESSION_STORAGE) || '';
-    } catch (e) {
-      /**
-       * in incognize mode, this method may throw an error
-       * */
-      return '';
+  private getPatchedUrl = (url: string, workspaceId: string) => {
+    const newUrl = new URL(url, window.location.href);
+    /**
+     * Patch workspace id into path
+     */
+    newUrl.pathname = this.core?.http.basePath.remove(newUrl.pathname) || '';
+    if (workspaceId) {
+      newUrl.pathname = `${this.core?.http.basePath.serverBasePath || ''}/w/${workspaceId}${
+        newUrl.pathname
+      }`;
+    } else {
+      newUrl.pathname = `${this.core?.http.basePath.serverBasePath || ''}${newUrl.pathname}`;
     }
-  }
-  private clearWorkspaceIdFromSessionStorage(): void {
-    try {
-      sessionStorage.removeItem(WORKSPACE_ID_IN_SESSION_STORAGE);
-    } catch (e) {
-      /**
-       * in incognize mode, this method may throw an error
-       * */
-    }
-  }
+
+    return newUrl.toString();
+  };
   public async setup(core: CoreSetup) {
     this.core = core;
+    this.core?.workspaces.setFormatUrlWithWorkspaceId((url, id) => this.getPatchedUrl(url, id));
     /**
-     * Retrive workspace id from url or sessionstorage
-     * url > sessionstorage
+     * Retrive workspace id from url
      */
-    const workspaceId =
-      this.getWorkpsaceIdFromQueryString() || this.getWorkpsaceIdFromSessionStorage();
+    const workspaceId = this.getWorkpsaceIdFromURL();
 
     if (workspaceId) {
       const result = await core.workspaces.client.enterWorkspace(workspaceId);
       if (!result.success) {
-        this.clearWorkspaceIdFromSessionStorage();
         core.fatalErrors.add(
           result.error ||
             i18n.translate('workspace.error.setup', {
@@ -72,11 +55,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
         );
       }
     }
-
-    /**
-     * register a listener
-     */
-    this.addWorkspaceListener();
 
     core.application.register({
       id: WORKSPACE_APP_ID,

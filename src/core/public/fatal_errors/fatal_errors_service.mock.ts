@@ -82,6 +82,7 @@ const createWorkspacesSetupContractMock = () => ({
     update: jest.fn(),
   },
   formatUrlWithWorkspaceId: jest.fn(),
+  setFormatUrlWithWorkspaceId: jest.fn(),
 });
 
 const createWorkspacesStartContractMock = createWorkspacesSetupContractMock;

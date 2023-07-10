@@ -21,11 +21,7 @@ import { useOpenSearchDashboards } from '../../../../../../src/plugins/opensearc
 
 import { PATHS } from '../../../common/constants';
 import { WorkspaceForm, WorkspaceFormData } from '../workspace_creator/workspace_form';
-import {
-  WORKSPACE_APP_ID,
-  WORKSPACE_ID_IN_SESSION_STORAGE,
-  WORKSPACE_OP_TYPE_UPDATE,
-} from '../../../common/constants';
+import { WORKSPACE_APP_ID, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
 import { ApplicationStart } from '../../../../../core/public';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 
@@ -80,9 +76,14 @@ export const WorkspaceUpdater = () => {
             defaultMessage: 'Update workspace successfully',
           }),
         });
-        await application.navigateToApp(WORKSPACE_APP_ID, {
-          path: PATHS.overview + '?' + WORKSPACE_ID_IN_SESSION_STORAGE + '=' + currentWorkspace.id,
-        });
+        window.location.href =
+          workspaces?.formatUrlWithWorkspaceId(
+            application.getUrlForApp(WORKSPACE_APP_ID, {
+              path: PATHS.overview,
+              absolute: true,
+            }),
+            currentWorkspace.id
+          ) || '';
         return;
       }
       notifications?.toasts.addDanger({
@@ -92,7 +93,7 @@ export const WorkspaceUpdater = () => {
         text: result?.error,
       });
     },
-    [notifications?.toasts, workspaces?.client, currentWorkspace, application]
+    [notifications?.toasts, workspaces, currentWorkspace, application]
   );
 
   if (!currentWorkspaceFormData.name) {

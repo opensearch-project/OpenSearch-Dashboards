@@ -33,14 +33,28 @@ import { modifyUrl } from '@osd/std';
 export class BasePath {
   constructor(
     private readonly basePath: string = '',
-    public readonly serverBasePath: string = basePath
+    public readonly serverBasePath: string = basePath,
+    private readonly workspaceBasePath: string = ''
   ) {}
 
   public get = () => {
+    return `${this.basePath}${this.workspaceBasePath}`;
+  };
+
+  public getBasePath = () => {
     return this.basePath;
   };
 
   public prepend = (path: string): string => {
+    if (!this.get()) return path;
+    return modifyUrl(path, (parts) => {
+      if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
+        parts.pathname = `${this.get()}${parts.pathname}`;
+      }
+    });
+  };
+
+  public prependWithoutWorkspacePath = (path: string): string => {
     if (!this.basePath) return path;
     return modifyUrl(path, (parts) => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
@@ -50,16 +64,16 @@ export class BasePath {
   };
 
   public remove = (path: string): string => {
-    if (!this.basePath) {
+    if (!this.get()) {
       return path;
     }
 
-    if (path === this.basePath) {
+    if (path === this.get()) {
       return '/';
     }
 
-    if (path.startsWith(`${this.basePath}/`)) {
-      return path.slice(this.basePath.length);
+    if (path.startsWith(`${this.get()}/`)) {
+      return path.slice(this.get().length);
     }
 
     return path;
