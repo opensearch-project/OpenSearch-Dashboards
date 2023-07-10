@@ -13,3 +13,4 @@ export function plugin() {
   return new DataExplorerPlugin();
 }
 export { DataExplorerPluginSetup, DataExplorerPluginStart, ViewRedirectParams } from './types';
+export { ViewMountParameters, ViewDefinition } from './services/view_service';
