@@ -37,7 +37,7 @@ import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSet
 const component = new ComponentRegistry();
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
-  defaultMessage: 'Advanced Settings',
+  defaultMessage: 'Advanced settings',
 });
 
 export class AdvancedSettingsPlugin
