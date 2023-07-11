@@ -53,7 +53,7 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-statsd.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/statsd.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/statsd.svg',
     artifacts: {
       dashboards: [],
       exportedFields: {

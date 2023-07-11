@@ -57,7 +57,7 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-envoyproxy.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/envoyproxy.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/envoyproxy.svg',
     artifacts: {
       dashboards: [
         {

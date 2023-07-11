@@ -57,7 +57,7 @@ export function sophosLogsSpecProvider(context: TutorialContext): TutorialSchema
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-sophos.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/sophos.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/sophos.svg',
     artifacts: {
       dashboards: [],
       application: {

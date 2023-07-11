@@ -44,7 +44,7 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
       defaultMessage: 'Zookeeper metrics',
     }),
     moduleName,
-    euiIconType: '/plugins/home/assets/logos/zookeeper.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/zookeeper.svg',
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.zookeeperMetrics.shortDescription', {
