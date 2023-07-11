@@ -75,7 +75,10 @@ const ruleFunction = (
       }
 
       reportInfo.message = messages.expected(
-        getNotCompliantMessage(`Modifying global selector "${rule.selector}" not allowed.`)
+        getNotCompliantMessage(
+          `Modifying global selector "${rule.selector}" not allowed.`,
+          selectorRule.explanation
+        )
       );
       report(reportInfo);
     });
