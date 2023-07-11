@@ -11,13 +11,13 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
 } from '../../../core/public';
-import { WORKSPACE_APP_ID, PATHS } from '../common/constants';
+import { WORKSPACE_APP_ID } from '../common/constants';
 import { mountDropdownList } from './mount';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
   private core?: CoreSetup;
-  private getWorkpsaceIdFromURL(): string | null {
+  private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
   private getPatchedUrl = (url: string, workspaceId: string) => {
@@ -40,9 +40,9 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     this.core = core;
     this.core?.workspaces.setFormatUrlWithWorkspaceId((url, id) => this.getPatchedUrl(url, id));
     /**
-     * Retrive workspace id from url
+     * Retrieve workspace id from url
      */
-    const workspaceId = this.getWorkpsaceIdFromURL();
+    const workspaceId = this.getWorkspaceIdFromURL();
 
     if (workspaceId) {
       const result = await core.workspaces.client.enterWorkspace(workspaceId);

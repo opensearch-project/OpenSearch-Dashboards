@@ -113,11 +113,6 @@ export interface IBasePath {
    * See {@link BasePath.get} for getting the basePath value for a specific request
    */
   readonly serverBasePath: string;
-
-  /**
-   * Prepends `path` with the basePath.
-   */
-  prependWithoutWorkspacePath: (url: string) => string;
 }
 
 /**

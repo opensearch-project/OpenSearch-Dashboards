@@ -152,15 +152,6 @@ export class InjectedMetadataService {
       getSurvey: () => {
         return this.state.survey;
       },
-
-      getWorkspaceBasePath: () => {
-        const workspaceId = getWorkspaceIdFromUrl(window.location.href);
-        if (workspaceId) {
-          return `/w/${workspaceId}`;
-        }
-
-        return '';
-      },
     };
   }
 }

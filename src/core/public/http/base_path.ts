@@ -45,20 +45,12 @@ export class BasePath {
     return this.basePath;
   };
 
-  public prepend = (path: string): string => {
-    if (!this.get()) return path;
+  public prepend = (path: string, withoutWorkspace: boolean = false): string => {
+    const basePath = withoutWorkspace ? this.basePath : this.get();
+    if (!basePath) return path;
     return modifyUrl(path, (parts) => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-        parts.pathname = `${this.get()}${parts.pathname}`;
-      }
-    });
-  };
-
-  public prependWithoutWorkspacePath = (path: string): string => {
-    if (!this.basePath) return path;
-    return modifyUrl(path, (parts) => {
-      if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-        parts.pathname = `${this.basePath}${parts.pathname}`;
+        parts.pathname = `${basePath}${parts.pathname}`;
       }
     });
   };
