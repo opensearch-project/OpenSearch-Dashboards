@@ -14,7 +14,7 @@ import {
 import type { DashboardProvider } from '../../types';
 
 interface CreateButtonProps {
-  dashboardProviders?: DashboardProvider[];
+  dashboardProviders?: { [key: string]: DashboardProvider };
 }
 
 const CreateButton = (props: CreateButtonProps) => {
