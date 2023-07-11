@@ -242,9 +242,12 @@ exports[`Header handles visibility and lock changes 1`] = `
     BasePath {
       "basePath": "/test",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
+      "prependWithoutWorkspacePath": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
+      "workspaceBasePath": "",
     }
   }
   branding={Object {}}
@@ -362,48 +365,11 @@ exports[`Header handles visibility and lock changes 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
+      "observers": Array [],
       "thrownError": null,
     }
   }
+  exitWorkspace={[Function]}
   forceAppSwitcherNavigation$={
     BehaviorSubject {
       "_isScalar": false,
@@ -490,6 +456,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  getWorkspaceUrl={[Function]}
   helpExtension$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1931,6 +1898,18 @@ exports[`Header handles visibility and lock changes 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
+  survey="/"
+  workspaceList$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
       "observers": Array [
         Subscriber {
           "_parentOrParents": null,
@@ -1973,7 +1952,6 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
-  survey="/"
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -5921,9 +5899,12 @@ exports[`Header handles visibility and lock changes 1`] = `
         BasePath {
           "basePath": "/test",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
+          "prependWithoutWorkspacePath": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
+          "workspaceBasePath": "",
         }
       }
       closeNav={[Function]}
@@ -5988,48 +5969,12 @@ exports[`Header handles visibility and lock changes 1`] = `
           "closed": false,
           "hasError": false,
           "isStopped": false,
-          "observers": Array [
-            Subscriber {
-              "_parentOrParents": null,
-              "_subscriptions": Array [
-                SubjectSubscription {
-                  "_parentOrParents": [Circular],
-                  "_subscriptions": null,
-                  "closed": false,
-                  "subject": [Circular],
-                  "subscriber": [Circular],
-                },
-              ],
-              "closed": false,
-              "destination": SafeSubscriber {
-                "_complete": undefined,
-                "_context": [Circular],
-                "_error": undefined,
-                "_next": [Function],
-                "_parentOrParents": null,
-                "_parentSubscriber": [Circular],
-                "_subscriptions": null,
-                "closed": false,
-                "destination": Object {
-                  "closed": true,
-                  "complete": [Function],
-                  "error": [Function],
-                  "next": [Function],
-                },
-                "isStopped": false,
-                "syncErrorThrowable": false,
-                "syncErrorThrown": false,
-                "syncErrorValue": null,
-              },
-              "isStopped": false,
-              "syncErrorThrowable": true,
-              "syncErrorThrown": false,
-              "syncErrorValue": null,
-            },
-          ],
+          "observers": Array [],
           "thrownError": null,
         }
       }
+      exitWorkspace={[Function]}
+      getWorkspaceUrl={[Function]}
       homeHref="/"
       id="mockId"
       isLocked={true}
@@ -6245,6 +6190,17 @@ exports[`Header handles visibility and lock changes 1`] = `
           "closed": false,
           "hasError": false,
           "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        }
+      }
+      workspaceList$={
+        BehaviorSubject {
+          "_isScalar": false,
+          "_value": Array [],
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
           "observers": Array [
             Subscriber {
               "_parentOrParents": null,
@@ -6321,329 +6277,611 @@ exports[`Header handles visibility and lock changes 1`] = `
             role={null}
           >
             <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "flexShrink": 0,
-                }
-              }
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-                style={
-                  Object {
-                    "flexShrink": 0,
-                  }
-                }
-              >
-                <EuiCollapsibleNavGroup
-                  background="light"
-                  className="eui-yScroll"
-                  style={
-                    Object {
-                      "maxHeight": "40vh",
-                    }
-                  }
-                >
-                  <div
-                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
-                    id="mockId"
-                    style={
-                      Object {
-                        "maxHeight": "40vh",
-                      }
-                    }
-                  >
-                    <div
-                      className="euiCollapsibleNavGroup__children"
-                    >
-                      <EuiListGroup
-                        color="text"
-                        gutterSize="none"
-                        listItems={
-                          Array [
-                            Object {
-                              "data-test-subj": "collapsibleNavCustomNavLink",
-                              "href": "",
-                              "icon": undefined,
-                              "iconType": undefined,
-                              "isActive": false,
-                              "isDisabled": undefined,
-                              "label": "Manage cloud deployment",
-                              "onClick": [Function],
-                            },
-                          ]
-                        }
-                        maxWidth="none"
-                        size="s"
-                      >
-                        <ul
-                          className="euiListGroup"
-                          style={
-                            Object {
-                              "maxWidth": "none",
-                            }
-                          }
-                        >
-                          <EuiListGroupItem
-                            color="text"
-                            data-test-subj="collapsibleNavCustomNavLink"
-                            href=""
-                            isActive={false}
-                            key="title-0"
-                            label="Manage cloud deployment"
-                            onClick={[Function]}
-                            showToolTip={false}
-                            size="s"
-                            wrapText={false}
-                          >
-                            <li
-                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
-                            >
-                              <button
-                                className="euiListGroupItem__button"
-                                data-test-subj="collapsibleNavCustomNavLink"
-                                disabled={false}
-                                onClick={[Function]}
-                                type="button"
-                              >
-                                <span
-                                  className="euiListGroupItem__label"
-                                  title="Manage cloud deployment"
-                                >
-                                  Manage cloud deployment
-                                </span>
-                              </button>
-                            </li>
-                          </EuiListGroupItem>
-                        </ul>
-                      </EuiListGroup>
-                    </div>
-                  </div>
-                </EuiCollapsibleNavGroup>
-              </div>
-            </EuiFlexItem>
-            <EuiHorizontalRule
-              margin="none"
-            >
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full"
-              />
-            </EuiHorizontalRule>
-            <EuiCollapsibleNavGroup
-              background="light"
-              data-test-subj="collapsibleNavGroup-recentlyViewed"
-              initialIsOpen={true}
-              isCollapsible={true}
-              key="recentlyViewed"
-              onToggle={[Function]}
-              title="Recently viewed"
-            >
-              <EuiAccordion
-                arrowDisplay="right"
-                buttonClassName="euiCollapsibleNavGroup__heading"
-                buttonContent={
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="m"
-                    responsive={false}
-                  >
-                    <EuiFlexItem>
-                      <EuiTitle
-                        size="xxs"
-                      >
-                        <h3
-                          className="euiCollapsibleNavGroup__title"
-                          id="mockId__title"
-                        >
-                          Recently viewed
-                        </h3>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                data-test-subj="collapsibleNavGroup-recentlyViewed"
-                id="mockId"
-                initialIsOpen={true}
-                isLoading={false}
-                isLoadingMessage={false}
-                onToggle={[Function]}
-                paddingSize="none"
-              >
-                <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
-                  data-test-subj="collapsibleNavGroup-recentlyViewed"
-                  onToggle={[Function]}
-                >
-                  <div
-                    className="euiAccordion__triggerWrapper"
-                  >
-                    <button
-                      aria-controls="mockId"
-                      aria-expanded={true}
-                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
-                      id="mockId"
-                      onClick={[Function]}
-                      type="button"
-                    >
-                      <span
-                        className="euiAccordion__iconWrapper"
-                      >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <span
-                            className="euiAccordion__icon euiAccordion__icon-isOpen"
-                            data-euiicon-type="arrowRight"
-                            size="m"
-                          />
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
-                      >
-                        <EuiFlexGroup
-                          alignItems="center"
-                          gutterSize="m"
-                          responsive={false}
-                        >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                          >
-                            <EuiFlexItem>
-                              <div
-                                className="euiFlexItem"
-                              >
-                                <EuiTitle
-                                  size="xxs"
-                                >
-                                  <h3
-                                    className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                    id="mockId__title"
-                                  >
-                                    Recently viewed
-                                  </h3>
-                                </EuiTitle>
-                              </div>
-                            </EuiFlexItem>
-                          </div>
-                        </EuiFlexGroup>
-                      </span>
-                    </button>
-                  </div>
-                  <div
-                    aria-labelledby="mockId"
-                    className="euiAccordion__childWrapper"
-                    id="mockId"
-                    role="region"
-                    tabIndex={-1}
-                  >
-                    <EuiResizeObserver
-                      onResize={[Function]}
-                    >
-                      <div>
-                        <div
-                          className=""
-                        >
-                          <div
-                            className="euiCollapsibleNavGroup__children"
-                          >
-                            <EuiListGroup
-                              aria-label="Recently viewed links"
-                              className="osdCollapsibleNav__recentsListGroup"
-                              color="subdued"
-                              gutterSize="none"
-                              listItems={
-                                Array [
-                                  Object {
-                                    "aria-label": "dashboard, type: opensearchDashboards",
-                                    "data-test-subj": "collapsibleNavAppLink--recent",
-                                    "href": "http://localhost/",
-                                    "label": "dashboard",
-                                    "onClick": [Function],
-                                    "title": "dashboard, type: opensearchDashboards",
-                                  },
-                                ]
-                              }
-                              maxWidth="none"
-                              size="s"
-                            >
-                              <ul
-                                aria-label="Recently viewed links"
-                                className="euiListGroup osdCollapsibleNav__recentsListGroup"
-                                style={
-                                  Object {
-                                    "maxWidth": "none",
-                                  }
-                                }
-                              >
-                                <EuiListGroupItem
-                                  aria-label="dashboard, type: opensearchDashboards"
-                                  color="subdued"
-                                  data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/"
-                                  key="title-0"
-                                  label="dashboard"
-                                  onClick={[Function]}
-                                  showToolTip={false}
-                                  size="s"
-                                  title="dashboard, type: opensearchDashboards"
-                                  wrapText={false}
-                                >
-                                  <li
-                                    className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
-                                  >
-                                    <a
-                                      aria-label="dashboard, type: opensearchDashboards"
-                                      className="euiListGroupItem__button"
-                                      data-test-subj="collapsibleNavAppLink--recent"
-                                      href="http://localhost/"
-                                      onClick={[Function]}
-                                      rel="noreferrer"
-                                      title="dashboard, type: opensearchDashboards"
-                                    >
-                                      <span
-                                        className="euiListGroupItem__label"
-                                        title="dashboard"
-                                      >
-                                        dashboard
-                                      </span>
-                                    </a>
-                                  </li>
-                                </EuiListGroupItem>
-                              </ul>
-                            </EuiListGroup>
-                          </div>
-                        </div>
-                      </div>
-                    </EuiResizeObserver>
-                  </div>
-                </div>
-              </EuiAccordion>
-            </EuiCollapsibleNavGroup>
-            <EuiHorizontalRule
-              margin="none"
-            >
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full"
-              />
-            </EuiHorizontalRule>
-            <EuiFlexItem
               className="eui-yScroll"
             >
               <div
                 className="euiFlexItem eui-yScroll"
               >
                 <EuiCollapsibleNavGroup
-                  data-test-subj="collapsibleNavGroup-noCategory"
-                  key="0"
+                  iconType="logoOpenSearch"
+                  onClick={[Function]}
+                  title="Home"
                 >
                   <div
+                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                    id="mockId"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiCollapsibleNavGroup__heading"
+                    >
+                      <EuiFlexGroup
+                        alignItems="center"
+                        gutterSize="m"
+                        responsive={false}
+                      >
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                        >
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <EuiIcon
+                                size="l"
+                                type="logoOpenSearch"
+                              >
+                                <span
+                                  data-euiicon-type="logoOpenSearch"
+                                  size="l"
+                                />
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiTitle
+                                size="xxs"
+                              >
+                                <h3
+                                  className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                  id="mockId__title"
+                                >
+                                  Home
+                                </h3>
+                              </EuiTitle>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </div>
+                  </div>
+                </EuiCollapsibleNavGroup>
+                <EuiCollapsibleNavGroup
+                  iconType="bell"
+                  onClick={[Function]}
+                  title="Alerts"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                    id="mockId"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiCollapsibleNavGroup__heading"
+                    >
+                      <EuiFlexGroup
+                        alignItems="center"
+                        gutterSize="m"
+                        responsive={false}
+                      >
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                        >
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <EuiIcon
+                                size="l"
+                                type="bell"
+                              >
+                                <span
+                                  data-euiicon-type="bell"
+                                  size="l"
+                                />
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiTitle
+                                size="xxs"
+                              >
+                                <h3
+                                  className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                  id="mockId__title"
+                                >
+                                  Alerts
+                                </h3>
+                              </EuiTitle>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </div>
+                  </div>
+                </EuiCollapsibleNavGroup>
+                <EuiCollapsibleNavGroup
+                  iconType="starEmpty"
+                  initialIsOpen={true}
+                  isCollapsible={true}
+                  title="Favorites"
+                >
+                  <EuiAccordion
+                    arrowDisplay="right"
+                    buttonClassName="euiCollapsibleNavGroup__heading"
+                    buttonContent={
+                      <EuiFlexGroup
+                        alignItems="center"
+                        gutterSize="m"
+                        responsive={false}
+                      >
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <EuiIcon
+                            size="l"
+                            type="starEmpty"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiTitle
+                            size="xxs"
+                          >
+                            <h3
+                              className="euiCollapsibleNavGroup__title"
+                              id="mockId__title"
+                            >
+                              Favorites
+                            </h3>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
+                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                    id="mockId"
+                    initialIsOpen={true}
+                    isLoading={false}
+                    isLoadingMessage={false}
+                    paddingSize="none"
+                  >
+                    <div
+                      className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                    >
+                      <div
+                        className="euiAccordion__triggerWrapper"
+                      >
+                        <button
+                          aria-controls="mockId"
+                          aria-expanded={true}
+                          className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                          id="mockId"
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <span
+                            className="euiAccordion__iconWrapper"
+                          >
+                            <EuiIcon
+                              className="euiAccordion__icon euiAccordion__icon-isOpen"
+                              size="m"
+                              type="arrowRight"
+                            >
+                              <span
+                                className="euiAccordion__icon euiAccordion__icon-isOpen"
+                                data-euiicon-type="arrowRight"
+                                size="m"
+                              />
+                            </EuiIcon>
+                          </span>
+                          <span
+                            className="euiIEFlexWrapFix"
+                          >
+                            <EuiFlexGroup
+                              alignItems="center"
+                              gutterSize="m"
+                              responsive={false}
+                            >
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                              >
+                                <EuiFlexItem
+                                  grow={false}
+                                >
+                                  <div
+                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <EuiIcon
+                                      size="l"
+                                      type="starEmpty"
+                                    >
+                                      <span
+                                        data-euiicon-type="starEmpty"
+                                        size="l"
+                                      />
+                                    </EuiIcon>
+                                  </div>
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <div
+                                    className="euiFlexItem"
+                                  >
+                                    <EuiTitle
+                                      size="xxs"
+                                    >
+                                      <h3
+                                        className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                        id="mockId__title"
+                                      >
+                                        Favorites
+                                      </h3>
+                                    </EuiTitle>
+                                  </div>
+                                </EuiFlexItem>
+                              </div>
+                            </EuiFlexGroup>
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        aria-labelledby="mockId"
+                        className="euiAccordion__childWrapper"
+                        id="mockId"
+                        role="region"
+                        tabIndex={-1}
+                      >
+                        <EuiResizeObserver
+                          onResize={[Function]}
+                        >
+                          <div>
+                            <div
+                              className=""
+                            >
+                              <div
+                                className="euiCollapsibleNavGroup__children"
+                              >
+                                <EuiText
+                                  color="subdued"
+                                  size="s"
+                                  style={
+                                    Object {
+                                      "padding": "0 8px 8px",
+                                    }
+                                  }
+                                >
+                                  <div
+                                    className="euiText euiText--small"
+                                    style={
+                                      Object {
+                                        "padding": "0 8px 8px",
+                                      }
+                                    }
+                                  >
+                                    <EuiTextColor
+                                      color="subdued"
+                                      component="div"
+                                    >
+                                      <div
+                                        className="euiTextColor euiTextColor--subdued"
+                                      >
+                                        <p>
+                                          No Favorites
+                                        </p>
+                                      </div>
+                                    </EuiTextColor>
+                                  </div>
+                                </EuiText>
+                                <EuiText
+                                  color="subdued"
+                                  size="s"
+                                  style={
+                                    Object {
+                                      "padding": "0 8px 8px",
+                                    }
+                                  }
+                                >
+                                  <div
+                                    className="euiText euiText--small"
+                                    style={
+                                      Object {
+                                        "padding": "0 8px 8px",
+                                      }
+                                    }
+                                  >
+                                    <EuiTextColor
+                                      color="subdued"
+                                      component="div"
+                                    >
+                                      <div
+                                        className="euiTextColor euiTextColor--subdued"
+                                      >
+                                        <p>
+                                          SEE MORE
+                                        </p>
+                                      </div>
+                                    </EuiTextColor>
+                                  </div>
+                                </EuiText>
+                              </div>
+                            </div>
+                          </div>
+                        </EuiResizeObserver>
+                      </div>
+                    </div>
+                  </EuiAccordion>
+                </EuiCollapsibleNavGroup>
+                <EuiCollapsibleNavGroup
+                  iconType="folderClosed"
+                  initialIsOpen={true}
+                  isCollapsible={true}
+                  title="Workspaces"
+                >
+                  <EuiAccordion
+                    arrowDisplay="right"
+                    buttonClassName="euiCollapsibleNavGroup__heading"
+                    buttonContent={
+                      <EuiFlexGroup
+                        alignItems="center"
+                        gutterSize="m"
+                        responsive={false}
+                      >
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <EuiIcon
+                            size="l"
+                            type="folderClosed"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiTitle
+                            size="xxs"
+                          >
+                            <h3
+                              className="euiCollapsibleNavGroup__title"
+                              id="mockId__title"
+                            >
+                              Workspaces
+                            </h3>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
+                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                    id="mockId"
+                    initialIsOpen={true}
+                    isLoading={false}
+                    isLoadingMessage={false}
+                    paddingSize="none"
+                  >
+                    <div
+                      className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                    >
+                      <div
+                        className="euiAccordion__triggerWrapper"
+                      >
+                        <button
+                          aria-controls="mockId"
+                          aria-expanded={true}
+                          className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                          id="mockId"
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <span
+                            className="euiAccordion__iconWrapper"
+                          >
+                            <EuiIcon
+                              className="euiAccordion__icon euiAccordion__icon-isOpen"
+                              size="m"
+                              type="arrowRight"
+                            >
+                              <span
+                                className="euiAccordion__icon euiAccordion__icon-isOpen"
+                                data-euiicon-type="arrowRight"
+                                size="m"
+                              />
+                            </EuiIcon>
+                          </span>
+                          <span
+                            className="euiIEFlexWrapFix"
+                          >
+                            <EuiFlexGroup
+                              alignItems="center"
+                              gutterSize="m"
+                              responsive={false}
+                            >
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                              >
+                                <EuiFlexItem
+                                  grow={false}
+                                >
+                                  <div
+                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <EuiIcon
+                                      size="l"
+                                      type="folderClosed"
+                                    >
+                                      <span
+                                        data-euiicon-type="folderClosed"
+                                        size="l"
+                                      />
+                                    </EuiIcon>
+                                  </div>
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <div
+                                    className="euiFlexItem"
+                                  >
+                                    <EuiTitle
+                                      size="xxs"
+                                    >
+                                      <h3
+                                        className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                        id="mockId__title"
+                                      >
+                                        Workspaces
+                                      </h3>
+                                    </EuiTitle>
+                                  </div>
+                                </EuiFlexItem>
+                              </div>
+                            </EuiFlexGroup>
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        aria-labelledby="mockId"
+                        className="euiAccordion__childWrapper"
+                        id="mockId"
+                        role="region"
+                        tabIndex={-1}
+                      >
+                        <EuiResizeObserver
+                          onResize={[Function]}
+                        >
+                          <div>
+                            <div
+                              className=""
+                            >
+                              <div
+                                className="euiCollapsibleNavGroup__children"
+                              >
+                                <EuiText
+                                  color="subdued"
+                                  size="s"
+                                  style={
+                                    Object {
+                                      "padding": "0 8px 8px",
+                                    }
+                                  }
+                                >
+                                  <div
+                                    className="euiText euiText--small"
+                                    style={
+                                      Object {
+                                        "padding": "0 8px 8px",
+                                      }
+                                    }
+                                  >
+                                    <EuiTextColor
+                                      color="subdued"
+                                      component="div"
+                                    >
+                                      <div
+                                        className="euiTextColor euiTextColor--subdued"
+                                      >
+                                        <p>
+                                          No Workspaces
+                                        </p>
+                                      </div>
+                                    </EuiTextColor>
+                                  </div>
+                                </EuiText>
+                                <EuiText
+                                  color="subdued"
+                                  onClick={[Function]}
+                                  size="s"
+                                  style={
+                                    Object {
+                                      "padding": "0 8px 8px",
+                                    }
+                                  }
+                                >
+                                  <div
+                                    className="euiText euiText--small"
+                                    onClick={[Function]}
+                                    style={
+                                      Object {
+                                        "padding": "0 8px 8px",
+                                      }
+                                    }
+                                  >
+                                    <EuiTextColor
+                                      color="subdued"
+                                      component="div"
+                                    >
+                                      <div
+                                        className="euiTextColor euiTextColor--subdued"
+                                      >
+                                        <p>
+                                          SEE MORE
+                                        </p>
+                                      </div>
+                                    </EuiTextColor>
+                                  </div>
+                                </EuiText>
+                              </div>
+                            </div>
+                          </div>
+                        </EuiResizeObserver>
+                      </div>
+                    </div>
+                  </EuiAccordion>
+                </EuiCollapsibleNavGroup>
+                <EuiCollapsibleNavGroup
+                  iconType="managementApp"
+                  onClick={[Function]}
+                  title="Admin"
+                >
+                  <div
+                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                    id="mockId"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiCollapsibleNavGroup__heading"
+                    >
+                      <EuiFlexGroup
+                        alignItems="center"
+                        gutterSize="m"
+                        responsive={false}
+                      >
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                        >
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <EuiIcon
+                                size="l"
+                                type="managementApp"
+                              >
+                                <span
+                                  data-euiicon-type="managementApp"
+                                  size="l"
+                                />
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiTitle
+                                size="xxs"
+                              >
+                                <h3
+                                  className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                                  id="mockId__title"
+                                >
+                                  Admin
+                                </h3>
+                              </EuiTitle>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </div>
+                  </div>
+                </EuiCollapsibleNavGroup>
+                <EuiCollapsibleNavGroup>
+                  <div
                     className="euiCollapsibleNavGroup"
-                    data-test-subj="collapsibleNavGroup-noCategory"
                     id="mockId"
                   >
                     <div
@@ -6655,60 +6893,13 @@ exports[`Header handles visibility and lock changes 1`] = `
                         <ul
                           className="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
                         >
-                          <EuiListGroupItem
-                            color="text"
-                            data-test-subj="collapsibleNavAppLink"
-                            href=""
-                            isActive={false}
-                            label="opensearchDashboards"
-                            onClick={[Function]}
-                            size="s"
-                          >
-                            <li
-                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
-                            >
-                              <button
-                                className="euiListGroupItem__button"
-                                data-test-subj="collapsibleNavAppLink"
-                                disabled={false}
-                                onClick={[Function]}
-                                type="button"
-                              >
-                                <span
-                                  className="euiListGroupItem__label"
-                                  title="opensearchDashboards"
-                                >
-                                  opensearchDashboards
-                                </span>
-                              </button>
-                            </li>
-                          </EuiListGroupItem>
-                        </ul>
-                      </EuiListGroup>
-                    </div>
-                  </div>
-                </EuiCollapsibleNavGroup>
-                <EuiShowFor
-                  sizes={
-                    Array [
-                      "l",
-                      "xl",
-                    ]
-                  }
-                >
-                  <EuiCollapsibleNavGroup>
-                    <div
-                      className="euiCollapsibleNavGroup"
-                      id="mockId"
-                    >
-                      <div
-                        className="euiCollapsibleNavGroup__children"
-                      >
-                        <EuiListGroup
-                          flush={true}
-                        >
-                          <ul
-                            className="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
+                          <EuiShowFor
+                            sizes={
+                              Array [
+                                "l",
+                                "xl",
+                              ]
+                            }
                           >
                             <EuiListGroupItem
                               aria-label="Undock primary navigation"
@@ -6772,12 +6963,12 @@ exports[`Header handles visibility and lock changes 1`] = `
                                 </button>
                               </li>
                             </EuiListGroupItem>
-                          </ul>
-                        </EuiListGroup>
-                      </div>
+                          </EuiShowFor>
+                        </ul>
+                      </EuiListGroup>
                     </div>
-                  </EuiCollapsibleNavGroup>
-                </EuiShowFor>
+                  </div>
+                </EuiCollapsibleNavGroup>
               </div>
             </EuiFlexItem>
           </nav>
@@ -7030,9 +7221,12 @@ exports[`Header renders condensed header 1`] = `
     BasePath {
       "basePath": "/test",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
+      "prependWithoutWorkspacePath": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
+      "workspaceBasePath": "",
     }
   }
   branding={
@@ -7182,48 +7376,11 @@ exports[`Header renders condensed header 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
+      "observers": Array [],
       "thrownError": null,
     }
   }
+  exitWorkspace={[Function]}
   forceAppSwitcherNavigation$={
     BehaviorSubject {
       "_isScalar": false,
@@ -7273,6 +7430,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  getWorkspaceUrl={[Function]}
   helpExtension$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8588,7 +8746,56 @@ exports[`Header renders condensed header 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
+  survey="/"
+  workspaceList$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
       "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
         Subscriber {
           "_parentOrParents": null,
           "_subscriptions": Array [
@@ -8630,7 +8837,6 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
-  survey="/"
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -11527,9 +11733,12 @@ exports[`Header renders condensed header 1`] = `
         BasePath {
           "basePath": "/test",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
+          "prependWithoutWorkspacePath": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
+          "workspaceBasePath": "",
         }
       }
       closeNav={[Function]}
@@ -11626,48 +11835,12 @@ exports[`Header renders condensed header 1`] = `
           "closed": false,
           "hasError": false,
           "isStopped": false,
-          "observers": Array [
-            Subscriber {
-              "_parentOrParents": null,
-              "_subscriptions": Array [
-                SubjectSubscription {
-                  "_parentOrParents": [Circular],
-                  "_subscriptions": null,
-                  "closed": false,
-                  "subject": [Circular],
-                  "subscriber": [Circular],
-                },
-              ],
-              "closed": false,
-              "destination": SafeSubscriber {
-                "_complete": undefined,
-                "_context": [Circular],
-                "_error": undefined,
-                "_next": [Function],
-                "_parentOrParents": null,
-                "_parentSubscriber": [Circular],
-                "_subscriptions": null,
-                "closed": false,
-                "destination": Object {
-                  "closed": true,
-                  "complete": [Function],
-                  "error": [Function],
-                  "next": [Function],
-                },
-                "isStopped": false,
-                "syncErrorThrowable": false,
-                "syncErrorThrown": false,
-                "syncErrorValue": null,
-              },
-              "isStopped": false,
-              "syncErrorThrowable": true,
-              "syncErrorThrown": false,
-              "syncErrorValue": null,
-            },
-          ],
+          "observers": Array [],
           "thrownError": null,
         }
       }
+      exitWorkspace={[Function]}
+      getWorkspaceUrl={[Function]}
       homeHref="/"
       id="mockId"
       isLocked={false}
@@ -11833,7 +12006,55 @@ exports[`Header renders condensed header 1`] = `
           "closed": false,
           "hasError": false,
           "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        }
+      }
+      workspaceList$={
+        BehaviorSubject {
+          "_isScalar": false,
+          "_value": Array [],
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
           "observers": Array [
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
             Subscriber {
               "_parentOrParents": null,
               "_subscriptions": Array [
