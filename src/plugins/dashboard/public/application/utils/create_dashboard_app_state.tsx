@@ -18,6 +18,7 @@ import {
 import { ViewMode } from '../../embeddable_plugin';
 import { getDashboardIdFromUrl } from '../lib';
 import { syncQueryStateWithUrl } from '../../../../data/public';
+import { SavedObjectDashboard } from '../../saved_dashboards';
 
 const APP_STATE_STORAGE_KEY = '_a';
 
@@ -25,14 +26,14 @@ interface Arguments {
   osdUrlStateStorage: IOsdUrlStateStorage;
   stateDefaults: DashboardAppState;
   services: DashboardServices;
-  instance: any;
+  savedDashboardInstance: SavedObjectDashboard;
 }
 
 export const createDashboardGlobalAndAppState = ({
   stateDefaults,
   osdUrlStateStorage,
   services,
-  instance,
+  savedDashboardInstance,
 }: Arguments) => {
   const urlState = osdUrlStateStorage.get<DashboardAppState>(APP_STATE_STORAGE_KEY);
   const {
@@ -67,7 +68,14 @@ export const createDashboardGlobalAndAppState = ({
         [option]: value,
       },
     }),
-    // setDashboard: (state)
+    setDashboard: (state) => (dashboard) => ({
+      ...state,
+      ...dashboard,
+      options: {
+        ...state.options,
+        ...dashboard.options,
+      },
+    }),
   } as DashboardAppStateTransitions;
 
   const stateContainer = createStateContainer<DashboardAppState, DashboardAppStateTransitions>(
@@ -90,7 +98,7 @@ export const createDashboardGlobalAndAppState = ({
           // is going to be destroyed soon and we shouldn't sync state anymore,
           // as it could potentially trigger further url updates
           const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
-          if (currentDashboardIdInUrl !== instance.id) return;
+          if (currentDashboardIdInUrl !== savedDashboardInstance.id) return;
 
           stateContainer.set({
             ...stateDefaults,
@@ -118,34 +126,19 @@ export const createDashboardGlobalAndAppState = ({
     osdUrlStateStorage
   );
 
-  /*
-     make sure url ('_a') matches initial state
-     Initializing appState does two things - first it translates the defaults into AppState,
-     second it updates appState based on the url (the url trumps the defaults). This means if
-     we update the state format at all and want to handle BWC, we must not only migrate the
-     data stored with saved vis, but also any old state in the url.
-   */
-  const updateStateUrl = ({ state, replace }: { state: DashboardAppState; replace: boolean }) => {
-    osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
-    // immediately forces scheduled updates and changes location
-    return osdUrlStateStorage.flush({ replace });
-  };
-
-  updateStateUrl({ state: initialState, replace: true });
-
+  updateStateUrl({ osdUrlStateStorage, state: initialState, replace: true });
   // start syncing the appState with the ('_a') url
   startStateSync();
-  return { stateContainer, stopStateSync, updateStateUrl, stopSyncingQueryServiceStateWithUrl };
+  return { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl };
 };
 
-const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
-  if (state.viewMode === ViewMode.VIEW) {
-    const { panels, ...stateWithoutPanels } = state;
-    return stateWithoutPanels;
-  }
-  return state;
-};
-
+/**
+ * make sure url ('_a') matches initial state
+ * Initializing appState does two things - first it translates the defaults into AppState,
+ * second it updates appState based on the url (the url trumps the defaults). This means if
+ * we update the state format at all and want to handle BWC, we must not only migrate the
+ * data stored with saved vis, but also any old state in the url.
+ */
 export const updateStateUrl = ({
   osdUrlStateStorage,
   state,
@@ -158,4 +151,12 @@ export const updateStateUrl = ({
   osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
   // immediately forces scheduled updates and changes location
   return osdUrlStateStorage.flush({ replace });
+};
+
+const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
+  if (state.viewMode === ViewMode.VIEW) {
+    const { panels, ...stateWithoutPanels } = state;
+    return stateWithoutPanels;
+  }
+  return state;
 };

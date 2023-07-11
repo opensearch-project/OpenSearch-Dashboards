@@ -106,9 +106,9 @@ export function migrateAppState(
     delete appState.uiState;
   }
 
-  appState.panels.forEach((panel) => {
-    panel.version = opensearchDashboardsVersion;
-  });
+  // appState.panels.forEach((panel) => {
+  //   panel.version = opensearchDashboardsVersion;
+  // });
 
   return appState;
 }

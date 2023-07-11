@@ -34,6 +34,7 @@ import { updateSavedDashboard } from './update_saved_dashboard';
 
 import { DashboardAppStateContainer } from '../../types';
 import { Dashboard } from '../../dashboard';
+import { SavedObjectDashboard } from '../../saved_dashboards';
 
 /**
  * Saves the dashboard.
@@ -43,7 +44,7 @@ import { Dashboard } from '../../dashboard';
 export function saveDashboard(
   timeFilter: TimefilterContract,
   stateContainer: DashboardAppStateContainer,
-  savedDashboard: any,
+  savedDashboard: SavedObjectDashboard,
   saveOptions: SavedObjectSaveOpts,
   dashboard: Dashboard
 ): Promise<string> {
@@ -54,7 +55,9 @@ export function saveDashboard(
   // TODO: should update Dashboard class in the if(id) block
   return savedDashboard.save(saveOptions).then((id: string) => {
     if (id) {
+      dashboard.id = id;
       return id;
     }
+    return id;
   });
 }

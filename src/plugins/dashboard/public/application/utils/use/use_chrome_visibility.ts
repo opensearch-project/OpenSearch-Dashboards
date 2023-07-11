@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react';
 import { ChromeStart } from 'opensearch-dashboards/public';
 
-export const useChromeVisibility = (chrome: ChromeStart) => {
+export const useChromeVisibility = ({ chrome }: { chrome: ChromeStart }) => {
   const [isVisible, setIsVisible] = useState<boolean>(true);
 
   useEffect(() => {

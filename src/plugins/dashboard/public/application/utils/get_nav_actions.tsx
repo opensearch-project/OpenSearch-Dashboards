@@ -49,10 +49,9 @@ export const getNavActions = (
   services: DashboardServices,
   dashboard: Dashboard,
   dashboardIdFromUrl?: string,
-  dashboardContainer?: DashboardContainer
+  currentContainer?: DashboardContainer
 ) => {
   const {
-    history,
     embeddable,
     data: { query: queryService },
     notifications,
@@ -97,9 +96,11 @@ export const getNavActions = (
       isTitleDuplicateConfirmed: boolean;
       onTitleDuplicate: () => void;
     }) => {
-      stateContainer.transitions.set('title', newTitle);
-      stateContainer.transitions.set('description', newDescription);
-      stateContainer.transitions.set('timeRestore', newTimeRestore);
+      stateContainer.transitions.setDashboard({
+        title: newTitle,
+        description: newDescription,
+        timeRestore: newTimeRestore,
+      });
       savedDashboard.copyOnSave = newCopyOnSave;
 
       const saveOptions = {
@@ -110,13 +111,15 @@ export const getNavActions = (
       return save(saveOptions).then((response: SaveResult) => {
         // If the save wasn't successful, put the original values back.
         if (!(response as { id: string }).id) {
-          stateContainer.transitions.set('title', currentTitle);
-          stateContainer.transitions.set('description', currentDescription);
-          stateContainer.transitions.set('timeRestore', currentTimeRestore);
+          stateContainer.transitions.setDashboard({
+            title: currentTitle,
+            description: currentDescription,
+            timeRestore: currentTimeRestore,
+          });
         }
 
-        // If the save was successfull, then set the dashboard isDirty back to false
-        dashboard.isDirty = false;
+        // If the save was successful, then set the dashboard isDirty back to false
+        dashboard.setIsDirty(false);
         return response;
       });
     };
@@ -133,6 +136,7 @@ export const getNavActions = (
     );
     showSaveModal(dashboardSaveModal, I18nContext);
   };
+
   navActions[TopNavIds.CLONE] = () => {
     const currentTitle = appState.title;
     const onClone = (
@@ -161,9 +165,9 @@ export const getNavActions = (
   };
 
   navActions[TopNavIds.ADD_EXISTING] = () => {
-    if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
+    if (currentContainer && !isErrorEmbeddable(currentContainer)) {
       openAddPanelFlyout({
-        embeddable: dashboardContainer,
+        embeddable: currentContainer,
         getAllFactories: embeddable.getEmbeddableFactories,
         getFactory: embeddable.getEmbeddableFactory,
         notifications,
@@ -179,7 +183,7 @@ export const getNavActions = (
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
-    await factory.create({} as EmbeddableInput, dashboardContainer);
+    await factory.create({} as EmbeddableInput, currentContainer);
   };
 
   navActions[TopNavIds.OPTIONS] = (anchorElement) => {
@@ -298,7 +302,7 @@ export const getNavActions = (
   function onChangeViewMode(newMode: ViewMode) {
     const isPageRefresh = newMode === appState.viewMode;
     const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
-    const willLoseChanges = isLeavingEditMode && dashboard.isDirty === true;
+    const willLoseChanges = isLeavingEditMode && dashboard.isDirty;
 
     // If there are no changes, do not show the discard window
     if (!willLoseChanges) {
@@ -312,23 +316,25 @@ export const getNavActions = (
         ? createDashboardEditUrl(savedDashboard.id)
         : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
 
-      dashboardContainer?.updateAppStateUrl?.(pathname, false);
+      currentContainer?.updateAppStateUrl?.({ replace: false, pathname });
 
+      const newStateContainer: { [key: string]: any } = {};
       // This is only necessary for new dashboards, which will default to Edit mode.
-      stateContainer.transitions.set('viewMode', ViewMode.VIEW);
+      newStateContainer.viewMode = ViewMode.VIEW;
 
       // We need to reset the app state to its original state
       if (dashboard.panels) {
-        stateContainer.transitions.set('panels', dashboard.panels);
+        newStateContainer.panels = dashboard.panels;
       }
 
-      stateContainer.transitions.set('filters', dashboard.filters);
-      stateContainer.transitions.set('query', dashboard.query);
-      stateContainer.transitions.setOption('hidePanelTitles', dashboard.options.hidePanelTitles);
-      stateContainer.transitions.setOption('useMargins', dashboard.options.useMargins);
-
-      // Need to see if needed
-      stateContainer.transitions.set('timeRestore', dashboard.timeRestore);
+      newStateContainer.filters = dashboard.filters;
+      newStateContainer.query = dashboard.query;
+      newStateContainer.options = {
+        hidePanelTitles: dashboard.options.hidePanelTitles,
+        useMargins: dashboard.options.useMargins,
+      };
+      newStateContainer.timeRestore = dashboard.timeRestore;
+      stateContainer.transitions.setDashboard(newStateContainer);
 
       // Since time filters are not tracked by app state, we need to manually reset it
       if (stateContainer.getState().timeRestore) {
@@ -342,7 +348,7 @@ export const getNavActions = (
       }
 
       // Set the isDirty flag back to false since we discard all the changes
-      dashboard.isDirty = false;
+      dashboard.setIsDirty(false);
     }
 
     overlays
@@ -393,7 +399,8 @@ export const getNavActions = (
         });
 
         if (id !== dashboardIdFromUrl) {
-          history.replace(createDashboardEditUrl(id));
+          const pathname = createDashboardEditUrl(id);
+          currentContainer?.updateAppStateUrl?.({ replace: false, pathname });
         }
 
         chrome.docTitle.change(savedDashboard.title);
@@ -401,8 +408,6 @@ export const getNavActions = (
       }
       return { id };
     } catch (error) {
-      // eslint-disable-next-line
-            console.error(error);
       notifications.toasts.addDanger({
         title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
           defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,

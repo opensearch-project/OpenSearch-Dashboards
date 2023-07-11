@@ -36,7 +36,7 @@ export const getDashboardInstance = async (
 
   // Create a Dashboard class using the serialized dashboard
   const dashboard = new Dashboard(serializedDashboard);
-  await dashboard.setState(serializedDashboard);
+  dashboard.setState(serializedDashboard);
 
   return {
     savedDashboard,
