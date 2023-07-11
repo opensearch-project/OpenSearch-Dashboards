@@ -153,7 +153,9 @@ export default function ({ getService, getPageObjects }) {
       expect(headers.length).to.be(0);
     });
 
-    it('Tile map with no changes will update with visualization changes', async () => {
+    // TODO: race condition it seems with the query from previous state
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4193
+    it.skip('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();

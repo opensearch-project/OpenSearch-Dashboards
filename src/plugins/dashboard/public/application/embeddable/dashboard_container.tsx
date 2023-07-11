@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import './_dashboard_container.scss';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
@@ -111,6 +113,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   public renderEmpty?: undefined | (() => React.ReactNode);
+  public updateAppStateUrl?:
+    | undefined
+    | (({ replace, pathname }: { replace: boolean; pathname?: string }) => void);
 
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
 
