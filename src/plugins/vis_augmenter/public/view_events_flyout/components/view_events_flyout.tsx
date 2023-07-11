@@ -128,10 +128,14 @@ export function ViewEventsFlyout(props: Props) {
               >
                 <DateRangeItem timeRange={timeRange as TimeRange} reload={reload} />
               </EuiFlexItem>
-              <EuiFlexItem className="view-events-flyout__contentPanel" grow={5}>
+              <EuiFlexItem
+                className="view-events-flyout__contentPanel"
+                grow={7}
+                style={{ maxHeight: '40vh' }}
+              >
                 <BaseVisItem embeddable={visEmbeddable as VisualizeEmbeddable} />
               </EuiFlexItem>
-              <EuiFlexItem className="view-events-flyout__contentPanel show-y-scroll" grow={5}>
+              <EuiFlexItem className="view-events-flyout__contentPanel show-y-scroll" grow={3}>
                 <EventsPanel
                   eventVisEmbeddablesMap={eventVisEmbeddablesMap as EventVisEmbeddablesMap}
                 />
