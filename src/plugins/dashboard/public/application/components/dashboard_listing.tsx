@@ -155,6 +155,12 @@ export const DashboardListing = () => {
     [history, application]
   );
 
+  // TODO: Currently, dashboard listing is using a href to view items.
+  // Dashboard listing should utilize a callback to take us away from using a href in favor
+  // of using onClick.
+  //
+  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3365
+  //
   // const viewItem = useCallback(
   //   ({ appId, viewUrl }: any) => {
   //     if (appId === 'dashboard') {

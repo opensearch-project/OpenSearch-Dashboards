@@ -105,13 +105,18 @@ export const createDashboardGlobalAndAppState = ({
             ...state,
           });
         } else {
+          // TODO: This logic was ported over this but can be handled more gracefully and intentionally
+          // Sync from state url should be refactored within this application. The app is syncing from
+          // the query state and the dashboard in different locations which can be handled better.
+          // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3365
+          //
           // Do nothing in case when state from url is empty,
           // this fixes: https://github.com/elastic/kibana/issues/57789
           // There are not much cases when state in url could become empty:
           // 1. User manually removed `_a` from the url
           // 2. Browser is navigating away from the page and most likely there is no `_a` in the url.
           //    In this case we don't want to do any state updates
-          //    and just allow $scope.$on('destroy') fire later and clean up everything
+          //    and just unmount later and clean up everything
         }
       },
     },
