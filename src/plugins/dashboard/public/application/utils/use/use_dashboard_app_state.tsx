@@ -117,7 +117,6 @@ export const useDashboardAppAndGlobalState = ({
           savedDashboard: savedDashboardInstance,
           appState: stateContainer,
         });
-        setCurrentContainer(dashboardContainer);
 
         if (!dashboardContainer) {
           return;
@@ -196,6 +195,8 @@ export const useDashboardAppAndGlobalState = ({
           stopSyncingDashboardContainerOutputs();
           subscriptions.unsubscribe();
         };
+
+        setCurrentContainer(dashboardContainer);
       };
 
       getDashboardContainer();
