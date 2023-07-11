@@ -79,7 +79,15 @@ export function migrateAppState(
       usageCollection.reportUiStats('DashboardPanelVersionInUrl', METRIC_TYPE.LOADED, `${version}`);
     }
 
-    return semver.satisfies(version, '<7.3');
+    // Adding this line to parse versions such as "7.0.0-alpha1"
+    const cleanVersion = semver.coerce(version);
+    if (cleanVersion?.version) {
+      // Only support migration for version 6.0 - 7.2
+      // We do not need to migrate OpenSearch version 1.x, 2.x, or 3.x since the panel structure
+      // is the same as previous version 7.3
+      return semver.satisfies(cleanVersion, '<7.3') && semver.satisfies(cleanVersion, '>6.0');
+    }
+    return true;
   });
 
   if (panelNeedsMigration) {
@@ -97,6 +105,10 @@ export function migrateAppState(
     ) as SavedDashboardPanel[];
     delete appState.uiState;
   }
+
+  // appState.panels.forEach((panel) => {
+  //   panel.version = opensearchDashboardsVersion;
+  // });
 
   return appState;
 }
