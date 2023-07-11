@@ -93,6 +93,8 @@ export const useSavedDashboardInstance = ({
       history.replace(DashboardConstants.LANDING_PAGE_PATH);
     };
 
+    // TODO: handle try/catch as expected workflows instead of catching as an error
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3365
     const getSavedDashboardInstance = async () => {
       try {
         let dashboardInstance: {

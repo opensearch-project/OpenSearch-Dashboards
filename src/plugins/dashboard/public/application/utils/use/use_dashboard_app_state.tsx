@@ -117,15 +117,15 @@ export const useDashboardAppAndGlobalState = ({
           savedDashboard: savedDashboardInstance,
           appState: stateContainer,
         });
-        setCurrentContainer(dashboardContainer);
-
         if (!dashboardContainer) {
           return;
         }
 
+        // Ensure empty state is attached to current container being dispatched
         dashboardContainer.renderEmpty = () =>
           renderEmpty(dashboardContainer, stateContainer, services);
 
+        // Ensure update app state in url is attached to current container being dispatched
         dashboardContainer.updateAppStateUrl = ({
           replace,
           pathname,
@@ -146,6 +146,8 @@ export const useDashboardAppAndGlobalState = ({
             });
           }
         };
+
+        setCurrentContainer(dashboardContainer);
 
         const stopSyncingDashboardContainerOutputs = handleDashboardContainerOutputs(
           services,
