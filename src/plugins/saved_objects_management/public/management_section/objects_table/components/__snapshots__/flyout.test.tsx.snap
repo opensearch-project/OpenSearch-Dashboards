@@ -171,9 +171,12 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "basePath": BasePath {
             "basePath": "",
             "get": [Function],
+            "getBasePath": [Function],
             "prepend": [Function],
+            "prependWithoutWorkspacePath": [Function],
             "remove": [Function],
             "serverBasePath": "",
+            "workspaceBasePath": "",
           },
           "delete": [MockFunction],
           "fetch": [MockFunction],

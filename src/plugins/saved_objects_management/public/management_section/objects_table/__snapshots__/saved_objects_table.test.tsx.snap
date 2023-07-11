@@ -200,6 +200,12 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 exports[`SavedObjectsTable should render normally 1`] = `
 <EuiPageContent
   horizontalPosition="center"
+  style={
+    Object {
+      "marginTop": "40px",
+      "maxWidth": "75%",
+    }
+  }
 >
   <Header
     filteredCount={4}
@@ -261,9 +267,12 @@ exports[`SavedObjectsTable should render normally 1`] = `
         BasePath {
           "basePath": "",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
+          "prependWithoutWorkspacePath": [Function],
           "remove": [Function],
           "serverBasePath": "",
+          "workspaceBasePath": "",
         }
       }
       canDelete={false}

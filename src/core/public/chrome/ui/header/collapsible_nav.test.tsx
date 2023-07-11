@@ -170,7 +170,7 @@ describe('CollapsibleNav', () => {
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
       />
     );
-    expectShownNavLinksCount(component, 3);
+    expectShownNavLinksCount(component, 0);
     clickGroup(component, 'opensearchDashboards');
     clickGroup(component, 'recentlyViewed');
     expectShownNavLinksCount(component, 1);
