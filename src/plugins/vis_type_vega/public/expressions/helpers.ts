@@ -199,13 +199,13 @@ export const createSpecFromXYChartDatatable = (
     const xAxisId = getXAxisId(dimensions, datatable.columns);
     const xAxisTitle = cleanString(dimensions.x.label);
     datatable.columns.forEach((column, index) => {
-      // Ignore columns that are for the x axis and events (eg. Alerts/Anomalies)
+      // Ignore columns that are for the x-axis and visLayers
       if (isXAxisColumn(column) || isVisLayerColumn(column)) return;
       // Get the series param id which is the 2nd value in the column id
       // Example: 'col-1-3', the seriesParamId is 3. 'col-1-2-6', the seriesParamId is 2.
       const seriesParamsId = column.id.split('-')[2];
       const currentSeriesParams = visParams.seriesParams.find(
-        (param: { data: { id: string } }) => param.data.id === seriesParamsId
+        (param: { data: { id: string } }) => param?.data?.id === seriesParamsId
       );
       if (!currentSeriesParams) {
         // eslint-disable-next-line no-console
