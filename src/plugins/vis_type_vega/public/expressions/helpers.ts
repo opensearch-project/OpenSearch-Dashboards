@@ -198,35 +198,40 @@ export const createSpecFromXYChartDatatable = (
   if (datatable.rows.length > 0 && dimensions.x !== null) {
     const xAxisId = getXAxisId(dimensions, datatable.columns);
     const xAxisTitle = cleanString(dimensions.x.label);
-    let seriesParamSkipCount = 0;
     datatable.columns.forEach((column, index) => {
-      // Don't add a layer for x axis column
-      if (isXAxisColumn(column)) {
-        seriesParamSkipCount++;
-        // Don't add a layer for vis layer column
-      } else if (!isVisLayerColumn(column)) {
-        const currentSeriesParams = visParams.seriesParams[index - seriesParamSkipCount];
-        const currentValueAxis = valueAxis.get(currentSeriesParams.valueAxis.toString());
-        let tooltip: Array<{ field: string; type: string; title: string }> = [];
-        if (visParams.addTooltip) {
-          tooltip = [
-            { field: xAxisId, type: 'temporal', title: xAxisTitle },
-            { field: column.id, type: 'quantitative', title: column.name },
-          ];
-        }
-        spec.layer.push({
-          mark: buildLayerMark(currentSeriesParams),
-          encoding: {
-            x: buildXAxis(xAxisTitle, xAxisId, visParams),
-            y: buildYAxis(column, currentValueAxis, visParams),
-            tooltip,
-            color: {
-              // This ensures all the different metrics have their own distinct and unique color
-              datum: column.name,
-            },
-          },
-        });
+      // Ignore columns that are for the x axis and events (eg. Alerts/Anomalies)
+      if (isXAxisColumn(column) || isVisLayerColumn(column)) return;
+      // Get the series param id which is the 2nd value in the column id
+      // Example: 'col-1-3', the seriesParamId is 3. 'col-1-2-6', the seriesParamId is 2.
+      const seriesParamsId = column.id.split('-')[2];
+      const currentSeriesParams = visParams.seriesParams.find(
+        (param: { data: { id: string } }) => param.data.id === seriesParamsId
+      );
+      if (!currentSeriesParams) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to find matching series param for column of id: ${column.id}`);
+        return;
       }
+      const currentValueAxis = valueAxis.get(currentSeriesParams.valueAxis.toString());
+      let tooltip: Array<{ field: string; type: string; title: string }> = [];
+      if (visParams.addTooltip) {
+        tooltip = [
+          { field: xAxisId, type: 'temporal', title: xAxisTitle },
+          { field: column.id, type: 'quantitative', title: column.name },
+        ];
+      }
+      spec.layer.push({
+        mark: buildLayerMark(currentSeriesParams),
+        encoding: {
+          x: buildXAxis(xAxisTitle, xAxisId, visParams),
+          y: buildYAxis(column, currentValueAxis, visParams),
+          tooltip,
+          color: {
+            // This ensures all the different metrics have their own distinct and unique color
+            datum: column.name,
+          },
+        },
+      });
     });
   }
 
