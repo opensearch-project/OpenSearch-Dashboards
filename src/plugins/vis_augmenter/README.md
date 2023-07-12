@@ -56,7 +56,7 @@ The feature can be toggled on/off entirely through the `vis_augmenter.pluginAugm
 `visualization.enablePluginAugmentation` to toggle the feature on/off.
 `visualization.enablePluginAugmentation.maxPluginObjects` to adjust the number of associations allowed per visualization. For example, to keep users from creating too many plugin resources and associations to visualizations, this value can be lowered.
 
-For more details, see the [original PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3961).
+For more details, see the [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3961).
 
 ### Steps for plugin integration
 
@@ -68,4 +68,4 @@ For an external plugin to utilize the Vis Augmenter plugin and its rendering fra
 
 2. Implement & register an expression function of type `vis_layers` that will fetch plugin data and format it into a `VisLayer`. This is what will be executed when a visualization is rendered and all of the chart's source data is being retrieved. It is important that the function does not simply return its own `VisLayer` result, but rather appends it to the list of input `VisLayer`s. By following this pattern, it allows any number of plugins to execute any number of functions in any sequence, to all produce the same final set of `VisLayer`s for a particular visualization. For an example function, check out Anomaly Detection's [overlay_anomalies](https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/blob/main/public/expressions/overlay_anomalies.ts).
 
-3. Define constant values to be included in the `augment-vis` saved objects. For example, all objects from a particular plugin should have a consistent `originPlugin`, `expressionFn`, `pluginEventTyp`, and follow a consistent pattern for populating `pluginResource` values, such as URL generation. For details on each specific field, see [here](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/vis_augmenter/public/types.ts). For an example, check out constants used by the Anomaly Detection plugin [here](https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/blob/main/public/expressions/constants.ts).
+3. Define constant values to be included in the `augment-vis` saved objects. For example, all objects from a particular plugin should have consistent values for `originPlugin`, `expressionFn`, and `pluginEventType`, as well as follow a consistent pattern for populating `pluginResource` values, such as `urlPath`. For details on each specific field, see [here](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/vis_augmenter/public/types.ts). For an example, check out constants used by the Anomaly Detection plugin [here](https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/blob/main/public/expressions/constants.ts).
