@@ -33,6 +33,7 @@
 - Update main menu to display 'Dashboards' for consistency ([#4453](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4453))
 - [Multiple DataSource] Retain the original sample data API ([#4526](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4526))
 - Remove `lmdb-store` to fix backport issue ([#4266](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4266))
+- Fix line to vega conversion bug ([#4554](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4554))
 
 ### 🚞 Infrastructure
 
