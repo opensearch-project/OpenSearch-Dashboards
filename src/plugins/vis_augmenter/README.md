@@ -31,14 +31,33 @@ This is a new saved object type introduced with the primary purpose of maintaini
 
 This is the primary UI for providing a more detailed view on `VisLayer`s for a particular visualization. See the corresponding [README](src/plugins/vis_augmenter/public/view_events_flyout/README.md) for details.
 
+### The `stats` API
+
+There is a new server-side `stats` API which can be used for retrieving feature usage metrics. It gathers all of the `augment-vis` saved objects and aggregates them to get an idea of how many associations are created between which plugins and which visualizations. For more details on the API, see the [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4006).
+
+Example usage:
+
+```
+curl localhost:5601/api/vis_augmenter/stats
+{
+  "total_objs": 2,
+  "obj_breakdown": {
+    "origin_plugin": { "anomalyDetectionDashboards": 2 },
+    "plugin_resource_type": { "Anomaly Detectors": 2 },
+    "plugin_resource_id": { "detector-1-id": 1, "detector-2-id": 1 },
+    "visualization_id": { "visualization-1-id": 2 }
+  }
+}
+```
+
 ### Steps for plugin integration
 
 For an external plugin to utilize the Vis Augmenter plugin and its rendering framework, there are a few main steps needed:
 
-1. Provide UX for handling associations between a visualization and plugin resources. There are examples in [Anomaly Detection](link) and [Alerting](link). This is where the bulk of the effort is needed. While there is no very strict requirements, there should be UX flows for creating, adding, and removing associated plugin resources to the visualization. Behind-the-scenes, this means making saved object API calls to handle CRUD operations of the `augment-vis` saved objects. Another important part is implementing & registering a `UIAction` so that there is a visible option under the visualization context menu to maintain associations. This is the current way that Anomaly Detection and Alerting inject their UX components into core Dashboards.
+1. Provide UX for handling associations between a visualization and plugin resources. There are examples in [Anomaly Detection](https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/400) and [Alerting](https://github.com/opensearch-project/alerting-dashboards-plugin/issues/457). This is where the bulk of the effort is needed. While there is no very strict requirements, there should be UX flows for creating, adding, and removing associated plugin resources to the visualization. Behind-the-scenes, this means making saved object API calls to handle CRUD operations of the `augment-vis` saved objects. Another important part is implementing & registering a `UIAction` so that there is a visible option under the visualization context menu to maintain associations. This is the current way that Anomaly Detection and Alerting inject their UX components into core Dashboards.
 
-   > It is worth calling out that currently there is no other registration being done by the plugins to potentially leverage common UX components or user flows, such as what's done in the Saved Objects Management plugin for different saved object types. There is absolutely improvements that can be done to decrease plugin responsibility and prevent duplicate code by persisting a lot of these common flows within Vis Augmenter. Given that this is an initial release with a lot of uncertainty on how the flows may differ across plugins, or what becomes the most important or common user flows, this was left as an open item for now.
+   > It is worth calling out that currently there is no other registration being done by the plugins to potentially leverage common UX components or user flows, such as what's done in the Saved Objects Management plugin for different saved object types. There is improvements that can be done to decrease plugin responsibility and prevent duplicate code by persisting a lot of these common flows within Vis Augmenter. Given that this is an initial release with a lot of uncertainty on how the flows may differ across plugins, or what becomes the most important or common user flows, this was left as an open item for now.
 
-2. Implement & register an expression function of type `vis_layers` that will fetch plugin data and format it into a `VisLayer`. This is what will be executed when a visualization is rendered and all of the chart's source data is being retrieved. It is important that the function does not simply return its own `VisLayer` result, but rather appends it to the list of input `VisLayer`s. By following this pattern, it allows an arbitrary group of plugins and arbitrary number of functions to be executed in any sequence, to all produce the same final set of `VisLayer`s for a particular visualization.
+2. Implement & register an expression function of type `vis_layers` that will fetch plugin data and format it into a `VisLayer`. This is what will be executed when a visualization is rendered and all of the chart's source data is being retrieved. It is important that the function does not simply return its own `VisLayer` result, but rather appends it to the list of input `VisLayer`s. By following this pattern, it allows any number of plugins to execute any number of functions in any sequence, to all produce the same final set of `VisLayer`s for a particular visualization. For an example function, check out Anomaly Detection's [overlay_anomalies](https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/blob/main/public/expressions/overlay_anomalies.ts).
 
-3. Define constant values to be included in the `augment-vis` saved objects. For example, all objects from a particular plugin should have a consistent `originPlugin`, `expressionFn`, and follow a consistent pattern for populating `pluginResource` values, such as URL generation.
+3. Define constant values to be included in the `augment-vis` saved objects. For example, all objects from a particular plugin should have a consistent `originPlugin`, `expressionFn`, `pluginEventTyp`, and follow a consistent pattern for populating `pluginResource` values, such as URL generation. For details on each specific field, see [here](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/vis_augmenter/public/types.ts). For an example, check out constants used by the Anomaly Detection plugin [here](https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/blob/main/public/expressions/constants.ts).

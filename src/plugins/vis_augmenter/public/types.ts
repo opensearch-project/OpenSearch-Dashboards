@@ -28,14 +28,22 @@ export type PluginResourceType = string;
 
 export interface PluginResource {
   type: PluginResourceType;
+  // Should match what is persisted in the plugin
   id: string;
+  // Should match what is persisted in the plugin
   name: string;
+  // Should be the full path to the resource details page
+  // in the respective plugin. Will be used in the hyperlinked
+  // name of the resource when viewed in the View Events flyout
   urlPath: string;
 }
 
 export interface VisLayer {
   type: keyof typeof VisLayerTypes;
+  // A unique name for the plugin. Is used to partition data
+  // on the View Events flyout by plugin.
   originPlugin: string;
+  // The specific plugin resource - e.g., an anomaly detector
   pluginResource: PluginResource;
   error?: VisLayerError;
 }
@@ -53,6 +61,9 @@ export interface PointInTimeEvent {
 
 export interface PointInTimeEventsVisLayer extends VisLayer {
   events: PointInTimeEvent[];
+  // Should be the plugin-specific event name, such as 'Anomalies'.
+  // Will be visible in the tooltips when hovering over an event
+  // in a visualization.
   pluginEventType: string;
 }
 
