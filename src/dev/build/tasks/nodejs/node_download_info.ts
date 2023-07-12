@@ -46,7 +46,7 @@ export async function getNodeDownloadInfo(config: Config, platform: Platform) {
     ? `node-v${version}-win-x64.zip`
     : `node-v${version}-${arch}.tar.gz`;
 
-  const url = `https://mirrors.nodejs.org/dist/v${version}/${downloadName}`;
+  const url = `https://nodejs.org/dist/v${version}/${downloadName}`;
   const downloadPath = config.resolveFromRepo('.node_binaries', version, basename(downloadName));
   const extractDir = config.resolveFromRepo('.node_binaries', version, arch);
 
@@ -69,7 +69,7 @@ export async function getNodeVersionDownloadInfo(
     ? `node-v${version}-win-x64.zip`
     : `node-v${version}-${architecture}.tar.gz`;
 
-  const url = `https://mirrors.nodejs.org/dist/v${version}/${downloadName}`;
+  const url = `https://nodejs.org/dist/v${version}/${downloadName}`;
   const downloadPath = resolve(repoRoot, '.node_binaries', version, basename(downloadName));
   const extractDir = resolve(repoRoot, '.node_binaries', version, architecture);
 
