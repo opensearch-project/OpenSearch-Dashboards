@@ -5,7 +5,7 @@
 This flyout provides a detailed view of all `VisLayer`s associated to a particular visualization. It consists of two main portions:
 
 1. The top portion showing the base visualization, and the contextual time range that can be refreshed to fetch any new data in real time
-2. The bottom portion showing a breakdown of each `VisLayer`, organized first by origin plugin (e.g., anomaly detection), and then by each plugin resource (e.g., anomaly detector). Each chart represents results produced only by the particular plugin resource. The resource name will also be a link, directing the user to the resource's details page within its respective plugin.
+2. The bottom portion showing a breakdown of each `VisLayer`, organized first by origin plugin (e.g., "Anomaly Detection"), and then by each plugin resource (e.g., "Anomaly Detector"). Each chart represents results produced from a single plugin resource. The resource name will also be a link, directing the user to the resource's details page within its respective plugin.
 
 ### Improvements
 
