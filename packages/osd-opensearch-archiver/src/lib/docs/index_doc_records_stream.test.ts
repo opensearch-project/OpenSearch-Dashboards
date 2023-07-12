@@ -63,11 +63,12 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     const client = createStubClient([
       async (name, params) => {
         expect(name).to.be('bulk');
-        expect(params).to.eql({
-          body: recordsToBulkBody(records),
-          requestTimeout: 120000,
-        });
-        return { ok: true };
+        expect(params).to.eql({ body: recordsToBulkBody(records) });
+        return {
+          body: {
+            ok: true,
+          },
+        };
       },
     ]);
     const stats = createStubStats();
@@ -88,19 +89,21 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     const client = createStubClient([
       async (name, params) => {
         expect(name).to.be('bulk');
-        expect(params).to.eql({
-          body: recordsToBulkBody(records.slice(0, 1)),
-          requestTimeout: 120000,
-        });
-        return { ok: true };
+        expect(params).to.eql({ body: recordsToBulkBody(records.slice(0, 1)) });
+        return {
+          body: {
+            ok: true,
+          },
+        };
       },
       async (name, params) => {
         expect(name).to.be('bulk');
-        expect(params).to.eql({
-          body: recordsToBulkBody(records.slice(1)),
-          requestTimeout: 120000,
-        });
-        return { ok: true };
+        expect(params).to.eql({ body: recordsToBulkBody(records.slice(1)) });
+        return {
+          body: {
+            ok: true,
+          },
+        };
       },
     ]);
     const stats = createStubStats();
@@ -124,21 +127,23 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     const client = createStubClient([
       async (name, params) => {
         expect(name).to.be('bulk');
-        expect(params).to.eql({
-          body: recordsToBulkBody(records.slice(0, 1)),
-          requestTimeout: 120000,
-        });
+        expect(params).to.eql({ body: recordsToBulkBody(records.slice(0, 1)) });
         await delay(delayMs);
-        return { ok: true };
+        return {
+          body: {
+            ok: true,
+          },
+        };
       },
       async (name, params) => {
         expect(name).to.be('bulk');
-        expect(params).to.eql({
-          body: recordsToBulkBody(records.slice(1)),
-          requestTimeout: 120000,
-        });
+        expect(params).to.eql({ body: recordsToBulkBody(records.slice(1)) });
         expect(Date.now() - start).to.not.be.lessThan(delayMs);
-        return { ok: true };
+        return {
+          body: {
+            ok: true,
+          },
+        };
       },
     ]);
     const progress = new Progress();
@@ -160,17 +165,29 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
       async (name, params) => {
         expect(name).to.be('bulk');
         expect(params.body.length).to.eql(1 * 2);
-        return { ok: true };
+        return {
+          body: {
+            ok: true,
+          },
+        };
       },
       async (name, params) => {
         expect(name).to.be('bulk');
         expect(params.body.length).to.eql(299 * 2);
-        return { ok: true };
+        return {
+          body: {
+            ok: true,
+          },
+        };
       },
       async (name, params) => {
         expect(name).to.be('bulk');
         expect(params.body.length).to.eql(1 * 2);
-        return { ok: true };
+        return {
+          body: {
+            ok: true,
+          },
+        };
       },
     ]);
     const progress = new Progress();
@@ -189,8 +206,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     const records = createPersonDocRecords(2);
     const stats = createStubStats();
     const client = createStubClient([
-      async () => ({ ok: true }),
-      async () => ({ errors: true, forcedError: true }),
+      async () => ({ body: { ok: true } }),
+      async () => ({ body: { errors: true, forcedError: true } }),
     ]);
     const progress = new Progress();
 

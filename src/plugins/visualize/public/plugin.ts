@@ -60,13 +60,14 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
-import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import { UiActionsSetup, UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
 import {
   setUISettings,
   setApplication,
   setIndexPatterns,
   setQueryService,
   setShareService,
+  setUiActions,
 } from './services';
 import { visualizeFieldAction } from './actions/visualize_field_action';
 import { createVisualizeUrlGenerator } from './url_generator';
@@ -80,6 +81,7 @@ export interface VisualizePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
+  uiActions: UiActionsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -248,6 +250,7 @@ export class VisualizePlugin
     if (plugins.share) {
       setShareService(plugins.share);
     }
+    setUiActions(plugins.uiActions);
   }
 
   stop() {

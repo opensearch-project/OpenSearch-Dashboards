@@ -58,7 +58,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-zeek.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/zeek.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/zeek.svg',
     artifacts: {
       dashboards: [
         {
