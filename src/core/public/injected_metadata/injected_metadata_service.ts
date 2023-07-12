@@ -38,7 +38,6 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { AppCategory, Branding } from '../';
-import { getWorkspaceIdFromUrl } from '../utils';
 
 export interface InjectedPluginMetadata {
   id: PluginName;
@@ -187,7 +186,6 @@ export interface InjectedMetadataSetup {
   };
   getBranding: () => Branding;
   getSurvey: () => string | undefined;
-  getWorkspaceBasePath: () => string;
 }
 
 /** @internal */
