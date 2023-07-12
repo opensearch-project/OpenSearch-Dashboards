@@ -50,6 +50,14 @@ curl localhost:5601/api/vis_augmenter/stats
 }
 ```
 
+### Settings
+
+The feature can be toggled on/off entirely through the `vis_augmenter.pluginAugmentationEnabled` setting in the `opensearch_dashboards.yml` config file. If enabled, there are additional fields that can be set in the advanced settings:
+`visualization.enablePluginAugmentation` to toggle the feature on/off.
+`visualization.enablePluginAugmentation.maxPluginObjects` to adjust the number of associations allowed per visualization. For example, to keep users from creating too many plugin resources and associations to visualizations, this value can be lowered.
+
+For more details, see the [original PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3961).
+
 ### Steps for plugin integration
 
 For an external plugin to utilize the Vis Augmenter plugin and its rendering framework, there are a few main steps needed:
