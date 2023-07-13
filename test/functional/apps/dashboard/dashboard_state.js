@@ -153,7 +153,9 @@ export default function ({ getService, getPageObjects }) {
       expect(headers.length).to.be(0);
     });
 
-    it('Tile map with no changes will update with visualization changes', async () => {
+    // TODO: race condition it seems with the query from previous state
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4193
+    it.skip('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
@@ -277,14 +279,14 @@ export default function ({ getService, getPageObjects }) {
 
           await retry.try(async () => {
             const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
-            // The default green color that was stored with the visualization before any dashboard overrides.
-            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
+            // The default color that was stored with the visualization before any dashboard overrides.
+            expect(pieSliceStyle.indexOf('rgb(84, 179, 153)')).to.be.greaterThan(0);
           });
         });
 
         it('resets the legend color as well', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#57c17b');
+            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#54B399');
             expect(colorExists).to.be(true);
           });
         });

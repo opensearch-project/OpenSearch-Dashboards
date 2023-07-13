@@ -3,22 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiHeaderProps } from '@elastic/eui';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { HeaderLogo, DEFAULT_DARK_LOGO, DEFAULT_LOGO } from './header_logo';
+import { BasePath } from '../../../http/base_path';
 
+const basePath = new BasePath('/base');
 const mockProps = () => ({
   href: '/',
+  basePath,
   navLinks$: new BehaviorSubject([]),
   forceNavigation$: new BehaviorSubject(false),
   navigateToApp: jest.fn(),
   branding: {},
+  theme: 'default' as EuiHeaderProps['theme'],
 });
 
-describe('Header logo ', () => {
-  describe('in default mode ', () => {
-    it('uses opensearch logo if no branding provided', () => {
+describe('Header logo', () => {
+  describe('when default-themed ', () => {
+    it('uses dashboards logo if no branding is provided', () => {
       const branding = {};
       const props = {
         ...mockProps(),
@@ -26,14 +31,13 @@ describe('Header logo ', () => {
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(`/${DEFAULT_LOGO}`);
+      expect(img.prop('src')).toEqual(`${basePath.serverBasePath}/${DEFAULT_LOGO}`);
       expect(img.prop('alt')).toEqual(`opensearch dashboards logo`);
       expect(component).toMatchSnapshot();
     });
 
-    it('uses opensearch logo if no logo provided', () => {
+    it('uses dashboards logo if branding containing no logo is provided', () => {
       const branding = {
-        darkMode: false,
         logo: {},
         mark: {},
         applicationTitle: 'custom title',
@@ -45,14 +49,13 @@ describe('Header logo ', () => {
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_LOGO}`);
+      expect(img.prop('src')).toEqual(`${basePath.serverBasePath}/${DEFAULT_LOGO}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
       expect(component).toMatchSnapshot();
     });
 
-    it('uses opensearch logo if custom mark provided without logo', () => {
+    it('uses dashboards logo if branding containing a mark but not a logo is provided', () => {
       const branding = {
-        darkMode: false,
         logo: {},
         mark: { defaultUrl: '/defaultModeMark' },
         applicationTitle: 'custom title',
@@ -64,14 +67,13 @@ describe('Header logo ', () => {
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_LOGO}`);
+      expect(img.prop('src')).toEqual(`${basePath.serverBasePath}/${DEFAULT_LOGO}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
       expect(component).toMatchSnapshot();
     });
 
-    it('uses custom logo default mode URL', () => {
+    it('uses custom default-mode logo if branding logo is provided', () => {
       const branding = {
-        darkMode: false,
         logo: { defaultUrl: '/defaultModeLogo' },
         mark: {},
         applicationTitle: 'custom title',
@@ -89,10 +91,23 @@ describe('Header logo ', () => {
     });
   });
 
-  describe('in dark mode ', () => {
-    it('uses opensearch logo if no logo provided', () => {
+  describe('when dark-themed', () => {
+    it("uses dashboards' dark logo if no branding is provided", () => {
+      const branding = {};
+      const props = {
+        ...mockProps(),
+        branding,
+        theme: 'dark' as EuiHeaderProps['theme'],
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
+      const img = component.find('.logoContainer img');
+      expect(img.prop('src')).toEqual(`${basePath.serverBasePath}/${DEFAULT_DARK_LOGO}`);
+      expect(img.prop('alt')).toEqual(`opensearch dashboards logo`);
+      expect(component).toMatchSnapshot();
+    });
+
+    it("uses dashboards' dark logo if branding containing no logo is provided", () => {
       const branding = {
-        darkMode: true,
         logo: {},
         mark: {},
         applicationTitle: 'custom title',
@@ -101,17 +116,17 @@ describe('Header logo ', () => {
       const props = {
         ...mockProps(),
         branding,
+        theme: 'dark' as EuiHeaderProps['theme'],
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_DARK_LOGO}`);
+      expect(img.prop('src')).toEqual(`${basePath.serverBasePath}/${DEFAULT_DARK_LOGO}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
       expect(component).toMatchSnapshot();
     });
 
-    it('uses opensearch logo if custom mark provided without logo', () => {
+    it("uses dashboards' dark logo if branding containing a mark but not a logo is provided", () => {
       const branding = {
-        darkMode: true,
         logo: {},
         mark: { defaultUrl: '/defaultModeMark' },
         applicationTitle: 'custom title',
@@ -120,17 +135,17 @@ describe('Header logo ', () => {
       const props = {
         ...mockProps(),
         branding,
+        theme: 'dark' as EuiHeaderProps['theme'],
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
-      expect(img.prop('src')).toEqual(`${branding.assetFolderUrl}/${DEFAULT_DARK_LOGO}`);
+      expect(img.prop('src')).toEqual(`${basePath.serverBasePath}/${DEFAULT_DARK_LOGO}`);
       expect(img.prop('alt')).toEqual(`${branding.applicationTitle} logo`);
       expect(component).toMatchSnapshot();
     });
 
-    it('uses custom logo default mode URL if no dark mode logo provided', () => {
+    it('uses default-themed custom logo if branding without dark-mode logo is provided', () => {
       const branding = {
-        darkMode: true,
         logo: { defaultUrl: '/defaultModeLogo' },
         mark: {},
         applicationTitle: 'custom title',
@@ -139,6 +154,7 @@ describe('Header logo ', () => {
       const props = {
         ...mockProps(),
         branding,
+        theme: 'dark' as EuiHeaderProps['theme'],
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');
@@ -147,9 +163,8 @@ describe('Header logo ', () => {
       expect(component).toMatchSnapshot();
     });
 
-    it('uses custom logo dark mode URL', () => {
+    it('uses custom dark-mode logo if branding dark-mode logo is provided', () => {
       const branding = {
-        darkMode: true,
         logo: { defaultUrl: '/defaultModeLogo', darkModeUrl: '/darkModeLogo' },
         mark: {},
         applicationTitle: 'custom title',
@@ -158,6 +173,7 @@ describe('Header logo ', () => {
       const props = {
         ...mockProps(),
         branding,
+        theme: 'dark' as EuiHeaderProps['theme'],
       };
       const component = mountWithIntl(<HeaderLogo {...props} />);
       const img = component.find('.logoContainer img');

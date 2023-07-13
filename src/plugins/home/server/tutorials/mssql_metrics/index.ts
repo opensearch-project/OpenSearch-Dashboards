@@ -56,7 +56,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mssql.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/mssql.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/mssql.svg',
     isBeta: false,
     artifacts: {
       dashboards: [

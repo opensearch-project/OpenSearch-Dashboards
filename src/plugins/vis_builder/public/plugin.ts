@@ -24,8 +24,6 @@ import {
   VisBuilderStart,
 } from './types';
 import { VisBuilderEmbeddableFactory, VISBUILDER_EMBEDDABLE } from './embeddable';
-import visBuilderIconSecondaryFill from './assets/vis_builder_icon_secondary_fill.svg';
-import visBuilderIcon from './assets/vis_builder_icon.svg';
 import {
   EDIT_PATH,
   PLUGIN_ID,
@@ -189,7 +187,7 @@ export class VisBuilderPlugin
       description: i18n.translate('visBuilder.visPicker.description', {
         defaultMessage: 'Create visualizations using the new VisBuilder',
       }),
-      icon: visBuilderIconSecondaryFill,
+      icon: 'visBuilder',
       stage: 'experimental',
       aliasApp: PLUGIN_ID,
       aliasPath: '#/',
@@ -200,7 +198,7 @@ export class VisBuilderPlugin
             description: attributes?.description,
             editApp: PLUGIN_ID,
             editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
-            icon: visBuilderIcon,
+            icon: 'visBuilder',
             id,
             savedObjectType: VISBUILDER_SAVED_OBJECT,
             stage: 'experimental',
