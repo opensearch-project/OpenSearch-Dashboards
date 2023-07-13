@@ -15,7 +15,8 @@ import {
   getNotCompliantMessage,
   getRulesFromConfig,
   isValidOptions,
-  getSelectorRule,
+  getRuleFromConfig,
+  FileBasedConfig,
 } from '../../utils';
 
 const { ruleMessages, report } = stylelint.utils;
@@ -25,30 +26,34 @@ const messages = ruleMessages(ruleName, {
   expected: (message) => `${message}`,
 });
 
-const ruleFunction = (
+const ruleFunction: stylelint.Rule = (
   primaryOption: Record<string, any>,
   secondaryOptionObject: Record<string, any>,
   context
 ) => {
-  return (postcssRoot: any, postcssResult: any) => {
+  return (postcssRoot, postcssResult) => {
     const validOptions = isValidOptions(postcssResult, ruleName, primaryOption);
     if (!validOptions) {
       return;
     }
 
-    const rules = getRulesFromConfig(primaryOption.config);
+    const rules: FileBasedConfig = getRulesFromConfig(primaryOption.config);
 
     const isAutoFixing = Boolean(context.fix);
 
-    postcssRoot.walkRules((rule: any) => {
-      const selectorRule = getSelectorRule(rules, rule);
+    postcssRoot.walkRules((rule) => {
+      const selectorRule = getRuleFromConfig(rules, rule.selector);
       if (!selectorRule) {
         return;
       }
 
       let shouldReport = false;
 
-      const file = postcssRoot.source.input.file;
+      const file = postcssRoot.source?.input.file;
+      if (!file) {
+        return;
+      }
+
       const approvedFiles = selectorRule.approved;
 
       const reportInfo = {

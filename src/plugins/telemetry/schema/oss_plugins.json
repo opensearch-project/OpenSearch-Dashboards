@@ -1337,6 +1337,12 @@
         "visualization:tileMap:maxPrecision": {
           "type": "long"
         },
+        "visualization:enablePluginAugmentation": {
+          "type": "boolean"
+        },
+        "visualization:enablePluginAugmentation.maxPluginObjects": {
+          "type": "number"
+        },
         "securitySolution:ipReputationLinks": {
           "type": "text"
         },

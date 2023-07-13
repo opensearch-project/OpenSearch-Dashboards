@@ -58,7 +58,7 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/oracle.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/oracle.svg',
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.oracleMetrics.artifacts.application.label', {

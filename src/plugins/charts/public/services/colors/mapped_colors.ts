@@ -33,8 +33,8 @@ import Color from 'color';
 
 import { CoreSetup } from 'opensearch-dashboards/public';
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { createColorPalette } from './color_palette';
 
 const standardizeColor = (color: string) => new Color(color).hex().toLowerCase();
 
@@ -100,7 +100,11 @@ export class MappedColors {
 
     // Generate a color palette big enough that all new keys can have unique color values
     const allColors = _(this._mapping).values().union(configColors).union(oldColors).value();
-    const colorPalette = createColorPalette(allColors.length + keysToMap.length);
+    const numColors = allColors.length + keysToMap.length;
+    const colorPalette = euiPaletteColorBlind({
+      rotations: Math.ceil(numColors / 10),
+      direction: 'both',
+    }).slice(0, numColors);
     let newColors = _.difference(colorPalette, allColors);
 
     while (keysToMap.length > newColors.length) {
