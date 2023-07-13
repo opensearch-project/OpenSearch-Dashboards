@@ -11,3 +11,5 @@ export {
 } from './workspaces_service';
 
 export { WorkspaceAttribute, WorkspaceFindOptions } from './types';
+
+export { WorkspacePermissionControl } from './workspace_permission_control';
