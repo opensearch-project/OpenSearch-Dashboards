@@ -14,6 +14,7 @@ const PLUGIN_RESOURCE_TYPE_2 = 'plugin-resource-type-2';
 const PLUGIN_RESOURCE_ID_1 = 'plugin-resource-id-1';
 const PLUGIN_RESOURCE_ID_2 = 'plugin-resource-id-2';
 const PLUGIN_RESOURCE_ID_3 = 'plugin-resource-id-3';
+const VIS_REF_NAME = 'visualization_0';
 const VIS_ID_1 = 'vis-id-1';
 const VIS_ID_2 = 'vis-id-2';
 const PER_PAGE = 4;
@@ -26,8 +27,14 @@ const SINGLE_SAVED_OBJ = [
         type: PLUGIN_RESOURCE_TYPE_1,
         id: PLUGIN_RESOURCE_ID_1,
       },
-      visId: VIS_ID_1,
+      visName: VIS_REF_NAME,
     },
+    references: [
+      {
+        name: VIS_REF_NAME,
+        id: VIS_ID_1,
+      },
+    ],
   },
 ] as Array<SavedObjectsFindResult<AugmentVisSavedObjectAttributes>>;
 
@@ -39,8 +46,14 @@ const MULTIPLE_SAVED_OBJS = [
         type: PLUGIN_RESOURCE_TYPE_1,
         id: PLUGIN_RESOURCE_ID_1,
       },
-      visId: VIS_ID_1,
+      visName: VIS_REF_NAME,
     },
+    references: [
+      {
+        name: VIS_REF_NAME,
+        id: VIS_ID_1,
+      },
+    ],
   },
   {
     attributes: {
@@ -49,8 +62,14 @@ const MULTIPLE_SAVED_OBJS = [
         type: PLUGIN_RESOURCE_TYPE_2,
         id: PLUGIN_RESOURCE_ID_2,
       },
-      visId: VIS_ID_1,
+      visName: VIS_REF_NAME,
     },
+    references: [
+      {
+        name: VIS_REF_NAME,
+        id: VIS_ID_1,
+      },
+    ],
   },
   {
     attributes: {
@@ -59,8 +78,14 @@ const MULTIPLE_SAVED_OBJS = [
         type: PLUGIN_RESOURCE_TYPE_2,
         id: PLUGIN_RESOURCE_ID_2,
       },
-      visId: VIS_ID_2,
+      visName: VIS_REF_NAME,
     },
+    references: [
+      {
+        name: VIS_REF_NAME,
+        id: VIS_ID_2,
+      },
+    ],
   },
   {
     attributes: {
@@ -69,8 +94,14 @@ const MULTIPLE_SAVED_OBJS = [
         type: PLUGIN_RESOURCE_TYPE_2,
         id: PLUGIN_RESOURCE_ID_3,
       },
-      visId: VIS_ID_1,
+      visName: VIS_REF_NAME,
     },
+    references: [
+      {
+        name: VIS_REF_NAME,
+        id: VIS_ID_1,
+      },
+    ],
   },
 ] as Array<SavedObjectsFindResult<AugmentVisSavedObjectAttributes>>;
 
