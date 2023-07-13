@@ -93,6 +93,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
+import { NEW_DISCOVER_APP } from '../../../../discover/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -480,7 +481,23 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       },
     };
 
+    const newDiscover = {
+      id: 'discover-new',
+      label: i18n.translate('discover.localMenu.newDiscoverTitle', {
+        defaultMessage: 'New Discover',
+      }),
+      description: i18n.translate('discover.localMenu.newDiscoverDescription', {
+        defaultMessage: 'New Discover Experience',
+      }),
+      testId: 'discoverNewButton',
+      run: async function () {
+        await getServices().uiSettings.set(NEW_DISCOVER_APP, true);
+        window.location.reload();
+      },
+    };
+
     return [
+      newDiscover,
       newSearch,
       ...(uiCapabilities.discover.save ? [saveSearch] : []),
       openSearch,

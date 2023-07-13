@@ -8,11 +8,12 @@ import ReactDOM from 'react-dom';
 import { ViewMountParameters } from '../../../../../data_explorer/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverServices } from '../../../build_services';
+import { Panel } from './panel';
 
 export const renderPanel = ({ panelElement }: ViewMountParameters, services: DiscoverServices) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <div>Side panel</div>
+      <Panel />
     </OpenSearchDashboardsContextProvider>,
     panelElement
   );

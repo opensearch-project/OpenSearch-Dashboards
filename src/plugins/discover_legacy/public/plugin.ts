@@ -56,6 +56,7 @@ import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
+import { NEW_DISCOVER_APP } from '../../discover/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { createOsdUrlTracker, url } from '../../opensearch_dashboards_utils/public';
@@ -88,6 +89,7 @@ import {
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
 import { AppNavLinkStatus } from '../../../core/public';
+import { ViewRedirectParams } from '../../data_explorer/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -317,6 +319,25 @@ export class DiscoverPlugin
         }
         if (!this.initializeInnerAngular) {
           throw Error('Discover plugin method initializeInnerAngular is undefined');
+        }
+
+        // If a user explicitly tries to access the legacy app URL
+        const {
+          core: {
+            application: { navigateToApp },
+          },
+        } = await this.initializeServices();
+        const path = window.location.hash;
+
+        const v2Enabled = core.uiSettings.get<boolean>(NEW_DISCOVER_APP);
+        if (v2Enabled) {
+          navigateToApp('data-explorer', {
+            replace: true,
+            path: `/discover`,
+            state: {
+              path,
+            } as ViewRedirectParams,
+          });
         }
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);

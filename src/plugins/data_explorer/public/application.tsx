@@ -14,20 +14,16 @@ import { DataExplorerApp } from './components/app';
 export const renderApp = (
   { notifications, http }: CoreStart,
   services: DataExplorerServices,
-  { appBasePath, element, history }: AppMountParameters
+  params: AppMountParameters
 ) => {
+  const { history, element } = params;
   ReactDOM.render(
     <Router history={history}>
       <OpenSearchDashboardsContextProvider services={services}>
         <services.i18n.Context>
           <Switch>
             <Route path={[`/:appId`, '/']} exact={false}>
-              <DataExplorerApp
-                basename={appBasePath}
-                notifications={notifications}
-                http={http}
-                history={history}
-              />
+              <DataExplorerApp params={params} />
             </Route>
           </Switch>
         </services.i18n.Context>
