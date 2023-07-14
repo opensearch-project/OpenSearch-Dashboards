@@ -14,7 +14,7 @@ import { createDashboardServicesMock } from '../mocks';
 import { Dashboard } from '../../../dashboard';
 import { convertToSerializedDashboard } from '../../../saved_dashboards/_saved_dashboard';
 import { setBreadcrumbsForExistingDashboard, setBreadcrumbsForNewDashboard } from '../breadcrumbs';
-import { ViewMode } from '../../../embeddable_plugin';
+import { ViewMode } from '../../../../../embeddable/public';
 
 describe('useEditorUpdates', () => {
   const eventEmitter = new EventEmitter();
