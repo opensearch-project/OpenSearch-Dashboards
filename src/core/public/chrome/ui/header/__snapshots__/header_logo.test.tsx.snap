@@ -1,12 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Header logo  in dark mode  uses custom logo dark mode URL 1`] = `
+exports[`Header logo when dark-themed uses custom dark-mode logo if branding dark-mode logo is provided 1`] = `
 <HeaderLogo
+  basePath={
+    BasePath {
+      "basePath": "/base",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "/base",
+    }
+  }
   branding={
     Object {
       "applicationTitle": "custom title",
       "assetFolderUrl": "base/ui/default_branding",
-      "darkMode": true,
       "logo": Object {
         "darkModeUrl": "/darkModeLogo",
         "defaultUrl": "/defaultModeLogo",
@@ -216,6 +224,7 @@ exports[`Header logo  in dark mode  uses custom logo dark mode URL 1`] = `
     }
   }
   navigateToApp={[MockFunction]}
+  theme="dark"
 >
   <a
     aria-label="Go to home page"
@@ -236,248 +245,21 @@ exports[`Header logo  in dark mode  uses custom logo dark mode URL 1`] = `
 </HeaderLogo>
 `;
 
-exports[`Header logo  in dark mode  uses custom logo default mode URL if no dark mode logo provided 1`] = `
+exports[`Header logo when dark-themed uses dashboards' dark logo if branding containing a mark but not a logo is provided 1`] = `
 <HeaderLogo
+  basePath={
+    BasePath {
+      "basePath": "/base",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "/base",
+    }
+  }
   branding={
     Object {
       "applicationTitle": "custom title",
       "assetFolderUrl": "base/ui/default_branding",
-      "darkMode": true,
-      "logo": Object {
-        "defaultUrl": "/defaultModeLogo",
-      },
-      "mark": Object {},
-    }
-  }
-  forceNavigation$={
-    BehaviorSubject {
-      "_isScalar": false,
-      "_value": false,
-      "closed": false,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  href="/"
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  navLinks$={
-    BehaviorSubject {
-      "_isScalar": false,
-      "_value": Array [],
-      "closed": false,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  navigateToApp={[MockFunction]}
->
-  <a
-    aria-label="Go to home page"
-    className="logoContainer"
-    data-test-subj="logo"
-    href="/"
-    onClick={[Function]}
-  >
-    <img
-      alt="custom title logo"
-      className="logoImage"
-      data-test-image-url="/defaultModeLogo"
-      data-test-subj="customLogo"
-      loading="lazy"
-      src="/defaultModeLogo"
-    />
-  </a>
-</HeaderLogo>
-`;
-
-exports[`Header logo  in dark mode  uses opensearch logo if custom mark provided without logo 1`] = `
-<HeaderLogo
-  branding={
-    Object {
-      "applicationTitle": "custom title",
-      "assetFolderUrl": "base/ui/default_branding",
-      "darkMode": true,
       "logo": Object {},
       "mark": Object {
         "defaultUrl": "/defaultModeMark",
@@ -686,6 +468,7 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom mark provided
     }
   }
   navigateToApp={[MockFunction]}
+  theme="dark"
 >
   <a
     aria-label="Go to home page"
@@ -697,22 +480,30 @@ exports[`Header logo  in dark mode  uses opensearch logo if custom mark provided
     <img
       alt="custom title logo"
       className="logoImage"
-      data-test-image-url="base/ui/default_branding/opensearch_logo_dark_mode.svg"
+      data-test-image-url="/base/ui/logos/opensearch_dashboards_darkmode.svg"
       data-test-subj="defaultLogo"
       loading="lazy"
-      src="base/ui/default_branding/opensearch_logo_dark_mode.svg"
+      src="/base/ui/logos/opensearch_dashboards_darkmode.svg"
     />
   </a>
 </HeaderLogo>
 `;
 
-exports[`Header logo  in dark mode  uses opensearch logo if no logo provided 1`] = `
+exports[`Header logo when dark-themed uses dashboards' dark logo if branding containing no logo is provided 1`] = `
 <HeaderLogo
+  basePath={
+    BasePath {
+      "basePath": "/base",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "/base",
+    }
+  }
   branding={
     Object {
       "applicationTitle": "custom title",
       "assetFolderUrl": "base/ui/default_branding",
-      "darkMode": true,
       "logo": Object {},
       "mark": Object {},
     }
@@ -919,6 +710,7 @@ exports[`Header logo  in dark mode  uses opensearch logo if no logo provided 1`]
     }
   }
   navigateToApp={[MockFunction]}
+  theme="dark"
 >
   <a
     aria-label="Go to home page"
@@ -930,487 +722,26 @@ exports[`Header logo  in dark mode  uses opensearch logo if no logo provided 1`]
     <img
       alt="custom title logo"
       className="logoImage"
-      data-test-image-url="base/ui/default_branding/opensearch_logo_dark_mode.svg"
+      data-test-image-url="/base/ui/logos/opensearch_dashboards_darkmode.svg"
       data-test-subj="defaultLogo"
       loading="lazy"
-      src="base/ui/default_branding/opensearch_logo_dark_mode.svg"
+      src="/base/ui/logos/opensearch_dashboards_darkmode.svg"
     />
   </a>
 </HeaderLogo>
 `;
 
-exports[`Header logo  in default mode  uses custom logo default mode URL 1`] = `
+exports[`Header logo when dark-themed uses dashboards' dark logo if no branding is provided 1`] = `
 <HeaderLogo
-  branding={
-    Object {
-      "applicationTitle": "custom title",
-      "assetFolderUrl": "base/ui/default_branding",
-      "darkMode": false,
-      "logo": Object {
-        "defaultUrl": "/defaultModeLogo",
-      },
-      "mark": Object {},
+  basePath={
+    BasePath {
+      "basePath": "/base",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "/base",
     }
   }
-  forceNavigation$={
-    BehaviorSubject {
-      "_isScalar": false,
-      "_value": false,
-      "closed": false,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  href="/"
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  navLinks$={
-    BehaviorSubject {
-      "_isScalar": false,
-      "_value": Array [],
-      "closed": false,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  navigateToApp={[MockFunction]}
->
-  <a
-    aria-label="Go to home page"
-    className="logoContainer"
-    data-test-subj="logo"
-    href="/"
-    onClick={[Function]}
-  >
-    <img
-      alt="custom title logo"
-      className="logoImage"
-      data-test-image-url="/defaultModeLogo"
-      data-test-subj="customLogo"
-      loading="lazy"
-      src="/defaultModeLogo"
-    />
-  </a>
-</HeaderLogo>
-`;
-
-exports[`Header logo  in default mode  uses opensearch logo if custom mark provided without logo 1`] = `
-<HeaderLogo
-  branding={
-    Object {
-      "applicationTitle": "custom title",
-      "assetFolderUrl": "base/ui/default_branding",
-      "darkMode": false,
-      "logo": Object {},
-      "mark": Object {
-        "defaultUrl": "/defaultModeMark",
-      },
-    }
-  }
-  forceNavigation$={
-    BehaviorSubject {
-      "_isScalar": false,
-      "_value": false,
-      "closed": false,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  href="/"
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  navLinks$={
-    BehaviorSubject {
-      "_isScalar": false,
-      "_value": Array [],
-      "closed": false,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
-  navigateToApp={[MockFunction]}
->
-  <a
-    aria-label="Go to home page"
-    className="logoContainer"
-    data-test-subj="logo"
-    href="/"
-    onClick={[Function]}
-  >
-    <img
-      alt="custom title logo"
-      className="logoImage"
-      data-test-image-url="base/ui/default_branding/opensearch_logo_default_mode.svg"
-      data-test-subj="defaultLogo"
-      loading="lazy"
-      src="base/ui/default_branding/opensearch_logo_default_mode.svg"
-    />
-  </a>
-</HeaderLogo>
-`;
-
-exports[`Header logo  in default mode  uses opensearch logo if no branding provided 1`] = `
-<HeaderLogo
   branding={Object {}}
   forceNavigation$={
     BehaviorSubject {
@@ -1614,6 +945,7 @@ exports[`Header logo  in default mode  uses opensearch logo if no branding provi
     }
   }
   navigateToApp={[MockFunction]}
+  theme="dark"
 >
   <a
     aria-label="Go to home page"
@@ -1625,22 +957,762 @@ exports[`Header logo  in default mode  uses opensearch logo if no branding provi
     <img
       alt="opensearch dashboards logo"
       className="logoImage"
-      data-test-image-url="/opensearch_logo_default_mode.svg"
+      data-test-image-url="/base/ui/logos/opensearch_dashboards_darkmode.svg"
       data-test-subj="defaultLogo"
       loading="lazy"
-      src="/opensearch_logo_default_mode.svg"
+      src="/base/ui/logos/opensearch_dashboards_darkmode.svg"
     />
   </a>
 </HeaderLogo>
 `;
 
-exports[`Header logo  in default mode  uses opensearch logo if no logo provided 1`] = `
+exports[`Header logo when dark-themed uses default-themed custom logo if branding without dark-mode logo is provided 1`] = `
 <HeaderLogo
+  basePath={
+    BasePath {
+      "basePath": "/base",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "/base",
+    }
+  }
   branding={
     Object {
       "applicationTitle": "custom title",
       "assetFolderUrl": "base/ui/default_branding",
-      "darkMode": false,
+      "logo": Object {
+        "defaultUrl": "/defaultModeLogo",
+      },
+      "mark": Object {},
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  navigateToApp={[MockFunction]}
+  theme="dark"
+>
+  <a
+    aria-label="Go to home page"
+    className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="/defaultModeLogo"
+      data-test-subj="customLogo"
+      loading="lazy"
+      src="/defaultModeLogo"
+    />
+  </a>
+</HeaderLogo>
+`;
+
+exports[`Header logo when default-themed  uses custom default-mode logo if branding logo is provided 1`] = `
+<HeaderLogo
+  basePath={
+    BasePath {
+      "basePath": "/base",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "/base",
+    }
+  }
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
+      "logo": Object {
+        "defaultUrl": "/defaultModeLogo",
+      },
+      "mark": Object {},
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  navigateToApp={[MockFunction]}
+  theme="default"
+>
+  <a
+    aria-label="Go to home page"
+    className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="/defaultModeLogo"
+      data-test-subj="customLogo"
+      loading="lazy"
+      src="/defaultModeLogo"
+    />
+  </a>
+</HeaderLogo>
+`;
+
+exports[`Header logo when default-themed  uses dashboards logo if branding containing a mark but not a logo is provided 1`] = `
+<HeaderLogo
+  basePath={
+    BasePath {
+      "basePath": "/base",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "/base",
+    }
+  }
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
+      "logo": Object {},
+      "mark": Object {
+        "defaultUrl": "/defaultModeMark",
+      },
+    }
+  }
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  navigateToApp={[MockFunction]}
+  theme="default"
+>
+  <a
+    aria-label="Go to home page"
+    className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
+  >
+    <img
+      alt="custom title logo"
+      className="logoImage"
+      data-test-image-url="/base/ui/logos/opensearch_dashboards.svg"
+      data-test-subj="defaultLogo"
+      loading="lazy"
+      src="/base/ui/logos/opensearch_dashboards.svg"
+    />
+  </a>
+</HeaderLogo>
+`;
+
+exports[`Header logo when default-themed  uses dashboards logo if branding containing no logo is provided 1`] = `
+<HeaderLogo
+  basePath={
+    BasePath {
+      "basePath": "/base",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "/base",
+    }
+  }
+  branding={
+    Object {
+      "applicationTitle": "custom title",
+      "assetFolderUrl": "base/ui/default_branding",
       "logo": Object {},
       "mark": Object {},
     }
@@ -1847,6 +1919,7 @@ exports[`Header logo  in default mode  uses opensearch logo if no logo provided 
     }
   }
   navigateToApp={[MockFunction]}
+  theme="default"
 >
   <a
     aria-label="Go to home page"
@@ -1858,10 +1931,245 @@ exports[`Header logo  in default mode  uses opensearch logo if no logo provided 
     <img
       alt="custom title logo"
       className="logoImage"
-      data-test-image-url="base/ui/default_branding/opensearch_logo_default_mode.svg"
+      data-test-image-url="/base/ui/logos/opensearch_dashboards.svg"
       data-test-subj="defaultLogo"
       loading="lazy"
-      src="base/ui/default_branding/opensearch_logo_default_mode.svg"
+      src="/base/ui/logos/opensearch_dashboards.svg"
+    />
+  </a>
+</HeaderLogo>
+`;
+
+exports[`Header logo when default-themed  uses dashboards logo if no branding is provided 1`] = `
+<HeaderLogo
+  basePath={
+    BasePath {
+      "basePath": "/base",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "/base",
+    }
+  }
+  branding={Object {}}
+  forceNavigation$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  href="/"
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  navLinks$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  navigateToApp={[MockFunction]}
+  theme="default"
+>
+  <a
+    aria-label="Go to home page"
+    className="logoContainer"
+    data-test-subj="logo"
+    href="/"
+    onClick={[Function]}
+  >
+    <img
+      alt="opensearch dashboards logo"
+      className="logoImage"
+      data-test-image-url="/base/ui/logos/opensearch_dashboards.svg"
+      data-test-subj="defaultLogo"
+      loading="lazy"
+      src="/base/ui/logos/opensearch_dashboards.svg"
     />
   </a>
 </HeaderLogo>
