@@ -224,7 +224,6 @@ export const addPointInTimeEventsLayersToTable = (
   });
 
   visLayers.forEach((visLayer: PointInTimeEventsVisLayer) => {
-    if (isEmpty(visLayer.events)) return;
     const visLayerColumnId = `${visLayer.pluginEventType}`;
 
     // Add placeholder values of 0 for every event value. This is so the tooltip
