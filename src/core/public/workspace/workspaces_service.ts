@@ -6,6 +6,7 @@ import { CoreService } from 'src/core/types';
 import { WorkspacesClient, WorkspacesClientContract } from './workspaces_client';
 import type { WorkspaceAttribute } from '../../server/types';
 import { HttpSetup } from '../http';
+import { IUiSettingsClient } from '../ui_settings';
 
 /**
  * @public
@@ -26,8 +27,14 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
   private setFormatUrlWithWorkspaceId(formatFn: WorkspacesStart['formatUrlWithWorkspaceId']) {
     this.formatUrlWithWorkspaceId = formatFn;
   }
-  public async setup({ http }: { http: HttpSetup }) {
+  public async setup({ http, uiSettings }: { http: HttpSetup; uiSettings: IUiSettingsClient }) {
     this.client = new WorkspacesClient(http);
+
+    // If workspace was disabled while opening a workspace url, navigate to basePath
+    if (uiSettings.get('workspace:enabled') === true) {
+      this.client.init();
+    }
+
     return {
       client: this.client,
       formatUrlWithWorkspaceId: (url: string, id: string) => this.formatUrlWithWorkspaceId(url, id),

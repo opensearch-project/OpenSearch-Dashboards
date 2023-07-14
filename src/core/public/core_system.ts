@@ -163,14 +163,14 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
-      const workspaces = await this.workspaces.setup({ http });
+      const workspaces = await this.workspaces.setup({ http, uiSettings });
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
         pluginDependencies: new Map([...pluginDependencies]),
       });
       const application = this.application.setup({ context, http });
-      this.coreApp.setup({ application, http, injectedMetadata, notifications, workspaces });
+      this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
@@ -204,7 +204,6 @@ export class CoreSystem {
       const uiSettings = await this.uiSettings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = await this.http.start();
-      const workspaces = await this.workspaces.start();
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const fatalErrors = await this.fatalErrors.start();
@@ -226,6 +225,7 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
       });
       const application = await this.application.start({ http, overlays });
+      const workspaces = await this.workspaces.start();
       const chrome = await this.chrome.start({
         application,
         docLinks,

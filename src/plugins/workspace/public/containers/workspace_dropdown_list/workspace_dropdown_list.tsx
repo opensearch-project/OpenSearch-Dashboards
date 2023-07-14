@@ -7,14 +7,15 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
+import { ApplicationStart, WorkspaceAttribute, WorkspacesStart } from '../../../../../core/public';
 import { WORKSPACE_APP_ID, PATHS } from '../../../common/constants';
 import { switchWorkspace } from '../../components/utils/workspace';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
 interface WorkspaceDropdownListProps {
-  coreStart: CoreStart;
+  workspaces: WorkspacesStart;
+  application: ApplicationStart;
 }
 
 function workspaceToOption(workspace: WorkspaceAttribute): WorkspaceOption {
@@ -27,10 +28,8 @@ export function getErrorMessage(err: any) {
 }
 
 export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
-  const { coreStart } = props;
-
-  const workspaceList = useObservable(coreStart.workspaces.client.workspaceList$, []);
-  const currentWorkspace = useObservable(coreStart.workspaces.client.currentWorkspace$, null);
+  const workspaceList = useObservable(props.workspaces.client.workspaceList$, []);
+  const currentWorkspace = useObservable(props.workspaces.client.currentWorkspace$, null);
 
   const [loading, setLoading] = useState(false);
   const [workspaceOptions, setWorkspaceOptions] = useState([] as WorkspaceOption[]);
@@ -58,14 +57,14 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
       /** switch the workspace */
       setLoading(true);
       const id = workspaceOption[0].key!;
-      switchWorkspace(coreStart, id);
+      switchWorkspace({ workspaces: props.workspaces, application: props.application }, id);
       setLoading(false);
     },
-    [coreStart]
+    [props.application, props.workspaces]
   );
 
   const onCreateWorkspaceClick = () => {
-    coreStart.application.navigateToApp(WORKSPACE_APP_ID, { path: PATHS.create });
+    props.application.navigateToApp(WORKSPACE_APP_ID, { path: PATHS.create });
   };
 
   useEffect(() => {

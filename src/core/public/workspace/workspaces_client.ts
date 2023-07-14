@@ -70,10 +70,12 @@ export class WorkspacesClient {
         }
       }
     );
+  }
 
-    /**
-     * Initialize workspace list
-     */
+  /**
+   * Initialize workspace list
+   */
+  init() {
     this.updateWorkspaceListAndNotify();
   }
 
