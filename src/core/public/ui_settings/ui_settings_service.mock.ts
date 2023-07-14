@@ -33,7 +33,7 @@ import type { PublicMethodsOf } from '@osd/utility-types';
 import { UiSettingsService } from './';
 import { IUiSettingsClient } from './types';
 
-const createSetupContractMock = () => {
+const createUiSettingsClientMock = () => {
   const setupContract: jest.Mocked<IUiSettingsClient> = {
     getAll: jest.fn(),
     get: jest.fn(),
@@ -66,12 +66,13 @@ const createMock = () => {
     stop: jest.fn(),
   };
 
-  mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.setup.mockReturnValue(createUiSettingsClientMock());
+  mocked.start.mockReturnValue(createUiSettingsClientMock());
   return mocked;
 };
 
 export const uiSettingsServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
-  createStartContract: createSetupContractMock,
+  createSetupContract: createUiSettingsClientMock,
+  createStartContract: createUiSettingsClientMock,
 };

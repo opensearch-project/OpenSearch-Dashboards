@@ -98,6 +98,11 @@ export interface IBasePath {
   get: () => string;
 
   /**
+   * Gets the `basePath
+   */
+  getBasePath: () => string;
+
+  /**
    * Prepends `path` with the basePath + workspace.
    */
   prepend: (url: string) => string;

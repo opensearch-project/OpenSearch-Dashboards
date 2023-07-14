@@ -36,6 +36,7 @@ import { getNavigationSettings } from './navigation';
 import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
 import { getStateSettings } from './state';
+import { getWorkspaceSettings } from './workspace';
 
 export const getCoreSettings = (): Record<string, UiSettingsParams> => {
   return {
@@ -46,5 +47,6 @@ export const getCoreSettings = (): Record<string, UiSettingsParams> => {
     ...getNotificationsSettings(),
     ...getThemeSettings(),
     ...getStateSettings(),
+    ...getWorkspaceSettings(),
   };
 };

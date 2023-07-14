@@ -263,6 +263,7 @@ export class Server {
     });
     await this.workspaces.start({
       savedObjects: savedObjectsStart,
+      uiSettings: uiSettingsStart,
     });
 
     this.coreStart = {

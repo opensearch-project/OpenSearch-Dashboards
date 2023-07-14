@@ -14,9 +14,12 @@ import {
 import { WORKSPACE_APP_ID } from '../common/constants';
 import { mountDropdownList } from './mount';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
+import type { Subscription } from 'rxjs';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
-  private core?: CoreSetup;
+  private coreSetup?: CoreSetup;
+  private coreStart?: CoreStart;
+  private currentWorkspaceSubscription?: Subscription;
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
@@ -25,20 +28,25 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     /**
      * Patch workspace id into path
      */
-    newUrl.pathname = this.core?.http.basePath.remove(newUrl.pathname) || '';
+    newUrl.pathname = this.coreSetup?.http.basePath.remove(newUrl.pathname) || '';
     if (workspaceId) {
-      newUrl.pathname = `${this.core?.http.basePath.serverBasePath || ''}/w/${workspaceId}${
+      newUrl.pathname = `${this.coreSetup?.http.basePath.serverBasePath || ''}/w/${workspaceId}${
         newUrl.pathname
       }`;
     } else {
-      newUrl.pathname = `${this.core?.http.basePath.serverBasePath || ''}${newUrl.pathname}`;
+      newUrl.pathname = `${this.coreSetup?.http.basePath.serverBasePath || ''}${newUrl.pathname}`;
     }
 
     return newUrl.toString();
   };
   public async setup(core: CoreSetup) {
-    this.core = core;
-    this.core?.workspaces.setFormatUrlWithWorkspaceId((url, id) => this.getPatchedUrl(url, id));
+    // If workspace feature is disabled, it will not load the workspace plugin
+    if (core.uiSettings.get('workspace:enabled') === false) {
+      return {};
+    }
+
+    this.coreSetup = core;
+    core.workspaces.setFormatUrlWithWorkspaceId((url, id) => this.getPatchedUrl(url, id));
     /**
      * Retrieve workspace id from url
      */
@@ -78,19 +86,34 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     return {};
   }
 
-  private async _changeSavedObjectCurrentWorkspace() {
-    const startServices = await this.core?.getStartServices();
-    if (startServices) {
-      const coreStart = startServices[0];
-      coreStart.workspaces.client.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
-        coreStart.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
-      });
+  private _changeSavedObjectCurrentWorkspace() {
+    if (this.coreStart) {
+      return this.coreStart.workspaces.client.currentWorkspaceId$.subscribe(
+        (currentWorkspaceId) => {
+          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+        }
+      );
     }
   }
 
   public start(core: CoreStart) {
-    mountDropdownList(core);
-    this._changeSavedObjectCurrentWorkspace();
+    // If workspace feature is disabled, it will not load the workspace plugin
+    if (core.uiSettings.get('workspace:enabled') === false) {
+      return {};
+    }
+
+    this.coreStart = core;
+
+    mountDropdownList({
+      application: core.application,
+      workspaces: core.workspaces,
+      chrome: core.chrome,
+    });
+    this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     return {};
+  }
+
+  public stop() {
+    this.currentWorkspaceSubscription?.unsubscribe();
   }
 }
