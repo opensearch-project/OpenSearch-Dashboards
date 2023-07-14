@@ -38,13 +38,13 @@ import { View } from './view';
  * @internal
  */
 export class ViewService implements CoreService<ViewServiceSetup, ViewServiceStart> {
-  private views: Record<string, ViewDefinition> = {};
+  private views: Record<string, View> = {};
 
-  private registerView(viewDefinition: View) {
-    if (this.views[viewDefinition.id]) {
-      throw new Error(`A view with this the id ${viewDefinition.id} already exists!`);
+  private registerView(view: View) {
+    if (this.views[view.id]) {
+      throw new Error(`A view with this the id ${view.id} already exists!`);
     }
-    this.views[viewDefinition.id] = viewDefinition;
+    this.views[view.id] = view;
   }
 
   public setup() {

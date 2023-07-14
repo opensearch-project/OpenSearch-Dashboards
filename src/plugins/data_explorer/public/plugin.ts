@@ -9,6 +9,7 @@ import {
   CoreStart,
   Plugin,
   AppNavLinkStatus,
+  ScopedHistory,
 } from '../../../core/public';
 import {
   DataExplorerPluginSetup,
@@ -19,6 +20,11 @@ import {
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ViewService } from './services/view_service';
+import {
+  createOsdUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../opensearch_dashboards_utils/public';
+import { getPreloadedStore } from './utils/state_management';
 
 export class DataExplorerPlugin
   implements
@@ -29,32 +35,52 @@ export class DataExplorerPlugin
       DataExplorerPluginStartDependencies
     > {
   private viewService = new ViewService();
+  private currentHistory?: ScopedHistory;
 
   public setup(
     core: CoreSetup<DataExplorerPluginStartDependencies, DataExplorerPluginStart>
   ): DataExplorerPluginSetup {
     const viewService = this.viewService;
+
     // Register an application into the side navigation menu
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
+        // Load application bundle
+        const { renderApp } = await import('./application');
+
         const [coreStart, pluginsStart] = await core.getStartServices();
+        this.currentHistory = params.history;
 
         // make sure the index pattern list is up to date
         pluginsStart.data.indexPatterns.clearCache();
 
         const services: DataExplorerServices = {
           ...coreStart,
+          scopedHistory: this.currentHistory,
+          data: pluginsStart.data,
+          embeddable: pluginsStart.embeddable,
+          expressions: pluginsStart.expressions,
+          osdUrlStateStorage: createOsdUrlStateStorage({
+            history: this.currentHistory,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          }),
           viewRegistry: viewService.start(),
         };
 
-        // Load application bundle
-        const { renderApp } = await import('./application');
         // Get start services as specified in opensearch_dashboards.json
         // Render the application
-        return renderApp(coreStart, services, params);
+        const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(services);
+
+        const unmount = renderApp(coreStart, services, params, store);
+
+        return () => {
+          unsubscribeStore();
+          unmount();
+        };
       },
     });
 

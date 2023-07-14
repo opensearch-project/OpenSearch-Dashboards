@@ -22,7 +22,7 @@ export interface ViewDefinition<T = any> {
   readonly id: string;
   readonly title: string;
   readonly ui?: {
-    defaults: T;
+    defaults: T | (() => T);
     reducer: (state: T, action: any) => T;
   };
   readonly mount: (params: ViewMountParameters) => Promise<() => void>;
