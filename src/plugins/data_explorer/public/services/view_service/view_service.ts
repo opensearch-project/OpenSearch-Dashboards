@@ -53,7 +53,7 @@ export class ViewService implements CoreService<ViewServiceSetup, ViewServiceSta
        * registers a visualization type
        * @param config - visualization type definition
        */
-      registerView: (config: ViewDefinition): void => {
+      registerView: <T = any>(config: ViewDefinition<T>): void => {
         const view = new View(config);
         this.registerView(view);
       },

@@ -9,9 +9,14 @@ import { AppMountParameters } from '../../../../core/public';
 import { Sidebar } from './sidebar';
 import { NoView } from './no_view';
 import { View } from '../services/view_service/view';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { DataExplorerServices } from '../types';
 
 export const AppContainer = ({ view, params }: { view?: View; params: AppMountParameters }) => {
   const [showSpinner, setShowSpinner] = useState(false);
+  const {
+    services: { store },
+  } = useOpenSearchDashboards<DataExplorerServices>();
   const canvasRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<any>(null);
@@ -40,6 +45,8 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
             canvasElement: canvasRef.current!,
             panelElement: panelRef.current!,
             appParams: params,
+            // The provider is added to the services right after the store is created. so it is safe to assume its here.
+            store: store!,
           })) || null;
       } catch (e) {
         // TODO: add error UI
@@ -56,7 +63,7 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
     mount();
 
     return unmount;
-  }, [params, view]);
+  }, [params, view, store]);
 
   // TODO: Make this more robust.
   if (!view) {

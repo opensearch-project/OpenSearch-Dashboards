@@ -41,6 +41,9 @@ export class DataExplorerPlugin
     core: CoreSetup<DataExplorerPluginStartDependencies, DataExplorerPluginStart>
   ): DataExplorerPluginSetup {
     const viewService = this.viewService;
+    // TODO: Remove this before merge to main
+    // eslint-disable-next-line no-console
+    console.log('data_explorer: Setup');
 
     // Register an application into the side navigation menu
     core.application.register({
@@ -48,6 +51,9 @@ export class DataExplorerPlugin
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
+        // TODO: Remove this before merge to main
+        // eslint-disable-next-line no-console
+        console.log('data_explorer: Mounted');
         // Load application bundle
         const { renderApp } = await import('./application');
 
@@ -74,6 +80,7 @@ export class DataExplorerPlugin
         // Get start services as specified in opensearch_dashboards.json
         // Render the application
         const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(services);
+        services.store = store;
 
         const unmount = renderApp(coreStart, services, params, store);
 
@@ -90,6 +97,9 @@ export class DataExplorerPlugin
   }
 
   public start(core: CoreStart): DataExplorerPluginStart {
+    // TODO: Remove this before merge to main
+    // eslint-disable-next-line no-console
+    console.log('data_explorer: Started');
     return {};
   }
 

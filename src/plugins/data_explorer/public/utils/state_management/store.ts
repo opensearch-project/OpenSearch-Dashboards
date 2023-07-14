@@ -3,24 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { combineReducers, configureStore, PreloadedState } from '@reduxjs/toolkit';
+import React from 'react';
+import { combineReducers, configureStore, PreloadedState, Reducer, Slice } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { reducer as metadataReducer } from './metadata_slice';
+import { Provider } from 'react-redux';
+import { reducer as metadataReducer, MetadataState } from './metadata_slice';
 import { loadReduxState, persistReduxState } from './redux_persistence';
 import { DataExplorerServices } from '../../types';
 
-const rootReducer = combineReducers({
+const dynamicReducers: {
+  metadata: Reducer<MetadataState>;
+  [key: string]: Reducer;
+} = {
   metadata: metadataReducer,
-});
+};
+
+const rootReducer = combineReducers(dynamicReducers);
 
 export const configurePreloadedStore = (preloadedState: PreloadedState<RootState>) => {
+  // After registering the slices the root reducer needs to be updated
+  const updatedRootReducer = combineReducers(dynamicReducers);
+
   return configureStore({
-    reducer: rootReducer,
+    reducer: updatedRootReducer,
     preloadedState,
   });
 };
 
 export const getPreloadedStore = async (services: DataExplorerServices) => {
+  // For each view preload the data and register the slice
+  const views = services.viewRegistry.all();
+  views.forEach((view) => {
+    if (!view.ui) return;
+
+    const { slice } = view.ui;
+    registerSlice(slice);
+  });
+
   const preloadedState = await loadReduxState(services);
   const store = configurePreloadedStore(preloadedState);
 
@@ -44,17 +63,12 @@ export const getPreloadedStore = async (services: DataExplorerServices) => {
   return { store, unsubscribe };
 };
 
-// export const registerSlice = (slice: any) => {
-//   dynamicReducers[slice.name] = slice.reducer;
-//   store.replaceReducer(combineReducers(dynamicReducers));
-
-//   // Extend RootState to include the new slice
-//   declare module 'path-to-main-store' {
-//     interface RootState {
-//       [slice.name]: ReturnType<typeof slice.reducer>;
-//     }
-//   }
-// }
+export const registerSlice = (slice: Slice) => {
+  if (dynamicReducers[slice.name]) {
+    throw new Error(`Slice ${slice.name} already registered`);
+  }
+  dynamicReducers[slice.name] = slice.reducer;
+};
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof rootReducer>;

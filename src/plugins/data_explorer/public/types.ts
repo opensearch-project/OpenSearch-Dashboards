@@ -9,6 +9,7 @@ import { ExpressionsStart } from '../../expressions/public';
 import { ViewServiceStart, ViewServiceSetup } from './services/view_service';
 import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
+import { Store } from './utils/state_management';
 
 export type DataExplorerPluginSetup = ViewServiceSetup;
 
@@ -29,6 +30,7 @@ export interface ViewRedirectParams {
 }
 
 export interface DataExplorerServices extends CoreStart {
+  store?: Store;
   viewRegistry: ViewServiceStart;
   expressions: ExpressionsStart;
   embeddable: EmbeddableStart;
