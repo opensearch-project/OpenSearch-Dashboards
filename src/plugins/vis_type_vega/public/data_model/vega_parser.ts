@@ -36,6 +36,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 // @ts-ignore
+import { Signal } from 'vega';
 import { vega, vegaLite } from '../lib/vega';
 import { OpenSearchQueryParser } from './opensearch_query_parser';
 import { Utils } from './utils';
@@ -44,6 +45,7 @@ import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
 import { IServiceSettings } from '../../../maps_legacy/public';
+import { VisAugmenterEmbeddableConfig, VisLayerTypes } from '../../../vis_augmenter/public';
 import {
   Bool,
   Data,
@@ -92,6 +94,8 @@ export class VegaParser {
   getServiceSettings: () => Promise<IServiceSettings>;
   filters: Bool;
   timeCache: TimeCache;
+  visibleVisLayers: Map<VisLayerTypes, boolean>;
+  visAugmenterConfig: VisAugmenterEmbeddableConfig;
 
   constructor(
     spec: VegaSpec | string,
@@ -102,6 +106,8 @@ export class VegaParser {
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
+    this.visibleVisLayers = new Map<VisLayerTypes, boolean>();
+    this.visAugmenterConfig = {} as VisAugmenterEmbeddableConfig;
 
     this.error = undefined;
     this.warnings = [];
@@ -158,6 +164,8 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
 
     this._config = this._parseConfig();
     this.hideWarnings = !!this._config.hideWarnings;
+    this.visibleVisLayers = this._config.visibleVisLayers;
+    this.visAugmenterConfig = this._config.visAugmenterConfig;
     this.useMap = this._config.type === 'map';
     this.renderer = this._config.renderer === 'svg' ? 'svg' : 'canvas';
     this.tooltips = this._parseTooltips();
@@ -190,6 +198,13 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       contains: 'padding',
     };
 
+    // If we are showing PointInTimeEventsVisLayers, it means we are showing a base vis + event vis.
+    // Because this will be using a vconcat spec, we cannot use the default autosize settings, or set
+    // top-level height/width values.
+    // See limitations: https://vega.github.io/vega-lite/docs/size.html#limitations
+    const showPointInTimeEvents =
+      this.visibleVisLayers?.get(VisLayerTypes.PointInTimeEvents) === true;
+
     let autosize = this.spec.autosize;
     let useResize = true;
 
@@ -220,6 +235,8 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         contains: string;
       };
       useResize = Boolean(autosize?.type && autosize?.type !== 'none');
+    } else if (showPointInTimeEvents) {
+      autosize = undefined;
     } else {
       autosize = defaultAutosize;
     }
@@ -243,7 +260,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       );
     }
 
-    if (useResize) {
+    if (useResize && !showPointInTimeEvents) {
       this.spec.width = 'container';
       this.spec.height = 'container';
     }
@@ -303,6 +320,52 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
       ) {
         delete this.spec.autosize;
       }
+    }
+
+    if (this._config?.signals) {
+      Object.entries(this._config?.signals).forEach(([markId, signals]: [string, any]) => {
+        const mark = this.getMarkWithStyle(this.spec.marks, markId);
+
+        if (mark) {
+          signals.forEach((signal: Signal) => {
+            signal.on?.forEach((eventObj) => {
+              // We are prepending mark name here so that the signals only listens to the events on
+              // the elements related to this mark
+              eventObj.events = `@${mark.name}:${eventObj.events}`;
+            });
+          });
+          this.spec.signals = (this.spec.signals || []).concat(signals);
+        }
+      });
+    }
+  }
+
+  /**
+   * This method recursively looks for a mark that includes the given style.
+   * Returns undefined if it doesn't find it.
+   */
+  getMarkWithStyle(marks: any[], style: string): any {
+    if (!marks) {
+      return undefined;
+    }
+
+    if (Array.isArray(marks)) {
+      const markWithStyle = marks.find((mark) => {
+        return mark.style?.includes(style);
+      });
+
+      if (markWithStyle) {
+        return markWithStyle;
+      }
+
+      for (let i = 0; i < marks.length; i++) {
+        const res = this.getMarkWithStyle(marks[i].marks, style);
+        if (res) {
+          return res;
+        }
+      }
+
+      return undefined;
     }
   }
 
@@ -385,6 +448,10 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
               }
             )
           );
+        }
+        // Converting the visibleVisLayers array back to a map
+        if (result.visibleVisLayers !== undefined && Array.isArray(result.visibleVisLayers)) {
+          result.visibleVisLayers = new Map<VisLayerTypes, boolean>(result.visibleVisLayers);
         }
       }
     }
