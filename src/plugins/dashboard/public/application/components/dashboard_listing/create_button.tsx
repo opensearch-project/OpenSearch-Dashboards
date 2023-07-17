@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import type { DashboardProvider } from '../../types';
+import type { DashboardProvider } from '../../../types';
 
 interface CreateButtonProps {
   dashboardProviders?: { [key: string]: DashboardProvider };
