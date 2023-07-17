@@ -293,8 +293,8 @@ describe('SavedObjectsClient', () => {
       expect(result.attributes).toBe(attributes);
     });
 
-    test('makes HTTP call with ID', () => {
-      savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
+    test('makes HTTP call with ID', async () => {
+      await savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -311,8 +311,8 @@ describe('SavedObjectsClient', () => {
       `);
     });
 
-    test('makes HTTP call without ID', () => {
-      savedObjectsClient.create('index-pattern', attributes);
+    test('makes HTTP call without ID', async () => {
+      await savedObjectsClient.create('index-pattern', attributes);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -445,7 +445,7 @@ describe('SavedObjectsClient', () => {
       expect(result.total).toBe(1);
     });
 
-    test('makes HTTP call correctly mapping options into snake case query parameters', () => {
+    test('makes HTTP call correctly mapping options into snake case query parameters', async () => {
       const options = {
         defaultSearchOperator: 'OR' as const,
         fields: ['title'],
@@ -458,7 +458,7 @@ describe('SavedObjectsClient', () => {
         type: 'index-pattern',
       };
 
-      savedObjectsClient.find(options);
+      await savedObjectsClient.find(options);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -481,6 +481,9 @@ describe('SavedObjectsClient', () => {
                 ],
                 "sort_field": "sort_field",
                 "type": "index-pattern",
+                "workspaces": Array [
+                  "public",
+                ],
               },
             },
           ],
@@ -488,7 +491,7 @@ describe('SavedObjectsClient', () => {
       `);
     });
 
-    test('ignores invalid options', () => {
+    test('ignores invalid options', async () => {
       const options = {
         invalid: true,
         namespace: 'default',
@@ -496,7 +499,7 @@ describe('SavedObjectsClient', () => {
       };
 
       // @ts-expect-error
-      savedObjectsClient.find(options);
+      await savedObjectsClient.find(options);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -504,7 +507,11 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "query": Object {},
+              "query": Object {
+                "workspaces": Array [
+                  "public",
+                ],
+              },
             },
           ],
         ]

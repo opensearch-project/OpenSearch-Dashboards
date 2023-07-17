@@ -280,16 +280,18 @@ export class SavedObjectsRepository {
       }
     }
 
-    let savedObjectWorkspaces;
+    let savedObjectWorkspaces = workspaces;
 
     if (id && overwrite) {
-      // do not overwrite workspaces
-      const currentItem = await this.get(type, id);
-      if (currentItem && currentItem.workspaces) {
-        savedObjectWorkspaces = currentItem.workspaces;
+      try {
+        const currentItem = await this.get(type, id);
+        if (currentItem && currentItem.workspaces) {
+          // do not overwrite workspaces
+          savedObjectWorkspaces = currentItem.workspaces;
+        }
+      } catch (e) {
+        // this.get will throw an error when no items can be found
       }
-    } else {
-      savedObjectWorkspaces = workspaces;
     }
 
     const migrated = this._migrator.migrateDocument({

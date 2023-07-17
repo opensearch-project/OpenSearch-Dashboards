@@ -34,7 +34,7 @@ import { AppCategory } from '../types';
 /** @internal */
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
   opensearchDashboards: {
-    id: 'library',
+    id: 'opensearchDashboards',
     label: i18n.translate('core.ui.libraryNavList.label', {
       defaultMessage: 'Library',
     }),

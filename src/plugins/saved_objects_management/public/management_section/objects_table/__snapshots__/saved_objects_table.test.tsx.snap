@@ -269,7 +269,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "get": [Function],
           "getBasePath": [Function],
           "prepend": [Function],
-          "prependWithoutWorkspacePath": [Function],
           "remove": [Function],
           "serverBasePath": "",
           "workspaceBasePath": "",
