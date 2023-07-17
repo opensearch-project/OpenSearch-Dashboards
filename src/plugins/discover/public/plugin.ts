@@ -30,6 +30,7 @@ import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
+import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { createOsdUrlTracker, url } from '../../opensearch_dashboards_utils/public';
@@ -163,7 +164,7 @@ export class DiscoverPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
   private urlGenerator?: DiscoverStart['urlGenerator'];
-  private initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
+  private initializeServices?: () => { core: CoreStart; plugins: DiscoverStartPlugins };
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     // TODO: Remove this before merge to main
@@ -323,9 +324,6 @@ export class DiscoverPlugin
           });
         }
 
-        // TODO: Carry this over to the view
-        // make sure the index pattern list is up to date
-        // await dataStart.indexPatterns.clearCache();
         return () => {
           appUnMounted();
         };
@@ -374,26 +372,16 @@ export class DiscoverPlugin
       },
       ui: {
         defaults: async () => {
-          await this.initializeServices?.();
+          this.initializeServices?.();
           const services = getServices();
           return await getPreloadedState(services);
         },
         slice: discoverSlice,
       },
       shouldShow: () => true,
-      mount: async (params) => {
-        // TODO: Remove this before merge to main
-        // eslint-disable-next-line no-console
-        console.log('DiscoverPlugin.dataExplorer.mount()');
-        const { renderCanvas, renderPanel } = await import('./application/view_components');
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        const services = await buildServices(coreStart, pluginsStart, this.initializerContext);
-
-        renderCanvas(params, services);
-        renderPanel(params, services);
-
-        return () => {};
-      },
+      // ViewCompon
+      Canvas: lazy(() => import('./application/view_components/canvas')),
+      Panel: lazy(() => import('./application/view_components/panel')),
     });
 
     // this.registerEmbeddable(core, plugins);
@@ -414,16 +402,18 @@ export class DiscoverPlugin
     console.log('DiscoverPlugin.start()');
     setUiActions(plugins.uiActions);
 
-    this.initializeServices = async () => {
+    this.initializeServices = () => {
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins, this.initializerContext);
+      const services = buildServices(core, plugins, this.initializerContext);
       setServices(services);
       this.servicesInitialized = true;
 
       return { core, plugins };
     };
+
+    this.initializeServices();
 
     return {
       urlGenerator: this.urlGenerator,

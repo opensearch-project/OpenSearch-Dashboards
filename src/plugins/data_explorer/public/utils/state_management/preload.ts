@@ -17,7 +17,7 @@ export const getPreloadedState = async (
 
   // initialize the default state for each view
   const views = services.viewRegistry.all();
-  views.forEach(async (view) => {
+  const promises = views.map(async (view) => {
     if (!view.ui) {
       return;
     }
@@ -31,6 +31,7 @@ export const getPreloadedState = async (
       rootState[view.id] = defaults;
     }
   });
+  await Promise.all(promises);
 
   return rootState;
 };

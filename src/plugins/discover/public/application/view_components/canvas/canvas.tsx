@@ -8,11 +8,7 @@ import { AppMountParameters } from '../../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverServices } from '../../../build_services';
 import { TopNav } from './top_nav';
-import {
-  updateState,
-  useDispatch,
-  useTypedSelector,
-} from '../../utils/state_management/discover_slice';
+import { updateState, useDispatch, useSelector } from '../../utils/state_management';
 
 interface CanvasProps {
   opts: {
@@ -22,15 +18,13 @@ interface CanvasProps {
 
 export const Canvas = ({ opts }: CanvasProps) => {
   const { services } = useOpenSearchDashboards<DiscoverServices>();
-  const {
-    discover: { interval },
-  } = useTypedSelector((state) => state);
+  const interval = useSelector((state) => state.discover.interval);
   const dispatch = useDispatch();
 
   return (
     <div>
       <TopNav opts={opts} />
-      Canvas
+      Interval:
       <input
         type="text"
         name=""
@@ -40,6 +34,7 @@ export const Canvas = ({ opts }: CanvasProps) => {
           dispatch(updateState({ interval: e.target.value }));
         }}
       />
+      <p>Services: {services.docLinks.DOC_LINK_VERSION}</p>
     </div>
   );
 };

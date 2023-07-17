@@ -4,19 +4,17 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { ViewMountParameters } from '../../../../../data_explorer/public';
+import { ViewProps } from '../../../../../data_explorer/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
-import { DiscoverServices } from '../../../build_services';
 import { Panel } from './panel';
+import { getServices } from '../../../opensearch_dashboards_services';
 
-export const renderPanel = ({ panelElement }: ViewMountParameters, services: DiscoverServices) => {
-  ReactDOM.render(
+// eslint-disable-next-line import/no-default-export
+export default function PanelApp(props: ViewProps) {
+  const services = getServices();
+  return (
     <OpenSearchDashboardsContextProvider services={services}>
       <Panel />
-    </OpenSearchDashboardsContextProvider>,
-    panelElement
+    </OpenSearchDashboardsContextProvider>
   );
-
-  return () => ReactDOM.unmountComponentAtNode(panelElement);
-};
+}
