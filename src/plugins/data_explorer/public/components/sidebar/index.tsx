@@ -5,17 +5,12 @@
 
 import React, { useMemo, FC, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import {
-  EuiPanel,
-  EuiComboBox,
-  EuiSelect,
-  EuiSelectOption,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiPanel, EuiComboBox, EuiSelect, EuiComboBoxOptionOption } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { useView } from '../../utils/use';
 import { DataExplorerServices } from '../../types';
 import { useTypedDispatch, useTypedSelector, setIndexPattern } from '../../utils/state_management';
+import { setView } from '../../utils/state_management/metadata_slice';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
@@ -24,7 +19,7 @@ export const Sidebar: FC = ({ children }) => {
   const [selectedOption, setSelectedOption] = useState<EuiComboBoxOptionOption<string>>();
   const { view, viewRegistry } = useView();
   const views = viewRegistry.all();
-  const viewOptions: EuiSelectOption[] = useMemo(
+  const viewOptions = useMemo(
     () =>
       views.map(({ id, title }) => ({
         value: id,
@@ -87,14 +82,16 @@ export const Sidebar: FC = ({ children }) => {
               return;
             }
 
-            dispatch(
-              setIndexPattern({
-                state: value,
-              })
-            );
+            dispatch(setIndexPattern(value));
           }}
         />
-        <EuiSelect options={viewOptions} value={view?.id} />
+        <EuiSelect
+          options={viewOptions}
+          value={view?.id}
+          onChange={(e) => {
+            dispatch(setView(e.target.value));
+          }}
+        />
       </EuiPanel>
       {children}
     </>

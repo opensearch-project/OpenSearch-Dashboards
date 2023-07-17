@@ -8,7 +8,7 @@ import { EmbeddableStart } from '../../embeddable/public';
 import { ExpressionsStart } from '../../expressions/public';
 import { ViewServiceStart, ViewServiceSetup } from './services/view_service';
 import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
-import { DataPublicPluginStart } from '../../data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { Store } from './utils/state_management';
 
 export type DataExplorerPluginSetup = ViewServiceSetup;
@@ -16,8 +16,10 @@ export type DataExplorerPluginSetup = ViewServiceSetup;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataExplorerPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataExplorerPluginSetupDependencies {}
+export interface DataExplorerPluginSetupDependencies {
+  data: DataPublicPluginSetup;
+}
+
 export interface DataExplorerPluginStartDependencies {
   expressions: ExpressionsStart;
   embeddable: EmbeddableStart;

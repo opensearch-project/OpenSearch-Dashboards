@@ -3,24 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { View } from '../../services/view_service/view';
 import { DataExplorerServices } from '../../types';
+import { useTypedDispatch, useTypedSelector } from '../state_management';
+import { setView } from '../state_management/metadata_slice';
 
 export const useView = () => {
-  // TODO: Move the view to the redux store once the store is ready
-  const [view, setView] = useState<View | undefined>();
-  const { appId } = useParams<{ appId: string }>();
+  const viewId = useTypedSelector((state) => state.metadata.view);
   const {
     services: { viewRegistry },
   } = useOpenSearchDashboards<DataExplorerServices>();
+  const dispatch = useTypedDispatch();
+  const { appId } = useParams<{ appId: string }>();
+
+  const view = useMemo(() => {
+    if (!viewId) return undefined;
+    return viewRegistry.get(viewId);
+  }, [viewId, viewRegistry]);
 
   useEffect(() => {
     const currentView = viewRegistry.get(appId);
-    setView(currentView);
-  }, [appId, viewRegistry]);
+
+    if (!currentView) return;
+
+    dispatch(setView(currentView?.id));
+  }, [appId, dispatch, viewRegistry]);
 
   return { view, viewRegistry };
 };
