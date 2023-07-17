@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Client } from 'elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 import { Writable } from 'stream';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
@@ -58,8 +58,8 @@ export function createIndexDocRecordsStream(
       );
     });
 
-    const resp = await client.bulk({ requestTimeout: 2 * 60 * 1000, body });
-    if (resp.errors) {
+    const resp = await client.bulk({ body }, { requestTimeout: 2 * 60 * 1000 });
+    if (resp.body.errors) {
       throw new Error(`Failed to index all documents: ${JSON.stringify(resp, null, 2)}`);
     }
   }

@@ -29,11 +29,12 @@ env:
 
 jobs:
   build-lint-test:
-    name: Build and Verify on ${{ matrix.name }}
+    name: Build and Verify on ${{ matrix.name }} (ciGroup${{ matrix.group }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
+        group: [1, 2, 3, 4]
         include:
           - os: ubuntu-latest
             name: Linux
@@ -72,14 +73,9 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
-      - name: Configure Yarn Cache (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
-          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
-
       - name: Initialize Yarn Cache
         uses: actions/cache@v3
+        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ hashFiles('**/yarn.lock') }}
@@ -95,18 +91,24 @@ jobs:
         run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Run linter
+        # ciGroup 1 of unit-tests is shorter and Linux is faster
+        if: matrix.group == 1 && matrix.os == 'ubuntu-latest'
         id: linter
         run: yarn lint
 
       - name: Validate NOTICE file
+        # ciGroup 1 of unit-tests is shorter and Linux is faster
+        if: matrix.group == 1 && matrix.os == 'ubuntu-latest'
         id: notice-validate
         run: yarn notice:validate
 
-      - name: Run unit tests with coverage
+      - name: Run unit tests group ${{ matrix.group }} with coverage
         id: unit-tests
-        run: yarn test:jest:ci:coverage
+        run: yarn test:jest:ci:coverage  --ci-group=${{ matrix.group }}
 
       - name: Run mocha tests with coverage
+        # ciGroup 1 of unit-tests is shorter
+        if: matrix.group == 1
         id: mocha-tests
         run: yarn test:mocha:coverage
 
@@ -115,9 +117,11 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           directory: ./target/opensearch-dashboards-coverage
-          flags: ${{ matrix.name }}
+          flags: ${{ matrix.name }}_${{ matrix.group }}
 
       - name: Run integration tests
+        # ciGroup 1 of unit-tests is shorter
+        if: matrix.group == 1
         id: integration-tests
         run: yarn test:jest_integration:ci
 
@@ -168,14 +172,9 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
-      - name: Configure Yarn Cache (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
-          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
-
       - name: Initialize Yarn Cache
         uses: actions/cache@v3
+        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ hashFiles('**/yarn.lock') }}
@@ -265,14 +264,9 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
-      - name: Configure Yarn Cache (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $env:GITHUB_ENV
-          echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
-
       - name: Initialize Yarn Cache
         uses: actions/cache@v3
+        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ hashFiles('**/yarn.lock') }}
@@ -324,7 +318,7 @@ jobs:
         working-directory: ./artifacts
     strategy:
       matrix:
-        version: [osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0]
+        version: [osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0, osd-2.6.0, osd-2.7.0]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

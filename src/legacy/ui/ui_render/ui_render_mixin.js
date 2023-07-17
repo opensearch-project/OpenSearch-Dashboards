@@ -95,7 +95,7 @@ export function uiRenderMixin(osdServer, server, config) {
       const darkMode =
         !authEnabled || request.auth.isAuthenticated
           ? await uiSettings.get('theme:darkMode')
-          : false;
+          : uiSettings.getOverrideOrDefault('theme:darkMode');
 
       const themeVersion =
         !authEnabled || request.auth.isAuthenticated ? await uiSettings.get('theme:version') : 'v7';

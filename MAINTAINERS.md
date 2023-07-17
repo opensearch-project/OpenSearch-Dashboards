@@ -19,11 +19,12 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs)       | Amazon      |
 | Tao Liu                   | [Flyingliuhub](https://github.com/Flyingliuhub)     | Amazon      |
 | Zilong Xia                | [ZilongX](https://github.com/ZilongX)               | Amazon      |
+| Matt Provost              | [BSFishy](https://github.com/BSFishy)               | Amazon      |
 
 ## Emeritus
 
-| Maintainer    | GitHub ID                               | Affiliation |
-| ------------- | --------------------------------------- | ----------- |
-| Tommy Markley | [tmarkley](https://github.com/tmarkley) | Amazon      |
+| Maintainer    | GitHub ID                                 | Affiliation |
+| ------------- | ----------------------------------------- | ----------- |
+| Tommy Markley | [tmarkley](https://github.com/tmarkley)   | Amazon      |
 | Mihir Soni    | [mihirsoni](https://github.com/mihirsoni) | Amazon      |
-| Bishoy Boktor | [boktorbb](https://github.com/boktorbb) | Amazon      |
+| Bishoy Boktor | [boktorbb](https://github.com/boktorbb)   | Amazon      |

@@ -89,6 +89,7 @@ http://www.opensearch.org/painlessDocs
 https://www.hostedgraphite.com/
 https://connectionurl.com
 http://169.254.169.254/latest/meta-data/
+http://company.net/*
 
 # External urls
 https://www.zeek.org/
@@ -118,5 +119,7 @@ http://www.creedthoughts.gov
 https://media-for-the-masses.theacademyofperformingartsandscience.org/
 https://yarnpkg.com/latest.msi
 https://forum.opensearch.org/
-https://facebook.github.io/jest/
-https://facebook.github.io/jest/docs/cli.html
+https://facebook.github.io/jest/*
+http://helpmenow.com/problem2
+https://sass-lang.com/*
+http://api.jquery.com/*
