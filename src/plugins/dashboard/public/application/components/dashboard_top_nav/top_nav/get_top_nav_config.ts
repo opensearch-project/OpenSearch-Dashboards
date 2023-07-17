@@ -29,9 +29,9 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { ViewMode } from '../../embeddable_plugin';
+import { ViewMode } from '../../../../../../embeddable/public';
 import { TopNavIds } from './top_nav_ids';
-import { NavAction } from '../../types';
+import { NavAction } from '../../../../types';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the
