@@ -1846,9 +1846,17 @@ describe('SavedObjectsRepository', () => {
 
     const createSuccess = async (type, attributes, options) => {
       const result = await savedObjectsRepository.create(type, attributes, options);
-      expect(client.get).toHaveBeenCalledTimes(
-        registry.isMultiNamespace(type) && options.overwrite ? 1 : 0
-      );
+      let count = 0;
+      if (options?.overwrite && options?.id) {
+        /**
+         * workspace will call extra one to get latest status of current object
+         */
+        count++;
+      }
+      if (registry.isMultiNamespace(type) && options.overwrite) {
+        count++;
+      }
+      expect(client.get).toHaveBeenCalledTimes(count);
       return result;
     };
 

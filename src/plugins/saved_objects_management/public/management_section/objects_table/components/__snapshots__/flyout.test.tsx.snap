@@ -173,7 +173,6 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "get": [Function],
             "getBasePath": [Function],
             "prepend": [Function],
-            "prependWithoutWorkspacePath": [Function],
             "remove": [Function],
             "serverBasePath": "",
             "workspaceBasePath": "",
