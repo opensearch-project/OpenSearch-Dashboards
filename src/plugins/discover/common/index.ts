@@ -4,7 +4,7 @@
  */
 
 export const PLUGIN_ID = 'discover';
-export const DISCOVER_LEGACY_TOGGLE = 'discover:legacyToggle';
+export const NEW_DISCOVER_APP = 'discover:v2';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';

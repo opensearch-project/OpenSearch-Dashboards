@@ -4,19 +4,12 @@
  */
 
 import React from 'react';
-import { CoreStart, ScopedHistory } from '../../../../core/public';
+import { AppMountParameters } from '../../../../core/public';
 import { useView } from '../utils/use';
 import { AppContainer } from './app_container';
 
-interface DataExplorerAppDeps {
-  basename: string;
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  history: ScopedHistory;
-}
-
-export const DataExplorerApp = (deps: DataExplorerAppDeps) => {
+export const DataExplorerApp = ({ params }: { params: AppMountParameters }) => {
   const { view } = useView();
 
-  return <AppContainer view={view} />;
+  return <AppContainer view={view} params={params} />;
 };

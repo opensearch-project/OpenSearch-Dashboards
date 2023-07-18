@@ -86,7 +86,7 @@ import {
   DiscoverUrlGenerator,
 } from './url_generator';
 // import { SearchEmbeddableFactory } from './application/embeddable';
-import { DISCOVER_LEGACY_TOGGLE, PLUGIN_ID } from '../common';
+import { NEW_DISCOVER_APP, PLUGIN_ID } from '../common';
 import { DataExplorerPluginSetup, ViewRedirectParams } from '../../data_explorer/public';
 import { registerFeature } from './register_feature';
 
@@ -319,9 +319,10 @@ export class DiscoverPlugin
           },
         } = await this.initializeServices();
 
+        // This is for instances where the user navigates to the app from the application nav menu
         const path = window.location.hash;
-        const enableLegacyMode = await core.uiSettings.get<boolean>(DISCOVER_LEGACY_TOGGLE);
-        if (enableLegacyMode) {
+        const v2Enabled = await core.uiSettings.get<boolean>(NEW_DISCOVER_APP);
+        if (!v2Enabled) {
           navigateToApp('discoverLegacy', {
             replace: true,
             path,
