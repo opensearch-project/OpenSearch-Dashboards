@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import type { Subscription } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -14,9 +15,14 @@ import {
 import { WORKSPACE_APP_ID } from '../common/constants';
 import { mountDropdownList } from './mount';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import type { Subscription } from 'rxjs';
+import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
+import { getWorkspaceColumn } from './components/utils/workspace_column';
 
-export class WorkspacesPlugin implements Plugin<{}, {}> {
+interface WorkspacesPluginSetupDeps {
+  savedObjectsManagement?: SavedObjectsManagementPluginSetup;
+}
+
+export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDeps> {
   private coreSetup?: CoreSetup;
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
@@ -39,7 +45,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
 
     return newUrl.toString();
   };
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacesPluginSetupDeps) {
     // If workspace feature is disabled, it will not load the workspace plugin
     if (core.uiSettings.get('workspace:enabled') === false) {
       return {};
@@ -63,6 +69,10 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
         );
       }
     }
+    /**
+     * register workspace column into saved objects table
+     */
+    savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
     core.application.register({
       id: WORKSPACE_APP_ID,
