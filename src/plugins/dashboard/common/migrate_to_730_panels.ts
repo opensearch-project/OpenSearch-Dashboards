@@ -87,8 +87,11 @@ function is640To720Panel(
   panel: unknown | RawSavedDashboardPanel640To720
 ): panel is RawSavedDashboardPanel640To720 {
   return (
-    semver.satisfies((panel as RawSavedDashboardPanel630).version, '>6.3') &&
-    semver.satisfies((panel as RawSavedDashboardPanel630).version, '<7.3')
+    semver.satisfies(
+      semver.coerce((panel as RawSavedDashboardPanel630).version)!.version,
+      '>6.3'
+    ) &&
+    semver.satisfies(semver.coerce((panel as RawSavedDashboardPanel630).version)!.version, '<7.3')
   );
 }
 
@@ -273,10 +276,12 @@ function migrate640To720PanelsToLatest(
   version: string
 ): RawSavedDashboardPanel730ToLatest {
   const panelIndex = panel.panelIndex ? panel.panelIndex.toString() : uuid.v4();
+  const embeddableConfig = panel.embeddableConfig ?? {};
   return {
     ...panel,
     version,
     panelIndex,
+    embeddableConfig,
   };
 }
 

@@ -32,6 +32,7 @@ import { coreMock } from '../../../core/public/mocks';
 import { homePluginMock } from '../../home/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
+import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
 
 describe('SavedObjectsManagementPlugin', () => {
@@ -48,8 +49,13 @@ describe('SavedObjectsManagementPlugin', () => {
       });
       const homeSetup = homePluginMock.createSetupContract();
       const managementSetup = managementPluginMock.createSetupContract();
+      const uiActionsSetup = uiActionsPluginMock.createSetupContract();
 
-      await plugin.setup(coreSetup, { home: homeSetup, management: managementSetup });
+      await plugin.setup(coreSetup, {
+        home: homeSetup,
+        management: managementSetup,
+        uiActions: uiActionsSetup,
+      });
 
       expect(homeSetup.featureCatalogue.register).toHaveBeenCalledTimes(1);
       expect(homeSetup.featureCatalogue.register).toHaveBeenCalledWith(

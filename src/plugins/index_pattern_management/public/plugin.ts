@@ -56,7 +56,7 @@ export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
 export type IndexPatternManagementStart = IndexPatternManagementServiceStart;
 
 const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.sectionsHeader', {
-  defaultMessage: 'Index Patterns',
+  defaultMessage: 'Index patterns',
 });
 
 const IPM_APP_ID = 'indexPatterns';

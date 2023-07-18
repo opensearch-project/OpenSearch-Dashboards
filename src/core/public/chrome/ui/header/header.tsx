@@ -30,6 +30,7 @@
 
 import {
   EuiHeader,
+  EuiHeaderProps,
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
@@ -116,6 +117,8 @@ export function Header({
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
   const { useExpandedHeader = true, darkMode } = branding;
 
+  const headerTheme: EuiHeaderProps['theme'] = 'dark';
+
   return (
     <>
       <header className={className} data-test-subj="headerGlobalNav">
@@ -123,7 +126,7 @@ export function Header({
           {useExpandedHeader && (
             <EuiHeader
               className="expandedHeader"
-              theme="dark"
+              theme={headerTheme}
               position="fixed"
               sections={[
                 {
@@ -134,6 +137,9 @@ export function Header({
                       navLinks$={observables.navLinks$}
                       navigateToApp={application.navigateToApp}
                       branding={branding}
+                      basePath={basePath}
+                      /* This `theme` should match the theme of EuiHeader */
+                      theme={headerTheme}
                     />,
                   ],
                   borders: 'none',
