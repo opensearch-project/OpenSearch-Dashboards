@@ -43,6 +43,9 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
     <style
       dangerouslySetInnerHTML={{
         __html: `
+          :root {
+            color-scheme: ${darkMode ? 'dark' : 'light'};
+          }
 
           *, *:before, *:after {
             box-sizing: border-box;

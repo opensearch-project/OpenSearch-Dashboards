@@ -56,7 +56,7 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-stan.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/stan.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/stan.svg',
     artifacts: {
       dashboards: [
         {
