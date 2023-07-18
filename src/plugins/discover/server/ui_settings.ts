@@ -33,7 +33,7 @@ import { schema } from '@osd/config-schema';
 
 import { UiSettingsParams } from 'opensearch-dashboards/server';
 import {
-  DISCOVER_LEGACY_TOGGLE,
+  NEW_DISCOVER_APP,
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
   AGGS_TERMS_SIZE_SETTING,
@@ -48,9 +48,9 @@ import {
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
-  [DISCOVER_LEGACY_TOGGLE]: {
+  [NEW_DISCOVER_APP]: {
     name: i18n.translate('discover.advancedSettings.legacyToggleTitle', {
-      defaultMessage: 'Disable new discover app',
+      defaultMessage: 'Enable new discover app',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.legacyToggleText', {

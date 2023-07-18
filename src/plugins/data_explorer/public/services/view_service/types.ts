@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// TODO: Correctly type this file.
+import { AppMountParameters } from '../../../../../core/public';
+
+// TODO: State management props
 
 interface ViewListItem {
   id: string;
@@ -13,6 +15,7 @@ interface ViewListItem {
 export interface ViewMountParameters {
   canvasElement: HTMLDivElement;
   panelElement: HTMLDivElement;
+  appParams: AppMountParameters;
 }
 
 export interface ViewDefinition<T = any> {

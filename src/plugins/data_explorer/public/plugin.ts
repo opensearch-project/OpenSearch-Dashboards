@@ -10,15 +10,29 @@ import {
   Plugin,
   AppNavLinkStatus,
 } from '../../../core/public';
-import { DataExplorerPluginSetup, DataExplorerPluginStart, DataExplorerServices } from './types';
+import {
+  DataExplorerPluginSetup,
+  DataExplorerPluginSetupDependencies,
+  DataExplorerPluginStart,
+  DataExplorerPluginStartDependencies,
+  DataExplorerServices,
+} from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ViewService } from './services/view_service';
 
 export class DataExplorerPlugin
-  implements Plugin<DataExplorerPluginSetup, DataExplorerPluginStart> {
+  implements
+    Plugin<
+      DataExplorerPluginSetup,
+      DataExplorerPluginStart,
+      DataExplorerPluginSetupDependencies,
+      DataExplorerPluginStartDependencies
+    > {
   private viewService = new ViewService();
 
-  public setup(core: CoreSetup): DataExplorerPluginSetup {
+  public setup(
+    core: CoreSetup<DataExplorerPluginStartDependencies, DataExplorerPluginStart>
+  ): DataExplorerPluginSetup {
     const viewService = this.viewService;
     // Register an application into the side navigation menu
     core.application.register({
@@ -26,7 +40,10 @@ export class DataExplorerPlugin
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const [coreStart, depsStart] = await core.getStartServices();
+        const [coreStart, pluginsStart] = await core.getStartServices();
+
+        // make sure the index pattern list is up to date
+        pluginsStart.data.indexPatterns.clearCache();
 
         const services: DataExplorerServices = {
           ...coreStart,
