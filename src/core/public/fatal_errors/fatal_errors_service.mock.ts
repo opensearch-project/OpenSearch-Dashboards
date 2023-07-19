@@ -70,6 +70,7 @@ const createWorkspacesSetupContractMock = () => ({
     currentWorkspaceId$,
     workspaceList$,
     currentWorkspace$,
+    init: jest.fn(),
     stop: jest.fn(),
     enterWorkspace: jest.fn(),
     exitWorkspace: jest.fn(),
