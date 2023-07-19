@@ -35,6 +35,8 @@ To run all the unit tests:
 `yarn test:jest`
 To run specific unit tests, pass the path to the test:
 `yarn test:jest [test path]`
+To run specific unit test groups:
+`yarn test:jest --ci-group=1 --ci-group=2`
 
 ### Integration tests
 To run all the integration tests:
