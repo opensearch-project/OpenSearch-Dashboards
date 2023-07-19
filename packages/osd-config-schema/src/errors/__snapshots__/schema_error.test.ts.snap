@@ -3,5 +3,6 @@
 exports[`includes stack 1`] = `
 "SchemaError: test
     at Object.<anonymous> (packages/osd-config-schema/src/errors/schema_error.test.ts:67:11)
-    at new Promise (<anonymous>)"
+    at new Promise (<anonymous>)
+    at runMicrotasks (<anonymous>)"
 `;

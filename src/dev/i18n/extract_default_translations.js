@@ -30,7 +30,7 @@
 
 import path from 'path';
 
-import { extractHtmlMessages, extractCodeMessages } from './extractors';
+import { extractCodeMessages } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
 import { createFailError, isFailError } from '@osd/dev-utils';
@@ -81,7 +81,7 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     '**/*.d.ts',
   ].concat(additionalIgnore);
 
-  const entries = await globAsync('*.{js,jsx,ts,tsx,html}', {
+  const entries = await globAsync('*.{js,jsx,ts,tsx}', {
     cwd: inputPath,
     matchBase: true,
     ignore,
@@ -89,25 +89,23 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     absolute,
   });
 
-  const { htmlEntries, codeEntries } = entries.reduce(
+  const { codeEntries } = entries.reduce(
     (paths, entry) => {
       const resolvedPath = path.resolve(inputPath, entry);
 
-      if (resolvedPath.endsWith('.html')) {
-        paths.htmlEntries.push(resolvedPath);
-      } else {
-        paths.codeEntries.push(resolvedPath);
-      }
+      paths.codeEntries.push(resolvedPath);
+
+      // if (resolvedPath.endsWith('.html')) {
+      //   paths.htmlEntries.push(resolvedPath);
+      // } else {
+      //   paths.codeEntries.push(resolvedPath);
+      // }
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [] }
+    { codeEntries: [] }
   );
-
-  return [
-    [htmlEntries, extractHtmlMessages],
-    [codeEntries, extractCodeMessages],
-  ];
+  return [[codeEntries, extractCodeMessages]];
 }
 
 export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
