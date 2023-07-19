@@ -30,7 +30,8 @@
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { seedColors } from './seed_colors';
+import { euiPaletteColorBlind } from '@elastic/eui';
+
 import { ColorsService } from './colors';
 
 // Local state for config
@@ -138,7 +139,7 @@ describe('Vislib Color Service', () => {
   });
 
   it('should return the first hex color in the seed colors array', () => {
-    expect(color(arr[0])).toBe(seedColors[0]);
+    expect(color(arr[0])).toBe(euiPaletteColorBlind()[0]);
   });
 
   it('should return the value from the mapped colors', () => {

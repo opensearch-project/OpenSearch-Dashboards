@@ -4,12 +4,12 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { TableVisConfig } from '../types';
+import { TableVisParams } from '../types';
 
-export const usePagination = (visConfig: TableVisConfig, nRow: number) => {
+export const usePagination = (visParams: TableVisParams, nRow: number) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: Math.min(visConfig.perPage || 10, nRow),
+    pageSize: Math.min(visParams.perPage || 0, nRow),
   });
   const onChangeItemsPerPage = useCallback(
     (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
@@ -20,20 +20,23 @@ export const usePagination = (visConfig: TableVisConfig, nRow: number) => {
   ]);
 
   useEffect(() => {
-    const perPage = Math.min(visConfig.perPage || 10, nRow);
+    const perPage = Math.min(visParams.perPage || 0, nRow);
     const maxiPageIndex = Math.ceil(nRow / perPage) - 1;
     setPagination((p) => ({
       pageIndex: p.pageIndex > maxiPageIndex ? maxiPageIndex : p.pageIndex,
       pageSize: perPage,
     }));
-  }, [nRow, visConfig.perPage]);
+  }, [nRow, visParams.perPage]);
 
   return useMemo(
-    () => ({
-      ...pagination,
-      onChangeItemsPerPage,
-      onChangePage,
-    }),
+    () =>
+      pagination.pageSize
+        ? {
+            ...pagination,
+            onChangeItemsPerPage,
+            onChangePage,
+          }
+        : undefined,
     [pagination, onChangeItemsPerPage, onChangePage]
   );
 };

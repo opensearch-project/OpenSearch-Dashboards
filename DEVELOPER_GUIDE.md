@@ -13,6 +13,7 @@ This guide applies to all development within the OpenSearch Dashboards project a
   - [Next Steps](#next-steps)
 - [Alternative development installations](#alternative-development-installations)
   - [Optional - Run OpenSearch with plugins](#optional---run-opensearch-with-plugins)
+  - [Plugin development](#plugin-development)
   - [Alternative - Run OpenSearch from tarball](#alternative---run-opensearch-from-tarball)
   - [Configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security)
 - [Building artifacts](#building-artifacts)
@@ -209,6 +210,10 @@ $ yarn start --run-examples
 - [Project testing guidelines](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/TESTING.md)
 - [Plugin conventions](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/CONVENTIONS.md#technical-conventions)
 
+#### Join the discussion
+
+See the [communication guide](COMMUNICATION.md)for information on how to join our slack workspace, forum, or developer office hours.
+
 ## Alternative development installations
 
 Although the [getting started guide](#getting-started-guide) covers the recommended development environment setup, there are several alternatives worth being aware of.
@@ -226,6 +231,9 @@ $ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plu
 ```
 
 Note - if you add the [`security` plugin](https://github.com/opensearch-project/security), you'll also need to [configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security).
+
+### Plugin development
+The osd-plugin-generator tool makes it easier to create a plugin for OpenSearch Dashboards. It sets up the basic structure of the project and provides scripts to build it. Refer to [osd-plugin-generator](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator) for more details.
 
 #### Other snapshot configuration options
 

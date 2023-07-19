@@ -48,6 +48,8 @@ export {
 } from './services';
 export { ProcessedImportResponse, processImportResponse, FailedImport } from './lib';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
+export { SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteTrigger } from './triggers';
+export { SavedObjectDeleteContext } from './ui_actions_bootstrap';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();

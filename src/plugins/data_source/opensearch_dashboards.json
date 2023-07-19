@@ -5,5 +5,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "extraPublicDirs": ["common/data_sources"]
 }

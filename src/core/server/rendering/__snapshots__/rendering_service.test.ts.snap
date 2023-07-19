@@ -106,7 +106,7 @@ Object {
 }
 `;
 
-exports[`RenderingService setup() render() renders "core" page driven by settings 1`] = `
+exports[`RenderingService setup() render() renders "core" page driven by defaults 1`] = `
 Object {
   "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
@@ -146,6 +146,59 @@ Object {
       "defaults": Object {
         "registered": Object {
           "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "serverBasePath": "/mock-server-basepath",
+  "survey": "https://survey.opensearch.org",
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders "core" page driven by settings 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "branding": Object {
+    "applicationTitle": "OpenSearch Dashboards",
+    "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
+    "darkMode": true,
+    "loadingLogo": Object {},
+    "logo": Object {},
+    "mark": Object {},
+    "useExpandedHeader": true,
+  },
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "uiSettings": Object {
+      "defaults": Object {
+        "theme:darkMode": Object {
+          "value": false,
         },
       },
       "user": Object {
@@ -197,6 +250,59 @@ Object {
   },
   "i18n": Object {
     "translationsUrl": "/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "serverBasePath": "/mock-server-basepath",
+  "survey": "https://survey.opensearch.org",
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders "core" page with no defaults or overrides 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "branding": Object {
+    "applicationTitle": "OpenSearch Dashboards",
+    "assetFolderUrl": "/mock-server-basepath/ui/default_branding",
+    "darkMode": false,
+    "loadingLogo": Object {},
+    "logo": Object {},
+    "mark": Object {},
+    "useExpandedHeader": true,
+  },
+  "buildNumber": Any<Number>,
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
     "uiSettings": Object {

@@ -31,6 +31,7 @@
 import * as Rx from 'rxjs';
 
 import { mockCluster } from './cluster_manager.test.mocks';
+import '@osd/optimizer/target/__mocks__/lmdb';
 
 jest.mock('readline', () => ({
   createInterface: jest.fn(() => ({

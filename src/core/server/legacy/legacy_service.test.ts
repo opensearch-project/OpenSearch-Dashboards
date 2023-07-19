@@ -31,6 +31,8 @@
 jest.mock('../../../legacy/server/osd_server');
 jest.mock('./cluster_manager');
 
+import '@osd/optimizer/target/__mocks__/lmdb';
+
 import { BehaviorSubject, throwError } from 'rxjs';
 import { REPO_ROOT } from '@osd/dev-utils';
 

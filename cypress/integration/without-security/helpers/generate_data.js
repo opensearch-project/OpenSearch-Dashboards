@@ -14,9 +14,6 @@ describe('Generating BWC test data without security', () => {
   it('adds advanced settings', () => {
     miscUtils.visitPage('app/management/opensearch-dashboards/settings');
     cy.get('[data-test-subj="advancedSetting-editField-theme:darkMode"]').click();
-    cy.get('[data-test-subj="advancedSetting-editField-timeline:default_columns"]').type(
-      '{selectAll}4'
-    );
     cy.get('[data-test-subj="advancedSetting-editField-timeline:max_buckets"]').type(
       '{selectAll}4'
     );
@@ -70,6 +67,7 @@ describe('Generating BWC test data without security', () => {
       });
     // update default expression to use `.es(*)` instead of `.opensearch(*)` for bwc
     cy.get('[class="view-line"]').type('.es(*)');
+    cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
     cy.get('[data-test-subj="visualizeSaveButton"]').click();
     cy.get('[data-test-subj="savedObjectTitle"]').type('test-timeline');
     cy.get('[data-test-subj="confirmSaveSavedObjectButton"]').click();

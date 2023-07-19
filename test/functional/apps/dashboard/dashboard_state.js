@@ -75,14 +75,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.switchToEditMode();
 
       await PageObjects.visChart.openLegendOptionColors('Count');
-      await PageObjects.visChart.selectNewLegendColorChoice('#EA6460');
+      await PageObjects.visChart.selectNewLegendColorChoice('#8d4059');
 
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
       const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
-        '#EA6460'
+        '#8d4059'
       );
 
       expect(colorChoiceRetained).to.be(true);
@@ -153,7 +153,9 @@ export default function ({ getService, getPageObjects }) {
       expect(headers.length).to.be(0);
     });
 
-    it('Tile map with no changes will update with visualization changes', async () => {
+    // TODO: race condition it seems with the query from previous state
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4193
+    it.skip('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
@@ -243,9 +245,9 @@ export default function ({ getService, getPageObjects }) {
         it('updates a pie slice color on a soft refresh', async function () {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await PageObjects.visChart.openLegendOptionColors('80,000');
-          await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
+          await PageObjects.visChart.selectNewLegendColorChoice('#e9b0c3');
           const currentUrl = await browser.getCurrentUrl();
-          const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
+          const newUrl = currentUrl.replace('e9b0c3', 'FFFFFF');
           await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -277,14 +279,14 @@ export default function ({ getService, getPageObjects }) {
 
           await retry.try(async () => {
             const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
-            // The default green color that was stored with the visualization before any dashboard overrides.
-            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
+            // The default color that was stored with the visualization before any dashboard overrides.
+            expect(pieSliceStyle.indexOf('rgb(84, 179, 153)')).to.be.greaterThan(0);
           });
         });
 
         it('resets the legend color as well', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#57c17b');
+            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#54B399');
             expect(colorExists).to.be(true);
           });
         });

@@ -168,7 +168,7 @@ describe('ui settings', () => {
           foo: 1,
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: [validation [foo]]: expected value of type [string] but got [number]]`
+        `[ValidationError: [validation [foo]]: expected value of type [string] but got [number]]`
       );
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
@@ -196,7 +196,7 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient } = setup({ defaults });
 
       await expect(uiSettings.set('foo', 1)).rejects.toMatchInlineSnapshot(
-        `[Error: [validation [foo]]: expected value of type [string] but got [number]]`
+        `[ValidationError: [validation [foo]]: expected value of type [string] but got [number]]`
       );
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
@@ -333,6 +333,25 @@ describe('ui settings', () => {
     });
   });
 
+  describe('#getOverrideOrDefault()', () => {
+    it('returns the non-overridden default settings passed within the constructor', () => {
+      const value = chance.word();
+      const defaults = { key: { value } };
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.getOverrideOrDefault('key')).toEqual(value);
+      expect(uiSettings.getOverrideOrDefault('unknown')).toBeUndefined();
+    });
+
+    it('returns the overridden settings passed within the constructor', () => {
+      const value = chance.word();
+      const override = chance.word();
+      const defaults = { key: { value } };
+      const overrides = { key: { value: override } };
+      const { uiSettings } = setup({ defaults, overrides });
+      expect(uiSettings.getOverrideOrDefault('key')).toEqual(override);
+    });
+  });
+
   describe('#getUserProvided()', () => {
     it('pulls user configuration from OpenSearch', async () => {
       const { uiSettings, savedObjectsClient } = setup();
@@ -389,7 +408,7 @@ describe('ui settings', () => {
       expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
           Array [
-            "Ignore invalid UiSettings value. Error: [validation [id]]: expected value of type [number] but got [string].",
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
         ]
       `);
@@ -531,7 +550,7 @@ describe('ui settings', () => {
       expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
           Array [
-            "Ignore invalid UiSettings value. Error: [validation [id]]: expected value of type [number] but got [string].",
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
         ]
       `);
@@ -682,7 +701,7 @@ describe('ui settings', () => {
       expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
           Array [
-            "Ignore invalid UiSettings value. Error: [validation [id]]: expected value of type [number] but got [string].",
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
         ]
       `);

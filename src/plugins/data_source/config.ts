@@ -37,6 +37,7 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     appender: fileAppenderSchema,
   }),
+  endpointDeniedIPs: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;

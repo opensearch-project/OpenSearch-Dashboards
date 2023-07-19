@@ -92,7 +92,7 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
    * Returns a title to be displayed to the user.
    * @param context
    */
-  getDisplayName(context: ActionExecutionContext<Context>): string;
+  getDisplayName(context: ActionExecutionContext<Context>): JSX.Element | string;
 
   /**
    * `UiComponent` to render when displaying this action as a context menu item.

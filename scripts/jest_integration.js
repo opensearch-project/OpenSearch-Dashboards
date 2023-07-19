@@ -38,7 +38,12 @@
 //
 //     node scripts/jest_integration --coverage
 //
-// See all cli options in https://facebook.github.io/jest/docs/cli.html
+// See all cli options in https://jestjs.io/docs/cli
+
+/* Increase the max listeners
+ * Numerous listeners are added by `root.start()` that are never removed.
+ */
+process.setMaxListeners(Infinity);
 
 var resolve = require('path').resolve;
 process.argv.push('--config', resolve(__dirname, '../src/dev/jest/config.integration.js'));

@@ -94,6 +94,14 @@ export interface PresentableGroup<Context extends object = object>
     Pick<Presentable<Context>, 'getDisplayName' | 'getDisplayNameTooltip' | 'getIconType' | 'order'>
   > {
   id: string;
+  /**
+   * This allows groups to be categorized with other groups. Within a UI action
+   * context menu, this means that an item, which links to a group, will be
+   * placed in the menu adjacent to similar items that link to groups of the
+   * same category.
+   * See PanelGroupOptionsAndContextActions example to learn more.
+   */
+  category?: string;
 }
 
 export type PresentableGrouping<Context extends object = object> = Array<PresentableGroup<Context>>;

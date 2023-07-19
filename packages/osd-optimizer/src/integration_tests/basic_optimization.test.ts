@@ -36,8 +36,7 @@ import { inspect } from 'util';
 import cpy from 'cpy';
 import del from 'del';
 import { tap, filter } from 'rxjs/operators';
-import { REPO_ROOT } from '@osd/utils';
-import { ToolingLog } from '@osd/dev-utils';
+import { createAbsolutePathSerializer, ToolingLog } from '@osd/dev-utils';
 import {
   runOptimizer,
   OptimizerConfig,
@@ -48,14 +47,14 @@ import {
 
 import { allValuesFrom } from '../common';
 
+import '../__mocks__/lmdb';
+
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
-expect.addSnapshotSerializer({
-  serialize: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
-  test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),
-});
+const absolutePathSerializer = createAbsolutePathSerializer();
+expect.addSnapshotSerializer(absolutePathSerializer);
 
 const log = new ToolingLog({
   level: 'error',
@@ -159,15 +158,16 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(foo).toBeTruthy();
   foo.cache.refresh();
   expect(foo.cache.getModuleCount()).toBe(6);
-  expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+  expect(foo.cache.getReferencedFiles()?.map(absolutePathSerializer.serialize).sort())
+    .toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/opensearch_dashboards.json,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
-      <absolute path>/packages/osd-optimizer/target/worker/entry_point_creator.js,
-      <absolute path>/packages/osd-ui-shared-deps/public_path_module_creator.js,
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/opensearch_dashboards.json",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts",
+      "<absolute path>/packages/osd-optimizer/target/worker/entry_point_creator.js",
+      "<absolute path>/packages/osd-ui-shared-deps/public_path_module_creator.js",
     ]
   `);
 
@@ -179,21 +179,22 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     17
   );
 
-  expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+  expect(bar.cache.getReferencedFiles()?.map(absolutePathSerializer.serialize).sort())
+    .toMatchInlineSnapshot(`
     Array [
-      <absolute path>/node_modules/css-loader/package.json,
-      <absolute path>/node_modules/style-loader/package.json,
-      <absolute path>/packages/osd-optimizer/postcss.config.js,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/opensearch_dashboards.json,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/_other_styles.scss,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7dark.scss,
-      <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7light.scss,
-      <absolute path>/packages/osd-optimizer/target/worker/entry_point_creator.js,
-      <absolute path>/packages/osd-ui-shared-deps/public_path_module_creator.js,
+      "<absolute path>/node_modules/css-loader/package.json",
+      "<absolute path>/node_modules/style-loader/package.json",
+      "<absolute path>/packages/osd-optimizer/postcss.config.js",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/opensearch_dashboards.json",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/_other_styles.scss",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7dark.scss",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7light.scss",
+      "<absolute path>/packages/osd-optimizer/target/worker/entry_point_creator.js",
+      "<absolute path>/packages/osd-ui-shared-deps/public_path_module_creator.js",
     ]
   `);
 });
@@ -256,7 +257,6 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
 
   // Verify the brotli variant matches
   expect(
-    // @ts-expect-error @types/node is missing the brotli functions
     Zlib.brotliDecompressSync(
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()

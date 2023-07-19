@@ -23,9 +23,7 @@ import {
   VisBuilderSetup,
   VisBuilderStart,
 } from './types';
-import { VisBuilderEmbeddableFactoryDefinition, VISBUILDER_EMBEDDABLE } from './embeddable';
-import visBuilderIconSecondaryFill from './assets/vis_builder_icon_secondary_fill.svg';
-import visBuilderIcon from './assets/vis_builder_icon.svg';
+import { VisBuilderEmbeddableFactory, VISBUILDER_EMBEDDABLE } from './embeddable';
 import {
   EDIT_PATH,
   PLUGIN_ID,
@@ -46,6 +44,7 @@ import {
   setTypeService,
   setReactExpressionRenderer,
   setQueryService,
+  setUIActions,
 } from './plugin_services';
 import { createSavedVisBuilderLoader } from './saved_visualizations';
 import { registerDefaultTypes } from './visualizations';
@@ -53,6 +52,7 @@ import { ConfigSchema } from '../config';
 import {
   createOsdUrlStateStorage,
   createOsdUrlTracker,
+  createStartServicesGetter,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
 import { opensearchFilters } from '../../data/public';
@@ -158,10 +158,11 @@ export class VisBuilderPlugin
           savedVisBuilderLoader: selfStart.savedVisBuilderLoader,
           embeddable: pluginsStart.embeddable,
           dashboard: pluginsStart.dashboard,
+          uiActions: pluginsStart.uiActions,
         };
 
         // Instantiate the store
-        const store = await getPreloadedStore(services);
+        const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(services);
         const unmount = renderApp(params, services, store);
 
         // Render the application
@@ -169,15 +170,14 @@ export class VisBuilderPlugin
           unlistenParentHistory();
           unmount();
           appUnMounted();
+          unsubscribeStore();
         };
       },
     });
 
     // Register embeddable
-    // TODO: investigate simplification via getter a la visualizations:
-    // const start = createStartServicesGetter(core.getStartServices));
-    // const embeddableFactory = new VisBuilderEmbeddableFactoryDefinition({ start });
-    const embeddableFactory = new VisBuilderEmbeddableFactoryDefinition();
+    const start = createStartServicesGetter(core.getStartServices);
+    const embeddableFactory = new VisBuilderEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISBUILDER_EMBEDDABLE, embeddableFactory);
 
     // Register the plugin as an alias to create visualization
@@ -187,7 +187,7 @@ export class VisBuilderPlugin
       description: i18n.translate('visBuilder.visPicker.description', {
         defaultMessage: 'Create visualizations using the new VisBuilder',
       }),
-      icon: visBuilderIconSecondaryFill,
+      icon: 'visBuilder',
       stage: 'experimental',
       aliasApp: PLUGIN_ID,
       aliasPath: '#/',
@@ -198,7 +198,7 @@ export class VisBuilderPlugin
             description: attributes?.description,
             editApp: PLUGIN_ID,
             editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
-            icon: visBuilderIcon,
+            icon: 'visBuilder',
             id,
             savedObjectType: VISBUILDER_SAVED_OBJECT,
             stage: 'experimental',
@@ -217,7 +217,7 @@ export class VisBuilderPlugin
 
   public start(
     core: CoreStart,
-    { expressions, data }: VisBuilderPluginStartDependencies
+    { expressions, data, uiActions }: VisBuilderPluginStartDependencies
   ): VisBuilderStart {
     const typeService = this.typeService.start();
 
@@ -239,6 +239,7 @@ export class VisBuilderPlugin
     setTimeFilter(data.query.timefilter.timefilter);
     setTypeService(typeService);
     setUISettings(core.uiSettings);
+    setUIActions(uiActions);
     setQueryService(data.query);
 
     return {
