@@ -31,6 +31,7 @@ import {
 } from '../';
 import {
   TEST_DATATABLE_MULTIPLE_VIS_LAYERS,
+  TEST_DATATABLE_MULTIPLE_VIS_LAYERS_ONE_EMPTY,
   TEST_DATATABLE_NO_VIS_LAYERS,
   TEST_DATATABLE_ONLY_VIS_LAYERS,
   TEST_DATATABLE_SINGLE_ROW_NO_VIS_LAYERS,
@@ -48,6 +49,7 @@ import {
   TEST_SPEC_NO_VIS_LAYERS,
   TEST_SPEC_SINGLE_VIS_LAYER,
   TEST_VIS_LAYERS_MULTIPLE,
+  TEST_VIS_LAYERS_MULTIPLE_ONE_EMPTY,
   TEST_VIS_LAYERS_SINGLE,
   TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS,
   TEST_VIS_LAYERS_SINGLE_ON_BOUNDS,
@@ -409,6 +411,16 @@ describe('helpers', function () {
           TEST_VIS_LAYERS_SINGLE
         )
       ).toStrictEqual(TEST_DATATABLE_ONLY_VIS_LAYERS);
+    });
+    it('vis layers with one having events and the other empty are added correctly', function () {
+      expect(
+        addPointInTimeEventsLayersToTable(
+          TEST_DATATABLE_NO_VIS_LAYERS,
+
+          TEST_DIMENSIONS,
+          TEST_VIS_LAYERS_MULTIPLE_ONE_EMPTY
+        )
+      ).toStrictEqual(TEST_DATATABLE_MULTIPLE_VIS_LAYERS_ONE_EMPTY);
     });
     it('vis layer with out-of-bounds timestamps are not added', function () {
       expect(

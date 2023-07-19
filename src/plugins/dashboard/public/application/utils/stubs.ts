@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ViewMode } from '../../embeddable_plugin';
+import { ViewMode } from '../../../../embeddable/public';
 import { DashboardAppState } from '../../types';
 
 export const dashboardAppStateStub: DashboardAppState = {

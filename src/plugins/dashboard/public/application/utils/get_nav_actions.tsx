@@ -14,22 +14,24 @@ import {
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { DashboardAppStateContainer, DashboardServices, NavAction } from '../../types';
-import { DashboardSaveModal } from '../top_nav/save_modal';
-import { TopNavIds } from '../top_nav/top_nav_ids';
+import {
+  DashboardSaveModal,
+  TopNavIds,
+  showCloneModal,
+  showOptionsPopover,
+  UrlParams,
+} from '../components/dashboard_top_nav';
 import {
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
   ViewMode,
   isErrorEmbeddable,
   openAddPanelFlyout,
-} from '../../embeddable_plugin';
-import { showCloneModal } from '../top_nav/show_clone_modal';
-import { showOptionsPopover } from '../top_nav/show_options_popover';
-import { saveDashboard } from '../lib';
+} from '../../../../embeddable/public';
+import { saveDashboard } from '../utils';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
-import { UrlParams } from '../components/dashboard_top_nav';
 import { Dashboard } from '../../dashboard';
 
 interface UrlParamsSelectedMap {

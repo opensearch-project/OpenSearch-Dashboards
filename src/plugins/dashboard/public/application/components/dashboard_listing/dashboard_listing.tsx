@@ -10,13 +10,13 @@ import { useLocation } from 'react-router-dom';
 import {
   useOpenSearchDashboards,
   TableListView,
-} from '../../../../opensearch_dashboards_react/public';
-import { CreateButton } from '../listing/create_button';
-import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
-import { DashboardServices } from '../../types';
-import { getTableColumns } from '../utils/get_table_columns';
-import { getNoItemsMessage } from '../utils/get_no_items_message';
-import { syncQueryStateWithUrl } from '../../../../data/public';
+} from '../../../../../opensearch_dashboards_react/public';
+import { CreateButton } from './create_button';
+import { DashboardConstants, createDashboardEditUrl } from '../../../dashboard_constants';
+import { DashboardServices } from '../../../types';
+import { getTableColumns } from '../../utils/get_table_columns';
+import { getNoItemsMessage } from '../../utils/get_no_items_message';
+import { syncQueryStateWithUrl } from '../../../../../data/public';
 
 export const EMPTY_FILTER = '';
 

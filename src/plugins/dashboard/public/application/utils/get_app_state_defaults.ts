@@ -28,4 +28,23 @@
  * under the License.
  */
 
-export * from '../../../plugins/embeddable/public';
+import { ViewMode } from '../../../../embeddable/public';
+import { SavedObjectDashboard } from '../../saved_dashboards';
+import { DashboardAppStateDefaults } from '../../types';
+
+export function getAppStateDefaults(
+  savedDashboard: SavedObjectDashboard,
+  hideWriteControls: boolean
+): DashboardAppStateDefaults {
+  return {
+    fullScreenMode: false,
+    title: savedDashboard.title,
+    description: savedDashboard.description || '',
+    timeRestore: savedDashboard.timeRestore,
+    panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
+    options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
+    query: savedDashboard.getQuery(),
+    filters: savedDashboard.getFilters(),
+    viewMode: savedDashboard.id || hideWriteControls ? ViewMode.VIEW : ViewMode.EDIT,
+  };
+}
