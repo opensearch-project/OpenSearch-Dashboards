@@ -128,7 +128,12 @@ export class SavedObjectLoader {
    * @param fields
    * @returns {Promise}
    */
-  findAll(search: string = '', size: number = 100, fields?: string[]) {
+  findAll(
+    search: string = '',
+    size: number = 100,
+    fields?: string[],
+    hasReference?: SavedObjectsFindOptions['hasReference']
+  ) {
     return this.savedObjectsClient
       .find<Record<string, unknown>>({
         type: this.lowercaseType,
@@ -138,6 +143,7 @@ export class SavedObjectLoader {
         searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
         fields,
+        hasReference,
       } as SavedObjectsFindOptions)
       .then((resp) => {
         return {
