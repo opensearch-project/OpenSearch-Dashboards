@@ -36,8 +36,8 @@ jest.mock(
   () => ({
     ...jest.requireActual('lodash'),
     // mock debounce to fire immediately with no internal timer
-    debounce: (func) => {
-      function debounced(...args) {
+    debounce: (func: any) => {
+      function debounced(this: any, ...args: any[]) {
         return func.apply(this, args);
       }
       return debounced;
@@ -49,9 +49,9 @@ jest.mock(
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { DashboardListing } from '../components/dashboard_listing';
+import { DashboardListing } from './dashboard_listing';
 
-const find = (num) => {
+const find = (num: number) => {
   const hits = [];
   for (let i = 0; i < num; i++) {
     hits.push({
@@ -62,7 +62,7 @@ const find = (num) => {
   }
   return Promise.resolve({
     total: num,
-    hits: hits,
+    hits,
   });
 };
 

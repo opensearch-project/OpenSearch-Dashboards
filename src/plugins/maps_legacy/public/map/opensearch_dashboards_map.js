@@ -62,7 +62,7 @@ function makeFitControl(fitContainer, opensearchDashboardsMap) {
       );
       $(this._fitContainer)
         .html(
-          `<a class="kuiIcon fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`
+          `<a class="mapButton fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`
         )
         .on('click', (e) => {
           e.preventDefault();
