@@ -5,7 +5,7 @@
 
 import React, { useMemo, FC, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiPanel, EuiComboBox, EuiSelect, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiPanel, EuiComboBox, EuiSelect, EuiComboBoxOptionOption, EuiSpacer } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { useView } from '../../utils/use';
 import { DataExplorerServices } from '../../types';
@@ -58,7 +58,7 @@ export const Sidebar: FC = ({ children }) => {
 
   return (
     <>
-      <EuiPanel borderRadius="none" hasShadow={false}>
+      <EuiPanel borderRadius="none" hasShadow={false} paddingSize="s">
         <EuiComboBox
           placeholder="Select a datasource"
           singleSelection={{ asPlainText: true }}
@@ -85,6 +85,7 @@ export const Sidebar: FC = ({ children }) => {
             dispatch(setIndexPattern(value));
           }}
         />
+        <EuiSpacer size="s" />
         <EuiSelect
           options={viewOptions}
           value={view?.id}

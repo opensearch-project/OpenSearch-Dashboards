@@ -10,6 +10,7 @@ import { AppMountParameters } from '../../../../core/public';
 import { Sidebar } from './sidebar';
 import { NoView } from './no_view';
 import { View } from '../services/view_service/view';
+import './app_container.scss';
 
 export const AppContainer = ({ view, params }: { view?: View; params: AppMountParameters }) => {
   // TODO: Make this more robust.
@@ -30,6 +31,9 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
           </Suspense>
         </Sidebar>
       }
+      pageSideBarProps={{
+        className: 'deSidebar',
+      }}
       className="dePageTemplate"
       template="default"
       restrictWidth={false}

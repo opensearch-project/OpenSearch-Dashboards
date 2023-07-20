@@ -29,7 +29,15 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../opensearch_dashboards_react/public';
@@ -79,17 +87,17 @@ export interface DiscoverFieldProps {
   useShortDots?: boolean;
 }
 
-export function DiscoverField({
-  columns,
+export const DiscoverField = ({
   field,
-  indexPattern,
+  selected,
   onAddField,
   onRemoveField,
+  columns,
+  indexPattern,
   onAddFilter,
   getDetails,
-  selected,
   useShortDots,
-}: DiscoverFieldProps) {
+}: DiscoverFieldProps) => {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
     values: { field: field.name },
@@ -112,10 +120,6 @@ export function DiscoverField({
     }
   };
 
-  function togglePopover() {
-    setOpen(!infoIsOpen);
-  }
-
   function wrapOnDot(str?: string) {
     // u200B is a non-width white-space character, which allows
     // the browser to efficiently word-wrap right after the dot
@@ -123,15 +127,11 @@ export function DiscoverField({
     return str ? str.replace(/\./g, '.\u200B') : '';
   }
 
-  const dscFieldIcon = (
-    <FieldIcon type={field.type} label={getFieldTypeName(field.type)} scripted={field.scripted} />
-  );
-
   const fieldName = (
     <span
       data-test-subj={`field-${field.name}`}
       title={field.name}
-      className="dscSidebarField__name"
+      className="dscSidebarField__name eui-textBreakWord"
     >
       {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
     </span>
@@ -190,12 +190,19 @@ export function DiscoverField({
   }
 
   if (field.type === '_source') {
+    // TODO: This is not the correct implementation of the source field details
     return (
       <FieldButton
         size="s"
         className="dscSidebarItem"
         dataTestSubj={`field-${field.name}-showDetails`}
-        fieldIcon={dscFieldIcon}
+        fieldIcon={
+          <FieldIcon
+            type={field.type}
+            label={getFieldTypeName(field.type)}
+            scripted={field.scripted}
+          />
+        }
         fieldAction={actionButton}
         fieldName={fieldName}
       />
@@ -203,43 +210,51 @@ export function DiscoverField({
   }
 
   return (
-    <EuiPopover
-      ownFocus
-      display="block"
-      button={
-        <FieldButton
-          size="s"
-          className="dscSidebarItem"
-          isActive={infoIsOpen}
-          onClick={() => {
-            togglePopover();
-          }}
-          dataTestSubj={`field-${field.name}-showDetails`}
-          fieldIcon={dscFieldIcon}
-          fieldAction={actionButton}
-          fieldName={fieldName}
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <FieldIcon
+          type={field.type}
+          label={getFieldTypeName(field.type)}
+          scripted={field.scripted}
         />
-      }
-      isOpen={infoIsOpen}
-      closePopover={() => setOpen(false)}
-      anchorPosition="rightUp"
-      panelClassName="dscSidebarItem__fieldPopoverPanel"
-    >
-      <EuiPopoverTitle>
-        {' '}
-        {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-          defaultMessage: 'Top 5 values',
-        })}
-      </EuiPopoverTitle>
-      {infoIsOpen && (
-        <DiscoverFieldDetails
-          columns={columns}
-          details={getDetails(field)}
-          field={field}
-          indexPattern={indexPattern}
-          onAddFilter={onAddFilter}
-        />
-      )}
-    </EuiPopover>
+      </EuiFlexItem>
+      <EuiFlexItem grow>
+        <EuiText size="xs">{fieldName}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          ownFocus
+          display="block"
+          isOpen={infoIsOpen}
+          closePopover={() => setOpen(false)}
+          anchorPosition="rightUp"
+          button={
+            <EuiButtonIcon
+              iconType="inspect"
+              size="xs"
+              onClick={() => setOpen((state) => !state)}
+            />
+          }
+          panelClassName="dscSidebarItem__fieldPopoverPanel"
+        >
+          <EuiPopoverTitle>
+            {' '}
+            {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+              defaultMessage: 'Top 5 values',
+            })}
+          </EuiPopoverTitle>
+          {infoIsOpen && (
+            <DiscoverFieldDetails
+              columns={columns}
+              details={getDetails(field)}
+              field={field}
+              indexPattern={indexPattern}
+              onAddFilter={onAddFilter}
+            />
+          )}
+        </EuiPopover>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>
+    </EuiFlexGroup>
   );
-}
+};

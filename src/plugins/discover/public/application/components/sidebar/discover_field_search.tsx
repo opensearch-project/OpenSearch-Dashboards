@@ -46,6 +46,7 @@ import {
   EuiFormRow,
   EuiButtonGroup,
   EuiOutsideClickDetector,
+  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
@@ -261,7 +262,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   );
 
   return (
-    <React.Fragment>
+    <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
       <EuiFlexGroup responsive={false} gutterSize={'s'}>
         <EuiFlexItem>
           <EuiFieldSearch
@@ -308,6 +309,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           </EuiPopover>
         </EuiOutsideClickDetector>
       </div>
-    </React.Fragment>
+    </EuiPanel>
   );
 }
