@@ -132,7 +132,8 @@ export class SavedObjectLoader {
     search: string = '',
     size: number = 100,
     fields?: string[],
-    hasReference?: SavedObjectsFindOptions['hasReference']
+    hasReference?: SavedObjectsFindOptions['hasReference'],
+    searchFields: string[] = ['title^3', 'description']
   ) {
     return this.savedObjectsClient
       .find<Record<string, unknown>>({
@@ -140,7 +141,7 @@ export class SavedObjectLoader {
         search: search ? `${search}*` : undefined,
         perPage: size,
         page: 1,
-        searchFields: ['title^3', 'description'],
+        searchFields,
         defaultSearchOperator: 'AND',
         fields,
         hasReference,

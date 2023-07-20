@@ -95,10 +95,11 @@ export class SavedObjectLoaderAugmentVis extends SavedObjectLoader {
     search: string = '',
     size: number = 100,
     fields?: string[],
-    hasReference?: SavedObjectsFindOptions['hasReference']
+    hasReference?: SavedObjectsFindOptions['hasReference'],
+    searchFields?: string[]
   ) {
     this.isAugmentationEnabled();
-    return super.findAll(search, size, fields, hasReference);
+    return super.findAll(search, size, fields, hasReference, searchFields);
   }
 
   find(search: string = '', size: number = 100) {
