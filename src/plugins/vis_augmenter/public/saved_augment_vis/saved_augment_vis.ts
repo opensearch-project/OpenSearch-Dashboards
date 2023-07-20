@@ -4,7 +4,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { IUiSettingsClient, SavedObjectsFindOptions } from 'opensearch-dashboards/public';
 import {
   SavedObjectLoader,
   SavedObjectOpenSearchDashboardsServices,
@@ -91,9 +91,14 @@ export class SavedObjectLoaderAugmentVis extends SavedObjectLoader {
    * @param fields
    * @returns {Promise}
    */
-  findAll(search: string = '', size: number = 100, fields?: string[]) {
+  findAll(
+    search: string = '',
+    size: number = 100,
+    fields?: string[],
+    hasReference?: SavedObjectsFindOptions['hasReference']
+  ) {
     this.isAugmentationEnabled();
-    return super.findAll(search, size, fields);
+    return super.findAll(search, size, fields, hasReference);
   }
 
   find(search: string = '', size: number = 100) {

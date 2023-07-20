@@ -54,7 +54,7 @@ export const isEligibleForVisLayers = (vis: Vis, uiSettingsClient?: IUiSettingsC
 
 /**
  * Using a SavedAugmentVisLoader, fetch all saved objects that are of 'augment-vis' type.
- * Filter by vis ID.
+ * Filter by vis ID by passing in a 'hasReferences' obj with the vis ID to the findAll() fn call.
  */
 export const getAugmentVisSavedObjs = async (
   visId: string | undefined,
@@ -69,18 +69,11 @@ export const getAugmentVisSavedObjs = async (
       'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
     );
   }
-  const allSavedObjects = await getAllAugmentVisSavedObjs(loader);
-  return allSavedObjects.filter((hit: ISavedAugmentVis) => hit.visId === visId);
-};
-
-/**
- * Using a SavedAugmentVisLoader, fetch all saved objects that are of 'augment-vis' type.
- */
-export const getAllAugmentVisSavedObjs = async (
-  loader: SavedAugmentVisLoader | undefined
-): Promise<ISavedAugmentVis[]> => {
   try {
-    const resp = await loader?.findAll();
+    const resp = await loader?.findAll('', 100, [], {
+      type: 'visualization',
+      id: visId as string,
+    });
     return (get(resp, 'hits', []) as any[]) as ISavedAugmentVis[];
   } catch (e) {
     return [] as ISavedAugmentVis[];
