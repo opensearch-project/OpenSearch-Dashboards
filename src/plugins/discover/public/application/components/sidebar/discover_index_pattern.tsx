@@ -41,7 +41,7 @@ export interface DiscoverIndexPatternProps {
    */
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
   /**
-   * currently selected index pattern, due to angular issues it's undefined at first rendering
+   * currently selected index pattern
    */
   selectedIndexPattern: IIndexPattern;
   /**
