@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ErrorFlyoutBody/> renders component 1`] = `
+<div>
+  <div
+    class="euiFlyoutBody"
+  >
+    <div
+      class="euiFlyoutBody__overflow"
+      tabindex="0"
+    >
+      <div
+        class="euiFlyoutBody__overflowContent"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiCallOut euiCallOut--danger"
+              data-test-subj="errorCallOut"
+            >
+              <div
+                class="euiText euiText--small"
+              >
+                <div
+                  class="euiTextColor euiTextColor--default"
+                >
+                  oh no an error!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

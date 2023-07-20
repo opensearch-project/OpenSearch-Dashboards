@@ -67,8 +67,8 @@ describe('opensearchArchiver: createGenerateIndexRecordsStream()', () => {
     ]);
 
     const params = (client.indices.get as sinon.SinonSpy).args[0][0];
-    expect(params).to.have.property('filterPath');
-    const filters: string[] = params.filterPath;
+    expect(params).to.have.property('filter_path');
+    const filters: string[] = params.filter_path;
     expect(filters.some((path) => path.includes('index.creation_date'))).to.be(true);
     expect(filters.some((path) => path.includes('index.uuid'))).to.be(true);
     expect(filters.some((path) => path.includes('index.version'))).to.be(true);

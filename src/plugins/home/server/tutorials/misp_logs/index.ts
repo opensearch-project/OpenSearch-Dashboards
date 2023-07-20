@@ -57,7 +57,7 @@ export function mispLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-misp.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/misp.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/misp.svg',
     artifacts: {
       dashboards: [
         {

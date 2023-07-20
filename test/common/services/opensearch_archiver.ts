@@ -39,7 +39,7 @@ export function OpenSearchArchiverProvider({
   hasService,
 }: FtrProviderContext): OpenSearchArchiver {
   const config = getService('config');
-  const client = getService('legacyOpenSearch');
+  const client = getService('opensearch');
   const log = getService('log');
 
   if (!config.get('opensearchArchiver')) {

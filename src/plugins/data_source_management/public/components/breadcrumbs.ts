@@ -10,7 +10,7 @@ export function getListBreadcrumbs() {
   return [
     {
       text: i18n.translate('dataSourcesManagement.dataSources.listBreadcrumb', {
-        defaultMessage: 'Data Sources',
+        defaultMessage: 'Data sources',
       }),
       href: `/`,
     },

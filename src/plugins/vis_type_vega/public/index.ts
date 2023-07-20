@@ -35,3 +35,5 @@ import { VegaPlugin as Plugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new Plugin(initializerContext);
 }
+
+export * from './expressions';

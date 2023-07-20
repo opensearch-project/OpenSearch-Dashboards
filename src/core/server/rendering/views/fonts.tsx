@@ -36,6 +36,7 @@ import { RenderingMetadata } from '../types';
 
 interface Props {
   url: RenderingMetadata['uiPublicUrl'];
+  theme: string;
 }
 
 interface FontFace {
@@ -49,7 +50,228 @@ interface FontFace {
   }>;
 }
 
-export const Fonts: FunctionComponent<Props> = ({ url }) => {
+export const Fonts: FunctionComponent<Props> = ({ url, theme }) => {
+  // For next theme
+  const sourceSans3: FontFace = {
+    family: 'Source Sans 3',
+    variants: [
+      {
+        weight: 200,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-ExtraLight.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-ExtraLight.otf.woff`,
+        ],
+      },
+      {
+        weight: 200,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-ExtraLightIt.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-ExtraLightIt.otf.woff`,
+        ],
+      },
+      {
+        weight: 300,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-Light.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-Light.otf.woff`,
+        ],
+      },
+      {
+        weight: 300,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-LightIt.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-LightIt.otf.woff`,
+        ],
+      },
+      {
+        weight: 400,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-Regular.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-Regular.otf.woff`,
+        ],
+      },
+      {
+        weight: 400,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-It.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-It.otf.woff`,
+        ],
+      },
+      {
+        weight: 600,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-Semibold.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-Semibold.otf.woff`,
+        ],
+      },
+      {
+        weight: 600,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-SemiboldIt.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-SemiboldIt.otf.woff`,
+        ],
+      },
+      {
+        weight: 700,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-Bold.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-Bold.otf.woff`,
+        ],
+      },
+      {
+        weight: 700,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-BoldIt.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-BoldIt.otf.woff`,
+        ],
+      },
+      {
+        weight: 900,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-Black.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-Black.otf.woff`,
+        ],
+      },
+      {
+        weight: 900,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_sans_3/SourceSans3-BlackIt.ttf.woff2`,
+          `${url}/fonts/source_sans_3/SourceSans3-BlackIt.otf.woff`,
+        ],
+      },
+    ],
+  };
+  const sourceCodePro: FontFace = {
+    family: 'Source Code Pro',
+    variants: [
+      {
+        weight: 200,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-ExtraLight.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-ExtraLight.otf.woff`,
+        ],
+      },
+      {
+        weight: 200,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-ExtraLightIt.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-ExtraLightIt.otf.woff`,
+        ],
+      },
+      {
+        weight: 300,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-Light.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-Light.otf.woff`,
+        ],
+      },
+      {
+        weight: 300,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-LightIt.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-LightIt.otf.woff`,
+        ],
+      },
+      {
+        weight: 400,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-Regular.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-Regular.otf.woff`,
+        ],
+      },
+      {
+        weight: 400,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-It.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-It.otf.woff`,
+        ],
+      },
+      {
+        weight: 500,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-Medium.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-Medium.otf.woff`,
+        ],
+      },
+      {
+        weight: 500,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-MediumIt.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-MediumIt.otf.woff`,
+        ],
+      },
+      {
+        weight: 600,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-Semibold.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-Semibold.otf.woff`,
+        ],
+      },
+      {
+        weight: 600,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-SemiboldIt.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-SemiboldIt.otf.woff`,
+        ],
+      },
+      {
+        weight: 700,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-Bold.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-Bold.otf.woff`,
+        ],
+      },
+      {
+        weight: 700,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-BoldIt.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-BoldIt.otf.woff`,
+        ],
+      },
+      {
+        weight: 900,
+        style: 'normal',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-Black.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-Black.otf.woff`,
+        ],
+      },
+      {
+        weight: 900,
+        style: 'italic',
+        sources: [
+          `${url}/fonts/source_code_pro/SourceCodePro-BlackIt.ttf.woff2`,
+          `${url}/fonts/source_code_pro/SourceCodePro-BlackIt.otf.woff`,
+        ],
+      },
+    ],
+  };
+
+  // ToDo [NEW THEME]: Remove these fonts and their files when the theme is released: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4301
   const interUi: FontFace = {
     family: 'Inter UI',
     variants: [
@@ -252,94 +474,119 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
     ],
   };
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: `
-        ${[interUi, roboto]
-          .flatMap(({ family, variants }) =>
-            variants.map(({ style, weight, format, sources, unicodeRange }) => {
-              const src = sources
-                .map((source) =>
-                  source.startsWith(url)
-                    ? `url('${source}') format('${format || source.split('.').pop()}')`
-                    : `local('${source}')`
-                )
-                .join(', ');
+  /*
+  Single variable font.
 
-              return `
+  Note that you may want to do something like this to make sure you're serving
+  constant fonts to older browsers:
+  html {
+    font-family: 'Inter UI', sans-serif;
+  }
+  @supports (font-variation-settings: normal) {
+    html {
+      font-family: 'Inter UI var', sans-serif;
+    }
+  }
+
+  BUGS:
+  - Safari 12.0 will default to italic instead of regular when font-weight
+    is provided in a @font-face declaration.
+    Workaround: Use 'Inter UI var alt' for Safari, or explicitly set
+    \`font-variation-settings: 'slnt' DEGREE\`.
+
+  @font-face {
+    font-family: 'Inter UI var';
+    font-weight: 100 900;
+    font-style: oblique 0deg 10deg;
+    src:
+      url('${url}/fonts/inter_ui/Inter-UI.var.woff2') format('woff2-variations'),
+      url('${url}/fonts/inter_ui/Inter-UI.var.woff2') format('woff2');
+  }
+
+  'Inter UI var alt' is recommended for Safari and Edge, for reliable italics.
+
+  @supports (font-variation-settings: normal) {
+    html {
+      font-family: 'Inter UI var alt', sans-serif;
+    }
+  }
+
+  @font-face {
+    font-family: 'Inter UI var alt';
+    font-weight: 100 900;
+    font-style: normal;
+    font-named-instance: 'Regular';
+    src:
+      url('${url}/fonts/inter_ui/Inter-UI-upright.var.woff2') format('woff2 supports variations(gvar)'),
+      url('${url}/fonts/inter_ui/Inter-UI-upright.var.woff2') format('woff2-variations'),
+      url('${url}/fonts/inter_ui/Inter-UI-upright.var.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Inter UI var alt';
+    font-weight: 100 900;
+    font-style: italic;
+    font-named-instance: 'Italic';
+    src:
+      url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2 supports variations(gvar)'),
+      url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2-variations'),
+      url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2');
+  }
+  */
+  const fontText = theme === 'v7' ? interUi : sourceSans3;
+  const fontCode = theme === 'v7' ? roboto : sourceCodePro;
+  const fontsDefinitionRules = [fontText, fontCode]
+    .flatMap(({ family, variants }) =>
+      variants.map(({ style, weight, format, sources, unicodeRange }) => {
+        const src = sources
+          .map((source) =>
+            source.startsWith(url)
+              ? `url('${source}') format('${format || source.split('.').pop()}')`
+              : `local('${source}')`
+          )
+          .join(', ');
+
+        return `
         @font-face {
           font-family: '${family}';
           font-style: ${style};
           font-weight: ${weight};
-          src: ${src};${
-                unicodeRange
-                  ? `
-          unicode-range: ${unicodeRange};`
-                  : ''
-              }
+          src: ${src};
+          ${unicodeRange ? `unicode-range: ${unicodeRange};` : ''}
         }`;
-            })
-          )
-          .join('\n')}
-        /*
-        Single variable font.
+      })
+    )
+    .join('\n');
 
-        Note that you may want to do something like this to make sure you're serving
-        constant fonts to older browsers:
-        html {
-          font-family: 'Inter UI', sans-serif;
-        }
-        @supports (font-variation-settings: normal) {
-          html {
-            font-family: 'Inter UI var', sans-serif;
-          }
-        }
+  /*
+   * The default fonts are added as CSS variables, overriding OUI's, and then
+   * the CSS variables are consumed.
+   */
+  const fontRules = `
+    :root {
+      --font-text: "${fontText.family}", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+                   sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 
-        BUGS:
-        - Safari 12.0 will default to italic instead of regular when font-weight
-          is provided in a @font-face declaration.
-          Workaround: Use 'Inter UI var alt' for Safari, or explicitly set
-          \`font-variation-settings: 'slnt' DEGREE\`.
+      --font-code: "${fontCode.family}", Consolas, Menlo, Courier, monospace;
 
-        @font-face {
-          font-family: 'Inter UI var';
-          font-weight: 100 900;
-          font-style: oblique 0deg 10deg;
-          src:
-            url('${url}/fonts/inter_ui/Inter-UI.var.woff2') format('woff2-variations'),
-            url('${url}/fonts/inter_ui/Inter-UI.var.woff2') format('woff2');
-        }
+      --oui-font-family: var(--font-text);
+      --oui-code-font-family: var(--font-code);
+    }
 
-        'Inter UI var alt' is recommended for Safari and Edge, for reliable italics.
+    code, pre, kbd, samp {
+      font-family: var(--font-code);
+    }
+    html, input, textarea, select, button {
+      font-family: var(--font-text);
+    }
 
-        @supports (font-variation-settings: normal) {
-          html {
-            font-family: 'Inter UI var alt', sans-serif;
-          }
-        }
+  `;
 
-        @font-face {
-          font-family: 'Inter UI var alt';
-          font-weight: 100 900;
-          font-style: normal;
-          font-named-instance: 'Regular';
-          src:
-            url('${url}/fonts/inter_ui/Inter-UI-upright.var.woff2') format('woff2 supports variations(gvar)'),
-            url('${url}/fonts/inter_ui/Inter-UI-upright.var.woff2') format('woff2-variations'),
-            url('${url}/fonts/inter_ui/Inter-UI-upright.var.woff2') format('woff2');
-        }
-        @font-face {
-          font-family: 'Inter UI var alt';
-          font-weight: 100 900;
-          font-style: italic;
-          font-named-instance: 'Italic';
-          src:
-            url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2 supports variations(gvar)'),
-            url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2-variations'),
-            url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2');
-        }
-        */
+  return (
+    <style
+      dangerouslySetInnerHTML={{
+        __html: `
+        ${fontsDefinitionRules}
+        ${fontRules}
       `,
       }}
     />
