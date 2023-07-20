@@ -348,7 +348,9 @@ export class SavedObjectsClient {
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
-    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]);
+    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Partial<
+      Record<string, any>
+    >;
 
     // has_reference needs post-processing since it is an object that needs to be read as
     // a query param
