@@ -54,7 +54,10 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
 
       if (!isEmpty(augmentVisIdsToDelete)) loader.delete(augmentVisIdsToDelete);
       // silently fail. this is because this is doing extra cleanup on objects unrelated
-      // to the user flow so we dont want to add confusing log lines or error toasts
-    } catch (e) {} // eslint-disable-line no-empty
+      // to the user flow so we dont want to add confusing errors on UI.
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
   }
 }
