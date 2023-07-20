@@ -41,6 +41,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
           typesToInclude: schema.arrayOf(schema.string()),
           namespacesToInclude: schema.maybe(schema.arrayOf(schema.string())),
           searchString: schema.maybe(schema.string()),
+          workspaces: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
@@ -53,6 +54,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       const findOptions: SavedObjectsFindOptions = {
         type: req.body.typesToInclude,
         perPage: 1000,
+        workspaces: req.body.workspaces,
       };
 
       const requestHasNamespaces =

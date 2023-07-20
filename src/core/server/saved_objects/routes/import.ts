@@ -34,7 +34,8 @@ import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { createSavedObjectsStreamFromNdJson, formatWorkspaces, workspacesValidator } from './utils';
+import { createSavedObjectsStreamFromNdJson } from './utils';
+import { formatWorkspaces, workspacesValidator } from '../../workspaces';
 
 interface FileStream extends Readable {
   hapi: {
