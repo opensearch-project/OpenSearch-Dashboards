@@ -48,6 +48,7 @@ import {
   notificationServiceMock,
   savedObjectsServiceMock,
   applicationServiceMock,
+  workspacesServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { serviceRegistryMock } from '../../services/service_registry.mock';
@@ -102,6 +103,7 @@ describe('SavedObjectsTable', () => {
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
   let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
+  let workspaces: ReturnType<typeof workspacesServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
     return (shallowWithI18nProvider(
@@ -121,6 +123,7 @@ describe('SavedObjectsTable', () => {
     notifications = notificationServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
     search = dataPluginMock.createStartContract().search;
+    workspaces = workspacesServiceMock.createSetupContractMock();
 
     const applications = applicationServiceMock.createStartContract();
     applications.capabilities = {
@@ -161,6 +164,7 @@ describe('SavedObjectsTable', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       search,
+      workspaces,
     };
 
     findObjectsMock.mockImplementation(() => ({
@@ -279,7 +283,9 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExport(true);
 
-      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true, {
+        workspaces: ['public'],
+      });
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
       });
@@ -322,7 +328,9 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExport(true);
 
-      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true, {
+        workspaces: ['public'],
+      });
       expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
         title:
           'Your file is downloading in the background. ' +
@@ -363,7 +371,8 @@ describe('SavedObjectsTable', () => {
         http,
         allowedTypes,
         undefined,
-        true
+        true,
+        { workspaces: ['public'] }
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -393,7 +402,8 @@ describe('SavedObjectsTable', () => {
         http,
         allowedTypes,
         'test*',
-        true
+        true,
+        { workspaces: ['public'] }
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({

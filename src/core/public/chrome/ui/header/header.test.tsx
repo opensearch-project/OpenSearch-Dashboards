@@ -36,7 +36,7 @@ import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
-import { workspacesServiceMock } from '../../../fatal_errors/fatal_errors_service.mock';
+import { workspacesServiceMock } from '../../../workspace/workspaces_service.mock';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',

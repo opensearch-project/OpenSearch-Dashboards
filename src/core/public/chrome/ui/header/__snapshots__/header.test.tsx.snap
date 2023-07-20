@@ -1914,6 +1914,20 @@ exports[`Header handles visibility and lock changes 1`] = `
               "borders": "none",
               "items": Array [
                 <HeaderLogo
+<<<<<<< HEAD
+=======
+                  basePath={
+                    BasePath {
+                      "basePath": "/test",
+                      "get": [Function],
+                      "getBasePath": [Function],
+                      "prepend": [Function],
+                      "remove": [Function],
+                      "serverBasePath": "/test",
+                      "workspaceBasePath": "",
+                    }
+                  }
+>>>>>>> 356e96dfed (Integrate workspace service into saved object management (#31))
                   branding={
                     Object {
                       "applicationTitle": "OpenSearch Dashboards",
@@ -2351,6 +2365,20 @@ exports[`Header handles visibility and lock changes 1`] = `
                   className="euiHeaderSectionItem"
                 >
                   <HeaderLogo
+<<<<<<< HEAD
+=======
+                    basePath={
+                      BasePath {
+                        "basePath": "/test",
+                        "get": [Function],
+                        "getBasePath": [Function],
+                        "prepend": [Function],
+                        "remove": [Function],
+                        "serverBasePath": "/test",
+                        "workspaceBasePath": "",
+                      }
+                    }
+>>>>>>> 356e96dfed (Integrate workspace service into saved object management (#31))
                     branding={
                       Object {
                         "applicationTitle": "OpenSearch Dashboards",

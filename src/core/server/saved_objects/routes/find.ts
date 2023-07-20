@@ -30,7 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
-import { formatWorkspaces, workspacesValidator } from './utils';
+import { formatWorkspaces, workspacesValidator } from '../../workspaces';
 
 export const registerFindRoute = (router: IRouter) => {
   router.get(

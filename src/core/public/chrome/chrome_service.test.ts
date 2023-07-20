@@ -41,7 +41,7 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
-import { workspacesServiceMock } from '../fatal_errors/fatal_errors_service.mock';
+import { workspacesServiceMock } from '../workspace/workspaces_service.mock';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
