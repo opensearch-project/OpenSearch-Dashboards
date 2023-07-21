@@ -16,6 +16,7 @@ import { IWorkspaceDBImpl } from './types';
 import { WorkspacesClientWithSavedObject } from './workspaces_client';
 import { WorkspacePermissionControl } from './workspace_permission_control';
 import { UiSettingsServiceStart } from '../ui_settings/types';
+import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 
 export interface WorkspacesServiceSetup {
   client: IWorkspaceDBImpl;
@@ -90,6 +91,15 @@ export class WorkspacesService
 
     await this.client.setup(setupDeps);
     await this.permissionControl.setup();
+    const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
+      this.permissionControl
+    );
+
+    setupDeps.savedObject.addClientWrapper(
+      0,
+      'workspace',
+      workspaceSavedObjectsClientWrapper.wrapperFactory
+    );
 
     this.proxyWorkspaceTrafficToRealHandler(setupDeps);
 

@@ -233,7 +233,7 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsDeleteOptions extends Omit<SavedObjectsBaseOptions, 'workspaces'> {
   /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
   /** Force deletion of an object that exists in multiple namespaces */

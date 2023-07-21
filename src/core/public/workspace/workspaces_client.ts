@@ -75,7 +75,7 @@ export class WorkspacesClient {
   /**
    * Initialize workspace list
    */
-  init() {
+  public init() {
     this.updateWorkspaceListAndNotify();
   }
 

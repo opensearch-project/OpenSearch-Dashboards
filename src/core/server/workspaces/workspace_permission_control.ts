@@ -19,5 +19,12 @@ export class WorkspacePermissionControl {
     return true;
   }
 
+  public async getPermittedWorkspaceIds(
+    permissionModeOrModes: WorkspacePermissionMode | WorkspacePermissionMode[],
+    request: OpenSearchDashboardsRequest
+  ) {
+    return [];
+  }
+
   public async setup() {}
 }
