@@ -119,7 +119,8 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
  *
  * @public
  */
-export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsDeleteByNamespaceOptions
+  extends Omit<SavedObjectsBaseOptions, 'workspaces'> {
   /** The OpenSearch supports only boolean flag for this operation */
   refresh?: boolean;
 }
@@ -891,7 +892,7 @@ export class SavedObjectsRepository {
    */
   async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
-    options: SavedObjectsBaseOptions = {}
+    options: Omit<SavedObjectsBaseOptions, 'workspaces'> = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     const namespace = normalizeNamespace(options.namespace);
 
@@ -979,7 +980,7 @@ export class SavedObjectsRepository {
   async get<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
+    options: Omit<SavedObjectsBaseOptions, 'workspaces'> = {}
   ): Promise<SavedObject<T>> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
