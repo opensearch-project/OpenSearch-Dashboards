@@ -29,6 +29,7 @@
  */
 
 import { modifyUrl } from '@osd/std';
+import type { PrependOptions } from './types';
 
 export class BasePath {
   constructor(
@@ -45,7 +46,8 @@ export class BasePath {
     return this.basePath;
   };
 
-  public prepend = (path: string, withoutWorkspace: boolean = false): string => {
+  public prepend = (path: string, prependOptions?: PrependOptions): string => {
+    const { withoutWorkspace } = prependOptions || {};
     const basePath = withoutWorkspace ? this.basePath : this.get();
     if (!basePath) return path;
     return modifyUrl(path, (parts) => {
@@ -55,17 +57,19 @@ export class BasePath {
     });
   };
 
-  public remove = (path: string): string => {
-    if (!this.get()) {
+  public remove = (path: string, prependOptions?: PrependOptions): string => {
+    const { withoutWorkspace } = prependOptions || {};
+    const basePath = withoutWorkspace ? this.basePath : this.get();
+    if (!basePath) {
       return path;
     }
 
-    if (path === this.get()) {
+    if (path === basePath) {
       return '/';
     }
 
-    if (path.startsWith(`${this.get()}/`)) {
-      return path.slice(this.get().length);
+    if (path.startsWith(`${basePath}/`)) {
+      return path.slice(basePath.length);
     }
 
     return path;

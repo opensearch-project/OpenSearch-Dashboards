@@ -14,9 +14,9 @@ import {
 } from '../../../core/public';
 import { WORKSPACE_APP_ID } from '../common/constants';
 import { mountDropdownList } from './mount';
-import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
+import { getWorkspaceIdFromUrl, WORKSPACE_PATH_PREFIX } from '../../../core/public/utils';
 
 interface WorkspacesPluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
@@ -36,12 +36,15 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
      */
     newUrl.pathname = this.coreSetup?.http.basePath.remove(newUrl.pathname) || '';
     if (workspaceId) {
-      newUrl.pathname = `${this.coreSetup?.http.basePath.serverBasePath || ''}/w/${workspaceId}${
-        newUrl.pathname
-      }`;
+      newUrl.pathname = `${WORKSPACE_PATH_PREFIX}/${workspaceId}${newUrl.pathname}`;
     } else {
-      newUrl.pathname = `${this.coreSetup?.http.basePath.serverBasePath || ''}${newUrl.pathname}`;
+      newUrl.pathname = newUrl.pathname.replace(/^\/w\/([^\/]*)/, '');
     }
+
+    newUrl.pathname =
+      this.coreSetup?.http.basePath.prepend(newUrl.pathname, {
+        withoutWorkspace: true,
+      }) || '';
 
     return newUrl.toString();
   };

@@ -37,6 +37,7 @@ import { LoadingCountService } from './loading_count_service';
 import { Fetch } from './fetch';
 import { CoreService } from '../../types';
 import { getWorkspaceIdFromUrl } from '../utils';
+import { WORKSPACE_PATH_PREFIX } from '../../utils/constants';
 
 interface HttpDeps {
   injectedMetadata: InjectedMetadataSetup;
@@ -54,7 +55,7 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
     let workspaceBasePath = '';
     const workspaceId = getWorkspaceIdFromUrl(window.location.href);
     if (workspaceId) {
-      workspaceBasePath = `/w/${workspaceId}`;
+      workspaceBasePath = `${WORKSPACE_PATH_PREFIX}/${workspaceId}`;
     }
     const basePath = new BasePath(
       injectedMetadata.getBasePath(),

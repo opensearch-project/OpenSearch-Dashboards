@@ -38,6 +38,7 @@ import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { getAllowedTypes } from './../lib';
+import { WORKSPACE_TYPE } from '../../../../core/public';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
@@ -67,7 +68,12 @@ export const mountManagementSection = async ({
   const setBreadcrumbs = mountParams?.setBreadcrumbs || chrome.setBreadcrumbs;
   let finalAllowedObjectTypes = allowedObjectTypes;
   if (finalAllowedObjectTypes === undefined) {
-    finalAllowedObjectTypes = await getAllowedTypes(coreStart.http);
+    /**
+     * Workspace needs to be filtered out since it is a concept with higher level than normal saved objects.
+     */
+    finalAllowedObjectTypes = (await getAllowedTypes(coreStart.http)).filter(
+      (item) => item !== WORKSPACE_TYPE
+    );
   }
 
   coreStart.chrome.docTitle.change(title);

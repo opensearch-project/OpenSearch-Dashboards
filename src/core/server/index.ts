@@ -509,4 +509,4 @@ export const config = {
   },
 };
 
-export { formatWorkspaces, workspacesValidator } from './workspaces';
+export { formatWorkspaces, workspacesValidator, WORKSPACE_TYPE } from './workspaces';

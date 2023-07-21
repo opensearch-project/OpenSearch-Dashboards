@@ -31,10 +31,6 @@ function WorkspaceColumn({ coreSetup, workspaces, record }: WorkspaceColumnProps
   });
   wsLookUp?.set('public', publicWsName);
 
-  if (record.type === 'workspace') {
-    return null;
-  }
-
   if (!workspaces) {
     return <EuiText>{publicWsName}</EuiText>;
   }

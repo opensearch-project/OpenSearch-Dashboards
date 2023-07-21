@@ -12,8 +12,7 @@ import {
 } from './types';
 import { WorkspacesSetupDeps } from './workspaces_service';
 import { workspace } from './saved_objects';
-
-export const WORKSPACES_TYPE_FOR_SAVED_OBJECT = 'workspace';
+import { WORKSPACE_TYPE } from './constants';
 
 export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
   private setupDep: WorkspacesSetupDeps;
@@ -50,7 +49,7 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
     try {
       const result = await this.getSavedObjectClientsFromRequestDetail(requestDetail).create<
         Omit<WorkspaceAttribute, 'id'>
-      >(WORKSPACES_TYPE_FOR_SAVED_OBJECT, payload);
+      >(WORKSPACE_TYPE, payload);
       return {
         success: true,
         result: {
@@ -75,7 +74,7 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
       } = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<WorkspaceAttribute>(
         {
           ...options,
-          type: WORKSPACES_TYPE_FOR_SAVED_OBJECT,
+          type: WORKSPACE_TYPE,
         }
       );
       return {
@@ -99,7 +98,7 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
     try {
       const result = await this.getSavedObjectClientsFromRequestDetail(requestDetail).get<
         WorkspaceAttribute
-      >(WORKSPACES_TYPE_FOR_SAVED_OBJECT, id);
+      >(WORKSPACE_TYPE, id);
       return {
         success: true,
         result: this.getFlatternedResultWithSavedObject(result),
@@ -119,7 +118,7 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
     try {
       await this.getSavedObjectClientsFromRequestDetail(requestDetail).update<
         Omit<WorkspaceAttribute, 'id'>
-      >(WORKSPACES_TYPE_FOR_SAVED_OBJECT, id, payload);
+      >(WORKSPACE_TYPE, id, payload);
       return {
         success: true,
         result: true,
@@ -133,10 +132,7 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
   }
   public async delete(requestDetail: IRequestDetail, id: string): Promise<IResponse<boolean>> {
     try {
-      await this.getSavedObjectClientsFromRequestDetail(requestDetail).delete(
-        WORKSPACES_TYPE_FOR_SAVED_OBJECT,
-        id
-      );
+      await this.getSavedObjectClientsFromRequestDetail(requestDetail).delete(WORKSPACE_TYPE, id);
       return {
         success: true,
         result: true,
