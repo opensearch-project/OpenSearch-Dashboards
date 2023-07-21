@@ -4,28 +4,15 @@
  */
 
 import { SavedObjectsType } from 'opensearch-dashboards/server';
+import { WORKSPACE_TYPE } from '../constants';
 
 export const workspace: SavedObjectsType = {
-  name: 'workspace',
+  name: WORKSPACE_TYPE,
   namespaceType: 'agnostic',
   hidden: false,
-  management: {
-    icon: 'apps', // todo: pending ux #2034
-    defaultSearchField: 'title',
-    importableAndExportable: true,
-    getTitle(obj) {
-      return obj.attributes.title;
-    },
-    getEditUrl(obj) {
-      return `/management/opensearch-dashboards/dataSources/${encodeURIComponent(obj.id)}`;
-    },
-    getInAppUrl(obj) {
-      return {
-        path: `/app/management/opensearch-dashboards/dataSources/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'management.opensearchDashboards.dataSources',
-      };
-    },
-  },
+  /**
+   * workspace won't appear in management page.
+   */
   mappings: {
     dynamic: false,
     properties: {

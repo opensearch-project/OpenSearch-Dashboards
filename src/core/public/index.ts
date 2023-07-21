@@ -357,3 +357,5 @@ export {
   WorkspaceAttribute,
   WorkspaceFindOptions,
 } from './workspace';
+
+export { getWorkspaceIdFromUrl, WORKSPACE_TYPE } from './utils';
