@@ -75,14 +75,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.switchToEditMode();
 
       await PageObjects.visChart.openLegendOptionColors('Count');
-      await PageObjects.visChart.selectNewLegendColorChoice('#EA6460');
+      await PageObjects.visChart.selectNewLegendColorChoice('#8d4059');
 
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
       const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
-        '#EA6460'
+        '#8d4059'
       );
 
       expect(colorChoiceRetained).to.be(true);
@@ -245,9 +245,9 @@ export default function ({ getService, getPageObjects }) {
         it('updates a pie slice color on a soft refresh', async function () {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await PageObjects.visChart.openLegendOptionColors('80,000');
-          await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
+          await PageObjects.visChart.selectNewLegendColorChoice('#e9b0c3');
           const currentUrl = await browser.getCurrentUrl();
-          const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
+          const newUrl = currentUrl.replace('e9b0c3', 'FFFFFF');
           await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
