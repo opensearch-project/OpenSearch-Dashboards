@@ -157,6 +157,7 @@ describe('SavedObjectsTable', () => {
       savedObjectsClient: savedObjects.client,
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       http,
+      workspaces,
       overlays,
       notifications,
       applications,
@@ -164,7 +165,6 @@ describe('SavedObjectsTable', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       search,
-      workspaces,
     };
 
     findObjectsMock.mockImplementation(() => ({

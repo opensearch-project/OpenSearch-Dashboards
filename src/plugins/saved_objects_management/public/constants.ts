@@ -29,3 +29,5 @@ export const SAVED_QUERIES_WORDINGS = i18n.translate(
     defaultMessage: 'Saved filters',
   }
 );
+
+export const SAVED_OBJECT_TYPE_WORKSAPCE = 'workspace';
