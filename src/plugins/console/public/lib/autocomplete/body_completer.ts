@@ -174,7 +174,9 @@ function getTemplate(description: Description): Description | Template {
       }
     }
     return [];
-  } else if (typeof description !== 'string' && description.__template) {
+  } else if (_.isString(description)) {
+    return description;
+  } else if (description.__template) {
     if (description.__raw && _.isString(description.__template)) {
       return {
         // This is a special secret attribute that gets passed through to indicate that
@@ -188,17 +190,15 @@ function getTemplate(description: Description): Description | Template {
       };
     }
     return description.__template;
-  } else if (typeof description !== 'string' && description.__one_of) {
+  } else if (description.__one_of) {
     return getTemplate(description.__one_of[0]);
-  } else if (typeof description !== 'string' && description.__any_of) {
+  } else if (description.__any_of) {
     return [];
-  } else if (typeof description !== 'string' && description.__scope_link) {
+  } else if (description.__scope_link) {
     // assume an object for now.
     return {};
   } else if (_.isObject(description)) {
     return {};
-  } else if (_.isString(description) && !/^\{.*\}$/.test(description)) {
-    return description;
   } else {
     return description;
   }
