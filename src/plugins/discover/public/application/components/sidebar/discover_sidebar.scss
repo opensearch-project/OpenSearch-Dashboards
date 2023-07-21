@@ -1,37 +1,3 @@
-// Needed for scrollable sidebar
-.sidebar-list {
-  display: flex;
-  flex-direction: column;
-}
-
 .dscFieldListHeader {
   padding-left: $euiSizeS;
-}
-
-.dscFieldList--popular {
-  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
-}
-
-.dscFieldSearch {
-  padding: $euiSizeS;
-}
-
-.dscFieldSearch__toggleButton {
-  width: calc(100% - #{$euiSizeS});
-  color: $euiColorPrimary;
-  padding-left: $euiSizeXS;
-  margin-left: $euiSizeXS;
-}
-
-.dscFieldSearch__filterWrapper {
-  flex-grow: 0;
-}
-
-.dscFieldSearch__formWrapper {
-  padding: $euiSizeM;
-}
-
-.dscFieldDetails {
-  color: $euiTextColor;
-  margin-bottom: $euiSizeS;
 }

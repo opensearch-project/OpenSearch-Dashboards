@@ -38,6 +38,7 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiPanel,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { DiscoverField } from './discover_field';
@@ -181,21 +182,26 @@ export function DiscoverSidebar({
 
   return (
     <I18nProvider>
-      <section
-        className="sidebar-list eui-yScroll"
-        aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
-          defaultMessage: 'Index and fields',
-        })}
-      >
-        <EuiDragDropContext onDragEnd={onDragEnd}>
-          <form>
+      <EuiDragDropContext onDragEnd={onDragEnd}>
+        <EuiSplitPanel.Outer
+          className="sidebar-list eui-yScroll"
+          aria-label={i18n.translate(
+            'discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
+            {
+              defaultMessage: 'Index and fields',
+            }
+          )}
+          borderRadius="none"
+          color="transparent"
+        >
+          <EuiSplitPanel.Inner grow={false} paddingSize="s">
             <DiscoverFieldSearch
               onChange={onChangeFieldSearch}
               value={fieldFilterState.name}
               types={fieldTypes}
             />
-          </form>
-          <div className="eui-yScroll">
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner className="eui-yScroll" paddingSize="none">
             {fields.length > 0 && (
               <>
                 <EuiTitle size="xxxs" id="selected_fields" className="dscFieldListHeader">
@@ -247,7 +253,15 @@ export function DiscoverSidebar({
                 </EuiTitle>
 
                 {popularFields.length > 0 && (
-                  <div>
+                  <EuiPanel
+                    hasBorder={false}
+                    paddingSize="none"
+                    hasShadow={false}
+                    className={`dscFieldList dscFieldList--popular`}
+                    aria-labelledby="available_fields available_fields_popular"
+                    data-test-subj={`fieldList-popular`}
+                    color="primary"
+                  >
                     <EuiTitle size="xxxs" className="dscFieldListHeader">
                       <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
                         <FormattedMessage
@@ -256,14 +270,7 @@ export function DiscoverSidebar({
                         />
                       </h4>
                     </EuiTitle>
-                    <EuiDroppable
-                      droppableId="POPULAR_FIELDS"
-                      spacing="m"
-                      className={`dscFieldList dscFieldList--popular`}
-                      aria-labelledby="available_fields available_fields_popular"
-                      data-test-subj={`fieldList-popular`}
-                      cloneDraggables={true}
-                    >
+                    <EuiDroppable droppableId="POPULAR_FIELDS" spacing="m" cloneDraggables={true}>
                       {popularFields.map((field: IndexPatternField, index) => {
                         return (
                           <EuiDraggable
@@ -293,7 +300,7 @@ export function DiscoverSidebar({
                         );
                       })}
                     </EuiDroppable>
-                  </div>
+                  </EuiPanel>
                 )}
                 <EuiDroppable
                   droppableId="UNPOPULAR_FIELDS"
@@ -334,9 +341,9 @@ export function DiscoverSidebar({
                 </EuiDroppable>
               </>
             )}
-          </div>
-        </EuiDragDropContext>
-      </section>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
+      </EuiDragDropContext>
     </I18nProvider>
   );
 }

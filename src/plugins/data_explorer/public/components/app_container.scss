@@ -1,5 +1,4 @@
-// Needed to allow the sidebar to scroll
 .deSidebar {
-  display: flex;
-  flex-direction: column;
+  max-width: 462px;
+  min-width: 400px;
 }
