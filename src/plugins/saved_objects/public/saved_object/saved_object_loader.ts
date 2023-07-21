@@ -126,6 +126,8 @@ export class SavedObjectLoader {
    * @param search
    * @param size
    * @param fields
+   * @param hasReference Optional field to specify a reference
+   * @param searchFields Optional field to specify the search fields in the query
    * @returns {Promise}
    */
   findAll(
