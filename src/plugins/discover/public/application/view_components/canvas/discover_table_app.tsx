@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState, useEffect } from 'react';
-import { EuiPage, EuiPageBody, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
 
 export const DiscoverTableApplication = ({ data$, indexPattern, savedSearch, services }) => {
@@ -36,31 +36,27 @@ export const DiscoverTableApplication = ({ data$, indexPattern, savedSearch, ser
     return <div>{'loading...'}</div>;
   } else {
     return (
-      <EuiPage className="dscCanvasAppPage">
-        <EuiPageBody className="dscCanvasAppPageBody">
-          <EuiFlexGroup className="dscCanvasAppPageBody__contents">
-            <EuiFlexItem>
-              <EuiPageContent>
-                <div className="dscDiscoverGrid">
-                  <DataGridTable
-                    columns={['_source']}
-                    indexPattern={indexPattern}
-                    onAddColumn={() => {}}
-                    onFilter={() => {}}
-                    onRemoveColumn={() => {}}
-                    onSetColumns={() => {}}
-                    onSort={() => {}}
-                    sort={[]}
-                    rows={rows}
-                    displayTimeColumn={true}
-                    services={services}
-                  />
-                </div>
-              </EuiPageContent>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiFlexGroup className="dscCanvasAppPageBody__contents">
+        <EuiFlexItem>
+          <EuiPageContent>
+            <div className="dscDiscoverGrid">
+              <DataGridTable
+                columns={['_source']}
+                indexPattern={indexPattern}
+                onAddColumn={() => {}}
+                onFilter={() => {}}
+                onRemoveColumn={() => {}}
+                onSetColumns={() => {}}
+                onSort={() => {}}
+                sort={[]}
+                rows={rows}
+                displayTimeColumn={true}
+                services={services}
+              />
+            </div>
+          </EuiPageContent>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 };

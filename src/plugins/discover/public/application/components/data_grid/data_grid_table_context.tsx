@@ -16,5 +16,8 @@ export interface DataGridContextProps {
 }
 
 export const DataGridContext = React.createContext<DataGridContextProps>(
-  ({} as unknown) as DataGridContextProps
+  {} as DataGridContextProps
 );
+
+export const DiscoverGridContextProvider = DataGridContext.Provider;
+export const useDataGridContext = () => React.useContext(DataGridContext);

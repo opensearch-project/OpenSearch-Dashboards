@@ -28,7 +28,7 @@ export const DiscoverTableService = ({
   });
 
   // trigger manual fetch
-  // ToDo: remove this once we implement refetch data:
+  // TODO: remove this once we implement refetch data:
   // Based on the controller, refetch$ should emit next when
   // 1) appStateContainer interval and sort change
   // 2) savedSearch id changes

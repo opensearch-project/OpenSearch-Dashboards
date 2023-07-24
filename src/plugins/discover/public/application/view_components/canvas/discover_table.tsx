@@ -20,7 +20,7 @@ export const DiscoverTable = ({ history, services }: DiscoverTableProps) => {
   const { core, chrome, data, uiSettings: config, toastNotifications } = services;
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  // ToDo: get id from data explorer since it is handling the routing logic
+  // TODO: get id from data explorer since it is handling the routing logic
   // Original angular code: const savedSearchId = $route.current.params.id;
   const savedSearchId = '';
   useEffect(() => {
@@ -53,7 +53,7 @@ export const DiscoverTable = ({ history, services }: DiscoverTableProps) => {
   }, [data, config, core, chrome, toastNotifications, history, savedSearchId, services]);
 
   if (!savedSearch || !savedSearch.searchSource || !indexPattern) {
-    // ToDo: handle loading state
+    // TODO: handle loading state
     return null;
   }
   return (

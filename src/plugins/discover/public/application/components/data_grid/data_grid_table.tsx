@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './data_grid_table.scss';
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiDataGrid } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';

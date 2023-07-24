@@ -26,7 +26,7 @@ export interface SavedSearchData {
   fieldCounts?: Record<string, number>;
   fetchError?: Error;
   hits?: number;
-  rows?: any[]; // ToDo: type
+  rows?: any[]; // TODO: type
 }
 
 export type SavedSearchRefetch = 'refetch' | undefined;
@@ -93,7 +93,7 @@ export const useSavedSearch = ({
         rows,
       });
     } catch (err) {
-      // ToDo: handle the error
+      // TODO: handle the error
     }
   }, [data$, timefilter, services, searchSource, indexPattern, fetchStateRef]);
 

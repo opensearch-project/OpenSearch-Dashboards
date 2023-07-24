@@ -70,6 +70,7 @@ export function DataGridFlyout({
     return `#/doc/${indexPatternId}/${hitObj._index}?id=${encodeURIComponent(hit._id)}`;
   };
 
+  // TODO: replace EuiLink with doc_view_links registry
   return (
     <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutHeader>

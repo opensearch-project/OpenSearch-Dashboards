@@ -23,8 +23,8 @@ export const fetchIndexPattern = async (data, config) => {
   const indexPatternData = await data.indexPatterns.get(id);
   const ip: IndexPatternData = {
     loaded: indexPatternData,
-    stateVal: '', // ToDo: get stateVal from appStateContainer
-    stateValFound: false, // ToDo: get stateValFound from appStateContainer
+    stateVal: '', // TODO: get stateVal from appStateContainer
+    stateValFound: false, // TODO: get stateValFound from appStateContainer
   };
   return ip;
 };
@@ -41,7 +41,7 @@ export const fetchSavedSearch = async (
     const savedSearch = await services.getSavedSearchById(savedSearchId);
     return savedSearch;
   } catch (error) {
-    // ToDo: handle redirect with Data Explorer
+    // TODO: handle redirect with Data Explorer
     redirectWhenMissing({
       history,
       navigateToApp: core.application.navigateToApp,
