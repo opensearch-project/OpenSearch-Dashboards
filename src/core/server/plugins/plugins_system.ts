@@ -34,7 +34,7 @@ import { CatPluginsResponse } from '@opensearch-project/opensearch/api/types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, PluginName } from './types';
+import { DiscoveredPlugin, PluginName, CompatibleOpenSearchPluginVersions } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { PluginDependencies } from '.';
