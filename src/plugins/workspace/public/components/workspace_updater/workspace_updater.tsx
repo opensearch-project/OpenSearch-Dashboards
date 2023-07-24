@@ -15,10 +15,8 @@ import {
 import { useObservable } from 'react-use';
 import { i18n } from '@osd/i18n';
 import { of } from 'rxjs';
-
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
-import { useOpenSearchDashboards } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
-
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { PATHS } from '../../../common/constants';
 import { WorkspaceForm, WorkspaceFormData } from '../workspace_creator/workspace_form';
 import { WORKSPACE_APP_ID, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
@@ -27,7 +25,7 @@ import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 
 export const WorkspaceUpdater = () => {
   const {
-    services: { application, workspaces, notifications },
+    services: { application, workspaces, notifications, http },
   } = useOpenSearchDashboards<{ application: ApplicationStart }>();
 
   const currentWorkspace = useObservable(
@@ -129,7 +127,50 @@ export const WorkspaceUpdater = () => {
       }
     }
     setDeleteWorkspaceModalVisible(false);
-    await application.navigateToApp('home');
+    if (http) {
+      const homeUrl = application.getUrlForApp('home', {
+        path: '/',
+        absolute: false,
+      });
+      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
+        withoutWorkspace: true,
+      });
+      await application.navigateToUrl(targetUrl);
+    }
+  };
+
+  const exitWorkspace = async () => {
+    let result;
+    try {
+      result = await workspaces?.client.exitWorkspace();
+    } catch (error) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate('workspace.exit.failed', {
+          defaultMessage: 'Failed to exit workspace',
+        }),
+        text: error instanceof Error ? error.message : JSON.stringify(error),
+      });
+      return;
+    }
+    if (!result?.success) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate('workspace.exit.failed', {
+          defaultMessage: 'Failed to exit workspace',
+        }),
+        text: result?.error,
+      });
+      return;
+    }
+    if (http) {
+      const homeUrl = application.getUrlForApp('home', {
+        path: '/',
+        absolute: false,
+      });
+      const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
+        withoutWorkspace: true,
+      });
+      await application.navigateToUrl(targetUrl);
+    }
   };
 
   return (
@@ -139,6 +180,7 @@ export const WorkspaceUpdater = () => {
           restrictWidth
           pageTitle="Update Workspace"
           rightSideItems={[
+            <EuiButton onClick={exitWorkspace}>Exit</EuiButton>,
             <EuiButton color="danger" onClick={() => setDeleteWorkspaceModalVisible(true)}>
               Delete
             </EuiButton>,
