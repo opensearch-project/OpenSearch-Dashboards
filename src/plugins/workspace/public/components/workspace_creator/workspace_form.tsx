@@ -33,12 +33,18 @@ import {
 } from '@elastic/eui';
 
 import { WorkspaceTemplate } from '../../../../../core/types';
-import { AppNavLinkStatus, ApplicationStart } from '../../../../../core/public';
+import { App, AppNavLinkStatus, ApplicationStart } from '../../../../../core/public';
 import { useApplications, useWorkspaceTemplate } from '../../hooks';
 import { WORKSPACE_OP_TYPE_CREATE, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
+import {
+  isFeatureDependBySelectedFeatures,
+  getFinalFeatureIdsByDependency,
+  generateFeatureDependencyMap,
+} from '../utils/feature';
+
 import { WorkspaceIconSelector } from './workspace_icon_selector';
 
-interface WorkspaceFeature {
+interface WorkspaceFeature extends Pick<App, 'dependencies'> {
   id: string;
   name: string;
   templates: WorkspaceTemplate[];
@@ -74,6 +80,7 @@ interface WorkspaceFormProps {
   defaultValues?: WorkspaceFormData;
   opType?: string;
 }
+
 export const WorkspaceForm = ({
   application,
   onSubmit,
@@ -115,13 +122,16 @@ export const WorkspaceForm = ({
       const apps = category2Applications[currentKey];
       const features = apps
         .filter(
-          ({ navLinkStatus, chromeless }) =>
-            navLinkStatus !== AppNavLinkStatus.hidden && !chromeless
+          ({ navLinkStatus, chromeless, featureGroup }) =>
+            navLinkStatus !== AppNavLinkStatus.hidden &&
+            !chromeless &&
+            featureGroup?.includes('WORKSPACE')
         )
-        .map(({ id, title, workspaceTemplate }) => ({
+        .map(({ id, title, workspaceTemplate, dependencies }) => ({
           id,
           name: title,
           templates: workspaceTemplate || [],
+          dependencies,
         }));
       if (features.length === 1 || currentKey === 'undefined') {
         return [...previousValue, ...features];
@@ -141,6 +151,22 @@ export const WorkspaceForm = ({
     [defaultVISTheme]
   );
 
+  const allFeatures = useMemo(
+    () =>
+      featureOrGroups.reduce<WorkspaceFeature[]>(
+        (previousData, currentData) => [
+          ...previousData,
+          ...(isWorkspaceFeatureGroup(currentData) ? currentData.features : [currentData]),
+        ],
+        []
+      ),
+    [featureOrGroups]
+  );
+
+  const featureDependencies = useMemo(() => generateFeatureDependencyMap(allFeatures), [
+    allFeatures,
+  ]);
+
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
   }
@@ -150,27 +176,33 @@ export const WorkspaceForm = ({
       const templateId = e.target.value;
       setSelectedTemplateId(templateId);
       setSelectedFeatureIds(
-        featureOrGroups.reduce<string[]>(
-          (previousData, currentData) => [
-            ...previousData,
-            ...(isWorkspaceFeatureGroup(currentData) ? currentData.features : [currentData])
-              .filter(({ templates }) => !!templates.find((template) => template.id === templateId))
-              .map((feature) => feature.id),
-          ],
-          []
+        getFinalFeatureIdsByDependency(
+          allFeatures
+            .filter(({ templates }) => !!templates.find((template) => template.id === templateId))
+            .map((feature) => feature.id),
+          featureDependencies
         )
       );
     },
-    [featureOrGroups]
+    [allFeatures, featureDependencies]
   );
 
-  const handleFeatureChange = useCallback<EuiCheckboxGroupProps['onChange']>((featureId) => {
-    setSelectedFeatureIds((previousData) =>
-      previousData.includes(featureId)
-        ? previousData.filter((id) => id !== featureId)
-        : [...previousData, featureId]
-    );
-  }, []);
+  const handleFeatureChange = useCallback<EuiCheckboxGroupProps['onChange']>(
+    (featureId) => {
+      setSelectedFeatureIds((previousData) => {
+        if (!previousData.includes(featureId)) {
+          return getFinalFeatureIdsByDependency([featureId], featureDependencies, previousData);
+        }
+
+        if (isFeatureDependBySelectedFeatures(featureId, previousData, featureDependencies)) {
+          return previousData;
+        }
+
+        return previousData.filter((selectedId) => selectedId !== featureId);
+      });
+    },
+    [featureDependencies]
+  );
 
   const handleFeatureCheckboxChange = useCallback<EuiCheckboxProps['onChange']>(
     (e) => {
@@ -187,14 +219,37 @@ export const WorkspaceForm = ({
           setSelectedFeatureIds((previousData) => {
             const notExistsIds = groupFeatureIds.filter((id) => !previousData.includes(id));
             if (notExistsIds.length > 0) {
-              return [...previousData, ...notExistsIds];
+              return getFinalFeatureIdsByDependency(
+                notExistsIds,
+                featureDependencies,
+                previousData
+              );
             }
-            return previousData.filter((id) => !groupFeatureIds.includes(id));
+            let groupRemainFeatureIds = groupFeatureIds;
+            const outGroupFeatureIds = previousData.filter(
+              (featureId) => !groupFeatureIds.includes(featureId)
+            );
+
+            while (true) {
+              const lastRemainFeatures = groupRemainFeatureIds.length;
+              groupRemainFeatureIds = groupRemainFeatureIds.filter((featureId) =>
+                isFeatureDependBySelectedFeatures(
+                  featureId,
+                  [...outGroupFeatureIds, ...groupRemainFeatureIds],
+                  featureDependencies
+                )
+              );
+              if (lastRemainFeatures === groupRemainFeatureIds.length) {
+                break;
+              }
+            }
+
+            return [...outGroupFeatureIds, ...groupRemainFeatureIds];
           });
         }
       }
     },
-    [featureOrGroups]
+    [featureOrGroups, featureDependencies]
   );
 
   const handleFormSubmit = useCallback<FormEventHandler>(
