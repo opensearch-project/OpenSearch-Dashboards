@@ -349,6 +349,76 @@ describe('utils', () => {
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
       expect((await getAugmentVisSavedObjs(visId1, loader)).length).toEqual(2);
     });
+    it('undefined plugin resource list has no effect', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      expect((await getAugmentVisSavedObjs(visId1, loader, undefined, undefined)).length).toEqual(
+        2
+      );
+    });
+    it('empty plugin resource list has no effect', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      expect((await getAugmentVisSavedObjs(visId1, loader, undefined, [])).length).toEqual(2);
+    });
+    it('empty / undefined plugin resource list passes correct findAll() params', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      loader.findAll = jest.fn().mockImplementation(loader.findAll);
+      expect((await getAugmentVisSavedObjs(visId1, loader, undefined, [])).length).toEqual(2);
+      expect(loader.findAll).toHaveBeenCalledWith(
+        '',
+        100,
+        [],
+        {
+          type: 'visualization',
+          id: visId1 as string,
+        },
+        []
+      );
+    });
+    it('single plugin resource is propagated to findAll()', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      loader.findAll = jest.fn().mockImplementation(loader.findAll);
+      expect(
+        (await getAugmentVisSavedObjs(visId1, loader, undefined, ['resource-1'])).length
+      ).toEqual(2);
+      expect(loader.findAll).toHaveBeenCalledWith(
+        'resource-1',
+        100,
+        [],
+        {
+          type: 'visualization',
+          id: visId1 as string,
+        },
+        ['pluginResource.id']
+      );
+    });
+    it('multiple plugin resources are propagated to findAll()', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      loader.findAll = jest.fn().mockImplementation(loader.findAll);
+      expect(
+        (await getAugmentVisSavedObjs(visId1, loader, undefined, ['resource-1', 'resource-2']))
+          .length
+      ).toEqual(2);
+      expect(loader.findAll).toHaveBeenCalledWith(
+        'resource-1|resource-2',
+        100,
+        [],
+        {
+          type: 'visualization',
+          id: visId1 as string,
+        },
+        ['pluginResource.id']
+      );
+    });
   });
 
   describe('buildPipelineFromAugmentVisSavedObjs', () => {
