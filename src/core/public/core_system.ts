@@ -31,7 +31,7 @@
 import { pick } from '@osd/std';
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
-import { ChromeNavLink, CoreSetup, CoreStart } from '.';
+import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';

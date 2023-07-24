@@ -66,7 +66,6 @@ import {
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
-  WorkspacesStart,
 } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
@@ -121,7 +120,6 @@ export interface SavedObjectsTableProps {
   dateFormat: string;
   title: string;
   fullWidth: boolean;
-  workspaces: WorkspacesStart;
 }
 
 export interface SavedObjectsTableState {
