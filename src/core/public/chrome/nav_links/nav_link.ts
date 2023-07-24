@@ -102,6 +102,11 @@ export interface ChromeNavLink {
    * Hides a link from the navigation.
    */
   readonly hidden?: boolean;
+
+  /**
+   * Links can be navigated through url.
+   */
+  readonly externalLink?: boolean;
 }
 
 /** @public */

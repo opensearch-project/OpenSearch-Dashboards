@@ -54,6 +54,16 @@ export interface ChromeNavLinks {
   getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 
   /**
+   * Set an observable for a sorted list of filtered navlinks.
+   */
+  getFilteredNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
+
+  /**
+   * Set filtered navlinks.
+   */
+  setFilteredNavLinks(filteredNavLinks: ReadonlyMap<string, ChromeNavLink>): void;
+
+  /**
    * Get the state of a navlink at this point in time.
    * @param id
    */
@@ -116,6 +126,7 @@ type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLi
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
+  private filteredNavLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink>>(new Map());
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const appLinks$ = application.applications$.pipe(
@@ -149,6 +160,14 @@ export class NavLinksService {
     return {
       getNavLinks$: () => {
         return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
+      },
+
+      setFilteredNavLinks: (filteredNavLinks: ReadonlyMap<string, ChromeNavLink>) => {
+        this.filteredNavLinks$.next(filteredNavLinks);
+      },
+
+      getFilteredNavLinks$: () => {
+        return this.filteredNavLinks$.pipe(map(sortChromeNavLinks), takeUntil(this.stop$));
       },
 
       get(id: string) {
@@ -212,6 +231,13 @@ export class NavLinksService {
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
   return sortBy(
     [...navLinks.values()].map((link) => link.properties),
+    'order'
+  );
+}
+
+function sortChromeNavLinks(chromeNavLinks: ReadonlyMap<string, ChromeNavLink>) {
+  return sortBy(
+    [...chromeNavLinks.values()].map((link) => link as Readonly<ChromeNavLink>),
     'order'
   );
 }

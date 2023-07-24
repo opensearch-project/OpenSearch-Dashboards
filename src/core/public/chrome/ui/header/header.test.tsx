@@ -36,7 +36,6 @@ import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
-import { workspacesServiceMock } from '../../../workspace/workspaces_service.mock';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -70,8 +69,6 @@ function mockProps() {
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
     onIsLockedUpdate: () => {},
-    exitWorkspace: () => {},
-    getWorkspaceUrl: (id: string) => '',
     branding: {
       darkMode: false,
       logo: { defaultUrl: '/' },
@@ -79,8 +76,6 @@ function mockProps() {
       applicationTitle: 'OpenSearch Dashboards',
     },
     survey: '/',
-    currentWorkspace$: workspacesServiceMock.createStartContract().client.currentWorkspace$,
-    workspaceList$: workspacesServiceMock.createStartContract().client.workspaceList$,
   };
 }
 

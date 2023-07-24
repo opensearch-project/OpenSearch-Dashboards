@@ -31,7 +31,7 @@
 import { pick } from '@osd/std';
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
-import { CoreSetup, CoreStart } from '.';
+import { ChromeNavLink, CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
@@ -233,7 +233,6 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
-        workspaces,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
