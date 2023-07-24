@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiPage } from '@elastic/eui';
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { Suspense } from 'react';
 import { AppMountParameters } from '../../../../core/public';
 import { Sidebar } from './sidebar';
@@ -29,7 +29,9 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
         <Sidebar>
           <Panel {...params} />
         </Sidebar>
-        <Canvas {...params} />
+        <EuiPageBody>
+          <Canvas {...params} />
+        </EuiPageBody>
       </Suspense>
     </EuiPage>
   );

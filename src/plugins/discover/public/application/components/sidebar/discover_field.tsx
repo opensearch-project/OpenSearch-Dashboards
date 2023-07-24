@@ -210,7 +210,7 @@ export const DiscoverField = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <FieldIcon
           type={field.type}
