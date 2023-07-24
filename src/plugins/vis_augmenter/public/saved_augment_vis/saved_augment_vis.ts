@@ -89,16 +89,19 @@ export class SavedObjectLoaderAugmentVis extends SavedObjectLoader {
    * @param search
    * @param size
    * @param fields
+   * @param hasReference Optional field to specify a reference
+   * @param searchFields Optional field to specify the search fields in the query
    * @returns {Promise}
    */
   findAll(
     search: string = '',
     size: number = 100,
     fields?: string[],
-    hasReference?: SavedObjectsFindOptions['hasReference']
+    hasReference?: SavedObjectsFindOptions['hasReference'],
+    searchFields?: string[]
   ) {
     this.isAugmentationEnabled();
-    return super.findAll(search, size, fields, hasReference);
+    return super.findAll(search, size, fields, hasReference, searchFields);
   }
 
   find(search: string = '', size: number = 100) {
