@@ -28,35 +28,30 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getFields } from '../../mappings/mappings';
-import { ListComponent } from './list_component';
-
-function FieldGenerator(context) {
-  return _.map(getFields(context.indices, context.types), function (field) {
-    return { name: field.name, meta: field.type };
-  });
-}
-
-export class FieldAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
-    super(name, FieldGenerator, parent, multiValued);
+import { SharedComponent } from './shared_component';
+import { AutoCompleteContext } from '../types';
+export class GlobalOnlyComponent extends SharedComponent {
+  getTerms() {
+    return null;
   }
-  validateTokens(tokens) {
-    if (!this.multiValued && tokens.length > 1) {
-      return false;
+
+  match(token: string, context: AutoCompleteContext) {
+    const result = {
+      next: [] as SharedComponent[],
+    };
+
+    // try to link to GLOBAL rules
+    const globalRules = context.globalComponentResolver(token, false);
+    if (globalRules) {
+      result.next.push.apply(result.next, globalRules);
     }
 
-    return !_.find(tokens, function (token) {
-      return token.match(/[^\w.?*]/);
-    });
-  }
+    if (result.next.length) {
+      return result;
+    }
+    // just loop back to us
+    result.next = [this];
 
-  getDefaultTermMeta() {
-    return 'field';
-  }
-
-  getContextKey() {
-    return 'fields';
+    return result;
   }
 }

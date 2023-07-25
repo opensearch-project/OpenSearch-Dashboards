@@ -28,15 +28,19 @@
  * under the License.
  */
 
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext } from '../types';
 import { SharedComponent } from './shared_component';
 export class SimpleParamComponent extends SharedComponent {
-  constructor(name, parent) {
+  constructor(name: string, parent: SharedComponent) {
     super(name, parent);
   }
-  match(token, context, editor) {
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
     const result = super.match(token, context, editor);
-    result.context_values = result.context_values || {};
-    result.context_values[this.name] = token;
+    if (result) {
+      result.context_values = result.context_values || {};
+      result.context_values[this.name] = token;
+    }
     return result;
   }
 }

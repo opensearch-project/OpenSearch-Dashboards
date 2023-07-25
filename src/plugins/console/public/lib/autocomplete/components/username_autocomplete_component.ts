@@ -31,25 +31,25 @@
 import _ from 'lodash';
 import { getIndices } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
-function nonValidIndexType(token) {
-  return !(token === '_all' || token[0] !== '_');
+function nonValidUsernameType(token: string) {
+  return token[0] === '_';
 }
-export class IndexAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
+export class UsernameAutocompleteComponent extends ListComponent {
+  constructor(name: string, parent: ListComponent, multiValued?: boolean) {
     super(name, getIndices, parent, multiValued);
   }
-  validateTokens(tokens) {
+  validateTokens(tokens: string[]) {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }
-    return !_.find(tokens, nonValidIndexType);
+    return !_.find(tokens, nonValidUsernameType);
   }
 
   getDefaultTermMeta() {
-    return 'index';
+    return 'username';
   }
 
   getContextKey() {
-    return 'indices';
+    return 'username';
   }
 }
