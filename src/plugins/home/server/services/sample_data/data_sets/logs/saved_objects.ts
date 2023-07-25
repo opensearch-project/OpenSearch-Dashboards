@@ -392,7 +392,7 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
+    updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzE0LDFd',
   },
   {
@@ -407,7 +407,7 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { 'index-pattern': '7.6.0' },
     references: [],
     type: 'index-pattern',
-    updated_at: '2023-07-14T17:48:07.229Z',
+    updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzE1LDFd',
   },
   {
@@ -433,8 +433,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-15T00:13:57.165Z',
-    version: 'Wzg0LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzE2LDFd',
   },
   {
     attributes: {
@@ -458,7 +458,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization-visbuilder',
-    updated_at: '2023-07-14T17:48:07.229Z',
+    updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzE3LDFd',
   },
   {
@@ -471,14 +471,14 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       version: 1,
       visState:
-        '{"title":"(Vega) Avg bytes over time","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            date_histogram: {\\n              field: @timestamp\\n              fixed_interval: 3h\\n              time_zone: America/Los_Angeles\\n              min_doc_count: 1\\n            }\\n            aggs: {\\n              2: {\\n                avg: {\\n                  field: bytes\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      calculate: datum.key\\n      as: timestamp\\n    }\\n    {\\n      calculate: datum[2].value\\n      as: bytes\\n    }\\n  ]\\n  layer:[\\n    {\\n      mark: {\\n        type: line\\n      }\\n    }\\n    {\\n      mark: {\\n        type: circle\\n        tooltip: true\\n      }\\n    }\\n  ]\\n  \\n  encoding: {\\n    x: {\\n      field: timestamp\\n      type: temporal\\n      axis: {\\n        title: @timestamp\\n      }\\n    }\\n    y: {\\n      field: bytes\\n      type: quantitative\\n      axis: {\\n        title: Average bytes\\n      }\\n    }\\n    color: {\\n      datum: Average bytes\\n      type: nominal\\n    }\\n  }\\n}"}}',
+        '{"title":"(Vega) Avg bytes over time","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            date_histogram: {\\n              field: @timestamp\\n              fixed_interval: 3h\\n              time_zone: America/Los_Angeles\\n              min_doc_count: 1\\n            }\\n            aggs: {\\n              2: {\\n                avg: {\\n                  field: bytes\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      calculate: datum.key\\n      as: timestamp\\n    }\\n    {\\n      calculate: datum[2].value\\n      as: bytes\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: line\\n      }\\n    }\\n    {\\n      mark: {\\n        type: circle\\n        tooltip: true\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: timestamp\\n      type: temporal\\n      axis: {\\n        title: @timestamp\\n      }\\n    }\\n    y: {\\n      field: bytes\\n      type: quantitative\\n      axis: {\\n        title: Average bytes\\n      }\\n    }\\n    color: {\\n      datum: Average bytes\\n      type: nominal\\n    }\\n  }\\n}"}}',
     },
     id: '0aa75ae0-eb7e-11ed-8e00-17d7d50cd7b2',
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
-    version: 'WzE4LDFd',
+    updated_at: '2023-07-25T17:34:12.286Z',
+    version: 'WzcxLDFd',
   },
   {
     attributes: {
@@ -496,8 +496,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
-    version: 'WzIwLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzE5LDFd',
   },
   {
     attributes: {
@@ -515,8 +515,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
-    version: 'WzE5LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzIwLDFd',
   },
   {
     attributes: {
@@ -534,7 +534,7 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
+    updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzIxLDFd',
   },
   {
@@ -560,7 +560,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
+    updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzIyLDFd',
   },
   {
@@ -585,27 +585,27 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization-visbuilder',
-    updated_at: '2023-07-14T17:48:07.229Z',
+    updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzIzLDFd',
   },
   {
     attributes: {
       description: '',
       kibanaSavedObjectMeta: {
-        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+        searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
       },
       title: '(Vega) Stacked extensions over time',
       uiStateJSON: '{}',
       version: 1,
       visState:
-        '{"title":"(Vega) Stacked extensions over time","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            date_histogram: {\\n              field: @timestamp\\n              fixed_interval: 3h\\n              time_zone: America/Los_Angeles\\n              min_doc_count: 1\\n            }\\n            aggs: {\\n              2: {\\n                terms: {\\n                  field: extension.keyword\\n                  order: {\\n                    _count: desc\\n                  }\\n                  size: 5\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      flatten: [\\n        2.buckets\\n      ]\\n      as: [\\n        extension_buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.key\\n      as: timestamp\\n    }\\n    {\\n      calculate: datum.extension_buckets.doc_count\\n      as: count\\n    }\\n    {\\n      calculate: datum.extension_buckets.key\\n      as: extension\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: area\\n        tooltip: true\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: timestamp\\n      type: temporal\\n      axis: {\\n        title: timestamp\\n      }\\n    }\\n    y: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    color: {\\n      field: extension\\n      type: nominal\\n    }\\n  }\\n}"}}',
+        '{"title":"(Vega) Stacked extensions over time","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            date_histogram: {\\n              field: @timestamp\\n              fixed_interval: 3h\\n              time_zone: America/Los_Angeles\\n              min_doc_count: 1\\n            }\\n            aggs: {\\n              2: {\\n                terms: {\\n                  field: extension.keyword\\n                  order: {\\n                    _count: desc\\n                  }\\n                  size: 5\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      flatten: [\\n        2.buckets\\n      ]\\n      as: [\\n        extension_buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.key\\n      as: timestamp\\n    }\\n    {\\n      calculate: datum.extension_buckets.doc_count\\n      as: count\\n    }\\n    {\\n      calculate: datum.extension_buckets.key\\n      as: extension\\n    }\\n    {\\n      joinaggregate: [\\n        {\\n          op: sum\\n          field: count\\n          as: total_count\\n        }\\n      ]\\n      groupby: [\\n        extension\\n      ]\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: area\\n        tooltip: true\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: timestamp\\n      type: temporal\\n      axis: {\\n        title: timestamp\\n      }\\n    }\\n    y: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    order: {\\n      field: total_count\\n      type: quantitative\\n      sort: descending\\n    }\\n    color: {\\n      field: extension\\n      type: nominal\\n      sort: {\\n        field: total_count\\n        order: descending\\n      }\\n    }\\n  }\\n}"}}',
     },
     id: 'be4dc860-eb90-11ed-8e00-17d7d50cd7b2',
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
-    version: 'WzI0LDFd',
+    updated_at: '2023-07-25T19:34:37.274Z',
+    version: 'Wzc4LDFd',
   },
   {
     attributes: {
@@ -623,8 +623,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
-    version: 'WzI2LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzI1LDFd',
   },
   {
     attributes: {
@@ -642,8 +642,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
-    version: 'WzI1LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzI2LDFd',
   },
   {
     attributes: {
@@ -661,8 +661,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T19:24:52.819Z',
-    version: 'WzQ1LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzI3LDFd',
   },
   {
     attributes: {
@@ -687,7 +687,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
+    updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzI4LDFd',
   },
   {
@@ -713,7 +713,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization-visbuilder',
-    updated_at: '2023-07-14T17:48:07.229Z',
+    updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzI5LDFd',
   },
   {
@@ -726,14 +726,14 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       version: 1,
       visState:
-        '{"title":"(Vega) Stacked extensions over time","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            date_histogram: {\\n              field: @timestamp\\n              fixed_interval: 3h\\n              time_zone: America/Los_Angeles\\n              min_doc_count: 1\\n            }\\n            aggs: {\\n              2: {\\n                terms: {\\n                  field: response.keyword\\n                  order: {\\n                    _count: desc\\n                  }\\n                  size: 5\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      flatten: [\\n        2.buckets\\n      ]\\n      as: [\\n        response_buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.key\\n      as: timestamp\\n    }\\n    {\\n      calculate: datum.response_buckets.doc_count\\n      as: count\\n    }\\n    {\\n      calculate: datum.response_buckets.key\\n      as: extension\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: bar\\n        tooltip: true\\n        width: { band: 1 }\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: timestamp\\n      type: temporal\\n      axis: {\\n        title: timestamp\\n      }\\n    }\\n    y: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    color: {\\n      field: extension\\n      type: nominal\\n    }\\n  }\\n}"}}',
+        '{"title":"(Vega) Stacked extensions over time","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            date_histogram: {\\n              field: @timestamp\\n              fixed_interval: 3h\\n              time_zone: America/Los_Angeles\\n              min_doc_count: 1\\n            }\\n            aggs: {\\n              2: {\\n                terms: {\\n                  field: response.keyword\\n                  order: {\\n                    _count: desc\\n                  }\\n                  size: 5\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      flatten: [\\n        2.buckets\\n      ]\\n      as: [\\n        response_buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.key\\n      as: timestamp\\n    }\\n    {\\n      calculate: datum.response_buckets.doc_count\\n      as: count\\n    }\\n    {\\n      calculate: datum.response_buckets.key\\n      as: extension\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: bar\\n        tooltip: true\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: timestamp\\n      type: temporal\\n      axis: {\\n        title: timestamp\\n      }\\n      timeUnit: {\\n        unit: yearmonthdatehours\\n        step: 3\\n      }\\n    }\\n    y: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    order: {\\n      field: extension\\n    }\\n    color: {\\n      field: extension\\n      type: nominal\\n    }\\n  }\\n}"}}',
     },
     id: '8b78d930-eb99-11ed-8e00-17d7d50cd7b2',
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
-    version: 'WzMwLDFd',
+    updated_at: '2023-07-25T19:03:15.669Z',
+    version: 'Wzc2LDFd',
   },
   {
     attributes: {
@@ -751,8 +751,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
-    version: 'WzMyLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzMxLDFd',
   },
   {
     attributes: {
@@ -770,8 +770,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T17:48:07.229Z',
-    version: 'WzMxLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzMyLDFd',
   },
   {
     attributes: {
@@ -789,8 +789,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T19:25:40.116Z',
-    version: 'WzQ2LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzMzLDFd',
   },
   {
     attributes: {
@@ -815,8 +815,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-14T18:38:22.207Z',
-    version: 'WzM5LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzM0LDFd',
   },
   {
     attributes: {
@@ -841,8 +841,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization-visbuilder',
-    updated_at: '2023-07-14T18:39:39.444Z',
-    version: 'WzQxLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzM1LDFd',
   },
   {
     attributes: {
@@ -854,14 +854,14 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       version: 1,
       visState:
-        '{"title":"(Vega) Top destination count","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            terms: {\\n              field: geo.dest\\n              order: {\\n                _count: desc\\n              }\\n              size: 5\\n            }\\n          }\\n        }\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      calculate: datum.key\\n      as: dest\\n    }\\n    {\\n      calculate: datum.doc_count\\n      as: count\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: bar\\n        tooltip: true\\n        width: { band: 1 }\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    y: {\\n      field: dest\\n      type: nominal\\n      axis: {\\n        title: Dest\\n      }\\n      sort: -x\\n    }\\n  }\\n}"}}',
+        '{"title":"(Vega) Top destination count","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            terms: {\\n              field: geo.dest\\n              order: {\\n                _count: desc\\n              }\\n              size: 5\\n            }\\n          }\\n        }\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      calculate: datum.key\\n      as: dest\\n    }\\n    {\\n      calculate: datum.doc_count\\n      as: count\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: bar\\n        tooltip: true\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    y: {\\n      field: dest\\n      type: nominal\\n      axis: {\\n        title: Dest\\n      }\\n      sort: -x\\n    }\\n  }\\n}"}}',
     },
     id: 'f0d162c0-227b-11ee-b88b-47a93b5c527c',
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T19:23:41.163Z',
-    version: 'WzQyLDFd',
+    updated_at: '2023-07-25T19:39:50.773Z',
+    version: 'WzgxLDFd',
   },
   {
     attributes: {
@@ -879,8 +879,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T19:27:42.915Z',
-    version: 'WzQ3LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzM3LDFd',
   },
   {
     attributes: {
@@ -898,8 +898,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T19:50:36.007Z',
-    version: 'WzU2LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzM4LDFd',
   },
   {
     attributes: {
@@ -924,8 +924,27 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-14T19:47:17.488Z',
-    version: 'WzUyLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzM5LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Vega) Source vs OS',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vega) Source vs OS","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          3: {\\n            terms: {\\n              field: geo.src\\n              order: {\\n                1: desc\\n              }\\n              size: 5\\n            }\\n            aggs: {\\n              1: {\\n                sum: {\\n                  field: memory\\n                }\\n              }\\n              2: {\\n                terms: {\\n                  field: machine.os.keyword\\n                  order: {\\n                    1: desc\\n                  }\\n                  size: 5\\n                }\\n                aggs: {\\n                  1: {\\n                    sum: {\\n                      field: memory\\n                    }\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.3\\n    }\\n  }\\n  transform: [\\n    {\\n      flatten: [\\n        buckets\\n      ]\\n      as: [\\n        source_buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.source_buckets.key\\n      as: source\\n    }\\n    {\\n      flatten: [\\n        source_buckets.2.buckets\\n      ]\\n      as: [\\n        os_buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.os_buckets[1].value\\n      as: metric\\n    }\\n    {\\n      calculate: datum.os_buckets.key\\n      as: os\\n    }\\n  ]\\n  mark: {\\n    type: rect\\n    tooltip: true\\n  }\\n  encoding: {\\n    x: {\\n      field: os\\n      type: nominal\\n      axis: {\\n        title: machine OS\\n      }\\n      sort: -y\\n    }\\n    y: {\\n      field: source\\n      type: nominal\\n      axis: {\\n        title: false\\n      }\\n      sort: -x\\n    }\\n    color: {\\n      field: metric\\n      type: quantitative\\n    }\\n  }\\n}"}}',
+    },
+    id: '29844a70-2a50-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-25T19:43:10.202Z',
+    version: 'WzgyLDFd',
   },
   {
     attributes: {
@@ -943,8 +962,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-15T00:21:00.849Z',
-    version: 'Wzg5LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzQxLDFd',
   },
   {
     attributes: {
@@ -969,8 +988,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-15T00:31:43.038Z',
-    version: 'WzkxLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzQyLDFd',
   },
   {
     attributes: {
@@ -994,8 +1013,27 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization-visbuilder',
-    updated_at: '2023-07-15T00:36:36.551Z',
-    version: 'WzkzLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzQzLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Vega) Bytes by request stats summary',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vega) Bytes by request stats summary","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          5: {\\n            terms: {\\n              field: request.keyword\\n              order: {\\n                _count: desc\\n              }\\n              size: 20\\n            }\\n            aggs: {\\n              2: {\\n                min: {\\n                  field: bytes\\n                }\\n              }\\n              3: {\\n                percentiles: {\\n                  field: bytes\\n                  percents: [\\n                    50\\n                  ]\\n                }\\n              }\\n              4: {\\n                max: {\\n                  field: bytes\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.5\\n    }\\n  }\\n  transform: [\\n    {\\n      flatten: [\\n        buckets\\n      ]\\n      as: [\\n        buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.buckets.key\\n      as: request\\n    }\\n    {\\n      calculate: datum.buckets.doc_count\\n      as: count\\n    }\\n    {\\n      calculate: datum.buckets[3].values[\\"50.0\\"]\\n      as: median_bytes\\n    }\\n    {\\n      calculate: datum.buckets[2].value\\n      as: min_bytes\\n    }\\n    {\\n      calculate: datum.buckets[4].value\\n      as: max_bytes\\n    }\\n    {\\n      window: [\\n        {\\n          op: row_number\\n          as: row_num\\n        }\\n      ]\\n    }\\n    {\\n      fold: [\\n        request\\n        count\\n        median_bytes\\n        min_bytes\\n        max_bytes\\n      ]\\n    }\\n  ]\\n  mark: {\\n    type: text\\n    limit: {\\n      expr: width/5\\n    }\\n  }\\n  encoding: {\\n    x: {\\n      field: key\\n      type: nominal\\n      axis: {\\n        orient: top\\n        title: null\\n        labelAngle: 0\\n        domain: false\\n        ticks: false\\n      }\\n      sort: -y\\n    }\\n    y: {\\n      field: row_num\\n      type: ordinal\\n      axis: null\\n      sort: {\\n        field: request\\n      }\\n    }\\n    text: {\\n      field: value\\n      type: nominal\\n    }\\n    tooltip: [\\n      {\\n        field: value\\n        type: nominal\\n      }\\n    ]\\n  }\\n  config: {\\n    view: {\\n      stroke: null\\n    }\\n  }\\n}"}}',
+    },
+    id: 'afdf7fa0-2a59-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-25T19:44:35.186Z',
+    version: 'WzgzLDFd',
   },
   {
     attributes: {
@@ -1004,17 +1042,17 @@ export const getSavedObjects = (): SavedObject[] => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(TSVB) Bytes by request stats summary',
-      uiStateJSON: '{}',
+      uiStateJSON: '{"table":{"sort":{"column":"_default_","order":"asc"}}}',
       version: 1,
       visState:
-        '{"title":"(TSVB) Bytes by request stats summary","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"table","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"everything","split_color_mode":"opensearchDashboards","metrics":[{"id":"c75df350-22a7-11ee-8c33-437692f62ad1","type":"count"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none"},{"id":"c9296480-22a7-11ee-8c33-437692f62ad1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"c9296481-22a7-11ee-8c33-437692f62ad1","type":"avg","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"ed1dcca0-22a7-11ee-8c33-437692f62ad1"}]},{"id":"caa3cf80-22a7-11ee-8c33-437692f62ad1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"caa3cf81-22a7-11ee-8c33-437692f62ad1","type":"min","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"eab16080-22a7-11ee-8c33-437692f62ad1"}]},{"id":"cc20d290-22a7-11ee-8c33-437692f62ad1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"cc20d291-22a7-11ee-8c33-437692f62ad1","type":"max","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"e6051680-22a7-11ee-8c33-437692f62ad1"}]}],"time_field":"","index_pattern":"","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_logs","default_timefield":"timestamp","isModelInvalid":false,"bar_color_rules":[{"id":"bdf75590-22a7-11ee-8c33-437692f62ad1"}],"pivot_id":"request.keyword","pivot_type":"string","pivot_rows":"20","time_range_mode":"entire_time_range"}}',
+        '{"title":"(TSVB) Bytes by request stats summary","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"table","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"everything","split_color_mode":"opensearchDashboards","metrics":[{"id":"c75df350-22a7-11ee-8c33-437692f62ad1","type":"count"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"dd26dcd0-2a61-11ee-9b78-47d8b94a8b48"}]},{"id":"c9296480-22a7-11ee-8c33-437692f62ad1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"c9296481-22a7-11ee-8c33-437692f62ad1","type":"avg","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"ed1dcca0-22a7-11ee-8c33-437692f62ad1"}]},{"id":"caa3cf80-22a7-11ee-8c33-437692f62ad1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"caa3cf81-22a7-11ee-8c33-437692f62ad1","type":"min","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"eab16080-22a7-11ee-8c33-437692f62ad1"}]},{"id":"cc20d290-22a7-11ee-8c33-437692f62ad1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"cc20d291-22a7-11ee-8c33-437692f62ad1","type":"max","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"e6051680-22a7-11ee-8c33-437692f62ad1"}]}],"time_field":"","index_pattern":"","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_logs","default_timefield":"timestamp","isModelInvalid":false,"bar_color_rules":[{"id":"bdf75590-22a7-11ee-8c33-437692f62ad1"}],"pivot_id":"request.keyword","pivot_type":"string","pivot_rows":"20","time_range_mode":"entire_time_range"}}',
     },
     id: '009fd930-22a8-11ee-b88b-47a93b5c527c',
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-15T00:39:05.539Z',
-    version: 'Wzk1LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzQ1LDFd',
   },
   {
     attributes: {
@@ -1032,8 +1070,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-15T00:09:04.654Z',
-    version: 'WzgxLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzQ2LDFd',
   },
   {
     attributes: {
@@ -1058,8 +1096,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-15T00:10:53.791Z',
-    version: 'WzgyLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzQ3LDFd',
   },
   {
     attributes: {
@@ -1084,8 +1122,27 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization-visbuilder',
-    updated_at: '2023-07-15T00:12:18.687Z',
-    version: 'WzgzLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzQ4LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Vega) Unique visitors',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vega) Unique visitors","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: _all\\n      body: {\\n        aggs: {\\n          1: {\\n            cardinality: {\\n              field: clientip\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.value\\n    }\\n  }\\n  params: [\\n    {\\n      name: metricFontSize\\n      value: 80\\n    }\\n  ]\\n  mark: {\\n    type: text\\n    fontSize: {\\n      expr: metricFontSize\\n    }\\n    fontWeight: 700\\n  }\\n  encoding: {\\n    text: {\\n      field: data\\n      type: nominal\\n    }\\n    x: {\\n      field: data\\n      type: nominal\\n      axis: {\\n        title: Unique count of clientip\\n        titleY: {\\n          expr: -height/2 + metricFontSize/2\\n        }\\n        titleFontSize: 16\\n        titleFontWeight: normal\\n        labels: false\\n        domain: false\\n        ticks: false\\n      }\\n    }\\n  }\\n  config: {\\n    view: {\\n      stroke: null\\n    }\\n  }\\n}"}}',
+    },
+    id: '249bf920-2a61-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-25T19:45:39.915Z',
+    version: 'Wzg0LDFd',
   },
   {
     attributes: {
@@ -1103,8 +1160,72 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-15T00:15:08.469Z',
-    version: 'Wzg1LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzUwLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Pie Charts Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Pie Charts Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Pie Charts"}}',
+    },
+    id: '8add5d90-2a44-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzUxLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Pie) Visitors by OS',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Pie) Visitors by OS","type":"pie","aggs":[{"id":"1","enabled":true,"type":"cardinality","params":{"field":"clientip"},"schema":"metric"},{"id":"2","enabled":true,"type":"terms","params":{"field":"machine.os.keyword","orderBy":"1","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"segment"}],"params":{"type":"pie","addTooltip":true,"addLegend":true,"legendPosition":"right","isDonut":true,"labels":{"show":false,"values":true,"last_level":true,"truncate":100}}}',
+    },
+    id: '7fd12620-2a44-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzUyLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Vega) Visitors by OS',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vega) Visitors by OS","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          2: {\\n            terms: {\\n              field: machine.os.keyword\\n              order: {\\n                1: desc\\n              }\\n              size: 5\\n            }\\n            aggs: {\\n              1: {\\n                cardinality: {\\n                  field: clientip\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.2\\n    }\\n  }\\n  transform: [\\n    {\\n      flatten: [\\n        buckets\\n      ]\\n      as: [\\n        os_buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.os_buckets.key\\n      as: os\\n    }\\n    {\\n      calculate: datum.os_buckets[1].value\\n      as: visitors\\n    }\\n    {\\n      joinaggregate: [\\n        {\\n          op: sum\\n          field: visitors\\n          as: total_visitors\\n        }\\n      ]\\n    }\\n    {\\n      calculate: datum.visitors / datum.total_visitors\\n      as: perc_visitors\\n    }\\n  ]\\n  mark: {\\n    type: arc\\n    tooltip: true\\n    innerRadius: {\\n      expr: min(height, width) * .375\\n    }\\n  }\\n  encoding: {\\n    theta: {\\n      field: visitors\\n      type: quantitative\\n      scale: {\\n        reverse: true\\n      }\\n    }\\n    order: {\\n      field: visitors\\n      type: quantitative\\n    }\\n    color: {\\n      field: os\\n      type: nominal\\n      sort: -theta\\n    }\\n    tooltip: [\\n      {\\n        field: os\\n      }\\n      {\\n        field: visitors\\n      }\\n      {\\n        field: perc_visitors\\n        title: % visitors\\n        format: .2%\\n      }\\n    ]\\n  }\\n}"}}',
+    },
+    id: '3e2d7da0-2a6b-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-25T19:53:03.733Z',
+    version: 'Wzg3LDFd',
   },
   {
     attributes: {
@@ -1122,8 +1243,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T19:55:27.916Z',
-    version: 'WzYwLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzU0LDFd',
   },
   {
     attributes: {
@@ -1148,8 +1269,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-14T20:06:49.269Z',
-    version: 'WzYyLDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzU1LDFd',
   },
   {
     attributes: {
@@ -1167,8 +1288,27 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T21:53:32.289Z',
-    version: 'Wzc1LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzU2LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Vega) Average machine RAM',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vega) Average machine RAM","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            avg: {\\n              field: machine.ram\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.value\\n    }\\n  }\\n  params: [\\n    {\\n      name: goal\\n      value: 20000000000\\n    }\\n    {\\n      name: offset\\n      value: 10\\n    }\\n    {\\n      name: metricFontSize\\n      value: 60\\n    }\\n    {\\n      name: range\\n      expr: PI*5/8\\n    }\\n    {\\n      name: innerRadius\\n      expr: min(height, width) * .375\\n    }\\n  ]\\n  transform: [\\n    {\\n      calculate: datum.data\\n      as: avg_machine_ram\\n    }\\n    {\\n      calculate: datum.avg_machine_ram / goal\\n      as: perc_goal\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: arc\\n        innerRadius: {\\n          expr: innerRadius + offset\\n        }\\n        outerRadius: {\\n          expr: (min(height, width) * .5) - offset\\n        }\\n      }\\n      encoding: {\\n        theta: {\\n          datum: {\\n            expr: goal\\n          }\\n          type: quantitative\\n          scale: {\\n            range: [\\n              {\\n                expr: -range\\n              }\\n              {\\n                expr: range\\n              }\\n            ]\\n          }\\n        }\\n        color: {\\n          value: rgba(105, 112, 125, 0.2)\\n        }\\n      }\\n    }\\n    {\\n      mark: {\\n        type: arc\\n        tooltip: true\\n        innerRadius: {\\n          expr: innerRadius\\n        }\\n      }\\n      encoding: {\\n        theta: {\\n          field: avg_machine_ram\\n          type: quantitative\\n          scale: {\\n            domain: [\\n              0\\n              {\\n                expr: goal\\n              }\\n            ]\\n            range: [\\n              {\\n                expr: -range\\n              }\\n              {\\n                expr: range\\n              }\\n            ]\\n          }\\n          axis: {\\n            ticks: true\\n          }\\n        }\\n        tooltip: [\\n          {\\n            field: avg_machine_ram\\n            title: Average RAM\\n          }\\n          {\\n            field: perc_goal\\n            title: % of goal\\n            format: .3%\\n          }\\n        ]\\n      }\\n    }\\n    {\\n      mark: {\\n        type: text\\n        fontSize: {\\n          expr: metricFontSize\\n        }\\n      }\\n      encoding: {\\n        text: {\\n          field: perc_goal\\n          type: nominal\\n          format: .3%\\n        }\\n        x: {\\n          field: perc_goal\\n          type: nominal\\n          axis: {\\n            title: Average RAM\\n            titleY: {\\n              expr: -height/2 - metricFontSize\\n            }\\n            titleFontSize: 16\\n            titleFontWeight: normal\\n            labels: false\\n            domain: false\\n            ticks: false\\n          }\\n        }\\n      }\\n    }\\n  ]\\n  config: {\\n    view: {\\n      stroke: null\\n    }\\n  }\\n}"}}',
+    },
+    id: 'd5bad060-2a7e-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-25T19:52:57.873Z',
+    version: 'Wzg2LDFd',
   },
   {
     attributes: {
@@ -1193,8 +1333,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-14T20:11:23.734Z',
-    version: 'WzY0LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzU4LDFd',
   },
   {
     attributes: {
@@ -1212,8 +1352,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T21:51:23.142Z',
-    version: 'Wzc0LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzU5LDFd',
   },
   {
     attributes: {
@@ -1231,8 +1371,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T19:50:16.928Z',
-    version: 'WzU1LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzYwLDFd',
   },
   {
     attributes: {
@@ -1257,8 +1397,34 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     ],
     type: 'visualization',
-    updated_at: '2023-07-14T19:52:41.319Z',
-    version: 'WzU3LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzYxLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Region Map) Destination count',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Region Map) Destination count","type":"region_map","aggs":[{"id":"1","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"2","enabled":true,"type":"terms","params":{"field":"geo.dest","orderBy":"1","order":"desc","size":50,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"segment"}],"params":{"addTooltip":true,"colorSchema":"Yellow to Red","emsHotLink":"?locale=en#file/world_countries","isDisplayWarning":true,"layerChosenByUser":"default","legendPosition":"bottomright","mapCenter":[0,0],"mapZoom":2,"outlineWeight":1,"selectedCustomJoinField":null,"selectedJoinField":{"description":"ISO 3166-1 alpha-2 Code","name":"iso2","type":"id"},"selectedLayer":{"attribution":"<a rel=\\"noreferrer noopener\\" href=\\"http://www.naturalearthdata.com/about/terms-of-use\\">Made with NaturalEarth</a>","created_at":"2017-04-26T17:12:15.978370","fields":[{"description":"ISO 3166-1 alpha-2 Code","name":"iso2","type":"id"},{"description":"ISO 3166-1 alpha-3 Code","name":"iso3","type":"id"},{"description":"Name","name":"name","type":"name"}],"format":{"type":"geojson"},"id":"world_countries","isEMS":true,"layerId":"elastic_maps_service.World Countries","name":"World Countries","origin":"elastic_maps_service"},"showAllShapes":true,"wms":{"enabled":false,"options":{"attribution":"","format":"image/png","layers":"","styles":"","transparent":true,"version":""},"selectedTmsLayer":{"attribution":"<a rel=\\"noreferrer noopener\\" href=\\"https://www.openstreetmap.org/copyright\\">Map data © OpenStreetMap contributors</a>","id":"road_map","maxZoom":14,"minZoom":0,"origin":"elastic_maps_service"},"url":""}}}',
+    },
+    id: 'eb268650-2a43-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzYyLDFd',
   },
   {
     attributes: {
@@ -1276,8 +1442,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T20:16:39.335Z',
-    version: 'WzY3LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzYzLDFd',
   },
   {
     attributes: {
@@ -1295,8 +1461,8 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T20:29:31.069Z',
-    version: 'WzY4LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzY0LDFd',
   },
   {
     attributes: {
@@ -1314,8 +1480,53 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: { visualization: '7.10.0' },
     references: [],
     type: 'visualization',
-    updated_at: '2023-07-14T21:56:34.270Z',
-    version: 'Wzc3LDFd',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzY1LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Tag Cloud Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Tag Cloud Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Tag Cloud"}}',
+    },
+    id: 'a58f3540-2a45-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzY2LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Tag Cloud) Requests',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Tag Cloud) Requests","type":"tagcloud","aggs":[{"id":"1","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"2","enabled":true,"type":"terms","params":{"field":"request.keyword","orderBy":"1","order":"desc","size":15,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"segment"}],"params":{"scale":"linear","orientation":"single","minFontSize":18,"maxFontSize":72,"showLabel":true}}',
+    },
+    id: '81017350-2a45-11ee-92de-ad1b6a4928e5',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-25T17:00:34.843Z',
+    version: 'WzY3LDFd',
   },
   {
     attributes: {
@@ -1326,7 +1537,7 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       optionsJSON: '{"hidePanelTitles":false,"useMargins":true}',
       panelsJSON:
-        '[{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea","w":48,"x":0,"y":0},"panelIndex":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea","version":"3.0.0","panelRefName":"panel_0"},{"embeddableConfig":{},"gridData":{"h":16,"i":"0c23bab6-f9a2-4bb6-b9d7-918b0879f18f","w":16,"x":0,"y":5},"panelIndex":"0c23bab6-f9a2-4bb6-b9d7-918b0879f18f","version":"3.0.0","panelRefName":"panel_1"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"5eb89f9b-4086-4508-b469-dc8a85aa9a1f","w":16,"x":16,"y":5},"panelIndex":"5eb89f9b-4086-4508-b469-dc8a85aa9a1f","version":"3.0.0","panelRefName":"panel_2"},{"embeddableConfig":{},"gridData":{"h":16,"i":"8402a6cc-8219-412e-9232-50d0e5a91735","w":16,"x":32,"y":5},"panelIndex":"8402a6cc-8219-412e-9232-50d0e5a91735","version":"3.0.0","panelRefName":"panel_3"},{"embeddableConfig":{},"gridData":{"h":16,"i":"1fb33b9c-7ea3-4113-84cc-4799d4398798","w":16,"x":0,"y":21},"panelIndex":"1fb33b9c-7ea3-4113-84cc-4799d4398798","version":"3.0.0","panelRefName":"panel_4"},{"embeddableConfig":{},"gridData":{"h":16,"i":"ea9035e7-1163-4662-a645-5aee8a3201ed","w":16,"x":16,"y":21},"panelIndex":"ea9035e7-1163-4662-a645-5aee8a3201ed","version":"3.0.0","panelRefName":"panel_5"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"eba90567-b720-43dc-9065-9097282c668e","w":48,"x":0,"y":37},"panelIndex":"eba90567-b720-43dc-9065-9097282c668e","version":"3.0.0","panelRefName":"panel_6"},{"embeddableConfig":{"table":null,"vis":{"legendOpen":true}},"gridData":{"h":16,"i":"f816a6c6-8fdd-405c-826e-58d0958d5f33","w":16,"x":0,"y":42},"panelIndex":"f816a6c6-8fdd-405c-826e-58d0958d5f33","version":"3.0.0","panelRefName":"panel_7"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"f49be7f3-7913-4c24-b98a-cdd7e8e3f893","w":16,"x":16,"y":42},"panelIndex":"f49be7f3-7913-4c24-b98a-cdd7e8e3f893","version":"3.0.0","panelRefName":"panel_8"},{"embeddableConfig":{},"gridData":{"h":16,"i":"cc261ebe-d39a-46d0-8de4-d3602889f8f6","w":16,"x":32,"y":42},"panelIndex":"cc261ebe-d39a-46d0-8de4-d3602889f8f6","version":"3.0.0","panelRefName":"panel_9"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9b57f39e-7fe2-47d1-ae25-afbbe1179525","w":16,"x":0,"y":58},"panelIndex":"9b57f39e-7fe2-47d1-ae25-afbbe1179525","version":"3.0.0","panelRefName":"panel_10"},{"embeddableConfig":{},"gridData":{"h":16,"i":"f1e579ac-2aff-4449-87db-21f1643e379d","w":16,"x":16,"y":58},"panelIndex":"f1e579ac-2aff-4449-87db-21f1643e379d","version":"3.0.0","panelRefName":"panel_11"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"06c8b217-3d11-431f-8591-b811046a6a16","w":48,"x":0,"y":74},"panelIndex":"06c8b217-3d11-431f-8591-b811046a6a16","version":"3.0.0","panelRefName":"panel_12"},{"embeddableConfig":{},"gridData":{"h":16,"i":"ab20d005-854e-4bf6-91ff-aedf5fc2712a","w":16,"x":0,"y":79},"panelIndex":"ab20d005-854e-4bf6-91ff-aedf5fc2712a","version":"3.0.0","panelRefName":"panel_13"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"0ab357d5-9918-442e-8a27-a6e3d61abb98","w":16,"x":16,"y":79},"panelIndex":"0ab357d5-9918-442e-8a27-a6e3d61abb98","version":"3.0.0","panelRefName":"panel_14"},{"embeddableConfig":{},"gridData":{"h":16,"i":"b60e8845-daf9-488a-9d7c-2e6c41d46ab4","w":16,"x":32,"y":79},"panelIndex":"b60e8845-daf9-488a-9d7c-2e6c41d46ab4","version":"3.0.0","panelRefName":"panel_15"},{"embeddableConfig":{},"gridData":{"h":16,"i":"6617b4f6-3227-4264-b87d-53f70fba6d79","w":16,"x":0,"y":95},"panelIndex":"6617b4f6-3227-4264-b87d-53f70fba6d79","version":"3.0.0","panelRefName":"panel_16"},{"embeddableConfig":{},"gridData":{"h":16,"i":"ea71d48b-a9b1-4822-b997-b5da294c7012","w":16,"x":16,"y":95},"panelIndex":"ea71d48b-a9b1-4822-b997-b5da294c7012","version":"3.0.0","panelRefName":"panel_17"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"6594da6a-87bd-4242-94db-9f04f8d961bb","w":48,"x":0,"y":111},"panelIndex":"6594da6a-87bd-4242-94db-9f04f8d961bb","version":"3.0.0","panelRefName":"panel_18"},{"embeddableConfig":{},"gridData":{"h":16,"i":"dca1fdd1-66ba-4dbb-94a9-033345da105d","w":16,"x":0,"y":116},"panelIndex":"dca1fdd1-66ba-4dbb-94a9-033345da105d","version":"3.0.0","panelRefName":"panel_19"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"98b7b7d9-0441-4f2a-a15b-d94f4eb3d61b","w":16,"x":16,"y":116},"panelIndex":"98b7b7d9-0441-4f2a-a15b-d94f4eb3d61b","version":"3.0.0","panelRefName":"panel_20"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9a4bd010-0c94-415d-9f21-3aabe24cb625","w":16,"x":32,"y":116},"panelIndex":"9a4bd010-0c94-415d-9f21-3aabe24cb625","version":"3.0.0","panelRefName":"panel_21"},{"embeddableConfig":{},"gridData":{"h":16,"i":"77b17b31-4a7c-4d79-8f02-3d5199fe3e15","w":16,"x":0,"y":132},"panelIndex":"77b17b31-4a7c-4d79-8f02-3d5199fe3e15","version":"3.0.0","panelRefName":"panel_22"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"6011b779-dc42-4e4c-b539-2c834057fb47","w":48,"x":0,"y":148},"panelIndex":"6011b779-dc42-4e4c-b539-2c834057fb47","version":"3.0.0","panelRefName":"panel_23"},{"embeddableConfig":{"vis":null},"gridData":{"h":16,"i":"d278b903-0f8e-4531-ba70-793f690d0b86","w":16,"x":0,"y":153},"panelIndex":"d278b903-0f8e-4531-ba70-793f690d0b86","version":"3.0.0","panelRefName":"panel_24"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"f76c7138-975d-46d0-841d-b5adaa12db4b","w":48,"x":0,"y":169},"panelIndex":"f76c7138-975d-46d0-841d-b5adaa12db4b","version":"3.0.0","panelRefName":"panel_25"},{"embeddableConfig":{},"gridData":{"h":16,"i":"3bab6531-5d55-45c6-ad95-8de643fd8726","w":16,"x":0,"y":174},"panelIndex":"3bab6531-5d55-45c6-ad95-8de643fd8726","version":"3.0.0","panelRefName":"panel_26"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"8d91d7c6-af0c-4dee-a5cc-657bdf5b1ad8","w":16,"x":16,"y":174},"panelIndex":"8d91d7c6-af0c-4dee-a5cc-657bdf5b1ad8","version":"3.0.0","panelRefName":"panel_27"},{"embeddableConfig":{"table":{"sort":{"column":"61ca57f1-469d-11e7-af02-69e470af7417","order":"desc"}}},"gridData":{"h":16,"i":"bf054c81-0e97-4ce3-94d2-cfc617286465","w":16,"x":0,"y":190},"panelIndex":"bf054c81-0e97-4ce3-94d2-cfc617286465","version":"3.0.0","panelRefName":"panel_28"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"fdfaa786-d74a-454e-b9f5-8031dc103055","w":48,"x":0,"y":206},"panelIndex":"fdfaa786-d74a-454e-b9f5-8031dc103055","version":"3.0.0","panelRefName":"panel_29"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9f0ef347-bcb1-4fd2-ab7e-7a1b2df9a8e4","w":16,"x":0,"y":211},"panelIndex":"9f0ef347-bcb1-4fd2-ab7e-7a1b2df9a8e4","version":"3.0.0","panelRefName":"panel_30"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"3a684545-ffdd-4f74-8f61-de8e09715f20","w":16,"x":16,"y":211},"panelIndex":"3a684545-ffdd-4f74-8f61-de8e09715f20","version":"3.0.0","panelRefName":"panel_31"},{"embeddableConfig":{},"gridData":{"h":16,"i":"2bffb85a-d5bf-4e64-a414-9f3d8dca3662","w":16,"x":0,"y":227},"panelIndex":"2bffb85a-d5bf-4e64-a414-9f3d8dca3662","version":"3.0.0","panelRefName":"panel_32"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"2af2604a-f9d9-4070-b171-25a8f9544da7","w":48,"x":0,"y":243},"panelIndex":"2af2604a-f9d9-4070-b171-25a8f9544da7","version":"3.0.0","panelRefName":"panel_33"},{"embeddableConfig":{"vis":null},"gridData":{"h":16,"i":"b72c4b77-abbb-4ad2-a117-c71f6e6ae100","w":16,"x":0,"y":248},"panelIndex":"b72c4b77-abbb-4ad2-a117-c71f6e6ae100","version":"3.0.0","panelRefName":"panel_34"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9f0a614d-59b8-4918-8b9e-cd6151268c82","w":16,"x":16,"y":248},"panelIndex":"9f0a614d-59b8-4918-8b9e-cd6151268c82","version":"3.0.0","panelRefName":"panel_35"},{"embeddableConfig":{"vis":null},"gridData":{"h":16,"i":"95e6cb30-3829-44eb-a40d-4fc81378d079","w":16,"x":0,"y":264},"panelIndex":"95e6cb30-3829-44eb-a40d-4fc81378d079","version":"3.0.0","panelRefName":"panel_36"},{"embeddableConfig":{},"gridData":{"h":16,"i":"df8c7a54-7312-4a5f-ad6d-9293b43624f9","w":16,"x":16,"y":264},"panelIndex":"df8c7a54-7312-4a5f-ad6d-9293b43624f9","version":"3.0.0","panelRefName":"panel_37"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"789c9ec0-cf5e-4abf-9927-d93f138fc6c5","w":48,"x":0,"y":280},"panelIndex":"789c9ec0-cf5e-4abf-9927-d93f138fc6c5","version":"3.0.0","panelRefName":"panel_38"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9b6398c7-b998-4e7a-8f8b-1ecbf3a6b374","w":16,"x":0,"y":285},"panelIndex":"9b6398c7-b998-4e7a-8f8b-1ecbf3a6b374","version":"3.0.0","panelRefName":"panel_39"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"fbd20e4e-6f57-4d0a-a39b-eec00ba78dc8","w":48,"x":0,"y":301},"panelIndex":"fbd20e4e-6f57-4d0a-a39b-eec00ba78dc8","version":"3.0.0","panelRefName":"panel_40"},{"embeddableConfig":{},"gridData":{"h":16,"i":"61fd2efa-3e87-458e-8a68-e64efadfb1e2","w":16,"x":0,"y":306},"panelIndex":"61fd2efa-3e87-458e-8a68-e64efadfb1e2","version":"3.0.0","panelRefName":"panel_41"},{"embeddableConfig":{},"gridData":{"h":16,"i":"1cb164b7-16eb-467b-bcad-7a59adcc5f38","w":16,"x":16,"y":306},"panelIndex":"1cb164b7-16eb-467b-bcad-7a59adcc5f38","version":"3.0.0","panelRefName":"panel_42"}]',
+        '[{"version":"3.0.0","gridData":{"x":0,"y":0,"w":48,"h":5,"i":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea"},"panelIndex":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_0"},{"version":"3.0.0","gridData":{"x":0,"y":5,"w":16,"h":16,"i":"0c23bab6-f9a2-4bb6-b9d7-918b0879f18f"},"panelIndex":"0c23bab6-f9a2-4bb6-b9d7-918b0879f18f","embeddableConfig":{},"panelRefName":"panel_1"},{"version":"3.0.0","gridData":{"x":16,"y":5,"w":16,"h":16,"i":"5eb89f9b-4086-4508-b469-dc8a85aa9a1f"},"panelIndex":"5eb89f9b-4086-4508-b469-dc8a85aa9a1f","embeddableConfig":{"uiState":{}},"panelRefName":"panel_2"},{"version":"3.0.0","gridData":{"x":32,"y":5,"w":16,"h":16,"i":"8402a6cc-8219-412e-9232-50d0e5a91735"},"panelIndex":"8402a6cc-8219-412e-9232-50d0e5a91735","embeddableConfig":{},"panelRefName":"panel_3"},{"version":"3.0.0","gridData":{"x":0,"y":21,"w":16,"h":16,"i":"1fb33b9c-7ea3-4113-84cc-4799d4398798"},"panelIndex":"1fb33b9c-7ea3-4113-84cc-4799d4398798","embeddableConfig":{},"panelRefName":"panel_4"},{"version":"3.0.0","gridData":{"x":16,"y":21,"w":16,"h":16,"i":"ea9035e7-1163-4662-a645-5aee8a3201ed"},"panelIndex":"ea9035e7-1163-4662-a645-5aee8a3201ed","embeddableConfig":{},"panelRefName":"panel_5"},{"version":"3.0.0","gridData":{"x":0,"y":37,"w":48,"h":5,"i":"eba90567-b720-43dc-9065-9097282c668e"},"panelIndex":"eba90567-b720-43dc-9065-9097282c668e","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_6"},{"version":"3.0.0","gridData":{"x":0,"y":42,"w":16,"h":16,"i":"f816a6c6-8fdd-405c-826e-58d0958d5f33"},"panelIndex":"f816a6c6-8fdd-405c-826e-58d0958d5f33","embeddableConfig":{"table":null,"vis":{"legendOpen":true}},"panelRefName":"panel_7"},{"version":"3.0.0","gridData":{"x":16,"y":42,"w":16,"h":16,"i":"f49be7f3-7913-4c24-b98a-cdd7e8e3f893"},"panelIndex":"f49be7f3-7913-4c24-b98a-cdd7e8e3f893","embeddableConfig":{"uiState":{}},"panelRefName":"panel_8"},{"version":"3.0.0","gridData":{"x":32,"y":42,"w":16,"h":16,"i":"cc261ebe-d39a-46d0-8de4-d3602889f8f6"},"panelIndex":"cc261ebe-d39a-46d0-8de4-d3602889f8f6","embeddableConfig":{},"panelRefName":"panel_9"},{"version":"3.0.0","gridData":{"x":0,"y":58,"w":16,"h":16,"i":"9b57f39e-7fe2-47d1-ae25-afbbe1179525"},"panelIndex":"9b57f39e-7fe2-47d1-ae25-afbbe1179525","embeddableConfig":{},"panelRefName":"panel_10"},{"version":"3.0.0","gridData":{"x":16,"y":58,"w":16,"h":16,"i":"f1e579ac-2aff-4449-87db-21f1643e379d"},"panelIndex":"f1e579ac-2aff-4449-87db-21f1643e379d","embeddableConfig":{},"panelRefName":"panel_11"},{"version":"3.0.0","gridData":{"x":0,"y":74,"w":48,"h":5,"i":"06c8b217-3d11-431f-8591-b811046a6a16"},"panelIndex":"06c8b217-3d11-431f-8591-b811046a6a16","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_12"},{"version":"3.0.0","gridData":{"x":0,"y":79,"w":16,"h":16,"i":"ab20d005-854e-4bf6-91ff-aedf5fc2712a"},"panelIndex":"ab20d005-854e-4bf6-91ff-aedf5fc2712a","embeddableConfig":{},"panelRefName":"panel_13"},{"version":"3.0.0","gridData":{"x":16,"y":79,"w":16,"h":16,"i":"0ab357d5-9918-442e-8a27-a6e3d61abb98"},"panelIndex":"0ab357d5-9918-442e-8a27-a6e3d61abb98","embeddableConfig":{"uiState":{}},"panelRefName":"panel_14"},{"version":"3.0.0","gridData":{"x":32,"y":79,"w":16,"h":16,"i":"b60e8845-daf9-488a-9d7c-2e6c41d46ab4"},"panelIndex":"b60e8845-daf9-488a-9d7c-2e6c41d46ab4","embeddableConfig":{},"panelRefName":"panel_15"},{"version":"3.0.0","gridData":{"x":0,"y":95,"w":16,"h":16,"i":"6617b4f6-3227-4264-b87d-53f70fba6d79"},"panelIndex":"6617b4f6-3227-4264-b87d-53f70fba6d79","embeddableConfig":{},"panelRefName":"panel_16"},{"version":"3.0.0","gridData":{"x":16,"y":95,"w":16,"h":16,"i":"ea71d48b-a9b1-4822-b997-b5da294c7012"},"panelIndex":"ea71d48b-a9b1-4822-b997-b5da294c7012","embeddableConfig":{},"panelRefName":"panel_17"},{"version":"3.0.0","gridData":{"x":0,"y":111,"w":48,"h":5,"i":"6594da6a-87bd-4242-94db-9f04f8d961bb"},"panelIndex":"6594da6a-87bd-4242-94db-9f04f8d961bb","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_18"},{"version":"3.0.0","gridData":{"x":0,"y":116,"w":16,"h":16,"i":"dca1fdd1-66ba-4dbb-94a9-033345da105d"},"panelIndex":"dca1fdd1-66ba-4dbb-94a9-033345da105d","embeddableConfig":{},"panelRefName":"panel_19"},{"version":"3.0.0","gridData":{"x":16,"y":116,"w":16,"h":16,"i":"98b7b7d9-0441-4f2a-a15b-d94f4eb3d61b"},"panelIndex":"98b7b7d9-0441-4f2a-a15b-d94f4eb3d61b","embeddableConfig":{"uiState":{}},"panelRefName":"panel_20"},{"version":"3.0.0","gridData":{"x":32,"y":116,"w":16,"h":16,"i":"9a4bd010-0c94-415d-9f21-3aabe24cb625"},"panelIndex":"9a4bd010-0c94-415d-9f21-3aabe24cb625","embeddableConfig":{},"panelRefName":"panel_21"},{"version":"3.0.0","gridData":{"x":0,"y":132,"w":16,"h":16,"i":"77b17b31-4a7c-4d79-8f02-3d5199fe3e15"},"panelIndex":"77b17b31-4a7c-4d79-8f02-3d5199fe3e15","embeddableConfig":{},"panelRefName":"panel_22"},{"version":"3.0.0","gridData":{"x":0,"y":148,"w":48,"h":5,"i":"6011b779-dc42-4e4c-b539-2c834057fb47"},"panelIndex":"6011b779-dc42-4e4c-b539-2c834057fb47","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_23"},{"version":"3.0.0","gridData":{"x":0,"y":153,"w":16,"h":16,"i":"d278b903-0f8e-4531-ba70-793f690d0b86"},"panelIndex":"d278b903-0f8e-4531-ba70-793f690d0b86","embeddableConfig":{"vis":null},"panelRefName":"panel_24"},{"version":"3.0.0","gridData":{"x":16,"y":153,"w":16,"h":16,"i":"b6d5a860-b78a-4ca4-b283-bb7223861ee8"},"panelIndex":"b6d5a860-b78a-4ca4-b283-bb7223861ee8","embeddableConfig":{},"panelRefName":"panel_25"},{"version":"3.0.0","gridData":{"x":0,"y":169,"w":48,"h":5,"i":"f76c7138-975d-46d0-841d-b5adaa12db4b"},"panelIndex":"f76c7138-975d-46d0-841d-b5adaa12db4b","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_26"},{"version":"3.0.0","gridData":{"x":0,"y":174,"w":16,"h":16,"i":"3bab6531-5d55-45c6-ad95-8de643fd8726"},"panelIndex":"3bab6531-5d55-45c6-ad95-8de643fd8726","embeddableConfig":{"table":null,"vis":{"columnsWidth":[{"colIndex":0,"width":102.4}],"sortColumn":{"colIndex":0,"direction":"asc"}}},"panelRefName":"panel_27"},{"version":"3.0.0","gridData":{"x":16,"y":174,"w":16,"h":16,"i":"8d91d7c6-af0c-4dee-a5cc-657bdf5b1ad8"},"panelIndex":"8d91d7c6-af0c-4dee-a5cc-657bdf5b1ad8","embeddableConfig":{"uiState":{"vis":{"sortColumn":{"colIndex":0,"direction":"asc"}}}},"panelRefName":"panel_28"},{"version":"3.0.0","gridData":{"x":32,"y":174,"w":16,"h":16,"i":"6c9ac433-1c03-4eee-8e4f-a2fb94669e4a"},"panelIndex":"6c9ac433-1c03-4eee-8e4f-a2fb94669e4a","embeddableConfig":{},"panelRefName":"panel_29"},{"version":"3.0.0","gridData":{"x":0,"y":190,"w":16,"h":16,"i":"bf054c81-0e97-4ce3-94d2-cfc617286465"},"panelIndex":"bf054c81-0e97-4ce3-94d2-cfc617286465","embeddableConfig":{"table":{"sort":{"column":"61ca57f1-469d-11e7-af02-69e470af7417","order":"desc"}}},"panelRefName":"panel_30"},{"version":"3.0.0","gridData":{"x":0,"y":206,"w":48,"h":5,"i":"fdfaa786-d74a-454e-b9f5-8031dc103055"},"panelIndex":"fdfaa786-d74a-454e-b9f5-8031dc103055","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_31"},{"version":"3.0.0","gridData":{"x":0,"y":211,"w":16,"h":16,"i":"9f0ef347-bcb1-4fd2-ab7e-7a1b2df9a8e4"},"panelIndex":"9f0ef347-bcb1-4fd2-ab7e-7a1b2df9a8e4","embeddableConfig":{},"panelRefName":"panel_32"},{"version":"3.0.0","gridData":{"x":16,"y":211,"w":16,"h":16,"i":"3a684545-ffdd-4f74-8f61-de8e09715f20"},"panelIndex":"3a684545-ffdd-4f74-8f61-de8e09715f20","embeddableConfig":{"uiState":{}},"panelRefName":"panel_33"},{"version":"3.0.0","gridData":{"x":32,"y":211,"w":16,"h":16,"i":"a31d3e61-7252-4649-8fc7-7b7f619901a6"},"panelIndex":"a31d3e61-7252-4649-8fc7-7b7f619901a6","embeddableConfig":{},"panelRefName":"panel_34"},{"version":"3.0.0","gridData":{"x":0,"y":227,"w":16,"h":16,"i":"2bffb85a-d5bf-4e64-a414-9f3d8dca3662"},"panelIndex":"2bffb85a-d5bf-4e64-a414-9f3d8dca3662","embeddableConfig":{},"panelRefName":"panel_35"},{"version":"3.0.0","gridData":{"x":0,"y":243,"w":48,"h":5,"i":"50fe3711-41a9-4b8b-8a5d-f2a450f7d0d3"},"panelIndex":"50fe3711-41a9-4b8b-8a5d-f2a450f7d0d3","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_36"},{"version":"3.0.0","gridData":{"x":0,"y":248,"w":16,"h":16,"i":"0273a589-6799-4144-9449-fdf186c13a9e"},"panelIndex":"0273a589-6799-4144-9449-fdf186c13a9e","embeddableConfig":{},"panelRefName":"panel_37"},{"version":"3.0.0","gridData":{"x":16,"y":248,"w":16,"h":16,"i":"a431a1d3-a2f8-4d73-b50b-bc9824e68202"},"panelIndex":"a431a1d3-a2f8-4d73-b50b-bc9824e68202","embeddableConfig":{},"panelRefName":"panel_38"},{"version":"3.0.0","gridData":{"x":0,"y":264,"w":48,"h":5,"i":"2af2604a-f9d9-4070-b171-25a8f9544da7"},"panelIndex":"2af2604a-f9d9-4070-b171-25a8f9544da7","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_39"},{"version":"3.0.0","gridData":{"x":0,"y":269,"w":16,"h":16,"i":"b72c4b77-abbb-4ad2-a117-c71f6e6ae100"},"panelIndex":"b72c4b77-abbb-4ad2-a117-c71f6e6ae100","embeddableConfig":{"vis":null},"panelRefName":"panel_40"},{"version":"3.0.0","gridData":{"x":16,"y":269,"w":16,"h":16,"i":"9f0a614d-59b8-4918-8b9e-cd6151268c82"},"panelIndex":"9f0a614d-59b8-4918-8b9e-cd6151268c82","embeddableConfig":{},"panelRefName":"panel_41"},{"version":"3.0.0","gridData":{"x":32,"y":269,"w":16,"h":16,"i":"b5d7b01d-5b74-4fbf-b7e6-df8d80c03fb9"},"panelIndex":"b5d7b01d-5b74-4fbf-b7e6-df8d80c03fb9","embeddableConfig":{},"panelRefName":"panel_42"},{"version":"3.0.0","gridData":{"x":0,"y":285,"w":16,"h":16,"i":"95e6cb30-3829-44eb-a40d-4fc81378d079"},"panelIndex":"95e6cb30-3829-44eb-a40d-4fc81378d079","embeddableConfig":{"vis":null},"panelRefName":"panel_43"},{"version":"3.0.0","gridData":{"x":16,"y":285,"w":16,"h":16,"i":"df8c7a54-7312-4a5f-ad6d-9293b43624f9"},"panelIndex":"df8c7a54-7312-4a5f-ad6d-9293b43624f9","embeddableConfig":{},"panelRefName":"panel_44"},{"version":"3.0.0","gridData":{"x":0,"y":301,"w":48,"h":5,"i":"789c9ec0-cf5e-4abf-9927-d93f138fc6c5"},"panelIndex":"789c9ec0-cf5e-4abf-9927-d93f138fc6c5","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_45"},{"version":"3.0.0","gridData":{"x":0,"y":306,"w":16,"h":16,"i":"9b6398c7-b998-4e7a-8f8b-1ecbf3a6b374"},"panelIndex":"9b6398c7-b998-4e7a-8f8b-1ecbf3a6b374","embeddableConfig":{"mapZoom":null,"mapCenter":null},"panelRefName":"panel_46"},{"version":"3.0.0","gridData":{"x":16,"y":306,"w":16,"h":16,"i":"e66cfa84-e9b8-410a-9841-42d889b67e68"},"panelIndex":"e66cfa84-e9b8-410a-9841-42d889b67e68","embeddableConfig":{"mapCenter":null,"mapZoom":null},"panelRefName":"panel_47"},{"version":"3.0.0","gridData":{"x":0,"y":322,"w":48,"h":5,"i":"fbd20e4e-6f57-4d0a-a39b-eec00ba78dc8"},"panelIndex":"fbd20e4e-6f57-4d0a-a39b-eec00ba78dc8","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_48"},{"version":"3.0.0","gridData":{"x":0,"y":327,"w":16,"h":16,"i":"61fd2efa-3e87-458e-8a68-e64efadfb1e2"},"panelIndex":"61fd2efa-3e87-458e-8a68-e64efadfb1e2","embeddableConfig":{},"panelRefName":"panel_49"},{"version":"3.0.0","gridData":{"x":16,"y":327,"w":16,"h":16,"i":"1cb164b7-16eb-467b-bcad-7a59adcc5f38"},"panelIndex":"1cb164b7-16eb-467b-bcad-7a59adcc5f38","embeddableConfig":{},"panelRefName":"panel_50"},{"version":"3.0.0","gridData":{"x":0,"y":343,"w":48,"h":5,"i":"353acf6d-bef6-408f-8703-bfe46444117a"},"panelIndex":"353acf6d-bef6-408f-8703-bfe46444117a","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_51"},{"version":"3.0.0","gridData":{"x":0,"y":348,"w":16,"h":16,"i":"0a64ca2e-c83f-4402-b639-10e86695f535"},"panelIndex":"0a64ca2e-c83f-4402-b639-10e86695f535","embeddableConfig":{},"panelRefName":"panel_52"}]',
       refreshInterval: { pause: true, value: 0 },
       timeFrom: 'now-7d',
       timeRestore: true,
@@ -1378,35 +1589,45 @@ export const getSavedObjects = (): SavedObject[] => [
       { id: '80e9a930-227c-11ee-b88b-47a93b5c527c', name: 'panel_22', type: 'visualization' },
       { id: '1507e780-227d-11ee-b88b-47a93b5c527c', name: 'panel_23', type: 'visualization' },
       { id: '3d034700-227f-11ee-b88b-47a93b5c527c', name: 'panel_24', type: 'visualization' },
-      { id: '6aed7840-22a5-11ee-b88b-47a93b5c527c', name: 'panel_25', type: 'visualization' },
-      { id: 'f8df8de0-22a6-11ee-b88b-47a93b5c527c', name: 'panel_26', type: 'visualization' },
+      { id: '29844a70-2a50-11ee-92de-ad1b6a4928e5', name: 'panel_25', type: 'visualization' },
+      { id: '6aed7840-22a5-11ee-b88b-47a93b5c527c', name: 'panel_26', type: 'visualization' },
+      { id: 'f8df8de0-22a6-11ee-b88b-47a93b5c527c', name: 'panel_27', type: 'visualization' },
       {
         id: 'a7d21570-22a7-11ee-b88b-47a93b5c527c',
-        name: 'panel_27',
+        name: 'panel_28',
         type: 'visualization-visbuilder',
       },
-      { id: '009fd930-22a8-11ee-b88b-47a93b5c527c', name: 'panel_28', type: 'visualization' },
-      { id: 'b24e65c0-22a3-11ee-b88b-47a93b5c527c', name: 'panel_29', type: 'visualization' },
-      { id: '104396f0-22a4-11ee-b88b-47a93b5c527c', name: 'panel_30', type: 'visualization' },
+      { id: 'afdf7fa0-2a59-11ee-92de-ad1b6a4928e5', name: 'panel_29', type: 'visualization' },
+      { id: '009fd930-22a8-11ee-b88b-47a93b5c527c', name: 'panel_30', type: 'visualization' },
+      { id: 'b24e65c0-22a3-11ee-b88b-47a93b5c527c', name: 'panel_31', type: 'visualization' },
+      { id: '104396f0-22a4-11ee-b88b-47a93b5c527c', name: 'panel_32', type: 'visualization' },
       {
         id: '42ddb0f0-22a4-11ee-b88b-47a93b5c527c',
-        name: 'panel_31',
+        name: 'panel_33',
         type: 'visualization-visbuilder',
       },
-      { id: '9a5e50b0-22a3-11ee-b88b-47a93b5c527c', name: 'panel_32', type: 'visualization' },
-      { id: '6154a6c0-2280-11ee-b88b-47a93b5c527c', name: 'panel_33', type: 'visualization' },
-      { id: 'f772de50-2281-11ee-b88b-47a93b5c527c', name: 'panel_34', type: 'visualization' },
-      { id: '4ec31b10-2288-11ee-b88b-47a93b5c527c', name: 'panel_35', type: 'visualization' },
-      { id: '9b0ae760-2282-11ee-b88b-47a93b5c527c', name: 'panel_36', type: 'visualization' },
-      { id: '19717e00-228f-11ee-b88b-47a93b5c527c', name: 'panel_37', type: 'visualization' },
-      { id: '93cc8830-227f-11ee-b88b-47a93b5c527c', name: 'panel_38', type: 'visualization' },
-      { id: 'fe07f770-227f-11ee-b88b-47a93b5c527c', name: 'panel_39', type: 'visualization' },
-      { id: '45146a10-2283-11ee-b88b-47a93b5c527c', name: 'panel_40', type: 'visualization' },
-      { id: '23250ed0-2285-11ee-b88b-47a93b5c527c', name: 'panel_41', type: 'visualization' },
-      { id: '4c6a47e0-2291-11ee-b88b-47a93b5c527c', name: 'panel_42', type: 'visualization' },
+      { id: '249bf920-2a61-11ee-92de-ad1b6a4928e5', name: 'panel_34', type: 'visualization' },
+      { id: '9a5e50b0-22a3-11ee-b88b-47a93b5c527c', name: 'panel_35', type: 'visualization' },
+      { id: '8add5d90-2a44-11ee-92de-ad1b6a4928e5', name: 'panel_36', type: 'visualization' },
+      { id: '7fd12620-2a44-11ee-92de-ad1b6a4928e5', name: 'panel_37', type: 'visualization' },
+      { id: '3e2d7da0-2a6b-11ee-92de-ad1b6a4928e5', name: 'panel_38', type: 'visualization' },
+      { id: '6154a6c0-2280-11ee-b88b-47a93b5c527c', name: 'panel_39', type: 'visualization' },
+      { id: 'f772de50-2281-11ee-b88b-47a93b5c527c', name: 'panel_40', type: 'visualization' },
+      { id: '4ec31b10-2288-11ee-b88b-47a93b5c527c', name: 'panel_41', type: 'visualization' },
+      { id: 'd5bad060-2a7e-11ee-92de-ad1b6a4928e5', name: 'panel_42', type: 'visualization' },
+      { id: '9b0ae760-2282-11ee-b88b-47a93b5c527c', name: 'panel_43', type: 'visualization' },
+      { id: '19717e00-228f-11ee-b88b-47a93b5c527c', name: 'panel_44', type: 'visualization' },
+      { id: '93cc8830-227f-11ee-b88b-47a93b5c527c', name: 'panel_45', type: 'visualization' },
+      { id: 'fe07f770-227f-11ee-b88b-47a93b5c527c', name: 'panel_46', type: 'visualization' },
+      { id: 'eb268650-2a43-11ee-92de-ad1b6a4928e5', name: 'panel_47', type: 'visualization' },
+      { id: '45146a10-2283-11ee-b88b-47a93b5c527c', name: 'panel_48', type: 'visualization' },
+      { id: '23250ed0-2285-11ee-b88b-47a93b5c527c', name: 'panel_49', type: 'visualization' },
+      { id: '4c6a47e0-2291-11ee-b88b-47a93b5c527c', name: 'panel_50', type: 'visualization' },
+      { id: 'a58f3540-2a45-11ee-92de-ad1b6a4928e5', name: 'panel_51', type: 'visualization' },
+      { id: '81017350-2a45-11ee-92de-ad1b6a4928e5', name: 'panel_52', type: 'visualization' },
     ],
     type: 'dashboard',
-    updated_at: '2023-07-15T00:43:10.001Z',
-    version: 'Wzk3LDFd',
+    updated_at: '2023-07-25T19:39:07.219Z',
+    version: 'WzgwLDFd',
   },
 ];
