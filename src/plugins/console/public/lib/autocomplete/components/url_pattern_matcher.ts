@@ -38,6 +38,17 @@ import {
 } from './index';
 
 import { FullRequestComponent } from './full_request_component';
+import { Endpoint, UrlComponent, UrlObjectComponent } from '../types';
+import { ComponentFactory, ParametrizedComponentFactories } from '../../osd/osd';
+
+interface MethodData {
+  rootComponent: SharedComponent;
+  parametrizedComponentFactories: ParametrizedComponentFactories | DefaultComponentFactories;
+}
+
+interface DefaultComponentFactories {
+  getComponent: () => void;
+}
 
 /**
  * @param parametrizedComponentFactories a dict of the following structure
@@ -50,13 +61,15 @@ import { FullRequestComponent } from './full_request_component';
  * @constructor
  */
 export class UrlPatternMatcher {
+  private methodsData: Record<string, MethodData>;
   // This is not really a component, just a handy container to make iteration logic simpler
-  constructor(parametrizedComponentFactories) {
+  constructor(parametrizedComponentFactories?: ParametrizedComponentFactories) {
     // We'll group endpoints by the methods which are attached to them,
-    //to avoid suggesting endpoints that are incompatible with the
-    //method that the user has entered.
+    // to avoid suggesting endpoints that are incompatible with the
+    // method that the user has entered.
+    this.methodsData = {};
     ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach((method) => {
-      this[method] = {
+      this.methodsData[method] = {
         rootComponent: new SharedComponent('ROOT'),
         parametrizedComponentFactories: parametrizedComponentFactories || {
           getComponent: () => {},
@@ -64,10 +77,10 @@ export class UrlPatternMatcher {
       };
     });
   }
-  addEndpoint(pattern, endpoint) {
+  addEndpoint(pattern: string, endpoint: Endpoint) {
     endpoint.methods.forEach((method) => {
-      let c;
-      let activeComponent = this[method].rootComponent;
+      let c: UrlComponent | ComponentFactory;
+      let activeComponent = this.methodsData[method].rootComponent;
       if (endpoint.template) {
         new FullRequestComponent(pattern + '[body]', activeComponent, endpoint.template);
       }
@@ -78,7 +91,7 @@ export class UrlPatternMatcher {
           part = part.substr(1, part.length - 2);
           if (activeComponent.getComponent(part)) {
             // we already have something for this, reuse
-            activeComponent = activeComponent.getComponent(part);
+            activeComponent = activeComponent.getComponent(part) as SharedComponent;
             return;
           }
           // a new path, resolve.
@@ -87,27 +100,32 @@ export class UrlPatternMatcher {
             // endpoint specific. Support list
             if (Array.isArray(c)) {
               c = new ListComponent(part, c, activeComponent);
-            } else if (_.isObject(c) && c.type === 'list') {
-              c = new ListComponent(
-                part,
-                c.list,
-                activeComponent,
-                c.multiValued,
-                c.allow_non_valid
-              );
+            } else if (_.isObject(c)) {
+              const objComponent = c as UrlObjectComponent;
+              if (objComponent.type === 'list') {
+                c = new ListComponent(
+                  part,
+                  objComponent.list,
+                  activeComponent,
+                  objComponent.multiValued,
+                  objComponent.allow_non_valid
+                );
+              }
             } else {
+              // eslint-disable-next-line no-console
               console.warn('incorrectly configured url component ', part, ' in endpoint', endpoint);
               c = new SharedComponent(part);
             }
-          } else if ((c = this[method].parametrizedComponentFactories.getComponent(part))) {
+          } else if (this.methodsData[method].parametrizedComponentFactories.getComponent(part)) {
             // c is a f
+            c = this.methodsData[method].parametrizedComponentFactories.getComponent(part)!;
             c = c(part, activeComponent);
           } else {
             // just accept whatever with not suggestions
             c = new SimpleParamComponent(part, activeComponent);
           }
 
-          activeComponent = c;
+          activeComponent = c as SharedComponent;
         } else {
           // not pattern
           let lookAhead = part;
@@ -123,8 +141,8 @@ export class UrlPatternMatcher {
 
           if (activeComponent.getComponent(part)) {
             // we already have something for this, reuse
-            activeComponent = activeComponent.getComponent(part);
-            activeComponent.addOption(lookAhead);
+            activeComponent = activeComponent.getComponent(part)!;
+            (activeComponent as ConstantComponent).addOption(lookAhead);
           } else {
             c = new ConstantComponent(part, activeComponent, lookAhead);
             activeComponent = c;
@@ -136,8 +154,8 @@ export class UrlPatternMatcher {
     });
   }
 
-  getTopLevelComponents = function (method) {
-    const methodRoot = this[method];
+  getTopLevelComponents = (method: string) => {
+    const methodRoot = this.methodsData[method];
     if (!methodRoot) {
       return [];
     }

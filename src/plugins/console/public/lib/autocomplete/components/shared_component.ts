@@ -28,27 +28,29 @@
  * under the License.
  */
 
-import { SharedComponent } from './shared_component';
-export class ConditionalProxy extends SharedComponent {
-  constructor(predicate, delegate) {
-    super('__condition');
-    this.predicate = predicate;
-    this.delegate = delegate;
+import { AutocompleteComponent } from './autocomplete_component';
+export class SharedComponent extends AutocompleteComponent {
+  _nextDict: { [key: string]: SharedComponent[] };
+  _parent?: SharedComponent | null;
+
+  constructor(name: string, parent?: SharedComponent | null) {
+    super(name);
+    this._nextDict = {};
+    if (parent) {
+      parent.addComponent(this);
+    }
+    // for debugging purposes
+    this._parent = parent;
+  }
+  /* return the first component with a given name */
+  getComponent(name: string): SharedComponent | undefined {
+    return (this._nextDict[name] || [undefined])[0];
   }
 
-  getTerms(context, editor) {
-    if (this.predicate(context, editor)) {
-      return this.delegate.getTerms(context, editor);
-    } else {
-      return null;
-    }
-  }
-
-  match(token, context, editor) {
-    if (this.predicate(context, editor)) {
-      return this.delegate.match(token, context, editor);
-    } else {
-      return false;
-    }
+  addComponent(component: SharedComponent): void {
+    const current = this._nextDict[component.name] || [];
+    current.push(component);
+    this._nextDict[component.name] = current;
+    this.next = ([] as SharedComponent[]).concat(...Object.values(this._nextDict));
   }
 }

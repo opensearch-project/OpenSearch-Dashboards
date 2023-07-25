@@ -28,29 +28,28 @@
  * under the License.
  */
 
-import { SharedComponent } from './shared_component';
-export class GlobalOnlyComponent extends SharedComponent {
-  getTerms() {
-    return null;
+import _ from 'lodash';
+import { getIndices } from '../../mappings/mappings';
+import { ListComponent } from './list_component';
+function nonValidIndexType(token: string) {
+  return !(token === '_all' || token[0] !== '_');
+}
+export class IndexAutocompleteComponent extends ListComponent {
+  constructor(name: string, parent: ListComponent, multiValued: boolean) {
+    super(name, getIndices, parent, multiValued);
+  }
+  validateTokens(tokens: string[]) {
+    if (!this.multiValued && tokens.length > 1) {
+      return false;
+    }
+    return !_.find(tokens, nonValidIndexType);
   }
 
-  match(token, context) {
-    const result = {
-      next: [],
-    };
+  getDefaultTermMeta() {
+    return 'index';
+  }
 
-    // try to link to GLOBAL rules
-    const globalRules = context.globalComponentResolver(token, false);
-    if (globalRules) {
-      result.next.push.apply(result.next, globalRules);
-    }
-
-    if (result.next.length) {
-      return result;
-    }
-    // just loop back to us
-    result.next = [this];
-
-    return result;
+  getContextKey() {
+    return 'indices';
   }
 }

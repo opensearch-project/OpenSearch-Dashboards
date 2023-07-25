@@ -28,33 +28,36 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext } from '../types';
+import { AutocompleteComponent } from './autocomplete_component';
 import { SharedComponent } from './shared_component';
-export class ConstantComponent extends SharedComponent {
-  constructor(name, parent, options) {
-    super(name, parent);
-    if (_.isString(options)) {
-      options = [options];
-    }
-    this.options = options || [name];
-  }
-  getTerms() {
-    return this.options;
+
+type PredicateFunction = (context: AutoCompleteContext, editor: CoreEditor) => boolean;
+
+export class ConditionalProxy extends SharedComponent {
+  predicate: PredicateFunction;
+  delegate: AutocompleteComponent;
+
+  constructor(predicate: PredicateFunction, delegate: AutocompleteComponent) {
+    super('__condition');
+    this.predicate = predicate;
+    this.delegate = delegate;
   }
 
-  addOption(options) {
-    if (!Array.isArray(options)) {
-      options = [options];
-    }
-
-    [].push.apply(this.options, options);
-    this.options = _.uniq(this.options);
-  }
-  match(token, context, editor) {
-    if (token !== this.name) {
+  getTerms(context: AutoCompleteContext, editor: CoreEditor) {
+    if (this.predicate(context, editor)) {
+      return this.delegate.getTerms(context, editor);
+    } else {
       return null;
     }
+  }
 
-    return super.match(token, context, editor);
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    if (this.predicate(context, editor)) {
+      return this.delegate.match(token, context, editor);
+    } else {
+      return false;
+    }
   }
 }

@@ -28,41 +28,28 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { ConstantComponent, ListComponent, SharedComponent } from './components';
-
-export class ParamComponent extends ConstantComponent {
-  constructor(name, parent, description) {
-    super(name, parent);
-    this.description = description;
-  }
-  getTerms() {
-    const t = { name: this.name };
-    if (this.description === '__flag__') {
-      t.meta = 'flag';
-    } else {
-      t.meta = 'param';
-      t.insertValue = this.name + '=';
-    }
-    return [t];
-  }
-}
+import { ConstantComponent, ListComponent, ParamComponent, SharedComponent } from './components';
 
 export class UrlParams {
-  constructor(description, defaults) {
+  rootComponent: SharedComponent;
+
+  constructor(description: Record<string, unknown>, defaults?: Record<string, unknown>) {
     // This is not really a component, just a handy container to make iteration logic simpler
     this.rootComponent = new SharedComponent('ROOT');
-    if (_.isUndefined(defaults)) {
+    if (defaults === undefined) {
       defaults = {
         pretty: '__flag__',
         format: ['json', 'yaml'],
         filter_path: '',
       };
     }
-    description = _.clone(description || {});
-    _.defaults(description, defaults);
-    _.each(description, (pDescription, param) => {
-      const component = new ParamComponent(param, this.rootComponent, pDescription);
+    description = { ...(description || {}), ...defaults };
+    Object.entries(description).forEach(([param, pDescription]) => {
+      const component = new ParamComponent(
+        param,
+        this.rootComponent as ConstantComponent,
+        pDescription
+      );
       if (Array.isArray(pDescription)) {
         new ListComponent(param, pDescription, component);
       } else if (pDescription === '__flag__') {

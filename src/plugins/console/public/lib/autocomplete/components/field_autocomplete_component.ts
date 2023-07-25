@@ -28,14 +28,36 @@
  * under the License.
  */
 
-import { getTemplates } from '../../mappings/mappings';
+import _ from 'lodash';
+import { getFields } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
+import { AutoCompleteContext } from '../types';
 
-export class TemplateAutocompleteComponent extends ListComponent {
-  constructor(name, parent) {
-    super(name, getTemplates, parent, true, true);
+function FieldGenerator(context: AutoCompleteContext) {
+  return _.map(getFields(context.indices, context.types), function (field) {
+    return { name: field.name, meta: field.type };
+  });
+}
+
+export class FieldAutocompleteComponent extends ListComponent {
+  constructor(name: string, parent: ListComponent, multiValued: boolean) {
+    super(name, FieldGenerator, parent, multiValued);
   }
+  validateTokens(tokens: string[]) {
+    if (!this.multiValued && tokens.length > 1) {
+      return false;
+    }
+
+    return !_.find(tokens, function (token) {
+      return token.match(/[^\w.?*]/);
+    });
+  }
+
+  getDefaultTermMeta() {
+    return 'field';
+  }
+
   getContextKey() {
-    return 'template';
+    return 'fields';
   }
 }
