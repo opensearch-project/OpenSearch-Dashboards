@@ -54,12 +54,14 @@ export const isEligibleForVisLayers = (vis: Vis, uiSettingsClient?: IUiSettingsC
 
 /**
  * Using a SavedAugmentVisLoader, fetch all saved objects that are of 'augment-vis' type.
- * Filter by vis ID by passing in a 'hasReferences' obj with the vis ID to the findAll() fn call.
+ * Filter by vis ID by passing in a 'hasReferences' obj with the vis ID to the findAll() fn call,
+ * and optionally by plugin resource ID list, if specified.
  */
 export const getAugmentVisSavedObjs = async (
   visId: string | undefined,
   loader: SavedAugmentVisLoader | undefined,
-  uiSettings?: IUiSettingsClient | undefined
+  uiSettings?: IUiSettingsClient | undefined,
+  pluginResourceIds?: string[] | undefined
 ): Promise<ISavedAugmentVis[] | Error> => {
   // Using optional services provided, or the built-in services from this plugin
   const config = uiSettings !== undefined ? uiSettings : getUISettings();
@@ -70,10 +72,20 @@ export const getAugmentVisSavedObjs = async (
     );
   }
   try {
-    const resp = await loader?.findAll('', 100, [], {
-      type: 'visualization',
-      id: visId as string,
-    });
+    // If there is specified plugin resource IDs, add a search string and search field
+    // into findAll() fn call
+    const pluginResourceIdsSpecified =
+      pluginResourceIds !== undefined && pluginResourceIds.length > 0;
+    const resp = await loader?.findAll(
+      pluginResourceIdsSpecified ? pluginResourceIds.join('|') : '',
+      100,
+      [],
+      {
+        type: 'visualization',
+        id: visId as string,
+      },
+      pluginResourceIdsSpecified ? ['pluginResource.id'] : []
+    );
     return (get(resp, 'hits', []) as any[]) as ISavedAugmentVis[];
   } catch (e) {
     return [] as ISavedAugmentVis[];
