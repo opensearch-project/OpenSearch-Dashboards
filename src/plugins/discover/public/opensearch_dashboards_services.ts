@@ -74,11 +74,6 @@ export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] = createGe
   AppMountParameters['setHeaderActionMenu']
 >('headerActionMenuMounter');
 
-export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
-  setTrackedUrl: (url: string) => void;
-  restorePreviousUrl: () => void;
-}>('urlTracker');
-
 export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
   'DocViewsRegistry'
 );

@@ -5,7 +5,6 @@
 
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 import {
   AppMountParameters,
@@ -33,7 +32,7 @@ import rison from 'rison-node';
 import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
-import { createOsdUrlTracker, url } from '../../opensearch_dashboards_utils/public';
+import { url } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
@@ -45,12 +44,10 @@ import { JsonCodeBlock } from './application/components/json_code_block/json_cod
 import {
   setDocViewsRegistry,
   setDocViewsLinksRegistry,
-  setUrlTracker,
   setServices,
   setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
-  getScopedHistory,
   syncHistoryLocations,
   getServices,
 } from './opensearch_dashboards_services';
@@ -63,13 +60,14 @@ import {
 } from './url_generator';
 // import { SearchEmbeddableFactory } from './application/embeddable';
 import { NEW_DISCOVER_APP, PLUGIN_ID } from '../common';
-import { DataExplorerPluginSetup, ViewRedirectParams } from '../../data_explorer/public';
+import { DataExplorerPluginSetup } from '../../data_explorer/public';
 import { registerFeature } from './register_feature';
 import {
   DiscoverState,
   discoverSlice,
   getPreloadedState,
 } from './application/utils/state_management/discover_slice';
+import { getRedirectState } from './get_redirect_state';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -245,42 +243,6 @@ export class DiscoverPlugin
       order: 2,
     });
 
-    const {
-      appMounted,
-      appUnMounted,
-      stop: stopUrlTracker,
-      setActiveUrl: setTrackedUrl,
-      restorePreviousUrl,
-    } = createOsdUrlTracker({
-      // we pass getter here instead of plain `history`,
-      // so history is lazily created (when app is mounted)
-      // this prevents redundant `#` when not in discover app
-      getHistory: getScopedHistory,
-      baseUrl,
-      defaultSubUrl: '#/',
-      storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
-      navLinkUpdater$: this.appStateUpdater,
-      toastNotifications: core.notifications.toasts,
-      stateParams: [
-        {
-          osdUrlKey: '_g',
-          stateUpdate$: plugins.data.query.state$.pipe(
-            filter(
-              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-            ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
-          ),
-        },
-      ],
-    });
-    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
-    this.stopUrlTracking = () => {
-      stopUrlTracker();
-    };
-
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
@@ -299,7 +261,6 @@ export class DiscoverPlugin
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
-        appMounted();
         const {
           core: {
             application: { navigateToApp },
@@ -308,6 +269,8 @@ export class DiscoverPlugin
 
         // This is for instances where the user navigates to the app from the application nav menu
         const path = window.location.hash;
+        const redirectState = getRedirectState(path);
+        // debugger;
         const v2Enabled = await core.uiSettings.get<boolean>(NEW_DISCOVER_APP);
         if (!v2Enabled) {
           navigateToApp('discoverLegacy', {
@@ -318,15 +281,11 @@ export class DiscoverPlugin
           navigateToApp('data-explorer', {
             replace: true,
             path: `/${PLUGIN_ID}`,
-            state: {
-              path,
-            } as ViewRedirectParams,
+            state: redirectState,
           });
         }
 
-        return () => {
-          appUnMounted();
-        };
+        return () => {};
       },
     });
 
@@ -379,7 +338,7 @@ export class DiscoverPlugin
         slice: discoverSlice,
       },
       shouldShow: () => true,
-      // ViewCompon
+      // ViewComponent
       Canvas: lazy(() => import('./application/view_components/canvas')),
       Panel: lazy(() => import('./application/view_components/panel')),
     });

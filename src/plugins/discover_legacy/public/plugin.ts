@@ -89,7 +89,6 @@ import {
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
 import { AppNavLinkStatus } from '../../../core/public';
-import { ViewRedirectParams } from '../../data_explorer/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -331,12 +330,9 @@ export class DiscoverPlugin
 
         const v2Enabled = core.uiSettings.get<boolean>(NEW_DISCOVER_APP);
         if (v2Enabled) {
-          navigateToApp('data-explorer', {
+          navigateToApp('discover', {
             replace: true,
-            path: `/discover`,
-            state: {
-              path,
-            } as ViewRedirectParams,
+            path,
           });
         }
         setScopedHistory(params.history);

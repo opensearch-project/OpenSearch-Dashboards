@@ -38,6 +38,7 @@ export const Panel = () => {
     <DiscoverSidebar
       columns={columns || []}
       fieldCounts={
+        // TODO: this is a hack to get the sidebar to render. Will be fixed when the table and its associated datafetching is added.
         indexPattern?.fields.reduce(
           (acc, field) => ({ ...acc, [field.name]: 1 }),
           {} as Record<string, number>
