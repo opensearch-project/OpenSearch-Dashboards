@@ -513,19 +513,14 @@ export class VisualizeEmbeddable
    * e.g., generating other vis embeddables in the view events flyout.
    */
   public async populateVisLayers(): Promise<void> {
-    const visLayers = await this.fetchVisLayers();
-    this.visLayers =
-      this.visAugmenterConfig?.visLayerResourceIds === undefined
-        ? visLayers
-        : visLayers.filter((visLayer) =>
-            this.visAugmenterConfig.visLayerResourceIds.includes(visLayer.pluginResource.id)
-          );
+    this.visLayers = await this.fetchVisLayers();
   }
 
   /**
    * Collects any VisLayers from plugin expressions functions
-   * by fetching all AugmentVisSavedObjects that match the vis
-   * saved object ID.
+   * by fetching all AugmentVisSavedObjects that meets below criteria:
+   * - includes a reference to the vis saved object id
+   * - includes any of the plugin resource IDs, if specified
    */
   fetchVisLayers = async (): Promise<VisLayers> => {
     try {
@@ -541,7 +536,9 @@ export class VisualizeEmbeddable
       const aborted = get(this.abortController, 'signal.aborted', false) as boolean;
       const augmentVisSavedObjs = await getAugmentVisSavedObjs(
         this.vis.id,
-        this.savedAugmentVisLoader
+        this.savedAugmentVisLoader,
+        undefined,
+        this.visAugmenterConfig?.visLayerResourceIds
       );
 
       if (!isEmpty(augmentVisSavedObjs) && !aborted && isEligibleForVisLayers(this.vis)) {
