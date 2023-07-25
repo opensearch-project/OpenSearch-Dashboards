@@ -57,8 +57,9 @@ import { getHistory } from './opensearch_dashboards_services';
 import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { DataExplorerServices } from '../../data_explorer/public';
 
-export interface DiscoverServices {
+export interface BuildDiscoverServices {
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
   chrome: ChromeStart;
@@ -87,7 +88,7 @@ export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext
-): DiscoverServices {
+): BuildDiscoverServices {
   const services: SavedObjectOpenSearchDashboardsServices = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
@@ -124,3 +125,5 @@ export function buildServices(
     visualizations: plugins.visualizations,
   };
 }
+
+export type DiscoverServices = BuildDiscoverServices & DataExplorerServices;

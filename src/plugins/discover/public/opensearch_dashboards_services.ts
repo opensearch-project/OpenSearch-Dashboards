@@ -32,7 +32,7 @@ import _ from 'lodash';
 import { createHashHistory } from 'history';
 import { ScopedHistory, AppMountParameters } from 'opensearch-dashboards/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { DiscoverServices } from './build_services';
+import { BuildDiscoverServices, DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { search } from '../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
@@ -56,7 +56,7 @@ export function getAngularModule() {
   return angularModule;
 }
 
-export function getServices(): DiscoverServices {
+export function getServices(): BuildDiscoverServices {
   if (!services) {
     throw new Error('Discover services are not yet available');
   }

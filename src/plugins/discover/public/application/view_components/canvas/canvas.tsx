@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AppMountParameters } from '../../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverServices } from '../../../build_services';
 import { TopNav } from './top_nav';
 import { updateState, useDispatch, useSelector } from '../../utils/state_management';
+import { connectStorageToQueryState, opensearchFilters } from '../../../../../data/public';
 
 interface CanvasProps {
   opts: {
@@ -20,6 +21,14 @@ export const Canvas = ({ opts }: CanvasProps) => {
   const { services } = useOpenSearchDashboards<DiscoverServices>();
   const interval = useSelector((state) => state.discover.interval);
   const dispatch = useDispatch();
+
+  // Connect the query service to the url state
+  useEffect(() => {
+    connectStorageToQueryState(services.data.query, services.osdUrlStateStorage, {
+      filters: opensearchFilters.FilterStateStore.APP_STATE,
+      query: true,
+    });
+  }, [services.data.query, services.osdUrlStateStorage, services.uiSettings]);
 
   return (
     <div>
