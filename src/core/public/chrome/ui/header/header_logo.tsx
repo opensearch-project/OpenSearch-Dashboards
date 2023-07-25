@@ -29,12 +29,14 @@
  */
 
 import './header_logo.scss';
+import { EuiHeaderProps } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeNavLink } from '../..';
 import { ChromeBranding } from '../../chrome_service';
+import { HttpStart } from '../../../http';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -96,32 +98,45 @@ function onClick(
   }
 }
 
-export const DEFAULT_DARK_LOGO = 'opensearch_logo_dark_mode.svg';
-export const DEFAULT_LOGO = 'opensearch_logo_default_mode.svg';
+export const DEFAULT_LOGO = 'ui/logos/opensearch_dashboards.svg';
+export const DEFAULT_DARK_LOGO = 'ui/logos/opensearch_dashboards_darkmode.svg';
+
 interface Props {
   href: string;
   navLinks$: Observable<ChromeNavLink[]>;
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
   branding: ChromeBranding;
+  basePath: HttpStart['basePath'];
+  // What background is the logo appearing on; this is independent of theme:darkMode
+  theme?: EuiHeaderProps['theme'];
 }
 
-export function HeaderLogo({ href, navigateToApp, branding, ...observables }: Props) {
+export function HeaderLogo({
+  href,
+  navigateToApp,
+  branding,
+  basePath,
+  theme = 'default',
+  ...observables
+}: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
   const {
-    darkMode,
-    assetFolderUrl = '',
-    logo = {},
+    logo: { defaultUrl: customLogoUrl, darkModeUrl: customDarkLogoUrl } = {},
     applicationTitle = 'opensearch dashboards',
   } = branding;
-  const { defaultUrl: logoUrl, darkModeUrl: darkLogoUrl } = logo;
 
-  const customLogo = darkMode ? darkLogoUrl ?? logoUrl : logoUrl;
-  const defaultLogo = darkMode ? DEFAULT_DARK_LOGO : DEFAULT_LOGO;
+  // Attempt to find a suitable custom branded logo before falling back on OSD's
+  let logoSrc = theme === 'dark' && customDarkLogoUrl ? customDarkLogoUrl : customLogoUrl;
+  let testSubj = 'customLogo';
 
-  const logoSrc = customLogo ? customLogo : `${assetFolderUrl}/${defaultLogo}`;
-  const testSubj = customLogo ? 'customLogo' : 'defaultLogo';
+  // If no custom branded logo was set, use OSD's
+  if (!logoSrc) {
+    logoSrc = `${basePath.serverBasePath}/${theme === 'dark' ? DEFAULT_DARK_LOGO : DEFAULT_LOGO}`;
+    testSubj = 'defaultLogo';
+  }
+
   const alt = `${applicationTitle} logo`;
 
   return (

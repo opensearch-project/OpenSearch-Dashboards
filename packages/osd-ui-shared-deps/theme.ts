@@ -46,8 +46,8 @@ if (version === 7) {
   euiLightVars = require('@elastic/eui/dist/eui_theme_light.json');
   euiDarkVars = require('@elastic/eui/dist/eui_theme_dark.json');
 } else {
-  euiLightVars = require('@elastic/eui/dist/eui_theme_amsterdam_light.json');
-  euiDarkVars = require('@elastic/eui/dist/eui_theme_amsterdam_dark.json');
+  euiLightVars = require('@elastic/eui/dist/eui_theme_next_light.json');
+  euiDarkVars = require('@elastic/eui/dist/eui_theme_next_dark.json');
 }
 
 /**

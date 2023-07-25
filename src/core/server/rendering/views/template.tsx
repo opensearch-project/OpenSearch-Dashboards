@@ -43,6 +43,7 @@ export const Template: FunctionComponent<Props> = ({
     uiPublicUrl,
     locale,
     darkMode,
+    themeVersion,
     injectedMetadata,
     i18n,
     bootstrapScriptUrl,
@@ -174,7 +175,6 @@ export const Template: FunctionComponent<Props> = ({
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
         <title>{applicationTitle}</title>
-        <Fonts url={uiPublicUrl} />
         {/**
          * Favicons (generated from https://realfavicongenerator.net/)
          *
@@ -229,6 +229,9 @@ export const Template: FunctionComponent<Props> = ({
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />
+
+        {/* Place fonts after styles that would be injected later to make sure nothing overrides them */}
+        <Fonts url={uiPublicUrl} theme={themeVersion} />
       </head>
       <body>
         {createElement('osd-csp', {

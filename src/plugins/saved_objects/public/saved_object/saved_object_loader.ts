@@ -126,18 +126,27 @@ export class SavedObjectLoader {
    * @param search
    * @param size
    * @param fields
+   * @param hasReference Optional field to specify a reference
+   * @param searchFields Optional field to specify the search fields in the query
    * @returns {Promise}
    */
-  findAll(search: string = '', size: number = 100, fields?: string[]) {
+  findAll(
+    search: string = '',
+    size: number = 100,
+    fields?: string[],
+    hasReference?: SavedObjectsFindOptions['hasReference'],
+    searchFields: string[] = ['title^3', 'description']
+  ) {
     return this.savedObjectsClient
       .find<Record<string, unknown>>({
         type: this.lowercaseType,
         search: search ? `${search}*` : undefined,
         perPage: size,
         page: 1,
-        searchFields: ['title^3', 'description'],
+        searchFields,
         defaultSearchOperator: 'AND',
         fields,
+        hasReference,
       } as SavedObjectsFindOptions)
       .then((resp) => {
         return {

@@ -1,0 +1,23 @@
+{
+  "name": "@osd/stylelint-plugin-stylelint",
+  "main": "./target/index.js",
+  "types": "./target/index.d.ts",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc",
+    "osd:bootstrap": "yarn build"
+  },
+  "opensearchDashboards": {
+    "devOnly": true
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.12",
+    "stylelint": "^14.5.2"
+  },
+  "devDependencies": {
+    "typescript": "4.0.2",
+    "tsd": "^0.21.0"
+  }
+}

@@ -56,7 +56,7 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-cockroachdb.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/cockroachdb.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/cockroachdb.svg',
     artifacts: {
       dashboards: [
         {
