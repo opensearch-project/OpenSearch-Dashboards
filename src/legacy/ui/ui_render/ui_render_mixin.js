@@ -98,8 +98,11 @@ export function uiRenderMixin(osdServer, server, config) {
           : uiSettings.getOverrideOrDefault('theme:darkMode');
 
       const themeVersion =
-        !authEnabled || request.auth.isAuthenticated ? await uiSettings.get('theme:version') : 'v7';
+        !authEnabled || request.auth.isAuthenticated
+          ? await uiSettings.get('theme:version')
+          : uiSettings.getOverrideOrDefault('theme:version');
 
+      // Next (preview) label is mapped to v8 here
       const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
 
       const buildHash = server.newPlatform.env.packageInfo.buildNum;
