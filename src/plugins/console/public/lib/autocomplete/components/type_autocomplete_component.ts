@@ -29,27 +29,33 @@
  */
 
 import _ from 'lodash';
-import { getIndices } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
-function nonValidUsernameType(token) {
-  return token[0] === '_';
+import { getTypes } from '../../mappings/mappings';
+import { AutoCompleteContext } from '../types';
+
+function TypeGenerator(context: AutoCompleteContext) {
+  return getTypes(context.indices);
 }
-export class UsernameAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
-    super(name, getIndices, parent, multiValued);
+function nonValidIndexType(token: string) {
+  return !(token === '_all' || token[0] !== '_');
+}
+export class TypeAutocompleteComponent extends ListComponent {
+  constructor(name: string, parent: ListComponent, multiValued?: boolean) {
+    super(name, TypeGenerator, parent, multiValued);
   }
-  validateTokens(tokens) {
+  validateTokens(tokens: string[]) {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }
-    return !_.find(tokens, nonValidUsernameType);
+
+    return !_.find(tokens, nonValidIndexType);
   }
 
   getDefaultTermMeta() {
-    return 'username';
+    return 'type';
   }
 
   getContextKey() {
-    return 'username';
+    return 'types';
   }
 }

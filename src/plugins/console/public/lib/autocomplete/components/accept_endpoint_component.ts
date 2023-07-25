@@ -28,31 +28,32 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { SharedComponent } from './shared_component';
-export class IdAutocompleteComponent extends SharedComponent {
-  constructor(name, parent, multi) {
-    super(name, parent);
-    this.multi_match = multi;
+import { AutoCompleteContext, Endpoint } from '../types';
+import { CoreEditor } from '../../../types';
+export const URL_PATH_END_MARKER = '__url_path_end__';
+
+export class AcceptEndpointComponent extends SharedComponent {
+  endpoint: Endpoint;
+  constructor(endpoint: Endpoint, parent?: SharedComponent) {
+    super(endpoint.id, parent);
+    this.endpoint = endpoint;
   }
-  match(token, context, editor) {
-    if (!token) {
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    if (token !== URL_PATH_END_MARKER) {
       return null;
     }
-    if (!this.multi_match && Array.isArray(token)) {
-      return null;
-    }
-    token = Array.isArray(token) ? token : [token];
-    if (
-      _.find(token, function (t) {
-        return t.match(/[\/,]/);
-      })
-    ) {
+    if (this.endpoint.methods && !this.endpoint.methods.includes(context.method)) {
       return null;
     }
     const r = super.match(token, context, editor);
-    r.context_values = r.context_values || {};
-    r.context_values.id = token;
+    if (r) {
+      r.context_values = r.context_values || {};
+      r.context_values.endpoint = this.endpoint;
+      if (typeof this.endpoint.priority === 'number') {
+        r.priority = this.endpoint.priority;
+      }
+    }
     return r;
   }
 }

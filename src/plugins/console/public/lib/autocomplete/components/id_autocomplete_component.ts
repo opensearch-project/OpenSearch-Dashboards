@@ -29,31 +29,38 @@
  */
 
 import _ from 'lodash';
-import { ListComponent } from './list_component';
-import { getTypes } from '../../mappings/mappings';
-function TypeGenerator(context) {
-  return getTypes(context.indices);
-}
-function nonValidIndexType(token) {
-  return !(token === '_all' || token[0] !== '_');
-}
-export class TypeAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
-    super(name, TypeGenerator, parent, multiValued);
+import { SharedComponent } from './shared_component';
+import { AutoCompleteContext } from '../types';
+import { CoreEditor } from '../../../types';
+
+export class IdAutocompleteComponent extends SharedComponent {
+  multi_match: boolean;
+
+  constructor(name: string, parent: SharedComponent, multi = false) {
+    super(name, parent);
+    this.multi_match = multi;
   }
-  validateTokens(tokens) {
-    if (!this.multiValued && tokens.length > 1) {
-      return false;
+  match(token: string | string[], context: AutoCompleteContext, editor: CoreEditor) {
+    if (!token) {
+      return null;
+    }
+    if (!this.multi_match && Array.isArray(token)) {
+      return null;
+    }
+    token = Array.isArray(token) ? token : [token];
+    if (
+      _.find(token, function (t) {
+        return t.match(/[\/,]/);
+      })
+    ) {
+      return null;
+    }
+    const r = super.match(token, context, editor);
+    if (r) {
+      r.context_values = r.context_values || {};
+      r.context_values.id = token;
     }
 
-    return !_.find(tokens, nonValidIndexType);
-  }
-
-  getDefaultTermMeta() {
-    return 'type';
-  }
-
-  getContextKey() {
-    return 'types';
+    return r;
   }
 }
