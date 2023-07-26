@@ -44,10 +44,10 @@ describe('CURL', () => {
     if (fixture.trim() === '') {
       return;
     }
-    fixture = fixture.split(/^-+$/m);
-    const name = fixture[0].trim();
-    const curlText = fixture[1];
-    const response = fixture[2].trim();
+    const fixtureParts = fixture.split(/^-+$/m);
+    const name = fixtureParts[0].trim();
+    const curlText = fixtureParts[1];
+    const response = fixtureParts[2].trim();
 
     test('cURL Detection - ' + name, function () {
       expect(detectCURL(curlText)).toBe(true);
