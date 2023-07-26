@@ -173,7 +173,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
               ...chromeNavLink,
               hidden: currentWorkspace !== null,
               euiIconType: 'logoOpenSearch',
-              order: 1000,
+              order: 0,
             };
             filteredNavLinks.set(chromeNavLink.id, homeNavLink);
           } else {
@@ -239,7 +239,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
             baseUrl: overviewUrl,
             href: overviewUrl,
             euiIconType: 'grid',
-            order: 1000,
+            order: 0,
           };
           filteredNavLinks.set(overviewId, overviewNavLink);
         }
