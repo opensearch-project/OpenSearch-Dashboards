@@ -39,7 +39,7 @@ import {
 
 import { FullRequestComponent } from './full_request_component';
 import { Endpoint, UrlComponent, UrlObjectComponent } from '../types';
-import { ComponentFactory, ParametrizedComponentFactories } from '../../osd/osd';
+import { ComponentFactory, ParametrizedComponentFactories } from '../types';
 
 interface MethodData {
   rootComponent: SharedComponent;
