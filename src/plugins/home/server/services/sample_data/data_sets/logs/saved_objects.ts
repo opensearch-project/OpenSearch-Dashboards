@@ -376,4 +376,1037 @@ export const getSavedObjects = (): SavedObject[] => [
       },
     },
   },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Line Charts Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Line Charts Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Line Charts"}}',
+    },
+    id: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzE0LDFd',
+  },
+  {
+    attributes: {
+      fieldFormatMap: '{"hour_of_day":{}}',
+      fields:
+        '[{"name":"@timestamp","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"_id","type":"string","esTypes":["_id"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_index","type":"string","esTypes":["_index"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_score","type":"number","count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_source","type":"_source","esTypes":["_source"],"count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_type","type":"string","esTypes":["_type"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"agent","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"agent.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"agent"}}},{"name":"bytes","type":"number","esTypes":["long"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"clientip","type":"ip","esTypes":["ip"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"event.dataset","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"extension","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"extension.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"extension"}}},{"name":"geo.coordinates","type":"geo_point","esTypes":["geo_point"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geo.dest","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geo.src","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geo.srcdest","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"host","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"host.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"host"}}},{"name":"index","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"index.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"index"}}},{"name":"ip","type":"ip","esTypes":["ip"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"machine.os","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"machine.os.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"machine.os"}}},{"name":"machine.ram","type":"number","esTypes":["long"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"memory","type":"number","esTypes":["double"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"message","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"message.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"message"}}},{"name":"phpmemory","type":"number","esTypes":["long"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"referer","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"request","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"request.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"request"}}},{"name":"response","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"response.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"response"}}},{"name":"tags","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"tags.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"tags"}}},{"name":"timestamp","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"url","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"url.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"url"}}},{"name":"utc_time","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"hour_of_day","type":"number","count":0,"scripted":true,"script":"doc[\'timestamp\'].value.getHour()","lang":"painless","searchable":true,"aggregatable":true,"readFromDocValues":false}]',
+      timeFieldName: 'timestamp',
+      title: 'opensearch_dashboards_sample_data_logs',
+    },
+    id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+    migrationVersion: { 'index-pattern': '7.6.0' },
+    references: [],
+    type: 'index-pattern',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzE1LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Line) Avg bytes over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Line) Avg bytes over time","type":"line","aggs":[{"id":"1","enabled":true,"type":"avg","params":{"field":"bytes"},"schema":"metric"},{"id":"2","enabled":true,"type":"date_histogram","params":{"field":"timestamp","timeRange":{"from":"now-7d","to":"now"},"useNormalizedOpenSearchInterval":true,"scaleMetricValues":false,"interval":"auto","drop_partials":false,"min_doc_count":1,"extended_bounds":{}},"schema":"segment"}],"params":{"type":"line","grid":{"categoryLines":false},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"filter":true,"truncate":100},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Average bytes"}}],"seriesParams":[{"show":true,"type":"line","mode":"normal","data":{"label":"Average bytes","id":"1"},"valueAxis":"ValueAxis-1","drawLinesBetweenPoints":true,"lineWidth":2,"interpolate":"linear","showCircles":true}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"labels":{},"thresholdLine":{"show":false,"value":10,"width":1,"style":"full","color":"#E7664C"}}}',
+    },
+    id: '39b5bd70-eb7b-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-15T00:13:57.165Z',
+    version: 'Wzg0LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      styleState: '{"addTooltip":true,"addLegend":true,"legendPosition":"right","type":"line"}',
+      title: '(VB) Avg bytes over time',
+      uiState: '{}',
+      version: 3,
+      visualizationState:
+        '{"searchField":"","activeVisualization":{"name":"line","aggConfigParams":[{"id":"1","enabled":true,"type":"date_histogram","params":{"field":"@timestamp","useNormalizedOpenSearchInterval":true,"scaleMetricValues":false,"interval":"auto","drop_partials":false,"min_doc_count":1,"extended_bounds":{}},"schema":"segment"},{"id":"2","enabled":true,"type":"avg","params":{"field":"bytes"},"schema":"metric"}]}}',
+    },
+    id: '64bb61a0-eb7b-11ed-8e00-17d7d50cd7b2',
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization-visbuilder',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzE3LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Vega) Avg bytes over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vega) Avg bytes over time","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            date_histogram: {\\n              field: @timestamp\\n              fixed_interval: 3h\\n              time_zone: America/Los_Angeles\\n              min_doc_count: 1\\n            }\\n            aggs: {\\n              2: {\\n                avg: {\\n                  field: bytes\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      calculate: datum.key\\n      as: timestamp\\n    }\\n    {\\n      calculate: datum[2].value\\n      as: bytes\\n    }\\n  ]\\n  layer:[\\n    {\\n      mark: {\\n        type: line\\n      }\\n    }\\n    {\\n      mark: {\\n        type: circle\\n        tooltip: true\\n      }\\n    }\\n  ]\\n  \\n  encoding: {\\n    x: {\\n      field: timestamp\\n      type: temporal\\n      axis: {\\n        title: @timestamp\\n      }\\n    }\\n    y: {\\n      field: bytes\\n      type: quantitative\\n      axis: {\\n        title: Average bytes\\n      }\\n    }\\n    color: {\\n      datum: Average bytes\\n      type: nominal\\n    }\\n  }\\n}"}}',
+    },
+    id: '0aa75ae0-eb7e-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzE4LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(TSVB) Avg bytes over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(TSVB) Avg bytes over time","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"everything","split_color_mode":"opensearchDashboards","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"avg","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":"","stacked":"none","label":"","type":"timeseries"}],"time_field":"timestamp","index_pattern":"opensearch_dashboards_sample_data_logs","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_ecommerce","default_timefield":"order_date","isModelInvalid":false,"drop_last_bucket":0}}',
+    },
+    id: 'fa54ce40-eb7b-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzIwLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Timeline) Avg bytes over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Timeline) Avg bytes over time","type":"timelion","aggs":[],"params":{"expression":".opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp).lines(show=true).points(show=true).yaxis(label=\\"Average bytes\\")","interval":"auto"}}',
+    },
+    id: '2c5a19f0-eb8a-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzE5LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Area Charts Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Area Charts Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Area Charts"}}',
+    },
+    id: 'ed89dfc0-eb8f-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzIxLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Area) Stacked extensions over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Area) Stacked extensions over time","type":"area","aggs":[{"id":"1","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"2","enabled":true,"type":"date_histogram","params":{"field":"timestamp","timeRange":{"from":"now-7d","to":"now"},"useNormalizedOpenSearchInterval":true,"scaleMetricValues":false,"interval":"auto","drop_partials":false,"min_doc_count":1,"extended_bounds":{}},"schema":"segment"},{"id":"3","enabled":true,"type":"terms","params":{"field":"extension.keyword","orderBy":"1","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"group"}],"params":{"type":"area","grid":{"categoryLines":false},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"filter":true,"truncate":100},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":true,"type":"area","mode":"stacked","data":{"label":"Count","id":"1"},"drawLinesBetweenPoints":true,"lineWidth":2,"showCircles":true,"interpolate":"linear","valueAxis":"ValueAxis-1"}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"thresholdLine":{"show":false,"value":10,"width":1,"style":"full","color":"#E7664C"},"labels":{}}}',
+    },
+    id: 'c0ba29f0-eb8f-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzIyLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      styleState: '{"addTooltip":true,"addLegend":true,"legendPosition":"right","type":"area"}',
+      title: '(VisBuilder) Extensions over time',
+      uiState: '{}',
+      version: 3,
+      visualizationState:
+        '{"searchField":"","activeVisualization":{"name":"area","aggConfigParams":[{"id":"4","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"5","enabled":true,"type":"date_histogram","params":{"field":"timestamp","useNormalizedOpenSearchInterval":true,"scaleMetricValues":false,"interval":"auto","drop_partials":false,"min_doc_count":1,"extended_bounds":{}},"schema":"segment"},{"id":"6","enabled":true,"type":"terms","params":{"field":"extension.keyword","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"group"}]}}',
+    },
+    id: '68fe55f0-eb90-11ed-8e00-17d7d50cd7b2',
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization-visbuilder',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzIzLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Vega) Stacked extensions over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vega) Stacked extensions over time","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            date_histogram: {\\n              field: @timestamp\\n              fixed_interval: 3h\\n              time_zone: America/Los_Angeles\\n              min_doc_count: 1\\n            }\\n            aggs: {\\n              2: {\\n                terms: {\\n                  field: extension.keyword\\n                  order: {\\n                    _count: desc\\n                  }\\n                  size: 5\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      flatten: [\\n        2.buckets\\n      ]\\n      as: [\\n        extension_buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.key\\n      as: timestamp\\n    }\\n    {\\n      calculate: datum.extension_buckets.doc_count\\n      as: count\\n    }\\n    {\\n      calculate: datum.extension_buckets.key\\n      as: extension\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: area\\n        tooltip: true\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: timestamp\\n      type: temporal\\n      axis: {\\n        title: timestamp\\n      }\\n    }\\n    y: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    color: {\\n      field: extension\\n      type: nominal\\n    }\\n  }\\n}"}}',
+    },
+    id: 'be4dc860-eb90-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzI0LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(TSVB) Stacked extensions over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(TSVB) Stacked extensions over time","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"terms","split_color_mode":"opensearchDashboards","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":"0","fill":"1","stacked":"stacked","label":"","type":"timeseries","terms_field":"extension.keyword"}],"time_field":"timestamp","index_pattern":"opensearch_dashboards_sample_data_logs","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_ecommerce","default_timefield":"order_date","isModelInvalid":false,"drop_last_bucket":0}}',
+    },
+    id: '689b7140-eb97-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzI2LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Timeline) Stacked extensions over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Timeline) Stacked extensions over time","type":"timelion","aggs":[],"params":{"expression":".opensearch(opensearch_dashboards_sample_data_logs, split=extension.keyword:10, timefield=@timestamp).lines(show=true,stack=true,fill=10).yaxis(label=\\"Count\\")","interval":"auto"}}',
+    },
+    id: '34a5bee0-eb97-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzI1LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Bar Charts (Vertical) Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Bar Charts (Vertical) Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Bar Charts (Vertical)"}}',
+    },
+    id: '5e34ac20-eb98-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T19:24:52.819Z',
+    version: 'WzQ1LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Vertical Bar) Stacked responses over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vertical Bar) Stacked responses over time","type":"histogram","aggs":[{"id":"1","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"2","enabled":true,"type":"date_histogram","params":{"field":"timestamp","timeRange":{"from":"now-7d","to":"now"},"useNormalizedOpenSearchInterval":true,"scaleMetricValues":false,"interval":"auto","drop_partials":false,"min_doc_count":1,"extended_bounds":{}},"schema":"segment"},{"id":"3","enabled":true,"type":"terms","params":{"field":"response.keyword","orderBy":"1","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"group"}],"params":{"type":"histogram","grid":{"categoryLines":false},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"filter":true,"truncate":100},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":true,"type":"histogram","mode":"stacked","data":{"label":"Count","id":"1"},"valueAxis":"ValueAxis-1","drawLinesBetweenPoints":true,"lineWidth":2,"showCircles":true}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"labels":{"show":false},"thresholdLine":{"show":false,"value":10,"width":1,"style":"full","color":"#E7664C"}}}',
+    },
+    id: '23a5de70-eb99-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzI4LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      styleState:
+        '{"addTooltip":true,"addLegend":true,"legendPosition":"right","type":"histogram"}',
+      title: '(VisBuilder) Responses over time',
+      uiState: '{}',
+      version: 3,
+      visualizationState:
+        '{"searchField":"","activeVisualization":{"name":"histogram","aggConfigParams":[{"id":"4","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"5","enabled":true,"type":"date_histogram","params":{"field":"timestamp","timeRange":{"from":"now-7d","to":"now"},"useNormalizedOpenSearchInterval":true,"scaleMetricValues":false,"interval":"auto","drop_partials":false,"min_doc_count":1,"extended_bounds":{}},"schema":"segment"},{"id":"6","enabled":true,"type":"terms","params":{"field":"response.keyword","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"group"}]}}',
+    },
+    id: '571745a0-eb99-11ed-8e00-17d7d50cd7b2',
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization-visbuilder',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzI5LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Vega) Stacked extensions over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vega) Stacked extensions over time","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            date_histogram: {\\n              field: @timestamp\\n              fixed_interval: 3h\\n              time_zone: America/Los_Angeles\\n              min_doc_count: 1\\n            }\\n            aggs: {\\n              2: {\\n                terms: {\\n                  field: response.keyword\\n                  order: {\\n                    _count: desc\\n                  }\\n                  size: 5\\n                }\\n              }\\n            }\\n          }\\n        }\\n        size: 0\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      flatten: [\\n        2.buckets\\n      ]\\n      as: [\\n        response_buckets\\n      ]\\n    }\\n    {\\n      calculate: datum.key\\n      as: timestamp\\n    }\\n    {\\n      calculate: datum.response_buckets.doc_count\\n      as: count\\n    }\\n    {\\n      calculate: datum.response_buckets.key\\n      as: extension\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: bar\\n        tooltip: true\\n        width: { band: 1 }\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: timestamp\\n      type: temporal\\n      axis: {\\n        title: timestamp\\n      }\\n    }\\n    y: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    color: {\\n      field: extension\\n      type: nominal\\n    }\\n  }\\n}"}}',
+    },
+    id: '8b78d930-eb99-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzMwLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(TSVB) Stacked responses over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(TSVB) Stacked responses over time","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"terms","split_color_mode":"opensearchDashboards","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"bar","line_width":1,"point_size":"0","fill":"1","stacked":"stacked","label":"","type":"timeseries","terms_field":"response.keyword"}],"time_field":"timestamp","index_pattern":"opensearch_dashboards_sample_data_logs","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_ecommerce","default_timefield":"order_date","isModelInvalid":false,"drop_last_bucket":0}}',
+    },
+    id: '9482ed20-eb9b-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzMyLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Timeline) Stacked responses over time',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Timeline) Stacked responses over time","type":"timelion","aggs":[],"params":{"expression":".opensearch(opensearch_dashboards_sample_data_logs, split=response.keyword:10, timefield=@timestamp).bars(stack=true).yaxis(label=\\"Count\\")","interval":"auto"}}',
+    },
+    id: '5c276fa0-eb9b-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T17:48:07.229Z',
+    version: 'WzMxLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Bar Charts (Horizontal) Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Bar Charts (Horizontal) Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Bar Charts (Horizontal)"}}',
+    },
+    id: 'fd3b0750-227b-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T19:25:40.116Z',
+    version: 'WzQ2LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Horizontal Bar) Top destination count',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Horizontal Bar) Top destination count","type":"horizontal_bar","aggs":[{"id":"1","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"2","enabled":true,"type":"terms","params":{"field":"geo.dest","orderBy":"1","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"segment"}],"params":{"type":"histogram","grid":{"categoryLines":false},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"left","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":200},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"bottom","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":75,"filter":true,"truncate":100},"title":{"text":"Count"}}],"seriesParams":[{"show":true,"type":"histogram","mode":"normal","data":{"label":"Count","id":"1"},"valueAxis":"ValueAxis-1","drawLinesBetweenPoints":true,"lineWidth":2,"showCircles":true}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"labels":{},"thresholdLine":{"show":false,"value":10,"width":1,"style":"full","color":"#E7664C"}}}',
+    },
+    id: '08741f50-2275-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-14T18:38:22.207Z',
+    version: 'WzM5LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      styleState:
+        '{"addTooltip":true,"addLegend":true,"legendPosition":"right","type":"histogram"}',
+      title: '(VisBuilder) Top destination count',
+      uiState: '{}',
+      version: 3,
+      visualizationState:
+        '{"searchField":"","activeVisualization":{"name":"histogram","aggConfigParams":[{"id":"1","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"2","enabled":true,"type":"terms","params":{"field":"geo.dest","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"segment"}]}}',
+    },
+    id: 'ca3ae740-2275-11ee-b88b-47a93b5c527c',
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization-visbuilder',
+    updated_at: '2023-07-14T18:39:39.444Z',
+    version: 'WzQxLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Vega) Top destination count',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Vega) Top destination count","type":"vega","aggs":[],"params":{"spec":"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            terms: {\\n              field: geo.dest\\n              order: {\\n                _count: desc\\n              }\\n              size: 5\\n            }\\n          }\\n        }\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      calculate: datum.key\\n      as: dest\\n    }\\n    {\\n      calculate: datum.doc_count\\n      as: count\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: bar\\n        tooltip: true\\n        width: { band: 1 }\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    y: {\\n      field: dest\\n      type: nominal\\n      axis: {\\n        title: Dest\\n      }\\n      sort: -x\\n    }\\n  }\\n}"}}',
+    },
+    id: 'f0d162c0-227b-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T19:23:41.163Z',
+    version: 'WzQyLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(TSVB) Top destinations count',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(TSVB) Top destinations count","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"top_n","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"terms","split_color_mode":"opensearchDashboards","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","terms_size":"5","terms_field":"geo.dest"}],"time_field":"","index_pattern":"","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_logs","default_timefield":"timestamp","isModelInvalid":false,"bar_color_rules":[{"id":"51d02a70-227c-11ee-89b9-a9479e055b94"}],"time_range_mode":"entire_time_range"}}',
+    },
+    id: '80e9a930-227c-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T19:27:42.915Z',
+    version: 'WzQ3LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Heatmaps Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Heatmaps Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Heatmaps"}}',
+    },
+    id: '1507e780-227d-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T19:50:36.007Z',
+    version: 'WzU2LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Heatmap) Source vs OS',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Heatmap) Source vs OS","type":"heatmap","aggs":[{"id":"1","enabled":true,"type":"sum","params":{"field":"memory"},"schema":"metric"},{"id":"3","enabled":true,"type":"terms","params":{"field":"geo.src","orderBy":"1","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"group"},{"id":"2","enabled":true,"type":"terms","params":{"field":"machine.os.keyword","orderBy":"1","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"segment"}],"params":{"type":"heatmap","addTooltip":true,"addLegend":true,"enableHover":false,"legendPosition":"right","times":[],"colorsNumber":4,"colorSchema":"Greens","setColorRange":false,"colorsRange":[],"invertColors":false,"percentageMode":false,"valueAxes":[{"show":false,"id":"ValueAxis-1","type":"value","scale":{"type":"linear","defaultYExtents":false},"labels":{"show":false,"rotate":0,"overwriteColor":false,"color":"black"}}]}}',
+    },
+    id: '3d034700-227f-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-14T19:47:17.488Z',
+    version: 'WzUyLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Tables Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Tables Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Tables"}}',
+    },
+    id: '6aed7840-22a5-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-15T00:21:00.849Z',
+    version: 'Wzg5LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Table) Bytes by request stats summary',
+      uiStateJSON: '{"vis":{"sortColumn":{"colIndex":0,"direction":"asc"}}}',
+      version: 1,
+      visState:
+        '{"title":"(Table) Bytes by request stats summary","type":"table","aggs":[{"id":"1","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"3","enabled":true,"type":"median","params":{"field":"bytes","percents":[50]},"schema":"metric"},{"id":"2","enabled":true,"type":"min","params":{"field":"bytes"},"schema":"metric"},{"id":"4","enabled":true,"type":"max","params":{"field":"bytes"},"schema":"metric"},{"id":"5","enabled":true,"type":"terms","params":{"field":"request.keyword","orderBy":"1","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"bucket"}],"params":{"perPage":10,"showPartialRows":false,"showMetricsAtAllLevels":false,"showTotal":false,"totalFunc":"sum","percentageCol":""}}',
+    },
+    id: 'f8df8de0-22a6-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-15T00:31:43.038Z',
+    version: 'WzkxLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      styleState: '{"perPage":10,"showPartialRows":false,"showMetricsAtAllLevels":false}',
+      title: '(VisBuilder) Bytes by request stats summary',
+      uiState: '{}',
+      version: 3,
+      visualizationState:
+        '{"searchField":"","activeVisualization":{"name":"table","aggConfigParams":[{"id":"1","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"2","enabled":true,"type":"median","params":{"field":"bytes","percents":[50]},"schema":"metric"},{"id":"3","enabled":true,"type":"terms","params":{"field":"request.keyword","orderBy":"1","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"bucket"},{"id":"4","enabled":true,"type":"min","params":{"field":"bytes"},"schema":"metric"},{"id":"5","enabled":true,"type":"max","params":{"field":"bytes"},"schema":"metric"}]}}',
+    },
+    id: 'a7d21570-22a7-11ee-b88b-47a93b5c527c',
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization-visbuilder',
+    updated_at: '2023-07-15T00:36:36.551Z',
+    version: 'WzkzLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(TSVB) Bytes by request stats summary',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(TSVB) Bytes by request stats summary","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"table","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"everything","split_color_mode":"opensearchDashboards","metrics":[{"id":"c75df350-22a7-11ee-8c33-437692f62ad1","type":"count"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none"},{"id":"c9296480-22a7-11ee-8c33-437692f62ad1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"c9296481-22a7-11ee-8c33-437692f62ad1","type":"avg","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"ed1dcca0-22a7-11ee-8c33-437692f62ad1"}]},{"id":"caa3cf80-22a7-11ee-8c33-437692f62ad1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"caa3cf81-22a7-11ee-8c33-437692f62ad1","type":"min","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"eab16080-22a7-11ee-8c33-437692f62ad1"}]},{"id":"cc20d290-22a7-11ee-8c33-437692f62ad1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"cc20d291-22a7-11ee-8c33-437692f62ad1","type":"max","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"e6051680-22a7-11ee-8c33-437692f62ad1"}]}],"time_field":"","index_pattern":"","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_logs","default_timefield":"timestamp","isModelInvalid":false,"bar_color_rules":[{"id":"bdf75590-22a7-11ee-8c33-437692f62ad1"}],"pivot_id":"request.keyword","pivot_type":"string","pivot_rows":"20","time_range_mode":"entire_time_range"}}',
+    },
+    id: '009fd930-22a8-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-15T00:39:05.539Z',
+    version: 'Wzk1LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Metrics Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Metrics Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Metrics"}}',
+    },
+    id: 'b24e65c0-22a3-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-15T00:09:04.654Z',
+    version: 'WzgxLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Metric) Unique visitors',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Metric) Unique visitors","type":"metric","aggs":[{"id":"1","enabled":true,"type":"cardinality","params":{"field":"clientip"},"schema":"metric"}],"params":{"addTooltip":true,"addLegend":false,"type":"metric","metric":{"percentageMode":false,"useRanges":false,"colorSchema":"Green to Red","metricColorMode":"None","colorsRange":[{"from":0,"to":10000}],"labels":{"show":true},"invertColors":false,"style":{"bgFill":"#000","bgColor":false,"labelColor":false,"subText":"","fontSize":60}}}}',
+    },
+    id: '104396f0-22a4-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-15T00:10:53.791Z',
+    version: 'WzgyLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      styleState:
+        '{"addTooltip":true,"addLegend":false,"type":"metric","metric":{"percentageMode":false,"useRanges":false,"colorSchema":"Green to Red","metricColorMode":"None","colorsRange":[{"from":0,"to":10000}],"labels":{"show":true},"invertColors":false,"style":{"bgFill":"#000","bgColor":false,"labelColor":false,"subText":"","fontSize":60}}}',
+      title: '(VisBuilder) Unique visitors',
+      uiState: '{}',
+      version: 3,
+      visualizationState:
+        '{"searchField":"","activeVisualization":{"name":"metric","aggConfigParams":[{"id":"1","enabled":true,"type":"cardinality","params":{"field":"clientip"},"schema":"metric"}]}}',
+    },
+    id: '42ddb0f0-22a4-11ee-b88b-47a93b5c527c',
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization-visbuilder',
+    updated_at: '2023-07-15T00:12:18.687Z',
+    version: 'WzgzLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(TSVB) Unique visitors',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(TSVB) Unique visitors","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"metric","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"everything","split_color_mode":"opensearchDashboards","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"cardinality","field":"clientip"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":""}],"time_field":"","index_pattern":"","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_logs","default_timefield":"timestamp","isModelInvalid":false,"background_color_rules":[{"id":"470e09a0-22a3-11ee-9154-c7376b9c3c25"}],"bar_color_rules":[{"id":"4819fb60-22a3-11ee-9154-c7376b9c3c25"}],"time_range_mode":"entire_time_range"}}',
+    },
+    id: '9a5e50b0-22a3-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-15T00:15:08.469Z',
+    version: 'Wzg1LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Radial Charts Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Radial Charts Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Radial Charts"}}',
+    },
+    id: '6154a6c0-2280-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T19:55:27.916Z',
+    version: 'WzYwLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Gauge) Average bytes by extension',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Gauge) Average bytes by extension","type":"gauge","aggs":[{"id":"1","enabled":true,"type":"avg","params":{"field":"bytes"},"schema":"metric"},{"id":"2","enabled":true,"type":"terms","params":{"field":"extension.keyword","orderBy":"1","order":"desc","size":5,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing"},"schema":"group"}],"params":{"type":"gauge","addTooltip":true,"addLegend":true,"isDisplayWarning":false,"gauge":{"alignment":"automatic","extendRange":true,"percentageMode":false,"gaugeType":"Arc","gaugeStyle":"Full","backStyle":"Full","orientation":"vertical","colorSchema":"Green to Red","gaugeColorMode":"Labels","colorsRange":[{"from":0,"to":6000},{"from":6000,"to":6500},{"from":6500,"to":7000}],"invertColors":false,"labels":{"show":true,"color":"black"},"scale":{"show":true,"labels":false,"color":"rgba(105,112,125,0.2)"},"type":"meter","style":{"bgWidth":0.9,"width":0.9,"mask":false,"bgMask":false,"maskBars":50,"bgFill":"rgba(105,112,125,0.2)","bgColor":true,"subText":"","fontSize":60}}}}',
+    },
+    id: 'f772de50-2281-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-14T20:06:49.269Z',
+    version: 'WzYyLDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(TSVB) Average bytes by extension',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(TSVB) Average bytes by extension","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"gauge","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"terms","split_color_mode":"opensearchDashboards","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"avg","field":"bytes"}],"separate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"","var_name":"","terms_order_by":"61ca57f2-469d-11e7-af02-69e470af7417","terms_field":"extension.keyword","terms_size":"5"}],"time_field":"","index_pattern":"","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_logs","default_timefield":"timestamp","isModelInvalid":false,"markdown":"# Average bytes by extension\\n\\n{{#each _all}}\\n- {{ label }}\\n{{/each}}\\n\\nText that is not a quote\\n\\n> Text that is a quote\\n\\n## A second-level heading\\n\\nUse `git status` to list all new or modified files that haven\'t yet been committed.\\n\\nSome basic Git commands are:\\n```\\ngit status\\ngit add\\ngit commit\\n```\\n\\n### A third-level heading\\n\\nTest out the [OpenSearch Dashboards Playground](https://playground.opensearch.org).\\n\\nNavigate to [home](/).\\n\\n![Screenshot of sample data UI in OpenSearch Dashboards](https://opensearch.org/docs/latest/images/dashboards/add-sample-data.png)\\n\\n- list item\\n- list item\\n- list item\\n\\n1. list item\\n2. list item\\n3. list item{{# count.data.formatted }}{{/ count.data.formatted }}{{ count.label }}","time_range_mode":"entire_time_range","bar_color_rules":[{"id":"459b7790-2287-11ee-9154-c7376b9c3c25"}],"gauge_color_rules":[{"value":0,"id":"489a1190-2287-11ee-9154-c7376b9c3c25","gauge":"rgba(1,125,115,1)","operator":"gt"},{"value":6000,"id":"adbd7cb0-2287-11ee-9154-c7376b9c3c25","gauge":"rgba(245,167,0,1)","operator":"gt"},{"value":6500,"id":"b1022060-2287-11ee-9154-c7376b9c3c25","gauge":"rgba(189,39,30,1)","operator":"gt"}],"gauge_width":10,"gauge_inner_width":10,"gauge_style":"half","gauge_max":"7000","filter":{"query":"","language":"kuery"},"gauge_inner_color":null}}',
+    },
+    id: '4ec31b10-2288-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T21:53:32.289Z',
+    version: 'Wzc1LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Goal) Average machine RAM',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Goal) Average machine RAM","type":"goal","aggs":[{"id":"1","enabled":true,"type":"avg","params":{"field":"machine.ram"},"schema":"metric"}],"params":{"addTooltip":true,"addLegend":false,"isDisplayWarning":false,"type":"gauge","gauge":{"verticalSplit":false,"autoExtend":false,"percentageMode":true,"gaugeType":"Arc","gaugeStyle":"Full","backStyle":"Full","orientation":"vertical","useRanges":false,"colorSchema":"Green to Red","gaugeColorMode":"None","colorsRange":[{"from":0,"to":10000000000},{"from":10000000000,"to":20000000000}],"invertColors":false,"labels":{"show":true,"color":"black"},"scale":{"show":false,"labels":false,"color":"rgba(105,112,125,0.2)","width":2},"type":"meter","style":{"bgFill":"rgba(105,112,125,0.2)","bgColor":false,"labelColor":false,"subText":"","fontSize":60}}}}',
+    },
+    id: '9b0ae760-2282-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-14T20:11:23.734Z',
+    version: 'WzY0LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(TSVB) Average machine RAM',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(TSVB) Average machine RAM","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"gauge","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"everything","split_color_mode":"opensearchDashboards","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"avg","field":"machine.ram"},{"id":"333bb4d0-2290-11ee-9154-c7376b9c3c25","type":"math","variables":[{"id":"3643ebc0-2290-11ee-9154-c7376b9c3c25","name":"ram","field":"61ca57f2-469d-11e7-af02-69e470af7417"}],"script":"params.ram/20000000000"}],"separate_axis":0,"axis_position":"right","formatter":"percent","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Average RAM","value_template":"","filter":{"query":"","language":"kuery"}}],"time_field":"","index_pattern":"","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_logs","default_timefield":"timestamp","isModelInvalid":false,"gauge_color_rules":[{"value":0,"id":"e17166f0-228e-11ee-9154-c7376b9c3c25","gauge":"rgba(189,39,30,1)","operator":"gt"}],"gauge_width":10,"gauge_inner_width":10,"gauge_style":"half","time_range_mode":"entire_time_range","gauge_max":"1","filter":{"query":"","language":"kuery"}}}',
+    },
+    id: '19717e00-228f-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T21:51:23.142Z',
+    version: 'Wzc0LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Maps Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Maps Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Maps"}}',
+    },
+    id: '93cc8830-227f-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T19:50:16.928Z',
+    version: 'WzU1LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON:
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      },
+      title: '(Coordinate Map) Geohash coordinates',
+      uiStateJSON: '{"mapZoom":3,"mapCenter":[35.0659731379842,-107.80640422373408]}',
+      version: 1,
+      visState:
+        '{"title":"(Coordinate Map) Geohash coordinates","type":"tile_map","aggs":[{"id":"1","enabled":true,"type":"count","params":{},"schema":"metric"},{"id":"2","enabled":true,"type":"geohash_grid","params":{"field":"geo.coordinates","autoPrecision":true,"precision":2,"useGeocentroid":true,"isFilteredByCollar":true},"schema":"segment"}],"params":{"colorSchema":"Yellow to Red","mapType":"Scaled Circle Markers","isDesaturated":true,"addTooltip":true,"heatClusterSize":1.5,"legendPosition":"bottomright","mapZoom":2,"mapCenter":[0,0],"wms":{"enabled":false,"url":"","options":{"version":"","layers":"","format":"image/png","transparent":true,"attribution":"","styles":""},"selectedTmsLayer":{"origin":"elastic_maps_service","id":"road_map","minZoom":0,"maxZoom":14,"attribution":"<a rel=\\"noreferrer noopener\\" href=\\"https://www.openstreetmap.org/copyright\\">Map data © OpenStreetMap contributors</a>"}}}}',
+    },
+    id: 'fe07f770-227f-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
+    type: 'visualization',
+    updated_at: '2023-07-14T19:52:41.319Z',
+    version: 'WzU3LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: 'Text Header',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"Text Header","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# Text"}}',
+    },
+    id: '45146a10-2283-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T20:16:39.335Z',
+    version: 'WzY3LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(Markdown) Sample static markdown',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(Markdown) Sample static markdown","type":"markdown","aggs":[],"params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"# A first-level heading\\n\\n- **This is bold text**\\n- _This text is italicized_\\n- ~~This was mistaken text~~\\n- **This text is _extremely_ important**\\n- ***All this text is important***\\n\\nText that is not a quote\\n\\n> Text that is a quote\\n\\n## A second-level heading\\n\\nUse `git status` to list all new or modified files that haven\'t yet been committed.\\n\\nSome basic Git commands are:\\n```\\ngit status\\ngit add\\ngit commit\\n```\\n\\n### A third-level heading\\n\\nTest out the [OpenSearch Dashboards Playground](https://playground.opensearch.org).\\n\\nNavigate to [home](/).\\n\\n![Screenshot of sample data UI in OpenSearch Dashboards](https://opensearch.org/docs/latest/images/dashboards/add-sample-data.png)\\n\\n- list item\\n- list item\\n- list item\\n\\n1. list item\\n2. list item\\n3. list item"}}',
+    },
+    id: '23250ed0-2285-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T20:29:31.069Z',
+    version: 'WzY4LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
+      },
+      title: '(TSVB) Sample static markdown',
+      uiStateJSON: '{}',
+      version: 1,
+      visState:
+        '{"title":"(TSVB) Sample static markdown","type":"metrics","aggs":[],"params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"markdown","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#54B399","split_mode":"everything","split_color_mode":"opensearchDashboards","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none"}],"time_field":"","index_pattern":"","interval":"","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"tooltip_mode":"show_all","default_index_pattern":"opensearch_dashboards_sample_data_logs","default_timefield":"timestamp","isModelInvalid":false,"markdown":"# A first-level heading\\n\\n- **This is bold text**\\n- _This text is italicized_\\n- ~~This was mistaken text~~\\n- **This text is _extremely_ important**\\n- ***All this text is important***\\n\\nText that is not a quote\\n\\n> Text that is a quote\\n\\n## A second-level heading\\n\\nUse `git status` to list all new or modified files that haven\'t yet been committed.\\n\\nSome basic Git commands are:\\n```\\ngit status\\ngit add\\ngit commit\\n```\\n\\n### A third-level heading\\n\\nTest out the [OpenSearch Dashboards Playground](https://playground.opensearch.org).\\n\\nNavigate to [home](/).\\n\\n![Screenshot of sample data UI in OpenSearch Dashboards](https://opensearch.org/docs/latest/images/dashboards/add-sample-data.png)\\n\\n- list item\\n- list item\\n- list item\\n\\n1. list item\\n2. list item\\n3. list item"}}',
+    },
+    id: '4c6a47e0-2291-11ee-b88b-47a93b5c527c',
+    migrationVersion: { visualization: '7.10.0' },
+    references: [],
+    type: 'visualization',
+    updated_at: '2023-07-14T21:56:34.270Z',
+    version: 'Wzc3LDFd',
+  },
+  {
+    attributes: {
+      description: '',
+      hits: 0,
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
+      },
+      optionsJSON: '{"hidePanelTitles":false,"useMargins":true}',
+      panelsJSON:
+        '[{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea","w":48,"x":0,"y":0},"panelIndex":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea","version":"3.0.0","panelRefName":"panel_0"},{"embeddableConfig":{},"gridData":{"h":16,"i":"0c23bab6-f9a2-4bb6-b9d7-918b0879f18f","w":16,"x":0,"y":5},"panelIndex":"0c23bab6-f9a2-4bb6-b9d7-918b0879f18f","version":"3.0.0","panelRefName":"panel_1"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"5eb89f9b-4086-4508-b469-dc8a85aa9a1f","w":16,"x":16,"y":5},"panelIndex":"5eb89f9b-4086-4508-b469-dc8a85aa9a1f","version":"3.0.0","panelRefName":"panel_2"},{"embeddableConfig":{},"gridData":{"h":16,"i":"8402a6cc-8219-412e-9232-50d0e5a91735","w":16,"x":32,"y":5},"panelIndex":"8402a6cc-8219-412e-9232-50d0e5a91735","version":"3.0.0","panelRefName":"panel_3"},{"embeddableConfig":{},"gridData":{"h":16,"i":"1fb33b9c-7ea3-4113-84cc-4799d4398798","w":16,"x":0,"y":21},"panelIndex":"1fb33b9c-7ea3-4113-84cc-4799d4398798","version":"3.0.0","panelRefName":"panel_4"},{"embeddableConfig":{},"gridData":{"h":16,"i":"ea9035e7-1163-4662-a645-5aee8a3201ed","w":16,"x":16,"y":21},"panelIndex":"ea9035e7-1163-4662-a645-5aee8a3201ed","version":"3.0.0","panelRefName":"panel_5"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"eba90567-b720-43dc-9065-9097282c668e","w":48,"x":0,"y":37},"panelIndex":"eba90567-b720-43dc-9065-9097282c668e","version":"3.0.0","panelRefName":"panel_6"},{"embeddableConfig":{"table":null,"vis":{"legendOpen":true}},"gridData":{"h":16,"i":"f816a6c6-8fdd-405c-826e-58d0958d5f33","w":16,"x":0,"y":42},"panelIndex":"f816a6c6-8fdd-405c-826e-58d0958d5f33","version":"3.0.0","panelRefName":"panel_7"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"f49be7f3-7913-4c24-b98a-cdd7e8e3f893","w":16,"x":16,"y":42},"panelIndex":"f49be7f3-7913-4c24-b98a-cdd7e8e3f893","version":"3.0.0","panelRefName":"panel_8"},{"embeddableConfig":{},"gridData":{"h":16,"i":"cc261ebe-d39a-46d0-8de4-d3602889f8f6","w":16,"x":32,"y":42},"panelIndex":"cc261ebe-d39a-46d0-8de4-d3602889f8f6","version":"3.0.0","panelRefName":"panel_9"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9b57f39e-7fe2-47d1-ae25-afbbe1179525","w":16,"x":0,"y":58},"panelIndex":"9b57f39e-7fe2-47d1-ae25-afbbe1179525","version":"3.0.0","panelRefName":"panel_10"},{"embeddableConfig":{},"gridData":{"h":16,"i":"f1e579ac-2aff-4449-87db-21f1643e379d","w":16,"x":16,"y":58},"panelIndex":"f1e579ac-2aff-4449-87db-21f1643e379d","version":"3.0.0","panelRefName":"panel_11"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"06c8b217-3d11-431f-8591-b811046a6a16","w":48,"x":0,"y":74},"panelIndex":"06c8b217-3d11-431f-8591-b811046a6a16","version":"3.0.0","panelRefName":"panel_12"},{"embeddableConfig":{},"gridData":{"h":16,"i":"ab20d005-854e-4bf6-91ff-aedf5fc2712a","w":16,"x":0,"y":79},"panelIndex":"ab20d005-854e-4bf6-91ff-aedf5fc2712a","version":"3.0.0","panelRefName":"panel_13"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"0ab357d5-9918-442e-8a27-a6e3d61abb98","w":16,"x":16,"y":79},"panelIndex":"0ab357d5-9918-442e-8a27-a6e3d61abb98","version":"3.0.0","panelRefName":"panel_14"},{"embeddableConfig":{},"gridData":{"h":16,"i":"b60e8845-daf9-488a-9d7c-2e6c41d46ab4","w":16,"x":32,"y":79},"panelIndex":"b60e8845-daf9-488a-9d7c-2e6c41d46ab4","version":"3.0.0","panelRefName":"panel_15"},{"embeddableConfig":{},"gridData":{"h":16,"i":"6617b4f6-3227-4264-b87d-53f70fba6d79","w":16,"x":0,"y":95},"panelIndex":"6617b4f6-3227-4264-b87d-53f70fba6d79","version":"3.0.0","panelRefName":"panel_16"},{"embeddableConfig":{},"gridData":{"h":16,"i":"ea71d48b-a9b1-4822-b997-b5da294c7012","w":16,"x":16,"y":95},"panelIndex":"ea71d48b-a9b1-4822-b997-b5da294c7012","version":"3.0.0","panelRefName":"panel_17"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"6594da6a-87bd-4242-94db-9f04f8d961bb","w":48,"x":0,"y":111},"panelIndex":"6594da6a-87bd-4242-94db-9f04f8d961bb","version":"3.0.0","panelRefName":"panel_18"},{"embeddableConfig":{},"gridData":{"h":16,"i":"dca1fdd1-66ba-4dbb-94a9-033345da105d","w":16,"x":0,"y":116},"panelIndex":"dca1fdd1-66ba-4dbb-94a9-033345da105d","version":"3.0.0","panelRefName":"panel_19"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"98b7b7d9-0441-4f2a-a15b-d94f4eb3d61b","w":16,"x":16,"y":116},"panelIndex":"98b7b7d9-0441-4f2a-a15b-d94f4eb3d61b","version":"3.0.0","panelRefName":"panel_20"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9a4bd010-0c94-415d-9f21-3aabe24cb625","w":16,"x":32,"y":116},"panelIndex":"9a4bd010-0c94-415d-9f21-3aabe24cb625","version":"3.0.0","panelRefName":"panel_21"},{"embeddableConfig":{},"gridData":{"h":16,"i":"77b17b31-4a7c-4d79-8f02-3d5199fe3e15","w":16,"x":0,"y":132},"panelIndex":"77b17b31-4a7c-4d79-8f02-3d5199fe3e15","version":"3.0.0","panelRefName":"panel_22"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"6011b779-dc42-4e4c-b539-2c834057fb47","w":48,"x":0,"y":148},"panelIndex":"6011b779-dc42-4e4c-b539-2c834057fb47","version":"3.0.0","panelRefName":"panel_23"},{"embeddableConfig":{"vis":null},"gridData":{"h":16,"i":"d278b903-0f8e-4531-ba70-793f690d0b86","w":16,"x":0,"y":153},"panelIndex":"d278b903-0f8e-4531-ba70-793f690d0b86","version":"3.0.0","panelRefName":"panel_24"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"f76c7138-975d-46d0-841d-b5adaa12db4b","w":48,"x":0,"y":169},"panelIndex":"f76c7138-975d-46d0-841d-b5adaa12db4b","version":"3.0.0","panelRefName":"panel_25"},{"embeddableConfig":{},"gridData":{"h":16,"i":"3bab6531-5d55-45c6-ad95-8de643fd8726","w":16,"x":0,"y":174},"panelIndex":"3bab6531-5d55-45c6-ad95-8de643fd8726","version":"3.0.0","panelRefName":"panel_26"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"8d91d7c6-af0c-4dee-a5cc-657bdf5b1ad8","w":16,"x":16,"y":174},"panelIndex":"8d91d7c6-af0c-4dee-a5cc-657bdf5b1ad8","version":"3.0.0","panelRefName":"panel_27"},{"embeddableConfig":{"table":{"sort":{"column":"61ca57f1-469d-11e7-af02-69e470af7417","order":"desc"}}},"gridData":{"h":16,"i":"bf054c81-0e97-4ce3-94d2-cfc617286465","w":16,"x":0,"y":190},"panelIndex":"bf054c81-0e97-4ce3-94d2-cfc617286465","version":"3.0.0","panelRefName":"panel_28"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"fdfaa786-d74a-454e-b9f5-8031dc103055","w":48,"x":0,"y":206},"panelIndex":"fdfaa786-d74a-454e-b9f5-8031dc103055","version":"3.0.0","panelRefName":"panel_29"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9f0ef347-bcb1-4fd2-ab7e-7a1b2df9a8e4","w":16,"x":0,"y":211},"panelIndex":"9f0ef347-bcb1-4fd2-ab7e-7a1b2df9a8e4","version":"3.0.0","panelRefName":"panel_30"},{"embeddableConfig":{"uiState":{}},"gridData":{"h":16,"i":"3a684545-ffdd-4f74-8f61-de8e09715f20","w":16,"x":16,"y":211},"panelIndex":"3a684545-ffdd-4f74-8f61-de8e09715f20","version":"3.0.0","panelRefName":"panel_31"},{"embeddableConfig":{},"gridData":{"h":16,"i":"2bffb85a-d5bf-4e64-a414-9f3d8dca3662","w":16,"x":0,"y":227},"panelIndex":"2bffb85a-d5bf-4e64-a414-9f3d8dca3662","version":"3.0.0","panelRefName":"panel_32"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"2af2604a-f9d9-4070-b171-25a8f9544da7","w":48,"x":0,"y":243},"panelIndex":"2af2604a-f9d9-4070-b171-25a8f9544da7","version":"3.0.0","panelRefName":"panel_33"},{"embeddableConfig":{"vis":null},"gridData":{"h":16,"i":"b72c4b77-abbb-4ad2-a117-c71f6e6ae100","w":16,"x":0,"y":248},"panelIndex":"b72c4b77-abbb-4ad2-a117-c71f6e6ae100","version":"3.0.0","panelRefName":"panel_34"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9f0a614d-59b8-4918-8b9e-cd6151268c82","w":16,"x":16,"y":248},"panelIndex":"9f0a614d-59b8-4918-8b9e-cd6151268c82","version":"3.0.0","panelRefName":"panel_35"},{"embeddableConfig":{"vis":null},"gridData":{"h":16,"i":"95e6cb30-3829-44eb-a40d-4fc81378d079","w":16,"x":0,"y":264},"panelIndex":"95e6cb30-3829-44eb-a40d-4fc81378d079","version":"3.0.0","panelRefName":"panel_36"},{"embeddableConfig":{},"gridData":{"h":16,"i":"df8c7a54-7312-4a5f-ad6d-9293b43624f9","w":16,"x":16,"y":264},"panelIndex":"df8c7a54-7312-4a5f-ad6d-9293b43624f9","version":"3.0.0","panelRefName":"panel_37"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"789c9ec0-cf5e-4abf-9927-d93f138fc6c5","w":48,"x":0,"y":280},"panelIndex":"789c9ec0-cf5e-4abf-9927-d93f138fc6c5","version":"3.0.0","panelRefName":"panel_38"},{"embeddableConfig":{},"gridData":{"h":16,"i":"9b6398c7-b998-4e7a-8f8b-1ecbf3a6b374","w":16,"x":0,"y":285},"panelIndex":"9b6398c7-b998-4e7a-8f8b-1ecbf3a6b374","version":"3.0.0","panelRefName":"panel_39"},{"embeddableConfig":{"hidePanelTitles":true},"gridData":{"h":5,"i":"fbd20e4e-6f57-4d0a-a39b-eec00ba78dc8","w":48,"x":0,"y":301},"panelIndex":"fbd20e4e-6f57-4d0a-a39b-eec00ba78dc8","version":"3.0.0","panelRefName":"panel_40"},{"embeddableConfig":{},"gridData":{"h":16,"i":"61fd2efa-3e87-458e-8a68-e64efadfb1e2","w":16,"x":0,"y":306},"panelIndex":"61fd2efa-3e87-458e-8a68-e64efadfb1e2","version":"3.0.0","panelRefName":"panel_41"},{"embeddableConfig":{},"gridData":{"h":16,"i":"1cb164b7-16eb-467b-bcad-7a59adcc5f38","w":16,"x":16,"y":306},"panelIndex":"1cb164b7-16eb-467b-bcad-7a59adcc5f38","version":"3.0.0","panelRefName":"panel_42"}]',
+      refreshInterval: { pause: true, value: 0 },
+      timeFrom: 'now-7d',
+      timeRestore: true,
+      timeTo: 'now',
+      title: 'Visual Consistency Dashboard',
+      version: 1,
+    },
+    id: 'c39012d0-eb7a-11ed-8e00-17d7d50cd7b2',
+    migrationVersion: { dashboard: '7.9.3' },
+    references: [
+      { id: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2', name: 'panel_0', type: 'visualization' },
+      { id: '39b5bd70-eb7b-11ed-8e00-17d7d50cd7b2', name: 'panel_1', type: 'visualization' },
+      {
+        id: '64bb61a0-eb7b-11ed-8e00-17d7d50cd7b2',
+        name: 'panel_2',
+        type: 'visualization-visbuilder',
+      },
+      { id: '0aa75ae0-eb7e-11ed-8e00-17d7d50cd7b2', name: 'panel_3', type: 'visualization' },
+      { id: 'fa54ce40-eb7b-11ed-8e00-17d7d50cd7b2', name: 'panel_4', type: 'visualization' },
+      { id: '2c5a19f0-eb8a-11ed-8e00-17d7d50cd7b2', name: 'panel_5', type: 'visualization' },
+      { id: 'ed89dfc0-eb8f-11ed-8e00-17d7d50cd7b2', name: 'panel_6', type: 'visualization' },
+      { id: 'c0ba29f0-eb8f-11ed-8e00-17d7d50cd7b2', name: 'panel_7', type: 'visualization' },
+      {
+        id: '68fe55f0-eb90-11ed-8e00-17d7d50cd7b2',
+        name: 'panel_8',
+        type: 'visualization-visbuilder',
+      },
+      { id: 'be4dc860-eb90-11ed-8e00-17d7d50cd7b2', name: 'panel_9', type: 'visualization' },
+      { id: '689b7140-eb97-11ed-8e00-17d7d50cd7b2', name: 'panel_10', type: 'visualization' },
+      { id: '34a5bee0-eb97-11ed-8e00-17d7d50cd7b2', name: 'panel_11', type: 'visualization' },
+      { id: '5e34ac20-eb98-11ed-8e00-17d7d50cd7b2', name: 'panel_12', type: 'visualization' },
+      { id: '23a5de70-eb99-11ed-8e00-17d7d50cd7b2', name: 'panel_13', type: 'visualization' },
+      {
+        id: '571745a0-eb99-11ed-8e00-17d7d50cd7b2',
+        name: 'panel_14',
+        type: 'visualization-visbuilder',
+      },
+      { id: '8b78d930-eb99-11ed-8e00-17d7d50cd7b2', name: 'panel_15', type: 'visualization' },
+      { id: '9482ed20-eb9b-11ed-8e00-17d7d50cd7b2', name: 'panel_16', type: 'visualization' },
+      { id: '5c276fa0-eb9b-11ed-8e00-17d7d50cd7b2', name: 'panel_17', type: 'visualization' },
+      { id: 'fd3b0750-227b-11ee-b88b-47a93b5c527c', name: 'panel_18', type: 'visualization' },
+      { id: '08741f50-2275-11ee-b88b-47a93b5c527c', name: 'panel_19', type: 'visualization' },
+      {
+        id: 'ca3ae740-2275-11ee-b88b-47a93b5c527c',
+        name: 'panel_20',
+        type: 'visualization-visbuilder',
+      },
+      { id: 'f0d162c0-227b-11ee-b88b-47a93b5c527c', name: 'panel_21', type: 'visualization' },
+      { id: '80e9a930-227c-11ee-b88b-47a93b5c527c', name: 'panel_22', type: 'visualization' },
+      { id: '1507e780-227d-11ee-b88b-47a93b5c527c', name: 'panel_23', type: 'visualization' },
+      { id: '3d034700-227f-11ee-b88b-47a93b5c527c', name: 'panel_24', type: 'visualization' },
+      { id: '6aed7840-22a5-11ee-b88b-47a93b5c527c', name: 'panel_25', type: 'visualization' },
+      { id: 'f8df8de0-22a6-11ee-b88b-47a93b5c527c', name: 'panel_26', type: 'visualization' },
+      {
+        id: 'a7d21570-22a7-11ee-b88b-47a93b5c527c',
+        name: 'panel_27',
+        type: 'visualization-visbuilder',
+      },
+      { id: '009fd930-22a8-11ee-b88b-47a93b5c527c', name: 'panel_28', type: 'visualization' },
+      { id: 'b24e65c0-22a3-11ee-b88b-47a93b5c527c', name: 'panel_29', type: 'visualization' },
+      { id: '104396f0-22a4-11ee-b88b-47a93b5c527c', name: 'panel_30', type: 'visualization' },
+      {
+        id: '42ddb0f0-22a4-11ee-b88b-47a93b5c527c',
+        name: 'panel_31',
+        type: 'visualization-visbuilder',
+      },
+      { id: '9a5e50b0-22a3-11ee-b88b-47a93b5c527c', name: 'panel_32', type: 'visualization' },
+      { id: '6154a6c0-2280-11ee-b88b-47a93b5c527c', name: 'panel_33', type: 'visualization' },
+      { id: 'f772de50-2281-11ee-b88b-47a93b5c527c', name: 'panel_34', type: 'visualization' },
+      { id: '4ec31b10-2288-11ee-b88b-47a93b5c527c', name: 'panel_35', type: 'visualization' },
+      { id: '9b0ae760-2282-11ee-b88b-47a93b5c527c', name: 'panel_36', type: 'visualization' },
+      { id: '19717e00-228f-11ee-b88b-47a93b5c527c', name: 'panel_37', type: 'visualization' },
+      { id: '93cc8830-227f-11ee-b88b-47a93b5c527c', name: 'panel_38', type: 'visualization' },
+      { id: 'fe07f770-227f-11ee-b88b-47a93b5c527c', name: 'panel_39', type: 'visualization' },
+      { id: '45146a10-2283-11ee-b88b-47a93b5c527c', name: 'panel_40', type: 'visualization' },
+      { id: '23250ed0-2285-11ee-b88b-47a93b5c527c', name: 'panel_41', type: 'visualization' },
+      { id: '4c6a47e0-2291-11ee-b88b-47a93b5c527c', name: 'panel_42', type: 'visualization' },
+    ],
+    type: 'dashboard',
+    updated_at: '2023-07-15T00:43:10.001Z',
+    version: 'Wzk3LDFd',
+  },
 ];

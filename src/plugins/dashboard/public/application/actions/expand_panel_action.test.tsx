@@ -28,18 +28,18 @@
  * under the License.
  */
 
-import { isErrorEmbeddable } from '../../embeddable_plugin';
-import { ExpandPanelAction } from './expand_panel_action';
-import { DashboardContainer } from '../embeddable';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+import { isErrorEmbeddable } from '../../../../embeddable/public';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+} from '../../../../embeddable/public/lib/test_samples';
+import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+import { ExpandPanelAction } from './expand_panel_action';
+import { DashboardContainer } from '../embeddable';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 

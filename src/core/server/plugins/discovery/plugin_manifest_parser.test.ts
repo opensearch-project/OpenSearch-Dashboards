@@ -247,6 +247,79 @@ test('return error when manifest contains unrecognized properties', async () => 
   });
 });
 
+describe('requiredOpenSearchPlugins', () => {
+  test('return error when plugin `requiredOpenSearchPlugins` is a string and not an array of string', async () => {
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({
+          id: 'id1',
+          version: '7.0.0',
+          server: true,
+          requiredOpenSearchPlugins: 'abc',
+        })
+      )
+    );
+
+    await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
+      message: `The "requiredOpenSearchPlugins" in plugin manifest for "id1" should be an array of strings. (invalid-manifest, ${pluginManifestPath})`,
+      type: PluginDiscoveryErrorType.InvalidManifest,
+      path: pluginManifestPath,
+    });
+  });
+
+  test('return error when `requiredOpenSearchPlugins` is not a string', async () => {
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(JSON.stringify({ id: 'id2', version: '7.0.0', requiredOpenSearchPlugins: 2 }))
+    );
+
+    await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
+      message: `The "requiredOpenSearchPlugins" in plugin manifest for "id2" should be an array of strings. (invalid-manifest, ${pluginManifestPath})`,
+      type: PluginDiscoveryErrorType.InvalidManifest,
+      path: pluginManifestPath,
+    });
+  });
+
+  test('return error when plugin requiredOpenSearchPlugins is an array that contains non-string values', async () => {
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({ id: 'id3', version: '7.0.0', requiredOpenSearchPlugins: ['plugin1', 2] })
+      )
+    );
+
+    await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
+      message: `The "requiredOpenSearchPlugins" in plugin manifest for "id3" should be an array of strings. (invalid-manifest, ${pluginManifestPath})`,
+      type: PluginDiscoveryErrorType.InvalidManifest,
+      path: pluginManifestPath,
+    });
+  });
+
+  test('Happy path when plugin `requiredOpenSearchPlugins` is an array of string', async () => {
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({
+          id: 'id1',
+          version: '7.0.0',
+          server: true,
+          requiredOpenSearchPlugins: ['plugin1', 'plugin2'],
+        })
+      )
+    );
+
+    await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
+      id: 'id1',
+      configPath: 'id_1',
+      version: '7.0.0',
+      opensearchDashboardsVersion: '7.0.0',
+      optionalPlugins: [],
+      requiredPlugins: [],
+      requiredOpenSearchPlugins: ['plugin1', 'plugin2'],
+      requiredBundles: [],
+      server: true,
+      ui: false,
+    });
+  });
+});
+
 describe('configPath', () => {
   test('falls back to plugin id if not specified', async () => {
     mockReadFilePromise.mockResolvedValue(
@@ -301,6 +374,7 @@ test('set defaults for all missing optional fields', async () => {
     opensearchDashboardsVersion: '7.0.0',
     optionalPlugins: [],
     requiredPlugins: [],
+    requiredOpenSearchPlugins: [],
     requiredBundles: [],
     server: true,
     ui: false,
@@ -317,6 +391,7 @@ test('return all set optional fields as they are in manifest', async () => {
         opensearchDashboardsVersion: '7.0.0',
         requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
         optionalPlugins: ['some-optional-plugin'],
+        requiredOpenSearchPlugins: ['test-opensearch-plugin-1', 'test-opensearch-plugin-2'],
         ui: true,
       })
     )
@@ -330,6 +405,7 @@ test('return all set optional fields as they are in manifest', async () => {
     optionalPlugins: ['some-optional-plugin'],
     requiredBundles: [],
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+    requiredOpenSearchPlugins: ['test-opensearch-plugin-1', 'test-opensearch-plugin-2'],
     server: false,
     ui: true,
   });
@@ -344,6 +420,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version matches
         version: 'some-version',
         opensearchDashboardsVersion: '7.0.0-alpha2',
         requiredPlugins: ['some-required-plugin'],
+        requiredOpenSearchPlugins: [],
         server: true,
       })
     )
@@ -356,6 +433,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version matches
     opensearchDashboardsVersion: '7.0.0-alpha2',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
+    requiredOpenSearchPlugins: [],
     requiredBundles: [],
     server: true,
     ui: false,
@@ -383,6 +461,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version is `ope
     opensearchDashboardsVersion: 'opensearchDashboards',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
+    requiredOpenSearchPlugins: [],
     requiredBundles: [],
     server: true,
     ui: true,

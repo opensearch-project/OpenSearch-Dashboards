@@ -58,7 +58,7 @@ export function oktaLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-okta.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/okta.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/okta.svg',
     artifacts: {
       dashboards: [
         {
