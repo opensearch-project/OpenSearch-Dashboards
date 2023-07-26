@@ -88,7 +88,7 @@ describe('Knowledge base', () => {
       tokenPath,
       context,
       null,
-      expectedContext.autoCompleteSet,
+      !!expectedContext.autoCompleteSet,
       osd.getTopLevelUrlCompleteComponents('GET')
     );
 

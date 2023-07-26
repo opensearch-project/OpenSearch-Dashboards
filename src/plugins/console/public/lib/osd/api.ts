@@ -36,7 +36,7 @@ import {
   compileBodyDescription,
 } from '../autocomplete/body_completer';
 import { Endpoint } from '../autocomplete/types';
-import { ParametrizedComponentFactories } from './osd';
+import { ParametrizedComponentFactories } from '../autocomplete/types';
 
 /**
  *
@@ -80,7 +80,7 @@ export class Api {
     return result;
   }
 
-  addEndpointDescription(endpoint: string, description?: Record<string, any>) {
+  addEndpointDescription(endpoint: string, description: Record<string, any>) {
     const copiedDescription: Record<string, any> = {};
     _.assign(copiedDescription, description || {});
     _.defaults(copiedDescription, {

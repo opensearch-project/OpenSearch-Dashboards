@@ -79,7 +79,7 @@ export function parseCURL(text: string) {
     if (lines.length === 0) {
       return false;
     }
-    line = lines.shift()?.replace(/[\r\n]+/g, '\n') + '\n';
+    line = lines.shift()!.replace(/[\r\n]+/g, '\n') + '\n';
     return true;
   }
 

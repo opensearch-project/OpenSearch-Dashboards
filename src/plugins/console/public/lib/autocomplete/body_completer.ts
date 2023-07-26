@@ -38,7 +38,7 @@ import {
   ConditionalProxy,
   GlobalOnlyComponent,
 } from './components';
-import { ParametrizedComponentFactories } from '../osd/osd';
+import { ParametrizedComponentFactories } from './types';
 import { AutoCompleteContext, Template, Term } from './types';
 import { CoreEditor, Token } from '../../types';
 import { MatchResult } from './components/autocomplete_component';
@@ -265,7 +265,7 @@ function compileParametrizedValue(
   if (!componentFactory) {
     throw new Error("no factory found for '" + value + "'");
   }
-  let component = componentFactory(value, null, template);
+  let component = componentFactory(value, null, !!template);
   if (!_.isUndefined(template)) {
     component = wrapComponentWithDefaults(component, { template });
   }
@@ -345,7 +345,7 @@ export function globalsOnlyAutocompleteComponents() {
 export function compileBodyDescription(
   endpointId: string,
   description: Description,
-  parametrizedComponentFactories: ParametrizedComponentFactories
+  parametrizedComponentFactories?: ParametrizedComponentFactories
 ) {
   return compileDescription(
     description,

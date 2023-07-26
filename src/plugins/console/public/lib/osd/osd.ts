@@ -38,45 +38,14 @@ import {
   ListComponent,
   TemplateAutocompleteComponent,
   UsernameAutocompleteComponent,
-  SharedComponent,
 } from '../autocomplete/components';
 
 import { Api } from './api';
-
-export type IdAutocompleteComponentFactory = (
-  name: string,
-  parent: SharedComponent,
-  multiValued?: boolean
-) => IdAutocompleteComponent;
-
-export type ComponentFactory = (
-  name: string,
-  parent: SharedComponent | null,
-  multiValued?: boolean | unknown
-) => SharedComponent;
-
-export interface ParametrizedComponentFactories {
-  getComponent: (
-    name: string,
-    parent?: SharedComponent | boolean,
-    provideDefault?: boolean
-  ) => ComponentFactory;
-  index?: (name: string, parent: ListComponent) => IndexAutocompleteComponent | undefined;
-  indices?: (name: string, parent: ListComponent) => IndexAutocompleteComponent | undefined;
-  type?: (name: string, parent: ListComponent) => TypeAutocompleteComponent;
-  types?: (name: string, parent: ListComponent) => TypeAutocompleteComponent;
-  id?: (name: string, parent: SharedComponent) => IdAutocompleteComponent;
-  transform_id?: (name: string, parent: SharedComponent) => IdAutocompleteComponent;
-  username?: (name: string, parent: ListComponent) => UsernameAutocompleteComponent;
-  user?: (name: string, parent: ListComponent) => UsernameAutocompleteComponent;
-  template?: (name: string, parent: ListComponent) => TemplateAutocompleteComponent;
-  task_id?: (name: string, parent: SharedComponent) => IdAutocompleteComponent;
-  ids?: (name: string, parent: SharedComponent) => IdAutocompleteComponent;
-  fields?: (name: string, parent: ListComponent) => FieldAutocompleteComponent;
-  field?: (name: string, parent: ListComponent) => FieldAutocompleteComponent;
-  nodes?: (name: string, parent: SharedComponent) => ListComponent;
-  node?: (name: string, parent: SharedComponent) => ListComponent;
-}
+import {
+  ComponentFactory,
+  IdAutocompleteComponentFactory,
+  ParametrizedComponentFactories,
+} from '../autocomplete/types';
 
 let ACTIVE_API = new Api();
 const isNotAnIndexName = (name: string) => name[0] === '_' && name !== '_all';
@@ -86,10 +55,10 @@ const idAutocompleteComponentFactory: IdAutocompleteComponentFactory = (name, pa
 };
 const parametrizedComponentFactories: ParametrizedComponentFactories = {
   getComponent(name, parent, provideDefault) {
-    if ((this as any)[name]) {
-      return (this as any)[name];
+    if (this[name as keyof ParametrizedComponentFactories]) {
+      return this[name as keyof ParametrizedComponentFactories] as ComponentFactory;
     } else if (provideDefault) {
-      return idAutocompleteComponentFactory;
+      return idAutocompleteComponentFactory as ComponentFactory;
     }
   },
   index(name, parent) {

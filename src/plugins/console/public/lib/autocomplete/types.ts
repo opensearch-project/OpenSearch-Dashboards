@@ -5,6 +5,15 @@
 
 import { Token, Position, Range } from '../../types';
 import { Description } from './body_completer';
+import {
+  FieldAutocompleteComponent,
+  IdAutocompleteComponent,
+  IndexAutocompleteComponent,
+  ListComponent,
+  TemplateAutocompleteComponent,
+  TypeAutocompleteComponent,
+  UsernameAutocompleteComponent,
+} from './components';
 import { SharedComponent } from './components/shared_component';
 
 export interface UrlObjectComponent {
@@ -75,3 +84,38 @@ export interface TermObject {
 }
 
 export type Term = string | TermObject;
+
+export type IdAutocompleteComponentFactory = (
+  name: string,
+  parent: SharedComponent,
+  multiValued?: boolean
+) => IdAutocompleteComponent;
+
+export type ComponentFactory = (
+  name: string,
+  parent: SharedComponent | null,
+  multiValued?: boolean
+) => SharedComponent;
+
+export interface ParametrizedComponentFactories {
+  getComponent: (
+    name: string,
+    parent?: SharedComponent | boolean,
+    provideDefault?: boolean
+  ) => ComponentFactory | undefined;
+  index?: (name: string, parent: ListComponent) => IndexAutocompleteComponent | undefined;
+  indices?: (name: string, parent: ListComponent) => IndexAutocompleteComponent | undefined;
+  type?: (name: string, parent: ListComponent) => TypeAutocompleteComponent;
+  types?: (name: string, parent: ListComponent) => TypeAutocompleteComponent;
+  id?: (name: string, parent: SharedComponent) => IdAutocompleteComponent;
+  transform_id?: (name: string, parent: SharedComponent) => IdAutocompleteComponent;
+  username?: (name: string, parent: ListComponent) => UsernameAutocompleteComponent;
+  user?: (name: string, parent: ListComponent) => UsernameAutocompleteComponent;
+  template?: (name: string, parent: ListComponent) => TemplateAutocompleteComponent;
+  task_id?: (name: string, parent: SharedComponent) => IdAutocompleteComponent;
+  ids?: (name: string, parent: SharedComponent) => IdAutocompleteComponent;
+  fields?: (name: string, parent: ListComponent) => FieldAutocompleteComponent;
+  field?: (name: string, parent: ListComponent) => FieldAutocompleteComponent;
+  nodes?: (name: string, parent: SharedComponent) => ListComponent;
+  node?: (name: string, parent: SharedComponent) => ListComponent;
+}
