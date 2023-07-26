@@ -3655,7 +3655,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                       <EuiInnerText>
                         <span
                           aria-current="page"
-                          className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
+                          className="euiBreadcrumb euiBreadcrumb--last"
                           data-test-subj="breadcrumb first last"
                           title="test"
                         >
@@ -8902,7 +8902,7 @@ exports[`Header renders condensed header 1`] = `
                       <EuiInnerText>
                         <span
                           aria-current="page"
-                          className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
+                          className="euiBreadcrumb euiBreadcrumb--last"
                           data-test-subj="breadcrumb first"
                           title="test"
                         >
