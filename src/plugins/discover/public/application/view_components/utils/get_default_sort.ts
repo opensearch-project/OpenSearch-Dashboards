@@ -28,9 +28,23 @@
  * under the License.
  */
 
+import { IndexPattern } from '../../../opensearch_dashboards_services';
+// @ts-ignore
+import { isSortable } from './get_sort';
+
+export type SortOrder = [string, string];
+
 /**
- * Returns true if the given array contains at least 1 object
+ * use in case the user didn't manually sort.
+ * the default sort is returned depending of the index pattern
  */
-export function arrayContainsObjects(value: unknown[]): boolean {
-  return Array.isArray(value) && value.some((v) => typeof v === 'object' && v !== null);
+export function getDefaultSort(
+  indexPattern: IndexPattern,
+  defaultSortOrder: string = 'desc'
+): SortOrder[] {
+  if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
+    return [[indexPattern.timeFieldName, defaultSortOrder]];
+  } else {
+    return [['_score', defaultSortOrder]];
+  }
 }
