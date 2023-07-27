@@ -5,7 +5,6 @@
 
 import { Slice } from '@reduxjs/toolkit';
 import { LazyExoticComponent } from 'react';
-import { LocationState } from 'history';
 import { AppMountParameters } from '../../../../../core/public';
 
 interface ViewListItem {
@@ -13,9 +12,7 @@ interface ViewListItem {
   label: string;
 }
 
-export interface ViewProps extends AppMountParameters {
-  redirectState: LocationState;
-}
+export type ViewProps = AppMountParameters;
 
 export interface ViewDefinition<T = any> {
   readonly id: string;

@@ -67,7 +67,7 @@ import {
   discoverSlice,
   getPreloadedState,
 } from './application/utils/state_management/discover_slice';
-import { getRedirectState } from './get_redirect_state';
+import { migrateUrlState } from './migrate_state';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -269,7 +269,6 @@ export class DiscoverPlugin
 
         // This is for instances where the user navigates to the app from the application nav menu
         const path = window.location.hash;
-        const redirectState = getRedirectState(path);
         // debugger;
         const v2Enabled = await core.uiSettings.get<boolean>(NEW_DISCOVER_APP);
         if (!v2Enabled) {
@@ -278,10 +277,10 @@ export class DiscoverPlugin
             path,
           });
         } else {
+          const newPath = migrateUrlState(path);
           navigateToApp('data-explorer', {
             replace: true,
-            path: `/${PLUGIN_ID}`,
-            state: redirectState,
+            path: `/${PLUGIN_ID}${newPath}`,
           });
         }
 

@@ -5,7 +5,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Filter, Query } from '../../../../../data/public';
-import { DiscoverServices } from '../../../build_services';
+import { BuildDiscoverServices } from '../../../build_services';
 import { RootState } from '../../../../../data_explorer/public';
 
 export interface DiscoverState {
@@ -41,10 +41,11 @@ export interface DiscoverRootState extends RootState {
 
 const initialState = {} as DiscoverState;
 
-export const getPreloadedState = async ({ data }: DiscoverServices): Promise<DiscoverState> => {
+export const getPreloadedState = async ({
+  data,
+}: BuildDiscoverServices): Promise<DiscoverState> => {
   return {
     ...initialState,
-    interval: data.query.timefilter.timefilter.getRefreshInterval().value.toString(),
   };
 };
 
