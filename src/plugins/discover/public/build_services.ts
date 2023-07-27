@@ -83,11 +83,11 @@ export interface DiscoverServices {
   visualizations: VisualizationsStart;
 }
 
-export async function buildServices(
+export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext
-): Promise<DiscoverServices> {
+): DiscoverServices {
   const services: SavedObjectOpenSearchDashboardsServices = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,

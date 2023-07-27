@@ -13,4 +13,5 @@ export function plugin() {
   return new DataExplorerPlugin();
 }
 export { DataExplorerPluginSetup, DataExplorerPluginStart, ViewRedirectParams } from './types';
-export { ViewMountParameters, ViewDefinition } from './services/view_service';
+export { ViewProps, ViewDefinition } from './services/view_service';
+export { RootState, useTypedSelector, useTypedDispatch } from './utils/state_management';

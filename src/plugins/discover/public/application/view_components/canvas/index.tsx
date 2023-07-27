@@ -4,28 +4,21 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { ViewMountParameters } from '../../../../../data_explorer/public';
+import { ViewProps } from '../../../../../data_explorer/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
-import { DiscoverServices } from '../../../build_services';
 import { Canvas } from './canvas';
+import { getServices } from '../../../opensearch_dashboards_services';
 
-export const renderCanvas = (
-  { canvasElement, appParams }: ViewMountParameters,
-  services: DiscoverServices
-) => {
-  const { setHeaderActionMenu } = appParams;
-
-  ReactDOM.render(
+// eslint-disable-next-line import/no-default-export
+export default function CanvasApp({ setHeaderActionMenu }: ViewProps) {
+  const services = getServices();
+  return (
     <OpenSearchDashboardsContextProvider services={services}>
       <Canvas
         opts={{
           setHeaderActionMenu,
         }}
       />
-    </OpenSearchDashboardsContextProvider>,
-    canvasElement
+    </OpenSearchDashboardsContextProvider>
   );
-
-  return () => ReactDOM.unmountComponentAtNode(canvasElement);
-};
+}

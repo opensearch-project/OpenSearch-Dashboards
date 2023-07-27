@@ -1,31 +1,6 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
  */
 
 import { i18n } from '@osd/i18n';
@@ -53,9 +28,10 @@ import {
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
+import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
-import { createOsdUrlTracker, url } from '../../opensearch_dashboards_utils/public';
+import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
@@ -84,6 +60,11 @@ import {
 import { NEW_DISCOVER_APP, PLUGIN_ID } from '../common';
 import { DataExplorerPluginSetup, ViewRedirectParams } from '../../data_explorer/public';
 import { registerFeature } from './register_feature';
+import {
+  DiscoverState,
+  discoverSlice,
+  getPreloadedState,
+} from './application/utils/state_management/discover_slice';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -170,9 +151,12 @@ export class DiscoverPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
   private urlGenerator?: DiscoverStart['urlGenerator'];
-  private initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
+  private initializeServices?: () => { core: CoreStart; plugins: DiscoverStartPlugins };
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
+    // TODO: Remove this before merge to main
+    // eslint-disable-next-line no-console
+    console.log('DiscoverPlugin.setup()');
     const baseUrl = core.http.basePath.prepend('/app/discover');
 
     if (plugins.share) {
@@ -247,6 +231,9 @@ export class DiscoverPlugin
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: async (params: AppMountParameters) => {
+        // TODO: Remove this before merge to main
+        // eslint-disable-next-line no-console
+        console.log('DiscoverPlugin.mount()');
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
         }
@@ -278,9 +265,6 @@ export class DiscoverPlugin
           });
         }
 
-        // TODO: Carry this over to the view
-        // make sure the index pattern list is up to date
-        // await dataStart.indexPatterns.clearCache();
         return () => {
           appUnMounted();
         };
@@ -314,7 +298,7 @@ export class DiscoverPlugin
       registerFeature(plugins.home);
     }
 
-    plugins.dataExplorer.registerView({
+    plugins.dataExplorer.registerView<DiscoverState>({
       id: PLUGIN_ID,
       title: 'Discover',
       defaultPath: '#/',
@@ -328,20 +312,17 @@ export class DiscoverPlugin
         },
       },
       ui: {
-        defaults: {},
-        reducer: () => ({}),
+        defaults: async () => {
+          this.initializeServices?.();
+          const services = getServices();
+          return await getPreloadedState(services);
+        },
+        slice: discoverSlice,
       },
       shouldShow: () => true,
-      mount: async (params) => {
-        const { renderCanvas, renderPanel } = await import('./application/view_components');
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        const services = await buildServices(coreStart, pluginsStart, this.initializerContext);
-
-        renderCanvas(params, services);
-        renderPanel(params, services);
-
-        return () => {};
-      },
+      // ViewCompon
+      Canvas: lazy(() => import('./application/view_components/canvas')),
+      Panel: lazy(() => import('./application/view_components/panel')),
     });
 
     // this.registerEmbeddable(core, plugins);
@@ -354,18 +335,23 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
+    // TODO: Remove this before merge to main
+    // eslint-disable-next-line no-console
+    console.log('DiscoverPlugin.start()');
     setUiActions(plugins.uiActions);
 
-    this.initializeServices = async () => {
+    this.initializeServices = () => {
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins, this.initializerContext);
+      const services = buildServices(core, plugins, this.initializerContext);
       setServices(services);
       this.servicesInitialized = true;
 
       return { core, plugins };
     };
+
+    this.initializeServices();
 
     return {
       urlGenerator: this.urlGenerator,

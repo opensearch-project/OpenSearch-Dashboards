@@ -13,7 +13,8 @@ export class View implements IView {
   public readonly defaultPath: string;
   public readonly appExtentions: IView['appExtentions'];
   readonly shouldShow?: (state: any) => boolean;
-  readonly mount: IView['mount'];
+  readonly Canvas: IView['Canvas'];
+  readonly Panel: IView['Panel'];
 
   constructor(options: ViewDefinition) {
     this.id = options.id;
@@ -22,6 +23,7 @@ export class View implements IView {
     this.defaultPath = options.defaultPath;
     this.appExtentions = options.appExtentions;
     this.shouldShow = options.shouldShow;
-    this.mount = options.mount;
+    this.Canvas = options.Canvas;
+    this.Panel = options.Panel;
   }
 }

@@ -3,65 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
+import { Suspense } from 'react';
 import { AppMountParameters } from '../../../../core/public';
 import { Sidebar } from './sidebar';
 import { NoView } from './no_view';
 import { View } from '../services/view_service/view';
 
 export const AppContainer = ({ view, params }: { view?: View; params: AppMountParameters }) => {
-  const [showSpinner, setShowSpinner] = useState(false);
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const unmountRef = useRef<any>(null);
-
-  useLayoutEffect(() => {
-    const unmount = () => {
-      if (unmountRef.current) {
-        unmountRef.current();
-        unmountRef.current = null;
-      }
-    };
-
-    // Do nothing if the view is not defined or if the view is the same as the previous view
-    if (!view || (unmountRef.current && unmountRef.current.viewId === view.id)) {
-      return;
-    }
-
-    // unmount the previous view
-    unmount();
-
-    const mount = async () => {
-      setShowSpinner(true);
-      try {
-        unmountRef.current =
-          (await view.mount({
-            canvasElement: canvasRef.current!,
-            panelElement: panelRef.current!,
-            appParams: params,
-          })) || null;
-      } catch (e) {
-        // TODO: add error UI
-        // eslint-disable-next-line no-console
-        console.error(e);
-      } finally {
-        // if (canvasRef.current && panelRef.current) {
-        if (canvasRef.current) {
-          setShowSpinner(false);
-        }
-      }
-    };
-
-    mount();
-
-    return unmount;
-  }, [params, view]);
-
   // TODO: Make this more robust.
   if (!view) {
     return <NoView />;
   }
+
+  const { Canvas, Panel } = view;
 
   // Render the application DOM.
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
@@ -69,7 +25,9 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
     <EuiPageTemplate
       pageSideBar={
         <Sidebar>
-          <div ref={panelRef} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <Panel {...params} />
+          </Suspense>
         </Sidebar>
       }
       className="dePageTemplate"
@@ -78,8 +36,9 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
       paddingSize="none"
     >
       {/* TODO: improve loading state */}
-      {showSpinner && <div>Loading...</div>}
-      <div key={view.id} ref={canvasRef} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Canvas {...params} />
+      </Suspense>
     </EuiPageTemplate>
   );
 };

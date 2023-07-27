@@ -4,7 +4,9 @@
  */
 
 import React from 'react';
+import { useSelector } from '../../utils/state_management';
 
 export const Panel = () => {
-  return <div>Side Panel</div>;
+  const interval = useSelector((state) => state.discover.interval);
+  return <div>{interval}</div>;
 };
