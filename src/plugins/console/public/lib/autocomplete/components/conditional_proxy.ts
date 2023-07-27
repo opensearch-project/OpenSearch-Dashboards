@@ -28,19 +28,36 @@
  * under the License.
  */
 
-export { AutocompleteComponent } from './autocomplete_component';
-export { SharedComponent } from './shared_component';
-export { ConstantComponent } from './constant_component';
-export { ListComponent } from './list_component';
-export { SimpleParamComponent } from './simple_param_component';
-export { ConditionalProxy } from './conditional_proxy';
-export { GlobalOnlyComponent } from './global_only_component';
-export { ObjectComponent } from './object_component';
-export { AcceptEndpointComponent, URL_PATH_END_MARKER } from './accept_endpoint_component';
-export { UrlPatternMatcher } from './url_pattern_matcher';
-export { IndexAutocompleteComponent } from './index_autocomplete_component';
-export { FieldAutocompleteComponent } from './field_autocomplete_component';
-export { TypeAutocompleteComponent } from './type_autocomplete_component';
-export { IdAutocompleteComponent } from './id_autocomplete_component';
-export { TemplateAutocompleteComponent } from './template_autocomplete_component';
-export { UsernameAutocompleteComponent } from './username_autocomplete_component';
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext } from '../types';
+import { AutocompleteComponent } from './autocomplete_component';
+import { SharedComponent } from './shared_component';
+
+type PredicateFunction = (context: AutoCompleteContext, editor: CoreEditor) => boolean;
+
+export class ConditionalProxy extends SharedComponent {
+  predicate: PredicateFunction;
+  delegate: AutocompleteComponent;
+
+  constructor(predicate: PredicateFunction, delegate: AutocompleteComponent) {
+    super('__condition');
+    this.predicate = predicate;
+    this.delegate = delegate;
+  }
+
+  getTerms(context: AutoCompleteContext, editor: CoreEditor) {
+    if (this.predicate(context, editor)) {
+      return this.delegate.getTerms(context, editor);
+    } else {
+      return null;
+    }
+  }
+
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    if (this.predicate(context, editor)) {
+      return this.delegate.match(token, context, editor);
+    } else {
+      return false;
+    }
+  }
+}

@@ -1273,10 +1273,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@npm:@opensearch-project/oui@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.1.2.tgz#38ebe687d856715f3a5d8662505e67966e1e3617"
-  integrity sha512-+gLzltuSjhR2Uz0DGaqYOysoh7WG9I+LvAZnYeyFsYxeAhvDmd5mLggyBWciqwj0h5yDJUV6uEuf9k88WiyAGA==
+"@elastic/eui@npm:@opensearch-project/oui@1.3.0-alpha.2":
+  version "1.3.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.3.0-alpha.2.tgz#90060e68ba9809239b7ee22a4f12c65e94e80028"
+  integrity sha512-RZ+23jgnz2vYgfipd++gNT9zsSNbqm8XEyE9vr6jMMGiwL/XCUJ/7Vli5Z3BpQb1XPQVklRQscMoG2UT9xEpxQ==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -18591,9 +18591,9 @@ wildcard@^2.0.0:
   integrity sha512-JcKqAHLPxcdb9KM49dufGXn2x3ssnfjbcaQdLlfZsL9rH9wgDQjUtDxbo8NE0F6SFvydeu1VhZe7hZuHsB2/pw==
 
 word-wrap@~1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.3.tgz#610636f6b1f703891bd34771ccb17fb93b47079c"
-  integrity sha512-Hz/mrNwitNRh/HUAtM/VT/5VH+ygD6DV7mYKZAtHOrbs8U7lvPS6xf7EJKMF0uW1KJCl0H701g3ZGus+muE5vQ==
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.4.tgz#cb4b50ec9aca570abd1f52f33cd45b6c61739a9f"
+  integrity sha512-2V81OA4ugVo5pRo46hAoD2ivUJx8jXmWXfUkY4KFNw0hEptvN0QfH3K4nHiwzGeKl5rFKedV48QVoqYavy4YpA==
 
 wordwrap@^1.0.0:
   version "1.0.0"

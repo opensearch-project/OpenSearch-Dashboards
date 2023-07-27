@@ -28,14 +28,39 @@
  * under the License.
  */
 
-import { getTemplates } from '../../mappings/mappings';
-import { ListComponent } from './list_component';
+import _ from 'lodash';
+import { SharedComponent } from './shared_component';
+import { AutoCompleteContext } from '../types';
+import { CoreEditor } from '../../../types';
 
-export class TemplateAutocompleteComponent extends ListComponent {
-  constructor(name, parent) {
-    super(name, getTemplates, parent, true, true);
+export class IdAutocompleteComponent extends SharedComponent {
+  multi_match: boolean;
+
+  constructor(name: string, parent: SharedComponent, multi = false) {
+    super(name, parent);
+    this.multi_match = multi;
   }
-  getContextKey() {
-    return 'template';
+  match(token: string | string[], context: AutoCompleteContext, editor: CoreEditor) {
+    if (!token) {
+      return null;
+    }
+    if (!this.multi_match && Array.isArray(token)) {
+      return null;
+    }
+    token = Array.isArray(token) ? token : [token];
+    if (
+      _.find(token, function (t) {
+        return t.match(/[\/,]/);
+      })
+    ) {
+      return null;
+    }
+    const r = super.match(token, context, editor);
+    if (r) {
+      r.context_values = r.context_values || {};
+      r.context_values.id = token;
+    }
+
+    return r;
   }
 }

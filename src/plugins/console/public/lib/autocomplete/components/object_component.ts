@@ -28,38 +28,52 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { SharedComponent } from './index';
+import { ConstantComponent } from './constant_component';
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext, Term } from '../types';
 /**
  * @param constants list of components that represent constant keys
  * @param patternsAndWildCards list of components that represent patterns and should be matched only if
  * there is no constant matches
  */
 export class ObjectComponent extends SharedComponent {
-  constructor(name, constants, patternsAndWildCards) {
+  constants: ConstantComponent[];
+  patternsAndWildCards: SharedComponent[];
+
+  constructor(
+    name: string,
+    constants: ConstantComponent[],
+    patternsAndWildCards: SharedComponent[]
+  ) {
     super(name);
     this.constants = constants;
     this.patternsAndWildCards = patternsAndWildCards;
   }
-  getTerms(context, editor) {
-    const options = [];
-    _.each(this.constants, function (component) {
-      options.push.apply(options, component.getTerms(context, editor));
+  getTerms(context: AutoCompleteContext, editor: CoreEditor) {
+    const options: Term[] = [];
+    this.constants.forEach((component) => {
+      options.push(...component.getTerms(context, editor));
     });
-    _.each(this.patternsAndWildCards, function (component) {
-      options.push.apply(options, component.getTerms(context, editor));
+    this.patternsAndWildCards.forEach((component) => {
+      const option = component.getTerms(context, editor);
+      if (option) {
+        options.push(...option);
+      }
     });
     return options;
   }
 
-  match(token, context, editor) {
-    const result = {
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    const result: {
+      next: SharedComponent[];
+    } = {
       next: [],
     };
-    _.each(this.constants, function (component) {
+    this.constants.forEach((component) => {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
+        result.next.push(...componentResult.next);
       }
     });
 
@@ -72,10 +86,10 @@ export class ObjectComponent extends SharedComponent {
     if (result.next.length) {
       return result;
     }
-    _.each(this.patternsAndWildCards, function (component) {
+    this.patternsAndWildCards.forEach((component) => {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
+        result.next.push(...componentResult.next);
       }
     });
 

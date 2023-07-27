@@ -29,27 +29,30 @@
  */
 
 import _ from 'lodash';
-import { SharedComponent } from './shared_component';
-export const URL_PATH_END_MARKER = '__url_path_end__';
+import { detectCURL, parseCURL } from '../curl';
+import curlTests from './curl_parsing.txt';
 
-export class AcceptEndpointComponent extends SharedComponent {
-  constructor(endpoint, parent) {
-    super(endpoint.id, parent);
-    this.endpoint = endpoint;
-  }
-  match(token, context, editor) {
-    if (token !== URL_PATH_END_MARKER) {
-      return null;
+describe('CURL', () => {
+  const notCURLS = ['sldhfsljfhs', 's;kdjfsldkfj curl -XDELETE ""', '{ "hello": 1 }'];
+  _.each(notCURLS, function (notCURL, i) {
+    test('cURL Detection - broken strings ' + i, function () {
+      expect(detectCURL(notCURL)).toEqual(false);
+    });
+  });
+
+  curlTests.split(/^=+$/m).forEach(function (fixture) {
+    if (fixture.trim() === '') {
+      return;
     }
-    if (this.endpoint.methods && -1 === _.indexOf(this.endpoint.methods, context.method)) {
-      return null;
-    }
-    const r = super.match(token, context, editor);
-    r.context_values = r.context_values || {};
-    r.context_values.endpoint = this.endpoint;
-    if (_.isNumber(this.endpoint.priority)) {
-      r.priority = this.endpoint.priority;
-    }
-    return r;
-  }
-}
+    const fixtureParts = fixture.split(/^-+$/m);
+    const name = fixtureParts[0].trim();
+    const curlText = fixtureParts[1];
+    const response = fixtureParts[2].trim();
+
+    test('cURL Detection - ' + name, function () {
+      expect(detectCURL(curlText)).toBe(true);
+      const r = parseCURL(curlText);
+      expect(r).toEqual(response);
+    });
+  });
+});
