@@ -5,18 +5,8 @@
 //   mkdChart__legend--small
 //   mkdChart__legend-isLoading
 
-.mkdVis {
-  padding: $euiSizeS;
-  width: 100%;
-}
-
 .visEditor--markdown {
-  .visEditorSidebar__config > *,
-  .visEditor--markdown__textarea {
+  .visEditorSidebar__config > * {
     flex-grow: 1;
-  }
-
-  .mkdEditor {
-    height: 100%;
   }
 }

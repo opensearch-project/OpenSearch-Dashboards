@@ -28,33 +28,19 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext } from '../types';
 import { SharedComponent } from './shared_component';
-export class ConstantComponent extends SharedComponent {
-  constructor(name, parent, options) {
+export class SimpleParamComponent extends SharedComponent {
+  constructor(name: string, parent: SharedComponent) {
     super(name, parent);
-    if (_.isString(options)) {
-      options = [options];
-    }
-    this.options = options || [name];
   }
-  getTerms() {
-    return this.options;
-  }
-
-  addOption(options) {
-    if (!Array.isArray(options)) {
-      options = [options];
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    const result = super.match(token, context, editor);
+    if (result) {
+      result.context_values = result.context_values || {};
+      result.context_values[this.name] = token;
     }
-
-    [].push.apply(this.options, options);
-    this.options = _.uniq(this.options);
-  }
-  match(token, context, editor) {
-    if (token !== this.name) {
-      return null;
-    }
-
-    return super.match(token, context, editor);
+    return result;
   }
 }

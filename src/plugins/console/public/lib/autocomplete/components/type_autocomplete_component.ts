@@ -31,17 +31,19 @@
 import _ from 'lodash';
 import { ListComponent } from './list_component';
 import { getTypes } from '../../mappings/mappings';
-function TypeGenerator(context) {
+import { AutoCompleteContext } from '../types';
+
+function TypeGenerator(context: AutoCompleteContext) {
   return getTypes(context.indices);
 }
-function nonValidIndexType(token) {
+function nonValidIndexType(token: string) {
   return !(token === '_all' || token[0] !== '_');
 }
 export class TypeAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
+  constructor(name: string, parent: ListComponent, multiValued?: boolean) {
     super(name, TypeGenerator, parent, multiValued);
   }
-  validateTokens(tokens) {
+  validateTokens(tokens: string[]) {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }

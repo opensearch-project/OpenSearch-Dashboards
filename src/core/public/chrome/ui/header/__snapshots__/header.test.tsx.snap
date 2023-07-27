@@ -3614,19 +3614,16 @@ exports[`Header handles visibility and lock changes 1`] = `
                 "thrownError": null,
               }
             }
-            isDarkMode={false}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
                 Array [
                   Object {
-                    "className": "osdBreadcrumbs",
                     "data-test-subj": "breadcrumb first last",
                     "text": "test",
                   },
                 ]
               }
-              className="osdHeaderBreadcrumbs"
               data-test-subj="breadcrumbs"
               max={10}
             >
@@ -3634,32 +3631,39 @@ exports[`Header handles visibility and lock changes 1`] = `
                 breadcrumbs={
                   Array [
                     Object {
-                      "className": "osdBreadcrumbs",
                       "data-test-subj": "breadcrumb first last",
                       "text": "test",
                     },
                   ]
                 }
-                className="euiHeaderBreadcrumbs osdHeaderBreadcrumbs"
+                className="euiHeaderBreadcrumbs"
                 data-test-subj="breadcrumbs"
                 max={10}
                 truncate={true}
               >
                 <nav
                   aria-label="breadcrumb"
-                  className="euiBreadcrumbs euiHeaderBreadcrumbs osdHeaderBreadcrumbs euiBreadcrumbs--truncate"
+                  className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                   data-test-subj="breadcrumbs"
                 >
-                  <EuiInnerText>
-                    <span
-                      aria-current="page"
-                      className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
-                      data-test-subj="breadcrumb first last"
-                      title="test"
+                  <div
+                    className="euiBreadcrumbWall euiBreadcrumbWall--single"
+                  >
+                    <div
+                      className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first euiBreadcrumbWrapper--last"
                     >
-                      test
-                    </span>
-                  </EuiInnerText>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiBreadcrumb euiBreadcrumb--last"
+                          data-test-subj="breadcrumb first last"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </div>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>
@@ -8857,19 +8861,16 @@ exports[`Header renders condensed header 1`] = `
                 "thrownError": null,
               }
             }
-            isDarkMode={false}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
                 Array [
                   Object {
-                    "className": "osdBreadcrumbs",
                     "data-test-subj": "breadcrumb first",
                     "text": "test",
                   },
                 ]
               }
-              className="osdHeaderBreadcrumbs"
               data-test-subj="breadcrumbs"
               max={10}
             >
@@ -8877,32 +8878,39 @@ exports[`Header renders condensed header 1`] = `
                 breadcrumbs={
                   Array [
                     Object {
-                      "className": "osdBreadcrumbs",
                       "data-test-subj": "breadcrumb first",
                       "text": "test",
                     },
                   ]
                 }
-                className="euiHeaderBreadcrumbs osdHeaderBreadcrumbs"
+                className="euiHeaderBreadcrumbs"
                 data-test-subj="breadcrumbs"
                 max={10}
                 truncate={true}
               >
                 <nav
                   aria-label="breadcrumb"
-                  className="euiBreadcrumbs euiHeaderBreadcrumbs osdHeaderBreadcrumbs euiBreadcrumbs--truncate"
+                  className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                   data-test-subj="breadcrumbs"
                 >
-                  <EuiInnerText>
-                    <span
-                      aria-current="page"
-                      className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
-                      data-test-subj="breadcrumb first"
-                      title="test"
+                  <div
+                    className="euiBreadcrumbWall euiBreadcrumbWall--single"
+                  >
+                    <div
+                      className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first euiBreadcrumbWrapper--last"
                     >
-                      test
-                    </span>
-                  </EuiInnerText>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiBreadcrumb euiBreadcrumb--last"
+                          data-test-subj="breadcrumb first"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </div>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>

@@ -28,28 +28,14 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getIndices } from '../../mappings/mappings';
+import { getTemplates } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
-function nonValidUsernameType(token) {
-  return token[0] === '_';
-}
-export class UsernameAutocompleteComponent extends ListComponent {
-  constructor(name, parent, multiValued) {
-    super(name, getIndices, parent, multiValued);
-  }
-  validateTokens(tokens) {
-    if (!this.multiValued && tokens.length > 1) {
-      return false;
-    }
-    return !_.find(tokens, nonValidUsernameType);
-  }
 
-  getDefaultTermMeta() {
-    return 'username';
+export class TemplateAutocompleteComponent extends ListComponent {
+  constructor(name: string, parent: ListComponent) {
+    super(name, getTemplates, parent, true, true);
   }
-
   getContextKey() {
-    return 'username';
+    return 'template';
   }
 }

@@ -29,14 +29,31 @@
  */
 
 import { SharedComponent } from './shared_component';
-export class SimpleParamComponent extends SharedComponent {
-  constructor(name, parent) {
-    super(name, parent);
+import { AutoCompleteContext, Endpoint } from '../types';
+import { CoreEditor } from '../../../types';
+export const URL_PATH_END_MARKER = '__url_path_end__';
+
+export class AcceptEndpointComponent extends SharedComponent {
+  endpoint: Endpoint;
+  constructor(endpoint: Endpoint, parent?: SharedComponent) {
+    super(endpoint.id, parent);
+    this.endpoint = endpoint;
   }
-  match(token, context, editor) {
-    const result = super.match(token, context, editor);
-    result.context_values = result.context_values || {};
-    result.context_values[this.name] = token;
-    return result;
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    if (token !== URL_PATH_END_MARKER) {
+      return null;
+    }
+    if (this.endpoint.methods && !this.endpoint.methods.includes(context.method)) {
+      return null;
+    }
+    const r = super.match(token, context, editor);
+    if (r) {
+      r.context_values = r.context_values || {};
+      r.context_values.endpoint = this.endpoint;
+      if (typeof this.endpoint.priority === 'number') {
+        r.priority = this.endpoint.priority;
+      }
+    }
+    return r;
   }
 }

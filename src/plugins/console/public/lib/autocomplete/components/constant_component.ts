@@ -30,29 +30,35 @@
 
 import _ from 'lodash';
 import { SharedComponent } from './shared_component';
-export class IdAutocompleteComponent extends SharedComponent {
-  constructor(name, parent, multi) {
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext, Term } from '../types';
+export class ConstantComponent extends SharedComponent {
+  options: Term[];
+
+  constructor(name: string, parent?: SharedComponent | null, options?: string | Term[]) {
     super(name, parent);
-    this.multi_match = multi;
+    if (_.isString(options)) {
+      options = [options];
+    }
+    this.options = options || [name];
   }
-  match(token, context, editor) {
-    if (!token) {
+  getTerms(context?: AutoCompleteContext, editor?: CoreEditor | null): string[] | Term[] {
+    return this.options;
+  }
+
+  addOption(options: Term | Term[]) {
+    if (!Array.isArray(options)) {
+      options = [options];
+    }
+
+    this.options.push(...options);
+    this.options = _.uniq(this.options);
+  }
+  match(token: string, context: AutoCompleteContext, editor: CoreEditor) {
+    if (token !== this.name) {
       return null;
     }
-    if (!this.multi_match && Array.isArray(token)) {
-      return null;
-    }
-    token = Array.isArray(token) ? token : [token];
-    if (
-      _.find(token, function (t) {
-        return t.match(/[\/,]/);
-      })
-    ) {
-      return null;
-    }
-    const r = super.match(token, context, editor);
-    r.context_values = r.context_values || {};
-    r.context_values.id = token;
-    return r;
+
+    return super.match(token, context, editor);
   }
 }

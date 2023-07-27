@@ -29,70 +29,96 @@
  */
 
 import _ from 'lodash';
+import { AutoCompleteContext, Template, Term } from './types';
+import { CoreEditor } from '../../types';
+import { PartialAutoCompleteContext } from './components/autocomplete_component';
+import { SharedComponent } from './components';
 
-export function wrapComponentWithDefaults(component, defaults) {
+export function wrapComponentWithDefaults(
+  component: SharedComponent,
+  defaults: { template: Template }
+) {
   const originalGetTerms = component.getTerms;
   component.getTerms = function (context, editor) {
     let result = originalGetTerms.call(component, context, editor);
     if (!result) {
       return result;
     }
-    result = _.map(result, (term) => {
-      if (!_.isObject(term)) {
+    result = result.map((term) => {
+      if (typeof term !== 'object') {
         term = { name: term };
       }
-      return _.defaults(term, defaults);
+      return { ...defaults, ...term };
     });
     return result;
   };
   return component;
 }
 
-const tracer = function () {
-  if (window.engine_trace) {
-    console.log.call(console, ...arguments);
+const tracer = function (...args: unknown[]) {
+  if ((window as any).engine_trace) {
+    // eslint-disable-next-line no-console
+    console.log(...args);
   }
 };
 
-function passThroughContext(context, extensionList) {
-  function PTC() {}
-
-  PTC.prototype = context;
-  const result = new PTC();
+function passThroughContext(
+  context: AutoCompleteContext | PartialAutoCompleteContext,
+  extensionList?: PartialAutoCompleteContext[]
+) {
+  const result = Object.create(context) as AutoCompleteContext;
   if (extensionList) {
-    extensionList.unshift(result);
-    _.assign.apply(_, extensionList);
-    extensionList.shift();
+    Object.assign(result, ...extensionList);
   }
   return result;
 }
 
-export function WalkingState(parentName, components, contextExtensionList, depth, priority) {
-  this.parentName = parentName;
-  this.components = components;
-  this.contextExtensionList = contextExtensionList;
-  this.depth = depth || 0;
-  this.priority = priority;
+export class WalkingState {
+  name?: string;
+  parentName: string;
+  components: SharedComponent[];
+  contextExtensionList: PartialAutoCompleteContext[];
+  depth: number;
+  priority: number | undefined;
+
+  constructor(
+    parentName: string,
+    components: SharedComponent[],
+    contextExtensionList: PartialAutoCompleteContext[],
+    depth = 0,
+    priority?: number
+  ) {
+    this.parentName = parentName;
+    this.components = components;
+    this.contextExtensionList = contextExtensionList;
+    this.depth = depth;
+    this.priority = priority;
+  }
 }
 
-export function walkTokenPath(tokenPath, walkingStates, context, editor) {
+export function walkTokenPath(
+  tokenPath: Array<string | string[]>,
+  walkingStates: WalkingState[],
+  context: AutoCompleteContext | PartialAutoCompleteContext,
+  editor: CoreEditor | null
+): WalkingState[] {
   if (!tokenPath || tokenPath.length === 0) {
     return walkingStates;
   }
   const token = tokenPath[0];
-  const nextWalkingStates = [];
+  const nextWalkingStates: WalkingState[] = [];
 
   tracer('starting token evaluation [' + token + ']');
 
-  _.each(walkingStates, function (ws) {
+  walkingStates.forEach((ws) => {
     const contextForState = passThroughContext(context, ws.contextExtensionList);
-    _.each(ws.components, function (component) {
+    ws.components.forEach((component) => {
       tracer('evaluating [' + token + '] with [' + component.name + ']', component);
       const result = component.match(token, contextForState, editor);
-      if (result && !_.isEmpty(result)) {
+      if (result && Object.keys(result).length !== 0) {
         tracer('matched [' + token + '] with:', result);
         let next;
-        let extensionList;
+        let extensionList: PartialAutoCompleteContext[];
         if (result.next && !Array.isArray(result.next)) {
           next = [result.next];
         } else {
@@ -100,15 +126,15 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
         }
         if (result.context_values) {
           extensionList = [];
-          [].push.apply(extensionList, ws.contextExtensionList);
+          extensionList = [...extensionList, ...ws.contextExtensionList];
           extensionList.push(result.context_values);
         } else {
           extensionList = ws.contextExtensionList;
         }
 
         let priority = ws.priority;
-        if (_.isNumber(result.priority)) {
-          if (_.isNumber(priority)) {
+        if (typeof result.priority === 'number') {
+          if (typeof priority === 'number') {
             priority = Math.min(priority, result.priority);
           } else {
             priority = result.priority;
@@ -124,15 +150,19 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
 
   if (nextWalkingStates.length === 0) {
     // no where to go, still return context variables returned so far..
-    return _.map(walkingStates, function (ws) {
-      return new WalkingState(ws.name, [], ws.contextExtensionList);
-    });
+    return walkingStates.map((ws) => new WalkingState(ws.name ?? '', [], ws.contextExtensionList));
   }
 
   return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);
 }
 
-export function populateContext(tokenPath, context, editor, includeAutoComplete, components) {
+export function populateContext(
+  tokenPath: Array<string | string[]>,
+  context: AutoCompleteContext | PartialAutoCompleteContext,
+  editor: CoreEditor | null,
+  includeAutoComplete: boolean,
+  components: SharedComponent[]
+) {
   let walkStates = walkTokenPath(
     tokenPath,
     [new WalkingState('ROOT', components, [])],
@@ -140,19 +170,22 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     editor
   );
   if (includeAutoComplete) {
-    let autoCompleteSet = [];
-    _.each(walkStates, function (ws) {
+    let autoCompleteSet: Term[] = [];
+    walkStates.forEach((ws) => {
       const contextForState = passThroughContext(context, ws.contextExtensionList);
-      _.each(ws.components, function (component) {
-        _.each(component.getTerms(contextForState, editor), function (term) {
-          if (!_.isObject(term)) {
-            term = { name: term };
-          }
-          autoCompleteSet.push(term);
-        });
+      ws.components.forEach((component) => {
+        const terms = component.getTerms(contextForState, editor);
+        if (terms) {
+          terms.forEach((term) => {
+            if (typeof term !== 'object') {
+              term = { name: term };
+            }
+            autoCompleteSet.push(term);
+          });
+        }
       });
     });
-    autoCompleteSet = _.uniq(autoCompleteSet);
+    autoCompleteSet = [...new Set(autoCompleteSet)];
     context.autoCompleteSet = autoCompleteSet;
   }
 
@@ -167,6 +200,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     });
 
     if (!wsToUse && walkStates.length > 1 && !includeAutoComplete) {
+      // eslint-disable-next-line no-console
       console.info(
         "more then one context active for current path, but autocomplete isn't requested",
         walkStates

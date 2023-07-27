@@ -28,31 +28,29 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { detectCURL, parseCURL } from '../curl';
-import curlTests from './curl_parsing.txt';
+import { AutocompleteComponent } from './autocomplete_component';
+export class SharedComponent extends AutocompleteComponent {
+  _nextDict: { [key: string]: SharedComponent[] };
+  _parent?: SharedComponent | null;
 
-describe('CURL', () => {
-  const notCURLS = ['sldhfsljfhs', 's;kdjfsldkfj curl -XDELETE ""', '{ "hello": 1 }'];
-  _.each(notCURLS, function (notCURL, i) {
-    test('cURL Detection - broken strings ' + i, function () {
-      expect(detectCURL(notCURL)).toEqual(false);
-    });
-  });
-
-  curlTests.split(/^=+$/m).forEach(function (fixture) {
-    if (fixture.trim() === '') {
-      return;
+  constructor(name: string, parent?: SharedComponent | null) {
+    super(name);
+    this._nextDict = {};
+    if (parent) {
+      parent.addComponent(this);
     }
-    fixture = fixture.split(/^-+$/m);
-    const name = fixture[0].trim();
-    const curlText = fixture[1];
-    const response = fixture[2].trim();
+    // for debugging purposes
+    this._parent = parent;
+  }
+  /* return the first component with a given name */
+  getComponent(name: string): SharedComponent | undefined {
+    return (this._nextDict[name] || [undefined])[0];
+  }
 
-    test('cURL Detection - ' + name, function () {
-      expect(detectCURL(curlText)).toBe(true);
-      const r = parseCURL(curlText);
-      expect(r).toEqual(response);
-    });
-  });
-});
+  addComponent(component: SharedComponent): void {
+    const current = this._nextDict[component.name] || [];
+    current.push(component);
+    this._nextDict[component.name] = current;
+    this.next = ([] as SharedComponent[]).concat(...Object.values(this._nextDict));
+  }
+}

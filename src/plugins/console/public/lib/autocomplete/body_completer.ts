@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import _ from 'lodash';
 import { WalkingState, walkTokenPath, wrapComponentWithDefaults } from './engine';
 import {
@@ -37,11 +38,24 @@ import {
   ConditionalProxy,
   GlobalOnlyComponent,
 } from './components';
+import { ParametrizedComponentFactories } from './types';
+import { AutoCompleteContext, Template, Term } from './types';
+import { CoreEditor, Token } from '../../types';
+import { MatchResult } from './components/autocomplete_component';
 
-function CompilingContext(endpointId, parametrizedComponentFactories) {
-  this.parametrizedComponentFactories = parametrizedComponentFactories;
-  this.endpointId = endpointId;
+export class CompilingContext {
+  parametrizedComponentFactories?: ParametrizedComponentFactories;
+  endpointId: string;
+
+  constructor(endpointId: string, parametrizedComponentFactories?: ParametrizedComponentFactories) {
+    this.parametrizedComponentFactories = parametrizedComponentFactories;
+    this.endpointId = endpointId;
+  }
 }
+
+export type Description = Record<string, any> | string | Description[];
+
+type LinkType = string | ((context: AutoCompleteContext, editor: CoreEditor) => any);
 
 /**
  * An object to resolve scope links (syntax endpoint.path1.path2)
@@ -55,19 +69,29 @@ function CompilingContext(endpointId, parametrizedComponentFactories) {
  * which should return the top level components for the given endpoint
  */
 
-function resolvePathToComponents(tokenPath, context, editor, components) {
+function resolvePathToComponents(
+  tokenPath: string[],
+  context: AutoCompleteContext,
+  editor: CoreEditor,
+  components: SharedComponent[]
+) {
   const walkStates = walkTokenPath(
     tokenPath,
     [new WalkingState('ROOT', components, [])],
     context,
     editor
   );
-  const result = [].concat.apply([], _.map(walkStates, 'components'));
+  const result: SharedComponent[] = ([] as SharedComponent[]).concat.apply(
+    [],
+    _.map(walkStates, 'components')
+  );
   return result;
 }
 
 class ScopeResolver extends SharedComponent {
-  constructor(link, compilingContext) {
+  link: LinkType;
+  compilingContext: CompilingContext;
+  constructor(link: LinkType, compilingContext: CompilingContext) {
     super('__scope_link');
     if (_.isString(link) && link[0] === '.') {
       // relative link, inject current endpoint
@@ -81,7 +105,7 @@ class ScopeResolver extends SharedComponent {
     this.compilingContext = compilingContext;
   }
 
-  resolveLinkToComponents(context, editor) {
+  resolveLinkToComponents(context: AutoCompleteContext, editor: CoreEditor): SharedComponent[] {
     if (_.isFunction(this.link)) {
       const desc = this.link(context, editor);
       return compileDescription(desc, this.compilingContext);
@@ -92,7 +116,7 @@ class ScopeResolver extends SharedComponent {
 
     let path = this.link.replace(/\./g, '{').split(/(\{)/);
     const endpoint = path[0];
-    let components;
+    let components: SharedComponent[];
     try {
       if (endpoint === 'GLOBAL') {
         // global rules need an extra indirection
@@ -112,32 +136,47 @@ class ScopeResolver extends SharedComponent {
     return resolvePathToComponents(path, context, editor, components);
   }
 
-  getTerms(context, editor) {
-    const options = [];
+  getTerms(context: AutoCompleteContext, editor: CoreEditor) {
+    const options: Term[] = [];
     const components = this.resolveLinkToComponents(context, editor);
     _.each(components, function (component) {
-      options.push.apply(options, component.getTerms(context, editor));
+      const option = component.getTerms(context, editor);
+      if (option) {
+        options.push.apply(options, option);
+      }
     });
     return options;
   }
 
-  match(token, context, editor) {
-    const result = {
+  match(token: string | string[] | Token, context: AutoCompleteContext, editor: CoreEditor) {
+    const result: MatchResult = {
       next: [],
     };
     const components = this.resolveLinkToComponents(context, editor);
     _.each(components, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
+        result.next?.push.apply(result.next, componentResult.next);
       }
     });
 
     return result;
   }
 }
-function getTemplate(description) {
-  if (description.__template) {
+function getTemplate(description: Description): Description | Template {
+  if (Array.isArray(description)) {
+    if (description.length === 1) {
+      if (_.isObject(description[0])) {
+        // shortcut to save typing
+        const innerTemplate = getTemplate(description[0]);
+
+        return innerTemplate != null ? [innerTemplate] : [];
+      }
+    }
+    return [];
+  } else if (_.isString(description)) {
+    return description;
+  } else if (description.__template) {
     if (description.__raw && _.isString(description.__template)) {
       return {
         // This is a special secret attribute that gets passed through to indicate that
@@ -158,28 +197,16 @@ function getTemplate(description) {
   } else if (description.__scope_link) {
     // assume an object for now.
     return {};
-  } else if (Array.isArray(description)) {
-    if (description.length === 1) {
-      if (_.isObject(description[0])) {
-        // shortcut to save typing
-        const innerTemplate = getTemplate(description[0]);
-
-        return innerTemplate != null ? [innerTemplate] : [];
-      }
-    }
-    return [];
   } else if (_.isObject(description)) {
     return {};
-  } else if (_.isString(description) && !/^\{.*\}$/.test(description)) {
-    return description;
   } else {
     return description;
   }
 }
 
-function getOptions(description) {
-  const options = {};
-  const template = getTemplate(description);
+function getOptions(description: Record<string, any>) {
+  const options: Term = {};
+  const template = getTemplate(description) as Template;
 
   if (!_.isUndefined(template)) {
     options.template = template;
@@ -191,7 +218,10 @@ function getOptions(description) {
  * @param description a json dict describing the endpoint
  * @param compilingContext
  */
-function compileDescription(description, compilingContext) {
+function compileDescription(
+  description: Description,
+  compilingContext: CompilingContext
+): SharedComponent[] {
   if (Array.isArray(description)) {
     return [compileList(description, compilingContext)];
   } else if (_.isObject(description)) {
@@ -211,7 +241,7 @@ function compileDescription(description, compilingContext) {
     }
     const obj = compileObject(description, compilingContext);
     if (description.__condition) {
-      return [compileCondition(description.__condition, obj, compilingContext)];
+      return [compileCondition(description.__condition, obj)];
     } else {
       return [obj];
     }
@@ -222,23 +252,30 @@ function compileDescription(description, compilingContext) {
   }
 }
 
-function compileParametrizedValue(value, compilingContext, template) {
+function compileParametrizedValue(
+  value: string,
+  compilingContext: CompilingContext,
+  template?: Template
+) {
   value = value.substr(1, value.length - 2).toLowerCase();
-  let component = compilingContext.parametrizedComponentFactories.getComponent(value, true);
-  if (!component) {
+  const componentFactory = compilingContext.parametrizedComponentFactories?.getComponent(
+    value,
+    true
+  );
+  if (!componentFactory) {
     throw new Error("no factory found for '" + value + "'");
   }
-  component = component(value, null, template);
+  let component = componentFactory(value, null, !!template);
   if (!_.isUndefined(template)) {
-    component = wrapComponentWithDefaults(component, { template: template });
+    component = wrapComponentWithDefaults(component, { template });
   }
   return component;
 }
 
-function compileObject(objDescription, compilingContext) {
+function compileObject(objDescription: Record<string, any>, compilingContext: CompilingContext) {
   const objectC = new ConstantComponent('{');
-  const constants = [];
-  const patterns = [];
+  const constants: ConstantComponent[] = [];
+  const patterns: SharedComponent[] = [];
   _.each(objDescription, function (desc, key) {
     if (key.indexOf('__') === 0) {
       // meta key
@@ -246,7 +283,7 @@ function compileObject(objDescription, compilingContext) {
     }
 
     const options = getOptions(desc);
-    let component;
+    let component: SharedComponent | ConstantComponent;
     if (/^\{.*\}$/.test(key)) {
       component = compileParametrizedValue(key, compilingContext, options.template);
       patterns.push(component);
@@ -256,7 +293,7 @@ function compileObject(objDescription, compilingContext) {
     } else {
       options.name = key;
       component = new ConstantComponent(key, null, [options]);
-      constants.push(component);
+      constants.push(component as ConstantComponent);
     }
     _.map(compileDescription(desc, compilingContext), function (subComponent) {
       component.addComponent(subComponent);
@@ -266,7 +303,7 @@ function compileObject(objDescription, compilingContext) {
   return objectC;
 }
 
-function compileList(listRule, compilingContext) {
+function compileList(listRule: Description[], compilingContext: CompilingContext) {
   const listC = new ConstantComponent('[');
   _.each(listRule, function (desc) {
     _.each(compileDescription(desc, compilingContext), function (component) {
@@ -277,7 +314,7 @@ function compileList(listRule, compilingContext) {
 }
 
 /** takes a compiled object and wraps in a {@link ConditionalProxy }*/
-function compileCondition(description, compiledObject) {
+function compileCondition(description: Record<string, any>, compiledObject: ConstantComponent) {
   if (description.lines_regex) {
     return new ConditionalProxy(function (context, editor) {
       const lines = editor
@@ -286,7 +323,7 @@ function compileCondition(description, compiledObject) {
       return new RegExp(description.lines_regex, 'm').test(lines);
     }, compiledObject);
   } else {
-    throw 'unknown condition type - got: ' + JSON.stringify(description);
+    throw new Error('unknown condition type - got: ' + JSON.stringify(description));
   }
 }
 
@@ -298,17 +335,18 @@ export function globalsOnlyAutocompleteComponents() {
 /**
  * @param endpointId id of the endpoint being compiled.
  * @param description a json dict describing the endpoint
- * @param endpointComponentResolver a function (endpoint,context,editor) which should resolve an endpoint
- *        to it's list of compiled components.
- * @param parametrizedComponentFactories a dict of the following structure
- * that will be used as a fall back for pattern keys (i.e.: {type} ,resolved without the $s)
+ * @param parametrizedComponentFactories an object containing factories for different types of autocomplete components.
+ * It is used as a fallback for pattern keys (e.g., `{type}`, resolved without the `$s`)
+ * and has the following structure:
  * {
- *   TYPE: function (part, parent, endpoint) {
- *      return new SharedComponent(part, parent)
- *   }
+ *   TYPE: (part, parent) => new SharedComponent(part, parent)
  * }
  */
-export function compileBodyDescription(endpointId, description, parametrizedComponentFactories) {
+export function compileBodyDescription(
+  endpointId: string,
+  description: Description,
+  parametrizedComponentFactories?: ParametrizedComponentFactories
+) {
   return compileDescription(
     description,
     new CompilingContext(endpointId, parametrizedComponentFactories)

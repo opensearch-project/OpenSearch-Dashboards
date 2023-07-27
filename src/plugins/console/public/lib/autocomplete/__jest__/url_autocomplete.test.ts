@@ -33,16 +33,25 @@ import {
   URL_PATH_END_MARKER,
   UrlPatternMatcher,
   ListComponent,
+  SharedComponent,
 } from '../../autocomplete/components';
 
 import { populateContext } from '../../autocomplete/engine';
+import { PartialAutoCompleteContext } from '../components/autocomplete_component';
+import { ComponentFactory, ParametrizedComponentFactories } from '../types';
 
 describe('Url autocomplete', () => {
-  function patternsTest(name, endpoints, tokenPath, expectedContext, globalUrlComponentFactories) {
+  function patternsTest(
+    name: string,
+    endpoints: Record<number | string, any>,
+    tokenPath: string | Array<string | string[]>,
+    expectedContext: PartialAutoCompleteContext,
+    globalUrlComponentFactories?: ParametrizedComponentFactories
+  ) {
     test(name, function () {
       const patternMatcher = new UrlPatternMatcher(globalUrlComponentFactories);
       _.each(endpoints, function (e, id) {
-        e.id = id;
+        e.id = id.toString();
         _.each(e.patterns, function (p) {
           patternMatcher.addEndpoint(p, e);
         });
@@ -52,39 +61,40 @@ describe('Url autocomplete', () => {
           tokenPath = tokenPath.substr(0, tokenPath.length - 1) + '/' + URL_PATH_END_MARKER;
         }
         tokenPath = _.map(tokenPath.split('/'), function (p) {
-          p = p.split(',');
-          if (p.length === 1) {
-            return p[0];
+          const pSplit = p.split(',');
+          if (pSplit.length === 1) {
+            return pSplit[0];
           }
-          return p;
+          return pSplit;
         });
       }
 
       if (expectedContext.autoCompleteSet) {
-        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
-          if (_.isString(t)) {
-            t = { name: t };
+        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (term) {
+          if (_.isString(term)) {
+            term = { name: term };
           }
-          return t;
+          return term;
         });
         expectedContext.autoCompleteSet = _.sortBy(expectedContext.autoCompleteSet, 'name');
       }
 
-      const context = {};
+      const context: PartialAutoCompleteContext = {};
       if (expectedContext.method) {
         context.method = expectedContext.method;
       }
+
       populateContext(
         tokenPath,
         context,
         null,
-        expectedContext.autoCompleteSet,
-        patternMatcher.getTopLevelComponents(context.method)
+        expectedContext.autoCompleteSet ? true : false,
+        patternMatcher.getTopLevelComponents(context.method!)
       );
 
       // override context to just check on id
       if (context.endpoint) {
-        context.endpoint = context.endpoint.id;
+        context.endpoint = (context as any).endpoint.id;
       }
 
       if (context.autoCompleteSet) {
@@ -95,9 +105,9 @@ describe('Url autocomplete', () => {
     });
   }
 
-  function t(name, meta) {
+  function t(name: string, meta: string) {
     if (meta) {
-      return { name: name, meta: meta };
+      return { name, meta };
     }
     return name;
   }
@@ -265,11 +275,11 @@ describe('Url autocomplete', () => {
       },
     };
     const globalFactories = {
-      p: function (name, parent) {
+      p(name: string, parent: SharedComponent) {
         return new ListComponent(name, ['g1', 'g2'], parent);
       },
-      getComponent(name) {
-        return this[name];
+      getComponent(name: string): ComponentFactory {
+        return (this as any)[name];
       },
     };
 
@@ -355,7 +365,7 @@ describe('Url autocomplete', () => {
   })();
 
   (function () {
-    const endpoints = {
+    const endpoints: Record<string, any> = {
       '1_param': {
         patterns: ['a/{p}'],
         methods: ['GET'],

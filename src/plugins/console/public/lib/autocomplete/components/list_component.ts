@@ -30,9 +30,23 @@
 
 import _ from 'lodash';
 import { SharedComponent } from './shared_component';
+import { CoreEditor } from '../../../types';
+import { AutoCompleteContext, Term } from '../types';
+
+type ListGenerator = (...args: any[]) => Term[];
 /** A component that suggests one of the give options, but accepts anything */
 export class ListComponent extends SharedComponent {
-  constructor(name, list, parent, multiValued, allowNonValidValues) {
+  listGenerator: ListGenerator;
+  multiValued: boolean;
+  allowNonValidValues: boolean;
+
+  constructor(
+    name: string,
+    list: string[] | ListGenerator,
+    parent: SharedComponent,
+    multiValued?: boolean,
+    allowNonValidValues?: boolean
+  ) {
     super(name, parent);
     this.listGenerator = Array.isArray(list)
       ? function () {
@@ -42,7 +56,7 @@ export class ListComponent extends SharedComponent {
     this.multiValued = _.isUndefined(multiValued) ? true : multiValued;
     this.allowNonValidValues = _.isUndefined(allowNonValidValues) ? false : allowNonValidValues;
   }
-  getTerms(context, editor) {
+  getTerms(context: AutoCompleteContext, editor: CoreEditor) {
     if (!this.multiValued && context.otherTokenValues) {
       // already have a value -> no suggestions
       return [];
@@ -59,14 +73,14 @@ export class ListComponent extends SharedComponent {
         if (_.isString(term)) {
           term = { name: term };
         }
-        return _.defaults(term, { meta: meta });
+        return _.defaults(term, { meta });
       });
     }
 
     return ret;
   }
 
-  validateTokens(tokens) {
+  validateTokens(tokens: string[]): boolean {
     if (!this.multiValued && tokens.length > 1) {
       return false;
     }
@@ -91,17 +105,19 @@ export class ListComponent extends SharedComponent {
     return this.name;
   }
 
-  match(token, context, editor) {
+  match(token: string | string[], context: AutoCompleteContext, editor: CoreEditor) {
     if (!Array.isArray(token)) {
       token = [token];
     }
-    if (!this.allowNonValidValues && !this.validateTokens(token, context, editor)) {
+    if (!this.allowNonValidValues && !this.validateTokens(token)) {
       return null;
     }
 
     const result = super.match(token, context, editor);
-    result.context_values = result.context_values || {};
-    result.context_values[this.getContextKey()] = token;
+    if (result) {
+      result.context_values = result.context_values || {};
+      result.context_values[this.getContextKey()] = token;
+    }
     return result;
   }
 }
