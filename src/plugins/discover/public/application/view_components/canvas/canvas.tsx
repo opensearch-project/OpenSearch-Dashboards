@@ -6,10 +6,10 @@
 import React, { useEffect } from 'react';
 import { AppMountParameters } from '../../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DiscoverServices } from '../../../build_services';
+import { DiscoverViewServices } from '../../../build_services';
 import { TopNav } from './top_nav';
-import { updateState, useDispatch, useSelector } from '../../utils/state_management';
 import { connectStorageToQueryState, opensearchFilters } from '../../../../../data/public';
+import { DiscoverTable } from './discover_table';
 
 interface CanvasProps {
   opts: {
@@ -18,9 +18,9 @@ interface CanvasProps {
 }
 
 export const Canvas = ({ opts }: CanvasProps) => {
-  const { services } = useOpenSearchDashboards<DiscoverServices>();
-  const interval = useSelector((state) => state.discover.interval);
-  const dispatch = useDispatch();
+  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+  const { history: getHistory } = services;
+  const history = getHistory();
 
   // Connect the query service to the url state
   useEffect(() => {
@@ -33,17 +33,7 @@ export const Canvas = ({ opts }: CanvasProps) => {
   return (
     <div>
       <TopNav opts={opts} />
-      Interval:
-      <input
-        type="text"
-        name=""
-        id="temp"
-        value={interval}
-        onChange={(e) => {
-          dispatch(updateState({ interval: e.target.value }));
-        }}
-      />
-      <p>Services: {services.docLinks.DOC_LINK_VERSION}</p>
+      <DiscoverTable services={services} history={history} />
     </div>
   );
 };

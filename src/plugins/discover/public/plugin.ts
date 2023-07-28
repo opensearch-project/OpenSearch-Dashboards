@@ -36,7 +36,6 @@ import { url } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
-import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
 import { DocViewTable } from './application/components/table/table';
@@ -85,10 +84,6 @@ export interface DiscoverSetup {
      * @param docViewRaw
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
-  };
-
-  docViewsLinks: {
-    addDocViewLink(docViewLinkRaw: DocViewLink): void;
   };
 }
 
@@ -145,12 +140,9 @@ export interface DiscoverStartPlugins {
   visualizations: VisualizationsStart;
 }
 
-const embeddableAngularName = 'app/discoverEmbeddable';
-
 /**
  * Contains Discover, one of the oldest parts of OpenSearch Dashboards
- * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
- * Discover provides embeddables, those contain a slimmer Angular
+ * Discover provides embeddables for Dashboards
  */
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
@@ -269,7 +261,6 @@ export class DiscoverPlugin
 
         // This is for instances where the user navigates to the app from the application nav menu
         const path = window.location.hash;
-        // debugger;
         const v2Enabled = await core.uiSettings.get<boolean>(NEW_DISCOVER_APP);
         if (!v2Enabled) {
           navigateToApp('discoverLegacy', {
@@ -347,9 +338,6 @@ export class DiscoverPlugin
     return {
       docViews: {
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
-      },
-      docViewsLinks: {
-        addDocViewLink: this.docViewsLinksRegistry.addDocViewLink.bind(this.docViewsLinksRegistry),
       },
     };
   }

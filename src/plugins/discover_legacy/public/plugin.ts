@@ -89,6 +89,7 @@ import {
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
 import { AppNavLinkStatus } from '../../../core/public';
+import { ViewRedirectParams } from '../../data_explorer/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {

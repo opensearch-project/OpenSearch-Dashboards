@@ -107,12 +107,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     missing: true,
   });
 
-  if (typeof value !== 'string') {
-    // at initial rendering value is undefined (angular related), this catches the warning
-    // should be removed once all is react
-    return null;
-  }
-
   const filterBtnAriaLabel = isPopoverOpen
     ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
         defaultMessage: 'Hide field filter settings',

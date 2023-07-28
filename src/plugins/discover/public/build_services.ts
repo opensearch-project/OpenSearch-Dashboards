@@ -59,7 +59,7 @@ import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataExplorerServices } from '../../data_explorer/public';
 
-export interface BuildDiscoverServices {
+export interface DiscoverServices {
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
   chrome: ChromeStart;
@@ -88,7 +88,7 @@ export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext
-): BuildDiscoverServices {
+): DiscoverServices {
   const services: SavedObjectOpenSearchDashboardsServices = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
@@ -126,4 +126,4 @@ export function buildServices(
   };
 }
 
-export type DiscoverServices = BuildDiscoverServices & DataExplorerServices;
+export type DiscoverViewServices = DiscoverServices & DataExplorerServices;

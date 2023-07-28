@@ -115,8 +115,3 @@ export function OpenSearchPanel(props) {
     </EuiFlyout>
   );
 }
-
-OpenSearchPanel.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  makeUrl: PropTypes.func.isRequired,
-};

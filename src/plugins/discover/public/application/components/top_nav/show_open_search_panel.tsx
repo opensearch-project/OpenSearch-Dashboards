@@ -28,20 +28,37 @@
  * under the License.
  */
 
-import { i18n } from '@osd/i18n';
-import { getServices } from '../../../opensearch_dashboards_services';
-const { docLinks } = getServices();
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { OpenSearchPanel } from './open_search_panel';
+import { I18nStart } from '../../../../../../core/public';
 
-export function addHelpMenuToAppChrome(chrome) {
-  chrome.setHelpExtension({
-    appName: i18n.translate('discover.helpMenu.appName', {
-      defaultMessage: 'Discover',
-    }),
-    links: [
-      {
-        linkType: 'documentation',
-        href: `${docLinks.links.opensearchDashboards.introduction}`,
-      },
-    ],
-  });
+let isOpen = false;
+
+export function showOpenSearchPanel({
+  makeUrl,
+  I18nContext,
+}: {
+  makeUrl: (id: string) => void;
+  I18nContext: I18nStart['Context'];
+}) {
+  if (isOpen) {
+    return;
+  }
+
+  isOpen = true;
+  const container = document.createElement('div');
+  const onClose = () => {
+    ReactDOM.unmountComponentAtNode(container);
+    document.body.removeChild(container);
+    isOpen = false;
+  };
+
+  document.body.appendChild(container);
+  const element = (
+    <I18nContext>
+      <OpenSearchPanel onClose={onClose} makeUrl={makeUrl} />
+    </I18nContext>
+  );
+  ReactDOM.render(element, container);
 }

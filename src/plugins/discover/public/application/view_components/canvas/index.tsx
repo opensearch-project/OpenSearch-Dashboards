@@ -12,7 +12,6 @@ import { getServices } from '../../../opensearch_dashboards_services';
 // eslint-disable-next-line import/no-default-export
 export default function CanvasApp({ setHeaderActionMenu }: ViewProps) {
   const services = getServices();
-
   return (
     <OpenSearchDashboardsContextProvider services={services}>
       <Canvas
