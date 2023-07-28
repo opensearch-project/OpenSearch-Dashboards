@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { createOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { dashboardPluginMock } from '../../../../dashboard/public/mocks';
@@ -18,6 +19,7 @@ export const createDashboardServicesMock = () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const embeddable = embeddablePluginMock.createStartContract();
   const opensearchDashboardsVersion = '3.0.0';
+  const osdUrlStateStorageMock = createOsdUrlStateStorage({ useHash: false });
 
   return ({
     ...coreStartMock,
@@ -34,5 +36,15 @@ export const createDashboardServicesMock = () => {
     opensearchDashboardsVersion,
     usageCollection,
     embeddable,
+    savedObjectsClient: {
+      find: jest.fn(),
+    },
+    savedObjectsPublic: {
+      settings: {
+        getPerPage: () => 10,
+        getListingLimit: jest.fn(),
+      },
+    },
+    osdUrlStateStorage: osdUrlStateStorageMock,
   } as unknown) as jest.Mocked<DashboardServices>;
 };

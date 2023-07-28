@@ -9,28 +9,6 @@
  * GitHub history for details.
  */
 
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-// TODO:
-// Rewrite the dashboard listing tests for the new component
-// https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4051
 jest.mock(
   'lodash',
   () => ({
@@ -46,88 +24,78 @@ jest.mock(
   { virtual: true }
 );
 
+let mockURLsearch =
+  '?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    search: mockURLsearch,
+    pathname: '',
+    hash: '',
+    state: undefined,
+  }),
+}));
+
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
 import { DashboardListing } from './dashboard_listing';
+import { createDashboardServicesMock } from '../../utils/mocks';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { I18nProvider } from '@osd/i18n/react';
 
-const find = (num: number) => {
-  const hits = [];
-  for (let i = 0; i < num; i++) {
-    hits.push({
-      id: `dashboard${i}`,
-      title: `dashboard${i} title`,
-      description: `dashboard${i} desc`,
-    });
-  }
-  return Promise.resolve({
-    total: num,
-    hits,
-  });
-};
+function wrapDashboardListingInContext(mockServices: any) {
+  const services = {
+    ...mockServices,
+    dashboardProviders: () => {
+      return {
+        dashboard: {
+          appId: '1',
+          savedObjectsName: 'dashboardSavedObjects',
+          viewUrlPathFn: jest.fn(),
+          editUrlPathFn: jest.fn(),
+        },
+      };
+    },
+  };
 
-test.skip('renders empty page in before initial fetch to avoid flickering', () => {
-  const component = shallow(
-    <DashboardListing
-      findItems={find.bind(null, 2)}
-      deleteItems={() => {}}
-      createItem={() => {}}
-      editItem={() => {}}
-      viewItem={() => {}}
-      dashboardItemCreatorClickHandler={() => {}}
-      dashboardItemCreators={() => []}
-      initialPageSize={10}
-      listingLimit={1000}
-      hideWriteControls={false}
-      core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
-    />
+  return (
+    <I18nProvider>
+      <OpenSearchDashboardsContextProvider services={services}>
+        <DashboardListing />
+      </OpenSearchDashboardsContextProvider>
+    </I18nProvider>
   );
-  expect(component).toMatchSnapshot();
-});
+}
 
-describe.skip('after fetch', () => {
-  test('initialFilter', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 2)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        viewItem={() => {}}
-        dashboardItemCreatorClickHandler={() => {}}
-        dashboardItemCreators={() => []}
-        listingLimit={1000}
-        hideWriteControls={false}
-        initialPageSize={10}
-        initialFilter="my dashboard"
-        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
-      />
-    );
+describe('dashboard listing', () => {
+  let mockServices: any;
 
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
+  beforeEach(() => {
+    mockServices = createDashboardServicesMock();
+    mockServices.savedObjectsClient.find = () => {
+      const hits: any[] = [];
+      for (let i = 0; i < 2; i++) {
+        hits.push({
+          type: `dashboard`,
+          id: `dashboard${i}`,
+          attributes: {
+            title: `dashboard${i}`,
+            description: `dashboard${i} desc`,
+          },
+        });
+      }
+      return Promise.resolve({
+        savedObjects: hits,
+      });
+    };
+    mockServices.dashboardConfig.getHideWriteControls = () => false;
+    mockServices.savedObjectsPublic.settings.getListingLimit = () => 100;
   });
 
   test('renders table rows', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 2)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        viewItem={() => {}}
-        dashboardItemCreatorClickHandler={() => {}}
-        dashboardItemCreators={() => []}
-        listingLimit={1000}
-        initialPageSize={10}
-        hideWriteControls={false}
-        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
-      />
-    );
+    const component = mount(wrapDashboardListingInContext(mockServices));
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -138,21 +106,15 @@ describe.skip('after fetch', () => {
   });
 
   test('renders call to action when no dashboards exist', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 0)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        viewItem={() => {}}
-        dashboardItemCreatorClickHandler={() => {}}
-        dashboardItemCreators={() => []}
-        listingLimit={1}
-        initialPageSize={10}
-        hideWriteControls={false}
-        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
-      />
-    );
+    // savedObjectsClient.find() needs to find no dashboard
+    mockServices.savedObjectsClient.find = () => {
+      const hits: any[] = [];
+      return Promise.resolve({
+        total: 0,
+        hits,
+      });
+    };
+    const component = mount(wrapDashboardListingInContext(mockServices));
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -163,21 +125,11 @@ describe.skip('after fetch', () => {
   });
 
   test('hideWriteControls', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 0)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        viewItem={() => {}}
-        dashboardItemCreatorClickHandler={() => {}}
-        dashboardItemCreators={() => []}
-        listingLimit={1}
-        initialPageSize={10}
-        hideWriteControls={true}
-        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
-      />
-    );
+    // dashboardConfig.getHideWriteControls() to true
+    mockServices.dashboardConfig.getHideWriteControls = () => {
+      return true;
+    };
+    const component = mount(wrapDashboardListingInContext(mockServices));
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -188,21 +140,23 @@ describe.skip('after fetch', () => {
   });
 
   test('renders warning when listingLimit is exceeded', async () => {
-    const component = shallow(
-      <DashboardListing
-        findItems={find.bind(null, 2)}
-        deleteItems={() => {}}
-        createItem={() => {}}
-        editItem={() => {}}
-        viewItem={() => {}}
-        dashboardItemCreatorClickHandler={() => {}}
-        dashboardItemCreators={() => []}
-        listingLimit={1}
-        initialPageSize={10}
-        hideWriteControls={false}
-        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
-      />
-    );
+    mockServices.savedObjectsPublic.settings.getListingLimit = () => 1;
+
+    const component = mount(wrapDashboardListingInContext(mockServices));
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('render table listing with initial filters from URL', async () => {
+    mockURLsearch =
+      '?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&filter=dashboard';
+
+    const component = mount(wrapDashboardListingInContext(mockServices));
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
