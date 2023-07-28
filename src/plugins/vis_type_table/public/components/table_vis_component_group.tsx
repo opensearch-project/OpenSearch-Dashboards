@@ -23,7 +23,7 @@ export const TableVisComponentGroup = memo(
     return (
       <>
         {tableGroups.map(({ table, title }) => (
-          <EuiFlexItem key={title} className="visTable__group">
+          <EuiFlexItem key={title} className="visTable__group" grow={false}>
             <TableVisComponent
               title={title}
               table={table}
