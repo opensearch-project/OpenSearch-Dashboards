@@ -256,6 +256,25 @@ Options:
 $ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip
 ```
 
+#### Read Only capabalities
+
+_This feature will only work if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+
+Whenever a plugin registers capabilities that should be limited (in other words, set to false) for read-only tenants, such capabilities should be listed in a separate capability called `hide_for_read_only` that is an array of strings, containing capabilities that are set to false whenever Dashboards Security Plugin detects a read-only tenant.
+
+For example:
+
+```js
+export const capabilitiesProvider = () => ({
+  indexPatterns: {
+    save: true,
+    hide_for_read_only: ['save'],
+  },
+});
+```
+
+In this case, we might assume that a plugin relies on the `save` capability to limit saving changes somewhere in the UI. Therefore, this `save` capability is listed in the `hide_for_read_only` array and will be set to `false` whenever a read-only tenant is accessed.
+
 ### Alternative - Run OpenSearch from tarball
 
 If you would like to run OpenSearch from the tarball, you'll need to download the minimal distribution, install it, and then run the executable. (You'll also need Java installed and the `JAVA_HOME` environmental variable set - see [OpenSearch developer guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md#install-prerequisites) for details).
