@@ -116,7 +116,7 @@ function DevToolsWrapper({
       })
       .catch(() => {
         toasts.addDanger(
-          i18n.translate('devTool.devToolWrapper.fetchDataSourceError', {
+          i18n.translate('devTools.devToolWrapper.fetchDataSourceError', {
             defaultMessage: 'Unable to fetch existing data sources',
           })
         );
@@ -173,10 +173,10 @@ function DevToolsWrapper({
         {dataSourceEnabled ? (
           <div className="devAppDataSourcePicker">
             <EuiComboBox
-              aria-label={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxAriaLabel', {
+              aria-label={i18n.translate('devTools.devToolWrapper.DataSourceComboBoxAriaLabel', {
                 defaultMessage: 'Select a Data Source',
               })}
-              placeholder={i18n.translate('devTool.devToolWrapper.DataSourceComboBoxPlaceholder', {
+              placeholder={i18n.translate('devTools.devToolWrapper.DataSourceComboBoxPlaceholder', {
                 defaultMessage: 'Select a Data Source',
               })}
               singleSelection={{ asPlainText: true }}

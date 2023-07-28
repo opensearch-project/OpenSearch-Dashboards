@@ -91,7 +91,7 @@ export const aggDateRange = (): FunctionDefinition => ({
     json: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.dateRange.json.help', {
-        defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
+        defaultMessage: 'Advanced json to include when the agg is sent to OpenSearch',
       }),
     },
     customLabel: {

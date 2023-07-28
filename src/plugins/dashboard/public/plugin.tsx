@@ -356,7 +356,7 @@ export class DashboardPlugin
       createSortText: 'Dashboard',
       createLinkText: (
         <FormattedMessage
-          id="opensearch-dashboards-react.tableListView.listing.createNewItemButtonLabel"
+          id="dashboard.tableListView.listing.createNewItemButtonLabel"
           defaultMessage="{entityName}"
           values={{ entityName: 'Dashboard' }}
         />
