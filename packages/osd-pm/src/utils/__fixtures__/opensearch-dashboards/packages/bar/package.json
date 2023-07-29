@@ -3,5 +3,10 @@
   "version": "1.0.0",
   "dependencies": {
     "foo": "1.0.0"
+  },
+  "@osd/pm": {
+    "node": true,
+    "web": true,
+    "extra": "test"
   }
 }
