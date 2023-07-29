@@ -19,7 +19,11 @@
     "babel-plugin-add-module-exports": "^1.0.4",
     "babel-plugin-styled-components": "^2.0.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "browserslist": "^4.21.10",
     "react-is": "^16.8.0",
     "styled-components": "^5.3.9"
+  },
+  "devDependencies": {
+    "@types/browserslist": "^4.15.0"
   }
 }
