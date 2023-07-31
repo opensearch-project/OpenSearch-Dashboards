@@ -17,14 +17,15 @@ export interface ManagementOverviewProps {
   overviewApps?: OverviewApp[];
 }
 
-function ManagementOverviewWrapper(props: ManagementOverviewProps) {
+export function ManagementOverviewWrapper(props: ManagementOverviewProps) {
   const { application, overviewApps } = props;
   const applications = useObservable(application.applications$);
 
   const availableApps = useMemo(() => {
-    return overviewApps?.filter(
-      (overviewApp) => applications?.get(overviewApp.id)?.navLinkStatus !== AppNavLinkStatus.hidden
-    );
+    return overviewApps?.filter((overviewApp) => {
+      const app = applications?.get(overviewApp.id);
+      return app && app.navLinkStatus !== AppNavLinkStatus.hidden;
+    });
   }, [applications, overviewApps]);
 
   return (
