@@ -74,6 +74,8 @@ module.exports = function (grunt) {
     Promise.all([
       uiFrameworkCompile('src/kui_light.scss', 'dist/kui_light.css'),
       uiFrameworkCompile('src/kui_dark.scss', 'dist/kui_dark.css'),
+      uiFrameworkCompile('src/kui_next_light.scss', 'dist/kui_next_light.css'),
+      uiFrameworkCompile('src/kui_next_dark.scss', 'dist/kui_next_dark.css'),
     ]).then(done);
   });
 
