@@ -167,7 +167,12 @@ export class NavLinksService {
       },
 
       getFilteredNavLinks$: () => {
-        return this.filteredNavLinks$.pipe(map(sortChromeNavLinks), takeUntil(this.stop$));
+        return combineLatest([navLinks$, this.filteredNavLinks$]).pipe(
+          map(([navLinks, filteredNavLinks]) =>
+            filteredNavLinks.size ? sortChromeNavLinks(filteredNavLinks) : sortNavLinks(navLinks)
+          ),
+          takeUntil(this.stop$)
+        );
       },
 
       get(id: string) {

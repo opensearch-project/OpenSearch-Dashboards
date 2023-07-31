@@ -153,35 +153,58 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     return allNavLinks.filter((item) => features.includes(item.id));
   }
 
-  private filterNavLinks(core: CoreStart, workspaceEnabled: boolean) {
+  private filterNavLinks(core: CoreStart) {
     const navLinksService = core.chrome.navLinks;
     const chromeNavLinks$ = navLinksService.getNavLinks$();
-    if (workspaceEnabled) {
-      const workspaceList$ = core.workspaces.client.workspaceList$;
-      const currentWorkspace$ = core.workspaces.client.currentWorkspace$;
-      combineLatest([
-        workspaceList$,
-        chromeNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
-        currentWorkspace$,
-      ]).subscribe(([workspaceList, chromeNavLinks, currentWorkspace]) => {
-        const filteredNavLinks = new Map<string, ChromeNavLink>();
-        chromeNavLinks = this.filterByWorkspace(currentWorkspace, chromeNavLinks);
-        chromeNavLinks.forEach((chromeNavLink) => {
-          if (chromeNavLink.id === 'home') {
-            // set hidden, icon and order for home nav link
-            const homeNavLink: ChromeNavLink = {
-              ...chromeNavLink,
-              hidden: currentWorkspace !== null,
-              euiIconType: 'logoOpenSearch',
-              order: 0,
-            };
-            filteredNavLinks.set(chromeNavLink.id, homeNavLink);
-          } else {
-            filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
-          }
-        });
+    const workspaceList$ = core.workspaces.client.workspaceList$;
+    const currentWorkspace$ = core.workspaces.client.currentWorkspace$;
+    combineLatest([
+      workspaceList$,
+      chromeNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
+      currentWorkspace$,
+    ]).subscribe(([workspaceList, chromeNavLinks, currentWorkspace]) => {
+      const filteredNavLinks = new Map<string, ChromeNavLink>();
+      chromeNavLinks = this.filterByWorkspace(currentWorkspace, chromeNavLinks);
+      chromeNavLinks.forEach((chromeNavLink) => {
+        if (chromeNavLink.id === 'home') {
+          // set hidden, icon and order for home nav link
+          const homeNavLink: ChromeNavLink = {
+            ...chromeNavLink,
+            hidden: currentWorkspace !== null,
+            euiIconType: 'logoOpenSearch',
+            order: 0,
+          };
+          filteredNavLinks.set(chromeNavLink.id, homeNavLink);
+        } else {
+          filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
+        }
+      });
+      if (currentWorkspace) {
+        // Overview only inside workspace
+        const overviewId = WORKSPACE_APP_ID + PATHS.update;
+        const overviewUrl = core.workspaces.formatUrlWithWorkspaceId(
+          core.application.getUrlForApp(WORKSPACE_APP_ID, {
+            path: PATHS.update,
+            absolute: true,
+          }),
+          currentWorkspace.id
+        );
+        const overviewNavLink: ChromeNavLink = {
+          id: overviewId,
+          title: i18n.translate('core.ui.workspaceNavList.overview', {
+            defaultMessage: 'Overview',
+          }),
+          hidden: false,
+          disabled: false,
+          baseUrl: overviewUrl,
+          href: overviewUrl,
+          euiIconType: 'grid',
+          order: 0,
+        };
+        filteredNavLinks.set(overviewId, overviewNavLink);
+      } else {
         workspaceList
-          .filter((value, index) => !currentWorkspace && index < 5)
+          .filter((workspace, index) => index < 5)
           .map((workspace) =>
             this.workspaceToChromeNavLink(workspace, core.workspaces, core.application)
           )
@@ -196,7 +219,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
           title: i18n.translate('core.ui.workspaceNavList.seeMore', {
             defaultMessage: 'SEE MORE',
           }),
-          hidden: currentWorkspace !== null,
+          hidden: false,
           disabled: false,
           baseUrl: seeMoreUrl,
           href: seeMoreUrl,
@@ -211,7 +234,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
           title: i18n.translate('core.ui.workspaceNavList.admin', {
             defaultMessage: 'Admin',
           }),
-          hidden: currentWorkspace !== null,
+          hidden: false,
           disabled: true,
           baseUrl: adminUrl,
           href: adminUrl,
@@ -219,41 +242,9 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
           order: 9000,
         };
         filteredNavLinks.set(adminId, adminNavLink);
-        // Overview only inside workspace
-        if (currentWorkspace) {
-          const overviewId = WORKSPACE_APP_ID + PATHS.update;
-          const overviewUrl = core.workspaces.formatUrlWithWorkspaceId(
-            core.application.getUrlForApp(WORKSPACE_APP_ID, {
-              path: PATHS.update,
-              absolute: true,
-            }),
-            currentWorkspace.id
-          );
-          const overviewNavLink: ChromeNavLink = {
-            id: overviewId,
-            title: i18n.translate('core.ui.workspaceNavList.overview', {
-              defaultMessage: 'Overview',
-            }),
-            hidden: false,
-            disabled: false,
-            baseUrl: overviewUrl,
-            href: overviewUrl,
-            euiIconType: 'grid',
-            order: 0,
-          };
-          filteredNavLinks.set(overviewId, overviewNavLink);
-        }
-        navLinksService.setFilteredNavLinks(filteredNavLinks);
-      });
-    } else {
-      chromeNavLinks$.subscribe((chromeNavLinks) => {
-        const filteredNavLinks = new Map<string, ChromeNavLink>();
-        chromeNavLinks.forEach((chromeNavLink) =>
-          filteredNavLinks.set(chromeNavLink.id, chromeNavLink)
-        );
-        navLinksService.setFilteredNavLinks(filteredNavLinks);
-      });
-    }
+      }
+      navLinksService.setFilteredNavLinks(filteredNavLinks);
+    });
   }
 
   /**
@@ -281,8 +272,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
   public start(core: CoreStart) {
     // If workspace feature is disabled, it will not load the workspace plugin
     if (core.uiSettings.get('workspace:enabled') === false) {
-      // set default value for filtered nav links
-      this.filterNavLinks(core, false);
       return {};
     }
 
@@ -295,7 +284,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     });
     this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     if (core) {
-      this.filterNavLinks(core, true);
+      this.filterNavLinks(core);
     }
     return {};
   }
