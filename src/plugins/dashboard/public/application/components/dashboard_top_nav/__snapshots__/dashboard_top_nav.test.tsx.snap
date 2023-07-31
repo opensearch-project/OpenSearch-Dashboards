@@ -726,6 +726,13 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
+            "osdUrlStateStorage": Object {
+              "cancel": [Function],
+              "change$": [Function],
+              "flush": [Function],
+              "get": [Function],
+              "set": [Function],
+            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -809,18 +816,21 @@ exports[`Dashboard top nav render in embed mode 1`] = `
           }
           currentAppState={
             Object {
-              "description": "",
+              "description": "Dashboard Test Description",
               "filters": Array [],
-              "fullScreenMode": false,
+              "fullScreenMode": true,
               "options": Object {
                 "hidePanelTitles": false,
                 "useMargins": true,
               },
               "panels": Array [],
-              "query": "",
+              "query": Object {
+                "language": "kuery",
+                "query": "",
+              },
               "timeRestore": true,
-              "title": "",
-              "viewMode": "view",
+              "title": "Dashboard Test Title",
+              "viewMode": "edit",
             }
           }
           currentContainer={Object {}}
@@ -833,16 +843,17 @@ exports[`Dashboard top nav render in embed mode 1`] = `
         >
           <TopNavMenu
             appName="dashboard"
+            className="osdTopNavMenu-isFullScreen"
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
-            screenTitle=""
+            screenTitle="Dashboard Test Title"
             showDatePicker={false}
-            showFilterBar={true}
+            showFilterBar={false}
             showQueryBar={false}
             showQueryInput={false}
             showSaveQuery={true}
-            showSearchBar={true}
+            showSearchBar={false}
             useDefaultBehaviors={true}
           />
         </Memo(TopNav)>
@@ -1578,6 +1589,13 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
+            "osdUrlStateStorage": Object {
+              "cancel": [Function],
+              "change$": [Function],
+              "flush": [Function],
+              "get": [Function],
+              "set": [Function],
+            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -1661,18 +1679,21 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
           }
           currentAppState={
             Object {
-              "description": "",
+              "description": "Dashboard Test Description",
               "filters": Array [],
-              "fullScreenMode": false,
+              "fullScreenMode": true,
               "options": Object {
                 "hidePanelTitles": false,
                 "useMargins": true,
               },
               "panels": Array [],
-              "query": "",
+              "query": Object {
+                "language": "kuery",
+                "query": "",
+              },
               "timeRestore": true,
-              "title": "",
-              "viewMode": "view",
+              "title": "Dashboard Test Title",
+              "viewMode": "edit",
             }
           }
           currentContainer={Object {}}
@@ -1685,10 +1706,11 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
         >
           <TopNavMenu
             appName="dashboard"
+            className="osdTopNavMenu-isFullScreen"
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
-            screenTitle=""
+            screenTitle="Dashboard Test Title"
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -2430,6 +2452,13 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
+            "osdUrlStateStorage": Object {
+              "cancel": [Function],
+              "change$": [Function],
+              "flush": [Function],
+              "get": [Function],
+              "set": [Function],
+            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -2513,18 +2542,21 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
           }
           currentAppState={
             Object {
-              "description": "",
+              "description": "Dashboard Test Description",
               "filters": Array [],
-              "fullScreenMode": false,
+              "fullScreenMode": true,
               "options": Object {
                 "hidePanelTitles": false,
                 "useMargins": true,
               },
               "panels": Array [],
-              "query": "",
+              "query": Object {
+                "language": "kuery",
+                "query": "",
+              },
               "timeRestore": true,
-              "title": "",
-              "viewMode": "view",
+              "title": "Dashboard Test Title",
+              "viewMode": "edit",
             }
           }
           currentContainer={Object {}}
@@ -2537,16 +2569,17 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
         >
           <TopNavMenu
             appName="dashboard"
+            className="osdTopNavMenu-isFullScreen"
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
-            screenTitle=""
-            showDatePicker={true}
-            showFilterBar={true}
-            showQueryBar={true}
+            screenTitle="Dashboard Test Title"
+            showDatePicker={false}
+            showFilterBar={false}
+            showQueryBar={false}
             showQueryInput={false}
             showSaveQuery={true}
-            showSearchBar={true}
+            showSearchBar={false}
             useDefaultBehaviors={true}
           />
         </Memo(TopNav)>
@@ -3282,6 +3315,13 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
+            "osdUrlStateStorage": Object {
+              "cancel": [Function],
+              "change$": [Function],
+              "flush": [Function],
+              "get": [Function],
+              "set": [Function],
+            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -3365,7 +3405,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
           }
           currentAppState={
             Object {
-              "description": "",
+              "description": "Dashboard Test Description",
               "filters": Array [],
               "fullScreenMode": true,
               "options": Object {
@@ -3373,10 +3413,13 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "useMargins": true,
               },
               "panels": Array [],
-              "query": "",
+              "query": Object {
+                "language": "kuery",
+                "query": "",
+              },
               "timeRestore": true,
-              "title": "",
-              "viewMode": "view",
+              "title": "Dashboard Test Title",
+              "viewMode": "edit",
             }
           }
           currentContainer={Object {}}
@@ -3393,7 +3436,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
-            screenTitle=""
+            screenTitle="Dashboard Test Title"
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -4135,6 +4178,13 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
+            "osdUrlStateStorage": Object {
+              "cancel": [Function],
+              "change$": [Function],
+              "flush": [Function],
+              "get": [Function],
+              "set": [Function],
+            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -4218,7 +4268,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
           }
           currentAppState={
             Object {
-              "description": "",
+              "description": "Dashboard Test Description",
               "filters": Array [],
               "fullScreenMode": true,
               "options": Object {
@@ -4226,10 +4276,13 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "useMargins": true,
               },
               "panels": Array [],
-              "query": "",
+              "query": Object {
+                "language": "kuery",
+                "query": "",
+              },
               "timeRestore": true,
-              "title": "",
-              "viewMode": "view",
+              "title": "Dashboard Test Title",
+              "viewMode": "edit",
             }
           }
           currentContainer={Object {}}
@@ -4246,7 +4299,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
-            screenTitle=""
+            screenTitle="Dashboard Test Title"
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -4988,6 +5041,13 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
+            "osdUrlStateStorage": Object {
+              "cancel": [Function],
+              "change$": [Function],
+              "flush": [Function],
+              "get": [Function],
+              "set": [Function],
+            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -5071,7 +5131,7 @@ exports[`Dashboard top nav render with all components 1`] = `
           }
           currentAppState={
             Object {
-              "description": "",
+              "description": "Dashboard Test Description",
               "filters": Array [],
               "fullScreenMode": false,
               "options": Object {
@@ -5079,10 +5139,13 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "useMargins": true,
               },
               "panels": Array [],
-              "query": "",
+              "query": Object {
+                "language": "kuery",
+                "query": "",
+              },
               "timeRestore": true,
-              "title": "",
-              "viewMode": "view",
+              "title": "Dashboard Test Title",
+              "viewMode": "edit",
             }
           }
           currentContainer={Object {}}
@@ -5098,7 +5161,7 @@ exports[`Dashboard top nav render with all components 1`] = `
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
-            screenTitle=""
+            screenTitle="Dashboard Test Title"
             showDatePicker={false}
             showFilterBar={true}
             showQueryBar={false}

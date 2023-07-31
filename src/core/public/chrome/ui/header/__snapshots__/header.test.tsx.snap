@@ -3646,24 +3646,16 @@ exports[`Header handles visibility and lock changes 1`] = `
                   className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                   data-test-subj="breadcrumbs"
                 >
-                  <div
-                    className="euiBreadcrumbWall euiBreadcrumbWall--single"
-                  >
-                    <div
-                      className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first euiBreadcrumbWrapper--last"
+                  <EuiInnerText>
+                    <span
+                      aria-current="page"
+                      className="euiBreadcrumb euiBreadcrumb--last"
+                      data-test-subj="breadcrumb first last"
+                      title="test"
                     >
-                      <EuiInnerText>
-                        <span
-                          aria-current="page"
-                          className="euiBreadcrumb euiBreadcrumb--last"
-                          data-test-subj="breadcrumb first last"
-                          title="test"
-                        >
-                          test
-                        </span>
-                      </EuiInnerText>
-                    </div>
-                  </div>
+                      test
+                    </span>
+                  </EuiInnerText>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>
@@ -8893,24 +8885,16 @@ exports[`Header renders condensed header 1`] = `
                   className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                   data-test-subj="breadcrumbs"
                 >
-                  <div
-                    className="euiBreadcrumbWall euiBreadcrumbWall--single"
-                  >
-                    <div
-                      className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first euiBreadcrumbWrapper--last"
+                  <EuiInnerText>
+                    <span
+                      aria-current="page"
+                      className="euiBreadcrumb euiBreadcrumb--last"
+                      data-test-subj="breadcrumb first"
+                      title="test"
                     >
-                      <EuiInnerText>
-                        <span
-                          aria-current="page"
-                          className="euiBreadcrumb euiBreadcrumb--last"
-                          data-test-subj="breadcrumb first"
-                          title="test"
-                        >
-                          test
-                        </span>
-                      </EuiInnerText>
-                    </div>
-                  </div>
+                      test
+                    </span>
+                  </EuiInnerText>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>
