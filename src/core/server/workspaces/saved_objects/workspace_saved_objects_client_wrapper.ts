@@ -18,10 +18,9 @@ import {
   SavedObjectsDeleteOptions,
   SavedObjectsFindOptions,
 } from 'opensearch-dashboards/server';
-import {
-  WorkspacePermissionControl,
-  WorkspacePermissionMode,
-} from '../workspace_permission_control';
+import { SavedObjectsPermissionControlContract } from '../../saved_objects/permission_control/client';
+import { WORKSPACE_TYPE } from '../constants';
+import { PermissionMode } from '../../../utils';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -42,16 +41,34 @@ const isWorkspacesLikeAttributes = (attributes: unknown): attributes is Attribut
   Array.isArray((attributes as { workspaces: unknown }).workspaces);
 
 export class WorkspaceSavedObjectsClientWrapper {
+  private formatPermissionModeToStringArray(
+    permission: PermissionMode | PermissionMode[]
+  ): string[] {
+    if (Array.isArray(permission)) {
+      return permission;
+    }
+
+    return [permission];
+  }
   private async validateMultiWorkspacesPermissions(
     workspaces: string[] | undefined,
     request: OpenSearchDashboardsRequest,
-    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
+    permissionMode: PermissionMode | PermissionMode[]
   ) {
     if (!workspaces) {
       return;
     }
     for (const workspaceId of workspaces) {
-      if (!(await this.permissionControl.validate(workspaceId, permissionMode, request))) {
+      if (
+        !(await this.permissionControl.validate(
+          request,
+          {
+            type: WORKSPACE_TYPE,
+            id: workspaceId,
+          },
+          this.formatPermissionModeToStringArray(permissionMode)
+        ))
+      ) {
         throw generateWorkspacePermissionError();
       }
     }
@@ -60,14 +77,23 @@ export class WorkspaceSavedObjectsClientWrapper {
   private async validateAtLeastOnePermittedWorkspaces(
     workspaces: string[] | undefined,
     request: OpenSearchDashboardsRequest,
-    permissionMode: WorkspacePermissionMode | WorkspacePermissionMode[]
+    permissionMode: PermissionMode | PermissionMode[]
   ) {
     if (!workspaces) {
       return;
     }
     let permitted = false;
     for (const workspaceId of workspaces) {
-      if (await this.permissionControl.validate(workspaceId, permissionMode, request)) {
+      if (
+        await this.permissionControl.validate(
+          request,
+          {
+            type: WORKSPACE_TYPE,
+            id: workspaceId,
+          },
+          this.formatPermissionModeToStringArray(permissionMode)
+        )
+      ) {
         permitted = true;
         break;
       }
@@ -87,7 +113,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       await this.validateMultiWorkspacesPermissions(
         objectToDeleted.workspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Admin
+        PermissionMode.Management
       );
       return await wrapperOptions.client.delete(type, id, options);
     };
@@ -108,7 +134,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         await this.validateMultiWorkspacesPermissions(
           attributes.workspaces,
           wrapperOptions.request,
-          WorkspacePermissionMode.Admin
+          PermissionMode.Management
         );
       }
       return await wrapperOptions.client.create(type, attributes, options);
@@ -123,7 +149,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       await this.validateAtLeastOnePermittedWorkspaces(
         objectToGet.workspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Read
+        PermissionMode.Read
       );
       return objectToGet;
     };
@@ -137,7 +163,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         await this.validateAtLeastOnePermittedWorkspaces(
           object.workspaces,
           wrapperOptions.request,
-          WorkspacePermissionMode.Read
+          PermissionMode.Read
         );
       }
       return objectToBulkGet;
@@ -150,18 +176,20 @@ export class WorkspaceSavedObjectsClientWrapper {
         options.workspaces = options.workspaces.filter(
           async (workspaceId) =>
             await this.permissionControl.validate(
-              workspaceId,
-              WorkspacePermissionMode.Read,
-              wrapperOptions.request
+              wrapperOptions.request,
+              {
+                type: WORKSPACE_TYPE,
+                id: workspaceId,
+              },
+              [PermissionMode.Read]
             )
         );
       } else {
         options.workspaces = [
           'public',
-          ...(await this.permissionControl.getPermittedWorkspaceIds(
-            WorkspacePermissionMode.Read,
-            wrapperOptions.request
-          )),
+          ...(await this.permissionControl.getPermittedWorkspaceIds(wrapperOptions.request, [
+            PermissionMode.Read,
+          ])),
         ];
       }
       return await wrapperOptions.client.find<T>(options);
@@ -184,5 +212,5 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
   };
 
-  constructor(private readonly permissionControl: WorkspacePermissionControl) {}
+  constructor(private readonly permissionControl: SavedObjectsPermissionControlContract) {}
 }

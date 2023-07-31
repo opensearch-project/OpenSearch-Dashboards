@@ -14,18 +14,15 @@ import {
 } from '../saved_objects';
 import { IWorkspaceDBImpl } from './types';
 import { WorkspacesClientWithSavedObject } from './workspaces_client';
-import { WorkspacePermissionControl } from './workspace_permission_control';
 import { UiSettingsServiceStart } from '../ui_settings/types';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 
 export interface WorkspacesServiceSetup {
   client: IWorkspaceDBImpl;
-  permissionControl: WorkspacePermissionControl;
 }
 
 export interface WorkspacesServiceStart {
   client: IWorkspaceDBImpl;
-  permissionControl: WorkspacePermissionControl;
 }
 
 export interface WorkspacesSetupDeps {
@@ -46,7 +43,6 @@ export class WorkspacesService
   implements CoreService<WorkspacesServiceSetup, WorkspacesServiceStart> {
   private logger: Logger;
   private client?: IWorkspaceDBImpl;
-  private permissionControl?: WorkspacePermissionControl;
   private startDeps?: WorkspacesStartDeps;
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('workspaces-service');
@@ -87,12 +83,10 @@ export class WorkspacesService
     this.logger.debug('Setting up Workspaces service');
 
     this.client = new WorkspacesClientWithSavedObject(setupDeps);
-    this.permissionControl = new WorkspacePermissionControl();
 
     await this.client.setup(setupDeps);
-    await this.permissionControl.setup();
     const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-      this.permissionControl
+      setupDeps.savedObject.permissionControl
     );
 
     setupDeps.savedObject.addClientWrapper(
@@ -111,7 +105,6 @@ export class WorkspacesService
 
     return {
       client: this.client,
-      permissionControl: this.permissionControl,
     };
   }
 
@@ -121,7 +114,6 @@ export class WorkspacesService
 
     return {
       client: this.client as IWorkspaceDBImpl,
-      permissionControl: this.permissionControl as WorkspacePermissionControl,
     };
   }
 

@@ -276,6 +276,7 @@ export class LegacyService implements CoreService {
         registerType: setupDeps.core.savedObjects.registerType,
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
         setRepositoryFactoryProvider: setupDeps.core.savedObjects.setRepositoryFactoryProvider,
+        permissionControl: setupDeps.core.savedObjects.permissionControl,
       },
       status: {
         isStatusPageAnonymous: setupDeps.core.status.isStatusPageAnonymous,
