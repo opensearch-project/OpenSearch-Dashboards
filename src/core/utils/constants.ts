@@ -4,3 +4,11 @@
  */
 
 export const WORKSPACE_PATH_PREFIX = '/w';
+
+export enum PermissionMode {
+  Read = 'read',
+  Write = 'write',
+  Management = 'management',
+  LibraryRead = 'library_read',
+  LibraryWrite = 'library_write',
+}

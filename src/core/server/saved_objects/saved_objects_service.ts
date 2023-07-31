@@ -67,6 +67,11 @@ import { registerRoutes } from './routes';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationOpenSearchClient } from './migrations/core/';
+import {
+  SavedObjectsPermissionControl,
+  SavedObjectsPermissionControlContract,
+} from './permission_control/client';
+import { registerPermissionCheckRoutes } from './permission_control/routes';
 /**
  * Saved Objects is OpenSearchDashboards's data persistence mechanism allowing plugins to
  * use OpenSearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -183,6 +188,8 @@ export interface SavedObjectsServiceSetup {
    * Completely overrides the default status.
    */
   setStatus(status$: Observable<ServiceStatus<SavedObjectStatusMeta>>): void;
+
+  permissionControl: SavedObjectsPermissionControlContract;
 }
 
 /**
@@ -314,6 +321,7 @@ export class SavedObjectsService
     level: ServiceStatusLevels.unavailable,
     summary: `waiting`,
   });
+  private permissionControl?: SavedObjectsPermissionControlContract;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
@@ -339,6 +347,13 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+    });
+
+    this.permissionControl = new SavedObjectsPermissionControl();
+
+    registerPermissionCheckRoutes({
+      http: setupDeps.http,
+      permissionControl: this.permissionControl,
     });
 
     return {
@@ -389,6 +404,7 @@ export class SavedObjectsService
         }
         this.savedObjectServiceCustomStatus$ = status$;
       },
+      permissionControl: this.permissionControl,
     };
   }
 
@@ -527,8 +543,11 @@ export class SavedObjectsService
 
     this.started = true;
 
+    const getScopedClient = clientProvider.getClient.bind(clientProvider);
+    this.permissionControl?.setup(getScopedClient);
+
     return {
-      getScopedClient: clientProvider.getClient.bind(clientProvider),
+      getScopedClient,
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),

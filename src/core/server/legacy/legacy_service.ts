@@ -279,6 +279,7 @@ export class LegacyService implements CoreService {
         setStatus: () => {
           throw new Error(`core.savedObjects.setStatus is unsupported in legacy`);
         },
+        permissionControl: setupDeps.core.savedObjects.permissionControl,
       },
       status: {
         isStatusPageAnonymous: setupDeps.core.status.isStatusPageAnonymous,

@@ -206,6 +206,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
       setRepositoryFactoryProvider: deps.savedObjects.setRepositoryFactoryProvider,
       setStatus: deps.savedObjects.setStatus,
+      permissionControl: deps.savedObjects.permissionControl,
     },
     status: {
       core$: deps.status.core$,
