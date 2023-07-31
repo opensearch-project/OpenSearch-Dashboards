@@ -35,18 +35,14 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeBreadcrumb } from '../../chrome_service';
 
-import './header_breadcrumbs.scss';
-
 interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  isDarkMode?: boolean;
 }
 
-export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$, isDarkMode }: Props) {
+export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
-  const className = isDarkMode ? 'osdHeaderBreadcrumbs--dark' : 'osdHeaderBreadcrumbs';
   let crumbs = breadcrumbs;
 
   if (breadcrumbs.length === 0 && appTitle) {
@@ -61,15 +57,7 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$, isDarkMode }: Props
       i === 0 && 'first',
       i === breadcrumbs.length - 1 && 'last'
     ),
-    className: classNames('osdBreadcrumbs'),
   }));
 
-  return (
-    <EuiHeaderBreadcrumbs
-      breadcrumbs={crumbs}
-      max={10}
-      data-test-subj="breadcrumbs"
-      className={className}
-    />
-  );
+  return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
 }

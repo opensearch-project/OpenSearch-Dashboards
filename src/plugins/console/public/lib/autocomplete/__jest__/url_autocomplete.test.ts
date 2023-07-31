@@ -38,7 +38,7 @@ import {
 
 import { populateContext } from '../../autocomplete/engine';
 import { PartialAutoCompleteContext } from '../components/autocomplete_component';
-import { ComponentFactory, ParametrizedComponentFactories } from '../../osd';
+import { ComponentFactory, ParametrizedComponentFactories } from '../types';
 
 describe('Url autocomplete', () => {
   function patternsTest(

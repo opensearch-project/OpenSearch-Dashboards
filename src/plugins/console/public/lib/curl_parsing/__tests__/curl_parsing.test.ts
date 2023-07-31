@@ -29,16 +29,30 @@
  */
 
 import _ from 'lodash';
+import { detectCURL, parseCURL } from '../curl';
+import curlTests from './curl_parsing.txt';
 
-import { euiPaletteColorBlind } from '@elastic/eui';
+describe('CURL', () => {
+  const notCURLS = ['sldhfsljfhs', 's;kdjfsldkfj curl -XDELETE ""', '{ "hello": 1 }'];
+  _.each(notCURLS, function (notCURL, i) {
+    test('cURL Detection - broken strings ' + i, function () {
+      expect(detectCURL(notCURL)).toEqual(false);
+    });
+  });
 
-/**
- * Generates an array of hex colors the length of the input number
- */
-export function createColorPalette(num: number): string[] {
-  if (!_.isNumber(num)) {
-    throw new TypeError('ColorPaletteUtilService expects a number');
-  }
+  curlTests.split(/^=+$/m).forEach(function (fixture) {
+    if (fixture.trim() === '') {
+      return;
+    }
+    const fixtureParts = fixture.split(/^-+$/m);
+    const name = fixtureParts[0].trim();
+    const curlText = fixtureParts[1];
+    const response = fixtureParts[2].trim();
 
-  return euiPaletteColorBlind({ rotations: Math.ceil(num / 10), direction: 'both' }).slice(0, num);
-}
+    test('cURL Detection - ' + name, function () {
+      expect(detectCURL(curlText)).toBe(true);
+      const r = parseCURL(curlText);
+      expect(r).toEqual(response);
+    });
+  });
+});

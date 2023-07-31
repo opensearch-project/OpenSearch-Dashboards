@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@elastic/charts": "31.1.0",
-    "@elastic/eui": "npm:@opensearch-project/oui@1.1.2",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.3.0-alpha.2",
     "@elastic/numeral": "^2.5.0",
     "@osd/i18n": "1.0.0",
     "@osd/monaco": "1.0.0",
