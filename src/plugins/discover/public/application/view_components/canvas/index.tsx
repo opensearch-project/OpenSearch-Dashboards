@@ -4,21 +4,20 @@
  */
 
 import React from 'react';
+import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
-import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
-import { Canvas } from './canvas';
-import { getServices } from '../../../opensearch_dashboards_services';
+import { DiscoverTable } from './discover_table';
 
 // eslint-disable-next-line import/no-default-export
-export default function CanvasApp({ setHeaderActionMenu }: ViewProps) {
-  const services = getServices();
+export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
   return (
-    <OpenSearchDashboardsContextProvider services={services}>
-      <Canvas
+    <div>
+      <TopNav
         opts={{
           setHeaderActionMenu,
         }}
       />
-    </OpenSearchDashboardsContextProvider>
+      <DiscoverTable history={history} />
+    </div>
   );
 }

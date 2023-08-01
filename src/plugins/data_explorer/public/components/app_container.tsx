@@ -18,19 +18,21 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
     return <NoView />;
   }
 
-  const { Canvas, Panel } = view;
+  const { Canvas, Panel, Context } = view;
 
   // Render the application DOM.
   return (
     <EuiPage className="dePage eui-fullHeight" paddingSize="none">
       {/* TODO: improve loading state */}
       <Suspense fallback={<div>Loading...</div>}>
-        <Sidebar>
-          <Panel {...params} />
-        </Sidebar>
-        <EuiPageBody className="eui-fullHeight">
-          <Canvas {...params} />
-        </EuiPageBody>
+        <Context {...params}>
+          <Sidebar>
+            <Panel {...params} />
+          </Sidebar>
+          <EuiPageBody className="eui-fullHeight">
+            <Canvas {...params} />
+          </EuiPageBody>
+        </Context>
       </Suspense>
     </EuiPage>
   );

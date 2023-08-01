@@ -14,6 +14,7 @@ const commonReducers = {
 };
 
 let dynamicReducers: {
+  metadata: typeof metadataReducer;
   [key: string]: Reducer;
 } = {
   ...commonReducers,

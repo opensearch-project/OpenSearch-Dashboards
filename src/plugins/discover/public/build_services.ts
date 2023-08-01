@@ -126,4 +126,5 @@ export function buildServices(
   };
 }
 
+// Any component inside the panel and canvas views has access to both these services.
 export type DiscoverViewServices = DiscoverServices & DataExplorerServices;

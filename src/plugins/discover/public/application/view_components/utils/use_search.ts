@@ -4,14 +4,15 @@
  */
 
 import { useCallback, useMemo, useRef } from 'react';
-import { ISearchSource, IndexPattern } from 'src/plugins/data/public';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { useEffect } from 'react';
 import { DiscoverServices } from '../../../build_services';
 
-import { validateTimeRange } from '../../../application/helpers/validate_time_range';
-import { updateDataSource } from './update_data_source';
+import { validateTimeRange } from '../../helpers/validate_time_range';
+import { createSearchSource } from './create_search_source';
+import { useIndexPattern } from './use_index_pattern';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -20,29 +21,34 @@ export enum FetchStatus {
   ERROR = 'error',
 }
 
-export interface SavedSearchData {
+export interface SearchData {
   status: FetchStatus;
   fetchCounter?: number;
   fieldCounts?: Record<string, number>;
   fetchError?: Error;
   hits?: number;
-  rows?: any[]; // TODO: type
+  rows?: OpenSearchSearchHit[];
 }
 
-export type SavedSearchRefetch = 'refetch' | undefined;
+export type SearchRefetch = 'refetch' | undefined;
 
-export type DataSubject = BehaviorSubject<SavedSearchData>;
-export type RefetchSubject = BehaviorSubject<SavedSearchRefetch>;
+export type DataSubject = BehaviorSubject<SearchData>;
+export type RefetchSubject = Subject<SearchRefetch>;
 
-export const useSavedSearch = ({
-  indexPattern,
-  searchSource,
-  services,
-}: {
-  indexPattern: IndexPattern;
-  searchSource: ISearchSource;
-  services: DiscoverServices;
-}) => {
+/**
+ * A hook that provides functionality for fetching and managing discover search data.
+ * @returns { data: DataSubject, refetch$: RefetchSubject, indexPattern: IndexPattern } - data is a BehaviorSubject that emits the current search data, refetch$ is a Subject that can be used to trigger a refetch.
+ * @example
+ * const { data$, refetch$ } = useSearch();
+ * useEffect(() => {
+ *  const subscription = data$.subscribe((d) => {
+ *   // do something with the data
+ * });
+ * return () => subscription.unsubscribe();
+ * }, [data$]);
+ */
+export const useSearch = (services: DiscoverServices) => {
+  const indexPattern = useIndexPattern();
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
@@ -56,23 +62,23 @@ export const useSavedSearch = ({
   });
 
   const data$ = useMemo(
-    () => new BehaviorSubject<any>({ state: FetchStatus.UNINITIALIZED }),
+    () => new BehaviorSubject<SearchData>({ status: FetchStatus.UNINITIALIZED }),
     []
   );
-  const refetch$ = useMemo(() => new Subject<any>(), []);
+  const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
-    if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
+    if (!validateTimeRange(timefilter.getTime(), services.toastNotifications) || !indexPattern) {
       return Promise.reject();
     }
 
     if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
     fetchStateRef.current.abortController = new AbortController();
     const sort = undefined;
-    const updatedSearchSource = updateDataSource({ searchSource, indexPattern, services, sort });
+    const searchSource = await createSearchSource({ indexPattern, services, sort });
 
     try {
-      const fetchResp = await updatedSearchSource.fetch({
+      const fetchResp = await searchSource.fetch({
         abortSignal: fetchStateRef.current.abortController.signal,
       });
       const hits = fetchResp.hits.total as number;
@@ -95,13 +101,14 @@ export const useSavedSearch = ({
     } catch (err) {
       // TODO: handle the error
     }
-  }, [data$, timefilter, services, searchSource, indexPattern, fetchStateRef]);
+  }, [data$, timefilter, services, indexPattern]);
 
   useEffect(() => {
     const fetch$ = merge(
       refetch$,
       filterManager.getFetches$(),
       timefilter.getFetch$(),
+      timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
       data.query.queryString.getUpdates$()
     ).pipe(debounceTime(100));
@@ -113,11 +120,14 @@ export const useSavedSearch = ({
         } catch (error) {
           data$.next({
             status: FetchStatus.ERROR,
-            fetchError: error,
+            fetchError: error as Error,
           });
         }
       })();
     });
+
+    // kick off initial fetch
+    refetch$.next();
 
     return () => {
       subscription.unsubscribe();
@@ -127,5 +137,8 @@ export const useSavedSearch = ({
   return {
     data$,
     refetch$,
+    indexPattern,
   };
 };
+
+export type SearchContextValue = ReturnType<typeof useSearch>;

@@ -336,6 +336,7 @@ export class DiscoverPlugin
       // ViewComponent
       Canvas: lazy(() => import('./application/view_components/canvas')),
       Panel: lazy(() => import('./application/view_components/panel')),
+      Context: lazy(() => import('./application/view_components/context')),
     });
 
     // this.registerEmbeddable(core, plugins);

@@ -23,6 +23,9 @@ export interface ViewDefinition<T = any> {
   };
   readonly Canvas: LazyExoticComponent<(props: ViewProps) => React.ReactElement>;
   readonly Panel: LazyExoticComponent<(props: ViewProps) => React.ReactElement>;
+  readonly Context: LazyExoticComponent<
+    (props: React.PropsWithChildren<ViewProps>) => React.ReactElement
+  >;
   readonly defaultPath: string;
   readonly appExtentions: {
     savedObject: {

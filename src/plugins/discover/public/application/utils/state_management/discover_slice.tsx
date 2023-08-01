@@ -7,6 +7,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Filter, Query } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { RootState } from '../../../../../data_explorer/public';
+import { buildColumns } from '../columns';
 
 export interface DiscoverState {
   /**
@@ -57,54 +58,35 @@ export const discoverSlice = createSlice({
     setState(state, action: PayloadAction<DiscoverState>) {
       return action.payload;
     },
-    addColumn(
-      state,
-      action: PayloadAction<{
-        column: string;
-        index?: number;
-      }>
-    ) {
+    addColumn(state, action: PayloadAction<{ column: string; index?: number }>) {
       const { column, index } = action.payload;
       const columns = [...(state.columns || [])];
-      if (index !== undefined) {
-        columns.splice(index, 0, column);
-      } else {
-        columns.push(column);
-      }
-      state = {
-        ...state,
-        columns,
-      };
-
-      return state;
+      if (index !== undefined) columns.splice(index, 0, column);
+      else columns.push(column);
+      return { ...state, columns: buildColumns(columns) };
     },
     removeColumn(state, action: PayloadAction<string>) {
-      state = {
+      const columns = (state.columns || []).filter((column) => column !== action.payload);
+      return {
         ...state,
-        columns: (state.columns || []).filter((column) => column !== action.payload),
+        columns: buildColumns(columns),
       };
-
-      return state;
     },
     reorderColumn(state, action: PayloadAction<{ source: number; destination: number }>) {
       const { source, destination } = action.payload;
       const columns = [...(state.columns || [])];
       const [removed] = columns.splice(source, 1);
       columns.splice(destination, 0, removed);
-      state = {
+      return {
         ...state,
         columns,
       };
-
-      return state;
     },
     updateState(state, action: PayloadAction<Partial<DiscoverState>>) {
-      state = {
+      return {
         ...state,
         ...action.payload,
       };
-
-      return state;
     },
   },
 });
