@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
+import { addColumn, removeColumn, useDispatch, useSelector } from '../../utils/state_management';
 
 export const DiscoverTableApplication = ({ data$, indexPattern, savedSearch, services }) => {
   const [fetchState, setFetchState] = useState<any>({
@@ -13,6 +13,9 @@ export const DiscoverTableApplication = ({ data$, indexPattern, savedSearch, ser
     fieldCounts: {},
     rows: [],
   });
+
+  const { columns } = useSelector((state) => state.discover);
+  const dispatch = useDispatch();
 
   const { rows } = fetchState;
 
@@ -30,33 +33,31 @@ export const DiscoverTableApplication = ({ data$, indexPattern, savedSearch, ser
     };
   }, [data$, fetchState]);
 
-  // ToDo: implement columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns using config, indexPattern, appState
+  // ToDo: implement columns, onMoveColumn, onSetColumns using config, indexPattern, appState
 
   if (rows.length === 0) {
     return <div>{'loading...'}</div>;
   } else {
     return (
-      <EuiFlexGroup className="dscCanvasAppPageBody__contents">
-        <EuiFlexItem>
-          <EuiPageContent>
-            <div className="dscDiscoverGrid">
-              <DataGridTable
-                columns={['_source']}
-                indexPattern={indexPattern}
-                onAddColumn={() => {}}
-                onFilter={() => {}}
-                onRemoveColumn={() => {}}
-                onSetColumns={() => {}}
-                onSort={() => {}}
-                sort={[]}
-                rows={rows}
-                displayTimeColumn={true}
-                services={services}
-              />
-            </div>
-          </EuiPageContent>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <DataGridTable
+        columns={columns}
+        indexPattern={indexPattern}
+        onAddColumn={(column) =>
+          dispatch(
+            addColumn({
+              column,
+            })
+          )
+        }
+        onFilter={() => {}}
+        onRemoveColumn={(column) => dispatch(removeColumn(column))}
+        onSetColumns={() => {}}
+        onSort={() => {}}
+        sort={[]}
+        rows={rows}
+        displayTimeColumn={true}
+        services={services}
+      />
     );
   }
 };

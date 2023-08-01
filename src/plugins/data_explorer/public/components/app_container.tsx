@@ -28,7 +28,7 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
         <Sidebar>
           <Panel {...params} />
         </Sidebar>
-        <EuiPageBody>
+        <EuiPageBody className="eui-fullHeight">
           <Canvas {...params} />
         </EuiPageBody>
       </Suspense>

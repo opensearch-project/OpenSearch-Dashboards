@@ -109,6 +109,10 @@ export const DiscoverField = ({
       values: { field: field.name },
     }
   );
+  const infoLabelAria = i18n.translate('discover.fieldChooser.discoverField.infoButtonAriaLabel', {
+    defaultMessage: 'View {field} summary',
+    values: { field: field.name },
+  });
 
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -233,6 +237,7 @@ export const DiscoverField = ({
               iconType="inspect"
               size="xs"
               onClick={() => setOpen((state) => !state)}
+              aria-label={infoLabelAria}
             />
           }
           panelClassName="dscSidebarItem__fieldPopoverPanel"

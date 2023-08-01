@@ -36,6 +36,7 @@ import { url } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
+import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
 import { DocViewTable } from './application/components/table/table';
@@ -84,6 +85,10 @@ export interface DiscoverSetup {
      * @param docViewRaw
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
+  };
+
+  docViewsLinks: {
+    addDocViewLink(docViewLinkRaw: DocViewLink): void;
   };
 }
 
@@ -338,6 +343,9 @@ export class DiscoverPlugin
     return {
       docViews: {
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
+      },
+      docViewsLinks: {
+        addDocViewLink: this.docViewsLinksRegistry.addDocViewLink.bind(this.docViewsLinksRegistry),
       },
     };
   }

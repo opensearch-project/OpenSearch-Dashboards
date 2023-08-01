@@ -12,7 +12,7 @@ export interface DiscoverState {
   /**
    * Columns displayed in the table
    */
-  columns?: string[];
+  columns: string[];
   /**
    * Array of applied filters
    */
@@ -28,7 +28,7 @@ export interface DiscoverState {
   /**
    * Array of the used sorting [[field,direction],...]
    */
-  sort?: string[][];
+  sort: Array<[string, string]>;
   /**
    * id of the used saved query
    */
@@ -39,7 +39,10 @@ export interface DiscoverRootState extends RootState {
   discover: DiscoverState;
 }
 
-const initialState = {} as DiscoverState;
+const initialState: DiscoverState = {
+  columns: [],
+  sort: [],
+};
 
 export const getPreloadedState = async ({ data }: DiscoverServices): Promise<DiscoverState> => {
   return {
