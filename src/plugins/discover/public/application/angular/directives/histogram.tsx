@@ -33,8 +33,7 @@ import moment from 'moment-timezone';
 import { unitOfTime } from 'moment';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 import {
   AnnotationDomainType,
@@ -276,7 +275,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const lineAnnotationStyle = {
       line: {
         strokeWidth: 2,
-        stroke: isDarkMode ? darkEuiTheme.euiColorDanger : lightEuiTheme.euiColorDanger,
+        stroke: euiThemeVars.euiColorDanger,
         opacity: 0.7,
       },
     };
@@ -298,10 +297,10 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     }
 
     const rectAnnotationStyle = {
-      stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
+      stroke: isDarkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkShade,
       strokeWidth: 0,
       opacity: isDarkMode ? 0.6 : 0.2,
-      fill: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
+      fill: isDarkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkShade,
     };
 
     const tooltipProps = {
