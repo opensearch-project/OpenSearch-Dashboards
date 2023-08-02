@@ -261,10 +261,7 @@ export class Server {
       opensearch: opensearchStart,
       savedObjects: savedObjectsStart,
     });
-    await this.workspaces.start({
-      savedObjects: savedObjectsStart,
-      uiSettings: uiSettingsStart,
-    });
+    await this.workspaces.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
