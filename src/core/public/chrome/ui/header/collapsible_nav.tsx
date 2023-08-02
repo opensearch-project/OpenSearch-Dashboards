@@ -206,7 +206,7 @@ export function CollapsibleNav({
                   }),
                 ]}
                 maxWidth="none"
-                color="text"
+                color="subdued"
                 gutterSize="none"
                 size="s"
               />
@@ -219,8 +219,8 @@ export function CollapsibleNav({
 
       {/* Recently viewed */}
       <EuiCollapsibleNavGroup
-        key="recentlyViewed"
         background="light"
+        key="recentlyViewed"
         title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
         isCollapsible={true}
         initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
@@ -281,6 +281,7 @@ export function CollapsibleNav({
 
           return (
             <EuiCollapsibleNavGroup
+              background="light"
               key={category.id}
               iconType={opensearchLinkLogo}
               title={category.label}
@@ -307,16 +308,20 @@ export function CollapsibleNav({
 
         {/* Things with no category (largely for custom plugins) */}
         {unknowns.map((link, i) => (
-          <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
+          <EuiCollapsibleNavGroup
+            background="light"
+            data-test-subj={`collapsibleNavGroup-noCategory`}
+            key={i}
+          >
             <EuiListGroup flush>
-              <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
+              <EuiListGroupItem color="subdued" size="s" {...readyForEUI(link, true)} />
             </EuiListGroup>
           </EuiCollapsibleNavGroup>
         ))}
 
         {/* Docking button only for larger screens that can support it*/}
         <EuiShowFor sizes={['l', 'xl']}>
-          <EuiCollapsibleNavGroup>
+          <EuiCollapsibleNavGroup background="light">
             <EuiListGroup flush>
               <EuiListGroupItem
                 data-test-subj="collapsible-nav-lock"
