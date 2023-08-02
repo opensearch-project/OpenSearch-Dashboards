@@ -243,7 +243,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
 
   addLayer(opensearchDashboardsLayer) {
     const onshowTooltip = (event) => {
-      if (!this._showTooltip) {
+      if (!this._showTooltip || !event.content) {
         return;
       }
 
