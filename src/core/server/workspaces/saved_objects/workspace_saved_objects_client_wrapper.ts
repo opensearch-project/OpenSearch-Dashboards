@@ -122,6 +122,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
+      if (options.workspaces) {
+        await this.validateMultiWorkspacesPermissions(options.workspaces, wrapperOptions.request, [
+          PermissionMode.Write,
+          PermissionMode.Management,
+        ]);
+      }
       return await wrapperOptions.client.bulkCreate(objects, options);
     };
 
