@@ -16,7 +16,7 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
   }
 
   .leaflet-container {
-      background: $euiColorEmptyShade;
+    background: $euiColorEmptyShade;
 
     // the heatmap layer plugin logs an error to the console when the map is in a 0-sized container
     min-width: 1px !important;
