@@ -253,11 +253,6 @@ export interface App<HistoryLocationState = unknown> {
   exactRoute?: boolean;
 
   /**
-   * The feature group of workspace, won't be displayed as feature if feature set is ADMIN.
-   */
-  featureGroup?: Array<'WORKSPACE' | 'ADMIN'>;
-
-  /**
    * The dependencies of one application, required feature will be automatic select and can't
    * be unselect in the workspace configuration.
    */
