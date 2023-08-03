@@ -35,7 +35,15 @@ export class SavedObjectsPermissionControl {
     savedObject: SavedObjectsBulkGetObject,
     permissionModeOrModes: SavedObjectsPermissionModes
   ) {
-    const savedObjectsGet = await this.bulkGetSavedObjects(request, [savedObject]);
+    return await this.batchValidate(request, [savedObject], permissionModeOrModes);
+  }
+
+  public async batchValidate(
+    request: OpenSearchDashboardsRequest,
+    savedObjects: SavedObjectsBulkGetObject[],
+    permissionModeOrModes: SavedObjectsPermissionModes
+  ) {
+    const savedObjectsGet = await this.bulkGetSavedObjects(request, savedObjects);
     if (savedObjectsGet) {
       return {
         success: true,

@@ -28,11 +28,12 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit, intersection } from 'lodash';
 import type { opensearchtypes } from '@opensearch-project/opensearch';
 import uuid from 'uuid';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { OpenSearchClient, DeleteDocumentResponse } from '../../../opensearch/';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { DeleteDocumentResponse, OpenSearchClient } from '../../../opensearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
   createRepositoryOpenSearchClient,
@@ -40,43 +41,45 @@ import {
 } from './repository_opensearch_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
-import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
-import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
+import { DecoratedError, SavedObjectsErrorHelpers } from './errors';
+import { decodeRequestVersion, encodeHitVersion, encodeVersion } from '../../version';
 import { IOpenSearchDashboardsMigrator } from '../../migrations';
 import {
-  SavedObjectsSerializer,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
+  SavedObjectsSerializer,
 } from '../../serialization';
 import {
+  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsAddToNamespacesResponse,
+  SavedObjectsAddToWorkspacesOptions,
+  SavedObjectsAddToWorkspacesResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsDeleteOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+  SavedObjectsShareObjects,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from '../saved_objects_client';
 import {
+  MutatingOperationRefreshSetting,
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
-  MutatingOperationRefreshSetting,
 } from '../../types';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import {
   ALL_NAMESPACES_STRING,
@@ -84,6 +87,7 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
+import { GLOBAL_WORKSPACE_ID } from '../../../workspaces/constants';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -1270,6 +1274,112 @@ export class SavedObjectsRepository {
         })}`
       );
     }
+  }
+
+  async addToWorkspaces(
+    savedObjects: SavedObjectsShareObjects[],
+    workspaces: string[],
+    options: SavedObjectsAddToWorkspacesOptions = {}
+  ): Promise<SavedObjectsAddToWorkspacesResponse[]> {
+    if (!savedObjects.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'shared savedObjects must not be an empty array'
+      );
+    }
+
+    // saved objects must exist in specified workspace
+    if (options.workspaces) {
+      const invalidObjects = savedObjects.filter((obj) => {
+        if (
+          obj.workspaces &&
+          obj.workspaces.length > 0 &&
+          !obj.workspaces.includes(GLOBAL_WORKSPACE_ID)
+        ) {
+          return intersection(obj.workspaces, options.workspaces).length === 0;
+        }
+        return false;
+      });
+      if (invalidObjects && invalidObjects.length > 0) {
+        const [savedObj] = invalidObjects;
+        throw SavedObjectsErrorHelpers.createConflictError(savedObj.type, savedObj.id);
+      }
+    }
+
+    savedObjects.forEach(({ type, id }) => {
+      if (!this._allowedTypes.includes(type)) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+    });
+
+    if (!workspaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'workspaces must be a non-empty array of strings'
+      );
+    }
+
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+    const savedObjectsBulkResponse = await this.bulkGet(savedObjects);
+
+    const docs = savedObjectsBulkResponse.saved_objects.map((obj) => {
+      const { type, id } = obj;
+      const rawId = this._serializer.generateRawId(undefined, type, id);
+      const time = this._getCurrentTime();
+
+      return [
+        {
+          update: {
+            _id: rawId,
+            _index: this.getIndexForType(type),
+          },
+        },
+        {
+          script: {
+            source: `
+              if (params.workspaces != null && ctx._source.workspaces != null && !ctx._source.workspaces?.contains(params.globalWorkspaceId)) {
+                ctx._source.workspaces.addAll(params.workspaces);
+                HashSet workspacesSet = new HashSet(ctx._source.workspaces);
+                ctx._source.workspaces = new ArrayList(workspacesSet);
+              }
+              ctx._source.updated_at = params.time;
+            `,
+            lang: 'painless',
+            params: {
+              time,
+              workspaces,
+              globalWorkspaceId: GLOBAL_WORKSPACE_ID,
+            },
+          },
+        },
+      ];
+    });
+
+    const bulkUpdateResponse = await this.client.bulk({
+      refresh,
+      body: docs.flat(),
+      _source_includes: ['workspaces'],
+    });
+
+    if (bulkUpdateResponse.body.errors) {
+      const failures = bulkUpdateResponse.body.items
+        .map((item) => item.update?.error?.reason)
+        .join(',');
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Add to workspace failed with: ' + failures
+      );
+    }
+
+    const savedObjectIdWorkspaceMap = bulkUpdateResponse.body.items.reduce((map, item) => {
+      return map.set(item.update?._id!, item.update?.get?._source.workspaces);
+    }, new Map<string, string[]>());
+
+    return savedObjects.map((obj) => {
+      const rawId = this._serializer.generateRawId(undefined, obj.type, obj.id);
+      return {
+        type: obj.type,
+        id: obj.id,
+        workspaces: savedObjectIdWorkspaceMap.get(rawId),
+      } as SavedObjectsAddToWorkspacesResponse;
+    });
   }
 
   /**

@@ -169,6 +169,8 @@ export interface SavedObjectsCheckConflictsResponse {
   }>;
 }
 
+export type SavedObjectsShareObjects = Pick<SavedObject, 'type' | 'id' | 'workspaces'>;
+
 /**
  *
  * @public
@@ -193,6 +195,11 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
   refresh?: MutatingOperationRefreshSetting;
 }
 
+export type SavedObjectsAddToWorkspacesOptions = Pick<
+  SavedObjectsUpdateOptions,
+  'refresh' | 'workspaces'
+>;
+
 /**
  *
  * @public
@@ -200,6 +207,11 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
 export interface SavedObjectsAddToNamespacesResponse {
   /** The namespaces the object exists in after this operation is complete. */
   namespaces: string[];
+}
+
+export interface SavedObjectsAddToWorkspacesResponse extends Pick<SavedObject, 'type' | 'id'> {
+  /** The workspaces the object exists in after this operation is complete. */
+  workspaces: string[];
 }
 
 /**
@@ -432,6 +444,21 @@ export class SavedObjectsClient {
   ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
+
+  /**
+   * Adds workspace to SavedObjects
+   *
+   * @param objects
+   * @param workspaces
+   * @param options
+   */
+  addToWorkspaces = async (
+    objects: SavedObjectsShareObjects[],
+    workspaces: string[],
+    options: SavedObjectsAddToWorkspacesOptions = {}
+  ): Promise<SavedObjectsAddToWorkspacesResponse[]> => {
+    return await this._repository.addToWorkspaces(objects, workspaces, options);
+  };
 
   /**
    * Bulk Updates multiple SavedObject at once

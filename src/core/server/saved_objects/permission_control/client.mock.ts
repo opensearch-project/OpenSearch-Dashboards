@@ -8,6 +8,7 @@ import { SavedObjectsPermissionControlContract } from './client';
 export const savedObjectsPermissionControlMock: SavedObjectsPermissionControlContract = {
   setup: jest.fn(),
   validate: jest.fn(),
+  batchValidate: jest.fn(),
   addPrinciplesToObjects: jest.fn(),
   removePrinciplesFromObjects: jest.fn(),
   getPrinciplesOfObjects: jest.fn(),

@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import {
   OpenSearchDashboardsRequest,
   SavedObject,
+  SavedObjectsAddToWorkspacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -17,6 +18,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsFindOptions,
+  SavedObjectsShareObjects,
 } from 'opensearch-dashboards/server';
 import { SavedObjectsPermissionControlContract } from '../../saved_objects/permission_control/client';
 import { WORKSPACE_TYPE } from '../constants';
@@ -26,7 +28,14 @@ import { PermissionMode } from '../../../utils';
 const generateWorkspacePermissionError = () =>
   Boom.illegal(
     i18n.translate('workspace.permission.invalidate', {
-      defaultMessage: 'Invalidate workspace permission',
+      defaultMessage: 'Invalid workspace permission',
+    })
+  );
+
+const generateSavedObjectsPermissionError = () =>
+  Boom.illegal(
+    i18n.translate('saved_objects.permission.invalidate', {
+      defaultMessage: 'Invalid saved objects permission',
     })
   );
 
@@ -201,6 +210,33 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.find<T>(options);
     };
 
+    const addToWorkspacesWithPermissionControl = async (
+      objects: SavedObjectsShareObjects[],
+      targetWorkspaces: string[],
+      options: SavedObjectsAddToWorkspacesOptions = {}
+    ) => {
+      // target workspaces
+      await this.validateMultiWorkspacesPermissions(targetWorkspaces, wrapperOptions.request, [
+        PermissionMode.LibraryWrite,
+        PermissionMode.Management,
+      ]);
+
+      // saved_objects
+      const permitted = await this.permissionControl.batchValidate(
+        wrapperOptions.request,
+        objects.map((savedObj) => ({
+          ...savedObj,
+        })),
+        [PermissionMode.Write]
+      );
+
+      if (!permitted) {
+        throw generateSavedObjectsPermissionError();
+      }
+
+      return await wrapperOptions.client.addToWorkspaces(objects, targetWorkspaces, options);
+    };
+
     return {
       ...wrapperOptions.client,
       get: getWithWorkspacePermissionControl,
@@ -215,6 +251,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       delete: deleteWithWorkspacePermissionControl,
       update: wrapperOptions.client.update,
       bulkUpdate: wrapperOptions.client.bulkUpdate,
+      addToWorkspaces: addToWorkspacesWithPermissionControl,
     };
   };
 
