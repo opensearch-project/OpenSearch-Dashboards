@@ -319,6 +319,9 @@ export {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
+  SavedObjectsShareObjects,
+  SavedObjectsAddToWorkspacesOptions,
+  SavedObjectsAddToWorkspacesResponse,
 } from './saved_objects';
 
 export {

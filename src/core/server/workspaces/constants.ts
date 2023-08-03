@@ -4,3 +4,4 @@
  */
 
 export const WORKSPACE_TYPE = 'workspace';
+export const GLOBAL_WORKSPACE_ID = 'public';
