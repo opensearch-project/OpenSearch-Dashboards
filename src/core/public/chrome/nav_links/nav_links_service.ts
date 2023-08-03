@@ -151,8 +151,8 @@ export class NavLinksService {
           return linkUpdaters.reduce((links, updater) => updater(links), appLinks);
         })
       )
-      .subscribe((navlinks) => {
-        navLinks$.next(navlinks);
+      .subscribe((navLinks) => {
+        navLinks$.next(navLinks);
       });
 
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);

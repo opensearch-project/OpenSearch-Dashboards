@@ -8,7 +8,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiButton, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart, WorkspaceAttribute, WorkspacesStart } from '../../../../../core/public';
-import { WORKSPACE_APP_ID, PATHS } from '../../../common/constants';
+import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 import { switchWorkspace } from '../../components/utils/workspace';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
@@ -64,7 +64,7 @@ export function WorkspaceDropdownList(props: WorkspaceDropdownListProps) {
   );
 
   const onCreateWorkspaceClick = () => {
-    props.application.navigateToApp(WORKSPACE_APP_ID, { path: PATHS.create });
+    props.application.navigateToApp(WORKSPACE_CREATE_APP_ID);
   };
 
   useEffect(() => {
