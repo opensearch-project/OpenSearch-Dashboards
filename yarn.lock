@@ -6121,6 +6121,13 @@ commander@^5.0.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-5.1.0.tgz#46abbd1652f8e059bddaef99bbdcb2ad9cf179ae"
   integrity sha512-P0CysNDQ7rtVw4QIQtm+MRxV66vKFSvlsQvGYXZWR3qFU0jlMKHZZZgw8e+8DSah4UDKMqnknRDQz+xuQXQ/Zg==
 
+comment-stripper@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/comment-stripper/-/comment-stripper-0.0.4.tgz#e8d61366d362779ea225c764f05cca6c950f8a2c"
+  integrity sha512-4K87KyAmZtZmAUznIJuVsBB7v328V4GBL2wVhno71aunUymMfYBVaAWITH4jrH6uI7NbxpczSdl7NysHx+XfYg==
+  dependencies:
+    loader-utils "^2.0.0"
+
 commondir@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/commondir/-/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"

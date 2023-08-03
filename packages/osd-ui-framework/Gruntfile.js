@@ -28,6 +28,7 @@
  * under the License.
  */
 
+const { strip } = require('comment-stripper');
 const sass = require('node-sass');
 const postcss = require('postcss');
 const postcssConfig = require('@osd/optimizer/postcss.config.js');
@@ -91,7 +92,10 @@ module.exports = function (grunt) {
           }
 
           postcss([postcssConfig])
-            .process(result.css, { from: src, to: dest })
+            .process(strip(result.css.toString('utf8'), { language: 'css' }), {
+              from: src,
+              to: dest,
+            })
             .then((result) => {
               grunt.file.write(dest, result.css);
 

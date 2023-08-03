@@ -48,6 +48,7 @@
     "@types/watchpack": "^1.1.6",
     "@types/webpack": "^4.41.31",
     "babel-loader": "^8.2.3",
+    "comment-stripper": "^0.0.4",
     "css-loader": "^5.2.7",
     "file-loader": "^6.2.0",
     "loader-utils": "^2.0.4",
