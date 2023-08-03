@@ -114,33 +114,6 @@ export interface PluginDependencies {
   asOpaqueIds: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
 }
 
-// An interface defining OpenSearch plugin component name and semver compatible version range of
-// OpenSearch plugin to the plugin manifest.
-// This is used to check the compatibility of the plugin.
-// The plugin manifest is defined in the plugin's opensearch_dashboards.json file.
-//
-// @example
-//
-// "opensearch-dashboards-plugin-sample": {
-//   "opensearchDashboardsVersion": "2.0.0",
-//   "requiredPlugins": [
-//     "opensearch-dashboards-sample-data"
-//   ],
-//   "requiredOpenSearchPlugins": [
-//     {
-//       "id": "opensearch-dashboards-sample-data",
-//       "versionRange": "^2.0.0"
-//     }
-//   ],
-//   "requiredBundles": [
-//     "opensearch-dashboards-sample-data"
-//   ]
-// }
-export interface CompatibleOpenSearchPluginVersions {
-  id: PluginName;
-  versionRange: string;
-}
-
 /**
  * Describes the set of required and optional properties plugin can define in its
  * mandatory JSON manifest file.
@@ -257,6 +230,12 @@ export interface DiscoveredPlugin {
    * not required for this plugin to work properly.
    */
   readonly optionalPlugins: readonly PluginName[];
+
+  /**
+   * An optional list of the OpenSearch plugins that **must be** installed on the cluster
+   * for this plugin to function properly.
+   */
+  readonly requiredEnginePlugins: CompatibleEnginePluginVersions;
 
   /**
    * List of plugin ids that this plugin's UI code imports modules from that are
