@@ -68,7 +68,7 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 
     @include fontSize(11px);
 
-    font-family: $euiFontFamily;
+    font-family: var(--font-text);
     font-weight: $euiFontWeightMedium;
     line-height: $euiLineHeight;
 
