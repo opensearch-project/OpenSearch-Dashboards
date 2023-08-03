@@ -33,7 +33,12 @@ import {
 } from '@elastic/eui';
 
 import { WorkspaceTemplate } from '../../../../../core/types';
-import { App, AppNavLinkStatus, ApplicationStart } from '../../../../../core/public';
+import {
+  App,
+  AppNavLinkStatus,
+  ApplicationStart,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../../core/public';
 import { useApplications, useWorkspaceTemplate } from '../../hooks';
 import { WORKSPACE_OP_TYPE_CREATE, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
 import {
@@ -122,10 +127,10 @@ export const WorkspaceForm = ({
       const apps = category2Applications[currentKey];
       const features = apps
         .filter(
-          ({ navLinkStatus, chromeless, featureGroup }) =>
+          ({ navLinkStatus, chromeless, category }) =>
             navLinkStatus !== AppNavLinkStatus.hidden &&
             !chromeless &&
-            featureGroup?.includes('WORKSPACE')
+            category?.id !== DEFAULT_APP_CATEGORIES.management.id
         )
         .map(({ id, title, workspaceTemplate, dependencies }) => ({
           id,
@@ -133,6 +138,9 @@ export const WorkspaceForm = ({
           templates: workspaceTemplate || [],
           dependencies,
         }));
+      if (features.length === 0) {
+        return previousValue;
+      }
       if (features.length === 1 || currentKey === 'undefined') {
         return [...previousValue, ...features];
       }
