@@ -6,9 +6,10 @@
 import { i18n } from '@osd/i18n';
 import { AppCategory } from '../../../core/types';
 
-export const WORKSPACE_APP_ID = 'workspace';
-export const WORKSPACE_APP_NAME = 'Workspace';
-
+export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
+export const WORKSPACE_LIST_APP_ID = 'workspace_list';
+export const WORKSPACE_UPDATE_APP_ID = 'workspace_update';
+export const WORKSPACE_OVERVIEW_APP_ID = 'workspace_overview';
 export const PATHS = {
   create: '/create',
   overview: '/overview',

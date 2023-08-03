@@ -270,42 +270,6 @@ export function CollapsibleNav({
           )}
         </EuiCollapsibleNavGroup>
 
-        {/* Alerts and Favorites */}
-        {/* (
-          <>
-            <EuiCollapsibleNavGroup
-              onClick={closeNav}
-              iconType={'bell'}
-              title={i18n.translate('core.ui.primaryNavSection.alerts', {
-                defaultMessage: 'Alerts',
-              })}
-            />
-            <EuiCollapsibleNavGroup
-              iconType={'starEmpty'}
-              title={i18n.translate('core.ui.primaryNavSection.favorites', {
-                defaultMessage: 'Favorites',
-              })}
-              isCollapsible={true}
-              initialIsOpen={true}
-            >
-              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-                <p>
-                  {i18n.translate('core.ui.EmptyFavoriteList', {
-                    defaultMessage: 'No Favorites',
-                  })}
-                </p>
-              </EuiText>
-              <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-                <p>
-                  {i18n.translate('core.ui.SeeMoreFavorite', {
-                    defaultMessage: 'SEE MORE',
-                  })}
-                </p>
-              </EuiText>
-            </EuiCollapsibleNavGroup>
-          </>
-        ) */}
-
         {/* merged NavLinks */}
         {mergedNavLinks.map((item, i) => {
           if (typeof item === 'string') {

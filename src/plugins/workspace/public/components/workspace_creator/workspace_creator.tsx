@@ -10,7 +10,7 @@ import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 
 import { WorkspaceForm, WorkspaceFormData } from './workspace_form';
-import { PATHS, WORKSPACE_APP_ID, WORKSPACE_OP_TYPE_CREATE } from '../../../common/constants';
+import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_OP_TYPE_CREATE } from '../../../common/constants';
 
 export const WorkspaceCreator = () => {
   const {
@@ -39,8 +39,7 @@ export const WorkspaceCreator = () => {
         });
         if (application && workspaces) {
           window.location.href = workspaces.formatUrlWithWorkspaceId(
-            application.getUrlForApp(WORKSPACE_APP_ID, {
-              path: PATHS.overview,
+            application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
               absolute: true,
             }),
             result.result.id

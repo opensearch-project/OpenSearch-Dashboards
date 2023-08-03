@@ -19,7 +19,13 @@ import {
   WorkspacesStart,
   DEFAULT_APP_CATEGORIES,
 } from '../../../core/public';
-import { PATHS, WORKSPACE_APP_ID, WORKSPACE_NAV_CATEGORY } from '../common/constants';
+import {
+  WORKSPACE_LIST_APP_ID,
+  WORKSPACE_UPDATE_APP_ID,
+  WORKSPACE_CREATE_APP_ID,
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_NAV_CATEGORY,
+} from '../common/constants';
 import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
@@ -84,22 +90,70 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
-    core.application.register({
-      id: WORKSPACE_APP_ID,
-      title: i18n.translate('workspace.settings.title', {
-        defaultMessage: 'Workspace',
-      }),
-      // order: 6010,
-      navLinkStatus: AppNavLinkStatus.hidden,
-      // updater$: this.appUpdater,
-      async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
-        const services = {
-          ...coreStart,
-        };
+    type WorkspaceAppType = (params: AppMountParameters, services: CoreStart) => () => void;
+    const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
+      const [coreStart] = await core.getStartServices();
+      const services = {
+        ...coreStart,
+      };
 
-        return renderApp(params, services);
+      return renderApp(params, services);
+    };
+
+    // create
+    core.application.register({
+      id: WORKSPACE_CREATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceCreate', {
+        defaultMessage: 'Create Workspace',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderCreatorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderCreatorApp);
+      },
+    });
+
+    // overview
+    core.application.register({
+      id: WORKSPACE_OVERVIEW_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceOverview', {
+        defaultMessage: 'Home',
+      }),
+      order: 0,
+      euiIconType: 'home',
+      navLinkStatus: AppNavLinkStatus.default,
+      async mount(params: AppMountParameters) {
+        const { renderOverviewApp } = await import('./application');
+        return mountWorkspaceApp(params, renderOverviewApp);
+      },
+    });
+
+    // update
+    core.application.register({
+      id: WORKSPACE_UPDATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceUpdate', {
+        defaultMessage: 'Workspace Settings',
+      }),
+      euiIconType: 'managementApp',
+      navLinkStatus: AppNavLinkStatus.default,
+      async mount(params: AppMountParameters) {
+        const { renderUpdateApp } = await import('./application');
+        return mountWorkspaceApp(params, renderUpdateApp);
+      },
+    });
+
+    // list
+    core.application.register({
+      id: WORKSPACE_LIST_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceList', {
+        defaultMessage: 'See More',
+      }),
+      euiIconType: 'folderClosed',
+      category: WORKSPACE_NAV_CATEGORY,
+      navLinkStatus: workspaceId ? AppNavLinkStatus.hidden : AppNavLinkStatus.default,
+      async mount(params: AppMountParameters) {
+        const { renderListApp } = await import('./application');
+        return mountWorkspaceApp(params, renderListApp);
       },
     });
 
@@ -109,12 +163,12 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
   private workspaceToChromeNavLink(
     workspace: WorkspaceAttribute,
     workspacesStart: WorkspacesStart,
-    application: ApplicationStart
+    application: ApplicationStart,
+    index: number
   ): ChromeNavLink {
-    const id = WORKSPACE_APP_ID + '/' + workspace.id;
+    const id = WORKSPACE_OVERVIEW_APP_ID + '/' + workspace.id;
     const url = workspacesStart?.formatUrlWithWorkspaceId(
-      application.getUrlForApp(WORKSPACE_APP_ID, {
-        path: '/',
+      application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: true,
       }),
       workspace.id
@@ -122,6 +176,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     return {
       id,
       url,
+      order: index,
       hidden: false,
       disabled: false,
       baseUrl: url,
@@ -166,82 +221,17 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
       const filteredNavLinks = new Map<string, ChromeNavLink>();
       chromeNavLinks = this.filterByWorkspace(currentWorkspace, chromeNavLinks);
       chromeNavLinks.forEach((chromeNavLink) => {
-        if (chromeNavLink.id === 'home') {
-          // set hidden, icon and order for home nav link
-          const homeNavLink: ChromeNavLink = {
-            ...chromeNavLink,
-            hidden: currentWorkspace !== null,
-            euiIconType: 'logoOpenSearch',
-            order: 0,
-          };
-          filteredNavLinks.set(chromeNavLink.id, homeNavLink);
-        } else {
-          filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
-        }
+        filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
       });
-      if (currentWorkspace) {
-        // Overview only inside workspace
-        const overviewId = WORKSPACE_APP_ID + PATHS.update;
-        const overviewUrl = core.workspaces.formatUrlWithWorkspaceId(
-          core.application.getUrlForApp(WORKSPACE_APP_ID, {
-            path: PATHS.update,
-            absolute: true,
-          }),
-          currentWorkspace.id
-        );
-        const overviewNavLink: ChromeNavLink = {
-          id: overviewId,
-          title: i18n.translate('core.ui.workspaceNavList.overview', {
-            defaultMessage: 'Overview',
-          }),
-          hidden: false,
-          disabled: false,
-          baseUrl: overviewUrl,
-          href: overviewUrl,
-          euiIconType: 'grid',
-          order: 0,
-        };
-        filteredNavLinks.set(overviewId, overviewNavLink);
-      } else {
+      if (!currentWorkspace) {
         workspaceList
           .filter((workspace, index) => index < 5)
-          .map((workspace) =>
-            this.workspaceToChromeNavLink(workspace, core.workspaces, core.application)
+          .map((workspace, index) =>
+            this.workspaceToChromeNavLink(workspace, core.workspaces, core.application, index)
           )
           .forEach((workspaceNavLink) =>
             filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink)
           );
-        // See more
-        const seeMoreId = WORKSPACE_APP_ID + PATHS.list;
-        const seeMoreUrl = WORKSPACE_APP_ID + PATHS.list;
-        const seeMoreNavLink: ChromeNavLink = {
-          id: seeMoreId,
-          title: i18n.translate('core.ui.workspaceNavList.seeMore', {
-            defaultMessage: 'SEE MORE',
-          }),
-          hidden: false,
-          disabled: false,
-          baseUrl: seeMoreUrl,
-          href: seeMoreUrl,
-          category: WORKSPACE_NAV_CATEGORY,
-        };
-        filteredNavLinks.set(seeMoreId, seeMoreNavLink);
-        // Admin
-        const adminId = 'admin';
-        const adminUrl = '/app/admin';
-        const adminNavLink: ChromeNavLink = {
-          id: adminId,
-          title: i18n.translate('core.ui.workspaceNavList.admin', {
-            defaultMessage: 'Admin',
-          }),
-          hidden: false,
-          disabled: true,
-          baseUrl: adminUrl,
-          href: adminUrl,
-          euiIconType: 'managementApp',
-          order: 9000,
-        };
-        filteredNavLinks.set(adminId, adminNavLink);
       }
       navLinksService.setFilteredNavLinks(filteredNavLinks);
     });
