@@ -435,7 +435,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   className="euiCollapsibleNavGroup__children"
                 >
                   <EuiListGroup
-                    color="text"
+                    color="subdued"
                     gutterSize="none"
                     listItems={
                       Array [
@@ -463,7 +463,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       }
                     >
                       <EuiListGroupItem
-                        color="text"
+                        color="subdued"
                         data-test-subj="collapsibleNavCustomNavLink"
                         href="Custom link"
                         isActive={false}
@@ -475,7 +475,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         wrapText={false}
                       >
                         <li
-                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                         >
                           <a
                             className="euiListGroupItem__button"
@@ -757,6 +757,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="/defaultModeLogo"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
               iconType="/defaultModeLogo"
@@ -797,7 +798,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="/defaultModeLogo"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 id="mockId"
@@ -808,7 +809,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="/defaultModeLogo"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
@@ -1053,6 +1054,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="logoObservability"
               data-test-subj="collapsibleNavGroup-observability"
               iconType="logoObservability"
@@ -1093,7 +1095,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="logoObservability"
                 data-test-subj="collapsibleNavGroup-observability"
                 id="mockId"
@@ -1104,7 +1106,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="logoObservability"
                   data-test-subj="collapsibleNavGroup-observability"
                   onToggle={[Function]}
@@ -1310,6 +1312,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="logoSecurity"
               data-test-subj="collapsibleNavGroup-securitySolution"
               iconType="logoSecurity"
@@ -1350,7 +1353,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="logoSecurity"
                 data-test-subj="collapsibleNavGroup-securitySolution"
                 id="mockId"
@@ -1361,7 +1364,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="logoSecurity"
                   data-test-subj="collapsibleNavGroup-securitySolution"
                   onToggle={[Function]}
@@ -1528,6 +1531,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="managementApp"
               data-test-subj="collapsibleNavGroup-management"
               iconType="managementApp"
@@ -1568,7 +1572,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="managementApp"
                 data-test-subj="collapsibleNavGroup-management"
                 id="mockId"
@@ -1579,7 +1583,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="managementApp"
                   data-test-subj="collapsibleNavGroup-management"
                   onToggle={[Function]}
@@ -1746,11 +1750,12 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-subj="collapsibleNavGroup-noCategory"
               key="0"
             >
               <div
-                className="euiCollapsibleNavGroup"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                 data-test-subj="collapsibleNavGroup-noCategory"
                 id="mockId"
               >
@@ -1764,7 +1769,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       className="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
                     >
                       <EuiListGroupItem
-                        color="text"
+                        color="subdued"
                         data-test-subj="collapsibleNavAppLink"
                         href="canvas"
                         isActive={false}
@@ -1773,7 +1778,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         size="s"
                       >
                         <li
-                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                         >
                           <a
                             className="euiListGroupItem__button"
@@ -1804,9 +1809,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 ]
               }
             >
-              <EuiCollapsibleNavGroup>
+              <EuiCollapsibleNavGroup
+                background="light"
+              >
                 <div
-                  className="euiCollapsibleNavGroup"
+                  className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                   id="mockId"
                 >
                   <div
@@ -2832,9 +2839,11 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                 ]
               }
             >
-              <EuiCollapsibleNavGroup>
+              <EuiCollapsibleNavGroup
+                background="light"
+              >
                 <div
-                  className="euiCollapsibleNavGroup"
+                  className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                   id="mockId"
                 >
                   <div
@@ -3435,6 +3444,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="/darkModeLogo"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
               iconType="/darkModeLogo"
@@ -3475,7 +3485,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="/darkModeLogo"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 id="mockId"
@@ -3486,7 +3496,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="/darkModeLogo"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
@@ -3653,6 +3663,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="logoObservability"
               data-test-subj="collapsibleNavGroup-observability"
               iconType="logoObservability"
@@ -3693,7 +3704,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="logoObservability"
                 data-test-subj="collapsibleNavGroup-observability"
                 id="mockId"
@@ -3704,7 +3715,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="logoObservability"
                   data-test-subj="collapsibleNavGroup-observability"
                   onToggle={[Function]}
@@ -3878,9 +3889,11 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                 ]
               }
             >
-              <EuiCollapsibleNavGroup>
+              <EuiCollapsibleNavGroup
+                background="light"
+              >
                 <div
-                  className="euiCollapsibleNavGroup"
+                  className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                   id="mockId"
                 >
                   <div
@@ -4480,6 +4493,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="/defaultModeLogo"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
               iconType="/defaultModeLogo"
@@ -4520,7 +4534,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="/defaultModeLogo"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 id="mockId"
@@ -4531,7 +4545,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="/defaultModeLogo"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
@@ -4698,6 +4712,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="logoObservability"
               data-test-subj="collapsibleNavGroup-observability"
               iconType="logoObservability"
@@ -4738,7 +4753,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="logoObservability"
                 data-test-subj="collapsibleNavGroup-observability"
                 id="mockId"
@@ -4749,7 +4764,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="logoObservability"
                   data-test-subj="collapsibleNavGroup-observability"
                   onToggle={[Function]}
@@ -4923,9 +4938,11 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                 ]
               }
             >
-              <EuiCollapsibleNavGroup>
+              <EuiCollapsibleNavGroup
+                background="light"
+              >
                 <div
-                  className="euiCollapsibleNavGroup"
+                  className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                   id="mockId"
                 >
                   <div
@@ -5523,6 +5540,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
               iconType="undefined/opensearch_mark_default_mode.svg"
@@ -5563,7 +5581,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 id="mockId"
@@ -5574,7 +5592,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
@@ -5741,6 +5759,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="logoObservability"
               data-test-subj="collapsibleNavGroup-observability"
               iconType="logoObservability"
@@ -5781,7 +5800,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="logoObservability"
                 data-test-subj="collapsibleNavGroup-observability"
                 id="mockId"
@@ -5792,7 +5811,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="logoObservability"
                   data-test-subj="collapsibleNavGroup-observability"
                   onToggle={[Function]}
@@ -5966,9 +5985,11 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                 ]
               }
             >
-              <EuiCollapsibleNavGroup>
+              <EuiCollapsibleNavGroup
+                background="light"
+              >
                 <div
-                  className="euiCollapsibleNavGroup"
+                  className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                   id="mockId"
                 >
                   <div
@@ -6569,6 +6590,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="/defaultModeLogo"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
               iconType="/defaultModeLogo"
@@ -6609,7 +6631,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="/defaultModeLogo"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 id="mockId"
@@ -6620,7 +6642,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="/defaultModeLogo"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
@@ -6787,6 +6809,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="logoObservability"
               data-test-subj="collapsibleNavGroup-observability"
               iconType="logoObservability"
@@ -6827,7 +6850,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="logoObservability"
                 data-test-subj="collapsibleNavGroup-observability"
                 id="mockId"
@@ -6838,7 +6861,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="logoObservability"
                   data-test-subj="collapsibleNavGroup-observability"
                   onToggle={[Function]}
@@ -7012,9 +7035,11 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                 ]
               }
             >
-              <EuiCollapsibleNavGroup>
+              <EuiCollapsibleNavGroup
+                background="light"
+              >
                 <div
-                  className="euiCollapsibleNavGroup"
+                  className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                   id="mockId"
                 >
                   <div
@@ -7612,6 +7637,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
               iconType="undefined/opensearch_mark_default_mode.svg"
@@ -7652,7 +7678,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 id="mockId"
@@ -7663,7 +7689,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="undefined/opensearch_mark_default_mode.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
@@ -7830,6 +7856,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              background="light"
               data-test-opensearch-logo="logoObservability"
               data-test-subj="collapsibleNavGroup-observability"
               iconType="logoObservability"
@@ -7870,7 +7897,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                 data-test-opensearch-logo="logoObservability"
                 data-test-subj="collapsibleNavGroup-observability"
                 id="mockId"
@@ -7881,7 +7908,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="logoObservability"
                   data-test-subj="collapsibleNavGroup-observability"
                   onToggle={[Function]}
@@ -8055,9 +8082,11 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                 ]
               }
             >
-              <EuiCollapsibleNavGroup>
+              <EuiCollapsibleNavGroup
+                background="light"
+              >
                 <div
-                  className="euiCollapsibleNavGroup"
+                  className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                   id="mockId"
                 >
                   <div

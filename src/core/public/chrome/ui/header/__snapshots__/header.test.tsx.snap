@@ -5955,7 +5955,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                       className="euiCollapsibleNavGroup__children"
                     >
                       <EuiListGroup
-                        color="text"
+                        color="subdued"
                         gutterSize="none"
                         listItems={
                           Array [
@@ -5983,7 +5983,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                           }
                         >
                           <EuiListGroupItem
-                            color="text"
+                            color="subdued"
                             data-test-subj="collapsibleNavCustomNavLink"
                             href=""
                             isActive={false}
@@ -5995,7 +5995,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                             wrapText={false}
                           >
                             <li
-                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                             >
                               <button
                                 className="euiListGroupItem__button"
@@ -6235,11 +6235,12 @@ exports[`Header handles visibility and lock changes 1`] = `
                 className="euiFlexItem eui-yScroll"
               >
                 <EuiCollapsibleNavGroup
+                  background="light"
                   data-test-subj="collapsibleNavGroup-noCategory"
                   key="0"
                 >
                   <div
-                    className="euiCollapsibleNavGroup"
+                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                     data-test-subj="collapsibleNavGroup-noCategory"
                     id="mockId"
                   >
@@ -6253,7 +6254,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                           className="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
                         >
                           <EuiListGroupItem
-                            color="text"
+                            color="subdued"
                             data-test-subj="collapsibleNavAppLink"
                             href=""
                             isActive={false}
@@ -6262,7 +6263,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                             size="s"
                           >
                             <li
-                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
                             >
                               <button
                                 className="euiListGroupItem__button"
@@ -6293,9 +6294,11 @@ exports[`Header handles visibility and lock changes 1`] = `
                     ]
                   }
                 >
-                  <EuiCollapsibleNavGroup>
+                  <EuiCollapsibleNavGroup
+                    background="light"
+                  >
                     <div
-                      className="euiCollapsibleNavGroup"
+                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light"
                       id="mockId"
                     >
                       <div
