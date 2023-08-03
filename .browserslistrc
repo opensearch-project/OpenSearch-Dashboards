@@ -1,9 +1,14 @@
 [production]
-last 2 Firefox versions
-last 2 Chrome versions
-last 2 Safari versions
-> 0.25%
-not ie 11
+Firefox > 0 and last 2 years and > 0.01%
+Chrome > 0 and last 2 years and > 0.01%
+Safari > 0 and last 2 years and > 0.01%
+Edge > 0 and last 1 years and > 0.01%
+Opera > 0 and last 2 years and > 0.01%
+> 0.2%
+not op_mini all
+not and_uc < 100
+not android < 100
+not dead
 
 [dev]
 last 1 chrome versions
