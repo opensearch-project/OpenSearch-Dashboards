@@ -1,0 +1,264 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { PrincipalType } from '../../../../core/utils/constants';
+
+export interface Principals {
+  users?: string[];
+  groups?: string[];
+}
+
+export type Permissions = Partial<Record<string, Principals>>;
+
+export interface TransformedPermission {
+  type: string;
+  name: string;
+  permissions: string[];
+}
+
+const addToPrincipals = (principals?: Principals, users?: string[], groups?: string[]) => {
+  if (!principals) {
+    principals = {};
+  }
+  if (!!users) {
+    if (!principals.users) {
+      principals.users = [];
+    }
+    principals.users = Array.from(new Set([...principals.users, ...users]));
+  }
+  if (!!groups) {
+    if (!principals.groups) {
+      principals.groups = [];
+    }
+    principals.groups = Array.from(new Set([...principals.groups, ...groups]));
+  }
+  return principals;
+};
+
+const deleteFromPrincipals = (principals?: Principals, users?: string[], groups?: string[]) => {
+  if (!principals) {
+    return principals;
+  }
+  if (!!users && !!principals.users) {
+    principals.users = principals.users.filter((item) => !users.includes(item));
+  }
+  if (!!groups && !!principals.groups) {
+    principals.groups = principals.groups.filter((item) => !groups.includes(item));
+  }
+  return principals;
+};
+
+const checkPermission = (currentPrincipals: Principals | undefined, principals: Principals) => {
+  return (
+    (currentPrincipals?.users &&
+      principals?.users &&
+      checkPermissionForSinglePrincipalType(currentPrincipals.users, principals.users)) ||
+    (currentPrincipals?.groups &&
+      principals.groups &&
+      checkPermissionForSinglePrincipalType(currentPrincipals.groups, principals.groups))
+  );
+};
+
+const checkPermissionForSinglePrincipalType = (
+  currentPrincipalArray: string[],
+  principalArray: string[]
+) => {
+  return (
+    currentPrincipalArray &&
+    principalArray &&
+    (currentPrincipalArray.includes('*') ||
+      principalArray.some((item) => currentPrincipalArray.includes(item)))
+  );
+};
+
+export class ACL {
+  private permissions?: Permissions;
+  constructor(initialPermissions?: Permissions) {
+    this.permissions = initialPermissions || {};
+  }
+
+  // parse the permissions object to check whether the specific principal has the specific permission types or not
+  public hasPermission(permissionTypes: string[], principals: Principals) {
+    if (!permissionTypes || permissionTypes.length === 0 || !this.permissions || !principals) {
+      return false;
+    }
+
+    const currentPermissions = this.permissions;
+    return permissionTypes.some((permissionType) =>
+      checkPermission(currentPermissions[permissionType], principals)
+    );
+  }
+
+  // permissions object build function, add principal with specific permission to the object
+  public addPermission(permissionTypes: string[], principals: Principals) {
+    if (!permissionTypes || !principals) {
+      return this;
+    }
+    if (!this.permissions) {
+      this.permissions = {};
+    }
+
+    for (const permissionType of permissionTypes) {
+      this.permissions[permissionType] = addToPrincipals(
+        this.permissions[permissionType],
+        principals.users,
+        principals.groups
+      );
+    }
+
+    return this;
+  }
+
+  // permissions object build funciton, remove specific permission of specific principal from the object
+  public removePermission(permissionTypes: string[], principals: Principals) {
+    if (!permissionTypes || !principals) {
+      return this;
+    }
+    if (!this.permissions) {
+      this.permissions = {};
+    }
+
+    for (const permissionType of permissionTypes) {
+      this.permissions[permissionType] = deleteFromPrincipals(
+        this.permissions![permissionType],
+        principals.users,
+        principals.groups
+      );
+    }
+
+    return this;
+  }
+
+  /* 
+        transfrom permissions format
+        original permissions:   {
+            read: {
+                users:['user1']
+            },
+            write:{
+                groups:['group1']
+            }
+        }
+    
+        transformed permissions: [
+            {type:'users',name:'user1',permissions:['read']},
+            {type:'groups',name:'group1',permissions:['write']},
+        ]
+        */
+  public transformPermissions(): TransformedPermission[] {
+    const result: TransformedPermission[] = [];
+    if (!this.permissions) {
+      return result;
+    }
+
+    const permissionMapResult: Record<string, Record<string, string[]>> = {};
+    const principalTypes = [PrincipalType.Users, PrincipalType.Groups];
+    for (const permissionType in this.permissions) {
+      if (!!permissionType) {
+        const value = this.permissions[permissionType];
+        principalTypes.forEach((principalType) => {
+          if (value?.[principalType]) {
+            for (const principal of value[principalType]!) {
+              if (!permissionMapResult[principalType]) {
+                permissionMapResult[principalType] = {};
+              }
+              if (!permissionMapResult[principalType][principal]) {
+                permissionMapResult[principalType][principal] = [];
+              }
+              permissionMapResult[principalType][principal] = [
+                ...permissionMapResult[principalType][principal]!,
+                permissionType,
+              ];
+            }
+          }
+        });
+      }
+    }
+
+    Object.entries(permissionMapResult).forEach(([type, permissionMap]) => {
+      Object.entries(permissionMap).forEach(([principal, permissions]) => {
+        result.push({
+          type,
+          name: principal,
+          permissions,
+        });
+      });
+    });
+
+    return result;
+  }
+
+  public resetPermissions() {
+    // reset permissions
+    this.permissions = {};
+  }
+
+  // return the permissions object
+  public getPermissions() {
+    return this.permissions;
+  }
+
+  /*
+        generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
+        */
+  public static genereateGetPermittedSavedObjectsQueryDSL(
+    permissionType: string,
+    principals: Principals,
+    savedObjectType?: string | string[]
+  ) {
+    if (!principals || !permissionType) {
+      return {
+        query: {
+          match_none: {},
+        },
+      };
+    }
+
+    const bool: any = {
+      filter: [],
+    };
+    const subBool: any = {
+      should: [],
+    };
+    if (!!principals.users) {
+      subBool.should.push({
+        terms: {
+          ['permissions.' + permissionType + '.users']: principals.users,
+        },
+      });
+      subBool.should.push({
+        term: {
+          ['permissions.' + permissionType + '.users']: '*',
+        },
+      });
+    }
+    if (!!principals.groups) {
+      subBool.should.push({
+        terms: {
+          ['permissions.' + permissionType + '.groups']: principals.groups,
+        },
+      });
+      subBool.should.push({
+        term: {
+          ['permissions.' + permissionType + '.groups']: '*',
+        },
+      });
+    }
+
+    bool.filter.push({
+      bool: subBool,
+    });
+
+    if (!!savedObjectType) {
+      bool.filter.push({
+        terms: {
+          type: Array.isArray(savedObjectType) ? savedObjectType : [savedObjectType],
+        },
+      });
+    }
+
+    return { query: { bool } };
+  }
+}
