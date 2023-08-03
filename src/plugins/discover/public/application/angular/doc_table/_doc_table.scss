@@ -59,7 +59,7 @@ doc-table {
     }
 
     dt {
-      background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
+      background-color: tintOrShade($euiColorPrimary, 90%, 70%);
       color: $euiTextColor;
       padding: ($euiSizeXS / 2) $euiSizeXS;
       margin-right: $euiSizeXS;

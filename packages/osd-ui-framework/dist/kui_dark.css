@@ -1,24 +1,519 @@
-/* 1 */
-/* 1 */
-/**
- * 1. Extend beta badges to at least 40% of the container's width
- * 2. Fix for IE to ensure badges are visible outside of a <button> tag
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
 /**
- * 1. Apply margin to all but last item in the flex.
- * 2. Margin gets flipped because of the row-reverse.
+ * 1. Focus rings shouldn't be visible on scrollable regions, but a11y requires them to be focusable.
+ *    Browser's supporting `:focus-visible` will still show outline on keyboard focus only.
+ *    Others like Safari, won't show anything at all.
+ * 2. Force the `:focus-visible` when the `tabindex=0` (is tabbable)
  */
-/**
- * 3. Must supply both values to background-size or some browsers apply the single value to both directions
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
-/**
- * 4. Override invalid state with focus state.
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
  */
-/**
- *  Mixin for use in:
- *  - EuiCard
- *  - EuiPageContent
-*/
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
+/*!
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+/* OUI -> EUI Aliases */
+/* End of Aliases */
 /**
  * 1. Enforce pointer when there's no href.
  * 2. Allow these styles to be applied to a button element.
@@ -49,7 +544,8 @@
  * coupled with Angular.
  */
 /**
- * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
+ * 1. Embedded SVG of fa-caret-down
+ *    (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
  * 2. Make room on right side for the caret.
  * 3. Prevent Firefox from showing dotted line around text on focus.
  */
@@ -78,55 +574,28 @@ main {
   /* 1 */ }
 
 .kuiBar {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
   min-height: 30px;
   /* 1 */ }
 
 .kuiBarSection {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  align-items: center;
+  flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiBarSection:not(:first-child):not(:last-child):not(:only-child) {
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-        -ms-flex-pack: center;
-            justify-content: center;
+    justify-content: center;
     /* 3 */ }
   .kuiBarSection:first-child {
     margin-left: 0; }
   .kuiBarSection:last-child {
     margin-right: 0;
-    -webkit-box-flex: 0;
-    -webkit-flex: 0 1 auto;
-        -ms-flex: 0 1 auto;
-            flex: 0 1 auto;
+    flex: 0 1 auto;
     /* 4 */
-    -webkit-box-pack: end;
-    -webkit-justify-content: flex-end;
-        -ms-flex-pack: end;
-            justify-content: flex-end;
+    justify-content: flex-end;
     /* 5 */ }
   .kuiBarSection:only-child {
     margin-left: auto;
@@ -145,7 +614,6 @@ main {
   display: inline-block;
   /* 1 */
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
   cursor: pointer;
   padding: 4px 12px 5px;
@@ -158,10 +626,10 @@ main {
   border-radius: 4px; }
   .kuiButton:disabled {
     cursor: not-allowed;
-    opacity: .5; }
+    opacity: 0.5; }
   a.kuiButton.kuiButton-isDisabled {
     cursor: not-allowed;
-    opacity: .5; }
+    opacity: 0.5; }
   .kuiButton:enabled:active {
     -webkit-transform: translateY(1px);
             transform: translateY(1px); }
@@ -174,15 +642,9 @@ main {
    * 1. Solves whitespace problems introduced by inline elements.
    */
 .kuiButton__inner {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   /* 1 */
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  align-items: center;
   /* 1 */ }
 
 .kuiButton--small {
@@ -303,8 +765,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
-            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
+    box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
     /* 3 */
     color: #F66; }
   a.kuiButton--danger:not(.kuiButton-isDisabled):focus {
@@ -313,8 +774,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
-            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
+    box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #F66;
     /* 3 */
     color: #F66; }
   .kuiButton--danger:enabled:hover {
@@ -347,8 +807,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
-            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
+    box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
     /* 3 */
     color: #FFF; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):focus {
@@ -357,8 +816,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
-            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
+    box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
     /* 3 */
     color: #FFF; }
   .kuiButton--warning:enabled:hover {
@@ -386,7 +844,7 @@ main {
 
 /**
  * 1. Override Bootstrap.
- * 2. Override either Bootstrap or Timelion styles.
+ * 2. Override either Bootstrap or Timeline styles.
  */
 .kuiButton--hollow {
   color: #1BA9F5 !important;
@@ -443,14 +901,8 @@ main {
     text-decoration: underline; }
 
 .kuiButtonGroup {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center; }
+  align-items: center; }
   .kuiButtonGroup .kuiButton + .kuiButton {
     margin-left: 4px; }
 
@@ -466,24 +918,15 @@ main {
   border-bottom-left-radius: 0; }
 
 .kuiButtonGroup--united > .kuiButton:only-child {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px; }
+  border-radius: 4px 4px 4px 4px; }
 
 .kuiButtonGroup--united .kuiButton + .kuiButton {
   margin-left: 0; }
 
 .kuiButtonGroup--fullWidth {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex; }
   .kuiButtonGroup--fullWidth > .kuiButton {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1 1 auto;
-        -ms-flex: 1 1 auto;
-            flex: 1 1 auto;
+    flex: 1 1 auto;
     text-align: center; }
 
 .eui-textCenter > .kuiButtonGroup,
@@ -492,7 +935,6 @@ main {
 
 .kuiCollapseButton {
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
   background-color: transparent;
   padding: 4px;
@@ -534,46 +976,44 @@ main {
  */
 .kuiCheckBox {
   -webkit-appearance: none;
+          appearance: none;
   /* 1 */
   background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   width: 16px;
   height: 16px;
+  font: "var(--font-text)" !important;
+  /* 2 */
   line-height: 1.5 !important;
   /* 2 */
   margin: 0 !important;
   /* 2 */
-  font: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
-  /* 2 */
-  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+  font-family: "var(--font-text)" !important;
   /* 2 */
   font-size: 10px !important;
   /* 2 */
-  -webkit-transition: background-color 0.1s linear;
   transition: background-color 0.1s linear; }
-  .kuiCheckBox:before {
+  .kuiCheckBox::before {
     position: relative;
     left: 0.25em;
-    font-family: FontAwesome;
+    font-family: FontAwesome, sans-serif;
     content: "\F00C";
     font-size: 1em;
     opacity: 0;
     color: #FFF;
-    -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {
     border-color: #1BA9F5;
     background-color: #1BA9F5; }
-    .kuiCheckBox:checked:before {
+    .kuiCheckBox:checked::before {
       opacity: 1; }
   .kuiCheckBox:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #1BA9F5;
-            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #1BA9F5;
+    box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   .kuiCheckBox:disabled {
     background-color: #202128 !important;
@@ -581,14 +1021,8 @@ main {
     cursor: not-allowed !important; }
 
 .kuiCheckBoxLabel {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  align-items: center;
   font-weight: normal !important;
   line-height: 1.5; }
 
@@ -628,9 +1062,8 @@ main {
    */
 .kuiSearchInput__input {
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
-  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "var(--font-text)";
   padding: 4px 12px 4px;
   font-size: 16px;
   font-weight: 400;
@@ -639,7 +1072,6 @@ main {
   background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
   /* 1 */
@@ -667,9 +1099,8 @@ main {
  */
 .kuiSelect {
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
-  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "var(--font-text)";
   padding: 4px 12px 4px;
   font-size: 16px;
   font-weight: 400;
@@ -678,7 +1109,6 @@ main {
   background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
   /* 1 */
@@ -704,8 +1134,7 @@ main {
   .kuiSelect.kuiSelect-isInvalid {
     border-color: #F66; }
   .kuiSelect:focus {
-    -webkit-box-shadow: none;
-            box-shadow: none;
+    box-shadow: none;
     outline: none;
     border-color: #1BA9F5; }
 
@@ -724,9 +1153,8 @@ main {
 .kuiStaticInput {
   width: 180px;
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
-  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "var(--font-text)";
   padding: 4px 12px 4px;
   font-size: 16px;
   font-weight: 400;
@@ -739,9 +1167,8 @@ main {
 .kuiTextArea {
   width: 180px;
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
-  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "var(--font-text)";
   padding: 4px 12px 4px;
   font-size: 16px;
   font-weight: 400;
@@ -750,7 +1177,6 @@ main {
   background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
   /* 1 */ }
@@ -763,8 +1189,7 @@ main {
     opacity: 0.4;
     cursor: not-allowed; }
   .kuiTextArea:focus {
-    -webkit-box-shadow: none;
-            box-shadow: none;
+    box-shadow: none;
     outline: none;
     border-color: #1BA9F5; }
   .kuiTextArea.kuiTextArea-isInvalid {
@@ -782,9 +1207,8 @@ main {
 .kuiTextInput {
   width: 180px;
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
-  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "var(--font-text)";
   padding: 4px 12px 4px;
   font-size: 16px;
   font-weight: 400;
@@ -793,7 +1217,6 @@ main {
   background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
   /* 1 */ }
@@ -818,21 +1241,12 @@ main {
  * 1. We may want to put elements in here which have different heights.
  */
 .kuiFieldGroup {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  align-items: center;
   /* 1 */ }
 
 .kuiFieldGroup--alignTop {
-  -webkit-box-align: start;
-  -webkit-align-items: flex-start;
-      -ms-flex-align: start;
-          align-items: flex-start; }
+  align-items: flex-start; }
 
 .kuiFieldGroupSection {
   line-height: 1.5; }
@@ -840,10 +1254,7 @@ main {
     margin-left: 10px; }
 
 .kuiFieldGroupSection--wide {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto; }
+  flex: 1 1 auto; }
   .kuiFieldGroupSection--wide > * {
     width: 100%; }
 
@@ -854,7 +1265,7 @@ main {
 .kuiIcon {
   display: inline-block;
   /* 1 */
-  font: normal normal normal 14px/1 FontAwesome;
+  font: normal normal normal 14px/1 FontAwesome, sans-serif;
   /* 1 */
   font-size: inherit;
   /* 1 */
@@ -920,14 +1331,8 @@ main {
  * 1. Align with first line of title text if it wraps.
  */
 .kuiInfoPanelHeader {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: baseline;
-  -webkit-align-items: baseline;
-      -ms-flex-align: baseline;
-          align-items: baseline;
+  align-items: baseline;
   /* 1 */ }
 
 .kuiInfoPanelHeader__icon {
@@ -955,7 +1360,6 @@ main {
   cursor: pointer;
   /* 1 */
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
   /* 2 */
   background-color: transparent;
@@ -977,24 +1381,13 @@ main {
  *    a bit.
  */
 .kuiLocalBreadcrumbs {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  align-items: center;
   padding: 12px 8px;
   /* 1 */
   border-bottom: 1px solid #343741;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  -webkit-flex-basis: 100%;
-      -ms-flex-preferred-size: 100%;
-          flex-basis: 100%;
+  flex-grow: 1;
+  flex-basis: 100%;
   background-color: #1D1E24; }
 
 .kuiLocalBreadcrumb {
@@ -1003,11 +1396,9 @@ main {
   font-weight: normal; }
   .kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
     margin-left: 6px; }
-    .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
-      content: '/';
+    .kuiLocalBreadcrumb + .kuiLocalBreadcrumb::before {
+      content: "/";
       -webkit-user-select: none;
-         -moz-user-select: none;
-          -ms-user-select: none;
               user-select: none;
       margin-right: 4px;
       color: #343741; }
@@ -1021,7 +1412,6 @@ main {
   cursor: pointer;
   /* 1 */
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
   /* 2 */
   background-color: transparent;
@@ -1054,18 +1444,9 @@ main {
   padding: 0; }
 
 .kuiDatePickerNavigation {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 4px; }
 
 /**
@@ -1073,7 +1454,6 @@ main {
  */
 .kuiDatePickerNavigationButton {
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
   background-color: transparent;
   border: none;
@@ -1090,8 +1470,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
-            box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
+    box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
     /* 3 */
     color: #DFE5EF;
     /* 1 */ }
@@ -1122,7 +1501,6 @@ main {
  */
 .kuiDatePickerRowCellContent {
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
   background-color: transparent;
   width: 100%;
@@ -1137,8 +1515,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
-            box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
+    box-shadow: 0 0 0 1px transparent, 0 0 0 2px #1BA9F5;
     /* 3 */
     color: #DFE5EF;
     /* 1 */ }
@@ -1167,7 +1544,6 @@ main {
 
 .kuiLocalDropdownCloseButton {
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
   background-color: transparent;
   padding: 4px;
@@ -1185,16 +1561,10 @@ main {
     opacity: 1; }
 
 .kuiLocalDropdownPanels {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex; }
 
 .kuiLocalDropdownPanel {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 0%;
-      -ms-flex: 1 1 0%;
-          flex: 1 1 0%; }
+  flex: 1 1 0%; }
 
 .kuiLocalDropdownPanel--left {
   margin-right: 30px; }
@@ -1218,18 +1588,9 @@ main {
     margin-bottom: 0; }
 
 .kuiLocalDropdownHeader {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 6px; }
 
 /**
@@ -1243,9 +1604,6 @@ main {
   color: #DFE5EF; }
 
 .kuiLocalDropdownHeader__actions {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex; }
 
 .kuiLocalDropdownHeader__action {
@@ -1289,26 +1647,14 @@ main {
   color: #98A2B3; }
 
 .kuiLocalMenu {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: stretch;
-  -webkit-align-items: stretch;
-      -ms-flex-align: stretch;
-          align-items: stretch;
+  align-items: stretch;
   padding-top: 8px;
   padding-bottom: 8px; }
 
 .kuiLocalMenuItem {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  align-items: center;
   padding: 2px 8px;
   font-size: 16px;
   background-color: transparent;
@@ -1342,19 +1688,9 @@ main {
  *    dropdown.
  */
 .kuiLocalNav {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  flex-direction: column;
+  justify-content: space-between;
   min-height: 69px;
   /* 1 */
   color: #DFE5EF;
@@ -1366,28 +1702,13 @@ main {
  * 1. Allow row to expand if the content is so long that it wraps.
  */
 .kuiLocalNavRow {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: stretch;
-  -webkit-align-items: stretch;
-      -ms-flex-align: stretch;
-          align-items: stretch;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-      -ms-flex-pack: justify;
-          justify-content: space-between; }
+  align-items: stretch;
+  justify-content: space-between; }
 
 .kuiLocalNavRow__section {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: stretch;
-  -webkit-align-items: stretch;
-      -ms-flex-align: stretch;
-          align-items: stretch; }
+  align-items: stretch; }
 
 /**
  * 1. We make this row flex-start because it usually contains a search input, which may expand
@@ -1399,25 +1720,18 @@ main {
 .kuiLocalNavRow--secondary {
   padding: 0 8px;
   /* 1 */
-  -webkit-box-align: start;
-  -webkit-align-items: flex-start;
-      -ms-flex-align: start;
-          align-items: flex-start;
+  align-items: flex-start;
   /* 1 */ }
 
 .kuiLocalSearch {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   width: 100%;
   margin-bottom: 8px; }
 
 .kuiLocalSearchInput {
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
-  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "var(--font-text)";
   padding: 4px 12px 4px;
   font-size: 16px;
   font-weight: 400;
@@ -1426,14 +1740,10 @@ main {
   background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
   /* 1 */
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 100%;
-      -ms-flex: 1 1 100%;
-          flex: 1 1 100%;
+  flex: 1 1 100%;
   border-color: #FFF;
   border-color: #343741;
   border-radius: 4px 0 0 4px; }
@@ -1446,30 +1756,15 @@ main {
     opacity: 0.4;
     cursor: not-allowed; }
   .kuiLocalSearchInput:focus {
-    -webkit-box-shadow: none;
-            box-shadow: none; }
+    box-shadow: none; }
   .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
     border-color: #F66; }
 
 .kuiLocalSearchInput--secondary {
   height: 32px;
-  -webkit-box-flex: 0;
-  -webkit-flex: 0 0 auto;
-      -ms-flex: 0 0 auto;
-          flex: 0 0 auto;
+  flex: 0 0 auto;
   border-radius: 0;
   border-left-width: 0; }
-
-.kuiLocalSearchAssistedInput {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 100%;
-      -ms-flex: 1 1 100%;
-          flex: 1 1 100%;
-  position: relative; }
 
 /**
  * 1. em used for right padding so documentation link and query string
@@ -1482,8 +1777,8 @@ main {
   /* 1 */ }
 
 /**
-   * 1. Vertically center the assistance, regardless of its height.
-   */
+ * 1. Vertically center the assistance, regardless of its height.
+ */
 .kuiLocalSearchAssistedInput__assistance {
   position: absolute;
   right: 6px;
@@ -1496,9 +1791,8 @@ main {
 
 .kuiLocalSearchSelect {
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
-  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "var(--font-text)";
   padding: 4px 12px 4px;
   font-size: 16px;
   font-weight: 400;
@@ -1507,7 +1801,6 @@ main {
   background-color: #16171c;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
   /* 1 */
@@ -1551,29 +1844,22 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
-            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+    box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
 
 /**
  * 1. We want the bottom border on selected tabs to be flush with the bottom of the container.
  */
 .kuiLocalTabs {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: end;
-  -webkit-align-items: flex-end;
-      -ms-flex-align: end;
-          align-items: flex-end;
+  align-items: flex-end;
   height: 100%; }
 
 /**
    * 1. Override inherited typographic styles.
    */
 .kuiLocalTab {
-  padding: 5px 0 6px 0;
+  padding: 5px 0 6px;
   font-size: 18px;
   color: #D4DAE5;
   border-bottom: 2px solid transparent;
@@ -1601,25 +1887,14 @@ main {
     margin-left: 15px; }
 
 .kuiLocalTitle {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  align-items: center;
   padding: 12px 8px;
   font-size: 16px;
   font-weight: bold;
   border-bottom: 1px solid #343741;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  -webkit-flex-basis: 100%;
-      -ms-flex-preferred-size: 100%;
-          flex-basis: 100%;
+  flex-grow: 1;
+  flex-basis: 100%;
   background-color: #1D1E24; }
   .kuiLocalTitle:empty {
     padding: 0;
@@ -1629,14 +1904,8 @@ main {
  * 1. Put 10px of space between each child.
  */
 .kuiPager {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center; }
+  align-items: center; }
   .kuiPager > * + * {
     margin-left: 10px;
     /* 1 */ }
@@ -1649,31 +1918,17 @@ main {
   /* 1 */ }
 
 .kuiPanel {
-  -webkit-box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
-          box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
   background-color: #1D1E24;
   border: 1px solid #343741;
   border-radius: 4px; }
 
 .kuiPanel--prompt {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  justify-content: center;
   min-height: 300px; }
   .kuiPanel--prompt .kuiPanelBody {
     padding: 30px;
@@ -1687,32 +1942,14 @@ main {
   border-radius: 0; }
 
 .kuiPanel--centered {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center; }
+  justify-content: center;
+  align-items: center; }
 
 .kuiPanelHeader {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
   min-height: 30px;
   /* 1 */
   padding: 10px;
@@ -1723,8 +1960,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
-            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+    box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   a.kuiPanelHeader .kuiButton:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -1732,16 +1968,14 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
-            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+    box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   .kuiPanelHeader .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
-            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
+    box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
     /* 3 */ }
   a.kuiPanelHeader .kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -1749,8 +1983,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
-            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
+    box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
     /* 3 */ }
   .kuiPanelHeader .kuiSelect {
     border-color: #16171c; }
@@ -1775,39 +2008,21 @@ main {
  * 1. Undo what barSection mixin does.
  */
 .kuiPanelHeaderSection {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  align-items: center;
+  flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiPanelHeaderSection:not(:first-child):not(:last-child):not(:only-child) {
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-        -ms-flex-pack: center;
-            justify-content: center;
+    justify-content: center;
     /* 3 */ }
   .kuiPanelHeaderSection:first-child {
     margin-left: 0; }
   .kuiPanelHeaderSection:last-child {
     margin-right: 0;
-    -webkit-box-flex: 0;
-    -webkit-flex: 0 1 auto;
-        -ms-flex: 0 1 auto;
-            flex: 0 1 auto;
+    flex: 0 1 auto;
     /* 4 */
-    -webkit-box-pack: end;
-    -webkit-justify-content: flex-end;
-        -ms-flex-pack: end;
-            justify-content: flex-end;
+    justify-content: flex-end;
     /* 5 */ }
   .kuiPanelHeaderSection:only-child {
     margin-left: auto;
@@ -1825,19 +2040,9 @@ main {
   padding: 10px; }
 
 .kuiEmptyTablePrompt {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  flex-direction: column;
+  align-items: center;
   padding: 30px; }
 
 .kuiEmptyTablePrompt__message {
@@ -1849,14 +2054,8 @@ main {
   margin-top: 10px; }
 
 .kuiStatusText {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
   display: inline-flex;
-  -webkit-box-align: baseline;
-  -webkit-align-items: baseline;
-      -ms-flex-align: baseline;
-          align-items: baseline; }
+  align-items: baseline; }
 
 .kuiStatusText--info {
   color: #1BA9F5; }
@@ -1941,14 +2140,11 @@ main {
  */
 .kuiTableHeaderCellButton {
   -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
           user-select: none;
   /* 1 */
   cursor: pointer;
   width: 100%;
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
   /* 2 */
   background-color: transparent;
@@ -1969,14 +2165,8 @@ main {
     display: block;
     opacity: 1; }
   .kuiTableHeaderCellButton .kuiTableHeaderCell__liner {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-        -ms-flex-align: center;
-            align-items: center; }
+    align-items: center; }
 
 .kuiTableHeaderCell--alignRight {
   text-align: right; }
@@ -2074,9 +2264,6 @@ main {
   line-height: 1.5; }
 
 .kuiTabs {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   border-bottom: 1px solid #343741; }
 
@@ -2089,7 +2276,6 @@ main {
  */
 .kuiTab {
   -webkit-appearance: none;
-     -moz-appearance: none;
           appearance: none;
   /* 1 */
   cursor: pointer;
@@ -2111,8 +2297,7 @@ main {
   .kuiTab:active {
     outline: none !important;
     /* 1 */
-    -webkit-box-shadow: none;
-            box-shadow: none;
+    box-shadow: none;
     /* 1 */ }
   .kuiTab:focus {
     outline: none;
@@ -2131,18 +2316,9 @@ main {
     border-bottom-color: transparent; }
 
 .kuiToolBar {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
   min-height: 30px;
   /* 1 */
   padding: 10px;
@@ -2154,8 +2330,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
-            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+    box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   a.kuiToolBar .kuiButton:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2163,16 +2338,14 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
-            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
+    box-shadow: 0 0 0 1px #343741, 0 0 0 2px #1BA9F5;
     /* 3 */ }
   .kuiToolBar .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
-            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
+    box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
     /* 3 */ }
   a.kuiToolBar .kuiButton--danger:not(.kuiButton-isDisabled):focus {
     /* 1 */
@@ -2180,8 +2353,7 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
-            box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
+    box-shadow: 0 0 0 1px #343741, 0 0 0 2px #F66;
     /* 3 */ }
   .kuiToolBar .kuiSelect {
     border-color: #16171c; }
@@ -2194,39 +2366,21 @@ main {
       border-color: #1BA9F5; }
 
 .kuiToolBarSection {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  align-items: center;
+  flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiToolBarSection:not(:first-child):not(:last-child):not(:only-child) {
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-        -ms-flex-pack: center;
-            justify-content: center;
+    justify-content: center;
     /* 3 */ }
   .kuiToolBarSection:first-child {
     margin-left: 0; }
   .kuiToolBarSection:last-child {
     margin-right: 0;
-    -webkit-box-flex: 0;
-    -webkit-flex: 0 1 auto;
-        -ms-flex: 0 1 auto;
-            flex: 0 1 auto;
+    flex: 0 1 auto;
     /* 4 */
-    -webkit-box-pack: end;
-    -webkit-justify-content: flex-end;
-        -ms-flex-pack: end;
-            justify-content: flex-end;
+    justify-content: flex-end;
     /* 5 */ }
   .kuiToolBarSection:only-child {
     margin-left: auto;
@@ -2243,18 +2397,9 @@ main {
   /* 1 */ }
 
 .kuiToolBarFooter {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
   min-height: 30px;
   /* 1 */
   padding: 10px;
@@ -2262,39 +2407,21 @@ main {
   background-color: #1D1E24; }
 
 .kuiToolBarFooterSection {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  align-items: center;
+  flex: 1 1 auto;
   margin-left: 25px;
   margin-right: 25px; }
   .kuiToolBarFooterSection:not(:first-child):not(:last-child):not(:only-child) {
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-        -ms-flex-pack: center;
-            justify-content: center;
+    justify-content: center;
     /* 3 */ }
   .kuiToolBarFooterSection:first-child {
     margin-left: 0; }
   .kuiToolBarFooterSection:last-child {
     margin-right: 0;
-    -webkit-box-flex: 0;
-    -webkit-flex: 0 1 auto;
-        -ms-flex: 0 1 auto;
-            flex: 0 1 auto;
+    flex: 0 1 auto;
     /* 4 */
-    -webkit-box-pack: end;
-    -webkit-justify-content: flex-end;
-        -ms-flex-pack: end;
-            justify-content: flex-end;
+    justify-content: flex-end;
     /* 5 */ }
   .kuiToolBarFooterSection:only-child {
     margin-left: auto;
@@ -2309,20 +2436,11 @@ main {
  *    kuiToolBarSection sibling.
  */
 .kuiToolBarSearch {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+  align-items: center;
   margin-left: 25px;
   margin-right: 25px;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  flex: 1 1 auto;
   max-width: 100%;
   /* 2 */
   line-height: 1.5; }
@@ -2335,10 +2453,7 @@ main {
     /* 1 */ }
 
 .kuiToolBarSearchBox {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  flex: 1 1 auto;
   position: relative;
   font-size: 16px;
   max-width: 800px; }
@@ -2348,7 +2463,7 @@ main {
   top: 0.5em;
   left: 0.7em;
   font-size: 1em;
-  color: #ACACAC; }
+  color: #acacac; }
 
 /**
    * 1. Fix inherited styles (possibly from Bootstrap).
@@ -2357,7 +2472,7 @@ main {
   width: 100%;
   min-width: 200px;
   padding: 4px 12px 5px 28px;
-  font-family: "Inter UI", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "var(--font-text)";
   /* 1 */
   background-color: #1D1E24;
   color: #DFE5EF;
@@ -2366,7 +2481,6 @@ main {
   border: 1px solid #343741;
   line-height: normal;
   /* 1 */
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear; }
   .kuiToolBarSearchBox__input:focus {
     outline: none;
@@ -2448,11 +2562,8 @@ main {
   margin-top: 32px; }
 
 .kuiView {
-  background-color: #FFF;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto; }
+  background-color: #fff;
+  flex: 1 1 auto; }
 
 .kuiViewContent {
   padding-top: 20px;
