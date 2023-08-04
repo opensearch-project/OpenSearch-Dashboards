@@ -9,6 +9,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
+- [CVE-2023-26136] Resolve `tough-cookie` to `4.1.3` ([#4682](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4682))
+
 ### 📈 Features/Enhancements
 
 ### 🐛 Bug Fixes
