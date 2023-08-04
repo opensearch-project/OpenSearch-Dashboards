@@ -41,7 +41,7 @@ export interface DiscoverRootState extends RootState {
 }
 
 const initialState: DiscoverState = {
-  columns: [],
+  columns: ['_source'],
   sort: [],
 };
 
