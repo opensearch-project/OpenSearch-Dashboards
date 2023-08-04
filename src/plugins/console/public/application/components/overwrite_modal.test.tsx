@@ -16,13 +16,12 @@ describe('OverwriteModal Component', () => {
   const mockOnConfirm = jest.fn();
   const mockOnSkip = jest.fn();
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks();
-    await act(async () => {
-      component = await shallowWithIntl(
-        <OverwriteModal onConfirm={mockOnConfirm} onSkip={mockOnSkip} />
-      );
+    act(() => {
+      component = shallowWithIntl(<OverwriteModal onConfirm={mockOnConfirm} onSkip={mockOnSkip} />);
     });
+
     component.update();
   });
 
@@ -30,10 +29,10 @@ describe('OverwriteModal Component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should call onConfirm when clicking the "Overwrite" button', async () => {
-    await act(async () => {
+  it('should call onConfirm when clicking the "Overwrite" button', () => {
+    act(() => {
       // @ts-ignore
-      await component.find(confirmModalIdentifier).first().props().onConfirm();
+      component.find(confirmModalIdentifier).first().props().onConfirm();
     });
 
     component.update();
@@ -42,10 +41,10 @@ describe('OverwriteModal Component', () => {
     expect(mockOnConfirm).toHaveBeenCalled();
   });
 
-  it('should call onSkip when clicking the "Skip" button', async () => {
-    await act(async () => {
+  it('should call onSkip when clicking the "Skip" button', () => {
+    act(() => {
       // @ts-ignore
-      await component.find(confirmModalIdentifier).first().props().onCancel();
+      component.find(confirmModalIdentifier).first().props().onCancel();
     });
 
     component.update();

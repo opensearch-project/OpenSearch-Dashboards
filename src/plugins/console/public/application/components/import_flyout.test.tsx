@@ -8,7 +8,7 @@ import { act } from 'react-dom/test-utils';
 import { ImportFlyout } from './import_flyout';
 import { ContextValue, ServicesContextProvider } from '../contexts';
 import { serviceContextMock } from '../contexts/services_context.mock';
-import { wrapWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { ReactWrapper, mount } from 'enzyme';
 
 const mockFile = new File(['{"text":"Sample JSON data"}'], 'sample.json', {
@@ -30,8 +30,6 @@ const overwriteOptionIdentifier = '[id="overwriteEnabled"]';
 const callOutIdentifier = 'EuiCallOut';
 
 const invalidFileError = 'The selected file is not valid. Please select a valid JSON file.';
-
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('ImportFlyout Component', () => {
   let mockedAppContextValue: ContextValue;
@@ -56,7 +54,7 @@ describe('ImportFlyout Component', () => {
         },
       });
     });
-    await flushPromises();
+    await nextTick();
     component.update();
   });
 
@@ -64,7 +62,7 @@ describe('ImportFlyout Component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should enable confirm button when select file', () => {
+  it('should enable confirm button when select file', async () => {
     // Confirm button should be disable if no file selected
     expect(component.find(confirmBtnIdentifier).first().props().disabled).toBe(true);
     component.update();
@@ -74,6 +72,7 @@ describe('ImportFlyout Component', () => {
       // @ts-ignore
       nodes.first().props().onChange([mockFile]);
     });
+    await nextTick();
     component.update();
 
     // Confirm button should be enable after importing file
@@ -86,13 +85,14 @@ describe('ImportFlyout Component', () => {
       const nodes = component.find(filePickerIdentifier);
       // @ts-ignore
       nodes.first().props().onChange([mockFile]);
+      await nextTick();
     });
 
     component.update();
 
     await act(async () => {
       component.find(confirmBtnIdentifier).first().simulate('click');
-      await flushPromises();
+      await nextTick();
     });
 
     component.update();
@@ -116,7 +116,7 @@ describe('ImportFlyout Component', () => {
 
     await act(async () => {
       component.find(confirmBtnIdentifier).first().simulate('click');
-      await flushPromises();
+      await nextTick();
     });
 
     component.update();
@@ -141,7 +141,7 @@ describe('ImportFlyout Component', () => {
         const nodes = component.find(filePickerIdentifier);
         // @ts-ignore
         nodes.first().props().onChange([mockFile]);
-        await flushPromises();
+        await nextTick();
       });
 
       component.update();
@@ -149,7 +149,7 @@ describe('ImportFlyout Component', () => {
       // change import mode to overwrite
       await act(async () => {
         component.find(overwriteOptionIdentifier).last().simulate('change');
-        await flushPromises();
+        await nextTick();
       });
 
       component.update();
@@ -157,7 +157,7 @@ describe('ImportFlyout Component', () => {
       // import selected file
       await act(async () => {
         component.find(confirmBtnIdentifier).first().simulate('click');
-        await flushPromises();
+        await nextTick();
       });
 
       component.update();
@@ -169,7 +169,7 @@ describe('ImportFlyout Component', () => {
       // confirm overwrite
       await act(async () => {
         component.find(confirmModalConfirmButton).first().simulate('click');
-        await flushPromises();
+        await nextTick();
       });
 
       component.update();
@@ -189,7 +189,7 @@ describe('ImportFlyout Component', () => {
       act(() => {
         component.find(confirmModalCancelButton).first().simulate('click');
       });
-
+      await nextTick();
       component.update();
 
       // confirm overwrite modal should close after cancel.

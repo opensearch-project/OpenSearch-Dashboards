@@ -3,13 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { act } from '@testing-library/react-hooks';
 import { ShallowWrapper, shallow } from 'enzyme';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { nextTick, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ImportModeControl } from './import_mode_control';
 import { EuiFormLegendProps, EuiRadioGroupProps } from '@elastic/eui';
-import { ReactElement } from 'react';
 
 const radioGroupIdentifier = 'EuiRadioGroup';
 
@@ -19,14 +18,15 @@ describe('ImportModeControl Component', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    await act(async () => {
-      component = await shallowWithIntl(
+    act(() => {
+      component = shallowWithIntl(
         <ImportModeControl
           initialValues={{ overwrite: false }}
           updateSelection={mockUpdateSelection}
         />
       );
     });
+    await nextTick();
     component.update();
   });
 
@@ -62,9 +62,9 @@ describe('ImportModeControl Component', () => {
   });
 
   it('should call updateSelection when the selection is changed', async () => {
-    await act(async () => {
+    act(() => {
       // @ts-ignore
-      await component.find(radioGroupIdentifier).first().props().onChange('overwriteEnabled');
+      component.find(radioGroupIdentifier).first().props().onChange('overwriteEnabled');
     });
     component.update();
 
