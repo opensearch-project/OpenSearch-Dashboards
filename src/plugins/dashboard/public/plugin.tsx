@@ -86,7 +86,6 @@ import {
 } from '../../opensearch_dashboards_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { DEFAULT_WORKSPACE_TEMPLATES } from '../../../core/public';
 
 import {
   ACTION_CLONE_PANEL,
@@ -372,12 +371,6 @@ export class DashboardPlugin
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      workspaceTemplate: [
-        DEFAULT_WORKSPACE_TEMPLATES.search,
-        DEFAULT_WORKSPACE_TEMPLATES.general_analysis,
-        DEFAULT_WORKSPACE_TEMPLATES.observability,
-        DEFAULT_WORKSPACE_TEMPLATES.security_analytics,
-      ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;

@@ -59,7 +59,7 @@ import rison from 'rison-node';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { createOsdUrlTracker, url } from '../../opensearch_dashboards_utils/public';
-import { DEFAULT_APP_CATEGORIES, DEFAULT_WORKSPACE_TEMPLATES } from '../../../core/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
@@ -315,10 +315,6 @@ export class DiscoverPlugin
       euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      workspaceTemplate: [
-        DEFAULT_WORKSPACE_TEMPLATES.search,
-        DEFAULT_WORKSPACE_TEMPLATES.general_analysis,
-      ],
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');

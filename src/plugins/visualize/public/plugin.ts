@@ -55,7 +55,7 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import { VisualizeServices } from './application/types';
-import { DEFAULT_APP_CATEGORIES, DEFAULT_WORKSPACE_TEMPLATES } from '../../../core/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
@@ -156,10 +156,6 @@ export class VisualizePlugin
       euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      workspaceTemplate: [
-        DEFAULT_WORKSPACE_TEMPLATES.search,
-        DEFAULT_WORKSPACE_TEMPLATES.general_analysis,
-      ],
       updater$: this.appStateUpdater.asObservable(),
       // remove all references to visualize
       mount: async (params: AppMountParameters) => {

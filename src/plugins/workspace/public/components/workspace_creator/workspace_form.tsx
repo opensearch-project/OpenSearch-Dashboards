@@ -15,14 +15,10 @@ import {
   EuiText,
   EuiButton,
   EuiFlexItem,
-  EuiCheckableCard,
   htmlIdGenerator,
   EuiFlexGrid,
-  EuiFlexGroup,
-  EuiImage,
   EuiCheckbox,
   EuiCheckboxGroup,
-  EuiCheckableCardProps,
   EuiCheckboxGroupProps,
   EuiCheckboxProps,
   EuiFieldTextProps,
@@ -32,14 +28,13 @@ import {
   EuiComboBoxProps,
 } from '@elastic/eui';
 
-import { WorkspaceTemplate } from '../../../../../core/types';
 import {
   App,
   AppNavLinkStatus,
   ApplicationStart,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../../core/public';
-import { useApplications, useWorkspaceTemplate } from '../../hooks';
+import { useApplications } from '../../hooks';
 import { WORKSPACE_OP_TYPE_CREATE, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
 import {
   isFeatureDependBySelectedFeatures,
@@ -52,7 +47,6 @@ import { WorkspaceIconSelector } from './workspace_icon_selector';
 interface WorkspaceFeature extends Pick<App, 'dependencies'> {
   id: string;
   name: string;
-  templates: WorkspaceTemplate[];
 }
 
 interface WorkspaceFeatureGroup {
@@ -92,7 +86,6 @@ export const WorkspaceForm = ({
   defaultValues,
   opType,
 }: WorkspaceFormProps) => {
-  const { workspaceTemplates, templateFeatureMap } = useWorkspaceTemplate(application);
   const applications = useApplications(application);
 
   const [name, setName] = useState(defaultValues?.name);
@@ -101,11 +94,7 @@ export const WorkspaceForm = ({
   const [icon, setIcon] = useState(defaultValues?.icon);
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
 
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const [selectedFeatureIds, setSelectedFeatureIds] = useState(defaultValues?.features || []);
-  const selectedTemplate = workspaceTemplates.find(
-    (template) => template.id === selectedTemplateId
-  );
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const formIdRef = useRef<string>();
   const getFormData = () => ({
@@ -132,10 +121,9 @@ export const WorkspaceForm = ({
             !chromeless &&
             category?.id !== DEFAULT_APP_CATEGORIES.management.id
         )
-        .map(({ id, title, workspaceTemplate, dependencies }) => ({
+        .map(({ id, title, dependencies }) => ({
           id,
           name: title,
-          templates: workspaceTemplate || [],
           dependencies,
         }));
       if (features.length === 0) {
@@ -178,22 +166,6 @@ export const WorkspaceForm = ({
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
   }
-
-  const handleTemplateCardChange = useCallback<EuiCheckableCardProps['onChange']>(
-    (e) => {
-      const templateId = e.target.value;
-      setSelectedTemplateId(templateId);
-      setSelectedFeatureIds(
-        getFinalFeatureIdsByDependency(
-          allFeatures
-            .filter(({ templates }) => !!templates.find((template) => template.id === templateId))
-            .map((feature) => feature.id),
-          featureDependencies
-        )
-      );
-    },
-    [allFeatures, featureDependencies]
-  );
 
   const handleFeatureChange = useCallback<EuiCheckboxGroupProps['onChange']>(
     (featureId) => {
@@ -334,56 +306,6 @@ export const WorkspaceForm = ({
             isClearable={false}
           />
         </EuiFormRow>
-      </EuiPanel>
-      <EuiSpacer />
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h2>Workspace Template</h2>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGrid columns={2}>
-          {workspaceTemplates.map((template) => (
-            <EuiFlexItem key={template.label}>
-              <EuiCheckableCard
-                id={workspaceHtmlIdGenerator()}
-                title={template.label}
-                label={template.label}
-                value={template.id}
-                checked={template.id === selectedTemplateId}
-                onChange={handleTemplateCardChange}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-        <EuiSpacer />
-        {selectedTemplate && (
-          <>
-            <EuiTitle size="xs">
-              <h3>Features</h3>
-            </EuiTitle>
-            <EuiSpacer />
-            <EuiFlexGroup>
-              {selectedTemplate.coverImage && (
-                <EuiFlexItem>
-                  <EuiImage src={selectedTemplate.coverImage} alt={selectedTemplate.label} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem>
-                <EuiText>{selectedTemplate.description}</EuiText>
-                <EuiTitle size="xs">
-                  <h4>Key Features:</h4>
-                </EuiTitle>
-                <EuiSpacer />
-                <EuiFlexGrid style={{ paddingLeft: 20, paddingRight: 100 }} columns={2}>
-                  {templateFeatureMap.get(selectedTemplate.id)?.map((feature) => (
-                    <EuiFlexItem key={feature.id}>• {feature.title}</EuiFlexItem>
-                  ))}
-                </EuiFlexGrid>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-          </>
-        )}
       </EuiPanel>
       <EuiSpacer />
       <EuiPanel>
