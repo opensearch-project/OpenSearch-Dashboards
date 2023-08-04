@@ -17,6 +17,7 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 
   .leaflet-container {
     background: $euiColorEmptyShade;
+    font-family: var(--font-text);
 
     // the heatmap layer plugin logs an error to the console when the map is in a 0-sized container
     min-width: 1px !important;
@@ -48,6 +49,10 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
     }
   }
 
+  .leaflet-draw-actions a {
+    font-family: var(--font-text);
+  }
+
   .leaflet-touch .leaflet-bar a:first-child {
     border-top-left-radius: $euiBorderRadius;
     border-top-right-radius: $euiBorderRadius;
@@ -68,7 +73,7 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 
     @include fontSize(11px);
 
-    font-family: "var(--font-text)";
+    font-family: var(--font-text);
     font-weight: $euiFontWeightMedium;
     line-height: $euiLineHeight;
 
