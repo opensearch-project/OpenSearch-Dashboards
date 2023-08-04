@@ -15,6 +15,6 @@
     "patterns": [
       "_cat/repositories"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-repositories/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-repositories/"
   }
 }

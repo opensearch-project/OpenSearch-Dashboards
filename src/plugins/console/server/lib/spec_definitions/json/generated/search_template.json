@@ -35,6 +35,6 @@
       "{indices}/_search/template",
       "{indices}/{type}/_search/template"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/search-template/"
+    "documentation": "https://opensearch.org/docs/latest/search-plugins/search-template/"
   }
 }

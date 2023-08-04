@@ -1,0 +1,12 @@
+{
+  "indices.get_data_stream": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_stream",
+      "_data_stream/{name}"
+    ],
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/data-streams/"
+  }
+}
