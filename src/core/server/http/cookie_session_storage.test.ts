@@ -29,7 +29,7 @@
  * Modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-import request from 'request';
+import { parse as parseCookie } from 'tough-cookie';
 import supertest from 'supertest';
 import { REPO_ROOT } from '@osd/dev-utils';
 import { ByteSizeValue } from '@osd/config-schema';
@@ -107,7 +107,7 @@ interface Storage {
 }
 
 function retrieveSessionCookie(cookies: string) {
-  const sessionCookie = request.cookie(cookies);
+  const sessionCookie = parseCookie(cookies);
   if (!sessionCookie) {
     throw new Error('session cookie expected to be defined');
   }
@@ -487,7 +487,7 @@ describe('Cookie based SessionStorage', () => {
           expect(cookies).toHaveLength(1);
 
           const sessionCookie = retrieveSessionCookie(cookies[0]);
-          expect(sessionCookie.extensions).toContain(`SameSite=${sameSite}`);
+          expect(sessionCookie.sameSite).toEqual(sameSite.toLowerCase());
 
           await supertest(innerServer.listener)
             .get('/')
