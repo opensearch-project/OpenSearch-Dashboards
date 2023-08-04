@@ -15,6 +15,7 @@ export class View implements IView {
   readonly shouldShow?: (state: any) => boolean;
   readonly Canvas: IView['Canvas'];
   readonly Panel: IView['Panel'];
+  readonly Context: IView['Context'];
 
   constructor(options: ViewDefinition) {
     this.id = options.id;
@@ -25,5 +26,6 @@ export class View implements IView {
     this.shouldShow = options.shouldShow;
     this.Canvas = options.Canvas;
     this.Panel = options.Panel;
+    this.Context = options.Context;
   }
 }

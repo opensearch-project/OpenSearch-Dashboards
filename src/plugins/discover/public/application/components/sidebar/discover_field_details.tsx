@@ -40,7 +40,6 @@ import {
 } from './lib/visualize_trigger_utils';
 import { Bucket, FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
-import './discover_field_details.scss';
 
 interface DiscoverFieldDetailsProps {
   columns: string[];

@@ -57,6 +57,7 @@ import { getHistory } from './opensearch_dashboards_services';
 import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { DataExplorerServices } from '../../data_explorer/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -124,3 +125,6 @@ export function buildServices(
     visualizations: plugins.visualizations,
   };
 }
+
+// Any component inside the panel and canvas views has access to both these services.
+export type DiscoverViewServices = DiscoverServices & DataExplorerServices;

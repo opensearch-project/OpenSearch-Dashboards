@@ -10,7 +10,7 @@ import { fetchTableDataCell } from './data_grid_table_cell_value';
 import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_columns';
 import { DocViewExpandButton } from './data_grid_table_docview_expand_button';
 import { DataGridFlyout } from './data_grid_table_flyout';
-import { DataGridContext } from './data_grid_table_context';
+import { DiscoverGridContextProvider } from './data_grid_table_context';
 import { toolbarVisibility } from './constants';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
@@ -44,7 +44,7 @@ export const DataGridTable = ({
   displayTimeColumn,
   services,
 }: DataGridTableProps) => {
-  const [docViewExpand, setDocViewExpand] = useState(undefined);
+  const [expandedHit, setExpandedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
   const pagination = usePagination(rowCount);
 
@@ -94,11 +94,11 @@ export const DataGridTable = ({
   }, []);
 
   return (
-    <DataGridContext.Provider
+    <DiscoverGridContextProvider
       value={{
-        docViewExpand,
+        expandedHit,
         onFilter,
-        setDocViewExpand,
+        setExpandedHit,
         rows: rows || [],
         indexPattern,
       }}
@@ -116,19 +116,19 @@ export const DataGridTable = ({
           sorting={sorting}
           toolbarVisibility={toolbarVisibility}
         />
-        {docViewExpand && (
+        {expandedHit && (
           <DataGridFlyout
             indexPattern={indexPattern}
-            hit={docViewExpand}
+            hit={expandedHit}
             columns={columns}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
             onFilter={onFilter}
-            onClose={() => setDocViewExpand(undefined)}
+            onClose={() => setExpandedHit(undefined)}
             services={services}
           />
         )}
       </>
-    </DataGridContext.Provider>
+    </DiscoverGridContextProvider>
   );
 };

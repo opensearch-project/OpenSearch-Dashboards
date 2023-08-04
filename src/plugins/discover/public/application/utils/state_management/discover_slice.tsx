@@ -7,12 +7,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Filter, Query } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { RootState } from '../../../../../data_explorer/public';
+import { buildColumns } from '../columns';
 
 export interface DiscoverState {
   /**
    * Columns displayed in the table
    */
-  columns?: string[];
+  columns: string[];
   /**
    * Array of applied filters
    */
@@ -28,7 +29,7 @@ export interface DiscoverState {
   /**
    * Array of the used sorting [[field,direction],...]
    */
-  sort?: string[][];
+  sort: Array<[string, string]>;
   /**
    * id of the used saved query
    */
@@ -39,12 +40,14 @@ export interface DiscoverRootState extends RootState {
   discover: DiscoverState;
 }
 
-const initialState = {} as DiscoverState;
+const initialState: DiscoverState = {
+  columns: [],
+  sort: [],
+};
 
 export const getPreloadedState = async ({ data }: DiscoverServices): Promise<DiscoverState> => {
   return {
     ...initialState,
-    interval: data.query.timefilter.timefilter.getRefreshInterval().value.toString(),
   };
 };
 
@@ -52,23 +55,48 @@ export const discoverSlice = createSlice({
   name: 'discover',
   initialState,
   reducers: {
-    setState<T>(state: T, action: PayloadAction<DiscoverState>) {
+    setState(state, action: PayloadAction<DiscoverState>) {
       return action.payload;
     },
-    updateState<T>(state: T, action: PayloadAction<Partial<DiscoverState>>) {
-      state = {
+    addColumn(state, action: PayloadAction<{ column: string; index?: number }>) {
+      const { column, index } = action.payload;
+      const columns = [...(state.columns || [])];
+      if (index !== undefined) columns.splice(index, 0, column);
+      else columns.push(column);
+      return { ...state, columns: buildColumns(columns) };
+    },
+    removeColumn(state, action: PayloadAction<string>) {
+      const columns = (state.columns || []).filter((column) => column !== action.payload);
+      return {
+        ...state,
+        columns: buildColumns(columns),
+      };
+    },
+    reorderColumn(state, action: PayloadAction<{ source: number; destination: number }>) {
+      const { source, destination } = action.payload;
+      const columns = [...(state.columns || [])];
+      const [removed] = columns.splice(source, 1);
+      columns.splice(destination, 0, removed);
+      return {
+        ...state,
+        columns,
+      };
+    },
+    updateState(state, action: PayloadAction<Partial<DiscoverState>>) {
+      return {
         ...state,
         ...action.payload,
       };
-
-      return state;
     },
   },
 });
 
 // Exposing the state functions as generics
-export const setState = discoverSlice.actions.setState as <T>(payload: T) => PayloadAction<T>;
-export const updateState = discoverSlice.actions.updateState as <T>(
-  payload: Partial<T>
-) => PayloadAction<Partial<T>>;
+export const {
+  addColumn,
+  removeColumn,
+  reorderColumn,
+  setState,
+  updateState,
+} = discoverSlice.actions;
 export const { reducer } = discoverSlice;

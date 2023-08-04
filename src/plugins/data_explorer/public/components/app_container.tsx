@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { Suspense } from 'react';
 import { AppMountParameters } from '../../../../core/public';
 import { Sidebar } from './sidebar';
 import { NoView } from './no_view';
 import { View } from '../services/view_service/view';
+import './app_container.scss';
 
 export const AppContainer = ({ view, params }: { view?: View; params: AppMountParameters }) => {
   // TODO: Make this more robust.
@@ -17,28 +18,22 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
     return <NoView />;
   }
 
-  const { Canvas, Panel } = view;
+  const { Canvas, Panel, Context } = view;
 
   // Render the application DOM.
-  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
-    <EuiPageTemplate
-      pageSideBar={
-        <Sidebar>
-          <Suspense fallback={<div>Loading...</div>}>
-            <Panel {...params} />
-          </Suspense>
-        </Sidebar>
-      }
-      className="dePageTemplate"
-      template="default"
-      restrictWidth={false}
-      paddingSize="none"
-    >
+    <EuiPage className="dePage eui-fullHeight" paddingSize="none">
       {/* TODO: improve loading state */}
       <Suspense fallback={<div>Loading...</div>}>
-        <Canvas {...params} />
+        <Context {...params}>
+          <Sidebar>
+            <Panel {...params} />
+          </Sidebar>
+          <EuiPageBody className="eui-fullHeight">
+            <Canvas {...params} />
+          </EuiPageBody>
+        </Context>
       </Suspense>
-    </EuiPageTemplate>
+    </EuiPage>
   );
 };
