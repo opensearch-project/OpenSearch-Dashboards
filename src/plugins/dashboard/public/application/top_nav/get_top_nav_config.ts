@@ -29,7 +29,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { AppMountParameters } from 'opensearch-dashboards/public';
 import { ViewMode } from '../../embeddable_plugin';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
@@ -43,8 +42,7 @@ import { NavAction } from '../../types';
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean,
-  onAppLeave?: AppMountParameters['onAppLeave']
+  hideWriteControls: boolean
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:

@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OverviewCard should render normally 1`] = `
+<div
+  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable"
+  data-test-subj="link-test-id"
+>
+  <div
+    class="euiCard__content"
+  >
+    <h3
+      class="euiTitle euiTitle--xsmall euiCard__title"
+      id="generated-idTitle"
+    >
+      <button
+        aria-describedby=" generated-idDescription"
+        class="euiCard__titleButton"
+      >
+        Dev Tools
+      </button>
+    </h3>
+    <div
+      class="euiText euiText--small euiCard__description"
+      id="generated-idDescription"
+    >
+      <p>
+        Dev tools description
+      </p>
+    </div>
+  </div>
+</div>
+`;

@@ -198,7 +198,9 @@ export function createInstallRoute(
       }
 
       let createResults;
-      const savedObjectsList = sampleDataset.savedObjects(dataSourceId, dataSourceTitle);
+      const savedObjectsList = dataSourceId
+        ? sampleDataset.getDataSourceIntegratedSavedObjects(dataSourceId, dataSourceTitle)
+        : sampleDataset.savedObjects;
 
       try {
         createResults = await context.core.savedObjects.client.bulkCreate(
