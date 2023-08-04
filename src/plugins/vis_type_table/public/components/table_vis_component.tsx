@@ -5,7 +5,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
-import { EuiDataGridProps, EuiDataGrid, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
+import {
+  EuiDataGridProps,
+  EuiDataGrid,
+  EuiDataGridSorting,
+  EuiTitle,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { FormattedTableContext } from '../table_vis_response_handler';
@@ -102,7 +108,7 @@ export const TableVisComponent = ({
     : undefined;
 
   return (
-    <>
+    <EuiFlexItem>
       {title && (
         <EuiTitle size="xs" className="eui-textCenter">
           <h3>{title}</h3>
@@ -140,6 +146,6 @@ export const TableVisComponent = ({
           ),
         }}
       />
-    </>
+    </EuiFlexItem>
   );
 };
