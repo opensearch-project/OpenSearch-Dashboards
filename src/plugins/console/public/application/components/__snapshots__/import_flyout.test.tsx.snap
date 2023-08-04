@@ -111,6 +111,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                           <EuiFilePicker
                             accept=".ndjson, .json"
                             compressed={false}
+                            data-test-subj="queryFilePicker"
                             display="large"
                             fullWidth={true}
                             id="generated-id"
@@ -121,6 +122,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                                 values={Object {}}
                               />
                             }
+                            name="queryFileImport"
                             onBlur={[Function]}
                             onChange={[Function]}
                             onFocus={[Function]}
@@ -150,7 +152,9 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                                       accept=".ndjson, .json"
                                       aria-describedby="generated-id-filePicker__prompt"
                                       className="euiFilePicker__input"
+                                      data-test-subj="queryFilePicker"
                                       id="generated-id"
+                                      name="queryFileImport"
                                       onBlur={[Function]}
                                       onChange={[Function]}
                                       onDragLeave={[Function]}
@@ -410,14 +414,16 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                     className="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <EuiButton
+                      data-test-subj="importQueriesConfirmBtn"
+                      disabled={true}
                       fill={true}
-                      isDisabled={true}
                       isLoading={false}
                       onClick={[Function]}
                       size="s"
                     >
                       <EuiButtonDisplay
                         baseClassName="euiButton"
+                        data-test-subj="importQueriesConfirmBtn"
                         disabled={true}
                         element="button"
                         fill={true}
@@ -429,6 +435,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                       >
                         <button
                           className="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                          data-test-subj="importQueriesConfirmBtn"
                           disabled={true}
                           onClick={[Function]}
                           style={

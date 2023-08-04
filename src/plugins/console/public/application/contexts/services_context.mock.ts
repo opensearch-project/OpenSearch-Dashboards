@@ -28,8 +28,11 @@
  * under the License.
  */
 
-import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
-import { httpServiceMock } from '../../../../../core/public/mocks';
+import {
+  notificationServiceMock,
+  uiSettingsServiceMock,
+  httpServiceMock,
+} from '../../../../../core/public/mocks';
 
 import { HistoryMock } from '../../services/history.mock';
 import { SettingsMock } from '../../services/settings.mock';

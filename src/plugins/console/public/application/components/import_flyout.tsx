@@ -32,7 +32,7 @@ import { OverwriteModal } from './overwrite_modal';
 
 const OVERWRITE_ALL_DEFAULT = false;
 
-interface ImportFlyoutProps {
+export interface ImportFlyoutProps {
   close: () => void;
   refresh: () => void;
 }
@@ -70,7 +70,8 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
   const dateFormat = uiSettings.get<string>('dateFormat');
 
   const setImportFile = (files: FileList | null) => {
-    if (!files || !files[0]) {
+    const isFirstFileMissing = !files?.[0];
+    if (isFirstFileMissing) {
       setFile(undefined);
       return;
     }
@@ -141,6 +142,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
         >
           <EuiFilePicker
             accept=".ndjson, .json"
+            name="queryFileImport"
             fullWidth
             initialPromptText={
               <FormattedMessage
@@ -149,6 +151,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
               />
             }
             onChange={setImportFile}
+            data-test-subj="queryFilePicker"
           />
         </EuiFormRow>
         <EuiFormRow fullWidth>
@@ -167,7 +170,8 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
     try {
       const results = await objectStorageClient.text.findAll();
       const currentText = results.sort((a, b) => a.createdAt - b.createdAt)[0];
-      if (jsonData && jsonData.text) {
+
+      if (jsonData?.text) {
         if (importMode.overwrite) {
           if (!isOverwriteConfirmed) {
             setShowOverwriteModal(true);
@@ -252,11 +256,12 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            isDisabled={!file}
+            disabled={!file}
             onClick={() => importFile(false)}
             size="s"
             fill
             isLoading={status === 'loading'}
+            data-test-subj="importQueriesConfirmBtn"
           >
             <FormattedMessage
               id="console.importFlyout.import.confirmButtonLabel"
