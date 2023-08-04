@@ -1,6 +1,6 @@
 {
   "/#[a-fA-F0-9]{3}(?:[a-fA-F0-9]{3})?/": {
-    "explanation": "Use OUI variables instead of custom colors.",
+    "explanation": "All colors should be inherited from the OUI theme, not hard-coded. Either remove the custom color rule or use OUI SASS variables instead.",
     "approved": [
       "src/core/public/_variables.scss",
       "src/core/public/styles/_ace_overrides.scss",
@@ -12,7 +12,7 @@
     ]
   },
   "/(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\\([^)]*\\)/": {
-    "explanation": "Use OUI variables instead of custom colors.",
+    "explanation": "All colors should be inherited from the OUI theme, not hard-coded. Either remove the custom color rule or use OUI SASS variables instead.",
     "approved": [
       "src/core/public/styles/_ace_overrides.scss",
       "src/plugins/opensearch_dashboards_react/public/markdown/_markdown.scss",

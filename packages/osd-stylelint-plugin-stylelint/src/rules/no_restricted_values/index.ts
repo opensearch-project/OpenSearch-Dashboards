@@ -74,7 +74,7 @@ const ruleFunction: stylelint.Rule = (
 
       reportInfo.message = messages.expected(
         getNotCompliantMessage(
-          `Usage of value "${decl.value}" is not allowed.`,
+          `Using the value "${decl.value}" is not allowed.`,
           valueRule.explanation
         )
       );
