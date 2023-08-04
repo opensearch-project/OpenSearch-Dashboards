@@ -50,6 +50,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
+export const NUM_FILTERS = 3;
+
 export interface State {
   searchable: string;
   aggregatable: string;
@@ -214,7 +216,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         legend={legend}
         options={toggleButtons(id)}
         idSelected={`${id}-${values[id]}`}
-        onChange={(optionId) => handleValueChange(id, optionId.replace(`${id}-`, ''))}
+        onChange={(optionId: string) => handleValueChange(id, optionId.replace(`${id}-`, ''))}
         buttonSize="compressed"
         isFullWidth
         data-test-subj={`${id}ButtonGroup`}
@@ -245,7 +247,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           <EuiFieldSearch
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
-            // compressed
             fullWidth
             onChange={(event) => onChange('name', event.currentTarget.value)}
             placeholder={searchPlaceholder}
@@ -272,7 +273,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
                 hasActiveFilters={activeFiltersCount > 0}
                 aria-label={filterBtnAriaLabel}
                 data-test-subj="toggleFieldFilterButton"
-                numFilters={3}
+                numFilters={NUM_FILTERS}
                 onClick={handleFacetButtonClicked}
                 numActiveFilters={activeFiltersCount}
                 isSelected={isPopoverOpen}

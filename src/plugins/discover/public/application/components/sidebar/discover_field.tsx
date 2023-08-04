@@ -113,6 +113,7 @@ export const DiscoverField = ({
     defaultMessage: 'View {field} summary',
     values: { field: field.name },
   });
+  const isSourceField = field.name === '_source';
 
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -142,7 +143,7 @@ export const DiscoverField = ({
   );
 
   let actionButton;
-  if (field.name !== '_source' && !selected) {
+  if (!isSourceField && !selected) {
     actionButton = (
       <EuiToolTip
         delay="long"
@@ -166,7 +167,7 @@ export const DiscoverField = ({
         />
       </EuiToolTip>
     );
-  } else if (field.name !== '_source' && selected) {
+  } else if (!isSourceField && selected) {
     actionButton = (
       <EuiToolTip
         delay="long"
@@ -193,26 +194,6 @@ export const DiscoverField = ({
     );
   }
 
-  if (field.type === '_source') {
-    // TODO: This is not the correct implementation of the source field details
-    return (
-      <FieldButton
-        size="s"
-        className="dscSidebarItem"
-        dataTestSubj={`field-${field.name}-showDetails`}
-        fieldIcon={
-          <FieldIcon
-            type={field.type}
-            label={getFieldTypeName(field.type)}
-            scripted={field.scripted}
-          />
-        }
-        fieldAction={actionButton}
-        fieldName={fieldName}
-      />
-    );
-  }
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -225,41 +206,44 @@ export const DiscoverField = ({
       <EuiFlexItem grow>
         <EuiText size="xs">{fieldName}</EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          ownFocus
-          display="block"
-          isOpen={infoIsOpen}
-          closePopover={() => setOpen(false)}
-          anchorPosition="rightUp"
-          button={
-            <EuiButtonIcon
-              iconType="inspect"
-              size="xs"
-              onClick={() => setOpen((state) => !state)}
-              aria-label={infoLabelAria}
-            />
-          }
-          panelClassName="dscSidebarItem__fieldPopoverPanel"
-        >
-          <EuiPopoverTitle>
-            {' '}
-            {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-              defaultMessage: 'Top 5 values',
-            })}
-          </EuiPopoverTitle>
-          {infoIsOpen && (
-            <DiscoverFieldDetails
-              columns={columns}
-              details={getDetails(field)}
-              field={field}
-              indexPattern={indexPattern}
-              onAddFilter={onAddFilter}
-            />
-          )}
-        </EuiPopover>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>
+      {!isSourceField && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            ownFocus
+            display="block"
+            isOpen={infoIsOpen}
+            closePopover={() => setOpen(false)}
+            anchorPosition="rightUp"
+            button={
+              <EuiButtonIcon
+                iconType="inspect"
+                size="xs"
+                onClick={() => setOpen((state) => !state)}
+                aria-label={infoLabelAria}
+                data-test-subj={`field-${field.name}-showDetails`}
+              />
+            }
+            panelClassName="dscSidebarItem__fieldPopoverPanel"
+          >
+            <EuiPopoverTitle>
+              {' '}
+              {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+                defaultMessage: 'Top 5 values',
+              })}
+            </EuiPopoverTitle>
+            {infoIsOpen && (
+              <DiscoverFieldDetails
+                columns={columns}
+                details={getDetails(field)}
+                field={field}
+                indexPattern={indexPattern}
+                onAddFilter={onAddFilter}
+              />
+            )}
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
+      {!isSourceField && <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>}
     </EuiFlexGroup>
   );
 };

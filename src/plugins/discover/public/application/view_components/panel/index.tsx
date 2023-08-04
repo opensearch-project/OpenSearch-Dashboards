@@ -23,7 +23,6 @@ export default function DiscoverPanel(props: ViewProps) {
 
   const { columns } = useSelector((state) => ({
     columns: state.discover.columns,
-    indexPatternId: state.metadata.indexPattern,
   }));
   const dispatch = useDispatch();
 

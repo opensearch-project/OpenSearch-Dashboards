@@ -212,7 +212,11 @@ export function DiscoverSidebar({
                     />
                   </h3>
                 </EuiTitle>
-                <EuiDroppable droppableId="SELECTED_FIELDS" spacing="m">
+                <EuiDroppable
+                  droppableId="SELECTED_FIELDS"
+                  spacing="m"
+                  data-test-subj={`fieldList-selected`}
+                >
                   {selectedFields.map((field: IndexPatternField, index) => {
                     return (
                       <EuiDraggable
@@ -221,12 +225,13 @@ export function DiscoverSidebar({
                         draggableId={field.name}
                         index={index}
                       >
-                        {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
                         <EuiPanel
                           data-attr-field={field.name}
                           paddingSize="s"
                           className="dscSidebar__item"
+                          data-test-subj={`fieldList-field`}
                         >
+                          {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
                           <DiscoverField
                             field={field}
                             selected
@@ -279,12 +284,13 @@ export function DiscoverSidebar({
                             draggableId={field.name}
                             index={index}
                           >
-                            {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
                             <EuiPanel
                               data-attr-field={field.name}
                               paddingSize="s"
                               className="dscSidebar__item"
+                              data-test-subj={`fieldList-field`}
                             >
+                              {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
                               <DiscoverField
                                 columns={columns}
                                 field={field}
@@ -318,12 +324,13 @@ export function DiscoverSidebar({
                         draggableId={field.name}
                         index={index}
                       >
-                        {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
                         <EuiPanel
                           data-attr-field={field.name}
                           paddingSize="s"
                           className="dscSidebar__item"
+                          data-test-subj={`fieldList-field`}
                         >
+                          {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
                           <DiscoverField
                             columns={columns}
                             field={field}
