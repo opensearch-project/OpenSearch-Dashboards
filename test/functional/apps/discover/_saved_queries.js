@@ -35,11 +35,12 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const opensearchArchiver = getService('opensearchArchiver');
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
   const browser = getService('browser');
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'discover:v2': false,
   };
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
@@ -54,6 +55,7 @@ export default function ({ getService, getPageObjects }) {
       // and load a set of makelogs data
       await opensearchArchiver.loadIfNeeded('logstash_functional');
       await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
+
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
