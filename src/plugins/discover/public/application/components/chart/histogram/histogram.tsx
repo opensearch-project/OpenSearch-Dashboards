@@ -57,12 +57,13 @@ import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription, combineLatest } from 'rxjs';
-import { getServices } from '../../../opensearch_dashboards_services';
-import { Chart as IChart } from '../helpers/point_series';
+import { Chart as IChart } from '../utils/point_series';
+import { DiscoverServices } from '../../../../build_services';
 
 export interface DiscoverHistogramProps {
   chartData: IChart;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
+  services: DiscoverServices;
 }
 
 interface DiscoverHistogramState {
@@ -139,15 +140,11 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   };
 
   private subscription?: Subscription;
-  public state = {
-    chartsTheme: getServices().theme.chartsDefaultTheme,
-    chartsBaseTheme: getServices().theme.chartsDefaultBaseTheme,
-  };
 
   componentDidMount() {
     this.subscription = combineLatest(
-      getServices().theme.chartsTheme$,
-      getServices().theme.chartsBaseTheme$
+      this.props.services.theme.chartsTheme$,
+      this.props.services.theme.chartsBaseTheme$
     ).subscribe(([chartsTheme, chartsBaseTheme]) =>
       this.setState({ chartsTheme, chartsBaseTheme })
     );
@@ -219,10 +216,11 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   };
 
   public render() {
-    const uiSettings = getServices().uiSettings;
+    const { chartData, services } = this.props;
+    const { uiSettings } = services;
     const timeZone = getTimezone(uiSettings);
-    const { chartData } = this.props;
-    const { chartsTheme, chartsBaseTheme } = this.state;
+    const chartsTheme = services.theme.chartsDefaultTheme;
+    const chartsBaseTheme = services.theme.chartsDefaultBaseTheme;
 
     if (!chartData) {
       return null;

@@ -28,4 +28,4 @@
  * under the License.
  */
 
-export { TimechartHeader } from './timechart_header';
+export * from './timechart_header';

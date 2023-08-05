@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern, AggConfigs } from 'src/plugins/data/public';
 import { DiscoverServices } from '../../../build_services';
 import { SortOrder } from '../../../saved_searches/types';
 import { getSortForSearchSource } from './get_sort_for_search_source';
@@ -13,9 +13,15 @@ interface Props {
   indexPattern: IndexPattern;
   services: DiscoverServices;
   sort: SortOrder[] | undefined;
+  histogramConfigs?: AggConfigs;
 }
 
-export const createSearchSource = async ({ indexPattern, services, sort }: Props) => {
+export const createSearchSource = async ({
+  indexPattern,
+  services,
+  sort,
+  histogramConfigs,
+}: Props) => {
   const { uiSettings, data } = services;
   const sortForSearchSource = getSortForSearchSource(
     sort,
@@ -40,6 +46,11 @@ export const createSearchSource = async ({ indexPattern, services, sort }: Props
     filters.push(timeRangeFilter);
   }
   searchSource.setField('filter', filters);
+
+  if (histogramConfigs) {
+    const dslAggs = histogramConfigs.toDsl();
+    searchSource.setField('aggs', dslAggs);
+  }
 
   return searchSource;
 };
