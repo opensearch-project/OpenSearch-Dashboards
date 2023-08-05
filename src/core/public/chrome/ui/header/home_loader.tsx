@@ -39,6 +39,7 @@ import { ChromeNavLink } from '../..';
 import { ChromeBranding } from '../../chrome_service';
 import { LoadingIndicator } from '../loading_indicator';
 import { HomeIcon } from './home_icon';
+import type { Logos } from '../../../../common/types';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -107,9 +108,10 @@ interface Props {
   loadingCount$: Observable<number>;
   navigateToApp: (appId: string) => void;
   branding: ChromeBranding;
+  logos: Logos;
 }
 
-export function HomeLoader({ href, navigateToApp, branding, ...observables }: Props) {
+export function HomeLoader({ href, navigateToApp, branding, logos, ...observables }: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
   const loadingCount = useObservable(observables.loadingCount$, 0);
@@ -130,7 +132,7 @@ export function HomeLoader({ href, navigateToApp, branding, ...observables }: Pr
     >
       {!(loadingCount > 0) && (
         <div className="homeIconContainer">
-          <HomeIcon {...branding} />
+          <HomeIcon branding={branding} logos={logos} />
         </div>
       )}
       <div className="loaderContainer">

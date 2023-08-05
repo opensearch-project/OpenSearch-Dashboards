@@ -57,7 +57,7 @@ export class ManagementOverViewPlugin implements Plugin<ManagementOverViewPlugin
       title: i18n.translate('management.overview.overviewTitle', {
         defaultMessage: 'Overview',
       }),
-      icon: '/plugins/home/public/assets/logos/opensearch_mark_default.svg',
+      icon: '/ui/logos/opensearch_mark.svg',
       order: 9000,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
