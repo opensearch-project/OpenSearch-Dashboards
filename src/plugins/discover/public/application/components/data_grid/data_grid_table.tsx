@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiDataGrid, EuiPanel } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { fetchTableDataCell } from './data_grid_table_cell_value';
 import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_columns';
@@ -104,18 +104,22 @@ export const DataGridTable = ({
       }}
     >
       <>
-        <EuiDataGrid
-          aria-labelledby="aria-labelledby"
-          columns={dataGridTableColumns}
-          columnVisibility={dataGridTableColumnsVisibility}
-          leadingControlColumns={leadingControlColumns}
-          data-test-subj="docTable"
-          pagination={pagination}
-          renderCellValue={renderCellValue}
-          rowCount={rowCount}
-          sorting={sorting}
-          toolbarVisibility={toolbarVisibility}
-        />
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+          <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+            <EuiDataGrid
+              aria-labelledby="aria-labelledby"
+              columns={dataGridTableColumns}
+              columnVisibility={dataGridTableColumnsVisibility}
+              leadingControlColumns={leadingControlColumns}
+              data-test-subj="docTable"
+              pagination={pagination}
+              renderCellValue={renderCellValue}
+              rowCount={rowCount}
+              sorting={sorting}
+              toolbarVisibility={toolbarVisibility}
+            />
+          </EuiPanel>
+        </EuiPanel>
         {expandedHit && (
           <DataGridFlyout
             indexPattern={indexPattern}

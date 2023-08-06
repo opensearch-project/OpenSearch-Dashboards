@@ -22,14 +22,14 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
 
   // Render the application DOM.
   return (
-    <EuiPage className="dePage eui-fullHeight" paddingSize="none">
-      {/* TODO: improve loading state */}
+    <EuiPage className="deLayout" paddingSize="none">
+      {/* TODO: improve fallback state */}
       <Suspense fallback={<div>Loading...</div>}>
         <Context {...params}>
           <Sidebar>
             <Panel {...params} />
           </Sidebar>
-          <EuiPageBody className="eui-fullHeight">
+          <EuiPageBody className="deLayout__canvas">
             <Canvas {...params} />
           </EuiPageBody>
         </Context>
