@@ -111,13 +111,13 @@ describe('SavedObjectTypeRegistry', () => {
     expect(result?.length).toEqual(3);
   });
 
-  it('test genereate query DSL', () => {
+  it('test generate query DSL', () => {
     const principals = {
       users: ['user1'],
       groups: ['group1'],
     };
     const result = ACL.genereateGetPermittedSavedObjectsQueryDSL(
-      PermissionMode.Read,
+      [PermissionMode.Read],
       principals,
       'workspace'
     );

@@ -363,6 +363,7 @@ export class SavedObjectsClient {
       namespaces: 'namespaces',
       preference: 'preference',
       workspaces: 'workspaces',
+      queryDSL: 'queryDSL',
     };
 
     const workspaces = [

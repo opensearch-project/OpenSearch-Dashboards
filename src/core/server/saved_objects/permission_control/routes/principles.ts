@@ -13,7 +13,7 @@ export const registerListRoute = (
 ) => {
   router.post(
     {
-      path: '/principles',
+      path: '/principals',
       validate: {
         body: schema.object({
           objects: schema.arrayOf(
@@ -26,7 +26,7 @@ export const registerListRoute = (
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const result = await permissionControl.getPrinciplesOfObjects(req, req.body.objects);
+      const result = await permissionControl.getPrincipalsOfObjects(req, req.body.objects);
       return res.ok({ body: result });
     })
   );

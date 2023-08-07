@@ -500,7 +500,7 @@ export class SavedObjectsService
     this.started = true;
 
     const getScopedClient = clientProvider.getClient.bind(clientProvider);
-    this.permissionControl?.setup(getScopedClient);
+    this.permissionControl?.setup(repositoryFactory.createInternalRepository);
 
     return {
       getScopedClient,
