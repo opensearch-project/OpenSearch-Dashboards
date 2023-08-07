@@ -52,9 +52,13 @@ export {
  */
 export interface IUiSettingsClient {
   /**
-   * Returns registered uiSettings values {@link UiSettingsParams}
+   * Returns all registered uiSettings values {@link UiSettingsParams}
    */
   getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
+  /**
+   * Returns the overridden uiSettings value if one exists, or the registered default if one exists {@link UiSettingsParams}
+   */
+  getOverrideOrDefault: (key: string) => unknown;
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */

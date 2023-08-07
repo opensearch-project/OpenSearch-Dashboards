@@ -106,12 +106,41 @@ describe('RenderingService', () => {
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
 
+      it('renders "core" page driven by defaults', async () => {
+        uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: false } });
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => name === 'theme:darkMode');
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
+          includeUserSettings: false,
+        });
+        const dom = load(content);
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
+
+        expect(uiSettings.getUserProvided).not.toHaveBeenCalled();
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
       it('renders "core" page driven by settings', async () => {
         uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
+        uiSettings.getRegistered.mockReturnValue({ 'theme:darkMode': { value: false } });
         const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
         const dom = load(content);
         const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
+      it('renders "core" page with no defaults or overrides', async () => {
+        uiSettings.getUserProvided.mockResolvedValue({});
+        uiSettings.getOverrideOrDefault.mockImplementation((name) =>
+          name === 'theme:darkMode' ? undefined : false
+        );
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
+          includeUserSettings: false,
+        });
+        const dom = load(content);
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
+
+        expect(uiSettings.getUserProvided).not.toHaveBeenCalled();
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
 

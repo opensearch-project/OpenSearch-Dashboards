@@ -521,13 +521,15 @@ export default function ({ getService, getPageObjects }) {
 
         it('should show error when calendar interval invalid', async () => {
           await PageObjects.visEditor.setInterval('14d', { type: 'custom' });
-          const intervalErrorMessage = await find.byCssSelector(
-            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
-          );
+          const intervalErrorMessageSelector =
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText';
+
+          let intervalErrorMessage = await find.byCssSelector(intervalErrorMessageSelector);
           let errorMessage = await intervalErrorMessage.getVisibleText();
           expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
 
           await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
+          intervalErrorMessage = await find.byCssSelector(intervalErrorMessageSelector);
           errorMessage = await intervalErrorMessage.getVisibleText();
           expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
         });

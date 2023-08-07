@@ -56,7 +56,7 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-nats.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/nats.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/nats.svg',
     artifacts: {
       dashboards: [
         {

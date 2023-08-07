@@ -182,7 +182,7 @@ exports[`Overview render 1`] = `
               id="osdOverviewMore__title"
             >
               <FormattedMessage
-                defaultMessage="Do more with Elastic"
+                defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
                 values={Object {}}
               />
@@ -611,7 +611,7 @@ exports[`Overview without features 1`] = `
               id="osdOverviewMore__title"
             >
               <FormattedMessage
-                defaultMessage="Do more with Elastic"
+                defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
                 values={Object {}}
               />

@@ -333,6 +333,25 @@ describe('ui settings', () => {
     });
   });
 
+  describe('#getOverrideOrDefault()', () => {
+    it('returns the non-overridden default settings passed within the constructor', () => {
+      const value = chance.word();
+      const defaults = { key: { value } };
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.getOverrideOrDefault('key')).toEqual(value);
+      expect(uiSettings.getOverrideOrDefault('unknown')).toBeUndefined();
+    });
+
+    it('returns the overridden settings passed within the constructor', () => {
+      const value = chance.word();
+      const override = chance.word();
+      const defaults = { key: { value } };
+      const overrides = { key: { value: override } };
+      const { uiSettings } = setup({ defaults, overrides });
+      expect(uiSettings.getOverrideOrDefault('key')).toEqual(override);
+    });
+  });
+
   describe('#getUserProvided()', () => {
     it('pulls user configuration from OpenSearch', async () => {
       const { uiSettings, savedObjectsClient } = setup();
@@ -625,7 +644,7 @@ describe('ui settings', () => {
     });
 
     it('returns the overridden value for key theme:version', async () => {
-      const opensearchDocSource = { 'theme:version': 'v8 (beta)' };
+      const opensearchDocSource = { 'theme:version': 'Next (preview)' };
       const overrides = { 'theme:version': 'v7' };
       const { uiSettings } = setup({ opensearchDocSource, overrides });
 
@@ -641,10 +660,10 @@ describe('ui settings', () => {
     });
 
     it('rewrites the key theme:version value without override', async () => {
-      const opensearchDocSource = { 'theme:version': 'v8 (beta)' };
+      const opensearchDocSource = { 'theme:version': 'Next (preview)' };
       const { uiSettings } = setup({ opensearchDocSource });
 
-      expect(await uiSettings.get('theme:version')).toBe('v8 (beta)');
+      expect(await uiSettings.get('theme:version')).toBe('Next (preview)');
     });
 
     it('returns the default value for an override with value null', async () => {

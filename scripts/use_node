@@ -64,7 +64,7 @@ else
   if [ -d "${OSD_HOME}/bin" ]; then
     NODE_ERROR_SHOW=true
     # Not all operating systems can run the latest Node.js and the fallback is for them
-    "${NODE}" -v 2> /dev/null
+    "${NODE}" -v > /dev/null 2>&1
     if [ $? -ne 0 ] && [ -d "${OSD_HOME}/node/fallback" ]; then
       NODE="$OSD_HOME/node/fallback/bin/node"
     fi

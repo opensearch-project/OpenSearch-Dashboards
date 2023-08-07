@@ -222,7 +222,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, bran
                       <h2 id="osdOverviewMore__title">
                         <FormattedMessage
                           id="opensearchDashboardsOverview.more.title"
-                          defaultMessage="Do more with Elastic"
+                          defaultMessage="Do more with OpenSearch"
                         />
                       </h2>
                     </EuiTitle>
