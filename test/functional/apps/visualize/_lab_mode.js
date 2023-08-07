@@ -34,13 +34,7 @@ import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualiza
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings']);
-  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
-  before(async () => {
-    await opensearchDashboardsServer.uiSettings.replace({
-      'discover:v2': false,
-    });
-  });
   describe('visualize lab mode', () => {
     it('disabling does not break loading saved searches', async () => {
       await PageObjects.common.navigateToUrl('discover', '', { useActualUrl: true });

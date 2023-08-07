@@ -43,6 +43,7 @@ export default function ({ getService, getPageObjects }) {
     'tileMap',
     'visChart',
     'timePicker',
+    'common',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -52,11 +53,16 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('dashboard state', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
     });
 
     after(async function () {
@@ -91,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
     it('Saved search with no changes will update when the saved object changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      await PageObjects.header.clickDiscover();
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setHistoricalDataRange();
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
@@ -106,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
       const inViewMode = await testSubjects.exists('dashboardEditMode');
       expect(inViewMode).to.be(true);
 
-      await PageObjects.header.clickDiscover();
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -125,7 +131,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
-      await PageObjects.header.clickDiscover();
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
