@@ -46,11 +46,11 @@ export default function ({ getService, getPageObjects }) {
 
   describe('discover app', function describeIndexTests() {
     before(async function () {
-      // delete .kibana index and update configDoc
-      await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
-
       log.debug('load opensearch-dashboards index with default index pattern');
       await opensearchArchiver.load('discover');
+
+      // delete .kibana index and update configDoc
+      await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
 
       // and load a set of makelogs data
       await opensearchArchiver.loadIfNeeded('logstash_functional');
