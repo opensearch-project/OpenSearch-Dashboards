@@ -4,13 +4,13 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiDataGrid, EuiPanel } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { fetchTableDataCell } from './data_grid_table_cell_value';
 import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_columns';
 import { DocViewExpandButton } from './data_grid_table_docview_expand_button';
 import { DataGridFlyout } from './data_grid_table_flyout';
-import { DataGridContext } from './data_grid_table_context';
+import { DiscoverGridContextProvider } from './data_grid_table_context';
 import { toolbarVisibility } from './constants';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
@@ -44,7 +44,7 @@ export const DataGridTable = ({
   displayTimeColumn,
   services,
 }: DataGridTableProps) => {
-  const [docViewExpand, setDocViewExpand] = useState(undefined);
+  const [expandedHit, setExpandedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
   const pagination = usePagination(rowCount);
 
@@ -94,41 +94,45 @@ export const DataGridTable = ({
   }, []);
 
   return (
-    <DataGridContext.Provider
+    <DiscoverGridContextProvider
       value={{
-        docViewExpand,
+        expandedHit,
         onFilter,
-        setDocViewExpand,
+        setExpandedHit,
         rows: rows || [],
         indexPattern,
       }}
     >
       <>
-        <EuiDataGrid
-          aria-labelledby="aria-labelledby"
-          columns={dataGridTableColumns}
-          columnVisibility={dataGridTableColumnsVisibility}
-          leadingControlColumns={leadingControlColumns}
-          data-test-subj="docTable"
-          pagination={pagination}
-          renderCellValue={renderCellValue}
-          rowCount={rowCount}
-          sorting={sorting}
-          toolbarVisibility={toolbarVisibility}
-        />
-        {docViewExpand && (
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
+          <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+            <EuiDataGrid
+              aria-labelledby="aria-labelledby"
+              columns={dataGridTableColumns}
+              columnVisibility={dataGridTableColumnsVisibility}
+              leadingControlColumns={leadingControlColumns}
+              data-test-subj="docTable"
+              pagination={pagination}
+              renderCellValue={renderCellValue}
+              rowCount={rowCount}
+              sorting={sorting}
+              toolbarVisibility={toolbarVisibility}
+            />
+          </EuiPanel>
+        </EuiPanel>
+        {expandedHit && (
           <DataGridFlyout
             indexPattern={indexPattern}
-            hit={docViewExpand}
+            hit={expandedHit}
             columns={columns}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
             onFilter={onFilter}
-            onClose={() => setDocViewExpand(undefined)}
+            onClose={() => setExpandedHit(undefined)}
             services={services}
           />
         )}
       </>
-    </DataGridContext.Provider>
+    </DiscoverGridContextProvider>
   );
 };

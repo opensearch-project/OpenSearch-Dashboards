@@ -27,7 +27,7 @@ export const createDataExplorerServicesMock = () => {
     scopedHistory: (scopedHistoryMock.create() as unknown) as ScopedHistory,
     viewRegistry: {
       get: jest.fn(),
-      all: jest.fn(),
+      all: jest.fn(() => []),
     },
   };
 

@@ -3,19 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { combineReducers, configureStore, PreloadedState, Reducer, Slice } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { Provider } from 'react-redux';
-import { reducer as metadataReducer, MetadataState } from './metadata_slice';
+import { reducer as metadataReducer } from './metadata_slice';
 import { loadReduxState, persistReduxState } from './redux_persistence';
 import { DataExplorerServices } from '../../types';
 
-const dynamicReducers: {
-  metadata: Reducer<MetadataState>;
+const commonReducers = {
+  metadata: metadataReducer,
+};
+
+let dynamicReducers: {
+  metadata: typeof metadataReducer;
   [key: string]: Reducer;
 } = {
-  metadata: metadataReducer,
+  ...commonReducers,
 };
 
 const rootReducer = combineReducers(dynamicReducers);
@@ -60,7 +62,15 @@ export const getPreloadedStore = async (services: DataExplorerServices) => {
   // the store subscriber will automatically detect changes and call handleChange function
   const unsubscribe = store.subscribe(handleChange);
 
-  return { store, unsubscribe };
+  const onUnsubscribe = () => {
+    dynamicReducers = {
+      ...commonReducers,
+    };
+
+    unsubscribe();
+  };
+
+  return { store, unsubscribe: onUnsubscribe };
 };
 
 export const registerSlice = (slice: Slice) => {

@@ -26,11 +26,6 @@ export interface DataExplorerPluginStartDependencies {
   data: DataPublicPluginStart;
 }
 
-export interface ViewRedirectParams {
-  view: string;
-  path?: string;
-}
-
 export interface DataExplorerServices extends CoreStart {
   store?: Store;
   viewRegistry: ViewServiceStart;

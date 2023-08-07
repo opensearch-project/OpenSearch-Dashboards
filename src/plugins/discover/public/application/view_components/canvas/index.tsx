@@ -4,21 +4,32 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiPanel } from '@elastic/eui';
+import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
-import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
-import { Canvas } from './canvas';
-import { getServices } from '../../../opensearch_dashboards_services';
+import { DiscoverTable } from './discover_table';
 
 // eslint-disable-next-line import/no-default-export
-export default function CanvasApp({ setHeaderActionMenu }: ViewProps) {
-  const services = getServices();
+export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
   return (
-    <OpenSearchDashboardsContextProvider services={services}>
-      <Canvas
-        opts={{
-          setHeaderActionMenu,
-        }}
-      />
-    </OpenSearchDashboardsContextProvider>
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <TopNav
+          opts={{
+            setHeaderActionMenu,
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
+          <EuiPanel>
+            <EuiLoadingChart />
+          </EuiPanel>
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <DiscoverTable history={history} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

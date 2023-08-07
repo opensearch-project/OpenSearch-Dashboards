@@ -5,62 +5,70 @@
 
 import React, { useState, useEffect } from 'react';
 import { History } from 'history';
-import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { DiscoverServices } from '../../../build_services';
-import { SavedSearch } from '../../../saved_searches';
-import { DiscoverTableService } from './discover_table_service';
-import { fetchIndexPattern, fetchSavedSearch } from '../utils/index_pattern_helper';
+import { DiscoverViewServices } from '../../../build_services';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DataGridTable } from '../../components/data_grid/data_grid_table';
+import { useDiscoverContext } from '../context';
+import { addColumn, removeColumn, useDispatch, useSelector } from '../../utils/state_management';
+import { SearchData } from '../utils/use_search';
 
-export interface DiscoverTableProps {
-  services: DiscoverServices;
+interface Props {
   history: History;
 }
 
-export const DiscoverTable = ({ history, services }: DiscoverTableProps) => {
-  const { core, chrome, data, uiSettings: config, toastNotifications } = services;
-  const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  // TODO: get id from data explorer since it is handling the routing logic
-  // Original angular code: const savedSearchId = $route.current.params.id;
-  const savedSearchId = '';
+export const DiscoverTable = ({ history }: Props) => {
+  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+  const { data$, indexPattern } = useDiscoverContext();
+  const [fetchState, setFetchState] = useState<SearchData>({
+    status: data$.getValue().status,
+    rows: [],
+  });
+
+  const { columns } = useSelector((state) => state.discover);
+  const dispatch = useDispatch();
+
+  const { rows } = fetchState || {};
+
   useEffect(() => {
-    const fetchData = async () => {
-      const indexPatternData = await fetchIndexPattern(data, config);
-      setIndexPattern(indexPatternData.loaded);
-
-      const savedSearchData = await fetchSavedSearch(
-        core,
-        '', // basePath
-        history,
-        savedSearchId,
-        services,
-        toastNotifications
-      );
-      if (savedSearchData && !savedSearchData?.searchSource.getField('index')) {
-        savedSearchData.searchSource.setField('index', indexPatternData);
+    const subscription = data$.subscribe((next) => {
+      if (next.status !== fetchState.status || (next.rows && next.rows !== fetchState.rows)) {
+        setFetchState({ ...fetchState, ...next });
       }
-      setSavedSearch(savedSearchData);
-
-      if (savedSearchId) {
-        chrome.recentlyAccessed.add(
-          savedSearchData.getFullPath(),
-          savedSearchData.title,
-          savedSearchData.id
-        );
-      }
+    });
+    return () => {
+      subscription.unsubscribe();
     };
-    fetchData();
-  }, [data, config, core, chrome, toastNotifications, history, savedSearchId, services]);
+  }, [data$, fetchState]);
 
-  if (!savedSearch || !savedSearch.searchSource || !indexPattern) {
-    // TODO: handle loading state
+  if (indexPattern === undefined) {
+    // TODO: handle better
     return null;
   }
+
+  if (!rows || rows.length === 0) {
+    // TODO: handle better
+    return <div>{'loading...'}</div>;
+  }
+
   return (
-    <DiscoverTableService
-      services={services}
-      savedSearch={savedSearch}
+    <DataGridTable
+      columns={columns}
       indexPattern={indexPattern}
+      onAddColumn={(column) =>
+        dispatch(
+          addColumn({
+            column,
+          })
+        )
+      }
+      onFilter={() => {}}
+      onRemoveColumn={(column) => dispatch(removeColumn(column))}
+      onSetColumns={() => {}}
+      onSort={() => {}}
+      sort={[]}
+      rows={rows}
+      displayTimeColumn={true}
+      services={services}
     />
   );
 };

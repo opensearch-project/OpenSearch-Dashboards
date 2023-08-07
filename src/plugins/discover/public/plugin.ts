@@ -5,7 +5,6 @@
 
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 import {
   AppMountParameters,
@@ -28,24 +27,27 @@ import {
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
+import { stringify } from 'query-string';
+import rison from 'rison-node';
 import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
-import { createOsdUrlTracker } from '../../opensearch_dashboards_utils/public';
+import { url } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
+import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
 import { DocViewTable } from './application/components/table/table';
 import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
 import {
   setDocViewsRegistry,
-  setUrlTracker,
+  setDocViewsLinksRegistry,
   setServices,
   setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
-  getScopedHistory,
   syncHistoryLocations,
   getServices,
 } from './opensearch_dashboards_services';
@@ -58,13 +60,14 @@ import {
 } from './url_generator';
 // import { SearchEmbeddableFactory } from './application/embeddable';
 import { NEW_DISCOVER_APP, PLUGIN_ID } from '../common';
-import { DataExplorerPluginSetup, ViewRedirectParams } from '../../data_explorer/public';
+import { DataExplorerPluginSetup } from '../../data_explorer/public';
 import { registerFeature } from './register_feature';
 import {
   DiscoverState,
   discoverSlice,
   getPreloadedState,
 } from './application/utils/state_management/discover_slice';
+import { migrateUrlState } from './migrate_state';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -82,6 +85,10 @@ export interface DiscoverSetup {
      * @param docViewRaw
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
+  };
+
+  docViewsLinks: {
+    addDocViewLink(docViewLinkRaw: DocViewLink): void;
   };
 }
 
@@ -148,6 +155,7 @@ export class DiscoverPlugin
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
+  private docViewsLinksRegistry: DocViewsLinksRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
   private urlGenerator?: DiscoverStart['urlGenerator'];
@@ -186,41 +194,51 @@ export class DiscoverPlugin
       component: JsonCodeBlock,
     });
 
-    const {
-      appMounted,
-      appUnMounted,
-      stop: stopUrlTracker,
-      setActiveUrl: setTrackedUrl,
-      restorePreviousUrl,
-    } = createOsdUrlTracker({
-      // we pass getter here instead of plain `history`,
-      // so history is lazily created (when app is mounted)
-      // this prevents redundant `#` when not in discover app
-      getHistory: getScopedHistory,
-      baseUrl,
-      defaultSubUrl: '#/',
-      storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
-      navLinkUpdater$: this.appStateUpdater,
-      toastNotifications: core.notifications.toasts,
-      stateParams: [
-        {
-          osdUrlKey: '_g',
-          stateUpdate$: plugins.data.query.state$.pipe(
-            filter(
-              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-            ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
-          ),
-        },
-      ],
+    this.docViewsLinksRegistry = new DocViewsLinksRegistry();
+    setDocViewsLinksRegistry(this.docViewsLinksRegistry);
+
+    this.docViewsLinksRegistry.addDocViewLink({
+      label: i18n.translate('discover.docTable.tableRow.viewSurroundingDocumentsLinkText', {
+        defaultMessage: 'View surrounding documents',
+      }),
+      generateCb: (renderProps: any) => {
+        const globalFilters: any = getServices().filterManager.getGlobalFilters();
+        const appFilters: any = getServices().filterManager.getAppFilters();
+
+        const hash = stringify(
+          url.encodeQuery({
+            _g: rison.encode({
+              filters: globalFilters || [],
+            }),
+            _a: rison.encode({
+              columns: renderProps.columns,
+              filters: (appFilters || []).map(opensearchFilters.disableFilter),
+            }),
+          }),
+          { encode: false, sort: false }
+        );
+
+        return {
+          url: `#/context/${encodeURIComponent(renderProps.indexPattern.id)}/${encodeURIComponent(
+            renderProps.hit._id
+          )}?${hash}`,
+          hide: !renderProps.indexPattern.isTimeBased(),
+        };
+      },
+      order: 1,
     });
-    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
-    this.stopUrlTracking = () => {
-      stopUrlTracker();
-    };
+
+    this.docViewsLinksRegistry.addDocViewLink({
+      label: i18n.translate('discover.docTable.tableRow.viewSingleDocumentLinkText', {
+        defaultMessage: 'View single document',
+      }),
+      generateCb: (renderProps) => ({
+        url: `#/doc/${renderProps.indexPattern.id}/${
+          renderProps.hit._index
+        }?id=${encodeURIComponent(renderProps.hit._id)}`,
+      }),
+      order: 2,
+    });
 
     core.application.register({
       id: PLUGIN_ID,
@@ -240,7 +258,6 @@ export class DiscoverPlugin
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
-        appMounted();
         const {
           core: {
             application: { navigateToApp },
@@ -256,18 +273,14 @@ export class DiscoverPlugin
             path,
           });
         } else {
+          const newPath = migrateUrlState(path);
           navigateToApp('data-explorer', {
             replace: true,
-            path: `/${PLUGIN_ID}`,
-            state: {
-              path,
-            } as ViewRedirectParams,
+            path: `/${PLUGIN_ID}${newPath}`,
           });
         }
 
-        return () => {
-          appUnMounted();
-        };
+        return () => {};
       },
     });
 
@@ -320,9 +333,10 @@ export class DiscoverPlugin
         slice: discoverSlice,
       },
       shouldShow: () => true,
-      // ViewCompon
+      // ViewComponent
       Canvas: lazy(() => import('./application/view_components/canvas')),
       Panel: lazy(() => import('./application/view_components/panel')),
+      Context: lazy(() => import('./application/view_components/context')),
     });
 
     // this.registerEmbeddable(core, plugins);
@@ -330,6 +344,9 @@ export class DiscoverPlugin
     return {
       docViews: {
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
+      },
+      docViewsLinks: {
+        addDocViewLink: this.docViewsLinksRegistry.addDocViewLink.bind(this.docViewsLinksRegistry),
       },
     };
   }
