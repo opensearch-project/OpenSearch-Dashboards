@@ -111,6 +111,7 @@ export interface SavedObjectsFindOptions {
   /** An optional OpenSearch preference value to be used for the query **/
   preference?: string;
   workspaces?: string[];
+  queryDSL?: Record<string, any>;
 }
 
 /**

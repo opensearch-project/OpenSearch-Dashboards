@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { Permissions } from '../permission_control/acl';
 import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 
 /**
@@ -53,6 +54,7 @@ export interface SavedObjectsRawDocSource {
   references?: SavedObjectReference[];
   originId?: string;
   workspaces?: string[];
+  permissions?: Permissions;
 
   [typeMapping: string]: any;
 }

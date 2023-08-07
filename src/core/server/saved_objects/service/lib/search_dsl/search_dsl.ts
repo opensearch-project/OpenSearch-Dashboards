@@ -53,6 +53,7 @@ interface GetSearchDslOptions {
   };
   kueryNode?: KueryNode;
   workspaces?: string[];
+  queryDSL?: Record<string, any>;
 }
 
 export function getSearchDsl(
@@ -73,6 +74,7 @@ export function getSearchDsl(
     hasReference,
     kueryNode,
     workspaces,
+    queryDSL,
   } = options;
 
   if (!type) {
@@ -96,6 +98,7 @@ export function getSearchDsl(
       hasReference,
       kueryNode,
       workspaces,
+      queryDSL,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };

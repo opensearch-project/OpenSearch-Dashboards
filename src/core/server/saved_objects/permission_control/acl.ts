@@ -10,7 +10,7 @@ export interface Principals {
   groups?: string[];
 }
 
-export type Permissions = Partial<Record<string, Principals>>;
+export type Permissions = Record<string, Principals>;
 
 export interface TransformedPermission {
   type: string;
@@ -121,11 +121,14 @@ export class ACL {
     }
 
     for (const permissionType of permissionTypes) {
-      this.permissions[permissionType] = deleteFromPrincipals(
+      const result = deleteFromPrincipals(
         this.permissions![permissionType],
         principals.users,
         principals.groups
       );
+      if (result) {
+        this.permissions[permissionType] = result;
+      }
     }
 
     return this;
@@ -204,11 +207,11 @@ export class ACL {
         generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
         */
   public static genereateGetPermittedSavedObjectsQueryDSL(
-    permissionType: string,
+    permissionTypes: string[],
     principals: Principals,
     savedObjectType?: string | string[]
   ) {
-    if (!principals || !permissionType) {
+    if (!principals || !permissionTypes) {
       return {
         query: {
           match_none: {},
@@ -222,30 +225,21 @@ export class ACL {
     const subBool: any = {
       should: [],
     };
-    if (!!principals.users) {
-      subBool.should.push({
-        terms: {
-          ['permissions.' + permissionType + '.users']: principals.users,
-        },
+
+    permissionTypes.forEach((permissionType) => {
+      Object.entries(principals).forEach(([principalType, principalsInCurrentType]) => {
+        subBool.should.push({
+          terms: {
+            ['permissions.' + permissionType + `.${principalType}`]: principalsInCurrentType,
+          },
+        });
+        subBool.should.push({
+          term: {
+            ['permissions.' + permissionType + `.${principalType}`]: '*',
+          },
+        });
       });
-      subBool.should.push({
-        term: {
-          ['permissions.' + permissionType + '.users']: '*',
-        },
-      });
-    }
-    if (!!principals.groups) {
-      subBool.should.push({
-        terms: {
-          ['permissions.' + permissionType + '.groups']: principals.groups,
-        },
-      });
-      subBool.should.push({
-        term: {
-          ['permissions.' + permissionType + '.groups']: '*',
-        },
-      });
-    }
+    });
 
     bool.filter.push({
       bool: subBool,

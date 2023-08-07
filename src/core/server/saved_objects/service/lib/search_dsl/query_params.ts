@@ -27,7 +27,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { mergeWith, isArray } from 'lodash';
 // @ts-expect-error no ts
 import { opensearchKuery } from '../../../opensearch_query';
 type KueryNode = any;
@@ -174,6 +174,7 @@ interface QueryParams {
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
   workspaces?: string[];
+  queryDSL?: Record<string, any>;
 }
 
 export function getClauseForReference(reference: HasReferenceQueryParams) {
@@ -231,6 +232,7 @@ export function getQueryParams({
   hasReference,
   kueryNode,
   workspaces,
+  queryDSL,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -287,7 +289,16 @@ export function getQueryParams({
     }
   }
 
-  return { query: { bool } };
+  const result = { query: { bool } };
+
+  if (queryDSL) {
+    return mergeWith({}, result, queryDSL, (objValue, srcValue) => {
+      if (isArray(objValue)) {
+        return objValue.concat(srcValue);
+      }
+    });
+  }
+  return result;
 }
 
 // we only want to add match_phrase_prefix clauses

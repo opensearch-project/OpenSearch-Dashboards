@@ -769,6 +769,7 @@ export class SavedObjectsRepository {
       filter,
       preference,
       workspaces,
+      queryDSL,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -843,6 +844,7 @@ export class SavedObjectsRepository {
           hasReference,
           kueryNode,
           workspaces,
+          queryDSL,
         }),
       },
     };
@@ -1897,7 +1899,7 @@ function getSavedObjectFromSource<T>(
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt, workspaces } = doc._source;
+  const { originId, updated_at: updatedAt, workspaces, permissions } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -1917,6 +1919,7 @@ function getSavedObjectFromSource<T>(
     attributes: doc._source[type],
     references: doc._source.references || [],
     migrationVersion: doc._source.migrationVersion,
+    permissions,
   };
 }
 
