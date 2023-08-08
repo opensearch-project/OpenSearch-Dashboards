@@ -84,7 +84,7 @@ export interface SavedObjectsFindOptions {
   /**
    * An array of fields to include in the results
    * @example
-   * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
+   * SavedObjects.find({type: 'dashboard', fields: ['name', 'location']})
    */
   fields?: string[];
   /** Search documents using the OpenSearch Simple Query String syntax. See OpenSearch Simple Query String `query` argument for more information */
