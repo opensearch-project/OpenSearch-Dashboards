@@ -264,3 +264,7 @@
 
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"
+
+# Set the value of this setting to true to enable plugin augmentation on Dashboard
+# vis_augmenter.pluginAugmentationEnabled: true
+

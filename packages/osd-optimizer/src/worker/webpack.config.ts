@@ -137,6 +137,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 sourceMap: !worker.dist,
               },
             },
+            {
+              loader: 'comment-stripper',
+              options: {
+                language: 'css',
+              },
+            },
           ],
         },
         {
@@ -162,6 +168,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                     postcssOptions: {
                       config: require.resolve('@osd/optimizer/postcss.config.js'),
                     },
+                  },
+                },
+                {
+                  loader: 'comment-stripper',
+                  options: {
+                    language: 'css',
                   },
                 },
                 {

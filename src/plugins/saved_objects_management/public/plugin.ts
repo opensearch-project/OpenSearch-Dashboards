@@ -33,11 +33,13 @@ import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
+import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
 import { DiscoverStart } from '../../discover/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
+import { VisAugmenterStart } from '../../vis_augmenter/public';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
@@ -52,6 +54,7 @@ import {
   ISavedObjectsManagementServiceRegistry,
 } from './services';
 import { registerServices } from './register_services';
+import { bootstrap } from './ui_actions_bootstrap';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -69,14 +72,17 @@ export interface SavedObjectsManagementPluginStart {
 export interface SetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
   dashboard?: DashboardStart;
   visualizations?: VisualizationsStart;
+  visAugmenter?: VisAugmenterStart;
   discover?: DiscoverStart;
   visBuilder?: VisBuilderStart;
+  uiActions: UiActionsStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -94,7 +100,7 @@ export class SavedObjectsManagementPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, management }: SetupDependencies
+    { home, management, uiActions }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
@@ -121,7 +127,7 @@ export class SavedObjectsManagementPlugin
     opensearchDashboardsSection.registerApp({
       id: 'objects',
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
-        defaultMessage: 'Saved Objects',
+        defaultMessage: 'Saved objects',
       }),
       order: 1,
       mount: async (mountParams) => {
@@ -134,6 +140,9 @@ export class SavedObjectsManagementPlugin
       },
     });
 
+    // sets up the context mappings and registers any triggers/actions for the plugin
+    bootstrap(uiActions);
+
     // depends on `getStartServices`, should not be awaited
     registerServices(this.serviceRegistry, core.getStartServices);
 
@@ -145,7 +154,7 @@ export class SavedObjectsManagementPlugin
     };
   }
 
-  public start(core: CoreStart, { data }: StartDependencies) {
+  public start(core: CoreStart, { data, uiActions }: StartDependencies) {
     const actionStart = this.actionService.start();
     const columnStart = this.columnService.start();
     const namespaceStart = this.namespaceService.start();

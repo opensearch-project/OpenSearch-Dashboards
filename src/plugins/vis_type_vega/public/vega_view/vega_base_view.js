@@ -51,6 +51,7 @@ const vegaFunctions = {
   opensearchDashboardsRemoveFilter: 'removeFilterHandler',
   opensearchDashboardsRemoveAllFilters: 'removeAllFiltersHandler',
   opensearchDashboardsSetTimeFilter: 'setTimeFilterHandler',
+  opensearchDashboardsVisEventTriggered: 'triggerExternalActionHandler',
 };
 
 for (const funcName of Object.keys(vegaFunctions)) {
@@ -76,6 +77,7 @@ export class VegaBaseView {
     this._serviceSettings = opts.serviceSettings;
     this._filterManager = opts.filterManager;
     this._applyFilter = opts.applyFilter;
+    this._triggerExternalAction = opts.externalAction;
     this._timefilter = opts.timefilter;
     this._view = null;
     this._vegaViewConfig = null;
@@ -259,6 +261,25 @@ export class VegaBaseView {
     return false;
   }
 
+  // This is only used when the PointInTimeEventsVisLayer type in vega parser's
+  // visibleVisLayers is true. This VisLayer type is currently only supported
+  // for time series chart types. It may be updated
+  // in the future to expand to other chart type use cases.
+  // Because there is no clean way to use autosize for concatenated views,
+  // we manually set the value of the top view (the base vis) to fill in
+  // space and leave enough space to show the bottom view (the events vis).
+  // Ref: https://vega.github.io/vega-lite/docs/size.html#limitations
+  addPointInTimeEventPadding(view) {
+    // This value represents the pixel height of the event canvas. It is determined
+    // based on the event mark size, such that there is sufficient but minimal space
+    // needed to render the event marks.
+    const eventVisHeight = 100;
+    const height = Math.max(0, this._$container.height()) - eventVisHeight;
+    if (view._signals.concat_0_height !== undefined) {
+      view._signals.concat_0_height.value = height;
+    }
+  }
+
   setView(view) {
     if (this._view === view) return;
 
@@ -325,6 +346,18 @@ export class VegaBaseView {
       alias
     );
     this._applyFilter({ filters: [filter] });
+  }
+
+  /**
+   * This method is triggered using signal expression in vega-spec via @see opensearchDashboardsVisEventTriggered
+   * @param {import('vega').ScenegraphEvent} event   Event triggered by the underlying vega visualization.
+   * @param {import('vega').Item} datum   Data associated with the element on which the event was triggered.
+   */
+  triggerExternalActionHandler(event, datum) {
+    this._triggerExternalAction({
+      event,
+      item: datum,
+    });
   }
 
   /**
@@ -442,7 +475,11 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
-    this._parser.searchAPI.inspectorAdapters?.vega.bindInspectValues({
+    // The vega inspector can now be null when rendering line charts using vega for the overlay visualization feature.
+    // This is because the inspectors get added at bootstrap to the different chart types and visualize embeddable
+    // thinks the line chart is vislib line chart and uses that inspector adapter and has no way of knowing it's
+    // actually a vega-lite chart and needs to use the vega inspector adapter without hacky code.
+    this._parser.searchAPI.inspectorAdapters?.vega?.bindInspectValues({
       view,
       spec: vlspec || spec,
     });

@@ -97,3 +97,12 @@ Use the UI actions explorer in the Developer examples to learn more about the se
 ```sh
 yarn start --run-examples
 ```
+
+## Action Properties
+
+Refer to [./public/actions/action.ts](./public/actions/action.ts) for all properties, keeping in mind it extends the [presentable](./public/util/presentable.ts) interface. Here are some properties that provide special functionality and customization.
+
+- `order` is used when there is more than one action matched to a trigger and within context menus. Higher numbers are displayed first.
+- `getDisplayName` is a function that can return either a string or a JSX element. Returning a JSX element allows flexibility with formatting.
+- `getIconType` can be used to add an icon before the display name.
+- `grouping` determines where this item should appear as a submenu. Each group can also contain a category, which is used within context menus to organize similar groups into the same section of the menu. See examples explorer for more details about what this looks like within a context menu.
