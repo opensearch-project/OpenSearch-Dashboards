@@ -3,11 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { schema } from '@osd/config-schema';
+
+import { PermissionMode } from '../../../utils/constants';
+import { ACL, Permissions } from '../../saved_objects/permission_control/acl';
 import { InternalHttpServiceSetup } from '../../http';
 import { Logger } from '../../logging';
-import { IWorkspaceDBImpl } from '../types';
+import { IWorkspaceDBImpl, WorkspaceRoutePermissionItem } from '../types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
+
+const workspacePermissionMode = schema.oneOf([
+  schema.literal(PermissionMode.LibraryRead),
+  schema.literal(PermissionMode.LibraryWrite),
+  schema.literal(PermissionMode.Management),
+]);
+
+const workspacePermission = schema.oneOf([
+  schema.object({
+    type: schema.literal('user'),
+    userId: schema.string(),
+    modes: schema.arrayOf(workspacePermissionMode),
+  }),
+  schema.object({
+    type: schema.literal('group'),
+    group: schema.string(),
+    modes: schema.arrayOf(workspacePermissionMode),
+  }),
+]);
 
 const workspaceAttributesSchema = schema.object({
   description: schema.maybe(schema.string()),
@@ -16,7 +38,41 @@ const workspaceAttributesSchema = schema.object({
   color: schema.maybe(schema.string()),
   icon: schema.maybe(schema.string()),
   defaultVISTheme: schema.maybe(schema.string()),
+  permissions: schema.oneOf([workspacePermission, schema.arrayOf(workspacePermission)]),
 });
+
+const convertToACL = (
+  workspacePermissions: WorkspaceRoutePermissionItem | WorkspaceRoutePermissionItem[]
+) => {
+  workspacePermissions = Array.isArray(workspacePermissions)
+    ? workspacePermissions
+    : [workspacePermissions];
+
+  const acl = new ACL();
+
+  workspacePermissions.forEach((permission) => {
+    switch (permission.type) {
+      case 'user':
+        acl.addPermission(permission.modes, { users: [permission.userId] });
+        return;
+      case 'group':
+        acl.addPermission(permission.modes, { groups: [permission.group] });
+        return;
+    }
+  });
+
+  return acl.getPermissions() || {};
+};
+
+const convertFromACL = (permissions: Permissions) => {
+  const acl = new ACL(permissions);
+
+  return acl.transformPermissions().map(({ name, permissions: modes, type }) => ({
+    type: type === 'users' ? 'user' : 'group',
+    modes,
+    ...{ [type === 'users' ? 'userId' : 'group']: name },
+  }));
+};
 
 export function registerRoutes({
   client,
@@ -51,7 +107,21 @@ export function registerRoutes({
         },
         req.body
       );
-      return res.ok({ body: result });
+      if (!result.success) {
+        return res.ok({ body: result });
+      }
+      return res.ok({
+        body: {
+          ...result,
+          result: {
+            ...result.result,
+            workspaces: result.result.workspaces.map((workspace) => ({
+              ...workspace,
+              permissions: convertFromACL(workspace.permissions),
+            })),
+          },
+        },
+      });
     })
   );
   router.get(
@@ -73,7 +143,19 @@ export function registerRoutes({
         },
         id
       );
-      return res.ok({ body: result });
+      if (!result.success) {
+        return res.ok({ body: result });
+      }
+
+      return res.ok({
+        body: {
+          ...result,
+          result: {
+            ...result.result,
+            permissions: convertFromACL(result.result.permissions),
+          },
+        },
+      });
     })
   );
   router.post(
@@ -94,7 +176,10 @@ export function registerRoutes({
           request: req,
           logger,
         },
-        attributes
+        {
+          ...attributes,
+          permissions: convertToACL(attributes.permissions),
+        }
       );
       return res.ok({ body: result });
     })
@@ -122,7 +207,10 @@ export function registerRoutes({
           logger,
         },
         id,
-        attributes
+        {
+          ...attributes,
+          permissions: convertToACL(attributes.permissions),
+        }
       );
       return res.ok({ body: result });
     })

@@ -27,6 +27,7 @@ import {
   EuiComboBox,
   EuiComboBoxProps,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 import {
   App,
@@ -43,6 +44,10 @@ import {
 } from '../utils/feature';
 
 import { WorkspaceIconSelector } from './workspace_icon_selector';
+import {
+  WorkspacePermissionSetting,
+  WorkspacePermissionSettingPanel,
+} from './workspace_permission_setting_panel';
 
 interface WorkspaceFeature extends Pick<App, 'dependencies'> {
   id: string;
@@ -61,13 +66,23 @@ export interface WorkspaceFormData {
   color?: string;
   icon?: string;
   defaultVISTheme?: string;
+  permissions: WorkspacePermissionSetting[];
 }
 
-type WorkspaceFormErrors = { [key in keyof WorkspaceFormData]?: string };
+type WorkspaceFormErrors = Omit<{ [key in keyof WorkspaceFormData]?: string }, 'permissions'> & {
+  permissions?: string[];
+};
 
 const isWorkspaceFeatureGroup = (
   featureOrGroup: WorkspaceFeature | WorkspaceFeatureGroup
 ): featureOrGroup is WorkspaceFeatureGroup => 'features' in featureOrGroup;
+
+const isValidWorkspacePermissionSetting = (
+  setting: Partial<WorkspacePermissionSetting>
+): setting is WorkspacePermissionSetting =>
+  !!setting.modes &&
+  setting.modes.length > 0 &&
+  ((setting.type === 'user' && !!setting.userId) || (setting.type === 'group' && !!setting.group));
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
@@ -95,6 +110,14 @@ export const WorkspaceForm = ({
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
 
   const [selectedFeatureIds, setSelectedFeatureIds] = useState(defaultValues?.features || []);
+  const [permissionSettings, setPermissionSettings] = useState<
+    Array<Partial<WorkspacePermissionSetting>>
+  >(
+    defaultValues?.permissions && defaultValues.permissions.length > 0
+      ? defaultValues.permissions
+      : [{}]
+  );
+
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const formIdRef = useRef<string>();
   const getFormData = () => ({
@@ -104,6 +127,7 @@ export const WorkspaceForm = ({
     color,
     icon,
     defaultVISTheme,
+    permissions: permissionSettings,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
@@ -237,11 +261,51 @@ export const WorkspaceForm = ({
       e.preventDefault();
       const formData = getFormDataRef.current();
       if (!formData.name) {
-        setFormErrors({ name: "Name can't be empty." });
+        setFormErrors({
+          name: i18n.translate('workspace.form.name.empty', {
+            defaultMessage: "Name can't be empty.",
+          }),
+        });
         return;
       }
+      const permissionErrors: string[] = new Array(formData.permissions.length);
+      for (let i = 0; i < formData.permissions.length; i++) {
+        const permission = formData.permissions[i];
+        if (isValidWorkspacePermissionSetting(permission)) {
+          continue;
+        }
+        if (!permission.type) {
+          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.type', {
+            defaultMessage: 'Invalid type',
+          });
+          continue;
+        }
+        if (!permission.modes || permission.modes.length === 0) {
+          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.modes', {
+            defaultMessage: 'Invalid permission modes',
+          });
+          continue;
+        }
+        if (permission.type === 'user' && !permission.userId) {
+          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.userId', {
+            defaultMessage: 'Invalid userId',
+          });
+          continue;
+        }
+        if (permission.type === 'group' && !permission.group) {
+          permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
+            defaultMessage: 'Invalid user group',
+          });
+          continue;
+        }
+      }
+      if (permissionErrors.some((error) => !!error)) {
+        setFormErrors({ permissions: permissionErrors });
+        return;
+      }
+      const permissions = formData.permissions.filter(isValidWorkspacePermissionSetting);
       setFormErrors({});
-      onSubmit?.({ ...formData, name: formData.name });
+      onSubmit?.({ ...formData, name: formData.name, permissions });
     },
     [onSubmit]
   );
@@ -365,6 +429,17 @@ export const WorkspaceForm = ({
             );
           })}
         </EuiFlexGrid>
+      </EuiPanel>
+      <EuiSpacer />
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h2>Members & permissions</h2>
+        </EuiTitle>
+        <WorkspacePermissionSettingPanel
+          errors={formErrors.permissions}
+          value={permissionSettings}
+          onChange={setPermissionSettings}
+        />
       </EuiPanel>
       <EuiSpacer />
       <EuiText textAlign="right">
