@@ -38,12 +38,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects([
     'dashboard',
     'header',
     'visualize',
     'discover',
     'timePicker',
+    'common',
   ]);
   const dashboardName = 'Dashboard Panel Controls Test';
 
@@ -51,6 +53,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
+      await browser.refresh();
+      await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setHistoricalDataRange();
       await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);

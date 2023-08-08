@@ -37,6 +37,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const browser = getService('browser');
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects([
     'dashboard',
@@ -46,6 +47,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
     'discover',
     'timePicker',
     'common',
+    'settings',
   ]);
 
   return new (class DashboardVisualizations {
@@ -75,8 +77,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       await opensearchDashboardsServer.uiSettings.replace({
         'discover:v2': false,
       });
-
-      await PageObjects.common.navigateToApp('discover');
+      await browser.refresh();
+      await PageObjects.header.clickDiscover();
 
       await PageObjects.timePicker.setHistoricalDataRange();
 

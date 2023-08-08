@@ -63,6 +63,7 @@ export default function ({ getService, getPageObjects }) {
       await opensearchDashboardsServer.uiSettings.replace({
         'discover:v2': false,
       });
+      await browser.refresh();
     });
 
     after(async function () {
@@ -97,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
     it('Saved search with no changes will update when the saved object changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.clickDiscover();
       await PageObjects.timePicker.setHistoricalDataRange();
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
@@ -112,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
       const inViewMode = await testSubjects.exists('dashboardEditMode');
       expect(inViewMode).to.be(true);
 
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -131,7 +132,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();

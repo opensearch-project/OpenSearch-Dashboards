@@ -78,9 +78,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Timepicker start, end, interval values are set by url', async () => {
-      await opensearchDashboardsServer.uiSettings.replace({
-        'discover:v2': false,
-      });
       await PageObjects.dashboard.gotoDashboardLandingPage();
       log.debug('Went to landing page');
       await PageObjects.dashboard.clickNewDashboard();
@@ -111,7 +108,6 @@ export default function ({ getService, getPageObjects }) {
     it('Timepicker respects dateFormat from UI settings', async () => {
       await opensearchDashboardsServer.uiSettings.replace({
         dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS',
-        'discover:v2': false,
       });
       await browser.refresh();
       await PageObjects.dashboard.gotoDashboardLandingPage();
