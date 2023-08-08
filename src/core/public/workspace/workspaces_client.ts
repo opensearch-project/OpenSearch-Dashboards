@@ -6,7 +6,7 @@ import type { PublicContract } from '@osd/utility-types';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
 import { HttpFetchError, HttpFetchOptions, HttpSetup } from '../http';
-import { WorkspaceAttribute, WorkspaceFindOptions } from '.';
+import { WorkspaceAttribute, WorkspaceFindOptions, WorkspaceRoutePermissionItem } from '.';
 import { WORKSPACES_API_BASE_URL, WORKSPACE_ERROR_REASON_MAP } from './consts';
 
 /**
@@ -192,7 +192,9 @@ export class WorkspacesClient {
    * @returns
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>
+    attributes: Omit<WorkspaceAttribute, 'id' | 'permissions'> & {
+      permissions: WorkspaceRoutePermissionItem[];
+    }
   ): Promise<IResponse<WorkspaceAttribute>> {
     const path = this.getPath([]);
 
@@ -277,7 +279,11 @@ export class WorkspacesClient {
    */
   public async update(
     id: string,
-    attributes: Partial<WorkspaceAttribute>
+    attributes: Partial<
+      Omit<WorkspaceAttribute, 'permissions'> & {
+        permissions: WorkspaceRoutePermissionItem[];
+      }
+    >
   ): Promise<IResponse<boolean>> {
     const path = this.getPath([id]);
     const body = {
