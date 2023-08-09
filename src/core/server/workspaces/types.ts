@@ -22,6 +22,9 @@ export interface WorkspaceAttribute {
   color?: string;
   icon?: string;
   defaultVISTheme?: string;
+}
+
+export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions: Permissions;
 }
 
@@ -44,7 +47,7 @@ export interface IWorkspaceDBImpl {
   setup(dep: WorkspacesSetupDeps): Promise<IResponse<boolean>>;
   create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
   list(
     requestDetail: IRequestDetail,
@@ -52,15 +55,18 @@ export interface IWorkspaceDBImpl {
   ): Promise<
     IResponse<
       {
-        workspaces: WorkspaceAttribute[];
+        workspaces: WorkspaceAttributeWithPermission[];
       } & Pick<SavedObjectsFindResponse, 'page' | 'per_page' | 'total'>
     >
   >;
-  get(requestDetail: IRequestDetail, id: string): Promise<IResponse<WorkspaceAttribute>>;
+  get(
+    requestDetail: IRequestDetail,
+    id: string
+  ): Promise<IResponse<WorkspaceAttributeWithPermission>>;
   update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): Promise<IResponse<boolean>>;
   delete(requestDetail: IRequestDetail, id: string): Promise<IResponse<boolean>>;
   destroy(): Promise<IResponse<boolean>>;

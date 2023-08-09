@@ -9,6 +9,7 @@ import {
   WorkspaceFindOptions,
   IResponse,
   IRequestDetail,
+  WorkspaceAttributeWithPermission,
 } from './types';
 import { WorkspacesSetupDeps } from './workspaces_service';
 import { workspace } from './saved_objects';
@@ -24,11 +25,12 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
   ): SavedObjectsClientContract {
     return requestDetail.context.core.savedObjects.client;
   }
-  private getFlatternedResultWithSavedObject(
+  private getFlattenedResultWithSavedObject(
     savedObject: SavedObject<WorkspaceAttribute>
-  ): WorkspaceAttribute {
+  ): WorkspaceAttributeWithPermission {
     return {
       ...savedObject.attributes,
+      permissions: savedObject.permissions || {},
       id: savedObject.id,
     };
   }
@@ -44,12 +46,15 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
   }
   public async create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): ReturnType<IWorkspaceDBImpl['create']> {
     try {
+      const { permissions, ...attributes } = payload;
       const result = await this.getSavedObjectClientsFromRequestDetail(requestDetail).create<
         Omit<WorkspaceAttribute, 'id'>
-      >(WORKSPACE_TYPE, payload);
+      >(WORKSPACE_TYPE, attributes, {
+        permissions,
+      });
       return {
         success: true,
         result: {
@@ -81,7 +86,7 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
         success: true,
         result: {
           ...others,
-          workspaces: savedObjects.map((item) => this.getFlatternedResultWithSavedObject(item)),
+          workspaces: savedObjects.map((item) => this.getFlattenedResultWithSavedObject(item)),
         },
       };
     } catch (e: unknown) {
@@ -94,14 +99,14 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
   public async get(
     requestDetail: IRequestDetail,
     id: string
-  ): Promise<IResponse<WorkspaceAttribute>> {
+  ): Promise<IResponse<WorkspaceAttributeWithPermission>> {
     try {
       const result = await this.getSavedObjectClientsFromRequestDetail(requestDetail).get<
         WorkspaceAttribute
       >(WORKSPACE_TYPE, id);
       return {
         success: true,
-        result: this.getFlatternedResultWithSavedObject(result),
+        result: this.getFlattenedResultWithSavedObject(result),
       };
     } catch (e: unknown) {
       return {
@@ -113,12 +118,15 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
   public async update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): Promise<IResponse<boolean>> {
+    const { permissions, ...attributes } = payload;
     try {
       await this.getSavedObjectClientsFromRequestDetail(requestDetail).update<
         Omit<WorkspaceAttribute, 'id'>
-      >(WORKSPACE_TYPE, id, payload);
+      >(WORKSPACE_TYPE, id, attributes, {
+        permissions,
+      });
       return {
         success: true,
         result: true,

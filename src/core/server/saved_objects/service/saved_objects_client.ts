@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { Permissions } from '../permission_control/acl';
+
 import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
@@ -68,6 +70,8 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Note: this can only be used for multi-namespace object types.
    */
   initialNamespaces?: string[];
+  /** permission control describe by ACL object */
+  permissions?: Permissions;
 }
 
 /**
@@ -182,6 +186,8 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** permission control describe by ACL object */
+  permissions?: Permissions;
 }
 
 /**

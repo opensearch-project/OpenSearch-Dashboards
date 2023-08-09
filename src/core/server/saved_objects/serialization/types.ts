@@ -73,6 +73,7 @@ interface SavedObjectDoc<T = unknown> {
   updated_at?: string;
   originId?: string;
   workspaces?: string[];
+  permissions?: Permissions;
 }
 
 interface Referencable {

@@ -10,7 +10,11 @@ export {
   InternalWorkspacesServiceStart,
 } from './workspaces_service';
 
-export { WorkspaceAttribute, WorkspaceFindOptions } from './types';
+export {
+  WorkspaceAttribute,
+  WorkspaceFindOptions,
+  WorkspaceAttributeWithPermission,
+} from './types';
 
 export { workspacesValidator, formatWorkspaces } from './utils';
 export { WORKSPACE_TYPE } from './constants';

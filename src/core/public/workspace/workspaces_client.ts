@@ -192,7 +192,7 @@ export class WorkspacesClient {
    * @returns
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id' | 'permissions'> & {
+    attributes: Omit<WorkspaceAttribute, 'id'> & {
       permissions: WorkspaceRoutePermissionItem[];
     }
   ): Promise<IResponse<WorkspaceAttribute>> {
@@ -280,7 +280,7 @@ export class WorkspacesClient {
   public async update(
     id: string,
     attributes: Partial<
-      Omit<WorkspaceAttribute, 'permissions'> & {
+      WorkspaceAttribute & {
         permissions: WorkspaceRoutePermissionItem[];
       }
     >
