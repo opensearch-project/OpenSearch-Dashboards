@@ -29,7 +29,12 @@ import {
 import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
-import { getWorkspaceIdFromUrl, WORKSPACE_PATH_PREFIX } from '../../../core/public/utils';
+import {
+  getWorkspaceIdFromUrl,
+  PUBLIC_WORKSPACE,
+  WORKSPACE_PATH_PREFIX,
+} from '../../../core/public/utils';
+import { WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS } from '../../../core/public/utils';
 
 interface WorkspacesPluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
@@ -63,7 +68,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
   };
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacesPluginSetupDeps) {
     // If workspace feature is disabled, it will not load the workspace plugin
-    if (core.uiSettings.get('workspace:enabled') === false) {
+    if (core.uiSettings.get(WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS) === false) {
       return {};
     }
 
@@ -194,7 +199,9 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     if (this.coreStart) {
       return this.coreStart.workspaces.client.currentWorkspaceId$.subscribe(
         (currentWorkspaceId) => {
-          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+          if (currentWorkspaceId) {
+            this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+          }
         }
       );
     }
@@ -262,7 +269,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
 
   public start(core: CoreStart) {
     // If workspace feature is disabled, it will not load the workspace plugin
-    if (core.uiSettings.get('workspace:enabled') === false) {
+    if (core.uiSettings.get(WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS) === false) {
       return {};
     }
 

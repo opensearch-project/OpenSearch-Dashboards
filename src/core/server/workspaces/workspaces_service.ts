@@ -3,17 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { URL } from 'node:url';
+import { i18n } from '@osd/i18n';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
 import { registerRoutes } from './routes';
-import { InternalSavedObjectsServiceSetup } from '../saved_objects';
-import { IWorkspaceDBImpl } from './types';
+import {
+  ISavedObjectsRepository,
+  InternalSavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+} from '../saved_objects';
+import { IWorkspaceDBImpl, WorkspaceAttribute } from './types';
 import { WorkspacesClientWithSavedObject } from './workspaces_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { InternalUiSettingsServiceSetup } from '../ui_settings';
 import { uiSettings } from './ui_settings';
+import { WORKSPACE_TYPE } from './constants';
+import { MANAGEMENT_WORKSPACE, PUBLIC_WORKSPACE, PermissionMode } from '../../utils';
+import { ACL, Permissions } from '../saved_objects/permission_control/acl';
 
 export interface WorkspacesServiceSetup {
   client: IWorkspaceDBImpl;
@@ -27,6 +35,10 @@ export interface WorkspacesSetupDeps {
   http: InternalHttpServiceSetup;
   savedObject: InternalSavedObjectsServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
+}
+
+export interface WorkpsaceStartDeps {
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export type InternalWorkspacesServiceSetup = WorkspacesServiceSetup;
@@ -89,8 +101,74 @@ export class WorkspacesService
     };
   }
 
-  public async start(): Promise<InternalWorkspacesServiceStart> {
+  private async checkAndCreateWorkspace(
+    internalRepository: ISavedObjectsRepository,
+    workspaceId: string,
+    workspaceAttribute: Omit<WorkspaceAttribute, 'id' | 'permissions'>,
+    permissions?: Permissions
+  ) {
+    /**
+     * Internal repository is attached to global tenant.
+     */
+    try {
+      await internalRepository.get(WORKSPACE_TYPE, workspaceId);
+    } catch (error) {
+      this.logger.debug(error?.toString() || '');
+      this.logger.info(`Workspace ${workspaceId} is not found, create it by using internal user`);
+      try {
+        const createResult = await internalRepository.create(WORKSPACE_TYPE, workspaceAttribute, {
+          id: workspaceId,
+          permissions,
+        });
+        if (createResult.id) {
+          this.logger.info(`Created workspace ${createResult.id} in global tenant.`);
+        }
+      } catch (e) {
+        this.logger.error(`Create ${workspaceId} workspace error: ${e?.toString() || ''}`);
+      }
+    }
+  }
+
+  private async setupWorkspaces(startDeps: WorkpsaceStartDeps) {
+    const internalRepository = startDeps.savedObjects.createInternalRepository();
+    const publicWorkspaceACL = new ACL().addPermission(
+      [PermissionMode.LibraryRead, PermissionMode.LibraryWrite],
+      {
+        users: ['*'],
+      }
+    );
+    const managementWorkspaceACL = new ACL().addPermission([PermissionMode.LibraryRead], {
+      users: ['*'],
+    });
+
+    await Promise.all([
+      this.checkAndCreateWorkspace(
+        internalRepository,
+        PUBLIC_WORKSPACE,
+        {
+          name: i18n.translate('workspaces.public.workspace.default.name', {
+            defaultMessage: 'public',
+          }),
+        },
+        publicWorkspaceACL.getPermissions()
+      ),
+      this.checkAndCreateWorkspace(
+        internalRepository,
+        MANAGEMENT_WORKSPACE,
+        {
+          name: i18n.translate('workspaces.management.workspace.default.name', {
+            defaultMessage: 'Management',
+          }),
+        },
+        managementWorkspaceACL.getPermissions()
+      ),
+    ]);
+  }
+
+  public async start(startDeps: WorkpsaceStartDeps): Promise<InternalWorkspacesServiceStart> {
     this.logger.debug('Starting SavedObjects service');
+
+    this.setupWorkspaces(startDeps);
 
     return {
       client: this.client as IWorkspaceDBImpl,

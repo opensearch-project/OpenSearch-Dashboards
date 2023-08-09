@@ -142,14 +142,6 @@ function getClauseForWorkspace(workspace: string) {
     };
   }
 
-  if (workspace === 'public') {
-    return {
-      bool: {
-        must_not: [{ exists: { field: 'workspaces' } }],
-      },
-    };
-  }
-
   return {
     bool: {
       must: [{ term: { workspaces: workspace } }],

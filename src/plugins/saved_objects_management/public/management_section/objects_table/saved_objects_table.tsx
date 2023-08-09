@@ -94,6 +94,7 @@ import {
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { SavedObjectsCopyModal } from './components/copy_modal';
+import { PUBLIC_WORKSPACE } from '../../../../../core/public/utils';
 
 interface ExportAllOption {
   id: string;
@@ -179,7 +180,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   private get workspaceIdQuery() {
-    return this.state.workspaceId ? ['public', this.state.workspaceId] : ['public'];
+    return this.state.workspaceId
+      ? Array.from(new Set([PUBLIC_WORKSPACE, this.state.workspaceId]))
+      : undefined;
   }
 
   componentDidMount() {

@@ -26,15 +26,6 @@ function WorkspaceColumn({ coreSetup, workspaces, record }: WorkspaceColumnProps
     return map.set(ws.id, ws.name);
   }, new Map<string, string>());
 
-  const publicWsName = i18n.translate('workspace.public.name', {
-    defaultMessage: 'public',
-  });
-  wsLookUp?.set('public', publicWsName);
-
-  if (!workspaces) {
-    return <EuiText>{publicWsName}</EuiText>;
-  }
-
   const workspaceNames = workspaces?.map((wsId) => wsLookUp?.get(wsId)).join(' | ');
 
   return <EuiText>{workspaceNames}</EuiText>;

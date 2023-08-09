@@ -29,7 +29,6 @@
  */
 
 import { Permissions } from '../permission_control/acl';
-
 import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,

@@ -214,26 +214,49 @@ export class WorkspaceSavedObjectsClientWrapper {
         );
         if (options.workspaces) {
           const isEveryWorkspaceIsPermitted = options.workspaces.every((item) =>
-            // TODO modify this line to use permittedWorkspaceIds if public workspace is also a workspace
-            ['public', ...(permittedWorkspaceIds || [])]?.includes(item)
+            (permittedWorkspaceIds || []).includes(item)
           );
           if (!isEveryWorkspaceIsPermitted) {
             throw generateWorkspacePermissionError();
           }
         } else {
           const queryDSL = ACL.genereateGetPermittedSavedObjectsQueryDSL(
-            [
-              PermissionMode.LibraryRead,
-              PermissionMode.LibraryWrite,
-              PermissionMode.Management,
-              PermissionMode.Read,
-              PermissionMode.Write,
-            ],
+            [PermissionMode.Read, PermissionMode.Write],
             principals,
             options.type
           );
-          options.workspaces = permittedWorkspaceIds;
-          options.queryDSL = queryDSL;
+          options.workspaces = undefined;
+          /**
+           * Select all the docs that
+           * 1. ACL matches read or write permission OR
+           * 2. workspaces matches library_read or library_write or management OR
+           * 3. Advanced settings
+           */
+          options.queryDSL = {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          term: {
+                            type: 'config',
+                          },
+                        },
+                        queryDSL.query,
+                        {
+                          terms: {
+                            workspaces: permittedWorkspaceIds,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          };
         }
       }
 
