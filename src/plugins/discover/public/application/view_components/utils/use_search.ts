@@ -58,7 +58,7 @@ export type RefetchSubject = Subject<SearchRefetch>;
  * }, [data$]);
  */
 export const useSearch = (services: DiscoverServices) => {
-  const indexPattern = useIndexPattern();
+  const indexPattern = useIndexPattern(services);
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{

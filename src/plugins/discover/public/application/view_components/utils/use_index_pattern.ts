@@ -7,16 +7,12 @@ import { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../../../data/public';
 import { useSelector } from '../../utils/state_management';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DiscoverViewServices } from '../../../build_services';
+import { DiscoverServices } from '../../../build_services';
 
-export const useIndexPattern = () => {
+export const useIndexPattern = (services: DiscoverServices) => {
   const indexPatternId = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-
-  const {
-    services: { data, toastNotifications },
-  } = useOpenSearchDashboards<DiscoverViewServices>();
+  const { data, toastNotifications } = services;
 
   useEffect(() => {
     if (!indexPatternId) return;
