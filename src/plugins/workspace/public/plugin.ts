@@ -68,6 +68,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
     }
 
     this.coreSetup = core;
+    core.workspaces.client.init();
     core.workspaces.setFormatUrlWithWorkspaceId((url, id) => this.getPatchedUrl(url, id));
     /**
      * Retrieve workspace id from url

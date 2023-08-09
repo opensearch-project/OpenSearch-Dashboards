@@ -12,6 +12,8 @@ import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { IWorkspaceDBImpl } from './types';
 import { WorkspacesClientWithSavedObject } from './workspaces_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
+import { InternalUiSettingsServiceSetup } from '../ui_settings';
+import { uiSettings } from './ui_settings';
 
 export interface WorkspacesServiceSetup {
   client: IWorkspaceDBImpl;
@@ -24,6 +26,7 @@ export interface WorkspacesServiceStart {
 export interface WorkspacesSetupDeps {
   http: InternalHttpServiceSetup;
   savedObject: InternalSavedObjectsServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
 }
 
 export type InternalWorkspacesServiceSetup = WorkspacesServiceSetup;
@@ -57,6 +60,8 @@ export class WorkspacesService
 
   public async setup(setupDeps: WorkspacesSetupDeps): Promise<InternalWorkspacesServiceSetup> {
     this.logger.debug('Setting up Workspaces service');
+
+    setupDeps.uiSettings.register(uiSettings);
 
     this.client = new WorkspacesClientWithSavedObject(setupDeps);
 
