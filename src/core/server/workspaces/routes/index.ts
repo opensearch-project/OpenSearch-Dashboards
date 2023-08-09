@@ -67,7 +67,7 @@ const convertToACL = (
 const convertFromACL = (permissions: Permissions) => {
   const acl = new ACL(permissions);
 
-  return acl.transformPermissions().map(({ name, permissions: modes, type }) => ({
+  return acl.toFlatList().map(({ name, permissions: modes, type }) => ({
     type: type === 'users' ? 'user' : 'group',
     modes,
     ...{ [type === 'users' ? 'userId' : 'group']: name },

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PrincipalType } from '../../../../core/utils/constants';
+import { PrincipalType } from '../../../utils/constants';
 
 export interface Principals {
   users?: string[];
@@ -111,7 +111,7 @@ export class ACL {
     return this;
   }
 
-  // permissions object build funciton, remove specific permission of specific principal from the object
+  // permissions object build function, remove specific permission of specific principal from the object
   public removePermission(permissionTypes: string[], principals: Principals) {
     if (!permissionTypes || !principals) {
       return this;
@@ -134,61 +134,49 @@ export class ACL {
     return this;
   }
 
-  /* 
-        transfrom permissions format
-        original permissions:   {
-            read: {
-                users:['user1']
-            },
-            write:{
-                groups:['group1']
-            }
-        }
-    
-        transformed permissions: [
-            {type:'users',name:'user1',permissions:['read']},
-            {type:'groups',name:'group1',permissions:['write']},
-        ]
-        */
-  public transformPermissions(): TransformedPermission[] {
+  /**
+   * transform permissions format
+   * original permissions:   {
+   *     read: {
+   *         users:['user1']
+   *     },
+   *     write:{
+   *         groups:['group1']
+   *     }
+   * }
+   *
+   * transformed permissions: [
+   *     {type:'users',name:'user1',permissions:['read']},
+   *     {type:'groups',name:'group1',permissions:['write']},
+   * ]
+   */
+  public toFlatList(): TransformedPermission[] {
     const result: TransformedPermission[] = [];
     if (!this.permissions) {
       return result;
     }
 
-    const permissionMapResult: Record<string, Record<string, string[]>> = {};
-    const principalTypes = [PrincipalType.Users, PrincipalType.Groups];
     for (const permissionType in this.permissions) {
-      if (!!permissionType) {
-        const value = this.permissions[permissionType];
-        principalTypes.forEach((principalType) => {
-          if (value?.[principalType]) {
-            for (const principal of value[principalType]!) {
-              if (!permissionMapResult[principalType]) {
-                permissionMapResult[principalType] = {};
-              }
-              if (!permissionMapResult[principalType][principal]) {
-                permissionMapResult[principalType][principal] = [];
-              }
-              permissionMapResult[principalType][principal] = [
-                ...permissionMapResult[principalType][principal]!,
-                permissionType,
-              ];
-            }
+      if (Object.prototype.hasOwnProperty.call(this.permissions, permissionType)) {
+        const { users = [], groups = [] } = this.permissions[permissionType] ?? {};
+        users.forEach((user) => {
+          const found = result.find((r) => r.type === PrincipalType.Users && r.name === user);
+          if (found) {
+            found.permissions.push(permissionType);
+          } else {
+            result.push({ type: PrincipalType.Users, name: user, permissions: [permissionType] });
+          }
+        });
+        groups.forEach((group) => {
+          const found = result.find((r) => r.type === PrincipalType.Groups && r.name === group);
+          if (found) {
+            found.permissions.push(permissionType);
+          } else {
+            result.push({ type: PrincipalType.Groups, name: group, permissions: [permissionType] });
           }
         });
       }
     }
-
-    Object.entries(permissionMapResult).forEach(([type, permissionMap]) => {
-      Object.entries(permissionMap).forEach(([principal, permissions]) => {
-        result.push({
-          type,
-          name: principal,
-          permissions,
-        });
-      });
-    });
 
     return result;
   }
@@ -203,9 +191,9 @@ export class ACL {
     return this.permissions;
   }
 
-  /*
-        generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
-        */
+  /**
+   * generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
+   */
   public static genereateGetPermittedSavedObjectsQueryDSL(
     permissionTypes: string[],
     principals: Principals,
