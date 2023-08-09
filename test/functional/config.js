@@ -84,7 +84,7 @@ export default async function ({ readConfigFile }) {
         hash: '/',
       },
       context: {
-        pathname: '/app/discoverLegacy',
+        pathname: '/app/discover',
         hash: '/context',
       },
       visualize: {

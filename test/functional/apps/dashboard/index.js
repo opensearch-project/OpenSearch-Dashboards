@@ -107,11 +107,11 @@ export default function ({ getService, loadTestFile }) {
       after(unloadLogstash);
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
-      // loadTestFile(require.resolve('./bwc_shared_urls'));
-      // loadTestFile(require.resolve('./panel_replacing'));
-      // loadTestFile(require.resolve('./panel_cloning'));
-      // loadTestFile(require.resolve('./panel_context_menu'));
-      // loadTestFile(require.resolve('./dashboard_state'));
+      loadTestFile(require.resolve('./bwc_shared_urls'));
+      loadTestFile(require.resolve('./panel_replacing'));
+      loadTestFile(require.resolve('./panel_cloning'));
+      loadTestFile(require.resolve('./panel_context_menu'));
+      loadTestFile(require.resolve('./dashboard_state'));
     });
 
     describe('using legacy data', function () {

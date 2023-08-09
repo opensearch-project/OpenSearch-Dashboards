@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
+  const listingTable = getService('listingTable');
   const PageObjects = getPageObjects([
     'dashboard',
     'header',
@@ -53,11 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
-      await opensearchDashboardsServer.uiSettings.replace({
-        'discover:v2': false,
-      });
-      await browser.refresh();
-      await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setHistoricalDataRange();
       await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
@@ -121,6 +117,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(0);
+        // need to find the correct save
+        await PageObjects.dashboard.saveDashboard(dashboardName);
       });
     });
 
@@ -128,11 +126,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const searchName = 'my search';
 
       before(async () => {
+        await opensearchDashboardsServer.uiSettings.replace({
+          'discover:v2': false,
+        });
+        await browser.refresh();
         await PageObjects.header.clickDiscover();
         await PageObjects.discover.clickNewSearchButton();
         await dashboardVisualizations.createSavedSearch({ name: searchName, fields: ['bytes'] });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.header.clickDashboard();
+        // Have to add steps to actually click on the dashboard; since added browser.refresh() will make
+        // clickDashboard() to only land on the dashboard listing page
+        // We need to add browser.refresh() so clickDiscover() lands correctly on the legacy discover page
+        await listingTable.clickItemLink('dashboard', dashboardName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const inViewMode = await PageObjects.dashboard.getIsInViewMode();
         if (inViewMode) await PageObjects.dashboard.switchToEditMode();
