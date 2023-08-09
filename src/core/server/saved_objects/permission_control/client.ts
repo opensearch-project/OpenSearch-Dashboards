@@ -116,7 +116,7 @@ export class SavedObjectsPermissionControl {
     return detailedSavedObjects.reduce((total, current) => {
       return {
         ...total,
-        [current.id]: new ACL(current.permissions).transformPermissions(),
+        [current.id]: new ACL(current.permissions).toFlatList(),
       };
     }, {});
   }

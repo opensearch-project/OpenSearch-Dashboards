@@ -107,8 +107,17 @@ describe('SavedObjectTypeRegistry', () => {
       write: principals,
     };
     acl = new ACL(permissions);
-    const result = acl.transformPermissions();
-    expect(result?.length).toEqual(3);
+    const result = acl.toFlatList();
+    expect(result).toHaveLength(3);
+    expect(result).toEqual(
+      expect.arrayContaining([{ type: 'users', name: 'user1', permissions: ['read', 'write'] }])
+    );
+    expect(result).toEqual(
+      expect.arrayContaining([{ type: 'groups', name: 'group1', permissions: ['read', 'write'] }])
+    );
+    expect(result).toEqual(
+      expect.arrayContaining([{ type: 'groups', name: 'group2', permissions: ['read', 'write'] }])
+    );
   });
 
   it('test generate query DSL', () => {
