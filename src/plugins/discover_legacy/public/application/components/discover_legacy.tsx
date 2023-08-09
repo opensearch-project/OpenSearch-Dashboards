@@ -166,21 +166,23 @@ export function DiscoverLegacy({
     <I18nProvider>
       <div className="dscAppContainer" data-fetch-counter={fetchCounter}>
         <h1 className="euiScreenReaderOnly">{savedSearch.title}</h1>
-        <TopNavMenu
-          appName="discoverLegacy"
-          config={topNavMenu}
-          indexPatterns={[indexPattern]}
-          onQuerySubmit={updateQuery}
-          onSavedQueryIdChange={updateSavedQueryId}
-          query={state.query}
-          setMenuMountPoint={opts.setHeaderActionMenu}
-          savedQueryId={state.savedQuery}
-          screenTitle={savedSearch.title}
-          showDatePicker={indexPattern.isTimeBased()}
-          showSaveQuery={showSaveQuery}
-          showSearchBar={true}
-          useDefaultBehaviors={true}
-        />
+        <div>
+          <TopNavMenu
+            appName="discoverLegacy"
+            config={topNavMenu}
+            indexPatterns={[indexPattern]}
+            onQuerySubmit={updateQuery}
+            onSavedQueryIdChange={updateSavedQueryId}
+            query={state.query}
+            setMenuMountPoint={opts.setHeaderActionMenu}
+            savedQueryId={state.savedQuery}
+            screenTitle={savedSearch.title}
+            showDatePicker={indexPattern.isTimeBased()}
+            showSaveQuery={showSaveQuery}
+            showSearchBar={true}
+            useDefaultBehaviors={true}
+          />
+        </div>
         <main className="container-fluid">
           <div className="row">
             <div
