@@ -42,6 +42,7 @@ import {
 
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
+import { PUBLIC_WORKSPACE } from '../../utils';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
@@ -184,7 +185,11 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
 export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
-  private currentWorkspaceId?: string;
+  /**
+   * if currentWorkspaceId is undefined, it means
+   * we should not carry out workspace info when doing any operation.
+   */
+  private currentWorkspaceId: string | undefined;
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
@@ -229,11 +234,11 @@ export class SavedObjectsClient {
     this.batchQueue = [];
   }
 
-  private async _getCurrentWorkspace(): Promise<string | null> {
-    return this.currentWorkspaceId || null;
+  private _getCurrentWorkspace(): string | undefined {
+    return this.currentWorkspaceId;
   }
 
-  public async setCurrentWorkspace(workspaceId: string): Promise<boolean> {
+  public setCurrentWorkspace(workspaceId: string): boolean {
     this.currentWorkspaceId = workspaceId;
     return true;
   }
@@ -259,7 +264,13 @@ export class SavedObjectsClient {
     const query = {
       overwrite: options.overwrite,
     };
-    const currentWorkspaceId = await this._getCurrentWorkspace();
+    const currentWorkspaceId = this._getCurrentWorkspace();
+    let finalWorkspaces;
+    if (options.hasOwnProperty('workspaces')) {
+      finalWorkspaces = options.workspaces;
+    } else if (typeof currentWorkspaceId === 'string') {
+      finalWorkspaces = [currentWorkspaceId];
+    }
 
     const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
@@ -268,9 +279,9 @@ export class SavedObjectsClient {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
-        ...(options.workspaces || currentWorkspaceId
+        ...(finalWorkspaces
           ? {
-              workspaces: options.workspaces || [currentWorkspaceId],
+              workspaces: finalWorkspaces,
             }
           : {}),
       }),
@@ -366,14 +377,21 @@ export class SavedObjectsClient {
       queryDSL: 'queryDSL',
     };
 
-    const workspaces = [
-      ...(options.workspaces || [await this._getCurrentWorkspace()]),
-      'public',
-    ].filter((item) => item);
+    const currentWorkspaceId = this._getCurrentWorkspace();
+    let finalWorkspaces;
+    if (options.hasOwnProperty('workspaces')) {
+      finalWorkspaces = options.workspaces;
+    } else if (typeof currentWorkspaceId === 'string') {
+      finalWorkspaces = Array.from(new Set([PUBLIC_WORKSPACE, currentWorkspaceId]));
+    }
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
       ...options,
-      workspaces,
+      ...(finalWorkspaces
+        ? {
+            workspaces: finalWorkspaces,
+          }
+        : {}),
     });
     const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Partial<
       Record<string, any>

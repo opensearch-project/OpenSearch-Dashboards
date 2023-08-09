@@ -5,6 +5,7 @@
 
 import { InternalHttpServiceSetup } from '../../../http';
 import { SavedObjectsPermissionControlContract } from '../client';
+import { registerListRoute } from './principals';
 import { registerValidateRoute } from './validate';
 
 export function registerPermissionCheckRoutes({
@@ -17,4 +18,5 @@ export function registerPermissionCheckRoutes({
   const router = http.createRouter('/api/saved_objects_permission_control/');
 
   registerValidateRoute(router, permissionControl);
+  registerListRoute(router, permissionControl);
 }

@@ -48,25 +48,27 @@ export class WorkspacesClient {
 
     combineLatest([this.workspaceList$, this.currentWorkspaceId$]).subscribe(
       ([workspaceList, currentWorkspaceId]) => {
-        const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
+        if (workspaceList.length) {
+          const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
 
-        /**
-         * Do a simple idempotent verification here
-         */
-        if (!isEqual(currentWorkspace, this.currentWorkspace$.getValue())) {
-          this.currentWorkspace$.next(currentWorkspace);
-        }
-
-        if (currentWorkspaceId && !currentWorkspace?.id) {
           /**
-           * Current workspace is staled
+           * Do a simple idempotent verification here
            */
-          this.currentWorkspaceId$.error({
-            reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
-          });
-          this.currentWorkspace$.error({
-            reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
-          });
+          if (!isEqual(currentWorkspace, this.currentWorkspace$.getValue())) {
+            this.currentWorkspace$.next(currentWorkspace);
+          }
+
+          if (currentWorkspaceId && !currentWorkspace?.id) {
+            /**
+             * Current workspace is staled
+             */
+            this.currentWorkspaceId$.error({
+              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+            });
+            this.currentWorkspace$.error({
+              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+            });
+          }
         }
       }
     );
