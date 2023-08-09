@@ -178,6 +178,7 @@ export class Server {
     await this.workspaces.setup({
       http: httpSetup,
       savedObject: savedObjectsSetup,
+      uiSettings: uiSettingsSetup,
     });
 
     const statusSetup = await this.status.setup({

@@ -36,7 +36,6 @@ import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
 import { getCoreSettings } from './index';
 import { getStateSettings } from './state';
-import { getWorkspaceSettings } from './workspace';
 
 describe('getCoreSettings', () => {
   it('should not have setting overlaps', () => {
@@ -49,7 +48,6 @@ describe('getCoreSettings', () => {
       getNotificationsSettings(),
       getThemeSettings(),
       getStateSettings(),
-      getWorkspaceSettings(),
     ].reduce((sum, settings) => sum + Object.keys(settings).length, 0);
 
     expect(coreSettingsLength).toBe(summedLength);
