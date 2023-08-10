@@ -52,8 +52,8 @@ import { SharePluginStart } from 'src/plugins/share/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { History } from 'history';
+import { EmbeddableStart, ViewMode } from '../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { EmbeddableStart, ViewMode } from './embeddable_plugin';
 import { SavedDashboardPanel730ToLatest } from '../common';
 
 export interface DashboardCapabilities {

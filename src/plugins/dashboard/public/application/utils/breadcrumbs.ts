@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { DashboardConstants } from '../../dashboard_constants';
-import { ViewMode } from '../../embeddable_plugin';
+import { ViewMode } from '../../../../embeddable/public';
 
 export function getLandingBreadcrumbs() {
   return [

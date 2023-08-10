@@ -40,9 +40,9 @@ import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../embeddable_plugin_test_samples';
+} from '../../../../../embeddable/public/lib/test_samples';
+import { embeddablePluginMock } from '../../../../../embeddable/public/mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 
