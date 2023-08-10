@@ -24,6 +24,8 @@ import {
   DashboardContainer,
   DashboardContainerInput,
   DashboardPanelState,
+  DashboardEmptyScreen,
+  DashboardEmptyScreenProps,
 } from '../embeddable';
 import {
   ContainerOutput,
@@ -32,12 +34,11 @@ import {
   ViewMode,
   isErrorEmbeddable,
   openAddPanelFlyout,
-} from '../../embeddable_plugin';
+} from '../../../../embeddable/public';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
-} from '../lib/embeddable_saved_object_converters';
-import { DashboardEmptyScreen, DashboardEmptyScreenProps } from '../dashboard_empty_screen';
+} from '../utils/embeddable_saved_object_converters';
 import {
   DashboardAppState,
   DashboardAppStateContainer,
@@ -47,7 +48,7 @@ import {
 import { getSavedObjectFinder } from '../../../../saved_objects/public';
 import { DashboardConstants } from '../../dashboard_constants';
 import { SavedObjectDashboard } from '../../saved_dashboards';
-import { migrateLegacyQuery } from '../lib/migrate_legacy_query';
+import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
 import { Dashboard } from '../../dashboard';
 
 export const createDashboardContainer = async ({

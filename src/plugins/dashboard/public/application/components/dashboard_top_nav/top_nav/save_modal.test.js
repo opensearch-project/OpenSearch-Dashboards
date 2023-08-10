@@ -28,4 +28,25 @@
  * under the License.
  */
 
-export * from '../../../plugins/ui_actions/public';
+import React from 'react';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+
+jest.mock('../../../../../../saved_objects/public', () => ({
+  SavedObjectSaveModal: () => null,
+}));
+
+import { DashboardSaveModal } from './save_modal';
+
+test('renders DashboardSaveModal', () => {
+  const component = shallowWithI18nProvider(
+    <DashboardSaveModal
+      onSave={() => {}}
+      onClose={() => {}}
+      title="dash title"
+      description="dash description"
+      timeRestore={true}
+      showCopyOnSave={true}
+    />
+  );
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});

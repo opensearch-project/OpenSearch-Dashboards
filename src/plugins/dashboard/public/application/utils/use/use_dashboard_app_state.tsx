@@ -9,11 +9,11 @@ import { cloneDeep } from 'lodash';
 import { map } from 'rxjs/operators';
 import { Subscription, merge } from 'rxjs';
 import { IndexPattern, connectToQueryState, opensearchFilters } from '../../../../../data/public';
-import { migrateLegacyQuery } from '../../lib/migrate_legacy_query';
+import { migrateLegacyQuery } from '../../utils/migrate_legacy_query';
 import { DashboardServices } from '../../../types';
 
 import { DashboardAppStateContainer } from '../../../types';
-import { migrateAppState, getAppStateDefaults } from '../../lib';
+import { migrateAppState, getAppStateDefaults } from '../../utils';
 import { createDashboardGlobalAndAppState, updateStateUrl } from '../create_dashboard_app_state';
 import { SavedObjectDashboard } from '../../../saved_dashboards';
 import {
