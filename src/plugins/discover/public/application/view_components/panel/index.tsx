@@ -6,9 +6,9 @@
 import React, { useEffect, useState } from 'react';
 import { ViewProps } from '../../../../../data_explorer/public';
 import {
-  addColumn,
-  removeColumn,
-  reorderColumn,
+  addDiscoverColumn,
+  removeDiscoverColumn,
+  reorderDiscoverColumn,
   useDispatch,
   useSelector,
 } from '../../utils/state_management';
@@ -42,18 +42,18 @@ export default function DiscoverPanel(props: ViewProps) {
       hits={fetchState.rows || []}
       onAddField={(fieldName, index) => {
         dispatch(
-          addColumn({
+          addDiscoverColumn({
             column: fieldName,
             index,
           })
         );
       }}
       onRemoveField={(fieldName) => {
-        dispatch(removeColumn(fieldName));
+        dispatch(removeDiscoverColumn(fieldName));
       }}
       onReorderFields={(source, destination) => {
         dispatch(
-          reorderColumn({
+          reorderDiscoverColumn({
             source,
             destination,
           })

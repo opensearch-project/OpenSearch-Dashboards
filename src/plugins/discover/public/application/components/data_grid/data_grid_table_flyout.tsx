@@ -26,6 +26,8 @@ interface Props {
   onClose: () => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
+  setDetailFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setSurroundingFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function DataGridFlyout({
@@ -36,9 +38,16 @@ export function DataGridFlyout({
   onClose,
   onFilter,
   onRemoveColumn,
+  setDetailFlyoutOpen,
+  setSurroundingFlyoutOpen,
 }: Props) {
   // TODO: replace EuiLink with doc_view_links registry
   // TODO: Also move the flyout higher in the react tree to prevent redrawing the table component and slowing down page performance
+  const openSurroundingFlyout = () => {
+    setSurroundingFlyoutOpen(true);
+    setDetailFlyoutOpen(false);
+  };
+
   return (
     <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutHeader>
@@ -49,7 +58,7 @@ export function DataGridFlyout({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <DocViewerLinks hit={hit} indexPattern={indexPattern} columns={columns} />
+            <DocViewerLinks hit={hit} indexPattern={indexPattern} columns={columns} onClick={openSurroundingFlyout} />
           </EuiFlexItem>
           <EuiFlexItem>
             <DocViewer

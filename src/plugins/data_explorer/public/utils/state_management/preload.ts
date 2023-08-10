@@ -26,7 +26,21 @@ export const getPreloadedState = async (
 
     // defaults can be a function or an object
     if (typeof defaults === 'function') {
-      rootState[view.id] = await defaults();
+      const defaultResult = await defaults();
+
+      // Check if the result contains the view's ID key.
+      // This is used to distinguish between a single registered state and multiple states.
+      // Multiple registered states should return an object with multiple key-value pairs with one key always equal to view.id.
+      if (view.id in defaultResult) {
+        for (const key in defaultResult) {
+          // The body of a for-in should be wrapped in an if statement to filter unwanted properties from the prototype
+          if (defaultResult.hasOwnProperty(key)) {
+            rootState[key] = defaultResult[key];
+          }
+        }
+      } else {
+        rootState[view.id] = defaultResult;
+      }
     } else {
       rootState[view.id] = defaults;
     }

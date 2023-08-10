@@ -33,13 +33,14 @@ export const configurePreloadedStore = (preloadedState: PreloadedState<RootState
 };
 
 export const getPreloadedStore = async (services: DataExplorerServices) => {
-  // For each view preload the data and register the slice
+  // For each view preload the data and register the slices
   const views = services.viewRegistry.all();
   views.forEach((view) => {
     if (!view.ui) return;
 
-    const { slice } = view.ui;
-    registerSlice(slice);
+    view.ui.slices.forEach((slice) => {
+      registerSlice(slice);
+    });
   });
 
   const preloadedState = await loadReduxState(services);

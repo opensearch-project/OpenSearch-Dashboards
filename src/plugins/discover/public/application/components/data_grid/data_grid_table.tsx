@@ -16,6 +16,7 @@ import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { usePagination } from '../utils/use_pagination';
+import { SurroundingDocumentsFlyout } from '../context/surrounding_documents_flyout';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -23,12 +24,14 @@ export interface DataGridTableProps {
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  onSort: (sort: string[][]) => void;
+  onSort: (sort: Array<[string, string]>) => void;
   rows: OpenSearchSearchHit[];
   onSetColumns: (columns: string[]) => void;
   sort: Array<[string, string]>;
+  onResize?: (colSettings: { columnId: string; width: number }) => void;
   displayTimeColumn: boolean;
   services: DiscoverServices;
+  isToolbarVisible?: boolean;
 }
 
 export const DataGridTable = ({
@@ -43,8 +46,11 @@ export const DataGridTable = ({
   rows,
   displayTimeColumn,
   services,
+  isToolbarVisible = true,
 }: DataGridTableProps) => {
   const [expandedHit, setExpandedHit] = useState<OpenSearchSearchHit | undefined>();
+  const [detailFlyoutOpen, setDetailFlyoutOpen] = useState<boolean>(false);
+  const [surroundingFlyoutOpen, setSurroundingFlyoutOpen] = useState<boolean>(false);
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
   const pagination = usePagination(rowCount);
 
@@ -70,8 +76,8 @@ export const DataGridTable = ({
   const dataGridTableColumnsVisibility = useMemo(
     () => ({
       visibleColumns: computeVisibleColumns(columns, indexPattern, displayTimeColumn) as string[],
-      setVisibleColumns: (newColumns: string[]) => {
-        onSetColumns(newColumns);
+      setVisibleColumns: (columns: string[]) => {
+        onSetColumns(columns);
       },
     }),
     [columns, indexPattern, displayTimeColumn, onSetColumns]
@@ -99,6 +105,7 @@ export const DataGridTable = ({
         expandedHit,
         onFilter,
         setExpandedHit,
+        setDetailFlyoutOpen,
         rows: rows || [],
         indexPattern,
       }}
@@ -116,11 +123,11 @@ export const DataGridTable = ({
               renderCellValue={renderCellValue}
               rowCount={rowCount}
               sorting={sorting}
-              toolbarVisibility={toolbarVisibility}
+              toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
             />
           </EuiPanel>
         </EuiPanel>
-        {expandedHit && (
+        {detailFlyoutOpen && (
           <DataGridFlyout
             indexPattern={indexPattern}
             hit={expandedHit}
@@ -128,8 +135,21 @@ export const DataGridTable = ({
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
             onFilter={onFilter}
-            onClose={() => setExpandedHit(undefined)}
+            onClose={() => {
+              setExpandedHit(undefined);
+              setDetailFlyoutOpen(false);
+            }}
             services={services}
+            setDetailFlyoutOpen={setDetailFlyoutOpen}
+            setSurroundingFlyoutOpen={setSurroundingFlyoutOpen}
+          />
+        )}
+        {surroundingFlyoutOpen && expandedHit && (
+          <SurroundingDocumentsFlyout
+            hit={expandedHit}
+            setExpandedHit={setExpandedHit}
+            setDetailFlyoutOpen={setDetailFlyoutOpen}
+            setSurroundingFlyoutOpen={setSurroundingFlyoutOpen}
           />
         )}
       </>

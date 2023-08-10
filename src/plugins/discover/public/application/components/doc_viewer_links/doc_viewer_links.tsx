@@ -17,7 +17,8 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
       const listItem: EuiListGroupItemProps = {
         'data-test-subj': 'docTableRowAction',
         ...props,
-        href: generateCb ? generateCb(renderProps).url : href,
+        //href: generateCb ? generateCb(renderProps).url : href,
+        onClick: renderProps.onClick,
       };
 
       return listItem;

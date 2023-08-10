@@ -19,7 +19,7 @@ export interface ViewDefinition<T = any> {
   readonly title: string;
   readonly ui?: {
     defaults: T | (() => T) | (() => Promise<T>);
-    slice: Slice<T>;
+    slices: Slice[];
   };
   readonly Canvas: LazyExoticComponent<(props: ViewProps) => React.ReactElement>;
   readonly Panel: LazyExoticComponent<(props: ViewProps) => React.ReactElement>;

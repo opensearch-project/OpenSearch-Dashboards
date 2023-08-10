@@ -13,6 +13,7 @@ export interface DataGridContextProps {
   setExpandedHit: (hit?: OpenSearchSearchHit) => void;
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
+  setDetailFlyoutOpen: (isOpen: boolean) => void;
 }
 
 export const DataGridContext = React.createContext<DataGridContextProps>(

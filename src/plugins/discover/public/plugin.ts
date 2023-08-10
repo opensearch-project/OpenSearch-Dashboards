@@ -63,10 +63,13 @@ import { NEW_DISCOVER_APP, PLUGIN_ID } from '../common';
 import { DataExplorerPluginSetup } from '../../data_explorer/public';
 import { registerFeature } from './register_feature';
 import {
-  DiscoverState,
   discoverSlice,
-  getPreloadedState,
+  getPreloadedDiscoverState,
 } from './application/utils/state_management/discover_slice';
+import {
+  discoverContextSlice,
+  getPreloadedDiscoverContextState,
+} from './application/utils/state_management/discover_context_slice';
 import { migrateUrlState } from './migrate_state';
 
 declare module '../../share/public' {
@@ -228,18 +231,6 @@ export class DiscoverPlugin
       order: 1,
     });
 
-    this.docViewsLinksRegistry.addDocViewLink({
-      label: i18n.translate('discover.docTable.tableRow.viewSingleDocumentLinkText', {
-        defaultMessage: 'View single document',
-      }),
-      generateCb: (renderProps) => ({
-        url: `#/doc/${renderProps.indexPattern.id}/${
-          renderProps.hit._index
-        }?id=${encodeURIComponent(renderProps.hit._id)}`,
-      }),
-      order: 2,
-    });
-
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
@@ -311,7 +302,7 @@ export class DiscoverPlugin
       registerFeature(plugins.home);
     }
 
-    plugins.dataExplorer.registerView<DiscoverState>({
+    plugins.dataExplorer.registerView({
       id: PLUGIN_ID,
       title: 'Discover',
       defaultPath: '#/',
@@ -328,9 +319,13 @@ export class DiscoverPlugin
         defaults: async () => {
           this.initializeServices?.();
           const services = getServices();
-          return await getPreloadedState(services);
+          const [discoverState, discoverContextState] = await Promise.all([
+            getPreloadedDiscoverState(services),
+            getPreloadedDiscoverContextState(services),
+          ]);
+          return { discover: discoverState, discoverContext: discoverContextState };
         },
-        slice: discoverSlice,
+        slices: [discoverSlice, discoverContextSlice],
       },
       shouldShow: () => true,
       // ViewComponent
