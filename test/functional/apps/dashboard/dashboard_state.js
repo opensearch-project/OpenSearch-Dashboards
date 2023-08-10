@@ -95,9 +95,7 @@ export default function ({ getService, getPageObjects }) {
       expect(colorChoiceRetained).to.be(true);
     });
 
-    // the following three tests are skipped because of save search save window bug:
-    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4698
-    it.skip('Saved search with no changes will update when the saved object changes', async () => {
+    it('Saved search with no changes will update when the saved object changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.header.clickDiscover();
@@ -129,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
       expect(headers[2]).to.be('agent');
     });
 
-    it.skip('Saved search with column changes will not update when the saved object changes', async () => {
+    it('Saved search with column changes will not update when the saved object changes', async () => {
       await PageObjects.discover.removeHeaderColumn('bytes');
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.saveDashboard('Has local edits');
@@ -147,7 +145,7 @@ export default function ({ getService, getPageObjects }) {
       expect(headers[1]).to.be('agent');
     });
 
-    it.skip('Saved search will update when the query is changed in the URL', async () => {
+    it('Saved search will update when the query is changed in the URL', async () => {
       const currentQuery = await queryBar.getQueryString();
       expect(currentQuery).to.equal('');
       const currentUrl = await browser.getCurrentUrl();

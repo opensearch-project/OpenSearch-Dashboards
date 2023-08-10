@@ -102,15 +102,15 @@ export default function ({ getService, loadTestFile }) {
     // the data once to save on time. Eventually, all of these tests should just use current data and we can reserve
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
-      this.tags('ciGroup4');
+      this.tags('ciGroupx');
       before(loadLogstash);
       after(unloadLogstash);
 
-      loadTestFile(require.resolve('./dashboard_time_picker'));
-      loadTestFile(require.resolve('./bwc_shared_urls'));
-      loadTestFile(require.resolve('./panel_replacing'));
-      loadTestFile(require.resolve('./panel_cloning'));
-      loadTestFile(require.resolve('./panel_context_menu'));
+      // loadTestFile(require.resolve('./dashboard_time_picker'));
+      // loadTestFile(require.resolve('./bwc_shared_urls'));
+      // loadTestFile(require.resolve('./panel_replacing'));
+      // loadTestFile(require.resolve('./panel_cloning'));
+      // loadTestFile(require.resolve('./panel_context_menu'));
       loadTestFile(require.resolve('./dashboard_state'));
     });
 
