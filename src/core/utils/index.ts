@@ -39,8 +39,7 @@ export {
 export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
 export {
   WORKSPACE_PATH_PREFIX,
-  PermissionMode,
+  WorkspacePermissionMode,
   PUBLIC_WORKSPACE,
-  WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS,
   MANAGEMENT_WORKSPACE,
 } from './constants';

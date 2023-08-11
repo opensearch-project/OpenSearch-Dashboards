@@ -5,7 +5,7 @@
 
 export const WORKSPACE_PATH_PREFIX = '/w';
 
-export enum PermissionMode {
+export enum WorkspacePermissionMode {
   Read = 'read',
   Write = 'write',
   Management = 'management',
@@ -13,13 +13,6 @@ export enum PermissionMode {
   LibraryWrite = 'library_write',
 }
 
-export enum PrincipalType {
-  Users = 'users',
-  Groups = 'groups',
-}
-
 export const PUBLIC_WORKSPACE = 'public';
 
 export const MANAGEMENT_WORKSPACE = 'management';
-
-export const WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS = 'workspace:enabled';

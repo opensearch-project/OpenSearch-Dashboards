@@ -61,12 +61,13 @@ import { FormattedMessage } from '@osd/i18n/react';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
-  WorkspacesStart,
+  WorkspaceStart,
   HttpStart,
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
-} from 'src/core/public';
+  PUBLIC_WORKSPACE,
+} from '../../../../../core/public';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -94,7 +95,6 @@ import {
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { SavedObjectsCopyModal } from './components/copy_modal';
-import { PUBLIC_WORKSPACE } from '../../../../../core/public/utils';
 
 interface ExportAllOption {
   id: string;
@@ -110,7 +110,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
-  workspaces: WorkspacesStart;
+  workspaces: WorkspaceStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;
@@ -175,7 +175,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
-      workspaceId: this.props.workspaces.client.currentWorkspaceId$.getValue(),
+      workspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
     };
   }
 
@@ -187,7 +187,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   componentDidMount() {
     this._isMounted = true;
-    this.props.workspaces.client.currentWorkspaceId$.subscribe((workspaceId) =>
+    this.props.workspaces.currentWorkspaceId$.subscribe((workspaceId) =>
       this.setState({
         workspaceId,
       })

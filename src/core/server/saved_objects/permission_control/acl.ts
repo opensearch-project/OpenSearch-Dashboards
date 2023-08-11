@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PrincipalType } from '../../../utils/constants';
+export enum PrincipalType {
+  Users = 'users',
+  Groups = 'groups',
+}
 
 export interface Principals {
   users?: string[];

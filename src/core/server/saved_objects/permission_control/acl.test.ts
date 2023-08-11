@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PermissionMode } from '../../../../core/utils/constants';
 import { Principals, Permissions, ACL } from './acl';
 
 describe('SavedObjectTypeRegistry', () => {
@@ -19,13 +18,13 @@ describe('SavedObjectTypeRegistry', () => {
     };
     acl = new ACL(permissions);
     expect(
-      acl.hasPermission([PermissionMode.Read], {
+      acl.hasPermission(['read'], {
         users: ['user1'],
         groups: [],
       })
     ).toEqual(true);
     expect(
-      acl.hasPermission([PermissionMode.Read], {
+      acl.hasPermission(['read'], {
         users: ['user2'],
         groups: [],
       })
@@ -35,7 +34,7 @@ describe('SavedObjectTypeRegistry', () => {
   it('test add permission', () => {
     acl = new ACL();
     const result1 = acl
-      .addPermission([PermissionMode.Read], {
+      .addPermission(['read'], {
         users: ['user1'],
         groups: [],
       })
@@ -44,7 +43,7 @@ describe('SavedObjectTypeRegistry', () => {
 
     acl.resetPermissions();
     const result2 = acl
-      .addPermission([PermissionMode.Write, PermissionMode.Management], {
+      .addPermission(['write', 'management'], {
         users: ['user2'],
         groups: ['group1', 'group2'],
       })
@@ -64,11 +63,11 @@ describe('SavedObjectTypeRegistry', () => {
     };
     acl = new ACL(permissions1);
     const result1 = acl
-      .removePermission([PermissionMode.Read], {
+      .removePermission(['read'], {
         users: ['user1'],
         groups: [],
       })
-      .removePermission([PermissionMode.Write], {
+      .removePermission(['write'], {
         users: [],
         groups: ['group2'],
       })
@@ -88,7 +87,7 @@ describe('SavedObjectTypeRegistry', () => {
 
     acl = new ACL(permissions2);
     const result2 = acl
-      .removePermission([PermissionMode.Read, PermissionMode.Write], {
+      .removePermission(['read', 'write'], {
         users: ['user1'],
         groups: ['group1'],
       })
@@ -125,11 +124,7 @@ describe('SavedObjectTypeRegistry', () => {
       users: ['user1'],
       groups: ['group1'],
     };
-    const result = ACL.genereateGetPermittedSavedObjectsQueryDSL(
-      [PermissionMode.Read],
-      principals,
-      'workspace'
-    );
+    const result = ACL.genereateGetPermittedSavedObjectsQueryDSL(['read'], principals, 'workspace');
     expect(result).toEqual({
       query: {
         bool: {

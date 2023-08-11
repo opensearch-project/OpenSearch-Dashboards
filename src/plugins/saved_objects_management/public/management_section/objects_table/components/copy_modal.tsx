@@ -30,9 +30,8 @@ import {
   EuiIcon,
   EuiCallOut,
 } from '@elastic/eui';
-import { WorkspaceAttribute, WorkspacesStart } from 'opensearch-dashboards/public';
+import { WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import { iteratorSymbol } from 'immer/dist/internal';
 import { SavedObjectWithMetadata } from '../../../types';
 import { getSavedObjectLabel } from '../../../lib';
 import { SAVED_OBJECT_TYPE_WORKSAPCE } from '../../../constants';
@@ -40,7 +39,7 @@ import { SAVED_OBJECT_TYPE_WORKSAPCE } from '../../../constants';
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
 interface Props {
-  workspaces: WorkspacesStart;
+  workspaces: WorkspaceStart;
   onCopy: (
     savedObjects: SavedObjectWithMetadata[],
     includeReferencesDeep: boolean,
@@ -81,8 +80,8 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
 
   async componentDidMount() {
     const { workspaces } = this.props;
-    const workspaceList = await workspaces.client.workspaceList$;
-    const currentWorkspace = await workspaces.client.currentWorkspace$;
+    const workspaceList = workspaces.workspaceList$;
+    const currentWorkspace = workspaces.currentWorkspace$;
 
     if (!!currentWorkspace?.value?.name) {
       const currentWorkspaceName = currentWorkspace.value.name;

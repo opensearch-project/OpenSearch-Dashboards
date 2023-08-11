@@ -15,8 +15,8 @@ import {
   CriteriaWithPagination,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { useMemo } from 'react';
-import { useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
+import { of } from 'rxjs';
 import { WorkspaceAttribute } from '../../../../../core/public';
 
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
@@ -24,7 +24,7 @@ import { switchWorkspace } from '../utils/workspace';
 
 export const WorkspaceList = () => {
   const {
-    services: { workspaces, application },
+    services: { workspaces, application, http },
   } = useOpenSearchDashboards();
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -32,7 +32,7 @@ export const WorkspaceList = () => {
   const [sortField, setSortField] = useState<'name' | 'id'>('name');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  const workspaceList = useObservable(workspaces!.client.workspaceList$, []);
+  const workspaceList = useObservable(workspaces?.workspaceList$ ?? of([]), []);
 
   const pageOfItems = useMemo(() => {
     return workspaceList
@@ -45,11 +45,11 @@ export const WorkspaceList = () => {
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
-      if (workspaces && application) {
-        switchWorkspace({ workspaces, application }, id);
+      if (application && http) {
+        switchWorkspace({ application, http }, id);
       }
     },
-    [workspaces, application]
+    [application, http]
   );
 
   const columns = [

@@ -11,10 +11,13 @@ import { WorkspaceListApp } from './components/workspace_list_app';
 import { WorkspaceCreatorApp } from './components/workspace_creator_app';
 import { WorkspaceUpdaterApp } from './components/workspace_updater_app';
 import { WorkspaceOverviewApp } from './components/workspace_overview_app';
+import { WorkspaceClient } from './workspace_client';
+
+export type Services = CoreStart & { workspaceClient: WorkspaceClient };
 
 export const renderListApp = (
   { element, history, appBasePath }: AppMountParameters,
-  services: CoreStart
+  services: Services
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
@@ -29,7 +32,7 @@ export const renderListApp = (
 };
 export const renderCreatorApp = (
   { element, history, appBasePath }: AppMountParameters,
-  services: CoreStart
+  services: Services
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
@@ -45,7 +48,7 @@ export const renderCreatorApp = (
 
 export const renderUpdateApp = (
   { element, history, appBasePath }: AppMountParameters,
-  services: CoreStart
+  services: Services
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
@@ -61,7 +64,7 @@ export const renderUpdateApp = (
 
 export const renderOverviewApp = (
   { element, history, appBasePath }: AppMountParameters,
-  services: CoreStart
+  services: Services
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>

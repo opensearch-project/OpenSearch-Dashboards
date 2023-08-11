@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { EuiPageHeader, EuiButton, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React from 'react';
+import { EuiPageHeader, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { ApplicationStart } from '../../../../core/public';
@@ -12,12 +12,10 @@ import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/pu
 
 export const WorkspaceOverview = () => {
   const {
-    services: { workspaces, application, notifications },
+    services: { workspaces },
   } = useOpenSearchDashboards<{ application: ApplicationStart }>();
 
-  const currentWorkspace = useObservable(
-    workspaces ? workspaces.client.currentWorkspace$ : of(null)
-  );
+  const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
 
   return (
     <>
