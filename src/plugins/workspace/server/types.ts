@@ -7,12 +7,10 @@ import {
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
   SavedObjectsFindResponse,
-} from '..';
-
-import { Permissions } from '../saved_objects/permission_control/acl';
-import { PermissionMode } from '../../utils/constants';
-
-import { WorkspacesSetupDeps } from './workspaces_service';
+  CoreSetup,
+  WorkspacePermissionMode,
+  Permissions,
+} from '../../../core/server';
 
 export interface WorkspaceAttribute {
   id: string;
@@ -44,7 +42,7 @@ export interface IRequestDetail {
 }
 
 export interface IWorkspaceDBImpl {
-  setup(dep: WorkspacesSetupDeps): Promise<IResponse<boolean>>;
+  setup(dep: CoreSetup): Promise<IResponse<boolean>>;
   create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'>
@@ -84,6 +82,8 @@ export type IResponse<T> =
 
 export type WorkspaceRoutePermissionItem = {
   modes: Array<
-    PermissionMode.LibraryRead | PermissionMode.LibraryWrite | PermissionMode.Management
+    | WorkspacePermissionMode.LibraryRead
+    | WorkspacePermissionMode.LibraryWrite
+    | WorkspacePermissionMode.Management
   >;
 } & ({ type: 'user'; userId: string } | { type: 'group'; group: string });

@@ -4,18 +4,21 @@
  */
 import { schema } from '@osd/config-schema';
 
-import { PermissionMode } from '../../../utils/constants';
-import { ACL, Permissions } from '../../saved_objects/permission_control/acl';
-import { InternalHttpServiceSetup } from '../../http';
-import { Logger } from '../../logging';
+import {
+  ACL,
+  Permissions,
+  CoreSetup,
+  Logger,
+  WorkspacePermissionMode,
+} from '../../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceRoutePermissionItem } from '../types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
 const workspacePermissionMode = schema.oneOf([
-  schema.literal(PermissionMode.LibraryRead),
-  schema.literal(PermissionMode.LibraryWrite),
-  schema.literal(PermissionMode.Management),
+  schema.literal(WorkspacePermissionMode.LibraryRead),
+  schema.literal(WorkspacePermissionMode.LibraryWrite),
+  schema.literal(WorkspacePermissionMode.Management),
 ]);
 
 const workspacePermission = schema.oneOf([
@@ -81,12 +84,12 @@ export function registerRoutes({
 }: {
   client: IWorkspaceDBImpl;
   logger: Logger;
-  http: InternalHttpServiceSetup;
+  http: CoreSetup['http'];
 }) {
-  const router = http.createRouter(WORKSPACES_API_BASE_URL);
+  const router = http.createRouter();
   router.post(
     {
-      path: '/_list',
+      path: `${WORKSPACES_API_BASE_URL}/_list`,
       validate: {
         body: schema.object({
           search: schema.maybe(schema.string()),
@@ -126,7 +129,7 @@ export function registerRoutes({
   );
   router.get(
     {
-      path: '/{id}',
+      path: `${WORKSPACES_API_BASE_URL}/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -160,7 +163,7 @@ export function registerRoutes({
   );
   router.post(
     {
-      path: '',
+      path: `${WORKSPACES_API_BASE_URL}`,
       validate: {
         body: schema.object({
           attributes: workspaceAttributesSchema,
@@ -186,7 +189,7 @@ export function registerRoutes({
   );
   router.put(
     {
-      path: '/{id?}',
+      path: `${WORKSPACES_API_BASE_URL}/{id?}`,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -217,7 +220,7 @@ export function registerRoutes({
   );
   router.delete(
     {
-      path: '/{id?}',
+      path: `${WORKSPACES_API_BASE_URL}/{id?}`,
       validate: {
         params: schema.object({
           id: schema.string(),

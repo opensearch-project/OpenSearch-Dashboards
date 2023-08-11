@@ -16,8 +16,8 @@ import {
   CoreStart,
   Plugin,
   WorkspaceAttribute,
-  WorkspacesStart,
   DEFAULT_APP_CATEGORIES,
+  HttpSetup,
 } from '../../../core/public';
 import {
   WORKSPACE_LIST_APP_ID,
@@ -29,59 +29,32 @@ import {
 import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
-import {
-  getWorkspaceIdFromUrl,
-  PUBLIC_WORKSPACE,
-  WORKSPACE_PATH_PREFIX,
-} from '../../../core/public/utils';
-import { WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS } from '../../../core/public/utils';
+import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
+import { formatUrlWithWorkspaceId } from './utils';
+import { WorkspaceClient } from './workspace_client';
+import { Services } from './application';
 
-interface WorkspacesPluginSetupDeps {
+interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
-export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDeps> {
-  private coreSetup?: CoreSetup;
+export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
-  private getPatchedUrl = (url: string, workspaceId: string) => {
-    const newUrl = new URL(url, window.location.href);
-    /**
-     * Patch workspace id into path
-     */
-    newUrl.pathname = this.coreSetup?.http.basePath.remove(newUrl.pathname) || '';
-    if (workspaceId) {
-      newUrl.pathname = `${WORKSPACE_PATH_PREFIX}/${workspaceId}${newUrl.pathname}`;
-    } else {
-      newUrl.pathname = newUrl.pathname.replace(/^\/w\/([^\/]*)/, '');
-    }
+  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
+    const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
+    workspaceClient.init();
 
-    newUrl.pathname =
-      this.coreSetup?.http.basePath.prepend(newUrl.pathname, {
-        withoutWorkspace: true,
-      }) || '';
-
-    return newUrl.toString();
-  };
-  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacesPluginSetupDeps) {
-    // If workspace feature is disabled, it will not load the workspace plugin
-    if (core.uiSettings.get(WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS) === false) {
-      return {};
-    }
-
-    this.coreSetup = core;
-    core.workspaces.client.init();
-    core.workspaces.setFormatUrlWithWorkspaceId((url, id) => this.getPatchedUrl(url, id));
     /**
      * Retrieve workspace id from url
      */
     const workspaceId = this.getWorkspaceIdFromURL();
 
     if (workspaceId) {
-      const result = await core.workspaces.client.enterWorkspace(workspaceId);
+      const result = await workspaceClient.enterWorkspace(workspaceId);
       if (!result.success) {
         core.fatalErrors.add(
           result.error ||
@@ -96,11 +69,15 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
-    type WorkspaceAppType = (params: AppMountParameters, services: CoreStart) => () => void;
+    // register apps for library object management
+    savedObjectsManagement?.registerLibrarySubApp();
+
+    type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
       const [coreStart] = await core.getStartServices();
       const services = {
         ...coreStart,
+        workspaceClient,
       };
 
       return renderApp(params, services);
@@ -168,16 +145,17 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
 
   private workspaceToChromeNavLink(
     workspace: WorkspaceAttribute,
-    workspacesStart: WorkspacesStart,
+    http: HttpSetup,
     application: ApplicationStart,
     index: number
   ): ChromeNavLink {
     const id = WORKSPACE_OVERVIEW_APP_ID + '/' + workspace.id;
-    const url = workspacesStart?.formatUrlWithWorkspaceId(
+    const url = formatUrlWithWorkspaceId(
       application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: true,
       }),
-      workspace.id
+      workspace.id,
+      http.basePath
     );
     return {
       id,
@@ -197,13 +175,11 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
 
   private async _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
-      return this.coreStart.workspaces.client.currentWorkspaceId$.subscribe(
-        (currentWorkspaceId) => {
-          if (currentWorkspaceId) {
-            this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
-          }
+      return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
+        if (currentWorkspaceId) {
+          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
         }
-      );
+      });
     }
   }
 
@@ -219,8 +195,8 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
   private filterNavLinks(core: CoreStart) {
     const navLinksService = core.chrome.navLinks;
     const chromeNavLinks$ = navLinksService.getNavLinks$();
-    const workspaceList$ = core.workspaces.client.workspaceList$;
-    const currentWorkspace$ = core.workspaces.client.currentWorkspace$;
+    const workspaceList$ = core.workspaces.workspaceList$;
+    const currentWorkspace$ = core.workspaces.currentWorkspace$;
     combineLatest([
       workspaceList$,
       chromeNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
@@ -235,7 +211,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
         workspaceList
           .filter((workspace, index) => index < 5)
           .map((workspace, index) =>
-            this.workspaceToChromeNavLink(workspace, core.workspaces, core.application, index)
+            this.workspaceToChromeNavLink(workspace, core.http, core.application, index)
           )
           .forEach((workspaceNavLink) =>
             filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink)
@@ -268,17 +244,13 @@ export class WorkspacesPlugin implements Plugin<{}, {}, WorkspacesPluginSetupDep
   }
 
   public start(core: CoreStart) {
-    // If workspace feature is disabled, it will not load the workspace plugin
-    if (core.uiSettings.get(WORKSPACE_FEATURE_FLAG_KEY_IN_UI_SETTINGS) === false) {
-      return {};
-    }
-
     this.coreStart = core;
 
     mountDropdownList({
       application: core.application,
       workspaces: core.workspaces,
       chrome: core.chrome,
+      http: core.http,
     });
     this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     if (core) {

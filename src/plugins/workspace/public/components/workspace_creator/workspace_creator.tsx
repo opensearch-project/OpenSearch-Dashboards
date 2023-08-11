@@ -11,17 +11,19 @@ import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashb
 
 import { WorkspaceForm, WorkspaceFormData } from './workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_OP_TYPE_CREATE } from '../../../common/constants';
+import { formatUrlWithWorkspaceId } from '../../utils';
+import { WorkspaceClient } from '../../workspace_client';
 
 export const WorkspaceCreator = () => {
   const {
-    services: { application, workspaces, notifications },
-  } = useOpenSearchDashboards();
+    services: { application, notifications, http, workspaceClient },
+  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormData) => {
       let result;
       try {
-        result = await workspaces?.client.create(data);
+        result = await workspaceClient.create(data);
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.create.failed', {
@@ -37,12 +39,13 @@ export const WorkspaceCreator = () => {
             defaultMessage: 'Create workspace successfully',
           }),
         });
-        if (application && workspaces) {
-          window.location.href = workspaces.formatUrlWithWorkspaceId(
+        if (application && http) {
+          window.location.href = formatUrlWithWorkspaceId(
             application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
               absolute: true,
             }),
-            result.result.id
+            result.result.id,
+            http.basePath
           );
         }
         return;
@@ -54,7 +57,7 @@ export const WorkspaceCreator = () => {
         text: result?.error,
       });
     },
-    [notifications?.toasts, workspaces, application]
+    [notifications?.toasts, http, application, workspaceClient]
   );
 
   return (

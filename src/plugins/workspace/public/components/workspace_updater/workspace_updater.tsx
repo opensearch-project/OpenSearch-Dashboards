@@ -19,17 +19,16 @@ import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormData } from '../workspace_creator/workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
-import { ApplicationStart } from '../../../../../core/public';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
+import { formatUrlWithWorkspaceId } from '../../utils';
+import { WorkspaceClient } from '../../workspace_client';
 
 export const WorkspaceUpdater = () => {
   const {
-    services: { application, workspaces, notifications, http },
-  } = useOpenSearchDashboards<{ application: ApplicationStart }>();
+    services: { application, workspaces, notifications, http, workspaceClient },
+  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
-  const currentWorkspace = useObservable(
-    workspaces ? workspaces.client.currentWorkspace$ : of(null)
-  );
+  const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
 
   const excludedAttribute = 'id';
   const { [excludedAttribute]: removedProperty, ...otherAttributes } =
@@ -57,7 +56,7 @@ export const WorkspaceUpdater = () => {
         return;
       }
       try {
-        result = await workspaces?.client.update(currentWorkspace?.id, data);
+        result = await workspaceClient.update(currentWorkspace?.id, data);
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.update.failed', {
@@ -73,13 +72,16 @@ export const WorkspaceUpdater = () => {
             defaultMessage: 'Update workspace successfully',
           }),
         });
-        window.location.href =
-          workspaces?.formatUrlWithWorkspaceId(
-            application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
-              absolute: true,
-            }),
-            currentWorkspace.id
-          ) || '';
+        if (application && http) {
+          window.location.href =
+            formatUrlWithWorkspaceId(
+              application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                absolute: true,
+              }),
+              currentWorkspace.id,
+              http.basePath
+            ) || '';
+        }
         return;
       }
       notifications?.toasts.addDanger({
@@ -89,7 +91,7 @@ export const WorkspaceUpdater = () => {
         text: result?.error,
       });
     },
-    [notifications?.toasts, workspaces, currentWorkspace, application]
+    [notifications?.toasts, currentWorkspace, application, http, workspaceClient]
   );
 
   if (!currentWorkspaceFormData.name) {
@@ -99,7 +101,7 @@ export const WorkspaceUpdater = () => {
     if (currentWorkspace?.id) {
       let result;
       try {
-        result = await workspaces?.client.delete(currentWorkspace?.id);
+        result = await workspaceClient.delete(currentWorkspace?.id);
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.delete.failed', {
@@ -125,7 +127,7 @@ export const WorkspaceUpdater = () => {
       }
     }
     setDeleteWorkspaceModalVisible(false);
-    if (http) {
+    if (http && application) {
       const homeUrl = application.getUrlForApp('home', {
         path: '/',
         absolute: false,
@@ -140,7 +142,7 @@ export const WorkspaceUpdater = () => {
   const exitWorkspace = async () => {
     let result;
     try {
-      result = await workspaces?.client.exitWorkspace();
+      result = await workspaceClient.exitWorkspace();
     } catch (error) {
       notifications?.toasts.addDanger({
         title: i18n.translate('workspace.exit.failed', {
@@ -159,7 +161,7 @@ export const WorkspaceUpdater = () => {
       });
       return;
     }
-    if (http) {
+    if (http && application) {
       const homeUrl = application.getUrlForApp('home', {
         path: '/',
         absolute: false,

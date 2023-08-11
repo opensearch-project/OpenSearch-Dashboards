@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsType } from 'opensearch-dashboards/server';
-import { WORKSPACE_TYPE } from '../constants';
+import { SavedObjectsType, WORKSPACE_TYPE } from '../../../../core/server';
 
 export const workspace: SavedObjectsType = {
   name: WORKSPACE_TYPE,

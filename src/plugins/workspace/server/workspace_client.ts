@@ -2,7 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { SavedObject, SavedObjectError, SavedObjectsClientContract } from '../types';
+import type { SavedObject, SavedObjectsClientContract, CoreSetup } from '../../../core/server';
+import { WORKSPACE_TYPE } from '../../../core/server';
 import {
   IWorkspaceDBImpl,
   WorkspaceAttribute,
@@ -11,14 +12,12 @@ import {
   IRequestDetail,
   WorkspaceAttributeWithPermission,
 } from './types';
-import { WorkspacesSetupDeps } from './workspaces_service';
 import { workspace } from './saved_objects';
-import { WORKSPACE_TYPE } from './constants';
 
-export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
-  private setupDep: WorkspacesSetupDeps;
-  constructor(dep: WorkspacesSetupDeps) {
-    this.setupDep = dep;
+export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
+  private setupDep: CoreSetup;
+  constructor(core: CoreSetup) {
+    this.setupDep = core;
   }
   private getSavedObjectClientsFromRequestDetail(
     requestDetail: IRequestDetail
@@ -34,11 +33,11 @@ export class WorkspacesClientWithSavedObject implements IWorkspaceDBImpl {
       id: savedObject.id,
     };
   }
-  private formatError(error: SavedObjectError | Error | any): string {
+  private formatError(error: Error | any): string {
     return error.message || error.error || 'Error';
   }
-  public async setup(dep: WorkspacesSetupDeps): Promise<IResponse<boolean>> {
-    this.setupDep.savedObject.registerType(workspace);
+  public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
+    this.setupDep.savedObjects.registerType(workspace);
     return {
       success: true,
       result: true,

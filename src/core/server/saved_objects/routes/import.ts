@@ -35,7 +35,6 @@ import { IRouter } from '../../http';
 import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
-import { formatWorkspaces, workspacesValidator } from '../../workspaces';
 
 interface FileStream extends Readable {
   hapi: {
@@ -61,7 +60,9 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
           {
             overwrite: schema.boolean({ defaultValue: false }),
             createNewCopies: schema.boolean({ defaultValue: false }),
-            workspaces: workspacesValidator,
+            workspaces: schema.maybe(
+              schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+            ),
           },
           {
             validate: (object) => {
@@ -93,7 +94,9 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         });
       }
 
-      const workspaces = formatWorkspaces(req.query.workspaces);
+      const workspaces = req.query.workspaces
+        ? Array<string>().concat(req.query.workspaces)
+        : undefined;
 
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,

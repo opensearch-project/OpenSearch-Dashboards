@@ -20,7 +20,7 @@ interface WorkspaceColumnProps {
 }
 
 function WorkspaceColumn({ coreSetup, workspaces, record }: WorkspaceColumnProps) {
-  const workspaceList = useObservable(coreSetup.workspaces.client.workspaceList$);
+  const workspaceList = useObservable(coreSetup.workspaces.workspaceList$);
 
   const wsLookUp = workspaceList?.reduce((map, ws) => {
     return map.set(ws.id, ws.name);

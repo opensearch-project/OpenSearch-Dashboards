@@ -35,4 +35,3 @@ export * from './ui_settings/types';
 export * from './legacy/types';
 export type { EnvironmentMode, PackageInfo } from '@osd/config';
 export { Branding } from '../../core/types';
-export * from './workspaces/types';

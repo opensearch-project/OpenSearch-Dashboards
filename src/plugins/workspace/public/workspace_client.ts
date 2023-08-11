@@ -2,19 +2,23 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import type { PublicContract } from '@osd/utility-types';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
-import { HttpFetchError, HttpFetchOptions, HttpSetup } from '../http';
-import { WorkspaceAttribute, WorkspaceFindOptions, WorkspaceRoutePermissionItem } from '.';
-import { WORKSPACES_API_BASE_URL, WORKSPACE_ERROR_REASON_MAP } from './consts';
 
-/**
- * WorkspacesClientContract as implemented by the {@link WorkspacesClient}
- *
- * @public
- */
-export type WorkspacesClientContract = PublicContract<WorkspacesClient>;
+import {
+  HttpFetchError,
+  HttpFetchOptions,
+  HttpSetup,
+  WorkspaceAttribute,
+  WorkspaceStart,
+} from '../../../core/public';
+import { WorkspacePermissionMode } from '../../../core/public';
+
+const WORKSPACES_API_BASE_URL = '/api/workspaces';
+
+enum WORKSPACE_ERROR_REASON_MAP {
+  WORKSPACE_STALED = 'WORKSPACE_STALED',
+}
 
 const join = (...uriComponents: Array<string | undefined>) =>
   uriComponents
@@ -32,21 +36,38 @@ type IResponse<T> =
       error?: string;
     };
 
+type WorkspaceRoutePermissionItem = {
+  modes: Array<
+    | WorkspacePermissionMode.LibraryRead
+    | WorkspacePermissionMode.LibraryWrite
+    | WorkspacePermissionMode.Management
+  >;
+} & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
+
+interface WorkspaceFindOptions {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: string;
+}
+
 /**
  * Workspaces is OpenSearchDashboards's visualize mechanism allowing admins to
  * organize related features
  *
  * @public
  */
-export class WorkspacesClient {
+export class WorkspaceClient {
   private http: HttpSetup;
-  public currentWorkspaceId$ = new BehaviorSubject<string>('');
-  public workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
-  public currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
-  constructor(http: HttpSetup) {
-    this.http = http;
+  private workspaces: WorkspaceStart;
 
-    combineLatest([this.workspaceList$, this.currentWorkspaceId$]).subscribe(
+  constructor(http: HttpSetup, workspaces: WorkspaceStart) {
+    this.http = http;
+    this.workspaces = workspaces;
+
+    combineLatest([workspaces.workspaceList$, workspaces.currentWorkspaceId$]).subscribe(
       ([workspaceList, currentWorkspaceId]) => {
         if (workspaceList.length) {
           const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
@@ -54,18 +75,18 @@ export class WorkspacesClient {
           /**
            * Do a simple idempotent verification here
            */
-          if (!isEqual(currentWorkspace, this.currentWorkspace$.getValue())) {
-            this.currentWorkspace$.next(currentWorkspace);
+          if (!isEqual(currentWorkspace, workspaces.currentWorkspace$.getValue())) {
+            workspaces.currentWorkspace$.next(currentWorkspace);
           }
 
           if (currentWorkspaceId && !currentWorkspace?.id) {
             /**
              * Current workspace is staled
              */
-            this.currentWorkspaceId$.error({
+            workspaces.currentWorkspaceId$.error({
               reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
             });
-            this.currentWorkspace$.error({
+            workspaces.currentWorkspace$.error({
               reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
             });
           }
@@ -137,14 +158,14 @@ export class WorkspacesClient {
     });
 
     if (result?.success) {
-      this.workspaceList$.next(result.result.workspaces);
+      this.workspaces.workspaceList$.next(result.result.workspaces);
     }
   }
 
   public async enterWorkspace(id: string): Promise<IResponse<null>> {
     const workspaceResp = await this.get(id);
     if (workspaceResp.success) {
-      this.currentWorkspaceId$.next(id);
+      this.workspaces.currentWorkspaceId$.next(id);
       return {
         success: true,
         result: null,
@@ -155,7 +176,7 @@ export class WorkspacesClient {
   }
 
   public async exitWorkspace(): Promise<IResponse<null>> {
-    this.currentWorkspaceId$.next('');
+    this.workspaces.currentWorkspaceId$.next('');
     return {
       success: true,
       result: null,
@@ -163,7 +184,7 @@ export class WorkspacesClient {
   }
 
   public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
-    const currentWorkspaceId = this.currentWorkspaceId$.getValue();
+    const currentWorkspaceId = this.workspaces.currentWorkspaceId$.getValue();
     if (!currentWorkspaceId) {
       return {
         success: false,
@@ -305,7 +326,7 @@ export class WorkspacesClient {
   }
 
   public stop() {
-    this.workspaceList$.unsubscribe();
-    this.currentWorkspaceId$.unsubscribe();
+    this.workspaces.workspaceList$.unsubscribe();
+    this.workspaces.currentWorkspaceId$.unsubscribe();
   }
 }

@@ -84,3 +84,7 @@ export {
 
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
+
+export { WORKSPACE_TYPE } from './constants';
+export { Permissions, ACL } from './permission_control/acl';
+export { SavedObjectsPermissionControlContract } from './permission_control/client';

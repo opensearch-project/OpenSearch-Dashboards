@@ -1,7 +1,7 @@
 {
   "id": "workspace",
   "version": "opensearchDashboards",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["savedObjects"],
   "optionalPlugins": ["savedObjectsManagement"],

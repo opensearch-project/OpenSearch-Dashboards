@@ -8,7 +8,7 @@ import { IRouter } from '../../http';
 import { exportSavedObjectsToStream } from '../export';
 import { validateObjects } from './utils';
 import { collectSavedObjects } from '../import/collect_saved_objects';
-import { WORKSPACE_TYPE } from '../../workspaces';
+import { WORKSPACE_TYPE } from '../constants';
 import { PUBLIC_WORKSPACE } from '../../../utils/constants';
 
 const SHARE_LIMIT = 10000;

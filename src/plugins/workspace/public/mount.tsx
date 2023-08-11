@@ -5,23 +5,25 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ApplicationStart, ChromeStart, WorkspacesStart } from '../../../core/public';
+import { ApplicationStart, ChromeStart, HttpSetup, WorkspaceStart } from '../../../core/public';
 import { WorkspaceDropdownList } from './containers/workspace_dropdown_list';
 
 export const mountDropdownList = ({
   application,
   workspaces,
   chrome,
+  http,
 }: {
   application: ApplicationStart;
-  workspaces: WorkspacesStart;
+  workspaces: WorkspaceStart;
   chrome: ChromeStart;
+  http: HttpSetup;
 }) => {
   chrome.navControls.registerLeft({
     order: 0,
     mount: (element) => {
       ReactDOM.render(
-        <WorkspaceDropdownList workspaces={workspaces} application={application} />,
+        <WorkspaceDropdownList http={http} workspaces={workspaces} application={application} />,
         element
       );
       return () => {
