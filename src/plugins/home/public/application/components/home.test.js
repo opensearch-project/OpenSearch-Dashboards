@@ -39,7 +39,7 @@ jest.mock('../opensearch_dashboards_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
     tutorialVariables: () => ({}),
-    homeConfig: { disableWelcomeScreen: false },
+    homeConfig: { disableWelcomeScreen: false, disableNewThemeModal: false },
     chrome: {
       setBreadcrumbs: () => {},
     },
@@ -80,7 +80,7 @@ describe('home', () => {
       },
       localStorage: {
         getItem: sinon.spy((path) => {
-          expect(path).toEqual('home:welcome:show');
+          expect(path).toMatch(/home:(welcome|newThemeModal):show/);
           return 'false';
         }),
         setItem: sinon.mock(),
@@ -284,7 +284,7 @@ describe('home', () => {
         find: () => Promise.resolve({ total: 0 }),
       });
 
-      sinon.assert.calledOnce(defaultProps.localStorage.getItem);
+      sinon.assert.calledWith(defaultProps.localStorage.getItem, 'home:welcome:show');
 
       expect(component).toMatchSnapshot();
     });
