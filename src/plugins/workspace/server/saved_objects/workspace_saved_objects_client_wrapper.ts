@@ -327,6 +327,16 @@ export class WorkspaceSavedObjectsClientWrapper {
                             workspaces: permittedWorkspaceIds,
                           },
                         },
+                        // TODO: remove this child clause when home workspace proposal is finalized.
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'workspaces',
+                              },
+                            },
+                          },
+                        },
                       ],
                     },
                   },
