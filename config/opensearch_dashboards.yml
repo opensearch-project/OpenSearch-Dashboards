@@ -233,7 +233,7 @@
 
 # Set the value of this setting to false to disable VisBuilder
 # functionality in Visualization.
-vis_builder.enabled: false
+# vis_builder.enabled: false
 
 # Set the value of this setting to true to enable multiple data source feature.
 #data_source.enabled: false
