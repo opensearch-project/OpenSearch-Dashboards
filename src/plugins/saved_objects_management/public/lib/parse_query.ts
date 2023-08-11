@@ -33,12 +33,15 @@ import { Query } from '@elastic/eui';
 interface ParsedQuery {
   queryText?: string;
   visibleTypes?: string[];
+  visibleNamespaces?: string[];
+  visibleWorkspaces?: string[];
 }
 
 export function parseQuery(query: Query): ParsedQuery {
   let queryText: string | undefined;
   let visibleTypes: string[] | undefined;
   let visibleNamespaces: string[] | undefined;
+  let visibleWorkspaces: string[] | undefined;
 
   if (query) {
     if (query.ast.getTermClauses().length) {
@@ -53,11 +56,15 @@ export function parseQuery(query: Query): ParsedQuery {
     if (query.ast.getFieldClauses('namespaces')) {
       visibleNamespaces = query.ast.getFieldClauses('namespaces')[0].value as string[];
     }
+    if (query.ast.getFieldClauses('workspaces')) {
+      visibleWorkspaces = query.ast.getFieldClauses('workspaces')[0].value as string[];
+    }
   }
 
   return {
     queryText,
     visibleTypes,
     visibleNamespaces,
+    visibleWorkspaces,
   };
 }
