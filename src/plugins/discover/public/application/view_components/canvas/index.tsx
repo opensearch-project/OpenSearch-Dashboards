@@ -4,10 +4,11 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
+import { DiscoverChartContainer } from './discover_chart_container';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
@@ -23,7 +24,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
           <EuiPanel>
-            <EuiLoadingChart />
+            <DiscoverChartContainer />
           </EuiPanel>
         </EuiPanel>
       </EuiFlexItem>

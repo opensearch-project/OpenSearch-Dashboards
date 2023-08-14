@@ -41,6 +41,12 @@ import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 
+export interface TimechartHeaderBucketInterval {
+  scaled?: boolean;
+  description?: string;
+  scale?: number;
+}
+
 export interface TimechartHeaderProps {
   /**
    * Format of date to be displayed
