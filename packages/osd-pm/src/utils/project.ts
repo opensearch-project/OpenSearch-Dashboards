@@ -47,6 +47,7 @@ import {
   runScriptInPackageStreaming,
   yarnWorkspacesInfo,
 } from './scripts';
+import { buildTargetedPackage, BuildTargets, BuildTargetTypes } from './targeted_build';
 
 interface BuildConfig {
   skip?: boolean;
@@ -84,6 +85,10 @@ export class Project {
   public readonly devDependencies: IPackageDependencies;
   /** scripts defined in the package.json file for the project [name => body] */
   public readonly scripts: IPackageScripts;
+  /** custom definitions for the project, @osd/pm: { key: value } */
+  public readonly customDefinitions: IPackageJson;
+  /** build targets from the custom definitions, @osd/pm: { node: true, web: true } */
+  public readonly buildTargets: BuildTargetTypes[];
 
   public isWorkspaceRoot = false;
   public isWorkspaceProject = false;
@@ -106,6 +111,12 @@ export class Project {
     this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
 
     this.scripts = this.json.scripts || {};
+    this.customDefinitions = this.json['@osd/pm'] || {};
+
+    this.buildTargets = [];
+    for (const target of BuildTargets) {
+      if (this.customDefinitions[target]) this.buildTargets.push(target);
+    }
   }
 
   public get name(): string {
@@ -172,6 +183,10 @@ export class Project {
     return name in this.scripts;
   }
 
+  public hasBuildTargets() {
+    return this.buildTargets.length > 0;
+  }
+
   public getExecutables(): { [key: string]: string } {
     const raw = this.json.bin;
 
@@ -217,6 +232,18 @@ export class Project {
       args: options.args || [],
       pkg: this,
       debug: options.debug,
+    });
+  }
+
+  public buildForTargets(options: { sourceMaps?: boolean } = {}) {
+    if (!this.hasBuildTargets()) {
+      log.warning(`There are no build targets defined for [${this.name}]`);
+      return false;
+    }
+
+    return buildTargetedPackage({
+      pkg: this,
+      sourceMaps: options.sourceMaps,
     });
   }
 
