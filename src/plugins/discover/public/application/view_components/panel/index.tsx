@@ -14,7 +14,7 @@ import {
 } from '../../utils/state_management';
 import { DiscoverSidebar } from '../../components/sidebar';
 import { useDiscoverContext } from '../context';
-import { SearchData } from '../utils/use_search';
+import { ResultStatus, SearchData } from '../utils/use_search';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverPanel(props: ViewProps) {
@@ -28,6 +28,7 @@ export default function DiscoverPanel(props: ViewProps) {
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
+      if (next.status === ResultStatus.LOADING) return;
       setFetchState(next);
     });
     return () => {

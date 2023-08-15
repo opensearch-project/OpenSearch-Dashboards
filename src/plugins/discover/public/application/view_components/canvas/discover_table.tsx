@@ -10,7 +10,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { useDiscoverContext } from '../context';
 import { addColumn, removeColumn, useDispatch, useSelector } from '../../utils/state_management';
-import { SearchData } from '../utils/use_search';
+import { ResultStatus, SearchData } from '../utils/use_search';
 
 interface Props {
   history: History;
@@ -31,6 +31,7 @@ export const DiscoverTable = ({ history }: Props) => {
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
+      if (next.status === ResultStatus.LOADING) return;
       if (next.status !== fetchState.status || (next.rows && next.rows !== fetchState.rows)) {
         setFetchState({ ...fetchState, ...next });
       }
