@@ -15,6 +15,7 @@ export const useIndexPattern = (services: DiscoverServices) => {
   const { data, toastNotifications } = services;
 
   useEffect(() => {
+    let isMounted = true;
     if (!indexPatternId) return;
     const indexPatternMissingWarning = i18n.translate(
       'discover.valueIsNotConfiguredIndexPatternIDWarningTitle',
@@ -28,12 +29,22 @@ export const useIndexPattern = (services: DiscoverServices) => {
 
     data.indexPatterns
       .get(indexPatternId)
-      .then(setIndexPattern)
+      .then((result) => {
+        if (isMounted) {
+          setIndexPattern(result);
+        }
+      })
       .catch(() => {
-        toastNotifications.addDanger({
-          title: indexPatternMissingWarning,
-        });
+        if (isMounted) {
+          toastNotifications.addDanger({
+            title: indexPatternMissingWarning,
+          });
+        }
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, [indexPatternId, data.indexPatterns, toastNotifications]);
 
   return indexPattern;

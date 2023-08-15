@@ -45,14 +45,21 @@ export const TopNav = ({ opts }: TopNavProps) => {
   }, [navigateToApp, uiSettings]);
 
   useEffect(() => {
+    let isMounted = true;
     const getDefaultIndexPattern = async () => {
       await data.indexPatterns.ensureDefaultIndexPattern();
       const indexPattern = await data.indexPatterns.getDefault();
+
+      if (!isMounted) return;
 
       setIndexPatterns(indexPattern ? [indexPattern] : undefined);
     };
 
     getDefaultIndexPattern();
+
+    return () => {
+      isMounted = false;
+    };
   }, [data.indexPatterns]);
 
   return (
