@@ -102,7 +102,7 @@ export default function ({ getService, loadTestFile }) {
     // the data once to save on time. Eventually, all of these tests should just use current data and we can reserve
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
-      this.tags('ciGroupx');
+      this.tags('ciGroup4');
       before(loadLogstash);
       after(unloadLogstash);
 
