@@ -17,6 +17,7 @@ import {
   MANAGEMENT_WORKSPACE,
   Permissions,
   WorkspacePermissionMode,
+  SavedObjectsClient,
 } from '../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceAttribute } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
@@ -71,6 +72,10 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       logger: this.logger,
       client: this.client as IWorkspaceDBImpl,
     });
+
+    core.savedObjects.setClientFactoryProvider((repositoryFactory) => () =>
+      new SavedObjectsClient(repositoryFactory.createInternalRepository())
+    );
 
     return {
       client: this.client,
