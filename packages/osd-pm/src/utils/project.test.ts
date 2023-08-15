@@ -32,6 +32,12 @@ import { join, resolve } from 'path';
 
 import { IPackageJson } from './package_json';
 import { Project } from './project';
+import { buildTargetedPackage } from './targeted_build';
+
+jest.mock('./targeted_build', () => ({
+  ...jest.requireActual('./targeted_build'),
+  buildTargetedPackage: jest.fn(() => true),
+}));
 
 const rootPath = resolve(`${__dirname}/__fixtures__/opensearch-dashboards`);
 
@@ -243,5 +249,58 @@ describe('#getIntermediateBuildDirectory', () => {
     const path = project.getIntermediateBuildDirectory();
 
     expect(path).toBe(join(project.path, 'quux'));
+  });
+});
+
+describe('#customDefinitions', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('can identify build targets', async () => {
+    const project = await Project.fromPath(join(rootPath, 'packages/bar'));
+
+    expect(project.customDefinitions).toEqual(
+      expect.objectContaining({
+        web: true,
+        node: true,
+        extra: 'test',
+      })
+    );
+
+    expect(project.hasBuildTargets()).toBeTruthy();
+  });
+
+  test('can identify absence of build targets', async () => {
+    const project = await Project.fromPath(join(rootPath, 'packages/foo'));
+
+    expect(project.customDefinitions).toEqual({});
+
+    expect(project.hasBuildTargets()).toBeFalsy();
+  });
+});
+
+describe('#buildForTargets', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('can identify build targets', async () => {
+    const project = await Project.fromPath(join(rootPath, 'packages/bar'));
+
+    expect(project.buildForTargets({ sourceMaps: true })).toBeTruthy();
+    expect(buildTargetedPackage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pkg: project,
+        sourceMaps: true,
+      })
+    );
+  });
+
+  test('can identify absence of build targets', async () => {
+    const project = await Project.fromPath(join(rootPath, 'packages/foo'));
+
+    expect(project.buildForTargets()).toBeFalsy();
+    expect(buildTargetedPackage).not.toHaveBeenCalled();
   });
 });
