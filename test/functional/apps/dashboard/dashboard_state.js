@@ -95,6 +95,8 @@ export default function ({ getService, getPageObjects }) {
       expect(colorChoiceRetained).to.be(true);
     });
 
+    // the following three tests are skipped because of save search save window bug:
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4698
     it('Saved search with no changes will update when the saved object changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
