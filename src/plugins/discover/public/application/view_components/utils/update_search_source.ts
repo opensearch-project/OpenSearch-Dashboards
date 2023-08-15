@@ -19,9 +19,16 @@ interface Props {
   services: DiscoverServices;
   sort: SortOrder[] | undefined;
   searchSource?: ISearchSource;
+  histogramConfigs?: AggConfigs;
 }
 
-export const updateSearchSource = async ({ indexPattern, services, searchSource, sort }: Props) => {
+export const updateSearchSource = async ({
+  indexPattern,
+  services,
+  searchSource,
+  sort,
+  histogramConfigs,
+}: Props) => {
   const { uiSettings, data } = services;
   const sortForSearchSource = getSortForSearchSource(
     sort,

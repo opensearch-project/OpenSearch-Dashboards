@@ -114,6 +114,7 @@ export const useSearch = (services: DiscoverServices) => {
       services,
       sort,
       searchSource: savedSearch?.searchSource,
+      histogramConfigs,
     });
 
     try {
