@@ -6,10 +6,16 @@
 import { Slice } from '@reduxjs/toolkit';
 import { LazyExoticComponent } from 'react';
 import { AppMountParameters } from '../../../../../core/public';
+import { RootState } from '../../utils/state_management';
 
 interface ViewListItem {
   id: string;
   label: string;
+}
+
+export interface DefaultViewState<T = unknown> {
+  state: T;
+  root?: Partial<RootState>;
 }
 
 export type ViewProps = AppMountParameters;
@@ -18,7 +24,7 @@ export interface ViewDefinition<T = any> {
   readonly id: string;
   readonly title: string;
   readonly ui?: {
-    defaults: T | (() => T) | (() => Promise<T>);
+    defaults: DefaultViewState | (() => DefaultViewState) | (() => Promise<DefaultViewState>);
     slice: Slice<T>;
   };
   readonly Canvas: LazyExoticComponent<(props: ViewProps) => React.ReactElement>;

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { useEffect } from 'react';
@@ -21,6 +21,8 @@ import {
   createHistogramConfigs,
   Chart,
 } from '../../components/chart/utils';
+import { SavedSearch } from '../../../saved_searches';
+import { useSelector } from '../../utils/state_management';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -47,7 +49,7 @@ export type RefetchSubject = Subject<SearchRefetch>;
 
 /**
  * A hook that provides functionality for fetching and managing discover search data.
- * @returns { data: DataSubject, refetch$: RefetchSubject, indexPattern: IndexPattern } - data is a BehaviorSubject that emits the current search data, refetch$ is a Subject that can be used to trigger a refetch.
+ * @returns { data: DataSubject, refetch$: RefetchSubject, indexPattern: IndexPattern, savedSearch?: SavedSearch } - data is a BehaviorSubject that emits the current search data, refetch$ is a Subject that can be used to trigger a refetch, savedSearch is the saved search object if it exists
  * @example
  * const { data$, refetch$ } = useSearch();
  * useEffect(() => {
@@ -58,8 +60,10 @@ export type RefetchSubject = Subject<SearchRefetch>;
  * }, [data$]);
  */
 export const useSearch = (services: DiscoverServices) => {
+  const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
+  const savedSearchId = useSelector((state) => state.discover.savedSearch);
   const indexPattern = useIndexPattern(services);
-  const { data, filterManager } = services;
+  const { data, filterManager, getSavedSearchById } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
@@ -169,10 +173,23 @@ export const useSearch = (services: DiscoverServices) => {
     };
   }, [data$, data.query.queryString, filterManager, refetch$, timefilter, fetch]);
 
+  // Get savedSearch if it exists
+  useEffect(() => {
+    (async () => {
+      if (!savedSearchId) return;
+
+      const savedSearchInstance = await getSavedSearchById(savedSearchId);
+      setSavedSearch(savedSearchInstance);
+    })();
+
+    return () => {};
+  }, [getSavedSearchById, savedSearchId]);
+
   return {
     data$,
     refetch$,
     indexPattern,
+    savedSearch,
   };
 };
 

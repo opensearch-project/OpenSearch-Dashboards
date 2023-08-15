@@ -11,6 +11,10 @@ interface CommonParams {
   appState?: string;
 }
 
+interface DiscoverParams extends CommonParams {
+  id?: string;
+}
+
 interface ContextParams extends CommonParams {
   indexPattern: string;
   id: string;
@@ -62,21 +66,26 @@ export function migrateUrlState(oldPath: string, newPath = '/'): string {
   let path = newPath;
   const pathPatterns = [
     {
-      pattern: '#/context/:indexPattern/:id\\?:appState',
+      pattern: '#/context/:indexPattern/:id\\?:appState?',
       extraState: { docView: 'context' },
       path: `context`,
     },
     {
-      pattern: '#/doc/:indexPattern/:index\\?:appState',
+      pattern: '#/doc/:indexPattern/:index\\?:appState?',
       extraState: { docView: 'doc' },
       path: `doc`,
     },
-    { pattern: '#/\\?:appState', extraState: {}, path: `discover` },
+    {
+      pattern: '#/view/:id',
+      extraState: {},
+      path: `savedSearch`,
+    },
+    { pattern: '#/', extraState: {}, path: `discover` },
   ];
 
   // Get the first matching path pattern.
   const matchingPathPattern = pathPatterns.find((pathPattern) =>
-    matchPath(oldPath, { path: pathPattern.pattern })
+    matchPath(oldPath, { path: pathPattern.pattern, strict: false })
   );
 
   if (!matchingPathPattern) {
@@ -86,11 +95,17 @@ export function migrateUrlState(oldPath: string, newPath = '/'): string {
   // Migrate the path.
   switch (matchingPathPattern.path) {
     case `discover`:
-      const params = matchPath<CommonParams>(oldPath, {
+    case `savedSearch`:
+      const params = matchPath<DiscoverParams>(oldPath, {
         path: matchingPathPattern.pattern,
       })!.params;
 
-      const appState = getStateFromOsdUrl<LegacyDiscoverState>('_a', `/#?${params.appState}`);
+      // if there is a saved search id, use the saved search path
+      if (params.id) {
+        path = `${path}#/view/${params.id}`;
+      }
+
+      const appState = getStateFromOsdUrl<LegacyDiscoverState>('_a', oldPath);
 
       if (!appState) return path;
 

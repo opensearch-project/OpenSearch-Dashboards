@@ -4,9 +4,10 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { matchPath } from 'react-router-dom';
 import { Filter, Query } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
-import { RootState } from '../../../../../data_explorer/public';
+import { RootState, DefaultViewState } from '../../../../../data_explorer/public';
 import { buildColumns } from '../columns';
 
 export interface DiscoverState {
@@ -31,9 +32,9 @@ export interface DiscoverState {
    */
   sort: Array<[string, string]>;
   /**
-   * id of the used saved query
+   * id of the used saved search
    */
-  savedQuery?: string;
+  savedSearch?: string;
 }
 
 export interface DiscoverRootState extends RootState {
@@ -45,10 +46,38 @@ const initialState: DiscoverState = {
   sort: [],
 };
 
-export const getPreloadedState = async ({ data }: DiscoverServices): Promise<DiscoverState> => {
-  return {
-    ...initialState,
+export const getPreloadedState = async ({
+  getSavedSearchById,
+}: DiscoverServices): Promise<DefaultViewState<DiscoverState>> => {
+  const preloadedState: DefaultViewState<DiscoverState> = {
+    state: {
+      ...initialState,
+    },
   };
+
+  const hashPath = window.location.hash.split('?')[0]; // hack to remove query params since matchPath considers them part of the id
+  const savedSearchId = matchPath<{ id?: string }>(hashPath, {
+    path: '#/view/:id',
+  })?.params.id;
+
+  if (savedSearchId) {
+    const savedSearchInstance = await getSavedSearchById(savedSearchId);
+
+    if (savedSearchInstance) {
+      preloadedState.state.columns = savedSearchInstance.columns;
+      preloadedState.state.sort = savedSearchInstance.sort;
+      const indexPatternId = savedSearchInstance.searchSource.getField('index')?.id;
+      preloadedState.root = {
+        metadata: {
+          indexPattern: indexPatternId,
+        },
+      };
+
+      savedSearchInstance.destroy(); // this instance is no longer needed, will create another one later
+    }
+  }
+
+  return preloadedState;
 };
 
 export const discoverSlice = createSlice({
