@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern, AggConfigs } from 'src/plugins/data/public';
+import {
+  IndexPattern,
+  ISearchSource,
+  indexPatterns as indexPatternUtils,
+  AggConfigs,
+} from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { SortOrder } from '../../../saved_searches/types';
 import { getSortForSearchSource } from './get_sort_for_search_source';
@@ -13,15 +18,10 @@ interface Props {
   indexPattern: IndexPattern;
   services: DiscoverServices;
   sort: SortOrder[] | undefined;
-  histogramConfigs?: AggConfigs;
+  searchSource?: ISearchSource;
 }
 
-export const createSearchSource = async ({
-  indexPattern,
-  services,
-  sort,
-  histogramConfigs,
-}: Props) => {
+export const updateSearchSource = async ({ indexPattern, services, searchSource, sort }: Props) => {
   const { uiSettings, data } = services;
   const sortForSearchSource = getSortForSearchSource(
     sort,
@@ -30,27 +30,36 @@ export const createSearchSource = async ({
   );
   const size = uiSettings.get(SAMPLE_SIZE_SETTING);
   const filters = data.query.filterManager.getFilters();
-  const searchSource = await data.search.searchSource.create({
+
+  const searchSourceInstance = searchSource || (await data.search.searchSource.create());
+
+  // searchSource which applies time range
+  const timeRangeSearchSource = await data.search.searchSource.create();
+  const { isDefault } = indexPatternUtils;
+  if (isDefault(indexPattern)) {
+    const timefilter = data.query.timefilter.timefilter;
+
+    timeRangeSearchSource.setField('filter', () => {
+      return timefilter.createFilter(indexPattern);
+    });
+  }
+
+  searchSourceInstance.setParent(timeRangeSearchSource);
+
+  searchSourceInstance.setFields({
     index: indexPattern,
     sort: sortForSearchSource,
     size,
     query: data.query.queryString.getQuery() || null,
     highlightAll: true,
     version: true,
+    filter: filters,
   });
-
-  // Add time filter
-  const timefilter = data.query.timefilter.timefilter;
-  const timeRangeFilter = timefilter.createFilter(indexPattern);
-  if (timeRangeFilter) {
-    filters.push(timeRangeFilter);
-  }
-  searchSource.setField('filter', filters);
 
   if (histogramConfigs) {
     const dslAggs = histogramConfigs.toDsl();
-    searchSource.setField('aggs', dslAggs);
+    searchSourceInstance.setField('aggs', dslAggs);
   }
 
-  return searchSource;
+  return searchSourceInstance;
 };

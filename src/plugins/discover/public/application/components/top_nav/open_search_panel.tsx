@@ -29,7 +29,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import rison from 'rison-node';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -44,18 +43,25 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { SavedObjectFinderUi } from '../../../../../saved_objects/public';
-import { getServices } from '../../../opensearch_dashboards_services';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DiscoverViewServices } from '../../../build_services';
+import { SAVED_OBJECT_TYPE } from '../../../saved_searches/_saved_search';
 
-const SEARCH_OBJECT_TYPE = 'search';
+interface Props {
+  onClose: () => void;
+  makeUrl: (id: string) => string;
+}
 
-export function OpenSearchPanel(props) {
+export function OpenSearchPanel({ onClose, makeUrl }: Props) {
   const {
-    core: { uiSettings, savedObjects },
-    addBasePath,
-  } = getServices();
+    services: {
+      core: { uiSettings, savedObjects },
+      addBasePath,
+    },
+  } = useOpenSearchDashboards<DiscoverViewServices>();
 
   return (
-    <EuiFlyout ownFocus onClose={props.onClose} data-test-subj="loadSearchForm">
+    <EuiFlyout ownFocus onClose={onClose} data-test-subj="loadSearchForm">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -76,7 +82,7 @@ export function OpenSearchPanel(props) {
           }
           savedObjectMetaData={[
             {
-              type: SEARCH_OBJECT_TYPE,
+              type: SAVED_OBJECT_TYPE,
               getIconForSavedObject: () => 'search',
               name: i18n.translate('discover.savedSearch.savedObjectName', {
                 defaultMessage: 'Saved search',
@@ -84,8 +90,12 @@ export function OpenSearchPanel(props) {
             },
           ]}
           onChoose={(id) => {
-            window.location.assign(props.makeUrl(id));
-            props.onClose();
+            setTimeout(() => {
+              window.location.assign(makeUrl(id));
+              // TODO: figure out why a history push doesn't update the app state. The page reload is a hack around it
+              window.location.reload();
+              onClose();
+            }, 0);
           }}
           uiSettings={uiSettings}
           savedObjects={savedObjects}
@@ -97,10 +107,10 @@ export function OpenSearchPanel(props) {
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiButton
               fill
-              onClick={props.onClose}
+              onClick={onClose}
               href={addBasePath(
                 `/app/management/opensearch-dashboards/objects?_a=${rison.encode({
-                  tab: SEARCH_OBJECT_TYPE,
+                  tab: SAVED_OBJECT_TYPE,
                 })}`
               )}
             >

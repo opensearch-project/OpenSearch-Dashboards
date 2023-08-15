@@ -20,7 +20,7 @@ export interface TopNavProps {
 
 export const TopNav = ({ opts }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { inspectorAdapters } = useDiscoverContext();
+  const { inspectorAdapters, savedSearch } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
 
   const {
@@ -34,7 +34,7 @@ export const TopNav = ({ opts }: TopNavProps) => {
     data,
   } = services;
 
-  const topNavLinks = getTopNavLinks(services, inspectorAdapters);
+  const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
 
   useEffect(() => {
     if (uiSettings.get(NEW_DISCOVER_APP) === false) {

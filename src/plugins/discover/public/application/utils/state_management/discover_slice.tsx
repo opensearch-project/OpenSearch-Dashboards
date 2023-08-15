@@ -35,6 +35,11 @@ export interface DiscoverState {
    * id of the used saved search
    */
   savedSearch?: string;
+  /**
+   * dirty flag to indicate if the saved search has been modified
+   * since the last save
+   */
+  isDirty: boolean;
 }
 
 export interface DiscoverRootState extends RootState {
@@ -44,6 +49,7 @@ export interface DiscoverRootState extends RootState {
 const initialState: DiscoverState = {
   columns: ['_source'],
   sort: [],
+  isDirty: false,
 };
 
 export const getPreloadedState = async ({
@@ -66,6 +72,7 @@ export const getPreloadedState = async ({
     if (savedSearchInstance) {
       preloadedState.state.columns = savedSearchInstance.columns;
       preloadedState.state.sort = savedSearchInstance.sort;
+      preloadedState.state.savedSearch = savedSearchInstance.id;
       const indexPatternId = savedSearchInstance.searchSource.getField('index')?.id;
       preloadedState.root = {
         metadata: {
@@ -92,13 +99,14 @@ export const discoverSlice = createSlice({
       const columns = [...(state.columns || [])];
       if (index !== undefined) columns.splice(index, 0, column);
       else columns.push(column);
-      return { ...state, columns: buildColumns(columns) };
+      return { ...state, columns: buildColumns(columns), isDirty: true };
     },
     removeColumn(state, action: PayloadAction<string>) {
       const columns = (state.columns || []).filter((column) => column !== action.payload);
       return {
         ...state,
         columns: buildColumns(columns),
+        isDirty: true,
       };
     },
     reorderColumn(state, action: PayloadAction<{ source: number; destination: number }>) {
@@ -109,12 +117,20 @@ export const discoverSlice = createSlice({
       return {
         ...state,
         columns,
+        isDirty: true,
       };
     },
     updateState(state, action: PayloadAction<Partial<DiscoverState>>) {
       return {
         ...state,
         ...action.payload,
+      };
+    },
+    setSavedSearchId(state, action: PayloadAction<string>) {
+      return {
+        ...state,
+        savedSearch: action.payload,
+        isDirty: false,
       };
     },
   },
@@ -127,5 +143,6 @@ export const {
   reorderColumn,
   setState,
   updateState,
+  setSavedSearchId,
 } = discoverSlice.actions;
 export const { reducer } = discoverSlice;

@@ -4,15 +4,15 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject, EMPTY, Subject, merge } from 'rxjs';
-import { catchError, debounceTime } from 'rxjs/operators';
+import { BehaviorSubject, Subject, merge } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverServices } from '../../../build_services';
 import { search } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
-import { createSearchSource } from './create_search_source';
+import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TimechartHeaderBucketInterval } from '../../components/timechart_header';
@@ -109,11 +109,11 @@ export const useSearch = (services: DiscoverServices) => {
     const histogramConfigs = indexPattern.timeFieldName
       ? createHistogramConfigs(indexPattern, 'auto', data)
       : undefined;
-    const searchSource = await createSearchSource({
+    const searchSource = await updateSearchSource({
       indexPattern,
       services,
       sort,
-      histogramConfigs,
+      searchSource: savedSearch?.searchSource,
     });
 
     try {
@@ -185,7 +185,15 @@ export const useSearch = (services: DiscoverServices) => {
 
       data.search.showError(error as Error);
     }
-  }, [indexPattern, timefilter, services, data, data$, inspectorAdapters.requests]);
+  }, [
+    indexPattern,
+    timefilter,
+    services,
+    data,
+    savedSearch?.searchSource,
+    data$,
+    inspectorAdapters.requests,
+  ]);
 
   useEffect(() => {
     const fetch$ = merge(
@@ -195,13 +203,7 @@ export const useSearch = (services: DiscoverServices) => {
       timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
       data.query.queryString.getUpdates$()
-    ).pipe(
-      debounceTime(100),
-      catchError((error) => {
-        core.fatalErrors.add(error as Error);
-        return EMPTY; // prevent the observable from completing due to the error
-      })
-    );
+    ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe(() => {
       (async () => {
@@ -224,9 +226,7 @@ export const useSearch = (services: DiscoverServices) => {
   // Get savedSearch if it exists
   useEffect(() => {
     (async () => {
-      if (!savedSearchId) return;
-
-      const savedSearchInstance = await getSavedSearchById(savedSearchId);
+      const savedSearchInstance = await getSavedSearchById(savedSearchId || '');
       setSavedSearch(savedSearchInstance);
     })();
 
