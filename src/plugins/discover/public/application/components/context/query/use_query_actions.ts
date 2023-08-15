@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   setAnchor,
   setPredecessors,
@@ -67,118 +67,128 @@ export function useQueryActions() {
     [uiSettings, indexPattern]
   );
 
-  const fetchAnchorRow = async (anchorId: string) => {
-    if (!tieBreakerField) {
-      setContextFetchStatus({
-        anchorStatus: { value: LOADING_STATUS.FAILED, reason: FAILURE_REASONS.INVALID_TIEBREAKER },
-      });
-      return;
-    }
-
-    try {
-      dispatch(setContextFetchStatus({ anchorStatus: { value: LOADING_STATUS.LOADING } }));
-      const sort = [
-        { [indexPattern.timeFieldName!]: SortDirection.desc },
-        { [tieBreakerField]: SortDirection.desc },
-      ];
-      const fetchAnchorResult = await fetchAnchor(anchorId, indexPattern, searchSource, sort);
-      dispatch(setAnchor(fetchAnchorResult));
-      dispatch(setContextFetchStatus({ anchorStatus: { value: LOADING_STATUS.LOADED } }));
-      return fetchAnchorResult;
-    } catch (error) {
-      setContextFetchStatus({
-        anchorStatus: { value: LOADING_STATUS.FAILED, reason: FAILURE_REASONS.UNKNOWN },
-      });
-      toastNotifications.addDanger({
-        title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
-          defaultMessage: 'Unable to fetch anchor document',
-        }),
-        text: 'fail',
-      });
-    }
-  };
-
-  const fetchSurroundingRows = async (
-    type: SurrDocType,
-    count: number,
-    filters: Filter[],
-    anchor: OpenSearchHitRecord
-  ) => {
-    try {
-      if (type === SurrDocType.PREDECESSORS) {
-        dispatch(setContextFetchStatus({ predecessorStatus: { value: LOADING_STATUS.LOADING } }));
-      } else {
-        dispatch(setContextFetchStatus({ successorStatus: { value: LOADING_STATUS.LOADING } }));
+  const fetchAnchorRow = useCallback(
+    async (anchorId: string) => {
+      if (!tieBreakerField) {
+        setContextFetchStatus({
+          anchorStatus: {
+            value: LOADING_STATUS.FAILED,
+            reason: FAILURE_REASONS.INVALID_TIEBREAKER,
+          },
+        });
+        return;
       }
 
-      const rows = await fetchSurroundingDocs(
-        type,
-        indexPattern,
-        anchor as OpenSearchHitRecord,
-        tieBreakerField,
-        SortDirection.desc,
-        count,
-        filters
-      );
-      if (type === SurrDocType.PREDECESSORS) {
-        dispatch(setPredecessors(rows));
-        dispatch(setContextFetchStatus({ predecessorStatus: { value: LOADING_STATUS.LOADED } }));
-      } else {
-        dispatch(setSuccessors(rows));
-        dispatch(setContextFetchStatus({ successorStatus: { value: LOADING_STATUS.LOADED } }));
-      }
-    } catch (error) {
-      if (type === SurrDocType.PREDECESSORS) {
-        dispatch(
-          setContextFetchStatus({
-            predecessorStatus: { value: LOADING_STATUS.FAILED, reason: FAILURE_REASONS.UNKNOWN },
-          })
-        );
-      } else {
-        dispatch(
-          setContextFetchStatus({
-            successorStatus: { value: LOADING_STATUS.FAILED, reason: FAILURE_REASONS.UNKNOWN },
-          })
-        );
+      try {
+        dispatch(setContextFetchStatus({ anchorStatus: { value: LOADING_STATUS.LOADING } }));
+        const sort = [
+          { [indexPattern.timeFieldName!]: SortDirection.desc },
+          { [tieBreakerField]: SortDirection.desc },
+        ];
+        const fetchAnchorResult = await fetchAnchor(anchorId, indexPattern, searchSource, sort);
+        dispatch(setAnchor(fetchAnchorResult));
+        dispatch(setContextFetchStatus({ anchorStatus: { value: LOADING_STATUS.LOADED } }));
+        return fetchAnchorResult;
+      } catch (error) {
+        setContextFetchStatus({
+          anchorStatus: { value: LOADING_STATUS.FAILED, reason: FAILURE_REASONS.UNKNOWN },
+        });
         toastNotifications.addDanger({
-          title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
-            defaultMessage: 'Unable to fetch surrounding documents',
+          title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
+            defaultMessage: 'Unable to fetch anchor document',
           }),
           text: 'fail',
         });
       }
-    }
-  };
+    },
+    [dispatch, indexPattern, searchSource, tieBreakerField, toastNotifications]
+  );
 
-  const fetchContextRows = async (
-    predecessorCount: number,
-    successorCount: number,
-    filters: Filter[],
-    anchor: OpenSearchHitRecord
-  ) =>
-    Promise.all([
-      fetchSurroundingRows(SurrDocType.PREDECESSORS, predecessorCount, filters, anchor),
-      fetchSurroundingRows(SurrDocType.SUCCESSORS, successorCount, filters, anchor),
-    ]);
+  const fetchSurroundingRows = useCallback(
+    async (type: SurrDocType, count: number, filters: Filter[], anchor: OpenSearchHitRecord) => {
+      try {
+        if (type === SurrDocType.PREDECESSORS) {
+          dispatch(setContextFetchStatus({ predecessorStatus: { value: LOADING_STATUS.LOADING } }));
+        } else {
+          dispatch(setContextFetchStatus({ successorStatus: { value: LOADING_STATUS.LOADING } }));
+        }
 
-  const fetchAllRows = async (
-    anchorId: string,
-    predecessorCount: number,
-    successorCount: number,
-    filters: Filter[]
-  ) => {
-    try {
-      const anchor = await fetchAnchorRow(anchorId);
-      fetchContextRows(predecessorCount, successorCount, filters, anchor);
-    } catch (error) {
-      toastNotifications.addDanger({
-        title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
-          defaultMessage: 'Unable to fetch all documents',
-        }),
-        text: 'fail',
-      });
-    }
-  };
+        const rows = await fetchSurroundingDocs(
+          type,
+          indexPattern,
+          anchor as OpenSearchHitRecord,
+          tieBreakerField,
+          SortDirection.desc,
+          count,
+          filters
+        );
+        if (type === SurrDocType.PREDECESSORS) {
+          dispatch(setPredecessors(rows));
+          dispatch(setContextFetchStatus({ predecessorStatus: { value: LOADING_STATUS.LOADED } }));
+        } else {
+          dispatch(setSuccessors(rows));
+          dispatch(setContextFetchStatus({ successorStatus: { value: LOADING_STATUS.LOADED } }));
+        }
+      } catch (error) {
+        if (type === SurrDocType.PREDECESSORS) {
+          dispatch(
+            setContextFetchStatus({
+              predecessorStatus: { value: LOADING_STATUS.FAILED, reason: FAILURE_REASONS.UNKNOWN },
+            })
+          );
+        } else {
+          dispatch(
+            setContextFetchStatus({
+              successorStatus: { value: LOADING_STATUS.FAILED, reason: FAILURE_REASONS.UNKNOWN },
+            })
+          );
+          toastNotifications.addDanger({
+            title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
+              defaultMessage: 'Unable to fetch surrounding documents',
+            }),
+            text: 'fail',
+          });
+        }
+      }
+    },
+    [dispatch, indexPattern, tieBreakerField, toastNotifications]
+  );
+
+  const fetchContextRows = useCallback(
+    async (
+      predecessorCount: number,
+      successorCount: number,
+      filters: Filter[],
+      anchor: OpenSearchHitRecord
+    ) =>
+      Promise.all([
+        fetchSurroundingRows(SurrDocType.PREDECESSORS, predecessorCount, filters, anchor),
+        fetchSurroundingRows(SurrDocType.SUCCESSORS, successorCount, filters, anchor),
+      ]),
+    [fetchSurroundingRows]
+  );
+
+  const fetchAllRows = useCallback(
+    async (
+      anchorId: string,
+      predecessorCount: number,
+      successorCount: number,
+      filters: Filter[]
+    ) => {
+      try {
+        const anchor = await fetchAnchorRow(anchorId);
+        fetchContextRows(predecessorCount, successorCount, filters, anchor);
+      } catch (error) {
+        toastNotifications.addDanger({
+          title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
+            defaultMessage: 'Unable to fetch all documents',
+          }),
+          text: 'fail',
+        });
+      }
+    },
+    [fetchAnchorRow, fetchContextRows, toastNotifications]
+  );
 
   return {
     fetchAnchorRow,

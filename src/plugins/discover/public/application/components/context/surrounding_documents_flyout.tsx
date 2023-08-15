@@ -55,7 +55,6 @@ export function SurroundingDocumentsFlyout({
     successorCount,
     predecessors,
     successors,
-    contextFetchStatus,
   } = useSelector((state) => state.discoverContext);
 
   const previousContextState = useRef({
@@ -64,7 +63,6 @@ export function SurroundingDocumentsFlyout({
     filters,
     predecessorCount,
     successorCount,
-    contextFetchStatus,
   });
 
   const onClose = () => {
@@ -111,16 +109,13 @@ export function SurroundingDocumentsFlyout({
       filters,
       predecessorCount,
       successorCount,
-      contextFetchStatus,
     };
   }, [
-    dispatch,
     anchor,
     anchorId,
     predecessorCount,
     successorCount,
     filters,
-    contextFetchStatus,
     fetchAllRows,
     fetchContextRows,
     fetchSurroundingRows,

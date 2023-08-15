@@ -66,9 +66,6 @@ export function ContextApp({ onAddFilter, rows }: Props) {
   const isSuccessorLoading =
     successorStatus.value === LOADING_STATUS.LOADING ||
     successorStatus.value === LOADING_STATUS.UNINITIALIZED;
-  // const isAnchorLoading = false;
-  // const isPredecessorLoading = false;
-  // const isSuccessorLoading = false;
   const onChangeCount = useCallback(
     (type: SurrDocType, count: number) => {
       const countType = type === SurrDocType.SUCCESSORS ? 'successorCount' : 'predecessorCount';
@@ -82,7 +79,7 @@ export function ContextApp({ onAddFilter, rows }: Props) {
   );
 
   return (
-    <EuiFlexGroup direction="column" grow={false}>
+    <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <ActionBar
           defaultStepSize={defaultStepSize}
@@ -94,24 +91,22 @@ export function ContextApp({ onAddFilter, rows }: Props) {
           type={SurrDocType.PREDECESSORS}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div className="dscContextGrid">
-          <DataGridTable
-            aria-label={'ContextTable'}
-            columns={columns}
-            indexPattern={indexPattern}
-            onAddColumn={onAddColumn}
-            onFilter={onAddFilter as DocViewFilterFn}
-            onRemoveColumn={onRemoveColumn}
-            onSetColumns={onSetColumns}
-            onSort={onSetSort}
-            sort={sort}
-            rows={rows}
-            displayTimeColumn={true}
-            services={services}
-            isToolbarVisible={false}
-          />
-        </div>
+      <EuiFlexItem>
+        <DataGridTable
+          aria-label={'ContextTable'}
+          columns={columns}
+          indexPattern={indexPattern}
+          onAddColumn={onAddColumn}
+          onFilter={onAddFilter as DocViewFilterFn}
+          onRemoveColumn={onRemoveColumn}
+          onSetColumns={onSetColumns}
+          onSort={onSetSort}
+          sort={sort}
+          rows={rows}
+          displayTimeColumn={true}
+          services={services}
+          isToolbarVisible={false}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <ActionBar
