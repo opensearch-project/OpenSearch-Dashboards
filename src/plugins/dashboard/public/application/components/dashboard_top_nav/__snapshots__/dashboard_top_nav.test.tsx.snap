@@ -726,13 +726,6 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
-            "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
-            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -1589,13 +1582,6 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
-            "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
-            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -2452,13 +2438,6 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
-            "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
-            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -3315,13 +3294,6 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
-            "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
-            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -4178,13 +4150,6 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
-            "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
-            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],
@@ -5041,13 +5006,6 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
             },
             "opensearchDashboardsVersion": "3.0.0",
-            "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
-            },
             "overlays": Object {
               "banners": Object {
                 "add": [MockFunction],

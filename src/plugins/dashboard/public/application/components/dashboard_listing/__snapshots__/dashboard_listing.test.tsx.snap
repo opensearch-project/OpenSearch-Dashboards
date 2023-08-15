@@ -830,11 +830,23 @@ exports[`dashboard listing hideWriteControls 1`] = `
             },
             "opensearchDashboardsVersion": "3.0.0",
             "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
+              "flush": [MockFunction],
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "_g",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "linked": false,
+                    },
+                  },
+                ],
+              },
+              "set": [MockFunction],
             },
             "overlays": Object {
               "banners": Object {
@@ -1849,11 +1861,23 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
             },
             "opensearchDashboardsVersion": "3.0.0",
             "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
+              "flush": [MockFunction],
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "_g",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "linked": false,
+                    },
+                  },
+                ],
+              },
+              "set": [MockFunction],
             },
             "overlays": Object {
               "banners": Object {
@@ -2929,11 +2953,23 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
             },
             "opensearchDashboardsVersion": "3.0.0",
             "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
+              "flush": [MockFunction],
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "_g",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "linked": false,
+                    },
+                  },
+                ],
+              },
+              "set": [MockFunction],
             },
             "overlays": Object {
               "banners": Object {
@@ -4009,11 +4045,23 @@ exports[`dashboard listing renders table rows 1`] = `
             },
             "opensearchDashboardsVersion": "3.0.0",
             "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
+              "flush": [MockFunction],
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "_g",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "linked": false,
+                    },
+                  },
+                ],
+              },
+              "set": [MockFunction],
             },
             "overlays": Object {
               "banners": Object {
@@ -5089,11 +5137,23 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
             },
             "opensearchDashboardsVersion": "3.0.0",
             "osdUrlStateStorage": Object {
-              "cancel": [Function],
-              "change$": [Function],
-              "flush": [Function],
-              "get": [Function],
-              "set": [Function],
+              "flush": [MockFunction],
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "_g",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "linked": false,
+                    },
+                  },
+                ],
+              },
+              "set": [MockFunction],
             },
             "overlays": Object {
               "banners": Object {

@@ -44,10 +44,17 @@ import { DashboardListing } from './dashboard_listing';
 import { createDashboardServicesMock } from '../../utils/mocks';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { I18nProvider } from '@osd/i18n/react';
+import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
 
 function wrapDashboardListingInContext(mockServices: any) {
+  const osdUrlStateStorage = ({
+    set: jest.fn(),
+    get: jest.fn(() => ({ linked: false })),
+    flush: jest.fn(),
+  } as unknown) as IOsdUrlStateStorage;
   const services = {
     ...mockServices,
+    osdUrlStateStorage,
     dashboardProviders: () => {
       return {
         dashboard: {
