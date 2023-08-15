@@ -749,6 +749,8 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
     if (this.isVegaLite) {
       // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: '#54B399' }}
       this._setDefaultValue(defaultColor, 'config', 'mark', 'color');
+      // By default text marks should use theme-aware text color
+      this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'text', 'fill');
     } else {
       // Vega - global mark has very strange behavior, must customize each mark type individually
       // https://github.com/vega/vega/issues/1083
@@ -765,6 +767,8 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         this._setDefaultValue(defaultColor, 'config', 'rule', 'stroke');
         this._setDefaultValue(defaultColor, 'config', 'shape', 'stroke');
         this._setDefaultValue(defaultColor, 'config', 'symbol', 'fill');
+        // By default text marks should use theme-aware text color
+        this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'text', 'fill');
         this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
       }
     }
