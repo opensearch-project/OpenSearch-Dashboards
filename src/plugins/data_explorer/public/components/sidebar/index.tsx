@@ -43,6 +43,7 @@ export const Sidebar: FC = ({ children }) => {
   } = useOpenSearchDashboards<DataExplorerServices>();
 
   useEffect(() => {
+    let isMounted = true;
     const fetchIndexPatterns = async () => {
       await indexPatterns.ensureDefaultIndexPattern();
       const cache = await indexPatterns.getCache();
@@ -50,9 +51,15 @@ export const Sidebar: FC = ({ children }) => {
         label: indexPattern.attributes.title,
         value: indexPattern.id,
       }));
-      setOptions(currentOptions);
+      if (isMounted) {
+        setOptions(currentOptions);
+      }
     };
     fetchIndexPatterns();
+
+    return () => {
+      isMounted = false;
+    };
   }, [indexPatterns]);
 
   // Set option to the current index pattern

@@ -4,12 +4,13 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@osd/i18n';
 import { AppMountParameters } from '../../../../../../core/public';
 import { NEW_DISCOVER_APP, PLUGIN_ID } from '../../../../common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DiscoverServices } from '../../../build_services';
+import { DiscoverViewServices } from '../../../build_services';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
+import { useDiscoverContext } from '../context';
 
 export interface TopNavProps {
   opts: {
@@ -18,19 +19,22 @@ export interface TopNavProps {
 }
 
 export const TopNav = ({ opts }: TopNavProps) => {
-  const {
-    services: {
-      uiSettings,
-      navigation: {
-        ui: { TopNavMenu },
-      },
-      core: {
-        application: { navigateToApp },
-      },
-      data,
-    },
-  } = useOpenSearchDashboards<DiscoverServices>();
+  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+  const { inspectorAdapters, savedSearch } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
+
+  const {
+    uiSettings,
+    navigation: {
+      ui: { TopNavMenu },
+    },
+    core: {
+      application: { navigateToApp },
+    },
+    data,
+  } = services;
+
+  const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
 
   useEffect(() => {
     if (uiSettings.get(NEW_DISCOVER_APP) === false) {
@@ -45,31 +49,27 @@ export const TopNav = ({ opts }: TopNavProps) => {
   }, [navigateToApp, uiSettings]);
 
   useEffect(() => {
+    let isMounted = true;
     const getDefaultIndexPattern = async () => {
       await data.indexPatterns.ensureDefaultIndexPattern();
       const indexPattern = await data.indexPatterns.getDefault();
+
+      if (!isMounted) return;
 
       setIndexPatterns(indexPattern ? [indexPattern] : undefined);
     };
 
     getDefaultIndexPattern();
+
+    return () => {
+      isMounted = false;
+    };
   }, [data.indexPatterns]);
 
   return (
     <TopNavMenu
       appName={PLUGIN_ID}
-      config={[
-        {
-          label: i18n.translate('discover.localMenu.legacyDiscoverTitle', {
-            defaultMessage: 'Legacy Discover',
-          }),
-          run: async () => {
-            await uiSettings.set(NEW_DISCOVER_APP, false);
-            window.location.reload();
-          },
-          emphasize: true,
-        },
-      ]}
+      config={topNavLinks}
       showSearchBar
       useDefaultBehaviors
       setMenuMountPoint={opts.setHeaderActionMenu}

@@ -11,7 +11,7 @@ import { DataExplorerServices } from '../../types';
 export const getPreloadedState = async (
   services: DataExplorerServices
 ): Promise<PreloadedState<RootState>> => {
-  const rootState: RootState = {
+  let rootState: RootState = {
     metadata: await getPreloadedMetadataState(services),
   };
 
@@ -25,10 +25,15 @@ export const getPreloadedState = async (
     const { defaults } = view.ui;
 
     // defaults can be a function or an object
-    if (typeof defaults === 'function') {
-      rootState[view.id] = await defaults();
-    } else {
-      rootState[view.id] = defaults;
+    const preloadedState = typeof defaults === 'function' ? await defaults() : defaults;
+    rootState[view.id] = preloadedState.state;
+
+    // if the view wants to override the root state, we do that here
+    if (preloadedState.root) {
+      rootState = {
+        ...rootState,
+        ...preloadedState.root,
+      };
     }
   });
   await Promise.all(promises);

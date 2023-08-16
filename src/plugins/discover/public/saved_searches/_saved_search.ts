@@ -34,6 +34,8 @@ import {
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
 
+export const SAVED_OBJECT_TYPE = 'search';
+
 export function createSavedSearchClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);
 

@@ -32,15 +32,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { OpenSearchPanel } from './open_search_panel';
 import { I18nStart } from '../../../../../../core/public';
+import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
+import { DiscoverViewServices } from '../../../build_services';
 
 let isOpen = false;
 
 export function showOpenSearchPanel({
   makeUrl,
   I18nContext,
+  services,
 }: {
-  makeUrl: (id: string) => void;
+  makeUrl: (id: string) => string;
   I18nContext: I18nStart['Context'];
+  services: DiscoverViewServices;
 }) {
   if (isOpen) {
     return;
@@ -56,9 +60,11 @@ export function showOpenSearchPanel({
 
   document.body.appendChild(container);
   const element = (
-    <I18nContext>
-      <OpenSearchPanel onClose={onClose} makeUrl={makeUrl} />
-    </I18nContext>
+    <OpenSearchDashboardsContextProvider services={services}>
+      <I18nContext>
+        <OpenSearchPanel onClose={onClose} makeUrl={makeUrl} />
+      </I18nContext>
+    </OpenSearchDashboardsContextProvider>
   );
   ReactDOM.render(element, container);
 }
