@@ -219,7 +219,7 @@
     "source-map-support": "^0.5.19",
     "symbol-observable": "^1.2.0",
     "tar": "^6.1.11",
-    "tinygradient": "0.4.3",
+    "tinygradient": "^1.1.5",
     "tinymath": "1.2.1",
     "tslib": "^2.0.0",
     "type-detect": "^4.0.8",
