@@ -5,7 +5,7 @@
 
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { CoreStart } from '../../../../../core/public';
-import { formatUrlWithWorkspaceId } from '../../utils';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 
 type Core = Pick<CoreStart, 'application' | 'http'>;
 

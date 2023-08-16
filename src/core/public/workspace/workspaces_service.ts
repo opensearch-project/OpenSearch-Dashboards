@@ -12,6 +12,7 @@ export interface WorkspaceStart {
   currentWorkspaceId$: BehaviorSubject<string>;
   currentWorkspace$: BehaviorSubject<WorkspaceAttribute | null>;
   workspaceList$: BehaviorSubject<WorkspaceAttribute[]>;
+  workspaceEnabled$: BehaviorSubject<boolean>;
 }
 
 export type WorkspaceSetup = WorkspaceStart;
@@ -30,12 +31,14 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
   private currentWorkspaceId$ = new BehaviorSubject<string>('');
   private workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
   private currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
+  private workspaceEnabled$ = new BehaviorSubject<boolean>(false);
 
   public setup(): WorkspaceSetup {
     return {
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
+      workspaceEnabled$: this.workspaceEnabled$,
     };
   }
 
@@ -44,6 +47,7 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
+      workspaceEnabled$: this.workspaceEnabled$,
     };
   }
 

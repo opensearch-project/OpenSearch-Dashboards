@@ -43,14 +43,15 @@ import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
+import { WorkspaceStart } from 'opensearch-dashboards/public';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
 import type { Logos } from '../../../../common/types';
-import { WorkspaceAttribute } from '../../../workspace';
 import { createEuiListItem, isModifiedOrPrevented, createRecentNavLink } from './nav_link';
+import { CollapsibleNavHeader } from './collapsible_nav_header';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -122,14 +123,12 @@ interface Props {
   storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
+  getUrlForApp: InternalApplicationStart['getUrlForApp'];
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   logos: Logos;
-  exitWorkspace: () => void;
-  getWorkspaceUrl: (id: string) => string;
-  currentWorkspace$: Rx.BehaviorSubject<WorkspaceAttribute | null>;
-  workspaceList$: Rx.BehaviorSubject<WorkspaceAttribute[]>;
+  workspaces: WorkspaceStart;
 }
 
 export function CollapsibleNav({
@@ -141,9 +140,11 @@ export function CollapsibleNav({
   storage = window.localStorage,
   onIsLockedUpdate,
   closeNav,
+  getUrlForApp,
   navigateToApp,
   navigateToUrl,
   logos,
+  workspaces,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -184,6 +185,12 @@ export function CollapsibleNav({
       outsideClickCloses={false}
     >
       <EuiFlexItem className="eui-yScroll">
+        <CollapsibleNavHeader
+          getUrlForApp={getUrlForApp}
+          workspaces={workspaces}
+          basePath={basePath}
+        />
+
         {/* Recently viewed */}
         <EuiCollapsibleNavGroup
           key="recentlyViewed"

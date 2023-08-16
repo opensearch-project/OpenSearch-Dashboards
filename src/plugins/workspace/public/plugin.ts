@@ -8,7 +8,6 @@ import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
-  ApplicationStart,
   AppMountParameters,
   AppNavLinkStatus,
   ChromeNavLink,
@@ -17,7 +16,6 @@ import {
   Plugin,
   WorkspaceAttribute,
   DEFAULT_APP_CATEGORIES,
-  HttpSetup,
 } from '../../../core/public';
 import {
   WORKSPACE_LIST_APP_ID,
@@ -30,7 +28,6 @@ import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import { formatUrlWithWorkspaceId } from './utils';
 import { WorkspaceClient } from './workspace_client';
 import { Services } from './application';
 
@@ -47,6 +44,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     workspaceClient.init();
+    core.workspaces.workspaceEnabled$.next(true);
 
     /**
      * Retrieve workspace id from url
@@ -133,7 +131,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       }),
       euiIconType: 'folderClosed',
       category: WORKSPACE_NAV_CATEGORY,
-      navLinkStatus: workspaceId ? AppNavLinkStatus.hidden : AppNavLinkStatus.default,
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
@@ -141,36 +139,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     });
 
     return {};
-  }
-
-  private workspaceToChromeNavLink(
-    workspace: WorkspaceAttribute,
-    http: HttpSetup,
-    application: ApplicationStart,
-    index: number
-  ): ChromeNavLink {
-    const id = WORKSPACE_OVERVIEW_APP_ID + '/' + workspace.id;
-    const url = formatUrlWithWorkspaceId(
-      application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
-        absolute: true,
-      }),
-      workspace.id,
-      http.basePath
-    );
-    return {
-      id,
-      url,
-      order: index,
-      hidden: false,
-      disabled: false,
-      baseUrl: url,
-      href: url,
-      category: WORKSPACE_NAV_CATEGORY,
-      title: i18n.translate('core.ui.workspaceNavList.workspaceName', {
-        defaultMessage: workspace.name,
-      }),
-      externalLink: true,
-    };
   }
 
   private async _changeSavedObjectCurrentWorkspace() {
@@ -183,10 +151,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     }
   }
 
-  private filterByWorkspace(
-    workspace: WorkspaceAttribute | null | undefined,
-    allNavLinks: ChromeNavLink[]
-  ) {
+  private filterByWorkspace(workspace: WorkspaceAttribute | null, allNavLinks: ChromeNavLink[]) {
     if (!workspace) return allNavLinks;
     const features = workspace.features ?? [];
     return allNavLinks.filter((item) => features.includes(item.id));
@@ -195,28 +160,16 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private filterNavLinks(core: CoreStart) {
     const navLinksService = core.chrome.navLinks;
     const chromeNavLinks$ = navLinksService.getNavLinks$();
-    const workspaceList$ = core.workspaces.workspaceList$;
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
     combineLatest([
-      workspaceList$,
       chromeNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
       currentWorkspace$,
-    ]).subscribe(([workspaceList, chromeNavLinks, currentWorkspace]) => {
+    ]).subscribe(([chromeNavLinks, currentWorkspace]) => {
       const filteredNavLinks = new Map<string, ChromeNavLink>();
       chromeNavLinks = this.filterByWorkspace(currentWorkspace, chromeNavLinks);
       chromeNavLinks.forEach((chromeNavLink) => {
         filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
       });
-      if (!currentWorkspace) {
-        workspaceList
-          .filter((workspace, index) => index < 5)
-          .map((workspace, index) =>
-            this.workspaceToChromeNavLink(workspace, core.http, core.application, index)
-          )
-          .forEach((workspaceNavLink) =>
-            filteredNavLinks.set(workspaceNavLink.id, workspaceNavLink)
-          );
-      }
       navLinksService.setFilteredNavLinks(filteredNavLinks);
     });
   }

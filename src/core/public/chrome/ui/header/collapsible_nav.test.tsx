@@ -93,11 +93,11 @@ function mockProps(branding = {}) {
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),
+    getUrlForApp: jest.fn(),
+    workspaces: workspacesServiceMock.createStartContract(),
     customNavLink$: new BehaviorSubject(undefined),
     branding,
     logos: getLogos(branding, mockBasePath.serverBasePath),
-    currentWorkspace$: workspacesServiceMock.createStartContract().client.currentWorkspace$,
-    workspaceList$: workspacesServiceMock.createStartContract().client.workspaceList$,
   };
 }
 
