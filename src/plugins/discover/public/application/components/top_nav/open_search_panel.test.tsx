@@ -31,18 +31,23 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-jest.mock('../../../opensearch_dashboards_services', () => {
-  return {
-    getServices: () => ({
+jest.mock('../../../../../saved_objects/public', () => ({
+  SavedObjectFinderUi: () => <div />,
+}));
+
+jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: jest.fn().mockReturnValue({
+    services: {
       core: { uiSettings: {}, savedObjects: {} },
       addBasePath: (path) => path,
-    }),
-  };
-});
+    },
+  }),
+  withOpenSearchDashboards: jest.fn(),
+}));
 
 import { OpenSearchPanel } from './open_search_panel';
 
 test('render', () => {
-  const component = shallow(<OpenSearchPanel onClose={() => {}} makeUrl={() => {}} />);
+  const component = shallow(<OpenSearchPanel onClose={() => {}} makeUrl={(id) => id} />);
   expect(component).toMatchSnapshot();
 });
