@@ -116,6 +116,9 @@ export default function ({ getService, getPageObjects }) {
       expect(inViewMode).to.be(true);
 
       await PageObjects.header.clickDiscover();
+      // Add load save search here since discover link won't take it to the save search link for
+      // the legacy discover plugin
+      await PageObjects.discover.loadSavedSearch('my search');
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -135,6 +138,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
       await PageObjects.header.clickDiscover();
+      // Add load save search here since discover link won't take it to the save search link for
+      // the legacy discover plugin
+      await PageObjects.discover.loadSavedSearch('my search');
       await PageObjects.discover.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
