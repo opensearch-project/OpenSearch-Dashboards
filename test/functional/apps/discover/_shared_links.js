@@ -62,6 +62,7 @@ export default function ({ getService, getPageObjects }) {
 
       await opensearchDashboardsServer.uiSettings.replace({
         'state:storeInSessionStorage': storeStateInSessionStorage,
+        'discover:v2': false,
       });
 
       log.debug('discover');
@@ -96,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
         it('should allow for copying the snapshot URL', async function () {
           const expectedUrl =
             baseUrl +
-            '/app/discover?_t=1453775307251#' +
+            '/app/discoverLegacy?_t=1453775307251#' +
             '/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time' +
             ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
             "-23T18:31:44.000Z'))&_a=(columns:!(_source),filters:!(),index:'logstash-" +
@@ -121,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
         it('should allow for copying the saved object URL', async function () {
           const expectedUrl =
             baseUrl +
-            '/app/discover#' +
+            '/app/discoverLegacy#' +
             '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
             '?_g=%28filters%3A%21%28%29%2CrefreshInterval%3A%28pause%3A%21t%2Cvalue%3A0%29%' +
             '2Ctime%3A%28from%3A%272015-09-19T06%3A31%3A44.000Z%27%2C' +
@@ -160,7 +161,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.get(actualUrl, false);
         await retry.waitFor('shortUrl resolves and opens', async () => {
           const resolvedUrl = await browser.getCurrentUrl();
-          expect(resolvedUrl).to.match(/discover/);
+          expect(resolvedUrl).to.match(/discoverLegacy/);
           const resolvedTime = await PageObjects.timePicker.getTimeConfig();
           expect(resolvedTime.start).to.equal(actualTime.start);
           expect(resolvedTime.end).to.equal(actualTime.end);
@@ -175,7 +176,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.get(currentUrl, false);
         await retry.waitFor('discover to open', async () => {
           const resolvedUrl = await browser.getCurrentUrl();
-          expect(resolvedUrl).to.match(/discover/);
+          expect(resolvedUrl).to.match(/discoverLegacy/);
           const { message } = await toasts.getErrorToast();
           expect(message).to.contain(
             'Unable to completely restore the URL, be sure to use the share functionality.'
