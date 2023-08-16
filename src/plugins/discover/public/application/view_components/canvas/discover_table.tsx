@@ -3,14 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { History } from 'history';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { useDiscoverContext } from '../context';
-import { addColumn, removeColumn, useDispatch, useSelector } from '../../utils/state_management';
+import {
+  addColumn,
+  removeColumn,
+  setColumns,
+  setSort,
+  useDispatch,
+  useSelector,
+} from '../../utils/state_management';
 import { ResultStatus, SearchData } from '../utils/use_search';
+import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
+import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
 interface Props {
   history: History;
@@ -18,14 +27,33 @@ interface Props {
 
 export const DiscoverTable = ({ history }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+  const { filterManager } = services.data.query;
   const { data$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>({
     status: data$.getValue().status,
     rows: [],
   });
 
-  const { columns } = useSelector((state) => state.discover);
+  const { columns, sort } = useSelector((state) => state.discover);
   const dispatch = useDispatch();
+  const onAddColumn = (col: string) => dispatch(addColumn({ column: col }));
+  const onRemoveColumn = (col: string) => dispatch(removeColumn(col));
+  const onSetColumns = (cols: string[]) =>
+    dispatch(setColumns({ timefield: indexPattern.timeFieldName, columns: cols }));
+  const onSetSort = (s: Array<[string, string]>) => dispatch(setSort(s));
+  const onAddFilter = useCallback(
+    (field: IndexPatternField, values: string, operation: '+' | '-') => {
+      const newFilters = opensearchFilters.generateFilters(
+        filterManager,
+        field,
+        values,
+        operation,
+        indexPattern.id
+      );
+      return filterManager.addFilters(newFilters);
+    },
+    [filterManager, indexPattern]
+  );
 
   const { rows } = fetchState || {};
 
@@ -55,18 +83,12 @@ export const DiscoverTable = ({ history }: Props) => {
     <DataGridTable
       columns={columns}
       indexPattern={indexPattern}
-      onAddColumn={(column) =>
-        dispatch(
-          addColumn({
-            column,
-          })
-        )
-      }
-      onFilter={() => {}}
-      onRemoveColumn={(column) => dispatch(removeColumn(column))}
-      onSetColumns={() => {}}
-      onSort={() => {}}
-      sort={[]}
+      onAddColumn={onAddColumn}
+      onFilter={onAddFilter as DocViewFilterFn}
+      onRemoveColumn={onRemoveColumn}
+      onSetColumns={onSetColumns}
+      onSort={onSetSort}
+      sort={sort}
       rows={rows}
       displayTimeColumn={true}
       services={services}

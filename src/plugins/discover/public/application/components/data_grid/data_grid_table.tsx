@@ -23,12 +23,13 @@ export interface DataGridTableProps {
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  onSort: (sort: string[][]) => void;
+  onSort: (sort: Array<[string, string]>) => void;
   rows: OpenSearchSearchHit[];
   onSetColumns: (columns: string[]) => void;
   sort: Array<[string, string]>;
   displayTimeColumn: boolean;
   services: DiscoverServices;
+  isToolbarVisible?: boolean;
 }
 
 export const DataGridTable = ({
@@ -43,6 +44,7 @@ export const DataGridTable = ({
   rows,
   displayTimeColumn,
   services,
+  isToolbarVisible = true,
 }: DataGridTableProps) => {
   const [expandedHit, setExpandedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
@@ -70,8 +72,8 @@ export const DataGridTable = ({
   const dataGridTableColumnsVisibility = useMemo(
     () => ({
       visibleColumns: computeVisibleColumns(columns, indexPattern, displayTimeColumn) as string[],
-      setVisibleColumns: (newColumns: string[]) => {
-        onSetColumns(newColumns);
+      setVisibleColumns: (cols: string[]) => {
+        onSetColumns(cols);
       },
     }),
     [columns, indexPattern, displayTimeColumn, onSetColumns]
@@ -116,7 +118,7 @@ export const DataGridTable = ({
               renderCellValue={renderCellValue}
               rowCount={rowCount}
               sorting={sorting}
-              toolbarVisibility={toolbarVisibility}
+              toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
             />
           </EuiPanel>
         </EuiPanel>
