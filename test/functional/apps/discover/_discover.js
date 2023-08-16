@@ -41,15 +41,16 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'discover:v2': false,
   };
 
   describe('discover app', function describeIndexTests() {
     before(async function () {
-      // delete .kibana index and update configDoc
-      await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
-
       log.debug('load opensearch-dashboards index with default index pattern');
       await opensearchArchiver.load('discover');
+
+      // delete .kibana index and update configDoc
+      await opensearchDashboardsServer.uiSettings.replace(defaultSettings);
 
       // and load a set of makelogs data
       await opensearchArchiver.loadIfNeeded('logstash_functional');
@@ -258,7 +259,10 @@ export default function ({ getService, getPageObjects }) {
         });
       });
       it('should show bars in the correct time zone after switching', async function () {
-        await opensearchDashboardsServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await opensearchDashboardsServer.uiSettings.replace({
+          'dateFormat:tz': 'America/Phoenix',
+          'discover:v2': false,
+        });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitOpenSearchDashboardsChrome();
         await queryBar.clearQuery();
@@ -273,7 +277,10 @@ export default function ({ getService, getPageObjects }) {
     });
     describe('usage of discover:searchOnPageLoad', () => {
       it('should fetch data from OpenSearch initially when discover:searchOnPageLoad is false', async function () {
-        await opensearchDashboardsServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
+        await opensearchDashboardsServer.uiSettings.replace({
+          'discover:searchOnPageLoad': false,
+          'discover:v2': false,
+        });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitOpenSearchDashboardsChrome();
 
@@ -281,7 +288,10 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not fetch data from OpenSearch initially when discover:searchOnPageLoad is true', async function () {
-        await opensearchDashboardsServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
+        await opensearchDashboardsServer.uiSettings.replace({
+          'discover:searchOnPageLoad': true,
+          'discover:v2': false,
+        });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitOpenSearchDashboardsChrome();
 
@@ -306,6 +316,7 @@ export default function ({ getService, getPageObjects }) {
       it('should update the histogram timerange when the query is resubmitted', async function () {
         await opensearchDashboardsServer.uiSettings.update({
           'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
+          'discover:v2': false,
         });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitOpenSearchDashboardsChrome();

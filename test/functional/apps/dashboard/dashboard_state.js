@@ -43,6 +43,7 @@ export default function ({ getService, getPageObjects }) {
     'tileMap',
     'visChart',
     'timePicker',
+    'common',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -52,11 +53,17 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('dashboard state', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
+      await browser.refresh();
     });
 
     after(async function () {
@@ -88,6 +95,8 @@ export default function ({ getService, getPageObjects }) {
       expect(colorChoiceRetained).to.be(true);
     });
 
+    // the following three tests are skipped because of save search save window bug:
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4698
     it('Saved search with no changes will update when the saved object changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
