@@ -9,11 +9,13 @@ import { WorkspaceAttribute } from '../workspace';
 const currentWorkspaceId$ = new BehaviorSubject<string>('');
 const workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
 const currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
+const workspaceEnabled$ = new BehaviorSubject<boolean>(false);
 
 const createWorkspacesSetupContractMock = () => ({
   currentWorkspaceId$,
   workspaceList$,
   currentWorkspace$,
+  workspaceEnabled$,
 });
 
 const createWorkspacesStartContractMock = createWorkspacesSetupContractMock;

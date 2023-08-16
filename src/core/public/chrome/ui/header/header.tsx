@@ -43,6 +43,7 @@ import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
+import { WorkspaceStart } from 'opensearch-dashboards/public';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -51,7 +52,7 @@ import {
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
 } from '../..';
-import { InternalApplicationStart } from '../../../application/types';
+import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
@@ -90,6 +91,7 @@ export interface HeaderProps {
   onIsLockedUpdate: OnIsLockedUpdate;
   branding: ChromeBranding;
   survey: string | undefined;
+  workspaces: WorkspaceStart;
 }
 
 export function Header({
@@ -101,6 +103,7 @@ export function Header({
   homeHref,
   branding,
   survey,
+  workspaces,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -244,6 +247,7 @@ export function Header({
           isNavOpen={isNavOpen}
           homeHref={homeHref}
           basePath={basePath}
+          getUrlForApp={application.getUrlForApp}
           navigateToApp={application.navigateToApp}
           navigateToUrl={application.navigateToUrl}
           onIsLockedUpdate={onIsLockedUpdate}
@@ -255,6 +259,7 @@ export function Header({
           }}
           customNavLink$={observables.customNavLink$}
           branding={branding}
+          workspaces={workspaces}
         />
       </header>
     </>

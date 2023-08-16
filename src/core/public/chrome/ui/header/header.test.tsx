@@ -33,7 +33,7 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { httpServiceMock } from '../../../http/http_service.mock';
-import { applicationServiceMock } from '../../../mocks';
+import { applicationServiceMock, workspacesServiceMock } from '../../../mocks';
 import { Header } from './header';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 
@@ -76,6 +76,7 @@ function mockProps() {
       applicationTitle: 'OpenSearch Dashboards',
     },
     survey: '/',
+    workspaces: workspacesServiceMock.createStartContract(),
   };
 }
 
