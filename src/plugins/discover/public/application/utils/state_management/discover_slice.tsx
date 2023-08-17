@@ -43,6 +43,10 @@ export interface DiscoverState {
   isDirty: boolean;
 }
 
+export interface DiscoverRootState extends RootState {
+  discover: DiscoverState;
+}
+
 const initialState: DiscoverState = {
   columns: ['_source'],
   sort: [],
