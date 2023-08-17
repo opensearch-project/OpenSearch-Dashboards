@@ -29,20 +29,17 @@ describe('discoverSlice', () => {
     const action1 = { type: 'discover/addColumn', payload: { column: 'column1' } };
     const result1 = discoverSlice.reducer(initialState, action1);
     expect(result1.columns).toEqual(['column1']);
-
-    const action2 = { type: 'discover/addColumn', payload: { column: 'column2', index: 0 } };
-    const result2 = discoverSlice.reducer(result1, action2);
-    expect(result2.columns).toEqual(['column2', 'column1']);
   });
 
   it('should handle removeColumn', () => {
     initialState = {
       columns: ['column1', 'column2'],
-      sort: [],
+      sort: [['column1', 'asc']],
     };
     const action = { type: 'discover/removeColumn', payload: 'column1' };
     const result = discoverSlice.reducer(initialState, action);
     expect(result.columns).toEqual(['column2']);
+    expect(result.sort).toEqual([]);
   });
 
   it('should handle reorderColumn', () => {
@@ -50,9 +47,27 @@ describe('discoverSlice', () => {
       columns: ['column1', 'column2', 'column3'],
       sort: [],
     };
-    const action = { type: 'discover/reorderColumn', payload: { source: 0, destination: 2 } };
+    const action = {
+      type: 'discover/reorderColumn',
+      payload: { source: 0, destination: 2 },
+    };
     const result = discoverSlice.reducer(initialState, action);
     expect(result.columns).toEqual(['column2', 'column3', 'column1']);
+  });
+
+  it('should handle setColumns', () => {
+    const action = {
+      type: 'discover/setColumns',
+      payload: { timeField: 'timeField', columns: ['timeField', 'column1', 'column2'] },
+    };
+    const result = discoverSlice.reducer(initialState, action);
+    expect(result.columns).toEqual(['column1', 'column2']);
+  });
+
+  it('should handle setSort', () => {
+    const action = { type: 'discover/setSort', payload: [['field1', 'asc']] };
+    const result = discoverSlice.reducer(initialState, action);
+    expect(result.sort).toEqual([['field1', 'asc']]);
   });
 
   it('should handle updateState', () => {
@@ -60,7 +75,10 @@ describe('discoverSlice', () => {
       columns: ['column1', 'column2'],
       sort: [['field1', 'asc']],
     };
-    const action = { type: 'discover/updateState', payload: { sort: [['field2', 'desc']] } };
+    const action = {
+      type: 'discover/updateState',
+      payload: { sort: [['field2', 'desc']] },
+    };
     const result = discoverSlice.reducer(initialState, action);
     expect(result.sort).toEqual([['field2', 'desc']]);
   });

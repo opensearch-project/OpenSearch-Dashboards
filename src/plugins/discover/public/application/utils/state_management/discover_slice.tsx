@@ -9,6 +9,7 @@ import { Filter, Query } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { RootState, DefaultViewState } from '../../../../../data_explorer/public';
 import { buildColumns } from '../columns';
+import * as utils from './common';
 
 export interface DiscoverState {
   /**
@@ -95,29 +96,43 @@ export const discoverSlice = createSlice({
       return action.payload;
     },
     addColumn(state, action: PayloadAction<{ column: string; index?: number }>) {
-      const { column, index } = action.payload;
-      const columns = [...(state.columns || [])];
-      if (index !== undefined) columns.splice(index, 0, column);
-      else columns.push(column);
-      return { ...state, columns: buildColumns(columns), isDirty: true };
+      const columns = utils.addColumn(state.columns || [], action.payload);
+      return { ...state, columns: buildColumns(columns) };
     },
     removeColumn(state, action: PayloadAction<string>) {
-      const columns = (state.columns || []).filter((column) => column !== action.payload);
+      const columns = utils.removeColumn(state.columns, action.payload);
+      const sort =
+        state.sort && state.sort.length ? state.sort.filter((s) => s[0] !== action.payload) : [];
       return {
         ...state,
         columns: buildColumns(columns),
+        sort,
         isDirty: true,
       };
     },
     reorderColumn(state, action: PayloadAction<{ source: number; destination: number }>) {
-      const { source, destination } = action.payload;
-      const columns = [...(state.columns || [])];
-      const [removed] = columns.splice(source, 1);
-      columns.splice(destination, 0, removed);
+      const columns = utils.reorderColumn(
+        state.columns,
+        action.payload.source,
+        action.payload.destination
+      );
       return {
         ...state,
         columns,
         isDirty: true,
+      };
+    },
+    setColumns(state, action: PayloadAction<{ timeField: string | undefined; columns: string[] }>) {
+      const columns = utils.setColumns(action.payload.timeField, action.payload.columns);
+      return {
+        ...state,
+        columns,
+      };
+    },
+    setSort(state, action: PayloadAction<Array<[string, string]>>) {
+      return {
+        ...state,
+        sort: action.payload,
       };
     },
     updateState(state, action: PayloadAction<Partial<DiscoverState>>) {
@@ -141,6 +156,8 @@ export const {
   addColumn,
   removeColumn,
   reorderColumn,
+  setColumns,
+  setSort,
   setState,
   updateState,
   setSavedSearchId,
