@@ -31,7 +31,7 @@
 import { SavedObject } from '../../../saved_objects/public';
 import { ISearchSource } from '../../../data/public';
 
-export type SortOrder = [string, string];
+export type SortOrder = [string, 'asc' | 'desc'];
 export interface SavedSearch
   extends Pick<SavedObject, 'id' | 'title' | 'copyOnSave' | 'destroy' | 'lastSavedTitle' | 'save'> {
   searchSource: ISearchSource; // This is optional in SavedObject, but required for SavedSearch

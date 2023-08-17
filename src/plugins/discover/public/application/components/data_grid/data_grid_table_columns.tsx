@@ -6,6 +6,7 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { getCellActions } from './data_grid_table_cell_actions';
 
 export function buildDataGridColumns(
   columnNames: string[],
@@ -37,7 +38,7 @@ export function generateDataGridTableColumn(colName: string, idxPattern: IndexPa
       showMoveLeft: false,
       showMoveRight: false,
     },
-    cellActions: [],
+    cellActions: idxPatternField ? getCellActions(idxPatternField) : [],
   };
 
   if (dataGridCol.id === idxPattern.timeFieldName) {
