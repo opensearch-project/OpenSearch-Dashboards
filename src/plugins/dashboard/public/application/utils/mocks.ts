@@ -34,5 +34,14 @@ export const createDashboardServicesMock = () => {
     opensearchDashboardsVersion,
     usageCollection,
     embeddable,
+    savedObjectsClient: {
+      find: jest.fn(),
+    },
+    savedObjectsPublic: {
+      settings: {
+        getPerPage: () => 10,
+        getListingLimit: jest.fn(),
+      },
+    },
   } as unknown) as jest.Mocked<DashboardServices>;
 };
