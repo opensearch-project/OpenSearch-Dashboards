@@ -13,7 +13,7 @@ import path from 'path';
 import { readFileSync } from 'fs';
 import { matches } from './matches';
 
-export type FileBasedConfig = Record<string, { approved?: string[] }>;
+export type FileBasedConfig = Record<string, { approved?: string[]; explanation?: string }>;
 export type ValueBasedConfig = Record<
   string,
   Record<string, Array<{ approved?: string; rejected?: string[] }>>
