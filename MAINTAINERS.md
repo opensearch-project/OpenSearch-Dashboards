@@ -20,7 +20,6 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Tao Liu                   | [Flyingliuhub](https://github.com/Flyingliuhub)     | Amazon      |
 | Zilong Xia                | [ZilongX](https://github.com/ZilongX)               | Amazon      |
 | Matt Provost              | [BSFishy](https://github.com/BSFishy)               | Amazon      |
-| Sirazh Gabdullin          | [curq](https://github.com/curq)                     | External contributor |
 
 ## Emeritus
 
