@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { schema } from '@osd/config-schema';
+import { ensureRawRequest } from '../../../../core/server';
 
 import {
   ACL,
@@ -172,6 +173,19 @@ export function registerRoutes({
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { attributes } = req.body;
+      const rawRequest = ensureRawRequest(req);
+      const authInfo = rawRequest?.auth?.credentials?.authInfo as { user_name?: string } | null;
+      const permissions = Array.isArray(attributes.permissions)
+        ? attributes.permissions
+        : [attributes.permissions];
+
+      if (!!authInfo?.user_name) {
+        permissions.push({
+          type: 'user',
+          userId: authInfo.user_name,
+          modes: [WorkspacePermissionMode.Management],
+        });
+      }
 
       const result = await client.create(
         {
@@ -181,7 +195,7 @@ export function registerRoutes({
         },
         {
           ...attributes,
-          permissions: convertToACL(attributes.permissions),
+          permissions: convertToACL(permissions),
         }
       );
       return res.ok({ body: result });
