@@ -4,52 +4,19 @@
  */
 
 import './discover_chart_container.scss';
-import React, { useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useDiscoverContext } from '../context';
-import { useDispatch } from '../../utils/state_management';
 import { SearchData } from '../utils/use_search';
 import { DiscoverChart } from '../../components/chart/chart';
 
-export const DiscoverChartContainer = () => {
+export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { uiSettings, data } = services;
-  const { data$, indexPattern } = useDiscoverContext();
-  const [fetchState, setFetchState] = useState<SearchData>({
-    status: data$.getValue().status,
-    hits: 0,
-    bucketInterval: {},
-    chartData: {},
-  });
+  const { indexPattern } = useDiscoverContext();
 
-  const dispatch = useDispatch();
-
-  const { hits, bucketInterval, chartData } = fetchState || {};
-
-  useEffect(() => {
-    const subscription = data$.subscribe((next) => {
-      if (
-        next.status !== fetchState.status ||
-        (next.hits && next.hits !== fetchState.hits) ||
-        (next.bucketInterval && next.bucketInterval !== fetchState.bucketInterval) ||
-        (next.chartData && next.chartData !== fetchState.chartData)
-      ) {
-        setFetchState({ ...fetchState, ...next });
-      }
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [data$, fetchState]);
-
-  if (indexPattern === undefined) {
-    // TODO: handle better
-    return null;
-  }
-
-  const timeField = indexPattern.timeFieldName ? indexPattern.timeFieldName : undefined;
+  const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
 
   if (!hits || !bucketInterval || !chartData) {
     // TODO: handle better

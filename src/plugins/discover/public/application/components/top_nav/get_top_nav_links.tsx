@@ -65,10 +65,6 @@ export const getTopNavLinks = (
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
-    disableButton: () => {
-      const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
-      return !state.isDirty;
-    },
     run: async () => {
       const onSave = async ({
         newTitle,
@@ -229,10 +225,10 @@ export const getTopNavLinks = (
     },
   };
 
-  const legacyDiscover = {
+  const legacyDiscover: TopNavMenuData = {
     id: 'discover-new',
-    label: i18n.translate('discover.localMenu.legacyDiscoverTitle', {
-      defaultMessage: 'Legacy Discover',
+    label: i18n.translate('discover.localMenu.newDiscoverTitle', {
+      defaultMessage: 'New Discover',
     }),
     description: i18n.translate('discover.localMenu.newDiscoverDescription', {
       defaultMessage: 'New Discover Experience',
@@ -242,6 +238,8 @@ export const getTopNavLinks = (
       await uiSettings.set(NEW_DISCOVER_APP, false);
       window.location.reload();
     },
+    type: 'toggle' as const,
+    emphasize: true,
   };
 
   return [

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { EuiDataGrid, EuiPanel } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridSorting, EuiPanel } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { fetchTableDataCell } from './data_grid_table_cell_value';
 import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_columns';
@@ -23,10 +23,10 @@ export interface DataGridTableProps {
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  onSort: (sort: Array<[string, string]>) => void;
+  onSort: (sort: Array<[string, 'asc' | 'desc']>) => void;
   rows: OpenSearchSearchHit[];
   onSetColumns: (columns: string[]) => void;
-  sort: Array<[string, string]>;
+  sort: Array<[string, 'asc' | 'desc']>;
   displayTimeColumn: boolean;
   services: DiscoverServices;
   isToolbarVisible?: boolean;
@@ -43,7 +43,6 @@ export const DataGridTable = ({
   sort,
   rows,
   displayTimeColumn,
-  services,
   isToolbarVisible = true,
 }: DataGridTableProps) => {
   const [expandedHit, setExpandedHit] = useState<OpenSearchSearchHit | undefined>();
@@ -51,10 +50,18 @@ export const DataGridTable = ({
   const pagination = usePagination(rowCount);
 
   const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
+  const rowHeightsOptions = useMemo(
+    () => ({
+      defaultHeight: {
+        lineCount: columns.includes('_source') ? 3 : 1,
+      },
+    }),
+    [columns]
+  );
 
   const onColumnSort = useCallback(
-    (cols) => {
-      onSort(cols.map(({ id, direction }: any) => [id, direction]));
+    (cols: EuiDataGridSorting['columns']) => {
+      onSort(cols.map(({ id, direction }) => [id, direction]));
     },
     [onSort]
   );
@@ -79,10 +86,10 @@ export const DataGridTable = ({
     [columns, indexPattern, displayTimeColumn, onSetColumns]
   );
 
-  const sorting = useMemo(() => ({ columns: sortingColumns, onSort: onColumnSort }), [
-    sortingColumns,
-    onColumnSort,
-  ]);
+  const sorting: EuiDataGridSorting = useMemo(
+    () => ({ columns: sortingColumns, onSort: onColumnSort }),
+    [sortingColumns, onColumnSort]
+  );
 
   const leadingControlColumns = useMemo(() => {
     return [
@@ -94,6 +101,35 @@ export const DataGridTable = ({
       },
     ];
   }, []);
+
+  const table = useMemo(
+    () => (
+      <EuiDataGrid
+        aria-labelledby="aria-labelledby"
+        columns={dataGridTableColumns}
+        columnVisibility={dataGridTableColumnsVisibility}
+        leadingControlColumns={leadingControlColumns}
+        data-test-subj="docTable"
+        pagination={pagination}
+        renderCellValue={renderCellValue}
+        rowCount={rowCount}
+        sorting={sorting}
+        toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
+        rowHeightsOptions={rowHeightsOptions}
+      />
+    ),
+    [
+      dataGridTableColumns,
+      dataGridTableColumnsVisibility,
+      leadingControlColumns,
+      pagination,
+      renderCellValue,
+      rowCount,
+      sorting,
+      isToolbarVisible,
+      rowHeightsOptions,
+    ]
+  );
 
   return (
     <DiscoverGridContextProvider
@@ -108,18 +144,7 @@ export const DataGridTable = ({
       <>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
           <EuiPanel paddingSize="s" style={{ height: '100%' }}>
-            <EuiDataGrid
-              aria-labelledby="aria-labelledby"
-              columns={dataGridTableColumns}
-              columnVisibility={dataGridTableColumnsVisibility}
-              leadingControlColumns={leadingControlColumns}
-              data-test-subj="docTable"
-              pagination={pagination}
-              renderCellValue={renderCellValue}
-              rowCount={rowCount}
-              sorting={sorting}
-              toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
-            />
+            {table}
           </EuiPanel>
         </EuiPanel>
         {expandedHit && (
@@ -131,7 +156,6 @@ export const DataGridTable = ({
             onAddColumn={onAddColumn}
             onFilter={onFilter}
             onClose={() => setExpandedHit(undefined)}
-            services={services}
           />
         )}
       </>

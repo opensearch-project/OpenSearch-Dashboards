@@ -153,7 +153,6 @@ export const DiscoverField = ({
       >
         <EuiButtonIcon
           iconType="plusInCircleFilled"
-          className="dscSidebarItem__action"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
               ev.currentTarget.focus();
@@ -178,7 +177,6 @@ export const DiscoverField = ({
         <EuiButtonIcon
           color="danger"
           iconType="cross"
-          className="dscSidebarItem__action"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
               ev.currentTarget.focus();

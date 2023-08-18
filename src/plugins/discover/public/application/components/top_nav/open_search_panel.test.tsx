@@ -39,7 +39,7 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
     services: {
       core: { uiSettings: {}, savedObjects: {} },
-      addBasePath: (path) => path,
+      addBasePath: (path: string) => path,
     },
   }),
   withOpenSearchDashboards: jest.fn(),
