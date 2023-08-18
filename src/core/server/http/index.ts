@@ -74,6 +74,7 @@ export {
   RouteValidationResultFactory,
   DestructiveRouteMethod,
   SafeRouteMethod,
+  ensureRawRequest,
 } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
 export { OnPreRoutingHandler, OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
