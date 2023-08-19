@@ -31,26 +31,15 @@ export class DataSourceRegisterationError extends Error {
   }
 }
 
+export type DataSourceType = DataSource<
+  IDataSourceMetaData,
+  IDataSetParams,
+  ISourceDataSet,
+  IDataSourceQueryParams,
+  IDataSourceQueryResult
+>;
+
 export interface IDataSourceService {
-  registerDatasource: (
-    ds: DataSource<
-      IDataSourceMetaData,
-      IDataSetParams,
-      ISourceDataSet,
-      IDataSourceQueryParams,
-      IDataSourceQueryResult
-    >
-  ) => Promise<IDataSourceRegisterationResult>;
-  getDataSources: (
-    filters: IDataSourceFilters
-  ) => Record<
-    string,
-    DataSource<
-      IDataSourceMetaData,
-      IDataSetParams,
-      ISourceDataSet,
-      IDataSourceQueryParams,
-      IDataSourceQueryResult
-    >
-  >;
+  registerDataSource: (ds: DataSourceType) => Promise<IDataSourceRegisterationResult>;
+  getDataSources: (filters?: IDataSourceFilters) => Record<string, DataSourceType>;
 }

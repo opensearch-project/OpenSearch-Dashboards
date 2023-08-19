@@ -10,4 +10,6 @@ export {
   IDataSetParams,
   IDataSourceQueryParams,
   IDataSourceQueryResult,
-} from './type';
+  ConnectionStatus,
+} from './types';
+export { DataSourceFactory } from './factory';
