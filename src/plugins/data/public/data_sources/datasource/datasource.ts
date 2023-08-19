@@ -12,6 +12,9 @@
  * SourceDataSet: Represents the dataset associated with the data source.
  * DataSourceQueryResult: Represents the result from querying the data source.
  */
+
+import { ConnectionStatus } from './types';
+
 export abstract class DataSource<
   DataSourceMetaData,
   DataSetParams,
@@ -63,12 +66,7 @@ export abstract class DataSource<
    * Implementing classes should provide the specific logic to determine
    * the connection status, typically indicating success or failure.
    *
-   * @returns {ConnectionStatus} Status of the connection test.
+   * @returns {ConnectionStatus | Promise<void>} Status of the connection test.
    */
-  abstract testConnection(): ConnectionStatus;
-}
-
-interface ConnectionStatus {
-  success: boolean;
-  info: string;
+  abstract testConnection(): ConnectionStatus | Promise<void>;
 }

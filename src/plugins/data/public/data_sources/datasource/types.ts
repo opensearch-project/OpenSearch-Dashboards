@@ -14,3 +14,8 @@ export interface IDataSetParams {}
 export interface IDataSourceQueryParams {}
 
 export interface IDataSourceQueryResult {}
+
+export interface ConnectionStatus {
+  success: boolean;
+  info: string;
+}

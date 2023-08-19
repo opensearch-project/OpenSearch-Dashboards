@@ -19,7 +19,7 @@ import {
   DataSourceRegisterationError,
 } from './types';
 
-type DataSourceType = DataSource<
+export type DataSourceType = DataSource<
   IDataSourceMetaData,
   IDataSetParams,
   ISourceDataSet,
@@ -28,10 +28,18 @@ type DataSourceType = DataSource<
 >;
 
 export class DataSourceService implements IDataSourceService {
+  private static dataSourceService: IDataSourceService;
   // A record to store all registered data sources, using the data source name as the key.
   private dataSources: Record<string, DataSourceType> = {};
 
-  constructor() {}
+  private constructor() {}
+
+  static getInstance(): IDataSourceService {
+    if (!this.dataSourceService) {
+      this.dataSourceService = new DataSourceService();
+    }
+    return this.dataSourceService;
+  }
 
   /**
    * Register multiple data sources at once.
@@ -40,7 +48,7 @@ export class DataSourceService implements IDataSourceService {
    * @returns An array of registration results, one for each data source.
    */
   registerMultipleDataSources(datasources: DataSourceType[]) {
-    return datasources.map(this.registerDatasource);
+    return datasources.map(this.registerDataSource);
   }
 
   /**
@@ -51,7 +59,7 @@ export class DataSourceService implements IDataSourceService {
    * @returns A registration result indicating success or failure.
    * @throws {DataSourceRegisterationError} Throws an error if a data source with the same name already exists.
    */
-  async registerDatasource(ds: DataSourceType): Promise<IDataSourceRegisterationResult> {
+  async registerDataSource(ds: DataSourceType): Promise<IDataSourceRegisterationResult> {
     const dsName = ds.getName();
     if (dsName in this.dataSources) {
       throw new DataSourceRegisterationError(
