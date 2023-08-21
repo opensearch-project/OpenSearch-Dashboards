@@ -16,11 +16,18 @@ const createWorkspacesSetupContractMock = () => ({
   workspaceList$,
   currentWorkspace$,
   workspaceEnabled$,
+  registerWorkspaceMenuRender: jest.fn(),
 });
 
-const createWorkspacesStartContractMock = createWorkspacesSetupContractMock;
+const createWorkspacesStartContractMock = () => ({
+  currentWorkspaceId$,
+  workspaceList$,
+  currentWorkspace$,
+  workspaceEnabled$,
+  renderWorkspaceMenu: jest.fn(),
+});
 
 export const workspacesServiceMock = {
-  createSetupContractMock: createWorkspacesStartContractMock,
+  createSetupContractMock: createWorkspacesSetupContractMock,
   createStartContract: createWorkspacesStartContractMock,
 };

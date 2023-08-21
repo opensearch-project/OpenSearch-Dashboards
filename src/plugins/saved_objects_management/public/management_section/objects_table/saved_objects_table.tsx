@@ -96,7 +96,7 @@ import {
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { SavedObjectsCopyModal } from './components/copy_modal';
-import { PUBLIC_WORKSPACE, MANAGEMENT_WORKSPACE } from '../../../../../core/public';
+import { PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../../../../../core/public';
 
 interface ExportAllOption {
   id: string;
@@ -193,12 +193,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (!availableWorkspace?.length) {
       return undefined;
     }
-    if (!workspaceId || workspaceId === MANAGEMENT_WORKSPACE) {
+    if (!workspaceId || workspaceId === MANAGEMENT_WORKSPACE_ID) {
       return availableWorkspace.map((ws) => ws.id);
-    } else if (workspaceId === PUBLIC_WORKSPACE) {
-      return [PUBLIC_WORKSPACE];
+    } else if (workspaceId === PUBLIC_WORKSPACE_ID) {
+      return [PUBLIC_WORKSPACE_ID];
     } else {
-      return [workspaceId, PUBLIC_WORKSPACE];
+      return [workspaceId, PUBLIC_WORKSPACE_ID];
     }
   }
 
@@ -247,7 +247,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
     if (visibleWorkspaces?.length) {
       filteredCountOptions.workspaces = visibleWorkspaces.map(
-        (wsName) => this.wsNameIdLookup?.get(wsName) || PUBLIC_WORKSPACE
+        (wsName) => this.wsNameIdLookup?.get(wsName) || PUBLIC_WORKSPACE_ID
       );
     }
 
@@ -340,7 +340,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     if (visibleWorkspaces?.length) {
       const workspaceIds: string[] = visibleWorkspaces.map(
-        (wsName) => this.wsNameIdLookup?.get(wsName) || PUBLIC_WORKSPACE
+        (wsName) => this.wsNameIdLookup?.get(wsName) || PUBLIC_WORKSPACE_ID
       );
       findOptions.workspaces = workspaceIds;
     }

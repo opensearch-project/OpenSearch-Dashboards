@@ -357,8 +357,8 @@ export { AppCategory } from '../types';
 export {
   DEFAULT_APP_CATEGORIES,
   WorkspacePermissionMode,
-  PUBLIC_WORKSPACE,
-  MANAGEMENT_WORKSPACE,
+  PUBLIC_WORKSPACE_ID,
+  MANAGEMENT_WORKSPACE_ID,
 } from '../utils';
 
 export {

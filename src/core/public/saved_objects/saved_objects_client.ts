@@ -42,7 +42,7 @@ import {
 
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
-import { PUBLIC_WORKSPACE } from '../../utils';
+import { PUBLIC_WORKSPACE_ID } from '../../utils';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
@@ -382,7 +382,7 @@ export class SavedObjectsClient {
     if (options.hasOwnProperty('workspaces')) {
       finalWorkspaces = options.workspaces;
     } else if (typeof currentWorkspaceId === 'string') {
-      finalWorkspaces = Array.from(new Set([PUBLIC_WORKSPACE, currentWorkspaceId]));
+      finalWorkspaces = Array.from(new Set([PUBLIC_WORKSPACE_ID, currentWorkspaceId]));
     }
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {

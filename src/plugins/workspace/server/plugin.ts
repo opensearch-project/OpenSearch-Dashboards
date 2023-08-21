@@ -13,8 +13,8 @@ import {
   ISavedObjectsRepository,
   WORKSPACE_TYPE,
   ACL,
-  PUBLIC_WORKSPACE,
-  MANAGEMENT_WORKSPACE,
+  PUBLIC_WORKSPACE_ID,
+  MANAGEMENT_WORKSPACE_ID,
   Permissions,
   WorkspacePermissionMode,
   SavedObjectsClient,
@@ -125,7 +125,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     await Promise.all([
       this.checkAndCreateWorkspace(
         internalRepository,
-        PUBLIC_WORKSPACE,
+        PUBLIC_WORKSPACE_ID,
         {
           name: i18n.translate('workspaces.public.workspace.default.name', {
             defaultMessage: 'public',
@@ -135,7 +135,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       ),
       this.checkAndCreateWorkspace(
         internalRepository,
-        MANAGEMENT_WORKSPACE,
+        MANAGEMENT_WORKSPACE_ID,
         {
           name: i18n.translate('workspaces.management.workspace.default.name', {
             defaultMessage: 'Management',
