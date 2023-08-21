@@ -27,7 +27,7 @@ Set up your [OpenSearch Dashboards development environment](ttps://github.com/op
 * [Project Website](https://opensearch.org/)
 * [Downloads](https://opensearch.org/downloads.html)
 * [Documentation](https://opensearch.org/docs/)
-* Need help? See the [communication guide](COMMUNICATION.md) for various options
+* Need help? See the [communication guide](COMMUNICATIONS.md) for various options
 * [Project Principles](https://opensearch.org/#principles)
 * [Developer Guide](DEVELOPER_GUIDE.md)
 * [Contributing to OpenSearch](CONTRIBUTING.md)

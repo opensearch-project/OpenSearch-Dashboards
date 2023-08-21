@@ -6,11 +6,6 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
-  "scripts": {
-    "build": "../../scripts/use_node scripts/build",
-    "osd:bootstrap": "../../scripts/use_node scripts/build --source-maps",
-    "osd:watch": "../../scripts/use_node scripts/build --watch --source-maps"
-  },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.5",
@@ -30,5 +25,9 @@
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
     "react-intl": "^2.8.0"
+  },
+  "@osd/pm": {
+    "node": true,
+    "web": true
   }
 }
