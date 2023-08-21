@@ -87,7 +87,7 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import { PUBLIC_WORKSPACE } from '../../../../utils/constants';
+import { PUBLIC_WORKSPACE_ID } from '../../../../utils/constants';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -1299,7 +1299,7 @@ export class SavedObjectsRepository {
         if (
           obj.workspaces &&
           obj.workspaces.length > 0 &&
-          !obj.workspaces.includes(PUBLIC_WORKSPACE)
+          !obj.workspaces.includes(PUBLIC_WORKSPACE_ID)
         ) {
           return intersection(obj.workspaces, options.workspaces).length === 0;
         }
@@ -1352,7 +1352,7 @@ export class SavedObjectsRepository {
             params: {
               time,
               workspaces,
-              globalWorkspaceId: PUBLIC_WORKSPACE,
+              globalWorkspaceId: PUBLIC_WORKSPACE_ID,
             },
           },
         },

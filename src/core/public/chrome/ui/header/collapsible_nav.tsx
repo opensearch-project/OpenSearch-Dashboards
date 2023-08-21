@@ -233,11 +233,7 @@ export function CollapsibleNav({
       outsideClickCloses={false}
     >
       <EuiFlexItem className="eui-yScroll">
-        <CollapsibleNavHeader
-          getUrlForApp={getUrlForApp}
-          workspaces={workspaces}
-          basePath={basePath}
-        />
+        <CollapsibleNavHeader workspaces={workspaces} />
 
         {/* merged NavLinks */}
         {mergedNavLinks.map((item, i) => {

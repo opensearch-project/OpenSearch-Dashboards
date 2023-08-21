@@ -10,7 +10,7 @@ import {
   HttpFetchOptions,
   HttpSetup,
   WorkspaceAttribute,
-  WorkspaceStart,
+  WorkspaceSetup,
 } from '../../../core/public';
 import { WorkspacePermissionMode } from '../../../core/public';
 
@@ -61,9 +61,9 @@ interface WorkspaceFindOptions {
  */
 export class WorkspaceClient {
   private http: HttpSetup;
-  private workspaces: WorkspaceStart;
+  private workspaces: WorkspaceSetup;
 
-  constructor(http: HttpSetup, workspaces: WorkspaceStart) {
+  constructor(http: HttpSetup, workspaces: WorkspaceSetup) {
     this.http = http;
     this.workspaces = workspaces;
 

@@ -31,5 +31,5 @@
 export { shareWeakReplay } from './share_weak_replay';
 export { Sha256 } from './crypto';
 export { MountWrapper, mountReactNode } from './mount';
-export { getWorkspaceIdFromUrl, WORKSPACE_TYPE, formatUrlWithWorkspaceId } from './workspace';
-export { WORKSPACE_PATH_PREFIX, PUBLIC_WORKSPACE, MANAGEMENT_WORKSPACE } from '../../utils';
+export { getWorkspaceIdFromUrl, WORKSPACE_TYPE } from './workspace';
+export { WORKSPACE_PATH_PREFIX, PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../../utils';

@@ -29,7 +29,8 @@ import { SavedObjectsManagementPluginSetup } from '../../saved_objects_managemen
 import { getWorkspaceColumn } from './components/utils/workspace_column';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { WorkspaceClient } from './workspace_client';
-import { Services } from './application';
+import { renderWorkspaceMenu } from './render_workspace_menu';
+import { Services } from './types';
 
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
@@ -45,6 +46,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     workspaceClient.init();
     core.workspaces.workspaceEnabled$.next(true);
+
+    core.workspaces.registerWorkspaceMenuRender(renderWorkspaceMenu);
 
     /**
      * Retrieve workspace id from url
