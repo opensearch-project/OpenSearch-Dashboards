@@ -36,6 +36,7 @@ import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
@@ -60,7 +61,8 @@ const readOnlyBadge = {
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
   params: ManagementAppMountParams,
-  getMlCardState: () => MlCardState
+  getMlCardState: () => MlCardState,
+  withPage: boolean = false
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
@@ -90,26 +92,36 @@ export async function mountManagementSection(
     dataSourceEnabled,
   };
 
+  const router = (
+    <Router history={params.history}>
+      <Switch>
+        <Route path={['/create']}>
+          <CreateIndexPatternWizardWithRouter />
+        </Route>
+        <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
+          <CreateEditFieldContainer />
+        </Route>
+        <Route path={['/patterns/:id']}>
+          <EditIndexPatternContainer />
+        </Route>
+        <Route path={['/']}>
+          <IndexPatternTableWithRouter canSave={canSave} />
+        </Route>
+      </Switch>
+    </Router>
+  );
+  let content = router;
+  if (withPage) {
+    content = (
+      <EuiPage restrictWidth="1200px">
+        <EuiPageBody component="main">{router}</EuiPageBody>
+      </EuiPage>
+    );
+  }
+
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
-      <I18nProvider>
-        <Router history={params.history}>
-          <Switch>
-            <Route path={['/create']}>
-              <CreateIndexPatternWizardWithRouter />
-            </Route>
-            <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
-              <CreateEditFieldContainer />
-            </Route>
-            <Route path={['/patterns/:id']}>
-              <EditIndexPatternContainer />
-            </Route>
-            <Route path={['/']}>
-              <IndexPatternTableWithRouter canSave={canSave} />
-            </Route>
-          </Switch>
-        </Router>
-      </I18nProvider>
+      <I18nProvider>{content}</I18nProvider>
     </OpenSearchDashboardsContextProvider>,
     params.element
   );
