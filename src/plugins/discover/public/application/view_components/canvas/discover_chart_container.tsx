@@ -16,7 +16,7 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
   const { uiSettings, data } = services;
   const { indexPattern } = useDiscoverContext();
 
-  const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
+  const timeField = indexPattern?.timeFieldName;
 
   if (!hits || !bucketInterval || !chartData) {
     // TODO: handle better
