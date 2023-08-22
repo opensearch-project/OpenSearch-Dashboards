@@ -61,6 +61,7 @@ beforeEach(async () => {
     application: {} as any,
     embeddable: start,
     inspector: {} as any,
+    chrome: {} as any,
     notifications: {} as any,
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
