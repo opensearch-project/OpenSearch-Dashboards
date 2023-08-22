@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
+import { Observable } from 'rxjs';
 
 import {
   PluginInitializerContext,
@@ -23,10 +24,12 @@ import { IWorkspaceDBImpl, WorkspaceAttribute } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
+import { ConfigSchema } from '../config';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
+  private config$: Observable<ConfigSchema>;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -47,6 +50,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
+    this.config$ = initializerContext.config.create<ConfigSchema>();
   }
 
   public async setup(core: CoreSetup) {
@@ -56,7 +60,10 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
     await this.client.setup(core);
     const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-      core.savedObjects.permissionControl
+      core.savedObjects.permissionControl,
+      {
+        config$: this.config$,
+      }
     );
 
     core.savedObjects.addClientWrapper(

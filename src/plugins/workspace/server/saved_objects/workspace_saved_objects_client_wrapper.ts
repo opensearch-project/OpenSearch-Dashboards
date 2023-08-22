@@ -5,6 +5,8 @@
 
 import { i18n } from '@osd/i18n';
 import Boom from '@hapi/boom';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import {
   OpenSearchDashboardsRequest,
@@ -29,6 +31,7 @@ import {
   ACL,
   WorkspacePermissionMode,
 } from '../../../../core/server';
+import { ConfigSchema } from '../../config';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -56,6 +59,7 @@ const isWorkspacesLikeAttributes = (attributes: unknown): attributes is Attribut
   Array.isArray((attributes as { workspaces: unknown }).workspaces);
 
 export class WorkspaceSavedObjectsClientWrapper {
+  private config?: ConfigSchema;
   private formatWorkspacePermissionModeToStringArray(
     permission: WorkspacePermissionMode | WorkspacePermissionMode[]
   ): string[] {
@@ -135,6 +139,14 @@ export class WorkspaceSavedObjectsClientWrapper {
     if (!permitted) {
       throw generateWorkspacePermissionError();
     }
+  }
+
+  private isDashboardAdmin(request: OpenSearchDashboardsRequest): boolean {
+    const config = this.config || ({} as ConfigSchema);
+    const principals = this.permissionControl.getPrincipalsFromRequest(request);
+    const adminBackendRoles = config?.dashboardAdmin?.backendRoles || [];
+    const matchAny = principals?.groups?.some((item) => adminBackendRoles.includes(item)) || false;
+    return matchAny;
   }
 
   /**
@@ -374,6 +386,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.addToWorkspaces(objects, targetWorkspaces, options);
     };
 
+    const isDashboardAdmin = this.isDashboardAdmin(wrapperOptions.request);
+
+    if (isDashboardAdmin) {
+      return wrapperOptions.client;
+    }
+
     return {
       ...wrapperOptions.client,
       get: getWithWorkspacePermissionControl,
@@ -392,5 +410,20 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
   };
 
-  constructor(private readonly permissionControl: SavedObjectsPermissionControlContract) {}
+  constructor(
+    private readonly permissionControl: SavedObjectsPermissionControlContract,
+    private readonly options: {
+      config$: Observable<ConfigSchema>;
+    }
+  ) {
+    this.options.config$.subscribe((config) => {
+      this.config = config;
+    });
+    this.options.config$
+      .pipe(first())
+      .toPromise()
+      .then((config) => {
+        this.config = config;
+      });
+  }
 }
