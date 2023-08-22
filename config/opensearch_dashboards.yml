@@ -268,3 +268,6 @@
 # Set the value of this setting to true to enable plugin augmentation
 # vis_augmenter.pluginAugmentationEnabled: true
 
+# Set the backend roles, whoever has the backend roles defined in this config will be regard as dashboard admin.
+# Dashboard admin will have the access to all the workspaces and objects inside OpenSearch Dashboards.
+# workspace.dashboardAdmin.backendRoles: ["dashboard_admin"]
