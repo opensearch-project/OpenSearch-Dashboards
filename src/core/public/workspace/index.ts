@@ -8,4 +8,3 @@ export {
   WorkspaceSetup,
   WorkspaceObservables,
 } from './workspaces_service';
-export type { WorkspaceAttribute } from './workspaces_service';

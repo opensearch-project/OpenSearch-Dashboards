@@ -4,7 +4,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { CoreService } from '../../types';
+import { CoreService, WorkspaceAttribute } from '../../types';
 import { InternalApplicationStart } from '../application';
 import { HttpSetup } from '../http';
 
@@ -34,16 +34,6 @@ export interface WorkspaceSetup extends WorkspaceObservables {
 
 export interface WorkspaceStart extends WorkspaceObservables {
   renderWorkspaceMenu: () => JSX.Element | null;
-}
-
-export interface WorkspaceAttribute {
-  id: string;
-  name: string;
-  description?: string;
-  features?: string[];
-  color?: string;
-  icon?: string;
-  defaultVISTheme?: string;
 }
 
 export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceStart> {

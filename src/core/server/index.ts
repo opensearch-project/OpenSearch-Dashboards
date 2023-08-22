@@ -353,7 +353,7 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { AppCategory } from '../types';
+export { AppCategory, WorkspaceAttribute } from '../types';
 export {
   DEFAULT_APP_CATEGORIES,
   WorkspacePermissionMode,
