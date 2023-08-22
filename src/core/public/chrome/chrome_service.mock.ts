@@ -30,7 +30,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@osd/utility-types';
-import { ChromeBadge, ChromeBrand, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
+import { ChromeBadge, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
+import { getLogosMock } from '../../common/mocks';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
@@ -54,6 +55,7 @@ const createStartContractMock = () => {
       change: jest.fn(),
       reset: jest.fn(),
     },
+    logos: getLogosMock.default,
     navControls: {
       registerLeft: jest.fn(),
       registerCenter: jest.fn(),
@@ -63,8 +65,6 @@ const createStartContractMock = () => {
       getRight$: jest.fn(),
     },
     setAppTitle: jest.fn(),
-    setBrand: jest.fn(),
-    getBrand$: jest.fn(),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn(),
     addApplicationClass: jest.fn(),
@@ -82,7 +82,6 @@ const createStartContractMock = () => {
     setCustomNavLink: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
-  startContract.getBrand$.mockReturnValue(new BehaviorSubject({} as ChromeBrand));
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
   startContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
   startContract.getBadge$.mockReturnValue(new BehaviorSubject({} as ChromeBadge));

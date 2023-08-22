@@ -37,6 +37,8 @@ export {
   StringValidationRegex,
 } from '../../core/types';
 
+export type { Logos } from '../common/types';
+
 /**
  * A function that should mount DOM content inside the provided container element
  * and return a handler to unmount it.
@@ -55,3 +57,12 @@ export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => Un
  * @public
  */
 export type UnmountCallback = () => void;
+
+/**
+ * @deprecated: Use Branding instead
+ * @public
+ */
+export interface ChromeBrand {
+  logo?: string;
+  smallLogo?: string;
+}

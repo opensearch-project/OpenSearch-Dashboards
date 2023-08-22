@@ -78,6 +78,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
       getEmbeddableFactory,
     } as any,
     notifications: {} as any,
+    chrome: {} as any,
     overlays: {} as any,
     inspector: {
       isAvailable: jest.fn(),

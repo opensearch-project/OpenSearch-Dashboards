@@ -145,36 +145,6 @@ describe('start', () => {
     });
   });
 
-  describe('brand', () => {
-    it('updates/emits the brand as it changes', async () => {
-      const { chrome, service } = await start();
-      const promise = chrome.getBrand$().pipe(toArray()).toPromise();
-
-      chrome.setBrand({
-        logo: 'big logo',
-        smallLogo: 'not so big logo',
-      });
-      chrome.setBrand({
-        logo: 'big logo without small logo',
-      });
-      service.stop();
-
-      await expect(promise).resolves.toMatchInlineSnapshot(`
-                      Array [
-                        Object {},
-                        Object {
-                          "logo": "big logo",
-                          "smallLogo": "not so big logo",
-                        },
-                        Object {
-                          "logo": "big logo without small logo",
-                          "smallLogo": undefined,
-                        },
-                      ]
-                  `);
-    });
-  });
-
   describe('visibility', () => {
     it('emits false when no application is mounted', async () => {
       const { chrome, service } = await start();
@@ -478,7 +448,6 @@ describe('stop', () => {
   it('completes applicationClass$, getIsNavDrawerLocked, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const { chrome, service } = await start();
     const promise = Rx.combineLatest(
-      chrome.getBrand$(),
       chrome.getApplicationClasses$(),
       chrome.getIsNavDrawerLocked$(),
       chrome.getBreadcrumbs$(),
@@ -496,7 +465,6 @@ describe('stop', () => {
 
     await expect(
       Rx.combineLatest(
-        chrome.getBrand$(),
         chrome.getApplicationClasses$(),
         chrome.getIsNavDrawerLocked$(),
         chrome.getBreadcrumbs$(),

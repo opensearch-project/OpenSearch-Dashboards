@@ -37,6 +37,7 @@ import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
+import { getLogos } from '../../../../common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -64,10 +65,22 @@ function mockRecentNavLink({ label = 'recent' }: Partial<ChromeRecentlyAccessedH
   };
 }
 
-function mockProps() {
+const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
+const mockBranding = {
+  logo: {
+    defaultUrl: '/custom/branded/logo.svg',
+    darkModeUrl: '/custom/branded/logo-darkmode.svg',
+  },
+  mark: {
+    defaultUrl: '/custom/branded/mark.svg',
+    darkModeUrl: '/custom/branded/mark-darkmode.svg',
+  },
+};
+
+function mockProps(branding = {}) {
   return {
     appId$: new BehaviorSubject('test'),
-    basePath: httpServiceMock.createSetupContract({ basePath: '/test' }).basePath,
+    basePath: mockBasePath,
     id: 'collapsibe-nav',
     isLocked: false,
     isNavOpen: false,
@@ -80,13 +93,8 @@ function mockProps() {
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),
     customNavLink$: new BehaviorSubject(undefined),
-    branding: {
-      darkMode: false,
-      mark: {
-        defaultUrl: '/defaultModeLogo',
-        darkModeUrl: '/darkModeLogo',
-      },
-    },
+    branding,
+    logos: getLogos(branding, mockBasePath.serverBasePath),
   };
 }
 
@@ -212,77 +220,79 @@ describe('CollapsibleNav', () => {
     expectNavIsClosed(component);
   });
 
-  it('renders the nav bar with custom logo in default mode', () => {
-    const navLinks = [
-      mockLink({ category: opensearchDashboards }),
-      mockLink({ category: observability }),
-    ];
-    const recentNavLinks = [mockRecentNavLink({})];
-    const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-      />
-    );
-    // check if nav bar renders default mode custom logo
-    expect(component).toMatchSnapshot();
+  describe('with custom branding', () => {
+    it('renders the nav bar in default mode', () => {
+      const navLinks = [
+        mockLink({ category: opensearchDashboards }),
+        mockLink({ category: observability }),
+      ];
+      const recentNavLinks = [mockRecentNavLink({})];
+      const component = mount(
+        <CollapsibleNav
+          {...mockProps(mockBranding)}
+          isNavOpen={true}
+          navLinks$={new BehaviorSubject(navLinks)}
+          recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        />
+      );
 
-    // check if nav bar renders the original default mode opensearch mark
-    component.setProps({
-      branding: {
-        darkMode: false,
-        mark: {},
-      },
+      expect(component).toMatchSnapshot();
     });
-    expect(component).toMatchSnapshot();
+
+    it('renders the nav bar in dark mode', () => {
+      const navLinks = [
+        mockLink({ category: opensearchDashboards }),
+        mockLink({ category: observability }),
+      ];
+      const recentNavLinks = [mockRecentNavLink({})];
+      const component = mount(
+        <CollapsibleNav
+          {...mockProps({ ...mockBranding, darkMode: true })}
+          isNavOpen={true}
+          navLinks$={new BehaviorSubject(navLinks)}
+          recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
+    });
   });
 
-  it('renders the nav bar with custom logo in dark mode', () => {
-    const navLinks = [
-      mockLink({ category: opensearchDashboards }),
-      mockLink({ category: observability }),
-    ];
-    const recentNavLinks = [mockRecentNavLink({})];
-    const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-      />
-    );
-    // check if nav bar renders dark mode custom logo
-    component.setProps({
-      branding: {
-        darkMode: true,
-        mark: {
-          defaultUrl: '/defaultModeLogo',
-          darkModeUrl: '/darkModeLogo',
-        },
-      },
-    });
-    expect(component).toMatchSnapshot();
+  describe('without custom branding', () => {
+    it('renders the nav bar in default mode', () => {
+      const navLinks = [
+        mockLink({ category: opensearchDashboards }),
+        mockLink({ category: observability }),
+      ];
+      const recentNavLinks = [mockRecentNavLink({})];
+      const component = mount(
+        <CollapsibleNav
+          {...mockProps()}
+          isNavOpen={true}
+          navLinks$={new BehaviorSubject(navLinks)}
+          recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        />
+      );
 
-    // check if nav bar renders default mode custom logo
-    component.setProps({
-      branding: {
-        darkMode: true,
-        mark: {
-          defaultUrl: '/defaultModeLogo',
-        },
-      },
+      expect(component).toMatchSnapshot();
     });
-    expect(component).toMatchSnapshot();
 
-    // check if nav bar renders the original dark mode opensearch mark
-    component.setProps({
-      branding: {
-        darkMode: false,
-        mark: {},
-      },
+    it('renders the nav bar in dark mode', () => {
+      const navLinks = [
+        mockLink({ category: opensearchDashboards }),
+        mockLink({ category: observability }),
+      ];
+      const recentNavLinks = [mockRecentNavLink({})];
+      const component = mount(
+        <CollapsibleNav
+          {...mockProps({ darkMode: true })}
+          isNavOpen={true}
+          navLinks$={new BehaviorSubject(navLinks)}
+          recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
     });
-    expect(component).toMatchSnapshot();
   });
 });
