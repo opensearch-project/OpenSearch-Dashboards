@@ -10,17 +10,8 @@ import {
   CoreSetup,
   WorkspacePermissionMode,
   Permissions,
+  WorkspaceAttribute,
 } from '../../../core/server';
-
-export interface WorkspaceAttribute {
-  id: string;
-  name: string;
-  description?: string;
-  features?: string[];
-  color?: string;
-  icon?: string;
-  defaultVISTheme?: string;
-}
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions: Permissions;

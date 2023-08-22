@@ -2,11 +2,15 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import type { SavedObject, SavedObjectsClientContract, CoreSetup } from '../../../core/server';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  CoreSetup,
+  WorkspaceAttribute,
+} from '../../../core/server';
 import { WORKSPACE_TYPE } from '../../../core/server';
 import {
   IWorkspaceDBImpl,
-  WorkspaceAttribute,
   WorkspaceFindOptions,
   IResponse,
   IRequestDetail,

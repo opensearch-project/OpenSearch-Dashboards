@@ -4,7 +4,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceAttribute } from '../workspace';
+import { WorkspaceAttribute } from '..';
 
 const currentWorkspaceId$ = new BehaviorSubject<string>('');
 const workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);

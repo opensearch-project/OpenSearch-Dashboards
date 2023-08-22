@@ -32,6 +32,7 @@ import { WorkspaceClient } from './workspace_client';
 import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
 import { renderWorkspaceMenu } from './render_workspace_menu';
 import { Services } from './types';
+import { featureMatchesConfig } from './utils';
 
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
@@ -163,7 +164,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private filterByWorkspace(workspace: WorkspaceAttribute | null, allNavLinks: ChromeNavLink[]) {
     if (!workspace) return allNavLinks;
     const features = workspace.features ?? [];
-    return allNavLinks.filter((item) => features.includes(item.id));
+    return allNavLinks.filter(featureMatchesConfig(features));
   }
 
   private filterNavLinks(core: CoreStart) {

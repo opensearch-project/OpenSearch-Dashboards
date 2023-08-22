@@ -103,6 +103,7 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
+  WorkspaceAttribute,
 } from '../types';
 
 export {
@@ -351,7 +352,6 @@ export {
   WorkspaceStart,
   WorkspaceSetup,
   WorkspaceService,
-  WorkspaceAttribute,
   WorkspaceObservables,
 } from './workspace';
 
