@@ -5,9 +5,19 @@
 
 import { i18n } from '@osd/i18n';
 
-export const LIBRARY_OVERVIEW_WORDINGS = i18n.translate('savedObjectsManagement.libraryOverview', {
-  defaultMessage: 'Overview',
-});
+export const ALL_LIBRARY_OBJECTS_WORDINGS = i18n.translate(
+  'savedObjectsManagement.allLibraryObjects',
+  {
+    defaultMessage: 'All library objects',
+  }
+);
+
+export const ALL_LIBRARY_OBJECTS_TITLE_WORDINGS = i18n.translate(
+  'savedObjectsManagement.objectsTable.header.allLibraryObjectsTitle',
+  {
+    defaultMessage: 'Library objects in Analytics',
+  }
+);
 
 export const SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS = i18n.translate(
   'savedObjectsManagement.objectsTable.header.savedObjectsTitle',

@@ -57,7 +57,8 @@ import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import {
-  LIBRARY_OVERVIEW_WORDINGS,
+  ALL_LIBRARY_OBJECTS_TITLE_WORDINGS,
+  ALL_LIBRARY_OBJECTS_WORDINGS,
   SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
   SAVED_QUERIES_WORDINGS,
   SAVED_SEARCHES_WORDINGS,
@@ -132,14 +133,14 @@ export class SavedObjectsManagementPlugin
      * Register saved objects overview & saved search & saved query here
      */
     core.application.register({
-      id: 'objects_overview',
+      id: 'objects_all',
       appRoute: '/app/objects',
       exactRoute: true,
-      title: LIBRARY_OVERVIEW_WORDINGS,
+      title: ALL_LIBRARY_OBJECTS_WORDINGS,
       order: 10000,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: mountWrapper({
-        title: SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
+        title: ALL_LIBRARY_OBJECTS_TITLE_WORDINGS,
       }),
     });
 
