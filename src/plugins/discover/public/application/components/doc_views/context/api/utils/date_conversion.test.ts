@@ -28,24 +28,16 @@
  * under the License.
  */
 
-import React, { useRef, useEffect } from 'react';
-import { DocViewRenderFn, DocViewRenderProps } from '../../../doc_views/doc_views_types';
+import { extractNanos } from './date_conversion';
 
-interface Props {
-  render: DocViewRenderFn;
-  renderProps: DocViewRenderProps;
-}
-/**
- * Responsible for rendering a tab provided by a render function.
- * The provided `render` function is called with a reference to the
- * component's `HTMLDivElement` as 1st arg and `renderProps` as 2nd arg
- */
-export function DocViewRenderTab({ render, renderProps }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (ref && ref.current) {
-      return render(ref.current, renderProps);
-    }
-  }, [render, renderProps]);
-  return <div ref={ref} />;
-}
+describe('function extractNanos', function () {
+  test('extract nanos of 2014-01-01', function () {
+    expect(extractNanos('2014-01-01')).toBe('000000000');
+  });
+  test('extract nanos of 2014-01-01T12:12:12.234Z', function () {
+    expect(extractNanos('2014-01-01T12:12:12.234Z')).toBe('234000000');
+  });
+  test('extract nanos of 2014-01-01T12:12:12.234123321Z', function () {
+    expect(extractNanos('2014-01-01T12:12:12.234123321Z')).toBe('234123321');
+  });
+});

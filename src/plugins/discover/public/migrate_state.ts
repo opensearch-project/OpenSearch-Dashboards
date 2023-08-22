@@ -94,6 +94,11 @@ export function migrateUrlState(oldPath: string, newPath = '/'): string {
 
   // Migrate the path.
   switch (matchingPathPattern.path) {
+    // doc and context views will use the same legacy path and state
+    // so we can use the saved legacy path in new discover
+    case `doc`:
+    case `context`:
+      path = oldPath;
     case `discover`:
     case `savedSearch`:
       const params = matchPath<DiscoverParams>(oldPath, {

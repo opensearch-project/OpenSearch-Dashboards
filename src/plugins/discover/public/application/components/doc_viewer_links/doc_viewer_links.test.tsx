@@ -7,7 +7,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerLinks } from './doc_viewer_links';
 import { getDocViewsLinksRegistry } from '../../../opensearch_dashboards_services';
-import { DocViewLinkRenderProps } from '../../doc_views_links/doc_views_links_types';
+import { DocViewLinkRenderProps } from '../doc_views/doc_views_links/doc_views_links_types';
 
 jest.mock('../../../opensearch_dashboards_services', () => {
   let registry: any[] = [];

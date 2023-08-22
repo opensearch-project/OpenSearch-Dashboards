@@ -12,9 +12,8 @@ import { DocViewInspectButton } from './data_grid_table_docview_inspect_button';
 import { DataGridFlyout } from './data_grid_table_flyout';
 import { DiscoverGridContextProvider } from './data_grid_table_context';
 import { toolbarVisibility } from './constants';
-import { DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { usePagination } from '../utils/use_pagination';
 import { SortOrder } from '../../../saved_searches/types';
 
