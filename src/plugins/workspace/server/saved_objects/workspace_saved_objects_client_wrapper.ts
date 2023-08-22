@@ -175,7 +175,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       await this.validateMultiWorkspacesPermissions(
         objectToDeleted.workspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Management
+        [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
       );
       return await wrapperOptions.client.delete(type, id, options);
     };
@@ -238,7 +238,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         await this.validateMultiWorkspacesPermissions(
           attributes.workspaces,
           wrapperOptions.request,
-          WorkspacePermissionMode.Management
+          [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Management]
         );
       }
       return await wrapperOptions.client.create(type, attributes, options);
@@ -253,7 +253,11 @@ export class WorkspaceSavedObjectsClientWrapper {
       await this.validateAtLeastOnePermittedWorkspaces(
         objectToGet.workspaces,
         wrapperOptions.request,
-        WorkspacePermissionMode.Read
+        [
+          WorkspacePermissionMode.LibraryRead,
+          WorkspacePermissionMode.LibraryWrite,
+          WorkspacePermissionMode.Management,
+        ]
       );
       return objectToGet;
     };
@@ -267,7 +271,11 @@ export class WorkspaceSavedObjectsClientWrapper {
         await this.validateAtLeastOnePermittedWorkspaces(
           object.workspaces,
           wrapperOptions.request,
-          WorkspacePermissionMode.Read
+          [
+            WorkspacePermissionMode.LibraryRead,
+            WorkspacePermissionMode.LibraryWrite,
+            WorkspacePermissionMode.Management,
+          ]
         );
       }
       return objectToBulkGet;
