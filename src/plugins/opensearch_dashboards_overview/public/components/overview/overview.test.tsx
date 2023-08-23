@@ -33,6 +33,7 @@ import React from 'react';
 import { Overview } from './overview';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
+import { getLogosMock } from '../../../../../core/common/mocks';
 
 jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -163,46 +164,42 @@ const mockFeatures = [
   },
 ];
 
-const mockBranding = {
-  darkMode: false,
-  mark: {
-    defaultUrl: '/defaultModeUrl',
-    darkModeUrl: '/darkModeUrl',
-  },
-};
+const makeProps = () => ({
+  newsFetchResult: mockNewsFetchResult,
+  solutions: mockSolutions,
+  features: mockFeatures,
+  logos: getLogosMock.default,
+});
 
 describe('Overview', () => {
-  test('render', () => {
-    const component = shallowWithIntl(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={mockSolutions}
-        features={mockFeatures}
-        branding={mockBranding}
-      />
-    );
-    expect(component).toMatchSnapshot();
+  describe('renders', () => {
+    it('with solutions and features', () => {
+      const props = {
+        ...makeProps(),
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('without solutions and with features', () => {
+      const props = {
+        ...makeProps(),
+        solutions: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+    it('with solutions and without features', () => {
+      const props = {
+        ...makeProps(),
+        features: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
   });
-  test('without solutions', () => {
-    const component = shallowWithIntl(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={[]}
-        features={mockFeatures}
-        branding={mockBranding}
-      />
-    );
-    expect(component).toMatchSnapshot();
-  });
-  test('without features', () => {
-    const component = shallowWithIntl(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={mockSolutions}
-        features={[]}
-        branding={mockBranding}
-      />
-    );
-    expect(component).toMatchSnapshot();
-  });
+
+  // ToDo: Add tests for all the complications of Overview
+  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4693
+  it.todo('renders each of the complications of Overview');
 });

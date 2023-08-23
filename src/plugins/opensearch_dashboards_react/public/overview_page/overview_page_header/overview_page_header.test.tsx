@@ -31,95 +31,265 @@
 import React from 'react';
 import { OverviewPageHeader } from './overview_page_header';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { useOpenSearchDashboards } from '../../context';
+import { getLogosMock } from '../../../../../core/common/mocks';
 
-jest.mock('../../app_links', () => ({
-  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-}));
-
-jest.mock('../../context', () => ({
-  useOpenSearchDashboards: jest.fn().mockReturnValue({
-    services: {
-      application: { capabilities: { navLinks: { management: true, dev_tools: true } } },
-      notifications: { toast: { addSuccess: jest.fn() } },
-    },
-  }),
-}));
-
-afterAll(() => jest.clearAllMocks());
+jest.mock('../../context', () => ({ useOpenSearchDashboards: jest.fn() }));
 
 const mockTitle = 'Page Title';
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
+const mockProps = () => ({
+  addBasePath: addBasePathMock,
+  title: mockTitle,
+  branding: {},
+  logos: getLogosMock.default,
+});
+
 describe('OverviewPageHeader ', () => {
-  describe('in default mode ', () => {
-    test('render logo as custom default mode logo', () => {
-      const branding = {
-        darkMode: false,
-        mark: {
-          defaultUrl: '/defaultModeLogo',
-          darkModeUrl: '/darkModeLogo',
-        },
-      };
-
-      const component = shallowWithIntl(
-        <OverviewPageHeader addBasePath={addBasePathMock} title={mockTitle} branding={branding} />
-      );
-      expect(component).toMatchSnapshot();
-    });
-
-    test('render logo as original default mode opensearch mark', () => {
-      const branding = {
-        darkMode: false,
-        mark: {},
-      };
-
-      const component = shallowWithIntl(
-        <OverviewPageHeader addBasePath={addBasePathMock} title={mockTitle} branding={branding} />
-      );
-      expect(component).toMatchSnapshot();
-    });
+  beforeAll(() => {
+    // @ts-ignore
+    useOpenSearchDashboards.mockImplementation(() => ({
+      services: {
+        application: { capabilities: { navLinks: { management: true, dev_tools: true } } },
+        notifications: { toast: { addSuccess: jest.fn() } },
+      },
+    }));
   });
 
-  describe('in dark mode ', () => {
-    test('render logo as custom dark mode logo', () => {
-      const branding = {
-        darkMode: false,
-        mark: {
-          defaultUrl: '/defaultModeLogo',
-          darkModeUrl: '/darkModeLogo',
-        },
-      };
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
 
-      const component = shallowWithIntl(
-        <OverviewPageHeader addBasePath={addBasePathMock} title={mockTitle} branding={branding} />
-      );
-      expect(component).toMatchSnapshot();
+  it('renders without overlap by default', () => {
+    const props = {
+      ...mockProps(),
+    };
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    const header = component.find('header');
+    expect(header.hasClass('osdOverviewPageHeader--hasOverlap')).toBeFalsy();
+    expect(header.hasClass('osdOverviewPageHeader--noOverlap')).toBeTruthy();
+  });
+
+  it('renders with overlap', () => {
+    const props = {
+      ...mockProps(),
+      overlap: true,
+    };
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    const header = component.find('header');
+    expect(header.hasClass('osdOverviewPageHeader--hasOverlap')).toBeTruthy();
+    expect(header.hasClass('osdOverviewPageHeader--noOverlap')).toBeFalsy();
+  });
+
+  it('renders without an icon by default', () => {
+    const props = {
+      ...mockProps(),
+    };
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    const icons = component.find({ 'data-test-subj': 'osdOverviewPageHeaderLogo' });
+    expect(icons.length).toBe(0);
+  });
+
+  it('renders the mark icon when asked to', () => {
+    const props = {
+      ...mockProps(),
+      showIcon: true,
+    };
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    const icons = component.find({ 'data-test-subj': 'osdOverviewPageHeaderLogo' });
+    expect(icons.length).toBe(1);
+    expect(icons.first().prop('type')).toEqual(props.logos.Mark.url);
+  });
+
+  it('uses the provided title in the header', () => {
+    const props = {
+      ...mockProps(),
+    };
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    const head = component.find('h1');
+    expect(head.length).toBe(1);
+    expect(head.first().text()).toEqual(mockTitle);
+  });
+
+  it('renders with the toolbar by default', () => {
+    const props = {
+      ...mockProps(),
+    };
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    const items = component.find('header > div > EuiFlexGroup > EuiFlexItem');
+    expect(items.length).toBe(2);
+
+    const buttons = component.find({ className: 'osdOverviewPageHeader__actionButton' });
+    // This also validates the order of the items
+    const btnAddData = buttons.at(0);
+    expect(btnAddData.prop('iconType')).toEqual('indexOpen');
+    expect(btnAddData.prop('href')).toEqual('/app/home#/tutorial_directory');
+
+    // Would contain only the "Add Data" button
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders with the toolbar when it is explicitly asked not to be hidden', () => {
+    const props = {
+      ...mockProps(),
+      hideToolbar: false,
+    };
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    const items = component.find('header > div > EuiFlexGroup > EuiFlexItem');
+    expect(items.length).toBe(2);
+
+    const buttons = component.find({ className: 'osdOverviewPageHeader__actionButton' });
+    // This also validates the order of the items
+    const btnAddData = buttons.at(0);
+    expect(btnAddData.prop('iconType')).toEqual('indexOpen');
+    expect(btnAddData.prop('href')).toEqual('/app/home#/tutorial_directory');
+  });
+
+  it('renders without the toolbar when it is explicitly asked to be hidden', () => {
+    const props = {
+      ...mockProps(),
+      hideToolbar: true,
+    };
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    const items = component.find('header > div > EuiFlexGroup > EuiFlexItem');
+    expect(items.length).toBe(1);
+
+    const buttons = component.find({ className: 'osdOverviewPageHeader__actionButton' });
+    expect(buttons.length).toBe(0);
+  });
+});
+
+describe('OverviewPageHeader toolbar items - Management', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
+  const setupAndGetButton = (management: boolean, showManagementLink?: boolean) => {
+    // @ts-ignore
+    useOpenSearchDashboards.mockImplementation(() => ({
+      services: {
+        application: { capabilities: { navLinks: { management, dev_tools: true } } },
+        notifications: { toast: { addSuccess: jest.fn() } },
+      },
+    }));
+
+    const props = mockProps();
+    if (showManagementLink !== undefined) {
+      // @ts-ignore
+      props.showManagementLink = showManagementLink;
+    }
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    return component.find({
+      className: 'osdOverviewPageHeader__actionButton',
+      href: '/app/management',
     });
+  };
 
-    test('render logo as custom default mode logo', () => {
-      const branding = {
-        darkMode: false,
-        mark: {
-          defaultUrl: '/defaultModeLogo',
-        },
-      };
+  it('renders without management when the management plugin is disabled', () => {
+    const btnManagement = setupAndGetButton(false);
+    expect(btnManagement.length).toEqual(0);
+  });
 
-      const component = shallowWithIntl(
-        <OverviewPageHeader addBasePath={addBasePathMock} title={mockTitle} branding={branding} />
-      );
-      expect(component).toMatchSnapshot();
+  it('renders without management when the management plugin is disabled and asked not to show', () => {
+    const btnManagement = setupAndGetButton(false, false);
+    expect(btnManagement.length).toEqual(0);
+  });
+
+  it('renders without management when the management plugin is disabled even if asked to show', () => {
+    const btnManagement = setupAndGetButton(false, true);
+    expect(btnManagement.length).toEqual(0);
+  });
+
+  it('renders without management when the management plugin is enabled', () => {
+    const btnManagement = setupAndGetButton(true);
+    expect(btnManagement.length).toEqual(0);
+  });
+
+  it('renders without management when the management plugin is enabled but asked not to show', () => {
+    const btnManagement = setupAndGetButton(true, false);
+    expect(btnManagement.length).toEqual(0);
+  });
+
+  it('renders with management when the management plugin is enabled and asked to show', () => {
+    const btnManagement = setupAndGetButton(true, true);
+    expect(btnManagement.length).toEqual(1);
+  });
+});
+
+describe('OverviewPageHeader toolbar items - DevTools', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
+  const setupAndGetButton = (devTools: boolean, showDevToolsLink?: boolean) => {
+    // @ts-ignore
+    useOpenSearchDashboards.mockImplementation(() => ({
+      services: {
+        application: { capabilities: { navLinks: { management: true, dev_tools: devTools } } },
+        notifications: { toast: { addSuccess: jest.fn() } },
+      },
+    }));
+
+    const props = mockProps();
+    if (showDevToolsLink !== undefined) {
+      // @ts-ignore
+      props.showDevToolsLink = showDevToolsLink;
+    }
+
+    const component = shallowWithIntl(<OverviewPageHeader {...props} />);
+
+    return component.find({
+      className: 'osdOverviewPageHeader__actionButton',
+      href: '/app/dev_tools#/console',
     });
+  };
 
-    test('render logo as original dark mode opensearch mark', () => {
-      const branding = {
-        darkMode: false,
-        mark: {},
-      };
+  it('renders without dev_tools when the dev_tools plugin is disabled', () => {
+    const btnDevTools = setupAndGetButton(false);
+    expect(btnDevTools.length).toEqual(0);
+  });
 
-      const component = shallowWithIntl(
-        <OverviewPageHeader addBasePath={addBasePathMock} title={mockTitle} branding={branding} />
-      );
-      expect(component).toMatchSnapshot();
-    });
+  it('renders without dev_tools when the dev_tools plugin is disabled and asked not to show', () => {
+    const btnDevTools = setupAndGetButton(false, false);
+    expect(btnDevTools.length).toEqual(0);
+  });
+
+  it('renders without dev_tools when the dev_tools plugin is disabled even if asked to show', () => {
+    const btnDevTools = setupAndGetButton(false, true);
+    expect(btnDevTools.length).toEqual(0);
+  });
+
+  it('renders without dev_tools when the dev_tools plugin is enabled', () => {
+    const btnDevTools = setupAndGetButton(true);
+    expect(btnDevTools.length).toEqual(0);
+  });
+
+  it('renders without dev_tools when the dev_tools plugin is enabled but asked not to show', () => {
+    const btnDevTools = setupAndGetButton(true, false);
+    expect(btnDevTools.length).toEqual(0);
+  });
+
+  it('renders with dev_tools when the dev_tools plugin is enabled and asked to show', () => {
+    const btnDevTools = setupAndGetButton(true, true);
+    expect(btnDevTools.length).toEqual(1);
   });
 });

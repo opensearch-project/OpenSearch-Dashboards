@@ -36,22 +36,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeNavLink } from '../..';
 import { ChromeBranding } from '../../chrome_service';
-import { HttpStart } from '../../../http';
-
-function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
-  let current = element;
-  while (current) {
-    if (current.tagName === 'A') {
-      return current as HTMLAnchorElement;
-    }
-
-    if (!current.parentElement || current.parentElement === document.body) {
-      return undefined;
-    }
-
-    current = current.parentElement;
-  }
-}
+import type { Logos } from '../../../../common/types';
 
 function onClick(
   event: React.MouseEvent<HTMLAnchorElement>,
@@ -59,7 +44,7 @@ function onClick(
   navLinks: ChromeNavLink[],
   navigateToApp: (appId: string) => void
 ) {
-  const anchor = findClosestAnchor((event as any).nativeEvent.target);
+  const anchor = (event.nativeEvent.target as HTMLAnchorElement)?.closest('a');
   if (!anchor) {
     return;
   }
@@ -98,44 +83,36 @@ function onClick(
   }
 }
 
-export const DEFAULT_LOGO = 'ui/logos/opensearch_dashboards.svg';
-export const DEFAULT_DARK_LOGO = 'ui/logos/opensearch_dashboards_darkmode.svg';
-
 interface Props {
   href: string;
   navLinks$: Observable<ChromeNavLink[]>;
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
   branding: ChromeBranding;
-  basePath: HttpStart['basePath'];
-  // What background is the logo appearing on; this is independent of theme:darkMode
-  theme?: EuiHeaderProps['theme'];
+  logos: Logos;
+  /* indicates the background color-scheme this element will appear over
+   * `'normal'` and `'light'` are synonyms of being `undefined`, to mean not `'dark'`
+   */
+  backgroundColorScheme?: 'normal' | 'light' | 'dark';
 }
 
 export function HeaderLogo({
   href,
   navigateToApp,
   branding,
-  basePath,
-  theme = 'default',
+  logos,
+  backgroundColorScheme,
   ...observables
 }: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
+  const { applicationTitle = 'opensearch dashboards' } = branding;
+
   const {
-    logo: { defaultUrl: customLogoUrl, darkModeUrl: customDarkLogoUrl } = {},
-    applicationTitle = 'opensearch dashboards',
-  } = branding;
-
-  // Attempt to find a suitable custom branded logo before falling back on OSD's
-  let logoSrc = theme === 'dark' && customDarkLogoUrl ? customDarkLogoUrl : customLogoUrl;
-  let testSubj = 'customLogo';
-
-  // If no custom branded logo was set, use OSD's
-  if (!logoSrc) {
-    logoSrc = `${basePath.serverBasePath}/${theme === 'dark' ? DEFAULT_DARK_LOGO : DEFAULT_LOGO}`;
-    testSubj = 'defaultLogo';
-  }
+    [backgroundColorScheme === 'dark' ? 'dark' : 'light']: { url: logoURL },
+    type: logoType,
+  } = logos.Application;
+  const testSubj = `${logoType}Logo`;
 
   const alt = `${applicationTitle} logo`;
 
@@ -151,8 +128,8 @@ export function HeaderLogo({
     >
       <img
         data-test-subj={testSubj}
-        data-test-image-url={logoSrc}
-        src={logoSrc}
+        data-test-image-url={logoURL}
+        src={logoURL}
         alt={alt}
         loading="lazy"
         className="logoImage"
