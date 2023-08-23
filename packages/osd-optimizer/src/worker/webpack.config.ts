@@ -137,6 +137,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 sourceMap: !worker.dist,
               },
             },
+            {
+              loader: 'comment-stripper',
+              options: {
+                language: 'css',
+              },
+            },
           ],
         },
         {
@@ -162,6 +168,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                     postcssOptions: {
                       config: require.resolve('@osd/optimizer/postcss.config.js'),
                     },
+                  },
+                },
+                {
+                  loader: 'comment-stripper',
+                  options: {
+                    language: 'css',
                   },
                 },
                 {
@@ -205,9 +217,15 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.(js|tsx?)$/,
-          // vega-lite and some of its dependencies don't have es5 builds
-          // so we need to build from source and transpile for webpack v4
-          exclude: /[\/\\]node_modules[\/\\](?!vega-(lite|label|functions)[\/\\])/,
+          exclude: [
+            /* vega-lite and some of its dependencies don't have es5 builds
+             * so we need to build from source and transpile for webpack v4
+             */
+            /[\/\\]node_modules[\/\\](?!vega-(lite|label|functions)[\/\\])/,
+
+            // Don't attempt to look into release artifacts of the plugins
+            /[\/\\]plugins[\/\\][^\/\\]+[\/\\]build[\/\\]/,
+          ],
           use: {
             loader: 'babel-loader',
             options: {

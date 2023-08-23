@@ -146,6 +146,18 @@ export const useSavedDashboardInstance = ({
       return;
     }
 
+    /*
+     * The else if block prevents error when user clicks on one dashboard,
+     * and before it loads the next screen, user clicks a different dashboard right after.
+     * In this situation, there can be two useSavedDashboardInstance() executing, one shortly after another.
+     * The first running instance might already set the dashboardId before the second running instance
+     * execute the following if else block.
+     * The second running will go into the else if block because dashboardId
+     * is already set but it is a different value than dashboardIdFromUrl and savedDashboardInstance?.savedDashboard?.id.
+     * Therefore, to avoid errors and to actually load the second dashboard correctly,
+     * we need to reset the state by calling setSavedDashboardInstance({})
+     * and then called getSavedDashboardInstance() again using the current dashboardIdFromUrl value.
+     */
     if (!dashboardId.current) {
       dashboardId.current = dashboardIdFromUrl || 'new';
       getSavedDashboardInstance();

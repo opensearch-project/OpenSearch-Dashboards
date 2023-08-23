@@ -34,3 +34,4 @@ export * from './recursive_serializer';
 export * from './any_instance_serizlizer';
 export * from './replace_serializer';
 export * from './strip_promises_serizlizer';
+export * from './flat_object_serializer';

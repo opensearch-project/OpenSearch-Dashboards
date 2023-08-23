@@ -268,6 +268,7 @@ export class DashboardPlugin
       return {
         capabilities: coreStart.application.capabilities,
         application: coreStart.application,
+        chrome: coreStart.chrome,
         notifications: coreStart.notifications,
         overlays: coreStart.overlays,
         embeddable: deps.embeddable,
@@ -356,7 +357,7 @@ export class DashboardPlugin
       createSortText: 'Dashboard',
       createLinkText: (
         <FormattedMessage
-          id="opensearch-dashboards-react.tableListView.listing.createNewItemButtonLabel"
+          id="dashboard.tableListView.listing.createNewItemButtonLabel"
           defaultMessage="{entityName}"
           values={{ entityName: 'Dashboard' }}
         />
