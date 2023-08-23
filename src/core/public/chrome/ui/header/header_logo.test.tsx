@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiHeaderProps } from '@elastic/eui';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
@@ -13,7 +12,6 @@ import { getLogosMock } from '../../../../common/mocks';
 const mockTitle = 'Page Title';
 const mockProps = () => ({
   href: '/',
-  basePath,
   navLinks$: new BehaviorSubject([]),
   forceNavigation$: new BehaviorSubject(false),
   navigateToApp: jest.fn(),
