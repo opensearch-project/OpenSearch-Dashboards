@@ -3,14 +3,17 @@
 exports[`Dont Render <DocViewerLink/> if generateCb.hide 1`] = `
 <EuiFlexGroup
   gutterSize="xs"
+  justifyContent="flexEnd"
 />
 `;
 
 exports[`Render <DocViewerLink/> with 2 different links 1`] = `
 <EuiFlexGroup
   gutterSize="xs"
+  justifyContent="flexEnd"
 >
   <EuiFlexItem
+    grow={false}
     key="0"
   >
     <EuiListGroupItem
@@ -21,6 +24,7 @@ exports[`Render <DocViewerLink/> with 2 different links 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
+    grow={false}
     key="1"
   >
     <EuiListGroupItem
