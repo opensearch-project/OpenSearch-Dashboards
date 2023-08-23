@@ -101,7 +101,7 @@ export class ClusterClient implements ICustomClusterClient {
       return;
     }
     this.isClosed = true;
-    await Promise.all([this.asInternalUser.close(), this.rootScopedClient.close()]);
+    await Promise.all([this.asInternalUser.close(noop), this.rootScopedClient.close(noop)]);
   }
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
