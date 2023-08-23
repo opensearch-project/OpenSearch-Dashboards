@@ -2227,7 +2227,6 @@ exports[`Header handles visibility and lock changes 1`] = `
                     }
                   }
                   navigateToApp={[MockFunction]}
-                  theme="dark"
                 />,
               ],
             },
@@ -2720,7 +2719,6 @@ exports[`Header handles visibility and lock changes 1`] = `
                       }
                     }
                     navigateToApp={[MockFunction]}
-                    theme="dark"
                   >
                     <a
                       aria-label="Go to home page"
