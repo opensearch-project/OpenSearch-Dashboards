@@ -494,6 +494,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         await getServices().uiSettings.set(NEW_DISCOVER_APP, true);
         window.location.reload();
       },
+      type: 'toggle',
     };
 
     return [

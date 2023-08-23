@@ -204,7 +204,7 @@ export function DiscoverSidebar({
           <EuiSplitPanel.Inner className="eui-yScroll" paddingSize="none">
             {fields.length > 0 && (
               <>
-                <EuiTitle size="xxxs" id="selected_fields" className="dscFieldListHeader">
+                <EuiTitle size="xxxs" id="selected_fields" className="dscSideBarFieldListHeader">
                   <h3>
                     <FormattedMessage
                       id="discover.fieldChooser.filter.selectedFieldsTitle"
@@ -248,7 +248,7 @@ export function DiscoverSidebar({
                     );
                   })}
                 </EuiDroppable>
-                <EuiTitle size="xxxs" id="available_fields" className="dscFieldListHeader">
+                <EuiTitle size="xxxs" id="available_fields" className="dscSideBarFieldListHeader">
                   <h3>
                     <FormattedMessage
                       id="discover.fieldChooser.filter.availableFieldsTitle"
@@ -267,7 +267,7 @@ export function DiscoverSidebar({
                     data-test-subj={`fieldList-popular`}
                     color="primary"
                   >
-                    <EuiTitle size="xxxs" className="dscFieldListHeader">
+                    <EuiTitle size="xxxs" className="dscSideBarFieldListHeader">
                       <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
                         <FormattedMessage
                           id="discover.fieldChooser.filter.popularTitle"

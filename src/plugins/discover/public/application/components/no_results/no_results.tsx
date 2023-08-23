@@ -28,23 +28,26 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
-import PropTypes from 'prop-types';
 
 import {
   EuiCallOut,
   EuiCode,
   EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { getServices } from '../../../opensearch_dashboards_services';
 
-export const DiscoverNoResults = (timeFieldName: string, queryLanguage: any) => {
+interface Props {
+  timeFieldName?: string;
+  queryLanguage?: string;
+}
+
+export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
   let timeFieldMessage;
 
   if (timeFieldName) {
@@ -189,27 +192,21 @@ export const DiscoverNoResults = (timeFieldName: string, queryLanguage: any) => 
 
   return (
     <I18nProvider>
-      <Fragment>
-        <EuiSpacer size="xl" />
-
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false} className="dscNoResults">
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
-                  defaultMessage="No results match your search criteria"
-                />
-              }
-              color="warning"
-              iconType="help"
-              data-test-subj="discoverNoResults"
+      <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+              defaultMessage="No results match your search criteria"
             />
-            {timeFieldMessage}
-            {luceneQueryMessage}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+          }
+          color="warning"
+          iconType="help"
+          data-test-subj="discoverNoResults"
+        />
+        {timeFieldMessage}
+        {luceneQueryMessage}
+      </EuiPanel>
     </I18nProvider>
   );
 };

@@ -15,7 +15,7 @@ import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import { TimechartHeaderBucketInterval } from '../../components/timechart_header';
+import { TimechartHeaderBucketInterval } from '../../components/chart/timechart_header';
 import { tabifyAggResponse } from '../../../opensearch_dashboards_services';
 import {
   getDimensions,
@@ -29,6 +29,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
 } from '../../../opensearch_dashboards_services';
+import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -44,7 +45,7 @@ export interface SearchData {
   hits?: number;
   rows?: OpenSearchSearchHit[];
   bucketInterval?: TimechartHeaderBucketInterval | {};
-  chartData?: Chart | {};
+  chartData?: Chart;
 }
 
 export type SearchRefetch = 'refetch' | undefined;
@@ -68,11 +69,12 @@ export const useSearch = (services: DiscoverServices) => {
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const savedSearchId = useSelector((state) => state.discover.savedSearch);
   const indexPattern = useIndexPattern(services);
-  const { data, filterManager, getSavedSearchById, core } = services;
+  const { data, filterManager, getSavedSearchById, core, toastNotifications } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
     fieldCounts: Record<string, number>;
+    rows?: OpenSearchSearchHit[];
   }>({
     abortController: undefined,
     fieldCounts: {},
@@ -81,21 +83,34 @@ export const useSearch = (services: DiscoverServices) => {
     requests: new RequestAdapter(),
   };
 
+  const shouldSearchOnPageLoad = useCallback(() => {
+    // A saved search is created on every page load, so we check the ID to see if we're loading a
+    // previously saved search or if it is just transient
+    return (
+      services.uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      savedSearch?.id !== undefined ||
+      timefilter.getRefreshInterval().pause === false
+    );
+  }, [savedSearch, services.uiSettings, timefilter]);
+
   const data$ = useMemo(
-    () => new BehaviorSubject<SearchData>({ status: ResultStatus.UNINITIALIZED }),
-    []
+    () =>
+      new BehaviorSubject<SearchData>({
+        status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+      }),
+    [shouldSearchOnPageLoad]
   );
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
     if (!indexPattern) {
       data$.next({
-        status: ResultStatus.UNINITIALIZED,
+        status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
       });
       return;
     }
 
-    if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
+    if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
       return data$.next({
         status: ResultStatus.NO_RESULTS,
         rows: [],
@@ -118,7 +133,10 @@ export const useSearch = (services: DiscoverServices) => {
     });
 
     try {
-      data$.next({ status: ResultStatus.LOADING });
+      // Only show loading indicator if we are fetching when the rows are empty
+      if (fetchStateRef.current.rows?.length === 0) {
+        data$.next({ status: ResultStatus.LOADING });
+      }
 
       // Initialize inspect adapter for search source
       inspectorAdapters.requests.reset();
@@ -145,7 +163,7 @@ export const useSearch = (services: DiscoverServices) => {
       const hits = fetchResp.hits.total as number;
       const rows = fetchResp.hits.hits;
       let bucketInterval = {};
-      let chartData = {};
+      let chartData;
       for (const row of rows) {
         const fields = Object.keys(indexPattern.flattenHit(row));
         for (const fieldName of fields) {
@@ -162,13 +180,15 @@ export const useSearch = (services: DiscoverServices) => {
           if (bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)) {
             bucketInterval = bucketAggConfig.buckets?.getInterval();
           }
+          // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
           chartData = buildPointSeriesData(tabifiedData, dimensions);
         }
       }
 
       fetchStateRef.current.fieldCounts = fetchStateRef.current.fieldCounts!;
+      fetchStateRef.current.rows = rows;
       data$.next({
-        status: ResultStatus.READY,
+        status: rows.length > 0 ? ResultStatus.READY : ResultStatus.NO_RESULTS,
         fieldCounts: fetchStateRef.current.fieldCounts,
         hits,
         rows,
@@ -189,10 +209,12 @@ export const useSearch = (services: DiscoverServices) => {
   }, [
     indexPattern,
     timefilter,
-    services,
+    toastNotifications,
     data,
+    services,
     savedSearch?.searchSource,
     data$,
+    shouldSearchOnPageLoad,
     inspectorAdapters.requests,
   ]);
 
