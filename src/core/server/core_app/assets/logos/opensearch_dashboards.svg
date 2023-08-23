@@ -1,5 +1,5 @@
 <svg height="28" width="259" viewBox="0 0 148 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <style>.a{fill:#005EB8}.b{fill:#003B5C}.c{fill:#002A3A}</style>
+  <style>.a{fill:#005EB8}.b{fill:#003B5C}.c{fill:#002A3A}@media(prefers-color-scheme:dark){.a{fill:#00A3E0}.b{fill:#B9D9EB}.c{fill:#D9E1E2}}</style>
   <g class="a">
     <path d="M13.72 5.88a.49.49 0 0 0-.49.49 7.28 7.28 0 0 1-7.28 7.28.49.49 0 1 0 0 .97c4.57 0 8.26-3.7 8.26-8.25a.49.49 0 0 0-.49-.5Z"/>
     <path d="M1.24 3.83A5.28 5.28 0 0 0 .4 7.05c.19 2.96 2.87 5.2 5.4 4.97 1-.1 2.02-.9 1.93-2.36-.04-.63-.35-1-.85-1.28a7.65 7.65 0 0 0-1.78-.64c-.84-.24-1.81-.5-2.56-1.06-.9-.66-1.51-1.42-1.3-2.85Z"/>

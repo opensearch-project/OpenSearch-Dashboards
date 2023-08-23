@@ -32,6 +32,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Welcome } from './welcome';
 import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
+import { getLogosMock } from '../../../../../core/common/mocks';
 
 jest.mock('../opensearch_dashboards_services', () => ({
   getServices: () => ({
@@ -48,120 +49,95 @@ test('should render a Welcome screen with the telemetry disclaimer', () => {
 });
 */
 
-const branding = {
-  darkMode: false,
-  mark: {
-    defaultUrl: '/',
+const mockTitle = 'Page Title';
+const makeProps = () => ({
+  urlBasePath: '/',
+  onSkip: jest.fn(),
+  branding: {
+    applicationTitle: mockTitle,
   },
-  applicationTitle: 'OpenSearch Dashboards',
-};
+  logos: getLogosMock.default,
+});
 
-describe('Welcome page ', () => {
-  describe('should render a Welcome screen ', () => {
-    test('with the telemetry disclaimer when optIn is true', () => {
+describe('Welcome page', () => {
+  describe('renders the Welcome screen', () => {
+    it('with the telemetry disclaimer when optIn is true', () => {
       const telemetry = telemetryPluginMock.createStartContract();
       telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
-      const component = shallow(
-        <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} branding={branding} />
-      );
 
+      const props = {
+        ...makeProps(),
+        telemetry,
+      };
+      const component = shallow(<Welcome {...props} />);
       expect(component).toMatchSnapshot();
     });
 
-    test('with the telemetry disclaimer when optIn is false', () => {
+    it('with the telemetry disclaimer when optIn is false', () => {
       const telemetry = telemetryPluginMock.createStartContract();
       telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
-      const component = shallow(
-        <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} branding={branding} />
-      );
 
+      const props = {
+        ...makeProps(),
+        telemetry,
+      };
+      const component = shallow(<Welcome {...props} />);
       expect(component).toMatchSnapshot();
     });
 
-    test('with no telemetry disclaimer', () => {
-      const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} branding={branding} />);
-
+    it('with no telemetry disclaimer', () => {
+      const props = {
+        ...makeProps(),
+      };
+      const component = shallow(<Welcome {...props} />);
       expect(component).toMatchSnapshot();
     });
 
-    test('fires opt-in seen when mounted', () => {
+    it('and fires opt-in seen when mounted', () => {
       const telemetry = telemetryPluginMock.createStartContract();
       const mockSetOptedInNoticeSeen = jest.fn();
       telemetry.telemetryNotifications.setOptedInNoticeSeen = mockSetOptedInNoticeSeen;
-      shallow(
-        <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} branding={branding} />
-      );
+
+      const props = {
+        ...makeProps(),
+        telemetry,
+      };
+      shallow(<Welcome {...props} />);
 
       expect(mockSetOptedInNoticeSeen).toHaveBeenCalled();
     });
   });
 
-  describe('should render welcome logo in default mode ', () => {
-    test('using mark default mode URL', () => {
-      const customBranding = {
-        darkMode: false,
-        mark: {
-          defaultUrl: '/defaultModeMark',
-        },
-        applicationTitle: 'custom title',
+  describe('renders the welcome logo', () => {
+    it('with OpenSearch center mark when not branded', () => {
+      const props = {
+        ...makeProps(),
       };
-      const component = shallow(
-        <Welcome urlBasePath="/" onSkip={() => {}} branding={customBranding} />
-      );
+      const component = shallow(<Welcome {...props} />);
+
+      const elements = component.find('EuiIcon');
+      expect(elements.length).toEqual(1);
+      expect(elements.first().prop('type')).toEqual(props.logos.CenterMark.url);
+
       expect(component).toMatchSnapshot();
     });
 
-    test('using the original OpenSearch Dashboards logo', () => {
-      const defaultBranding = {
-        darkMode: false,
-        mark: {},
-        applicationTitle: 'OpenSearch Dashboards',
+    it('with custom branded logo when branded', () => {
+      const props = {
+        ...makeProps(),
+        logos: getLogosMock.branded,
       };
-      const component = shallow(
-        <Welcome urlBasePath="/" onSkip={() => {}} branding={defaultBranding} />
-      );
-      expect(component).toMatchSnapshot();
-    });
-  });
-  describe('should render welcome logo in dark mode ', () => {
-    test('using mark dark mode URL', () => {
-      const customBranding = {
-        darkMode: true,
-        mark: {
-          defaultUrl: '/defaultModeMark',
-          darkModeUrl: '/darkModeMark',
-        },
-        title: 'custom title',
-      };
-      const component = shallow(
-        <Welcome urlBasePath="/" onSkip={() => {}} branding={customBranding} />
-      );
-      expect(component).toMatchSnapshot();
-    });
+      const component = shallow(<Welcome {...props} />);
 
-    test('using mark default mode URL', () => {
-      const customBranding = {
-        darkMode: true,
-        mark: {
-          defaultUrl: '/defaultModeMark',
-        },
-        title: 'custom title',
-      };
-      const component = shallow(
-        <Welcome urlBasePath="/" onSkip={() => {}} branding={customBranding} />
-      );
-      expect(component).toMatchSnapshot();
-    });
+      const elements = component.find({
+        'data-test-subj': 'welcomeCustomLogo',
+      });
+      expect(elements.length).toEqual(1);
 
-    test('using the original opensearch logo', () => {
-      const customBranding = {
-        darkMode: true,
-        mark: {},
-        title: 'custom title',
-      };
-      const component = shallow(
-        <Welcome urlBasePath="/" onSkip={() => {}} branding={customBranding} />
-      );
+      const img = elements.first();
+      expect(img.prop('src')).toEqual(props.logos.CenterMark.url);
+      expect(img.prop('alt')).toEqual(`${mockTitle} logo`);
+
       expect(component).toMatchSnapshot();
     });
   });
