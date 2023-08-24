@@ -307,12 +307,23 @@ export class WorkspaceSavedObjectsClientWrapper {
           ]
         );
         if (options.workspaces) {
-          const isEveryWorkspaceIsPermitted = options.workspaces.every((item) =>
+          const permittedWorkspaces = options.workspaces.filter((item) =>
             (permittedWorkspaceIds || []).includes(item)
           );
-          if (!isEveryWorkspaceIsPermitted) {
+          if (!permittedWorkspaces.length) {
+            /**
+             * If user does not have any one workspace access
+             * deny the request
+             */
             throw generateWorkspacePermissionError();
           }
+
+          /**
+           * Overwrite the options.workspaces when user has the access of partial workspaces.
+           * This mainly solve the problem that public workspace's ACL may be modified by dashboard_admin.
+           * And in custom workspace, we will fetch objects from public workspace and current custom workspace.
+           */
+          options.workspaces = permittedWorkspaces;
         } else {
           const queryDSL = ACL.genereateGetPermittedSavedObjectsQueryDSL(
             [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],

@@ -103,7 +103,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -158,7 +158,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "visualize",
@@ -171,7 +171,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "dashboard",
@@ -608,7 +608,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -635,7 +635,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -722,7 +722,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -750,7 +750,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -785,7 +785,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -1591,7 +1591,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-subj="collapsibleNavGroup-noCategory"
-              key="0"
+              key="4"
             >
               <div
                 className="euiCollapsibleNavGroup"
@@ -1813,15 +1813,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -2030,15 +2022,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -2248,15 +2232,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -2750,15 +2726,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -2778,7 +2746,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -3159,7 +3127,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -3186,7 +3154,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -3273,7 +3241,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -3301,7 +3269,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -3320,7 +3288,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 1`] = 
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -3759,15 +3727,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -3787,7 +3747,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -4168,7 +4128,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -4195,7 +4155,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -4282,7 +4242,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -4310,7 +4270,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -4329,7 +4289,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 2`] = 
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -4766,15 +4726,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -4794,7 +4746,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -5175,7 +5127,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -5202,7 +5154,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -5289,7 +5241,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -5317,7 +5269,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -5336,7 +5288,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in dark mode 3`] = 
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -5776,15 +5728,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -5804,7 +5748,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -6185,7 +6129,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -6212,7 +6156,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -6299,7 +6243,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -6327,7 +6271,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -6346,7 +6290,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 1`]
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -6783,15 +6727,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
-      "_value": Object {
-        "baseUrl": "/",
-        "category": undefined,
-        "data-test-subj": "Custom link",
-        "href": "Custom link",
-        "id": "Custom link",
-        "isActive": true,
-        "title": "Custom link",
-      },
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -6811,7 +6747,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
           "baseUrl": "/",
           "category": Object {
             "id": "opensearchDashboards",
-            "label": "Library",
+            "label": "OpenSearch Dashboards",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -7192,7 +7128,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
-              title="Library"
+              title="OpenSearch Dashboards"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -7219,7 +7155,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Library
+                          OpenSearch Dashboards
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -7306,7 +7242,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Library
+                                    OpenSearch Dashboards
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -7334,7 +7270,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Library"
+                              aria-label="Primary navigation links, OpenSearch Dashboards"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -7353,7 +7289,7 @@ exports[`CollapsibleNav renders the nav bar with custom logo in default mode 2`]
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Library"
+                                aria-label="Primary navigation links, OpenSearch Dashboards"
                                 className="euiListGroup"
                                 style={
                                   Object {

@@ -23,6 +23,7 @@ export interface WorkspaceObservables {
   currentWorkspace$: BehaviorSubject<WorkspaceAttribute | null>;
   workspaceList$: BehaviorSubject<WorkspaceAttribute[]>;
   workspaceEnabled$: BehaviorSubject<boolean>;
+  hasFetchedWorkspaceList$: BehaviorSubject<boolean>;
 }
 
 /**
@@ -40,6 +41,7 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
   private currentWorkspaceId$ = new BehaviorSubject<string>('');
   private workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
   private currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
+  private hasFetchedWorkspaceList$ = new BehaviorSubject<boolean>(false);
   private workspaceEnabled$ = new BehaviorSubject<boolean>(false);
   private _renderWorkspaceMenu: WorkspaceMenuRenderFn | null = null;
 
@@ -48,6 +50,7 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
+      hasFetchedWorkspaceList$: this.hasFetchedWorkspaceList$,
       workspaceEnabled$: this.workspaceEnabled$,
       registerWorkspaceMenuRender: (render: WorkspaceMenuRenderFn) =>
         (this._renderWorkspaceMenu = render),
@@ -65,6 +68,7 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
+      hasFetchedWorkspaceList$: this.hasFetchedWorkspaceList$,
       workspaceEnabled$: this.workspaceEnabled$,
     };
     return {
@@ -87,6 +91,7 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
     this.currentWorkspaceId$.unsubscribe();
     this.workspaceList$.unsubscribe();
     this.workspaceEnabled$.unsubscribe();
+    this.hasFetchedWorkspaceList$.unsubscribe();
     this._renderWorkspaceMenu = null;
   }
 }

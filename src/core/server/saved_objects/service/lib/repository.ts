@@ -378,15 +378,28 @@ export class SavedObjectsRepository {
 
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
+      /**
+       * Only when importing an object to a target workspace should we check if the object is workspace-specific.
+       */
+      const requiresWorkspaceCheck = object.id;
 
       if (object.id == null) object.id = uuid.v1();
+
+      let opensearchRequestIndexPayload = {};
+
+      if (requiresNamespacesCheck || requiresWorkspaceCheck) {
+        opensearchRequestIndexPayload = {
+          opensearchRequestIndex: bulkGetRequestIndexCounter,
+        };
+        bulkGetRequestIndexCounter++;
+      }
 
       return {
         tag: 'Right' as 'Right',
         value: {
           method,
           object,
-          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
+          ...opensearchRequestIndexPayload,
         },
       };
     });
@@ -397,7 +410,7 @@ export class SavedObjectsRepository {
       .map(({ value: { object: { type, id } } }) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
+        _source: ['type', 'namespaces', 'workspaces'],
       }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
@@ -426,15 +439,8 @@ export class SavedObjectsRepository {
         method,
       } = expectedBulkGetResult.value;
       let savedObjectWorkspaces: string[] | undefined;
-      if (expectedBulkGetResult.value.method === 'create') {
-        if (options.workspaces) {
-          savedObjectWorkspaces = Array.from(new Set([...(options.workspaces || [])]));
-        }
-      } else if (object.workspaces) {
-        savedObjectWorkspaces = Array.from(
-          new Set([...object.workspaces, ...(options.workspaces || [])])
-        );
-      }
+      let finalMethod = method;
+      let finalObjectId = object.id;
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
@@ -471,12 +477,57 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      if (expectedBulkGetResult.value.method === 'create') {
+        savedObjectWorkspaces = options.workspaces;
+      } else {
+        const changeToCreate = () => {
+          finalMethod = 'create';
+          finalObjectId = object.id;
+          savedObjectWorkspaces = options.workspaces;
+          versionProperties = {};
+        };
+        /**
+         * When overwrite, need to check if the object is workspace-specific
+         * if so, copy object to target workspace instead of refering it.
+         */
+        const rawId = this._serializer.generateRawId(namespace, object.type, object.id);
+        const findObject =
+          bulkGetResponse?.statusCode !== 404
+            ? bulkGetResponse?.body.docs?.find((item) => item._id === rawId)
+            : null;
+        if (findObject && findObject.found) {
+          const transformedObject = this._serializer.rawToSavedObject(
+            findObject as SavedObjectsRawDoc
+          ) as SavedObject;
+          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+            options.workspaces,
+            transformedObject.workspaces
+          );
+          /**
+           * We need to create a new object when the object
+           * is about to import into workspaces it is not belong to
+           */
+          if (filteredWorkspaces.length) {
+            /**
+             * Create a new object but only belong to the set of (target workspaces - original workspace)
+             */
+            changeToCreate();
+            finalObjectId = uuid.v1();
+            savedObjectWorkspaces = filteredWorkspaces;
+          } else {
+            savedObjectWorkspaces = transformedObject.workspaces;
+          }
+        } else {
+          savedObjectWorkspaces = options.workspaces;
+        }
+      }
+
       const expectedResult = {
         opensearchRequestIndex: bulkRequestIndexCounter++,
-        requestedId: object.id,
+        requestedId: finalObjectId,
         rawMigratedDoc: this._serializer.savedObjectToRaw(
           this._migrator.migrateDocument({
-            id: object.id,
+            id: finalObjectId,
             type: object.type,
             attributes: object.attributes,
             migrationVersion: object.migrationVersion,
@@ -492,7 +543,7 @@ export class SavedObjectsRepository {
 
       bulkCreateParams.push(
         {
-          [method]: {
+          [finalMethod]: {
             _id: expectedResult.rawMigratedDoc._id,
             _index: this.getIndexForType(object.type),
             ...(overwrite && versionProperties),
@@ -583,7 +634,7 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
       _id: this._serializer.generateRawId(namespace, type, id),
       _index: this.getIndexForType(type),
-      _source: ['type', 'namespaces'],
+      _source: ['type', 'namespaces', 'workspaces'],
     }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
@@ -606,17 +657,24 @@ export class SavedObjectsRepository {
       const { type, id, opensearchRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
       if (doc?.found) {
-        errors.push({
-          id,
-          type,
-          error: {
-            ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-            // @ts-expect-error MultiGetHit._source is optional
-            ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
-              metadata: { isNotOverwritable: true },
-            }),
-          },
-        });
+        const transformedObject = this._serializer.rawToSavedObject(doc as SavedObjectsRawDoc);
+        const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+          options.workspaces,
+          transformedObject.workspaces
+        );
+        if (!filteredWorkspaces.length) {
+          errors.push({
+            id,
+            type,
+            error: {
+              ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+              // @ts-expect-error MultiGetHit._source is optional
+              ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
+                metadata: { isNotOverwritable: true },
+              }),
+            },
+          });
+        }
       }
     });
 
