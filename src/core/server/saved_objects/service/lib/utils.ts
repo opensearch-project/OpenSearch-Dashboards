@@ -80,4 +80,11 @@ export class SavedObjectsUtils {
     total: 0,
     saved_objects: [],
   });
+
+  public static filterWorkspacesAccordingToBaseWorkspaces(
+    targetWorkspaces?: string[],
+    baseWorkspaces?: string[]
+  ): string[] {
+    return targetWorkspaces?.filter((item) => !baseWorkspaces?.includes(item)) || [];
+  }
 }

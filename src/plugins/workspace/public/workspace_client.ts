@@ -67,32 +67,34 @@ export class WorkspaceClient {
     this.http = http;
     this.workspaces = workspaces;
 
-    combineLatest([workspaces.workspaceList$, workspaces.currentWorkspaceId$]).subscribe(
-      ([workspaceList, currentWorkspaceId]) => {
-        if (workspaceList.length) {
-          const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
+    combineLatest([
+      workspaces.hasFetchedWorkspaceList$,
+      workspaces.workspaceList$,
+      workspaces.currentWorkspaceId$,
+    ]).subscribe(([hasFetchedWorkspaceList, workspaceList, currentWorkspaceId]) => {
+      if (hasFetchedWorkspaceList) {
+        const currentWorkspace = this.findWorkspace([workspaceList, currentWorkspaceId]);
 
+        /**
+         * Do a simple idempotent verification here
+         */
+        if (!isEqual(currentWorkspace, workspaces.currentWorkspace$.getValue())) {
+          workspaces.currentWorkspace$.next(currentWorkspace);
+        }
+
+        if (currentWorkspaceId && !currentWorkspace?.id) {
           /**
-           * Do a simple idempotent verification here
+           * Current workspace is staled
            */
-          if (!isEqual(currentWorkspace, workspaces.currentWorkspace$.getValue())) {
-            workspaces.currentWorkspace$.next(currentWorkspace);
-          }
-
-          if (currentWorkspaceId && !currentWorkspace?.id) {
-            /**
-             * Current workspace is staled
-             */
-            workspaces.currentWorkspaceId$.error({
-              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
-            });
-            workspaces.currentWorkspace$.error({
-              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
-            });
-          }
+          workspaces.currentWorkspaceId$.error({
+            reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+          });
+          workspaces.currentWorkspace$.error({
+            reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+          });
         }
       }
-    );
+    });
   }
 
   /**
@@ -160,6 +162,8 @@ export class WorkspaceClient {
     if (result?.success) {
       this.workspaces.workspaceList$.next(result.result.workspaces);
     }
+
+    this.workspaces.hasFetchedWorkspaceList$.next(true);
   }
 
   public async enterWorkspace(id: string): Promise<IResponse<null>> {

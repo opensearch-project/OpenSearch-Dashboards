@@ -209,9 +209,11 @@ exports[`SavedObjectsTable should render normally 1`] = `
 >
   <Header
     filteredCount={4}
+    onCopy={[Function]}
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
+    selectedCount={0}
   />
   <EuiSpacer
     size="xs"
