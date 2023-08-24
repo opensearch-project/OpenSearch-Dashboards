@@ -15,7 +15,7 @@ on:
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
-
+      
 env:
   TEST_BROWSER_HEADLESS: 1
   CI: 1
@@ -24,6 +24,7 @@ env:
   TEST_OPENSEARCH_DASHBOARDS_PORT: 6610
   TEST_OPENSEARCH_TRANSPORT_PORT: 9403
   TEST_OPENSEARCH_PORT: 9400
+  OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot'
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
   NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
 
@@ -346,12 +347,12 @@ jobs:
 
       - name: Set OpenSearch URL
         run: |
-          echo "OPENSEARCH_URL=https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.VERSION }}/latest/linux/x64/tar/dist/opensearch/opensearch-${{ env.VERSION }}-linux-x64.tar.gz" >> $GITHUB_ENV
+          echo "OPENSEARCH_URL=OPENSEARCH_SNAPSHOT_CMD" >> $GITHUB_ENV
 
       - name: Verify if OpenSearch is available for version
         id: verify-opensearch-exists
         run: |
-          if curl -I -L ${{ env.OPENSEARCH_URL }}; then
+          if ${{ env.OPENSEARCH_URL }}; then
             echo "::set-output name=version-exists::true"
           fi
 
