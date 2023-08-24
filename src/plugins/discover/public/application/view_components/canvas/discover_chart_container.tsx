@@ -14,7 +14,7 @@ import { DiscoverChart } from '../../components/chart/chart';
 export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { uiSettings, data } = services;
-  const { indexPattern } = useDiscoverContext();
+  const { indexPattern, savedSearch } = useDiscoverContext();
 
   const timeField = indexPattern?.timeFieldName;
 
@@ -31,8 +31,12 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
       data={data}
       hits={hits}
       timeField={timeField}
-      resetQuery={() => {}}
+      resetQuery={() => {
+        window.location.href = `#/view/${savedSearch?.id}`;
+        window.location.reload();
+      }}
       services={services}
+      showResetButton={!!savedSearch && !!savedSearch.id}
     />
   );
 };

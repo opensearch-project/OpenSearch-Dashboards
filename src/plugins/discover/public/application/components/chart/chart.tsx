@@ -23,6 +23,7 @@ interface DiscoverChartProps {
   data: DataPublicPluginStart;
   hits: number;
   resetQuery: () => void;
+  showResetButton?: boolean;
   timeField?: string;
   services: DiscoverServices;
 }
@@ -36,6 +37,7 @@ export const DiscoverChart = ({
   resetQuery,
   timeField,
   services,
+  showResetButton = false,
 }: DiscoverChartProps) => {
   const { from, to } = data.query.timefilter.timefilter.getTime();
   const timeRange = {
@@ -59,7 +61,11 @@ export const DiscoverChart = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false} className="dscChart__hitsCounter">
-        <HitsCounter hits={hits > 0 ? hits : 0} showResetButton={false} onResetQuery={resetQuery} />
+        <HitsCounter
+          hits={hits > 0 ? hits : 0}
+          showResetButton={showResetButton}
+          onResetQuery={resetQuery}
+        />
       </EuiFlexItem>
       {timeField && (
         <EuiFlexItem className="dscChart__TimechartHeader">
