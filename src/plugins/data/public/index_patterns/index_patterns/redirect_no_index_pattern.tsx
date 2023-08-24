@@ -72,8 +72,8 @@ export const onRedirectNoIndexPattern = (
   if (redirectTarget === '/home') {
     navigateToApp('home');
   } else {
-    navigateToApp('management', {
-      path: `/opensearch-dashboards/indexPatterns?bannerMessage=${bannerMessage}`,
+    navigateToApp('indexPatterns', {
+      path: `?bannerMessage=${bannerMessage}`,
     });
   }
 
