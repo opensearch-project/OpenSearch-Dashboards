@@ -163,7 +163,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   private filterByWorkspace(workspace: WorkspaceAttribute | null, allNavLinks: ChromeNavLink[]) {
     if (!workspace) return allNavLinks;
-    const features = workspace.features ?? [];
+    const features = workspace.features ?? ['*'];
     return allNavLinks.filter(featureMatchesConfig(features));
   }
 

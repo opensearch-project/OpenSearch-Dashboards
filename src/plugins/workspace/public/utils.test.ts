@@ -60,6 +60,16 @@ describe('workspace utils: featureMatchesConfig', () => {
     ).toBe(true);
   });
 
+  it('should NOT match the excluded feature category', () => {
+    const match = featureMatchesConfig(['!@management']);
+    expect(match({ id: 'dev_tools', category: { id: 'management', label: 'Management' } })).toBe(
+      false
+    );
+    expect(match({ id: 'integrations', category: { id: 'management', label: 'Management' } })).toBe(
+      false
+    );
+  });
+
   it('should match features of a category but NOT the excluded feature', () => {
     const match = featureMatchesConfig(['@management', '!dev_tools']);
     expect(match({ id: 'dev_tools', category: { id: 'management', label: 'Management' } })).toBe(

@@ -139,6 +139,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
           name: i18n.translate('workspaces.public.workspace.default.name', {
             defaultMessage: 'public',
           }),
+          features: ['*', `!@${DEFAULT_APP_CATEGORIES.management.id}`],
         },
         publicWorkspaceACL.getPermissions()
       ),
