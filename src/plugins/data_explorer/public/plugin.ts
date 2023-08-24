@@ -49,9 +49,6 @@ export class DataExplorerPlugin
     { data }: DataExplorerPluginSetupDependencies
   ): DataExplorerPluginSetup {
     const viewService = this.viewService;
-    // TODO: Remove this before merge to main
-    // eslint-disable-next-line no-console
-    console.log('data_explorer: Setup');
 
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
@@ -87,9 +84,6 @@ export class DataExplorerPlugin
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        // TODO: Remove this before merge to main
-        // eslint-disable-next-line no-console
-        console.log('data_explorer: Mounted');
         // Load application bundle
         const { renderApp } = await import('./application');
 
@@ -135,9 +129,6 @@ export class DataExplorerPlugin
   }
 
   public start(core: CoreStart): DataExplorerPluginStart {
-    // TODO: Remove this before merge to main
-    // eslint-disable-next-line no-console
-    console.log('data_explorer: Started');
     return {};
   }
 

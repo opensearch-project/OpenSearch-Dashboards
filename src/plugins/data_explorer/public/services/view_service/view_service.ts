@@ -41,8 +41,8 @@ export class ViewService implements CoreService<ViewServiceSetup, ViewServiceSta
   private views: Record<string, View> = {};
 
   private registerView(view: View) {
-    if (this.views[view.id]) {
-      throw new Error(`A view with this the id ${view.id} already exists!`);
+    if (view.id in this.views) {
+      throw new Error(`A view with the id ${view.id} already exists!`);
     }
     this.views[view.id] = view;
   }
@@ -73,7 +73,7 @@ export class ViewService implements CoreService<ViewServiceSetup, ViewServiceSta
        * returns all registered Views
        */
       all: (): View[] => {
-        return [...Object.values(this.views)];
+        return Object.values(this.views);
       },
     };
   }

@@ -162,9 +162,6 @@ export class DiscoverPlugin
   private initializeServices?: () => { core: CoreStart; plugins: DiscoverStartPlugins };
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
-    // TODO: Remove this before merge to main
-    // eslint-disable-next-line no-console
-    console.log('DiscoverPlugin.setup()');
     const baseUrl = core.http.basePath.prepend('/app/discover');
 
     if (plugins.share) {
@@ -249,9 +246,6 @@ export class DiscoverPlugin
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: async (params: AppMountParameters) => {
-        // TODO: Remove this before merge to main
-        // eslint-disable-next-line no-console
-        console.log('DiscoverPlugin.mount()');
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
         }
@@ -352,9 +346,6 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
-    // TODO: Remove this before merge to main
-    // eslint-disable-next-line no-console
-    console.log('DiscoverPlugin.start()');
     setUiActions(plugins.uiActions);
 
     this.initializeServices = () => {

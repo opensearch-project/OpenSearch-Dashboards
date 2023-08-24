@@ -5,9 +5,9 @@
 
 import React from 'react';
 import { AppContainer } from './app_container';
-import { render } from '@testing-library/react';
 import { View } from '../services/view_service/view';
-import { ViewMountParameters } from '../services/view_service';
+import { AppMountParameters } from '../../../../core/public';
+import { render } from 'test_utils/testing_lib_helpers';
 
 describe('DataExplorerApp', () => {
   const createView = () => {
@@ -16,32 +16,30 @@ describe('DataExplorerApp', () => {
       title: 'Test View',
       defaultPath: '/test-path',
       appExtentions: {} as any,
-      mount: async ({ canvasElement, panelElement }: ViewMountParameters) => {
-        const canvasContent = document.createElement('div');
-        const panelContent = document.createElement('div');
-        canvasContent.innerHTML = 'canvas-content';
-        panelContent.innerHTML = 'panel-content';
-        canvasElement.appendChild(canvasContent);
-        panelElement.appendChild(panelContent);
-        return () => {
-          canvasContent.remove();
-          panelContent.remove();
-        };
-      },
+      Canvas: (() => <div>canvas</div>) as any,
+      Panel: (() => <div>panel</div>) as any,
+      Context: (() => <div>Context</div>) as any,
     });
   };
 
+  const params: AppMountParameters = {
+    element: document.createElement('div'),
+    history: {} as any,
+    onAppLeave: jest.fn(),
+    setHeaderActionMenu: jest.fn(),
+    appBasePath: '',
+  };
+
   it('should render NoView when a non existent view is selected', () => {
-    const { container } = render(<AppContainer />);
+    const { container } = render(<AppContainer params={params} />);
 
     expect(container).toContainHTML('View not found');
   });
 
-  // TODO: Complete once state management is in place
-  // it('should render the canvas and panel when selected', () => {
-  //   const view = createView();
-  //   const { container } = render(<AppContainer view={view} />);
+  it('should render the canvas and panel when selected', () => {
+    const view = createView();
+    const { container } = render(<AppContainer view={view} params={params} />);
 
-  //   expect(container).toMatchSnapshot();
-  // });
+    expect(container).toMatchSnapshot();
+  });
 });

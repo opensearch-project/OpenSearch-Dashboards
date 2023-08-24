@@ -24,16 +24,21 @@ export const getPreloadedState = async (
 
     const { defaults } = view.ui;
 
-    // defaults can be a function or an object
-    const preloadedState = typeof defaults === 'function' ? await defaults() : defaults;
-    rootState[view.id] = preloadedState.state;
+    try {
+      // defaults can be a function or an object
+      const preloadedState = typeof defaults === 'function' ? await defaults() : defaults;
+      rootState[view.id] = preloadedState.state;
 
-    // if the view wants to override the root state, we do that here
-    if (preloadedState.root) {
-      rootState = {
-        ...rootState,
-        ...preloadedState.root,
-      };
+      // if the view wants to override the root state, we do that here
+      if (preloadedState.root) {
+        rootState = {
+          ...rootState,
+          ...preloadedState.root,
+        };
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(`Error initializing view ${view.id}: ${e}`);
     }
   });
   await Promise.all(promises);
