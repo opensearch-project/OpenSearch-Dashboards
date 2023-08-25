@@ -7,7 +7,7 @@ import React, { useMemo, Fragment } from 'react';
 import { useCallback } from 'react';
 import { SurrDocType } from './context/api/context';
 import { ActionBar } from './context/components/action_bar/action_bar';
-import { CONTEXT_STEP_SETTING } from '../../../../common';
+import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { LOADING_STATUS } from './context/utils/context_query_state';
@@ -77,6 +77,11 @@ export function ContextApp({
     return [[indexPattern.timeFieldName!, SortDirection.desc]];
   }, [indexPattern]);
 
+  const displayTimeColumn = useMemo(
+    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && indexPattern?.isTimeBased(),
+    [indexPattern, uiSettings]
+  );
+
   return (
     <Fragment>
       <ActionBar
@@ -100,7 +105,7 @@ export function ContextApp({
           onSort={() => {}}
           sort={sort}
           rows={rows}
-          displayTimeColumn={true}
+          displayTimeColumn={displayTimeColumn}
           services={services}
           isToolbarVisible={false}
           isContextView={true}

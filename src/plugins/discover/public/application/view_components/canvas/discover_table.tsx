@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { History } from 'history';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -21,6 +21,7 @@ import { ResultStatus, SearchData } from '../utils/use_search';
 import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../saved_searches/types';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 
 interface Props {
   history: History;
@@ -28,7 +29,12 @@ interface Props {
 
 export const DiscoverTable = ({ history }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { filterManager } = services.data.query;
+  const {
+    uiSettings,
+    data: {
+      query: { filterManager },
+    },
+  } = services;
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>({
     status: data$.getValue().status,
@@ -56,6 +62,10 @@ export const DiscoverTable = ({ history }: Props) => {
       return filterManager.addFilters(newFilters);
     },
     [filterManager, indexPattern]
+  );
+  const displayTimeColumn = useMemo(
+    () => !!(!uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && indexPattern?.isTimeBased()),
+    [indexPattern, uiSettings]
   );
 
   const { rows } = fetchState || {};
@@ -93,7 +103,7 @@ export const DiscoverTable = ({ history }: Props) => {
       onSort={onSetSort}
       sort={sort}
       rows={rows}
-      displayTimeColumn={true}
+      displayTimeColumn={displayTimeColumn}
       services={services}
     />
   );
