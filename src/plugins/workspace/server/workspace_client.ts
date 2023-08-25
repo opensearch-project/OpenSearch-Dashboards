@@ -17,6 +17,9 @@ import {
   WorkspaceAttributeWithPermission,
 } from './types';
 import { workspace } from './saved_objects';
+import { generateRandomId } from './utils';
+
+const WORKSPACE_ID_SIZE = 6;
 
 export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   private setupDep: CoreSetup;
@@ -53,9 +56,11 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   ): ReturnType<IWorkspaceDBImpl['create']> {
     try {
       const { permissions, ...attributes } = payload;
+      const id = generateRandomId(WORKSPACE_ID_SIZE);
       const result = await this.getSavedObjectClientsFromRequestDetail(requestDetail).create<
         Omit<WorkspaceAttribute, 'id'>
       >(WORKSPACE_TYPE, attributes, {
+        id,
         permissions,
       });
       return {
