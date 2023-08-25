@@ -36,7 +36,11 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '../../../../../core/public';
 import { useApplications } from '../../hooks';
-import { WORKSPACE_OP_TYPE_CREATE, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
+import {
+  WORKSPACE_OP_TYPE_CREATE,
+  WORKSPACE_OP_TYPE_UPDATE,
+  DEFAULT_CHECKED_FEATURES_IDS,
+} from '../../../common/constants';
 import {
   isFeatureDependBySelectedFeatures,
   getFinalFeatureIdsByDependency,
@@ -84,6 +88,15 @@ const isValidWorkspacePermissionSetting = (
   setting.modes.length > 0 &&
   ((setting.type === 'user' && !!setting.userId) || (setting.type === 'group' && !!setting.group));
 
+const isDefaultCheckedFeatureId = (id: string) => {
+  return DEFAULT_CHECKED_FEATURES_IDS.indexOf(id) > -1;
+};
+
+const appendDefaultFeatureIds = (ids: string[]) => {
+  // concat default checked ids and unique the result
+  return Array.from(new Set(ids.concat(DEFAULT_CHECKED_FEATURES_IDS)));
+};
+
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
 const defaultVISThemeOptions = [{ label: 'Categorical', value: 'categorical' }];
@@ -109,7 +122,9 @@ export const WorkspaceForm = ({
   const [icon, setIcon] = useState(defaultValues?.icon);
   const [defaultVISTheme, setDefaultVISTheme] = useState(defaultValues?.defaultVISTheme);
 
-  const [selectedFeatureIds, setSelectedFeatureIds] = useState(defaultValues?.features || []);
+  const [selectedFeatureIds, setSelectedFeatureIds] = useState(
+    appendDefaultFeatureIds(defaultValues?.features || [])
+  );
   const [permissionSettings, setPermissionSettings] = useState<
     Array<Partial<WorkspacePermissionSetting>>
   >(
@@ -402,6 +417,10 @@ export const WorkspaceForm = ({
                     features.length > 0 ? `(${selectedIds.length}/${features.length})` : ''
                   }`}
                   checked={selectedIds.length > 0}
+                  disabled={
+                    !isWorkspaceFeatureGroup(featureOrGroup) &&
+                    isDefaultCheckedFeatureId(featureOrGroup.id)
+                  }
                   indeterminate={
                     isWorkspaceFeatureGroup(featureOrGroup) &&
                     selectedIds.length > 0 &&
@@ -413,6 +432,7 @@ export const WorkspaceForm = ({
                     options={featureOrGroup.features.map((item) => ({
                       id: item.id,
                       label: item.name,
+                      disabled: isDefaultCheckedFeatureId(item.id),
                     }))}
                     idToSelectedMap={selectedIds.reduce(
                       (previousValue, currentValue) => ({
