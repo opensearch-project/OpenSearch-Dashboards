@@ -89,7 +89,10 @@ export class SavedObjectsPermissionControl {
     if (savedObjectsGet) {
       const principals = this.getPrincipalsFromRequest(request);
       const hasAllPermission = savedObjectsGet.every((item) => {
-        // item.permissions
+        // for object that doesn't contain ACL like config, return true
+        if (!item.permissions) {
+          return true;
+        }
         const aclInstance = new ACL(item.permissions);
         return aclInstance.hasPermission(permissionModes, principals);
       });
