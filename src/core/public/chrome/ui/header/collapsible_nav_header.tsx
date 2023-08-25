@@ -17,7 +17,7 @@ export function CollapsibleNavHeader({ workspaces }: Props) {
   const defaultHeaderName = i18n.translate(
     'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
     {
-      defaultMessage: 'OpenSearch Analytics',
+      defaultMessage: 'OpenSearch Dashboards',
     }
   );
 

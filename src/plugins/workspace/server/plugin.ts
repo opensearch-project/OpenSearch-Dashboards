@@ -27,6 +27,7 @@ import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
 import { ConfigSchema } from '../config';
+import { WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
@@ -150,7 +151,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
           name: i18n.translate('workspaces.management.workspace.default.name', {
             defaultMessage: 'Management',
           }),
-          features: [`@${DEFAULT_APP_CATEGORIES.management.id}`],
+          features: [`@${DEFAULT_APP_CATEGORIES.management.id}`, WORKSPACE_OVERVIEW_APP_ID],
         },
         managementWorkspaceACL.getPermissions()
       ),
