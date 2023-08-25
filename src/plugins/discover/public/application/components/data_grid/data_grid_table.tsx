@@ -8,7 +8,7 @@ import { EuiDataGrid, EuiDataGridSorting, EuiPanel } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { fetchTableDataCell } from './data_grid_table_cell_value';
 import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_columns';
-import { DocViewExpandButton } from './data_grid_table_docview_expand_button';
+import { DocViewInspectButton } from './data_grid_table_docview_inspect_button';
 import { DataGridFlyout } from './data_grid_table_flyout';
 import { DiscoverGridContextProvider } from './data_grid_table_context';
 import { toolbarVisibility } from './constants';
@@ -45,7 +45,7 @@ export const DataGridTable = ({
   displayTimeColumn,
   isToolbarVisible = true,
 }: DataGridTableProps) => {
-  const [expandedHit, setExpandedHit] = useState<OpenSearchSearchHit | undefined>();
+  const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
   const pagination = usePagination(rowCount);
 
@@ -94,9 +94,9 @@ export const DataGridTable = ({
   const leadingControlColumns = useMemo(() => {
     return [
       {
-        id: 'expandCollapseColumn',
+        id: 'inspectCollapseColumn',
         headerCellRender: () => null,
-        rowCellRender: DocViewExpandButton,
+        rowCellRender: DocViewInspectButton,
         width: 40,
       },
     ];
@@ -134,9 +134,9 @@ export const DataGridTable = ({
   return (
     <DiscoverGridContextProvider
       value={{
-        expandedHit,
+        inspectedHit,
         onFilter,
-        setExpandedHit,
+        setInspectedHit,
         rows: rows || [],
         indexPattern,
       }}
@@ -147,15 +147,15 @@ export const DataGridTable = ({
             {table}
           </EuiPanel>
         </EuiPanel>
-        {expandedHit && (
+        {inspectedHit && (
           <DataGridFlyout
             indexPattern={indexPattern}
-            hit={expandedHit}
+            hit={inspectedHit}
             columns={columns}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
             onFilter={onFilter}
-            onClose={() => setExpandedHit(undefined)}
+            onClose={() => setInspectedHit(undefined)}
           />
         )}
       </>
