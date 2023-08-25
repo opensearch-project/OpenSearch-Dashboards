@@ -131,10 +131,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     core.application.register({
       id: WORKSPACE_OVERVIEW_APP_ID,
       title: i18n.translate('workspace.settings.workspaceOverview', {
-        defaultMessage: 'Home',
+        defaultMessage: 'Overview',
       }),
       order: 0,
-      euiIconType: 'home',
+      euiIconType: 'grid',
       navLinkStatus: AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderOverviewApp } = await import('./application');

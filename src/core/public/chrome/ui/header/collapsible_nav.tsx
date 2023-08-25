@@ -56,6 +56,7 @@ import {
 } from './nav_link';
 import { ChromeBranding } from '../../chrome_service';
 import { CollapsibleNavHeader } from './collapsible_nav_header';
+import { MANAGEMENT_WORKSPACE_ID } from '../../../utils';
 
 function getAllCategories(allCategorizedLinks: Record<string, CollapsibleNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -153,14 +154,20 @@ export function CollapsibleNav({
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
+  const workspaceEnabled = useObservable(workspaces.workspaceEnabled$, false);
+  const currentWorkspaceId = useObservable(workspaces.currentWorkspaceId$, '');
   const allNavLinks: CollapsibleNavLink[] = [...navLinks];
-  if (recentlyAccessed.length) {
-    allNavLinks.push(
-      ...recentlyAccessed.map((link) => createRecentChromeNavLink(link, navLinks, basePath))
-    );
-  } else {
-    allNavLinks.push(emptyRecentlyVisited);
+  if (!workspaceEnabled || currentWorkspaceId !== MANAGEMENT_WORKSPACE_ID) {
+    // no recently visited in management workspace
+    if (recentlyAccessed.length) {
+      allNavLinks.push(
+        ...recentlyAccessed.map((link) => createRecentChromeNavLink(link, navLinks, basePath))
+      );
+    } else {
+      allNavLinks.push(emptyRecentlyVisited);
+    }
   }
+
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(allNavLinks, (link) => link?.category?.id);
