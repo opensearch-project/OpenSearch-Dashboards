@@ -20,6 +20,7 @@ import {
 import { ResultStatus, SearchData } from '../utils/use_search';
 import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
+import { SortOrder } from '../../../saved_searches/types';
 
 interface Props {
   history: History;
@@ -40,7 +41,7 @@ export const DiscoverTable = ({ history }: Props) => {
   const onRemoveColumn = (col: string) => dispatch(removeColumn(col));
   const onSetColumns = (cols: string[]) =>
     dispatch(setColumns({ timefield: indexPattern.timeFieldName, columns: cols }));
-  const onSetSort = (s: Array<[string, string]>) => dispatch(setSort(s));
+  const onSetSort = (s: SortOrder[]) => dispatch(setSort(s));
   const onAddFilter = useCallback(
     (field: IndexPatternField, values: string, operation: '+' | '-') => {
       const newFilters = opensearchFilters.generateFilters(
