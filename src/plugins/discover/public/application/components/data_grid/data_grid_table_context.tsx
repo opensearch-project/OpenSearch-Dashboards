@@ -8,9 +8,9 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 
 export interface DataGridContextProps {
-  expandedHit?: OpenSearchSearchHit;
+  inspectedHit?: OpenSearchSearchHit;
   onFilter: DocViewFilterFn;
-  setExpandedHit: (hit?: OpenSearchSearchHit) => void;
+  setInspectedHit: (hit?: OpenSearchSearchHit) => void;
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
 }
