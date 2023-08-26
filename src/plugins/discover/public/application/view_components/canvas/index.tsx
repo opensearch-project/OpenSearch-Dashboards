@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiCallOut } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -65,6 +65,12 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       {status === ResultStatus.LOADING && <LoadingSpinner />}
       {status === ResultStatus.READY && (
         <>
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              title="New Discover is available to switch by default and the old discover will be deprecated in 2.11."
+              iconType="alert"
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
               <EuiPanel>
