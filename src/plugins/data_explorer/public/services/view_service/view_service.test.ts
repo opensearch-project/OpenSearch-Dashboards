@@ -36,7 +36,7 @@ describe('TypeService', () => {
 
       expect(() => {
         registerView(createViewDefinition({ id: 'view-1' }));
-      }).toThrowErrorMatchingInlineSnapshot(`"A view with this the id view-1 already exists!"`);
+      }).toThrowErrorMatchingInlineSnapshot(`"A view with the id view-1 already exists!"`);
     });
   });
 
