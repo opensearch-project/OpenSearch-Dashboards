@@ -30,7 +30,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'opensearch-dashboards/public';
@@ -218,6 +218,12 @@ export function DiscoverLegacy({
               />
             </div>
             <div className={`dscWrapper ${mainSectionClassName}`}>
+              <div>
+                <EuiCallOut
+                  title="New Discover is available to switch by default and the old discover will be deprecated in 2.11."
+                  iconType="alert"
+                />
+              </div>
               {resultState === 'none' && (
                 <DiscoverNoResults
                   timeFieldName={opts.timefield}
