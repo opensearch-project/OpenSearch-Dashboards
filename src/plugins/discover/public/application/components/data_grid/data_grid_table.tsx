@@ -16,6 +16,7 @@ import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { usePagination } from '../utils/use_pagination';
+import { SortOrder } from '../../../saved_searches/types';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -23,10 +24,10 @@ export interface DataGridTableProps {
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  onSort: (sort: Array<[string, 'asc' | 'desc']>) => void;
+  onSort: (sort: SortOrder[]) => void;
   rows: OpenSearchSearchHit[];
   onSetColumns: (columns: string[]) => void;
-  sort: Array<[string, 'asc' | 'desc']>;
+  sort: SortOrder[];
   displayTimeColumn: boolean;
   services: DiscoverServices;
   isToolbarVisible?: boolean;

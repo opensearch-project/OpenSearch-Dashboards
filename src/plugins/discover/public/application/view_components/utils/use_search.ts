@@ -30,6 +30,7 @@ import {
   getResponseInspectorStats,
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
+import { SortOrder } from '../../../saved_searches/types';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -67,7 +68,7 @@ export type RefetchSubject = Subject<SearchRefetch>;
  */
 export const useSearch = (services: DiscoverServices) => {
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
-  const savedSearchId = useSelector((state) => state.discover.savedSearch);
+  const { savedSearch: savedSearchId, sort } = useSelector((state) => state.discover);
   const indexPattern = useIndexPattern(services);
   const { data, filterManager, getSavedSearchById, core, toastNotifications } = services;
   const timefilter = data.query.timefilter.timefilter;
@@ -101,122 +102,125 @@ export const useSearch = (services: DiscoverServices) => {
     [shouldSearchOnPageLoad]
   );
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
+  const sort$ = useMemo(() => new Subject<SortOrder[]>(), []);
 
-  const fetch = useCallback(async () => {
-    if (!indexPattern) {
-      data$.next({
-        status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
-      });
-      return;
-    }
-
-    if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
-      return data$.next({
-        status: ResultStatus.NO_RESULTS,
-        rows: [],
-      });
-    }
-
-    // Abort any in-progress requests before fetching again
-    if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
-    fetchStateRef.current.abortController = new AbortController();
-    const sort = undefined;
-    const histogramConfigs = indexPattern.timeFieldName
-      ? createHistogramConfigs(indexPattern, 'auto', data)
-      : undefined;
-    const searchSource = await updateSearchSource({
-      indexPattern,
-      services,
-      sort,
-      searchSource: savedSearch?.searchSource,
-      histogramConfigs,
-    });
-
-    try {
-      // Only show loading indicator if we are fetching when the rows are empty
-      if (fetchStateRef.current.rows?.length === 0) {
-        data$.next({ status: ResultStatus.LOADING });
+  const fetch = useCallback(
+    async (sortArr: SortOrder[]) => {
+      if (!indexPattern) {
+        data$.next({
+          status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        });
+        return;
       }
 
-      // Initialize inspect adapter for search source
-      inspectorAdapters.requests.reset();
-      const title = i18n.translate('discover.inspectorRequestDataTitle', {
-        defaultMessage: 'data',
-      });
-      const description = i18n.translate('discover.inspectorRequestDescription', {
-        defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
-      });
-      const inspectorRequest = inspectorAdapters.requests.start(title, { description });
-      inspectorRequest.stats(getRequestInspectorStats(searchSource));
-      searchSource.getSearchRequestBody().then((body) => {
-        inspectorRequest.json(body);
+      if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
+        return data$.next({
+          status: ResultStatus.NO_RESULTS,
+          rows: [],
+        });
+      }
+
+      // Abort any in-progress requests before fetching again
+      if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
+      fetchStateRef.current.abortController = new AbortController();
+      const histogramConfigs = indexPattern.timeFieldName
+        ? createHistogramConfigs(indexPattern, 'auto', data)
+        : undefined;
+      const searchSource = await updateSearchSource({
+        indexPattern,
+        services,
+        sort: sortArr,
+        searchSource: savedSearch?.searchSource,
+        histogramConfigs,
       });
 
-      // Execute the search
-      const fetchResp = await searchSource.fetch({
-        abortSignal: fetchStateRef.current.abortController.signal,
-      });
-
-      inspectorRequest
-        .stats(getResponseInspectorStats(fetchResp, searchSource))
-        .ok({ json: fetchResp });
-      const hits = fetchResp.hits.total as number;
-      const rows = fetchResp.hits.hits;
-      let bucketInterval = {};
-      let chartData;
-      for (const row of rows) {
-        const fields = Object.keys(indexPattern.flattenHit(row));
-        for (const fieldName of fields) {
-          fetchStateRef.current.fieldCounts[fieldName] =
-            (fetchStateRef.current.fieldCounts[fieldName] || 0) + 1;
+      try {
+        // Only show loading indicator if we are fetching when the rows are empty
+        if (fetchStateRef.current.rows?.length === 0) {
+          data$.next({ status: ResultStatus.LOADING });
         }
-      }
 
-      if (histogramConfigs) {
-        const bucketAggConfig = histogramConfigs.aggs[1];
-        const tabifiedData = tabifyAggResponse(histogramConfigs, fetchResp);
-        const dimensions = getDimensions(histogramConfigs, data);
-        if (dimensions) {
-          if (bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)) {
-            bucketInterval = bucketAggConfig.buckets?.getInterval();
+        // Initialize inspect adapter for search source
+        inspectorAdapters.requests.reset();
+        const title = i18n.translate('discover.inspectorRequestDataTitle', {
+          defaultMessage: 'data',
+        });
+        const description = i18n.translate('discover.inspectorRequestDescription', {
+          defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
+        });
+        const inspectorRequest = inspectorAdapters.requests.start(title, { description });
+        inspectorRequest.stats(getRequestInspectorStats(searchSource));
+        searchSource.getSearchRequestBody().then((body) => {
+          inspectorRequest.json(body);
+        });
+
+        // Execute the search
+        const fetchResp = await searchSource.fetch({
+          abortSignal: fetchStateRef.current.abortController.signal,
+        });
+
+        inspectorRequest
+          .stats(getResponseInspectorStats(fetchResp, searchSource))
+          .ok({ json: fetchResp });
+        const hits = fetchResp.hits.total as number;
+        const rows = fetchResp.hits.hits;
+        let bucketInterval = {};
+        let chartData;
+        for (const row of rows) {
+          const fields = Object.keys(indexPattern.flattenHit(row));
+          for (const fieldName of fields) {
+            fetchStateRef.current.fieldCounts[fieldName] =
+              (fetchStateRef.current.fieldCounts[fieldName] || 0) + 1;
           }
-          // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
-          chartData = buildPointSeriesData(tabifiedData, dimensions);
         }
+
+        if (histogramConfigs) {
+          const bucketAggConfig = histogramConfigs.aggs[1];
+          const tabifiedData = tabifyAggResponse(histogramConfigs, fetchResp);
+          const dimensions = getDimensions(histogramConfigs, data);
+          if (dimensions) {
+            if (bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)) {
+              bucketInterval = bucketAggConfig.buckets?.getInterval();
+            }
+            // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
+            chartData = buildPointSeriesData(tabifiedData, dimensions);
+          }
+        }
+
+        fetchStateRef.current.fieldCounts = fetchStateRef.current.fieldCounts!;
+        fetchStateRef.current.rows = rows;
+        data$.next({
+          status: rows.length > 0 ? ResultStatus.READY : ResultStatus.NO_RESULTS,
+          fieldCounts: fetchStateRef.current.fieldCounts,
+          hits,
+          rows,
+          bucketInterval,
+          chartData,
+        });
+      } catch (error) {
+        // If the request was aborted then no need to surface this error in the UI
+        if (error instanceof Error && error.name === 'AbortError') return;
+
+        data$.next({
+          status: ResultStatus.NO_RESULTS,
+          rows: [],
+        });
+
+        data.search.showError(error as Error);
       }
-
-      fetchStateRef.current.fieldCounts = fetchStateRef.current.fieldCounts!;
-      fetchStateRef.current.rows = rows;
-      data$.next({
-        status: rows.length > 0 ? ResultStatus.READY : ResultStatus.NO_RESULTS,
-        fieldCounts: fetchStateRef.current.fieldCounts,
-        hits,
-        rows,
-        bucketInterval,
-        chartData,
-      });
-    } catch (error) {
-      // If the request was aborted then no need to surface this error in the UI
-      if (error instanceof Error && error.name === 'AbortError') return;
-
-      data$.next({
-        status: ResultStatus.NO_RESULTS,
-        rows: [],
-      });
-
-      data.search.showError(error as Error);
-    }
-  }, [
-    indexPattern,
-    timefilter,
-    toastNotifications,
-    data,
-    services,
-    savedSearch?.searchSource,
-    data$,
-    shouldSearchOnPageLoad,
-    inspectorAdapters.requests,
-  ]);
+    },
+    [
+      indexPattern,
+      timefilter,
+      toastNotifications,
+      data,
+      services,
+      savedSearch?.searchSource,
+      data$,
+      shouldSearchOnPageLoad,
+      inspectorAdapters.requests,
+    ]
+  );
 
   useEffect(() => {
     const fetch$ = merge(
@@ -225,13 +229,14 @@ export const useSearch = (services: DiscoverServices) => {
       timefilter.getFetch$(),
       timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
-      data.query.queryString.getUpdates$()
+      data.query.queryString.getUpdates$(),
+      sort$
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe(() => {
       (async () => {
         try {
-          await fetch();
+          await fetch(sort);
         } catch (error) {
           core.fatalErrors.add(error as Error);
         }
@@ -244,7 +249,17 @@ export const useSearch = (services: DiscoverServices) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [data$, data.query.queryString, filterManager, refetch$, timefilter, fetch, core.fatalErrors]);
+  }, [
+    data$,
+    data.query.queryString,
+    filterManager,
+    refetch$,
+    sort,
+    sort$,
+    timefilter,
+    fetch,
+    core.fatalErrors,
+  ]);
 
   // Get savedSearch if it exists
   useEffect(() => {
@@ -255,6 +270,10 @@ export const useSearch = (services: DiscoverServices) => {
 
     return () => {};
   }, [getSavedSearchById, savedSearchId]);
+
+  useEffect(() => {
+    sort$.next(sort);
+  }, [sort, sort$]);
 
   return {
     data$,

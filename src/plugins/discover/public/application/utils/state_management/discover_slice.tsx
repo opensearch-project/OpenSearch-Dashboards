@@ -10,6 +10,7 @@ import { DiscoverServices } from '../../../build_services';
 import { RootState, DefaultViewState } from '../../../../../data_explorer/public';
 import { buildColumns } from '../columns';
 import * as utils from './common';
+import { SortOrder } from '../../../saved_searches/types';
 
 export interface DiscoverState {
   /**
@@ -31,7 +32,7 @@ export interface DiscoverState {
   /**
    * Array of the used sorting [[field,direction],...]
    */
-  sort: Array<[string, string]>;
+  sort: SortOrder[];
   /**
    * id of the used saved search
    */
@@ -129,7 +130,7 @@ export const discoverSlice = createSlice({
         columns,
       };
     },
-    setSort(state, action: PayloadAction<Array<[string, string]>>) {
+    setSort(state, action: PayloadAction<SortOrder[]>) {
       return {
         ...state,
         sort: action.payload,
