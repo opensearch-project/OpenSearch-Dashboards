@@ -71,6 +71,7 @@ export const TopNav = ({ opts }: TopNavProps) => {
       appName={PLUGIN_ID}
       config={topNavLinks}
       showSearchBar
+      showSaveQuery
       useDefaultBehaviors
       setMenuMountPoint={opts.setHeaderActionMenu}
       indexPatterns={indexPatterns}
