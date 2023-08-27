@@ -21,8 +21,3 @@ export const reorderColumn = (columns: string[], source: number, destination: nu
   newColumns.splice(destination, 0, removed);
   return newColumns;
 };
-
-export const setColumns = (timeField: string | undefined, columns: string[]) => {
-  const newColumns = timeField && timeField === columns[0] ? columns.slice(1) : columns;
-  return newColumns;
-};
