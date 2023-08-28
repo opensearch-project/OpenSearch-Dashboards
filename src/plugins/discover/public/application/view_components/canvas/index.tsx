@@ -67,7 +67,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
         <>
           <EuiFlexItem grow={false}>
             <EuiCallOut
-              title="New Discover is available to switch by default and the old discover will be deprecated in 2.11."
+              title="This Discover app version will be retired in OpenSearch version 2.11. To switch to the new Discover 2.0 version, toggle the New Discover."
               iconType="alert"
             />
           </EuiFlexItem>
