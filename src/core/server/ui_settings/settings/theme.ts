@@ -43,6 +43,7 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
         defaultMessage: `Enable a dark mode for the OpenSearch Dashboards UI. A page refresh is required for the setting to be applied.`,
       }),
       requiresPageReload: true,
+      category: ['appearance'],
       schema: schema.boolean(),
     },
     'theme:version': {
@@ -56,6 +57,7 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
         defaultMessage: `Switch between the theme used for the current and next version of OpenSearch Dashboards, A page refresh is required for the setting to be applied.`,
       }),
       requiresPageReload: true,
+      category: ['appearance'],
       schema: schema.oneOf([schema.literal('v7'), schema.literal('Next (preview)')]),
     },
   };
