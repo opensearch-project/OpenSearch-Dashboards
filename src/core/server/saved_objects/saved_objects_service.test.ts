@@ -34,7 +34,8 @@ import {
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { ByteSizeValue } from '@osd/config-schema';
 import { errors as opensearchErrors } from '@opensearch-project/opensearch';
 
@@ -50,6 +51,7 @@ import { SavedObjectsClientFactoryProvider } from './service/lib';
 import { NodesVersionCompatibility } from '../opensearch/version_check/ensure_opensearch_version';
 import { SavedObjectsRepository } from './service/lib/repository';
 import { SavedObjectRepositoryFactoryProvider } from './service/lib/scoped_client_provider';
+import { ServiceStatusLevels } from '../status';
 
 jest.mock('./service/lib/repository');
 
@@ -191,6 +193,31 @@ describe('SavedObjectsService', () => {
         );
       });
     });
+
+    describe('#setStatus', () => {
+      it('throws error if custom status is already set', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const customStatus1$ = of({
+          level: ServiceStatusLevels.available,
+          summary: 'Saved Object Service is using external storage and it is up',
+        });
+        const customStatus2$ = of({
+          level: ServiceStatusLevels.unavailable,
+          summary: 'Saved Object Service is not connected to external storage and it is down',
+        });
+
+        setup.setStatus(customStatus1$);
+
+        expect(() => {
+          setup.setStatus(customStatus2$);
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"custom saved object service status is already set, and can only be set once"`
+        );
+      });
+    });
   });
 
   describe('#start()', () => {
@@ -312,6 +339,15 @@ describe('SavedObjectsService', () => {
       }).toThrowErrorMatchingInlineSnapshot(
         '"cannot call `setRepositoryFactoryProvider` after service startup."'
       );
+
+      const customStatus$ = of({
+        level: ServiceStatusLevels.available,
+        summary: 'Saved Object Service is using external storage and it is up',
+      });
+
+      expect(() => {
+        setup.setStatus(customStatus$);
+      }).toThrowErrorMatchingInlineSnapshot('"cannot call `setStatus` after service startup."');
     });
 
     describe('#getTypeRegistry', () => {
@@ -428,6 +464,40 @@ describe('SavedObjectsService', () => {
         createInternalRepository();
 
         expect(SavedObjectsRepository.createRepository as jest.Mocked<any>).toHaveBeenCalled();
+      });
+    });
+
+    describe('#savedObjectServiceStatus', () => {
+      it('Saved objects service status should be custom when set using setStatus', async () => {
+        const coreContext = createCoreContext({});
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        const setup = await soService.setup(coreSetup);
+
+        const customStatus$ = of({
+          level: ServiceStatusLevels.available,
+          summary: 'Saved Object Service is using external storage and it is up',
+        });
+        setup.setStatus(customStatus$);
+        const coreStart = createStartDeps();
+        await soService.start(coreStart);
+        expect(await setup.status$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.available,
+          summary: 'Saved Object Service is using external storage and it is up',
+        });
+      });
+
+      it('Saved objects service should be default when custom status is not set', async () => {
+        const coreContext = createCoreContext({});
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        const setup = await soService.setup(coreSetup);
+        const coreStart = createStartDeps();
+        await soService.start(coreStart);
+        expect(await setup.status$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.available,
+          summary: 'SavedObjects service has completed migrations and is available',
+        });
       });
     });
   });
