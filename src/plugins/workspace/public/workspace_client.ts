@@ -329,6 +329,18 @@ export class WorkspaceClient {
     return result;
   }
 
+  public async getSettings(): Promise<
+    IResponse<{
+      enabled: boolean;
+    }>
+  > {
+    const result = await this.safeFetch(this.getPath(['settings']), {
+      method: 'get',
+    });
+
+    return result;
+  }
+
   public stop() {
     this.workspaces.workspaceList$.unsubscribe();
     this.workspaces.currentWorkspaceId$.unsubscribe();
