@@ -32,7 +32,7 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
-import { SavedObjectSaveModal } from '../../../../saved_objects/public';
+import { SavedObjectSaveModal } from '../../../../../../saved_objects/public';
 
 interface SaveOptions {
   newTitle: string;

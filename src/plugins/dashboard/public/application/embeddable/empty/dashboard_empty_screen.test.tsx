@@ -31,8 +31,8 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { coreMock } from '../../../../core/public/mocks';
+import { findTestSubject } from 'test_utils/helpers';
+import { coreMock } from '../../../../../../core/public/mocks';
 
 describe('DashboardEmptyScreen', () => {
   const setupMock = coreMock.createSetup();

@@ -42,10 +42,12 @@
     "@osd/babel-preset": "1.0.0",
     "@osd/dev-utils": "1.0.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "comment-stripper": "^0.0.4",
     "css-loader": "^5.2.7",
     "del": "^6.1.1",
     "loader-utils": "^2.0.4",
     "node-sass": "npm:@amoo-miki/node-sass@9.0.0-libsass-3.6.5",
+    "sass-loader": "npm:@amoo-miki/sass-loader@10.4.1-node-sass-9.0.0-libsass-3.6.5",
     "val-loader": "^2.1.2",
     "webpack": "npm:@amoo-miki/webpack@4.46.0-rc.2"
   }

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import './dashboard_empty_screen.scss';
 import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import {

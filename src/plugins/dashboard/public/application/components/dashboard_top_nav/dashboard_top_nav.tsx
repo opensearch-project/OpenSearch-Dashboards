@@ -7,12 +7,12 @@ import React, { memo, useState, useEffect } from 'react';
 import { IndexPattern } from 'src/plugins/data/public';
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { getTopNavConfig } from '../top_nav/get_top_nav_config';
-import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from '../../types';
-import { getNavActions } from '../utils/get_nav_actions';
-import { DashboardContainer } from '../embeddable';
-import { Dashboard } from '../../dashboard';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { getTopNavConfig } from './top_nav';
+import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from '../../../types';
+import { getNavActions } from '../../utils/get_nav_actions';
+import { DashboardContainer } from '../../embeddable';
+import { Dashboard } from '../../../dashboard';
 
 interface DashboardTopNavProps {
   isChromeVisible: boolean;
