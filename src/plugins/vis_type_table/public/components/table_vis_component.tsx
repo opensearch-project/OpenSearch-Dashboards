@@ -37,7 +37,7 @@ export const TableVisComponent = ({
   event,
   uiState: { sort, setSort, colWidth, setWidth },
 }: TableVisComponentProps) => {
-  const { rows, formattedColumns } = table;
+  const { rows, columns, formattedColumns } = table;
 
   const pagination = usePagination(visConfig, rows.length);
 
@@ -59,7 +59,15 @@ export const TableVisComponent = ({
     formattedColumns,
   ]);
 
-  const dataGridColumns = getDataGridColumns(table, event, colWidth);
+  const sortedTable = useMemo(() => {
+    return {
+      rows: sortedRows,
+      columns,
+      formattedColumns,
+    };
+  }, [sortedRows, columns, formattedColumns]);
+
+  const dataGridColumns = getDataGridColumns(sortedTable, event, colWidth);
 
   const sortedColumns = useMemo(() => {
     if (
