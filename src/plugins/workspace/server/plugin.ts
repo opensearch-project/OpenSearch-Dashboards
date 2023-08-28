@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import {
   PluginInitializerContext,
@@ -26,19 +26,28 @@ import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
-import { ConfigSchema } from '../config';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import { ConfigSchema, FEATURE_FLAG_KEY_IN_UI_SETTING } from '../config';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
+  private coreStart?: CoreStart;
   private config$: Observable<ConfigSchema>;
+  private enabled$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+
+  private get isEnabled() {
+    return this.enabled$.getValue();
+  }
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
      * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
      */
     setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
+      if (!this.isEnabled) {
+        return toolkit.next();
+      }
       const regexp = /\/w\/([^\/]*)/;
       const matchedResult = request.url.pathname.match(regexp);
 
@@ -81,14 +90,27 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       http: core.http,
       logger: this.logger,
       client: this.client as IWorkspaceDBImpl,
+      enabled$: this.enabled$,
+      config$: this.config$,
     });
 
-    core.savedObjects.setClientFactoryProvider((repositoryFactory) => () =>
-      new SavedObjectsClient(repositoryFactory.createInternalRepository())
+    core.savedObjects.setClientFactoryProvider(
+      (repositoryFactory) => ({ request, includedHiddenTypes }) => {
+        const enabled = this.isEnabled;
+        if (enabled) {
+          return new SavedObjectsClient(repositoryFactory.createInternalRepository());
+        }
+
+        return new SavedObjectsClient(
+          repositoryFactory.createScopedRepository(request, includedHiddenTypes)
+        );
+      }
     );
 
     return {
       client: this.client,
+      enabled$: this.enabled$,
+      setWorkspaceFeatureFlag: this.setWorkspaceFeatureFlag,
     };
   }
 
@@ -120,8 +142,11 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     }
   }
 
-  private async setupWorkspaces(startDeps: CoreStart) {
-    const internalRepository = startDeps.savedObjects.createInternalRepository();
+  private async setupWorkspaces() {
+    if (!this.coreStart) {
+      throw new Error('UI setting client can not be found');
+    }
+    const internalRepository = this.coreStart.savedObjects.createInternalRepository();
     const publicWorkspaceACL = new ACL().addPermission(
       [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
       {
@@ -158,15 +183,50 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     ]);
   }
 
+  private async getUISettingClient() {
+    if (!this.coreStart) {
+      throw new Error('UI setting client can not be found');
+    }
+    const { uiSettings, savedObjects } = this.coreStart as CoreStart;
+    const internalRepository = savedObjects.createInternalRepository();
+    const savedObjectClient = new SavedObjectsClient(internalRepository);
+    return uiSettings.asScopedToClient(savedObjectClient);
+  }
+
+  private async setWorkspaceFeatureFlag(featureFlag: boolean) {
+    const uiSettingClient = await this.getUISettingClient();
+    await uiSettingClient.set(FEATURE_FLAG_KEY_IN_UI_SETTING, featureFlag);
+    this.enabled$.next(featureFlag);
+  }
+
+  private async setupWorkspaceFeatureFlag() {
+    const uiSettingClient = await this.getUISettingClient();
+    const workspaceEnabled = await uiSettingClient.get(FEATURE_FLAG_KEY_IN_UI_SETTING);
+    this.enabled$.next(!!workspaceEnabled);
+    return workspaceEnabled;
+  }
+
   public start(core: CoreStart) {
     this.logger.debug('Starting SavedObjects service');
 
-    this.setupWorkspaces(core);
+    this.coreStart = core;
+
+    this.setupWorkspaceFeatureFlag();
+
+    this.enabled$.subscribe((enabled) => {
+      if (enabled) {
+        this.setupWorkspaces();
+      }
+    });
 
     return {
       client: this.client as IWorkspaceDBImpl,
+      enabled$: this.enabled$,
+      setWorkspaceFeatureFlag: this.setWorkspaceFeatureFlag,
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.enabled$.unsubscribe();
+  }
 }

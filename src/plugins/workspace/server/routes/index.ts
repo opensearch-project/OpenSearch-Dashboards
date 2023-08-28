@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { schema } from '@osd/config-schema';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { ensureRawRequest } from '../../../../core/server';
 
 import {
@@ -13,6 +15,7 @@ import {
   WorkspacePermissionMode,
 } from '../../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceRoutePermissionItem } from '../types';
+import { ConfigSchema } from '../../config';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -82,10 +85,14 @@ export function registerRoutes({
   client,
   logger,
   http,
+  enabled$,
+  config$,
 }: {
   client: IWorkspaceDBImpl;
   logger: Logger;
   http: CoreSetup['http'];
+  enabled$: BehaviorSubject<boolean>;
+  config$: Observable<ConfigSchema>;
 }) {
   const router = http.createRouter();
   router.post(
@@ -253,6 +260,25 @@ export function registerRoutes({
         id
       );
       return res.ok({ body: result });
+    })
+  );
+
+  router.get(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/settings`,
+      validate: {},
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const config = await config$.pipe(first()).toPromise();
+      return res.ok({
+        body: {
+          success: true,
+          result: {
+            ...config,
+            enabled: enabled$.getValue(),
+          },
+        },
+      });
     })
   );
 }

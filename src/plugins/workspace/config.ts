@@ -6,7 +6,6 @@
 import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
   dashboardAdmin: schema.object(
     {
       backendRoles: schema.arrayOf(schema.string(), {
@@ -22,3 +21,5 @@ export const configSchema = schema.object({
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
+
+export const FEATURE_FLAG_KEY_IN_UI_SETTING = 'workspace_enabled';
