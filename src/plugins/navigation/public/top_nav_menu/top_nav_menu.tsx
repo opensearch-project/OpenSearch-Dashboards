@@ -115,22 +115,21 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderLayout() {
     const { setMenuMountPoint } = props;
     const menuClassName = classNames('osdTopNavMenu', props.className);
-    const wrapperClassName = 'osdTopNavMenu__wrapper';
     if (setMenuMountPoint) {
       return (
         <>
           <MountPointPortal setMountPoint={setMenuMountPoint}>
-            <span className={wrapperClassName}>{renderMenu(menuClassName)}</span>
+            {renderMenu(menuClassName)}
           </MountPointPortal>
-          <span className={wrapperClassName}>{renderSearchBar()}</span>
+          {renderSearchBar()}
         </>
       );
     } else {
       return (
-        <span className={wrapperClassName}>
+        <>
           {renderMenu(menuClassName)}
           {renderSearchBar()}
-        </span>
+        </>
       );
     }
   }
