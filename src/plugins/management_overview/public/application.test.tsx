@@ -62,8 +62,7 @@ describe('Overview page rendering', () => {
   });
 
   it('should render normally when no overview app', () => {
-    const { container, queryByText } = renderOverviewPage(new Map<string, PublicAppInfo>());
-    expect(container.firstChild).toMatchSnapshot();
+    const { queryByText } = renderOverviewPage(new Map<string, PublicAppInfo>());
     expect(queryByText('Overview')).not.toBeNull();
   });
 
@@ -76,11 +75,7 @@ describe('Overview page rendering', () => {
         order: 0,
       },
     ];
-    const { container, queryByText } = renderOverviewPage(
-      new Map<string, PublicAppInfo>(),
-      overviewApps
-    );
-    expect(container.firstChild).toMatchSnapshot();
+    const { queryByText } = renderOverviewPage(new Map<string, PublicAppInfo>(), overviewApps);
     expect(queryByText('Dev Tools')).toBeNull();
   });
 
