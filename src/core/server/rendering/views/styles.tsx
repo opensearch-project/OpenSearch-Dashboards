@@ -92,6 +92,10 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
                     justify-content: center;
           }
 
+          .legacyBrowserErrorLogo {
+            height: 64px;
+          }
+
           .osdWelcomeTitle {
             color: #000;
             font-size: 20px;
@@ -161,8 +165,8 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .loadingLogoContainer {
-            height: 60px;
-            padding: 10px 10px 10px 10px;
+            height: 80px;
+            padding: 8px;
           }
 
           .loadingLogo {

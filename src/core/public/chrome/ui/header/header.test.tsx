@@ -33,7 +33,7 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { httpServiceMock } from '../../../http/http_service.mock';
-import { applicationServiceMock } from '../../../mocks';
+import { applicationServiceMock, chromeServiceMock } from '../../../mocks';
 import { Header } from './header';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 
@@ -69,13 +69,9 @@ function mockProps() {
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
     onIsLockedUpdate: () => {},
-    branding: {
-      darkMode: false,
-      logo: { defaultUrl: '/' },
-      mark: { defaultUrl: '/' },
-      applicationTitle: 'OpenSearch Dashboards',
-    },
+    branding: {},
     survey: '/',
+    logos: chromeServiceMock.createStartContract().logos,
   };
 }
 
@@ -102,17 +98,17 @@ describe('Header', () => {
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
     ]);
-    const component = mountWithIntl(
-      <Header
-        {...mockProps()}
-        isVisible$={isVisible$}
-        breadcrumbs$={breadcrumbs$}
-        navLinks$={navLinks$}
-        recentlyAccessed$={recentlyAccessed$}
-        isLocked$={isLocked$}
-        customNavLink$={customNavLink$}
-      />
-    );
+    const props = {
+      ...mockProps(),
+      isVisible$,
+      breadcrumbs$,
+      navLinks$,
+      recentlyAccessed$,
+      isLocked$,
+      customNavLink$,
+    };
+
+    const component = mountWithIntl(<Header {...props} />);
     expect(component.find('EuiHeader').exists()).toBeFalsy();
     expect(component.find('EuiProgress').exists()).toBeTruthy();
 
@@ -120,7 +116,6 @@ describe('Header', () => {
     component.update();
     expect(component.find('EuiHeader.primaryHeader').exists()).toBeTruthy();
     expect(component.find('EuiHeader.expandedHeader').exists()).toBeTruthy();
-    expect(component.find('HeaderLogo').exists()).toBeTruthy();
     expect(component.find('HeaderNavControls')).toHaveLength(5);
     expect(component.find('[data-test-subj="toggleNavButton"]').exists()).toBeTruthy();
     expect(component.find('HomeLoader').exists()).toBeTruthy();
@@ -131,6 +126,11 @@ describe('Header', () => {
 
     expect(component.find('EuiFlyout[aria-label="Primary"]').exists()).toBeFalsy();
 
+    const headerLogo = component.find('HeaderLogo');
+    expect(headerLogo.exists()).toBeTruthy();
+    expect(headerLogo.prop('backgroundColorScheme')).toEqual('dark');
+    expect(headerLogo.prop('logos')).toEqual(props.logos);
+
     act(() => isLocked$.next(true));
     component.update();
     expect(component.find('EuiFlyout[aria-label="Primary"]').exists()).toBeTruthy();
@@ -139,16 +139,13 @@ describe('Header', () => {
 
   it('renders condensed header', () => {
     const branding = {
-      darkMode: false,
-      logo: { defaultUrl: '/foo' },
-      mark: { defaultUrl: '/foo' },
-      applicationTitle: 'Foobar Dashboards',
       useExpandedHeader: false,
     };
     const props = {
       ...mockProps(),
       branding,
     };
+
     const component = mountWithIntl(<Header {...props} />);
 
     expect(component.find('EuiHeader.primaryHeader').exists()).toBeTruthy();
