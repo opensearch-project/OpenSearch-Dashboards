@@ -181,6 +181,7 @@ export class Home extends Component {
               solutions={solutions}
               directories={directories}
               branding={getServices().injectedMetadata.getBranding()}
+              logos={getServices().chrome.logos}
             />
           ) : null}
 
@@ -224,6 +225,7 @@ export class Home extends Component {
         urlBasePath={this.props.urlBasePath}
         telemetry={this.props.telemetry}
         branding={getServices().injectedMetadata.getBranding()}
+        logos={getServices().chrome.logos}
       />
     );
   }

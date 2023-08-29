@@ -4,51 +4,46 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, IconSize } from '@elastic/eui';
 import { ChromeBranding } from '../../chrome_service';
+import type { Logos } from '../../../../common/types';
 
-export const DEFAULT_MARK = 'opensearch_mark_default_mode.svg';
-export const DEFAULT_DARK_MARK = 'opensearch_mark_dark_mode.svg';
+interface Props {
+  branding: ChromeBranding;
+  logos: Logos;
+}
 
 /**
  * Use branding configurations to render the header mark on the nav bar.
- *
- * @param {ChromeBranding} - branding object consist of mark, darkmode selection, asset path and title
- * @returns Mark component which is going to be rendered on the main page header bar.
  */
-export const HomeIcon = ({
-  darkMode,
-  assetFolderUrl = '',
-  mark,
-  applicationTitle = 'opensearch dashboards',
-  useExpandedHeader = true,
-}: ChromeBranding) => {
-  const { defaultUrl: markUrl, darkModeUrl: darkMarkUrl } = mark ?? {};
+export const HomeIcon = ({ branding, logos }: Props) => {
+  const { applicationTitle = 'opensearch dashboards', useExpandedHeader = true } = branding;
 
-  const customMark = darkMode ? darkMarkUrl ?? markUrl : markUrl;
-  const defaultMark = darkMode ? DEFAULT_DARK_MARK : DEFAULT_MARK;
+  const { url: markURL, type: markType } = logos.Mark;
 
-  const getIconProps = () => {
-    const iconType = customMark
-      ? customMark
-      : useExpandedHeader
-      ? 'home'
-      : `${assetFolderUrl}/${defaultMark}`;
-    const testSubj = customMark ? 'customMark' : useExpandedHeader ? 'homeIcon' : 'defaultMark';
-    const title = `${applicationTitle} home`;
-    // marks look better at the large size, but the home icon should be medium to fit in with other icons
-    const size = iconType === 'home' ? ('m' as const) : ('l' as const);
+  let markIcon = markURL;
+  let testSubj = `${markType}Mark`;
+  // Marks look better at the large size
+  let markIconSize: IconSize = 'l';
 
-    return {
-      'data-test-subj': testSubj,
-      'data-test-image-url': iconType,
-      type: iconType,
-      title,
-      size,
-    };
-  };
+  // If no custom branded mark was set, use `home` icon only for expanded headers
+  if (markType !== 'custom' && useExpandedHeader) {
+    markIcon = 'home';
+    testSubj = 'homeIcon';
+    // Home icon should be medium to fit in with other icons
+    markIconSize = 'm';
+  }
 
-  const props = getIconProps();
+  const alt = `${applicationTitle} home`;
 
-  return <EuiIcon className="logoImage" {...props} />;
+  return (
+    <EuiIcon
+      data-test-subj={testSubj}
+      data-test-image-url={markIcon}
+      type={markIcon}
+      title={alt}
+      size={markIconSize}
+      className="logoImage"
+    />
+  );
 };

@@ -34,7 +34,6 @@ export {
   ChromeService,
   ChromeStart,
   InternalChromeStart,
-  ChromeBrand,
   ChromeHelpExtension,
 } from './chrome_service';
 export {
