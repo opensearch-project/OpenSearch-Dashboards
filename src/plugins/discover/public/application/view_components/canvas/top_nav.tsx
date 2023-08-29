@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import React, { useEffect, useState } from 'react';
 import { AppMountParameters } from '../../../../../../core/public';
 import { NEW_DISCOVER_APP, PLUGIN_ID } from '../../../../common';
@@ -32,6 +33,7 @@ export const TopNav = ({ opts }: TopNavProps) => {
       application: { navigateToApp },
     },
     data,
+    chrome,
   } = services;
 
   const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
@@ -65,6 +67,32 @@ export const TopNav = ({ opts }: TopNavProps) => {
       isMounted = false;
     };
   }, [data.indexPatterns]);
+
+  useEffect(() => {
+    const pageTitleSuffix = savedSearch?.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
+
+    if (savedSearch?.id) {
+      chrome.setBreadcrumbs([
+        {
+          text: i18n.translate('discover.discoverBreadcrumbTitle', {
+            defaultMessage: 'Discover',
+          }),
+          href: '#/',
+        },
+        { text: savedSearch.title },
+      ]);
+    } else {
+      chrome.setBreadcrumbs([
+        {
+          text: i18n.translate('discover.discoverBreadcrumbTitle', {
+            defaultMessage: 'Discover',
+          }),
+          href: '#/',
+        },
+      ]);
+    }
+  }, [chrome, savedSearch?.id, savedSearch?.title]);
 
   return (
     <TopNavMenu
