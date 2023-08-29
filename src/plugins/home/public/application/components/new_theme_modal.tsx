@@ -57,7 +57,9 @@ export const NewThemeModal: FC<Props> = ({ addBasePath, onClose }) => {
             modes. You or your administrator can change to the previous theme by visiting {advancedSettingsLink}."
               values={{
                 advancedSettingsLink: (
-                  <EuiLink href={addBasePath('/app/management/opensearch-dashboards/settings')}>
+                  <EuiLink
+                    href={addBasePath('/app/management/opensearch-dashboards/settings#appearance')}
+                  >
                     <FormattedMessage
                       id="home.newThemeModal.previewDescription.advancedSettingsLinkText"
                       defaultMessage="Advanced Settings"

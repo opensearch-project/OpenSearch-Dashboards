@@ -59,6 +59,7 @@ export class Home extends Component {
     );
 
     const isNewThemeModalEnabled = !(
+      getServices().uiSettings.get('theme:version') === 'v7' ||
       getServices().homeConfig.disableNewThemeModal ||
       props.localStorage.getItem(KEY_ENABLE_NEW_THEME_MODAL) === 'false'
     );
