@@ -1,27 +1,21 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import stylelint from 'stylelint';
 import { NAMESPACE } from '../..';
 import {
   getNotCompliantMessage,
+  getRuleFromConfig,
   getRulesFromConfig,
   isValidOptions,
-  getRuleFromConfig,
   FileBasedConfig,
 } from '../../utils';
 
 const { ruleMessages, report } = stylelint.utils;
 
-const ruleName = 'no_modifying_global_selectors';
+const ruleName = 'no_restricted_values';
 const messages = ruleMessages(ruleName, {
   expected: (message) => `${message}`,
 });
@@ -41,9 +35,9 @@ const ruleFunction: stylelint.Rule = (
 
     const isAutoFixing = Boolean(context.fix);
 
-    postcssRoot.walkRules((rule) => {
-      const selectorRule = getRuleFromConfig(rules, rule.selector);
-      if (!selectorRule) {
+    postcssRoot.walkDecls((decl) => {
+      const valueRule = getRuleFromConfig(rules, decl.value);
+      if (!valueRule) {
         return;
       }
 
@@ -54,12 +48,12 @@ const ruleFunction: stylelint.Rule = (
         return;
       }
 
-      const approvedFiles = selectorRule.approved;
+      const approvedFiles = valueRule.approved;
 
       const reportInfo = {
         ruleName: `${NAMESPACE}/${ruleName}`,
         result: postcssResult,
-        node: rule,
+        node: decl,
         message: '',
       };
 
@@ -70,7 +64,7 @@ const ruleFunction: stylelint.Rule = (
       }
 
       if (shouldReport && isAutoFixing) {
-        rule.remove();
+        decl.remove();
         return;
       }
 
@@ -80,8 +74,8 @@ const ruleFunction: stylelint.Rule = (
 
       reportInfo.message = messages.expected(
         getNotCompliantMessage(
-          `Modifying the global selector "${rule.selector}" is not allowed.`,
-          selectorRule.explanation
+          `Using the value "${decl.value}" is not allowed.`,
+          valueRule.explanation
         )
       );
       report(reportInfo);
