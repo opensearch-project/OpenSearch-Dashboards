@@ -178,7 +178,7 @@ describe('CollapsibleNav', () => {
     );
     expectShownNavLinksCount(component, 3);
     clickGroup(component, 'opensearchDashboards');
-    clickGroup(component, 'recentlyViewed');
+    clickGroup(component, 'recentlyVisited');
     expectShownNavLinksCount(component, 1);
     component.setProps({ isNavOpen: false });
     expectNavIsClosed(component);
@@ -208,7 +208,7 @@ describe('CollapsibleNav', () => {
       },
     });
 
-    component.find('[data-test-subj="collapsibleNavGroup-recentlyViewed"] a').simulate('click');
+    component.find('[data-test-subj="collapsibleNavGroup-recentlyVisited"] a').simulate('click');
     expect(onClose.callCount).toEqual(1);
     expectNavIsClosed(component);
     component.setProps({ isNavOpen: true });
