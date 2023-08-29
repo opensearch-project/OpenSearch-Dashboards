@@ -54,7 +54,8 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       type: 'select',
       options: ['v7', 'Next (preview)'],
       description: i18n.translate('core.ui_settings.params.themeVersionText', {
-        defaultMessage: `Switch between the theme used for the current and next version of OpenSearch Dashboards, A page refresh is required for the setting to be applied.`,
+        defaultMessage: `<p>Switch between the theme used for the current and next version of OpenSearch Dashboards. A page refresh is required for the setting to be applied.</p><p><a href="{href}">{linkText}</a></p>`,
+        values: { href: 'https://forum.opensearch.org/', linkText: 'Theme feedback' },
       }),
       requiresPageReload: true,
       category: ['appearance'],
