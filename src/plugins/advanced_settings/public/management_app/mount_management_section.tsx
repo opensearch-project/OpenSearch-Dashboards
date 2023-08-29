@@ -34,11 +34,17 @@ import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import { StartServicesAccessor } from 'src/core/public';
+import {
+  AppMountParameters,
+  ChromeBreadcrumb,
+  ScopedHistory,
+  StartServicesAccessor,
+} from 'src/core/public';
 
 import { AdvancedSettings } from './advanced_settings';
-import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
+import { reactRouterNavigate } from '../../../opensearch_dashboards_react/public';
+import { PageWrapper } from './components/page_wrapper';
 
 import './index.scss';
 
@@ -57,13 +63,21 @@ const readOnlyBadge = {
   iconType: 'glasses',
 };
 
-export async function mountManagementSection(
+export async function mountAdvancedSettingsManagementSection(
   getStartServices: StartServicesAccessor,
-  params: ManagementAppMountParams,
+  params: AppMountParameters,
   componentRegistry: ComponentRegistry['start']
 ) {
-  params.setBreadcrumbs(crumb);
   const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
+  const setBreadcrumbsScoped = (crumbs: ChromeBreadcrumb[] = []) => {
+    const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
+      ...item,
+      ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
+    });
+
+    chrome.setBreadcrumbs([...crumbs.map((item) => wrapBreadcrumb(item, params.history))]);
+  };
+  setBreadcrumbsScoped(crumb);
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
 
@@ -72,21 +86,23 @@ export async function mountManagementSection(
   }
 
   ReactDOM.render(
-    <I18nProvider>
-      <Router history={params.history}>
-        <Switch>
-          <Route path={['/:query', '/']}>
-            <AdvancedSettings
-              enableSaving={canSave}
-              toasts={notifications.toasts}
-              dockLinks={docLinks.links}
-              uiSettings={uiSettings}
-              componentRegistry={componentRegistry}
-            />
-          </Route>
-        </Switch>
-      </Router>
-    </I18nProvider>,
+    <PageWrapper>
+      <I18nProvider>
+        <Router history={params.history}>
+          <Switch>
+            <Route path={['/:query', '/']}>
+              <AdvancedSettings
+                enableSaving={canSave}
+                toasts={notifications.toasts}
+                dockLinks={docLinks.links}
+                uiSettings={uiSettings}
+                componentRegistry={componentRegistry}
+              />
+            </Route>
+          </Switch>
+        </Router>
+      </I18nProvider>
+    </PageWrapper>,
     params.element
   );
   return () => {
