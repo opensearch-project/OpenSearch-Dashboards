@@ -16,7 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('indexpattern with encoded id', () => {
     before(async () => {
       await opensearchArchiver.loadIfNeeded('index_pattern_with_encoded_id');
-      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'with-encoded-id' });
+      await opensearchDashboardsServer.uiSettings.replace({
+        defaultIndex: 'with-encoded-id',
+        'discover:v2': false,
+      });
       await PageObjects.common.navigateToApp('discover');
     });
 

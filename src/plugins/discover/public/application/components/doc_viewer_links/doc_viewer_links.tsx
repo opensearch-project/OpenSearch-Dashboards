@@ -24,9 +24,9 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
     });
 
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
       {listItems.map((item, index) => (
-        <EuiFlexItem key={index}>
+        <EuiFlexItem key={index} grow={false}>
           <EuiListGroupItem {...item} />
         </EuiFlexItem>
       ))}
