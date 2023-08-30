@@ -43,11 +43,8 @@ describe('shortUrlAssertValid()', () => {
     ['hostname', 'localhost/app/opensearch-dashboards', PATH_ERROR], // according to spec, this is not a valid URL -- you cannot specify a hostname without a protocol
     ['hostname and port', 'local.host:5601/app/opensearch-dashboards', PROTOCOL_ERROR], // parser detects 'local.host' as the protocol
     ['hostname and auth', 'user:pass@localhost.net/app/opensearch-dashboards', PROTOCOL_ERROR], // parser detects 'user' as the protocol
-    ['path traversal', '/app/../../not-opensearch-dashboards', PATH_ERROR], // fails because there are >2 path parts
     ['path traversal', '/../not-opensearch-dashboards', PATH_ERROR], // fails because first path part is not 'app'
-    ['deep path', '/app/opensearch-dashboards/foo', PATH_ERROR], // fails because there are >2 path parts
-    ['deeper path', '/app/opensearch-dashboards/foo/bar', PATH_ERROR], // fails because there are >2 path parts
-    ['base path', '/base/app/opensearch-dashboards', PATH_ERROR], // fails because there are >2 path parts
+    ['base path', '/base/app/opensearch-dashboards', PATH_ERROR], // fails because first path part is not 'app'
     ['path with an extra leading slash', '//foo/app/opensearch-dashboards', HOSTNAME_ERROR], // parser detects 'foo' as the hostname
     ['path with an extra leading slash', '///app/opensearch-dashboards', HOSTNAME_ERROR], // parser detects '' as the hostname
     ['path without app', '/foo/opensearch-dashboards', PATH_ERROR], // fails because first path part is not 'app'
@@ -63,10 +60,13 @@ describe('shortUrlAssertValid()', () => {
   const valid = [
     '/app/opensearch-dashboards',
     '/app/opensearch-dashboards/', // leading and trailing slashes are trimmed
+    '/app/opensearch-dashboards/deeper',
     '/app/monitoring#angular/route',
     '/app/text#document-id',
+    '/app/text/deeper#document-id',
     '/app/some?with=query',
     '/app/some?with=query#and-a-hash',
+    '/app/some/deeper?with=query#and-a-hash',
   ];
 
   valid.forEach((url) => {

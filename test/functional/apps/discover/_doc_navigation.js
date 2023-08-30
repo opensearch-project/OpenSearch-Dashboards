@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
   const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const retry = getService('retry');
 
   describe('doc link in discover', function contextSize() {
@@ -45,6 +46,9 @@ export default function ({ getService, getPageObjects }) {
       await opensearchArchiver.loadIfNeeded('discover');
 
       await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitForDocTableLoadingComplete();

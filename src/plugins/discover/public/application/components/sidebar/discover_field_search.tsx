@@ -31,11 +31,9 @@
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiFacetButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -46,8 +44,13 @@ import {
   EuiFormRow,
   EuiButtonGroup,
   EuiOutsideClickDetector,
+  EuiPanel,
+  EuiFilterButton,
+  EuiFilterGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+
+export const NUM_FILTERS = 3;
 
 export interface State {
   searchable: string;
@@ -105,12 +108,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     type: 'any',
     missing: true,
   });
-
-  if (typeof value !== 'string') {
-    // at initial rendering value is undefined (angular related), this catches the warning
-    // should be removed once all is react
-    return null;
-  }
 
   const filterBtnAriaLabel = isPopoverOpen
     ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
@@ -173,23 +170,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     handleValueChange('missing', missingValue);
   };
 
-  const buttonContent = (
-    <EuiFacetButton
-      aria-label={filterBtnAriaLabel}
-      data-test-subj="toggleFieldFilterButton"
-      className="dscFieldSearch__toggleButton"
-      icon={<EuiIcon type="filter" />}
-      isSelected={activeFiltersCount > 0}
-      quantity={activeFiltersCount}
-      onClick={handleFacetButtonClicked}
-    >
-      <FormattedMessage
-        id="discover.fieldChooser.fieldFilterFacetButtonLabel"
-        defaultMessage="Filter by type"
-      />
-    </EuiFacetButton>
-  );
-
   const select = (
     id: string,
     selectOptions: Array<{ text: ReactNode } & OptionHTMLAttributes<HTMLOptionElement>>,
@@ -236,7 +216,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         legend={legend}
         options={toggleButtons(id)}
         idSelected={`${id}-${values[id]}`}
-        onChange={(optionId) => handleValueChange(id, optionId.replace(`${id}-`, ''))}
+        onChange={(optionId: string) => handleValueChange(id, optionId.replace(`${id}-`, ''))}
         buttonSize="compressed"
         isFullWidth
         data-test-subj={`${id}ButtonGroup`}
@@ -245,7 +225,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   };
 
   const selectionPanel = (
-    <div className="dscFieldSearch__formWrapper">
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
       <EuiForm data-test-subj="filterSelectionPanel">
         <EuiFormRow fullWidth label={aggregatableLabel} display="columnCompressed">
           {buttonGroup('aggregatable', aggregatableLabel)}
@@ -257,26 +237,25 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           {select('type', typeOptions, values.type)}
         </EuiFormRow>
       </EuiForm>
-    </div>
+    </EuiPanel>
   );
 
   return (
-    <React.Fragment>
-      <EuiFlexGroup responsive={false} gutterSize={'s'}>
-        <EuiFlexItem>
+    <EuiFlexGroup responsive={false} gutterSize="xs">
+      <EuiFlexItem>
+        <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
           <EuiFieldSearch
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
-            compressed
             fullWidth
             onChange={(event) => onChange('name', event.currentTarget.value)}
             placeholder={searchPlaceholder}
             value={value}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <div className="dscFieldSearch__filterWrapper">
-        <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
+        </EuiOutsideClickDetector>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
           <EuiPopover
             id="dataPanelTypeFilter"
             panelClassName="euiFilterGroup__popoverPanel"
@@ -287,7 +266,24 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             closePopover={() => {
               setPopoverOpen(false);
             }}
-            button={buttonContent}
+            button={
+              <EuiFilterButton
+                iconType="filter"
+                iconSide="left"
+                hasActiveFilters={activeFiltersCount > 0}
+                aria-label={filterBtnAriaLabel}
+                data-test-subj="toggleFieldFilterButton"
+                numFilters={NUM_FILTERS}
+                onClick={handleFacetButtonClicked}
+                numActiveFilters={activeFiltersCount}
+                isSelected={isPopoverOpen}
+              >
+                <FormattedMessage
+                  id="discover.fieldChooser.fieldFilterFacetButtonLabel"
+                  defaultMessage="Filter by type"
+                />
+              </EuiFilterButton>
+            }
           >
             <EuiPopoverTitle>
               {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
@@ -306,8 +302,8 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               />
             </EuiPopoverFooter>
           </EuiPopover>
-        </EuiOutsideClickDetector>
-      </div>
-    </React.Fragment>
+        </EuiFilterGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
