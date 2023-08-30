@@ -77,6 +77,7 @@ import {
   SavedObjectCountOptions,
   getRelationships,
   getSavedObjectLabel,
+  getWorkspacesWithWritePermission,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   filterQuery,
@@ -94,7 +95,7 @@ import {
   SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
-import { DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectsCopyModal } from './components/copy_modal';
 import { PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../../../../../core/public';
 
@@ -472,6 +473,29 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
   };
 
+  getCopyWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
+    const { notifications, http } = this.props;
+    let result;
+    try {
+      result = await getWorkspacesWithWritePermission(http);
+    } catch (error) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectsTable.copyWorkspaces.dangerNotification',
+          {
+            defaultMessage: 'Unable to get workspaces with write permission',
+          }
+        ),
+        text: error instanceof Error ? error.message : JSON.stringify(error),
+      });
+    }
+    if (result?.success) {
+      return result.result?.workspaces ?? [];
+    } else {
+      return [];
+    }
+  };
+
   onCopy = async (
     savedObjects: SavedObjectWithMetadata[],
     includeReferencesDeep: boolean,
@@ -495,7 +519,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.refreshObjects();
     notifications.toasts.addSuccess({
       title: i18n.translate('savedObjectsManagement.objectsTable.copy.successNotification', {
-        defaultMessage: 'Copy saved objects successly',
+        defaultMessage: 'Copy saved objects successfully',
       }),
     });
   };
@@ -689,8 +713,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     return (
       <SavedObjectsCopyModal
-        seletedSavedObjects={this.state.selectedSavedObjects}
+        selectedSavedObjects={this.state.selectedSavedObjects}
         workspaces={this.props.workspaces}
+        getCopyWorkspaces={this.getCopyWorkspaces}
         onCopy={this.onCopy}
         onClose={this.hideCopyModal}
       />
@@ -1044,6 +1069,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
+            onCopy={() => this.setState({ isShowingCopyModal: true })}
             onActionRefresh={this.refreshObject}
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}

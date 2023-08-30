@@ -128,7 +128,7 @@ export class SavedObjectsPermissionControl {
     permissionModes: SavedObjectsPermissionModes
   ) {
     const principals = this.getPrincipalsFromRequest(request);
-    const queryDSL = ACL.genereateGetPermittedSavedObjectsQueryDSL(permissionModes, principals, [
+    const queryDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(permissionModes, principals, [
       WORKSPACE_TYPE,
     ]);
     const repository = this.getInternalRepository();

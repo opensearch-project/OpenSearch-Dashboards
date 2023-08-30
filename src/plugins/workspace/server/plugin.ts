@@ -34,7 +34,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private client?: IWorkspaceDBImpl;
   private coreStart?: CoreStart;
   private config$: Observable<ConfigSchema>;
-  private enabled$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private enabled$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   private get isEnabled() {
     return this.enabled$.getValue();

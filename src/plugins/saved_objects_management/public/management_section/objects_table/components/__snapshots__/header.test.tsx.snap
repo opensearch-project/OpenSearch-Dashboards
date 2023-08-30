@@ -25,6 +25,21 @@ exports[`Header should render normally 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
+            data-test-subj="copyObjects"
+            disabled={false}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Duplicate All"
+              id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
             data-test-subj="exportAllObjects"
             iconType="exportAction"
             onClick={[Function]}
@@ -53,22 +68,6 @@ exports[`Header should render normally 1`] = `
             <FormattedMessage
               defaultMessage="Import"
               id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="copyObjects"
-            disabled={false}
-            iconType="copy"
-            size="s"
-          >
-            <FormattedMessage
-              defaultMessage="Copy"
-              id="savedObjectsManagement.objectsTable.header.copyButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>

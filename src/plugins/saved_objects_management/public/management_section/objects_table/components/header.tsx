@@ -70,6 +70,19 @@ export const Header = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
+              data-test-subj="copyObjects"
+              onClick={onCopy}
+              disabled={selectedCount === 0}
+            >
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+                defaultMessage="Duplicate All"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
               iconType="exportAction"
               data-test-subj="exportAllObjects"
               onClick={onExportAll}
@@ -93,20 +106,6 @@ export const Header = ({
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.header.importButtonLabel"
                 defaultMessage="Import"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="copy"
-              data-test-subj="copyObjects"
-              onClick={onCopy}
-              disabled={selectedCount === 0}
-            >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.header.copyButtonLabel"
-                defaultMessage="Copy"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
