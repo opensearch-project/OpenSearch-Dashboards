@@ -99,7 +99,7 @@ describe('Overview page rendering', () => {
     expect(queryByText('Dev Tools')).toBeNull();
   });
 
-  it('should overview app not display when it is invalid app', () => {
+  it('should not display overview app when it is invalid app', () => {
     const overviewApps: OverviewApp[] = [
       {
         id: 'invalid_app_id',
