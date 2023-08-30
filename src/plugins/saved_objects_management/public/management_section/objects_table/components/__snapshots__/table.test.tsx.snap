@@ -40,6 +40,11 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             values={Object {}}
           />
         </EuiButton>,
+        <EuiButtonIcon
+          data-test-subj="savedObjectsManagementCopy"
+          iconType="copyClipboard"
+          isDisabled={false}
+        />,
         <EuiPopover
           anchorPosition="downCenter"
           button={
@@ -265,6 +270,11 @@ exports[`Table should render normally 1`] = `
             values={Object {}}
           />
         </EuiButton>,
+        <EuiButtonIcon
+          data-test-subj="savedObjectsManagementCopy"
+          iconType="copyClipboard"
+          isDisabled={false}
+        />,
         <EuiPopover
           anchorPosition="downCenter"
           button={

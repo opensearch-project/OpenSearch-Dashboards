@@ -51,6 +51,7 @@ interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 /**
@@ -265,6 +266,7 @@ export class WorkspaceClient {
    * @property {integer} [options.page=1]
    * @property {integer} [options.per_page=20]
    * @property {array} options.fields
+   * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
    */
   public list = (

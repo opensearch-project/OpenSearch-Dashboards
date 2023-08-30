@@ -106,6 +106,7 @@ export function registerRoutes({
           page: schema.number({ min: 0, defaultValue: 1 }),
           sortField: schema.maybe(schema.string()),
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
+          permissionModes: schema.maybe(schema.arrayOf(workspacePermissionMode)),
         }),
       },
     },

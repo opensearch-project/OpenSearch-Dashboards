@@ -124,7 +124,7 @@ describe('SavedObjectTypeRegistry', () => {
       users: ['user1'],
       groups: ['group1'],
     };
-    const result = ACL.genereateGetPermittedSavedObjectsQueryDSL(['read'], principals, 'workspace');
+    const result = ACL.generateGetPermittedSavedObjectsQueryDSL(['read'], principals, 'workspace');
     expect(result).toEqual({
       query: {
         bool: {

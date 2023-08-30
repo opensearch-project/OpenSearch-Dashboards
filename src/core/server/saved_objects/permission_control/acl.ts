@@ -197,7 +197,7 @@ export class ACL {
   /**
    * generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
    */
-  public static genereateGetPermittedSavedObjectsQueryDSL(
+  public static generateGetPermittedSavedObjectsQueryDSL(
     permissionTypes: string[],
     principals: Principals,
     savedObjectType?: string | string[]
