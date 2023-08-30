@@ -226,7 +226,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add support for Node.js >=14.20.1 <19 ([#4071](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4071))
 - Bundle Node.js 14 as a fallback for operating systems that cannot run Node.js 18 ([#4151](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4151))
 - Enhance grouping for context menus ([#3924](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3924))
-- [Data Explorer] Fix breadcrumb for data explorer ([#4856](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4856))
 
 ### 🐛 Bug Fixes
 
