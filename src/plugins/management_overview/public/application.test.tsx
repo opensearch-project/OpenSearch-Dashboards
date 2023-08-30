@@ -79,7 +79,7 @@ describe('Overview page rendering', () => {
     expect(queryByText('Dev Tools')).toBeNull();
   });
 
-  it('should overview app not display when nav link status is hidden', () => {
+  it('should not display overview app when nav link status is hidden', () => {
     const overviewApps: OverviewApp[] = [
       {
         id: 'dev_tools',
