@@ -32,6 +32,7 @@ import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { Logos } from 'opensearch-dashboards/public';
 import { SolutionPanel } from './solution_panel';
 import { HomePluginBranding } from '../../../plugin';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
@@ -46,9 +47,16 @@ interface Props {
   solutions: FeatureCatalogueSolution[];
   directories: FeatureCatalogueEntry[];
   branding: HomePluginBranding;
+  logos: Logos;
 }
 
-export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directories, branding }) => {
+export const SolutionsSection: FC<Props> = ({
+  addBasePath,
+  solutions,
+  directories,
+  branding,
+  logos,
+}) => {
   // Separate OpenSearch Dashboards from other solutions
   const opensearchDashboards = solutions.find(({ id }) => id === 'opensearchDashboards');
   const opensearchDashboardsApps = directories
@@ -78,6 +86,7 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
                     solution={solution}
                     addBasePath={addBasePath}
                     branding={branding}
+                    logos={logos}
                   />
                 ))}
               </EuiFlexGroup>
@@ -89,6 +98,7 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions, directorie
               addBasePath={addBasePath}
               apps={opensearchDashboardsApps.length ? opensearchDashboardsApps : undefined}
               branding={branding}
+              logos={logos}
             />
           ) : null}
         </EuiFlexGroup>

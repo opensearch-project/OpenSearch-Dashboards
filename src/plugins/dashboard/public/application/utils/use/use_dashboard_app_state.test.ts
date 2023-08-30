@@ -87,7 +87,7 @@ describe('useDashboardAppAndGlobalState', () => {
     expect(createDashboardGlobalAndAppState).toHaveBeenCalledWith({
       services: mockServices,
       stateDefaults: dashboardAppStateStub,
-      osdUrlStateStorage: undefined,
+      osdUrlStateStorage: mockServices.osdUrlStateStorage,
       savedDashboardInstance,
     });
     expect(mockServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
