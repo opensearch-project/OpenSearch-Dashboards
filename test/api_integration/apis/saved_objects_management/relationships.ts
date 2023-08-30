@@ -94,11 +94,9 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               title: 'saved_objects*',
               icon: 'indexPatternApp',
-              editUrl:
-                '/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl: '/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path:
-                  '/app/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                path: '/app/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
               },
               namespaceType: 'single',
@@ -137,11 +135,9 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'indexPatternApp',
               title: 'saved_objects*',
-              editUrl:
-                '/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl: '/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path:
-                  '/app/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                path: '/app/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
               },
               namespaceType: 'single',

@@ -85,9 +85,9 @@ describe('Relationships', () => {
         meta: {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
-          editUrl: '#/management/opensearch-dashboards/indexPatterns/patterns/1',
+          editUrl: '#/indexPatterns/patterns/1',
           inAppUrl: {
-            path: '/management/opensearch-dashboards/indexPatterns/patterns/1',
+            path: '/indexPatterns/patterns/1',
             uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
           },
         },
@@ -120,10 +120,10 @@ describe('Relationships', () => {
           id: '1',
           relationship: 'child',
           meta: {
-            editUrl: '/management/opensearch-dashboards/indexPatterns/patterns/1',
+            editUrl: '/indexPatterns/patterns/1',
             icon: 'indexPatternApp',
             inAppUrl: {
-              path: '/app/management/opensearch-dashboards/indexPatterns/patterns/1',
+              path: '/app/indexPatterns/patterns/1',
               uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
             },
             title: 'My Index Pattern',

@@ -61,8 +61,7 @@ const readOnlyBadge = {
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
   params: ManagementAppMountParams,
-  getMlCardState: () => MlCardState,
-  withPage: boolean = false
+  getMlCardState: () => MlCardState
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
@@ -110,14 +109,12 @@ export async function mountManagementSection(
       </Switch>
     </Router>
   );
-  let content = router;
-  if (withPage) {
-    content = (
-      <EuiPage restrictWidth="1200px">
-        <EuiPageBody component="main">{router}</EuiPageBody>
-      </EuiPage>
-    );
-  }
+
+  const content = (
+    <EuiPage restrictWidth="1200px">
+      <EuiPageBody component="main">{router}</EuiPageBody>
+    </EuiPage>
+  );
 
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>

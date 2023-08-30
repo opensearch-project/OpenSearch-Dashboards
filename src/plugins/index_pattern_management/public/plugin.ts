@@ -61,9 +61,7 @@ export interface IndexPatternManagementStartDependencies {
   dataSource?: DataSourcePluginStart;
 }
 
-export interface IndexPatternManagementSetup extends IndexPatternManagementServiceSetup {
-  registerLibrarySubApp: () => void;
-}
+export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
 
 export type IndexPatternManagementStart = IndexPatternManagementServiceStart;
 
@@ -95,7 +93,7 @@ export class IndexPatternManagementPlugin
       throw new Error('`opensearchDashboards` management section not found.');
     }
 
-    const newAppPath = `management/opensearch-dashboards/${IPM_APP_ID}`;
+    const newAppPath = IPM_APP_ID;
     const legacyPatternsPath = 'management/opensearch-dashboards/index_patterns';
 
     urlForwarding.forwardApp(
@@ -108,68 +106,45 @@ export class IndexPatternManagementPlugin
       return pathInApp && `/patterns${pathInApp}`;
     });
 
-    opensearchDashboardsSection.registerApp({
+    // register it under Library
+    core.application.register({
       id: IPM_APP_ID,
       title: sectionsHeader,
-      order: 0,
-      mount: async (params) => {
+      order: 8100,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, () =>
+        const [coreStart] = await core.getStartServices();
+
+        const setBreadcrumbsScope = (
+          crumbs: ChromeBreadcrumb[] = [],
+          appHistory?: ScopedHistory
+        ) => {
+          const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
+            ...item,
+            ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
+          });
+
+          coreStart.chrome.setBreadcrumbs([
+            ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || params.history)),
+          ]);
+        };
+
+        const managementParams: ManagementAppMountParams = {
+          element: params.element,
+          history: params.history,
+          setBreadcrumbs: setBreadcrumbsScope,
+          basePath: params.appBasePath,
+        };
+
+        return mountManagementSection(core.getStartServices, managementParams, () =>
           this.indexPatternManagementService.environmentService.getEnvironment().ml()
         );
       },
     });
 
-    const registerLibrarySubApp = () => {
-      // disable it under Dashboards Management
-      opensearchDashboardsSection.getApp(IPM_APP_ID)?.disable();
-      // register it under Library
-      core.application.register({
-        id: IPM_APP_ID,
-        title: sectionsHeader,
-        order: 8100,
-        category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-        mount: async (params: AppMountParameters) => {
-          const { mountManagementSection } = await import('./management_app');
-
-          const [coreStart] = await core.getStartServices();
-
-          const setBreadcrumbsScope = (
-            crumbs: ChromeBreadcrumb[] = [],
-            appHistory?: ScopedHistory
-          ) => {
-            const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
-              ...item,
-              ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
-            });
-
-            coreStart.chrome.setBreadcrumbs([
-              ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || params.history)),
-            ]);
-          };
-
-          const managementParams: ManagementAppMountParams = {
-            element: params.element,
-            history: params.history,
-            setBreadcrumbs: setBreadcrumbsScope,
-            basePath: params.appBasePath,
-          };
-
-          return mountManagementSection(
-            core.getStartServices,
-            managementParams,
-            () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
-            true
-          );
-        },
-      });
-    };
-
-    return {
-      ...this.indexPatternManagementService.setup({ httpClient: core.http }),
-      registerLibrarySubApp,
-    };
+    return this.indexPatternManagementService.setup({ httpClient: core.http });
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
