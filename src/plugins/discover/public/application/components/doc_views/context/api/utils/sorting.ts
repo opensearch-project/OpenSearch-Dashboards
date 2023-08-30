@@ -28,24 +28,36 @@
  * under the License.
  */
 
-import React, { useRef, useEffect } from 'react';
-import { DocViewRenderFn, DocViewRenderProps } from '../../../doc_views/doc_views_types';
+import { IndexPattern } from '../../../../../../opensearch_dashboards_services';
 
-interface Props {
-  render: DocViewRenderFn;
-  renderProps: DocViewRenderProps;
+export enum SortDirection {
+  asc = 'asc',
+  desc = 'desc',
 }
+
 /**
- * Responsible for rendering a tab provided by a render function.
- * The provided `render` function is called with a reference to the
- * component's `HTMLDivElement` as 1st arg and `renderProps` as 2nd arg
+ * The list of field names that are allowed for sorting, but not included in
+ * index pattern fields.
  */
-export function DocViewRenderTab({ render, renderProps }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (ref && ref.current) {
-      return render(ref.current, renderProps);
-    }
-  }, [render, renderProps]);
-  return <div ref={ref} />;
+const META_FIELD_NAMES: string[] = ['_seq_no', '_doc', '_uid'];
+
+/**
+ * Returns a field from the intersection of the set of sortable fields in the
+ * given index pattern and a given set of candidate field names.
+ */
+export function getFirstSortableField(indexPattern: IndexPattern, fieldNames: string[]) {
+  const sortableFields = fieldNames.filter(
+    (fieldName) =>
+      META_FIELD_NAMES.includes(fieldName) ||
+      // @ts-ignore
+      (indexPattern.fields.getByName(fieldName) || { sortable: false }).sortable
+  );
+  return sortableFields[0];
+}
+
+/**
+ * Return the reversed sort direction.
+ */
+export function reverseSortDir(sortDirection: SortDirection) {
+  return sortDirection === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
 }

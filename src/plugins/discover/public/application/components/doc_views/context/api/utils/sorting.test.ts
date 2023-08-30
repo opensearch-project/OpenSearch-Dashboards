@@ -28,24 +28,11 @@
  * under the License.
  */
 
-import React, { useRef, useEffect } from 'react';
-import { DocViewRenderFn, DocViewRenderProps } from '../../../doc_views/doc_views_types';
+import { reverseSortDir, SortDirection } from './sorting';
 
-interface Props {
-  render: DocViewRenderFn;
-  renderProps: DocViewRenderProps;
-}
-/**
- * Responsible for rendering a tab provided by a render function.
- * The provided `render` function is called with a reference to the
- * component's `HTMLDivElement` as 1st arg and `renderProps` as 2nd arg
- */
-export function DocViewRenderTab({ render, renderProps }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (ref && ref.current) {
-      return render(ref.current, renderProps);
-    }
-  }, [render, renderProps]);
-  return <div ref={ref} />;
-}
+describe('function reverseSortDir', function () {
+  test('reverse a given sort direction', function () {
+    expect(reverseSortDir(SortDirection.asc)).toBe(SortDirection.desc);
+    expect(reverseSortDir(SortDirection.desc)).toBe(SortDirection.asc);
+  });
+});
