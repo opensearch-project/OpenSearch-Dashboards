@@ -9,4 +9,5 @@ export const toolbarVisibility = {
     allowReorder: true,
   },
   showStyleSelector: false,
+  showFullScreenSelector: false,
 };

@@ -16,6 +16,7 @@ import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_
 import { DiscoverServices } from '../../../build_services';
 import { usePagination } from '../utils/use_pagination';
 import { SortOrder } from '../../../saved_searches/types';
+import { buildColumns } from '../../utils/columns';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -30,6 +31,7 @@ export interface DataGridTableProps {
   displayTimeColumn: boolean;
   services: DiscoverServices;
   isToolbarVisible?: boolean;
+  isContextView?: boolean;
 }
 
 export const DataGridTable = ({
@@ -44,19 +46,31 @@ export const DataGridTable = ({
   rows,
   displayTimeColumn,
   isToolbarVisible = true,
+  isContextView = false,
 }: DataGridTableProps) => {
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
   const pagination = usePagination(rowCount);
 
+  let adjustedColumns = buildColumns(columns);
+  // handle case where the user removes selected filed and leaves only time column
+  if (
+    adjustedColumns.length === 1 &&
+    indexPattern &&
+    adjustedColumns[0] === indexPattern.timeFieldName
+  ) {
+    adjustedColumns = [...adjustedColumns, '_source'];
+  }
+
+  const includeSourceInColumns = adjustedColumns.includes('_source');
   const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
   const rowHeightsOptions = useMemo(
     () => ({
       defaultHeight: {
-        lineCount: columns.includes('_source') ? 3 : 1,
+        lineCount: adjustedColumns.includes('_source') ? 3 : 1,
       },
     }),
-    [columns]
+    [adjustedColumns]
   );
 
   const onColumnSort = useCallback(
@@ -72,18 +86,29 @@ export const DataGridTable = ({
   ]);
 
   const dataGridTableColumns = useMemo(
-    () => buildDataGridColumns(columns, indexPattern, displayTimeColumn),
-    [columns, indexPattern, displayTimeColumn]
+    () =>
+      buildDataGridColumns(
+        adjustedColumns,
+        indexPattern,
+        displayTimeColumn,
+        includeSourceInColumns,
+        isContextView
+      ),
+    [adjustedColumns, indexPattern, displayTimeColumn, includeSourceInColumns, isContextView]
   );
 
   const dataGridTableColumnsVisibility = useMemo(
     () => ({
-      visibleColumns: computeVisibleColumns(columns, indexPattern, displayTimeColumn) as string[],
+      visibleColumns: computeVisibleColumns(
+        adjustedColumns,
+        indexPattern,
+        displayTimeColumn
+      ) as string[],
       setVisibleColumns: (cols: string[]) => {
         onSetColumns(cols);
       },
     }),
-    [columns, indexPattern, displayTimeColumn, onSetColumns]
+    [adjustedColumns, indexPattern, displayTimeColumn, onSetColumns]
   );
 
   const sorting: EuiDataGridSorting = useMemo(
@@ -151,7 +176,7 @@ export const DataGridTable = ({
           <DataGridFlyout
             indexPattern={indexPattern}
             hit={inspectedHit}
-            columns={columns}
+            columns={adjustedColumns}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
             onFilter={onFilter}
