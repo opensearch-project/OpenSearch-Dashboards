@@ -279,7 +279,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Temporarily hardcode chromedriver to 112.0.0 to enable all ftr tests ([#4039](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4039))
 - Update MAINTAINERS.md and CODEOWNERS ([#3938](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3938))
 - Add opensearch-dashboards-docker-dev to .gitignore ([#3781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3781))
-- [Data Explorer] Add dismissible callout for discover ([#4857](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4857))
 
 ### 🪛 Refactoring
 
