@@ -11,33 +11,52 @@ import { getCellActions } from './data_grid_table_cell_actions';
 export function buildDataGridColumns(
   columnNames: string[],
   idxPattern: IndexPattern,
-  displayTimeColumn: boolean
+  displayTimeColumn: boolean,
+  includeSourceInColumns: boolean,
+  isContextView: boolean
 ) {
   const timeFieldName = idxPattern.timeFieldName;
   let columnsToUse = columnNames;
 
-  if (displayTimeColumn && idxPattern.timeFieldName && !columnNames.includes(timeFieldName)) {
-    columnsToUse = [idxPattern.timeFieldName, ...columnNames];
+  if (displayTimeColumn && timeFieldName && !columnNames.includes(timeFieldName)) {
+    columnsToUse = [timeFieldName, ...columnNames];
   }
 
-  return columnsToUse.map((colName) => generateDataGridTableColumn(colName, idxPattern));
+  return columnsToUse.map((colName) =>
+    generateDataGridTableColumn(colName, idxPattern, includeSourceInColumns, isContextView)
+  );
 }
 
-export function generateDataGridTableColumn(colName: string, idxPattern: IndexPattern) {
+export function generateDataGridTableColumn(
+  colName: string,
+  idxPattern: IndexPattern,
+  includeSourceInColumns: boolean,
+  isContextView: boolean
+) {
   const timeLabel = i18n.translate('discover.timeLabel', {
     defaultMessage: 'Time',
   });
   const idxPatternField = idxPattern.getFieldByName(colName);
+  const shouldHide = colName === '_source' || colName === idxPattern.timeFieldName;
   const dataGridCol: EuiDataGridColumn = {
     id: colName,
     schema: idxPatternField?.type,
     isSortable: idxPatternField?.sortable,
     display: idxPatternField?.displayName,
-    actions: {
-      showHide: true,
-      showMoveLeft: false,
-      showMoveRight: false,
-    },
+    actions: isContextView
+      ? false
+      : {
+          showHide: shouldHide
+            ? false
+            : {
+                label: i18n.translate('discover.removeColumn.label', {
+                  defaultMessage: 'Remove column',
+                }),
+                iconType: 'cross',
+              },
+          showMoveLeft: !includeSourceInColumns,
+          showMoveRight: !includeSourceInColumns,
+        },
     cellActions: idxPatternField ? getCellActions(idxPatternField) : [],
   };
 

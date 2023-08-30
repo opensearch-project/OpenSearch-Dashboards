@@ -39,8 +39,7 @@ export const DiscoverTable = ({ history }: Props) => {
   const dispatch = useDispatch();
   const onAddColumn = (col: string) => dispatch(addColumn({ column: col }));
   const onRemoveColumn = (col: string) => dispatch(removeColumn(col));
-  const onSetColumns = (cols: string[]) =>
-    dispatch(setColumns({ timefield: indexPattern.timeFieldName, columns: cols }));
+  const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
     dispatch(setSort(s));
     refetch$.next();

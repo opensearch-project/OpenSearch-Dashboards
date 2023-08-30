@@ -103,6 +103,7 @@ export function ContextApp({
           displayTimeColumn={true}
           services={services}
           isToolbarVisible={false}
+          isContextView={true}
         />
       </div>
       <ActionBar
