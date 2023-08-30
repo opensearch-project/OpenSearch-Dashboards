@@ -29,7 +29,7 @@ interface Props {
 export const DiscoverTable = ({ history }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { filterManager } = services.data.query;
-  const { data$, indexPattern } = useDiscoverContext();
+  const { data$, refetch$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>({
     status: data$.getValue().status,
     rows: [],
@@ -41,7 +41,10 @@ export const DiscoverTable = ({ history }: Props) => {
   const onRemoveColumn = (col: string) => dispatch(removeColumn(col));
   const onSetColumns = (cols: string[]) =>
     dispatch(setColumns({ timefield: indexPattern.timeFieldName, columns: cols }));
-  const onSetSort = (s: SortOrder[]) => dispatch(setSort(s));
+  const onSetSort = (s: SortOrder[]) => {
+    dispatch(setSort(s));
+    refetch$.next();
+  };
   const onAddFilter = useCallback(
     (field: IndexPatternField, values: string, operation: '+' | '-') => {
       const newFilters = opensearchFilters.generateFilters(
