@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiCallOut, EuiLink } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -38,7 +38,15 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
           iconType="alert"
           dismissible
           onDismissible={closeCallOut}
-        />
+        >
+          <p>
+            To provide feedback,{' '}
+            <EuiLink href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues">
+              open an issue
+            </EuiLink>
+            .
+          </p>
+        </EuiCallOut>
       </EuiFlexItem>
     );
   }

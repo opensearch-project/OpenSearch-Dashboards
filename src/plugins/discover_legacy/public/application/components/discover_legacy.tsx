@@ -30,7 +30,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
-import { EuiButtonEmpty, EuiButtonIcon, EuiCallOut } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'opensearch-dashboards/public';
@@ -154,7 +154,15 @@ export function DiscoverLegacy({
           iconType="alert"
           dismissible
           onDismissible={closeCallOut}
-        />
+        >
+          <p>
+            To provide feedback,{' '}
+            <EuiLink href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues">
+              open an issue
+            </EuiLink>
+            .
+          </p>
+        </EuiCallOut>
       </div>
     );
   }
