@@ -136,6 +136,12 @@ export const discoverSlice = createSlice({
         sort: action.payload,
       };
     },
+    setInterval(state, action: PayloadAction<string>) {
+      return {
+        ...state,
+        interval: action.payload,
+      };
+    },
     updateState(state, action: PayloadAction<Partial<DiscoverState>>) {
       return {
         ...state,
@@ -159,6 +165,7 @@ export const {
   reorderColumn,
   setColumns,
   setSort,
+  setInterval,
   setState,
   updateState,
   setSavedSearchId,
