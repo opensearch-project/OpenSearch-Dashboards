@@ -43,15 +43,11 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/opensearch-dashboards/indexPatterns/patterns/${encodeURIComponent(
-        obj.id
-      )}`;
+      return `/indexPatterns/patterns/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/management/opensearch-dashboards/indexPatterns/patterns/${encodeURIComponent(
-          obj.id
-        )}`,
+        path: `/app/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
       };
     },

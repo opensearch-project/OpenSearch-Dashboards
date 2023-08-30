@@ -30,14 +30,12 @@ import { SavedObjectsManagementPluginSetup } from '../../saved_objects_managemen
 import { getWorkspaceColumn } from './components/utils/workspace_column';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { WorkspaceClient } from './workspace_client';
-import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
 import { renderWorkspaceMenu } from './render_workspace_menu';
 import { Services } from './types';
 import { featureMatchesConfig } from './utils';
 
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
-  indexPatternManagement?: IndexPatternManagementSetup;
 }
 
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
@@ -46,10 +44,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
-  public async setup(
-    core: CoreSetup,
-    { savedObjectsManagement, indexPatternManagement }: WorkspacePluginSetupDeps
-  ) {
+  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     workspaceClient.init();
     const featureFlagResp = await workspaceClient.getSettings();
@@ -110,7 +105,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     // register apps for library object management
     savedObjectsManagement?.registerLibrarySubApp();
-    indexPatternManagement?.registerLibrarySubApp();
 
     type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
