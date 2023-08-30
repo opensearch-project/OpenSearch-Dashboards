@@ -22,6 +22,10 @@ interface ManagementOverviewSetupDeps {
 export interface ManagementOverViewPluginSetup {
   register: (overviewApp: OverviewApp) => void;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ManagementOverViewPluginStart {}
+
 /** @public */
 export class ManagementOverViewPlugin implements Plugin<ManagementOverViewPluginSetup, void> {
   private readonly overviewApps = new Map<string, OverviewApp>();

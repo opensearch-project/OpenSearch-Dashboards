@@ -6,6 +6,6 @@
 import { ManagementOverViewPlugin } from './plugin';
 
 export { OverviewApp } from './overview_app';
-export { ManagementOverViewPluginSetup } from './plugin';
+export { ManagementOverViewPluginSetup, ManagementOverViewPluginStart } from './plugin';
 
 export const plugin = () => new ManagementOverViewPlugin();
