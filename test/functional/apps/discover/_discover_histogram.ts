@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'long-window-logstash-*',
     'dateFormat:tz': 'Europe/Berlin',
+    'discover:v2': false,
   };
 
   describe('discover histogram', function describeIndexTests() {
