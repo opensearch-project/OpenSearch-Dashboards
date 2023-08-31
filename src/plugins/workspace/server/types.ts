@@ -11,6 +11,7 @@ import {
   WorkspacePermissionMode,
   Permissions,
   WorkspaceAttribute,
+  ISavedObjectsRepository,
 } from '../../../core/server';
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
@@ -35,6 +36,7 @@ export interface IRequestDetail {
 
 export interface IWorkspaceDBImpl {
   setup(dep: CoreSetup): Promise<IResponse<boolean>>;
+  setInternalRepository(repository: ISavedObjectsRepository): void;
   create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'>
