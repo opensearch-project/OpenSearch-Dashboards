@@ -102,11 +102,7 @@ export const getTopNavLinks = (
             });
 
             if (id !== state.savedSearch) {
-              setTimeout(() => {
-                history().push(`/view/${encodeURIComponent(id)}`);
-                // TODO: figure out why a history push doesn't update the app state. The page reload is a hack around it
-                window.location.reload();
-              }, 0);
+              history().push(`/view/${encodeURIComponent(id)}`);
             } else {
               chrome.docTitle.change(savedSearch.lastSavedTitle);
               chrome.setBreadcrumbs([
@@ -122,6 +118,8 @@ export const getTopNavLinks = (
 
             // set App state to clean
             store!.dispatch({ type: setSavedSearchId.type, payload: id });
+
+            return { id };
           }
         } catch (error) {
           toastNotifications.addDanger({
@@ -136,9 +134,9 @@ export const getTopNavLinks = (
 
           // Reset the original title
           savedSearch.title = currentTitle;
-        }
 
-        return { test: true };
+          return { error };
+        }
       };
 
       const saveModal = (
