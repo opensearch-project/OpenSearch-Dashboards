@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './_histogram.scss';
+
 import React, { useCallback } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
