@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'discover:v2': false,
   };
 
   describe('discover doc table', function describeIndexTests() {

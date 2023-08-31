@@ -28,18 +28,16 @@
  * under the License.
  */
 
+import { SavedObject } from '../../../saved_objects/public';
 import { ISearchSource } from '../../../data/public';
 
-export type SortOrder = [string, string];
-export interface SavedSearch {
-  readonly id: string;
-  title: string;
-  searchSource: ISearchSource;
+export type SortOrder = [string, 'asc' | 'desc'];
+export interface SavedSearch
+  extends Pick<SavedObject, 'id' | 'title' | 'copyOnSave' | 'destroy' | 'lastSavedTitle' | 'save'> {
+  searchSource: ISearchSource; // This is optional in SavedObject, but required for SavedSearch
   description?: string;
   columns: string[];
   sort: SortOrder[];
-  destroy: () => void;
-  lastSavedTitle?: string;
 }
 export interface SavedSearchLoader {
   get: (id: string) => Promise<SavedSearch>;
