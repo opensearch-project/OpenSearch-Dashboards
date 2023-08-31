@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import React, { useEffect, useState } from 'react';
 import { AppMountParameters } from '../../../../../../core/public';
 import { NEW_DISCOVER_APP, PLUGIN_ID } from '../../../../common';
@@ -12,6 +11,7 @@ import { DiscoverViewServices } from '../../../build_services';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDiscoverContext } from '../context';
+import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 
 export interface TopNavProps {
   opts: {
@@ -30,7 +30,7 @@ export const TopNav = ({ opts }: TopNavProps) => {
       ui: { TopNavMenu },
     },
     core: {
-      application: { navigateToApp },
+      application: { navigateToApp, getUrlForApp },
     },
     data,
     chrome,
@@ -74,25 +74,13 @@ export const TopNav = ({ opts }: TopNavProps) => {
 
     if (savedSearch?.id) {
       chrome.setBreadcrumbs([
-        {
-          text: i18n.translate('discover.discoverBreadcrumbTitle', {
-            defaultMessage: 'Discover',
-          }),
-          href: '#/',
-        },
+        ...getRootBreadcrumbs(getUrlForApp(PLUGIN_ID)),
         { text: savedSearch.title },
       ]);
     } else {
-      chrome.setBreadcrumbs([
-        {
-          text: i18n.translate('discover.discoverBreadcrumbTitle', {
-            defaultMessage: 'Discover',
-          }),
-          href: '#/',
-        },
-      ]);
+      chrome.setBreadcrumbs([...getRootBreadcrumbs(getUrlForApp(PLUGIN_ID))]);
     }
-  }, [chrome, savedSearch?.id, savedSearch?.title]);
+  }, [chrome, getUrlForApp, savedSearch?.id, savedSearch?.title]);
 
   return (
     <TopNavMenu
