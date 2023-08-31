@@ -55,7 +55,10 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       options: ['v7', 'Next (preview)'],
       description: i18n.translate('core.ui_settings.params.themeVersionText', {
         defaultMessage: `<p>Switch between the theme used for the current and next version of OpenSearch Dashboards. A page refresh is required for the setting to be applied.</p><p><a href="{href}">{linkText}</a></p>`,
-        values: { href: 'https://forum.opensearch.org/', linkText: 'Theme feedback' },
+        values: {
+          href: 'https://forum.opensearch.org/t/feedback-on-dark-mode-experience/15725',
+          linkText: 'Theme feedback',
+        },
       }),
       requiresPageReload: true,
       category: ['appearance'],
