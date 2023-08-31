@@ -60,6 +60,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [@osd/pm] Automate multi-target bootstrap and build ([#4650](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4650))
 - Update webpack environment targets ([#4649](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4649))
 - Add @curq as maintainer ([#4760](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4760))
+- Add ReactFlow as a dependency ([#4882](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4882))
 
 ### 🪛 Refactoring
 
