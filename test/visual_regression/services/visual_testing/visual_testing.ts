@@ -29,7 +29,7 @@
  */
 
 import { postSnapshot } from '@percy/sdk-utils';
-import { Test } from 'mocha';
+import { Test } from 'mocha-next';
 
 import { testSubjSelector } from '@osd/test-subj-selector';
 

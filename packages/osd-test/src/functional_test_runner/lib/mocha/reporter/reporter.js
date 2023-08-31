@@ -30,7 +30,7 @@
 
 import { format } from 'util';
 
-import Mocha from 'mocha';
+import Mocha from 'mocha-next';
 import { ToolingLogTextWriter } from '@osd/dev-utils';
 import moment from 'moment';
 

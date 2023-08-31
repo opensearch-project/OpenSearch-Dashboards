@@ -40,7 +40,7 @@ module.exports = {
       files: ['**/*.js'],
       parser: require.resolve('babel-eslint'),
 
-      plugins: ['mocha', 'babel', 'import', 'no-unsanitized', 'prefer-object-spread'],
+      plugins: ['mocha-next', 'babel', 'import', 'no-unsanitized', 'prefer-object-spread'],
 
       settings: {
         'import/resolver': {
@@ -111,8 +111,8 @@ module.exports = {
         'valid-typeof': 'error',
         yoda: 'off',
 
-        'mocha/handle-done-callback': 'error',
-        'mocha/no-exclusive-tests': 'error',
+        'mocha-next/handle-done-callback': 'error',
+        'mocha-next/no-exclusive-tests': 'error',
 
         'import/no-unresolved': ['error', { amd: true, commonjs: true }],
         'import/named': 'error',
