@@ -36,11 +36,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
   const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('OpenSearch Dashboards browser back navigation should work', function describeIndexTests() {
     before(async () => {
       await opensearchArchiver.loadIfNeeded('discover');
       await opensearchArchiver.loadIfNeeded('logstash_functional');
+
+      await opensearchDashboardsServer.uiSettings.replace({ 'discover:v2': false });
     });
 
     it('detect navigate back issues', async () => {

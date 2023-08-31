@@ -49,10 +49,10 @@ export function simpleOpenSearchDashboardsPlatformPluginDiscovery(
         (acc: string[], dir) => [
           ...acc,
           resolve(dir, '*/opensearch_dashboards.json'),
-          resolve(dir, '*/*/opensearch_dashboards.json'),
-          resolve(dir, '*/*/*/opensearch_dashboards.json'),
-          resolve(dir, '*/*/*/*/opensearch_dashboards.json'),
-          resolve(dir, '*/*/*/*/*/opensearch_dashboards.json'),
+          resolve(dir, '*/!(build)/opensearch_dashboards.json'),
+          resolve(dir, '*/!(build)/*/opensearch_dashboards.json'),
+          resolve(dir, '*/!(build)/*/*/opensearch_dashboards.json'),
+          resolve(dir, '*/!(build)/*/*/*/opensearch_dashboards.json'),
         ],
         []
       ),
