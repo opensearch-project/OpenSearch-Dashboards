@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AppMountParameters } from '../../../../../../core/public';
 import { NEW_DISCOVER_APP, PLUGIN_ID } from '../../../../common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -21,7 +21,7 @@ export interface TopNavProps {
 
 export const TopNav = ({ opts }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { inspectorAdapters, savedSearch } = useDiscoverContext();
+  const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
 
   const {
@@ -54,11 +54,11 @@ export const TopNav = ({ opts }: TopNavProps) => {
     let isMounted = true;
     const getDefaultIndexPattern = async () => {
       await data.indexPatterns.ensureDefaultIndexPattern();
-      const indexPattern = await data.indexPatterns.getDefault();
+      const defaultIndexPattern = await data.indexPatterns.getDefault();
 
       if (!isMounted) return;
 
-      setIndexPatterns(indexPattern ? [indexPattern] : undefined);
+      setIndexPatterns(defaultIndexPattern ? [defaultIndexPattern] : undefined);
     };
 
     getDefaultIndexPattern();
@@ -82,11 +82,16 @@ export const TopNav = ({ opts }: TopNavProps) => {
     }
   }, [chrome, getUrlForApp, savedSearch?.id, savedSearch?.title]);
 
+  const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
+    indexPattern,
+  ]);
+
   return (
     <TopNavMenu
       appName={PLUGIN_ID}
       config={topNavLinks}
       showSearchBar
+      showDatePicker={showDatePicker}
       showSaveQuery
       useDefaultBehaviors
       setMenuMountPoint={opts.setHeaderActionMenu}
