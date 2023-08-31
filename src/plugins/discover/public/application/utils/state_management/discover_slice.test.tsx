@@ -58,7 +58,7 @@ describe('discoverSlice', () => {
   it('should handle setColumns', () => {
     const action = {
       type: 'discover/setColumns',
-      payload: { timeField: 'timeField', columns: ['timeField', 'column1', 'column2'] },
+      payload: { columns: ['column1', 'column2'] },
     };
     const result = discoverSlice.reducer(initialState, action);
     expect(result.columns).toEqual(['column1', 'column2']);
