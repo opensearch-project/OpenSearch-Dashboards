@@ -147,6 +147,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       throw new Error('UI setting client can not be found');
     }
     const internalRepository = this.coreStart.savedObjects.createInternalRepository();
+    this.client?.setInternalRepository(internalRepository);
     const publicWorkspaceACL = new ACL().addPermission(
       [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
       {
