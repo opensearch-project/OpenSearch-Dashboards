@@ -123,17 +123,22 @@ export const discoverSlice = createSlice({
         isDirty: true,
       };
     },
-    setColumns(state, action: PayloadAction<{ timeField: string | undefined; columns: string[] }>) {
-      const columns = utils.setColumns(action.payload.timeField, action.payload.columns);
+    setColumns(state, action: PayloadAction<{ columns: string[] }>) {
       return {
         ...state,
-        columns,
+        columns: action.payload.columns,
       };
     },
     setSort(state, action: PayloadAction<SortOrder[]>) {
       return {
         ...state,
         sort: action.payload,
+      };
+    },
+    setInterval(state, action: PayloadAction<string>) {
+      return {
+        ...state,
+        interval: action.payload,
       };
     },
     updateState(state, action: PayloadAction<Partial<DiscoverState>>) {
@@ -159,6 +164,7 @@ export const {
   reorderColumn,
   setColumns,
   setSort,
+  setInterval,
   setState,
   updateState,
   setSavedSearchId,

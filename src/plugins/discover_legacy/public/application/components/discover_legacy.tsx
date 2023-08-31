@@ -30,7 +30,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'opensearch-dashboards/public';
@@ -132,6 +132,7 @@ export function DiscoverLegacy({
   vis,
 }: DiscoverLegacyProps) {
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
+  const [isCallOutVisible, setIsCallOutVisible] = useState(true);
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, indexPatternList } = opts;
   const bucketAggConfig = vis?.data?.aggs?.aggs[1];
@@ -140,6 +141,31 @@ export function DiscoverLegacy({
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
   const [fixedScrollEl, setFixedScrollEl] = useState<HTMLElement | undefined>();
+
+  const closeCallOut = () => setIsCallOutVisible(false);
+
+  let callOut;
+
+  if (isCallOutVisible) {
+    callOut = (
+      <div>
+        <EuiCallOut
+          title="This Discover app version will be retired in OpenSearch version 2.11. To switch to the new Discover 2.0 version, toggle the New Discover."
+          iconType="alert"
+          dismissible
+          onDismissible={closeCallOut}
+        >
+          <p>
+            To provide feedback,{' '}
+            <EuiLink href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues">
+              open an issue
+            </EuiLink>
+            .
+          </p>
+        </EuiCallOut>
+      </div>
+    );
+  }
 
   useEffect(() => (fixedScrollEl ? opts.fixedScroll(fixedScrollEl) : undefined), [
     fixedScrollEl,
@@ -218,6 +244,7 @@ export function DiscoverLegacy({
               />
             </div>
             <div className={`dscWrapper ${mainSectionClassName}`}>
+              {callOut}
               {resultState === 'none' && (
                 <DiscoverNoResults
                   timeFieldName={opts.timefield}

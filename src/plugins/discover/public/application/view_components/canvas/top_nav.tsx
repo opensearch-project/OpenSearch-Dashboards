@@ -11,6 +11,7 @@ import { DiscoverViewServices } from '../../../build_services';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDiscoverContext } from '../context';
+import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 
 export interface TopNavProps {
   opts: {
@@ -29,9 +30,10 @@ export const TopNav = ({ opts }: TopNavProps) => {
       ui: { TopNavMenu },
     },
     core: {
-      application: { navigateToApp },
+      application: { navigateToApp, getUrlForApp },
     },
     data,
+    chrome,
   } = services;
 
   const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
@@ -65,6 +67,20 @@ export const TopNav = ({ opts }: TopNavProps) => {
       isMounted = false;
     };
   }, [data.indexPatterns]);
+
+  useEffect(() => {
+    const pageTitleSuffix = savedSearch?.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
+
+    if (savedSearch?.id) {
+      chrome.setBreadcrumbs([
+        ...getRootBreadcrumbs(getUrlForApp(PLUGIN_ID)),
+        { text: savedSearch.title },
+      ]);
+    } else {
+      chrome.setBreadcrumbs([...getRootBreadcrumbs(getUrlForApp(PLUGIN_ID))]);
+    }
+  }, [chrome, getUrlForApp, savedSearch?.id, savedSearch?.title]);
 
   return (
     <TopNavMenu

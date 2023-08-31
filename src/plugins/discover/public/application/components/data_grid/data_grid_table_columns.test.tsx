@@ -57,9 +57,12 @@ describe('Testing buildDataGridColumns function ', () => {
       Array [
         Object {
           "actions": Object {
-            "showHide": true,
-            "showMoveLeft": false,
-            "showMoveRight": false,
+            "showHide": Object {
+              "iconType": "cross",
+              "label": "Remove column",
+            },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": undefined,
@@ -69,9 +72,12 @@ describe('Testing buildDataGridColumns function ', () => {
         },
         Object {
           "actions": Object {
-            "showHide": true,
-            "showMoveLeft": false,
-            "showMoveRight": false,
+            "showHide": Object {
+              "iconType": "cross",
+              "label": "Remove column",
+            },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": undefined,
@@ -98,9 +104,9 @@ describe('Testing buildDataGridColumns function ', () => {
       Array [
         Object {
           "actions": Object {
-            "showHide": true,
-            "showMoveLeft": false,
-            "showMoveRight": false,
+            "showHide": false,
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": "Time (order_date)",
@@ -111,9 +117,12 @@ describe('Testing buildDataGridColumns function ', () => {
         },
         Object {
           "actions": Object {
-            "showHide": true,
-            "showMoveLeft": false,
-            "showMoveRight": false,
+            "showHide": Object {
+              "iconType": "cross",
+              "label": "Remove column",
+            },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": undefined,
@@ -123,9 +132,12 @@ describe('Testing buildDataGridColumns function ', () => {
         },
         Object {
           "actions": Object {
-            "showHide": true,
-            "showMoveLeft": false,
-            "showMoveRight": false,
+            "showHide": Object {
+              "iconType": "cross",
+              "label": "Remove column",
+            },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": undefined,
@@ -135,9 +147,9 @@ describe('Testing buildDataGridColumns function ', () => {
         },
         Object {
           "actions": Object {
-            "showHide": true,
-            "showMoveLeft": false,
-            "showMoveRight": false,
+            "showHide": false,
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": "Source",
@@ -162,9 +174,12 @@ describe('Testing buildDataGridColumns function ', () => {
       Array [
         Object {
           "actions": Object {
-            "showHide": true,
-            "showMoveLeft": false,
-            "showMoveRight": false,
+            "showHide": Object {
+              "iconType": "cross",
+              "label": "Remove column",
+            },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": undefined,
@@ -174,9 +189,12 @@ describe('Testing buildDataGridColumns function ', () => {
         },
         Object {
           "actions": Object {
-            "showHide": true,
-            "showMoveLeft": false,
-            "showMoveRight": false,
+            "showHide": Object {
+              "iconType": "cross",
+              "label": "Remove column",
+            },
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": undefined,
@@ -186,9 +204,9 @@ describe('Testing buildDataGridColumns function ', () => {
         },
         Object {
           "actions": Object {
-            "showHide": true,
-            "showMoveLeft": false,
-            "showMoveRight": false,
+            "showHide": false,
+            "showMoveLeft": true,
+            "showMoveRight": true,
           },
           "cellActions": undefined,
           "display": "Time (order_date)",

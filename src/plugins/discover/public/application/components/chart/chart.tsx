@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './_histogram.scss';
+
 import React, { useCallback } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -15,6 +17,8 @@ import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_head
 import { DiscoverHistogram } from './histogram/histogram';
 import { DiscoverServices } from '../../../build_services';
 import { Chart } from './utils';
+import { useDiscoverContext } from '../../view_components/context';
+import { setInterval, useDispatch, useSelector } from '../../utils/state_management';
 
 interface DiscoverChartProps {
   bucketInterval: TimechartHeaderBucketInterval;
@@ -39,14 +43,18 @@ export const DiscoverChart = ({
   services,
   showResetButton = false,
 }: DiscoverChartProps) => {
+  const { refetch$ } = useDiscoverContext();
   const { from, to } = data.query.timefilter.timefilter.getTime();
   const timeRange = {
     from: dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
     to: dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
   };
-
-  const onChangeInterval = () => {};
-
+  const { interval } = useSelector((state) => state.discover);
+  const dispatch = useDispatch();
+  const onChangeInterval = (newInterval: string) => {
+    dispatch(setInterval(newInterval));
+    refetch$.next();
+  };
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
       data.query.timefilter.timefilter.setTime({
@@ -75,7 +83,7 @@ export const DiscoverChart = ({
             timeRange={timeRange}
             options={search.aggs.intervalOptions}
             onChangeInterval={onChangeInterval}
-            stateInterval={'auto'}
+            stateInterval={interval || ''}
           />
         </EuiFlexItem>
       )}
