@@ -22,8 +22,13 @@ interface ManagementOverviewSetupDeps {
 export interface ManagementOverViewPluginSetup {
   register: (overviewApp: OverviewApp) => void;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ManagementOverViewPluginStart {}
+
 /** @public */
-export class ManagementOverViewPlugin implements Plugin<ManagementOverViewPluginSetup, void> {
+export class ManagementOverViewPlugin
+  implements Plugin<ManagementOverViewPluginSetup, ManagementOverViewPluginStart> {
   private readonly overviewApps = new Map<string, OverviewApp>();
 
   private getSortedOverviewApps(): OverviewApp[] {
@@ -82,5 +87,7 @@ export class ManagementOverViewPlugin implements Plugin<ManagementOverViewPlugin
     };
   }
 
-  public start(core: CoreStart): void {}
+  public start(core: CoreStart): ManagementOverViewPluginStart {
+    return {};
+  }
 }
