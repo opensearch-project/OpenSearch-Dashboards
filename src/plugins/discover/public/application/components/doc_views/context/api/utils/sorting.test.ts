@@ -28,4 +28,11 @@
  * under the License.
  */
 
-export { SkipBottomButton } from './skip_bottom_button';
+import { reverseSortDir, SortDirection } from './sorting';
+
+describe('function reverseSortDir', function () {
+  test('reverse a given sort direction', function () {
+    expect(reverseSortDir(SortDirection.asc)).toBe(SortDirection.desc);
+    expect(reverseSortDir(SortDirection.desc)).toBe(SortDirection.asc);
+  });
+});

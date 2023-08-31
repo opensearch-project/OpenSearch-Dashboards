@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { addColumn, removeColumn, reorderColumn, setColumns } from './common';
+import { addColumn, removeColumn, reorderColumn } from './common';
 
 describe('commonUtils', () => {
   it('should handle addColumn', () => {
@@ -21,13 +21,5 @@ describe('commonUtils', () => {
       'column3',
       'column1',
     ]);
-  });
-
-  it('should handle setColumns', () => {
-    expect(setColumns('timeField', ['timeField', 'column1', 'column2'])).toEqual([
-      'column1',
-      'column2',
-    ]);
-    expect(setColumns(undefined, ['column1', 'column2'])).toEqual(['column1', 'column2']);
   });
 });
