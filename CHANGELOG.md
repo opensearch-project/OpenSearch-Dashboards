@@ -27,9 +27,11 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Saved Object Service] Customize saved objects service status ([#4696](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4696))
 - Remove minimum constraint on opensearch hosts to allow empty host ([#4701](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4701))
 - [Discover] Update styles to compatible with OUI `next` theme ([#4644](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4644))
+- [Home] Add modal to introduce the `next` theme ([#4715](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4715))
 - Remove visualization editor sidebar background ([#4719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4719))
 - [Vis Colors] Remove customized colors from sample visualizations and dashboards ([#4741](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4741))
 - [Decouple] Allow plugin manifest config to define semver compatible OpenSearch plugin and verify if it is installed on the cluster([#4612](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4612))
+- Adds Data explorer framework and implements Discover using it ([#4806](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4806))
 
 ### 🐛 Bug Fixes
 
@@ -38,6 +40,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fix Node.js download link ([#4556](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4556))
 - [TSVB, Dashboards] Fix inconsistent dark mode code editor themes ([#4609](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4609))
 - [Legacy Maps] Fix dark mode style overrides ([#4658](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4658))
+- [BUG] Fix management overview page duplicate rendering ([#4636](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4636))
 
 ### 🚞 Infrastructure
 
@@ -53,6 +56,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛠 Maintenance
 
+- Remove angular html extractor ([#4680](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4680))
 - Removes `minimatch` manual resolution ([#3019](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3019))
 - Upgrade `vega-lite` dependency from `4.17.0` to `^5.6.0` ([#3076](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3076)). Backwards-compatible version included in v2.5.0 release.
 - Bump `js-yaml` from `3.14.0` to `4.1.0` ([#3770](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3770))
