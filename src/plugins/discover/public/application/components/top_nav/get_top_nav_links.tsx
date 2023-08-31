@@ -8,7 +8,7 @@ import React from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { SavedSearch } from '../../../saved_searches';
-import { NEW_DISCOVER_APP } from '../../..';
+import { NEW_DISCOVER_APP } from '../../../../common';
 import { Adapters } from '../../../../../inspector/public';
 import { TopNavMenuData } from '../../../../../navigation/public';
 import { ISearchSource, unhashUrl } from '../../../opensearch_dashboards_services';
