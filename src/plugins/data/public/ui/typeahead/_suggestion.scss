@@ -102,7 +102,7 @@ $osdTypeaheadTypes: (
     &.osdSuggestionItem--#{$name} {
       .osdSuggestionItem__type {
         background-color: tintOrShade($color, 90%, 50%);
-        color: makeHighContrastColor($color, tintOrShade($color, 90%, 50%));
+        color: makeGraphicContrastColor($color, tintOrShade($color, 90%, 50%));
       }
     }
   }
