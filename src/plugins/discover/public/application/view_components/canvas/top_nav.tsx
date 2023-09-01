@@ -90,7 +90,7 @@ export const TopNav = ({ opts }: TopNavProps) => {
       showSaveQuery
       useDefaultBehaviors
       setMenuMountPoint={opts.setHeaderActionMenu}
-      indexPatterns={indexPatterns}
+      indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
     />
   );
 };
