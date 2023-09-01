@@ -77,6 +77,7 @@ export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
           defaultMessage: 'Legacy',
         }),
       },
+      category: ['appearance'],
       schema: schema.oneOf([schema.literal('modern'), schema.literal('legacy')]),
     },
   };
