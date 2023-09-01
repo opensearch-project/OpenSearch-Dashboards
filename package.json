@@ -101,7 +101,8 @@
     "**/semver": "^7.5.3",
     "**/set-value": "^4.1.0",
     "**/xml2js": "^0.5.0",
-    "**/yaml": "^2.2.2"
+    "**/yaml": "^2.2.2",
+    "**/eslint-plugin-mocha-next/mocha": "npm:mocha@^10.1.0"
   },
   "workspaces": {
     "packages": [
@@ -305,7 +306,7 @@
     "@types/lru-cache": "^5.1.0",
     "@types/markdown-it": "^0.0.7",
     "@types/minimatch": "^2.0.29",
-    "@types/mocha": "^7.0.2",
+    "@types/mocha-next": "npm:@types/mocha@^10.0.1",
     "@types/mock-fs": "^4.10.0",
     "@types/moment-timezone": "^0.5.12",
     "@types/mustache": "^0.8.31",
@@ -377,7 +378,7 @@
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jest": "^26.1.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-mocha": "^6.2.2",
+    "eslint-plugin-mocha-next": "npm:eslint-plugin-mocha@^10.1.0",
     "eslint-plugin-no-unsanitized": "^3.0.2",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-prefer-object-spread": "^1.2.1",
@@ -419,7 +420,7 @@
     "load-grunt-config": "^4.0.1",
     "load-json-file": "^6.2.0",
     "markdown-it": "^12.3.2",
-    "mocha": "^7.2.0",
+    "mocha-next": "npm:mocha@^10.1.0",
     "mock-fs": "^4.12.0",
     "monaco-editor": "~0.17.0",
     "ms-chromium-edge-driver": "^0.4.3",
