@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview page rendering should render normally 1`] = `
+<div
+  class="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom"
+  style="max-width: 1200px;"
+>
+  <main
+    class="euiPageBody euiPageBody--borderRadiusNone"
+  >
+    <h1
+      class="euiTitle euiTitle--large"
+    >
+      <span>
+        Overview
+      </span>
+    </h1>
+    <div
+      class="euiSpacer euiSpacer--l"
+    />
+    <div
+      class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--thirds euiFlexGrid--responsive"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable"
+          data-test-subj="link-dev_tools"
+        >
+          <div
+            class="euiCard__content"
+          >
+            <h3
+              class="euiTitle euiTitle--xsmall euiCard__title"
+              id="generated-idTitle"
+            >
+              <button
+                aria-describedby=" generated-idDescription"
+                class="euiCard__titleButton"
+              >
+                Dev Tools
+              </button>
+            </h3>
+            <div
+              class="euiText euiText--small euiCard__description"
+              id="generated-idDescription"
+            >
+              <p>
+                dev tools description
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+`;
