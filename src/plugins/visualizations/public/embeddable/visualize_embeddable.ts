@@ -577,7 +577,8 @@ export class VisualizeEmbeddable
           const { toasts } = getNotifications();
           toasts.addError(err, {
             title: i18n.translate('visualizations.renderVisTitle', {
-              defaultMessage: `Error loading data on the ${this.vis.title} chart`,
+              defaultMessage: 'Error loading data on the {visTitle} chart',
+              values: { visTitle: this.vis.title },
             }),
             toastMessage: ' ',
             id: this.id,
