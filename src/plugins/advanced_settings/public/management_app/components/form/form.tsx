@@ -257,7 +257,7 @@ export class Form extends PureComponent<FormProps> {
   renderCategory(category: Category, settings: FieldSetting[], totalSettings: number) {
     return (
       <Fragment key={category}>
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" id={category}>
           <EuiForm>
             <EuiText>
               <EuiFlexGroup alignItems="baseline">
