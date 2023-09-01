@@ -17,6 +17,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Bump `node-sass` to a version that uses a newer `libsass` ([#4649](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4649))
 - [CVE-2019-11358] Bump version of tinygradient from 0.4.3 to 1.1.5 ([#4742](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4742))
 - [CVE-2021-3520] Bump `lmdb` from `2.8.0` to `2.8.5` ([#4804](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4804))
+- Remove examples and other unwanted artifacts from installed dependencies ([#4896](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4896))
 
 ### 📈 Features/Enhancements
 
