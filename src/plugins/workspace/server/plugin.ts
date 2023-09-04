@@ -26,7 +26,7 @@ import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
-import { WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_UPDATE_APP_ID } from '../common/constants';
 import { ConfigSchema, FEATURE_FLAG_KEY_IN_UI_SETTING } from '../config';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
@@ -177,7 +177,11 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
           name: i18n.translate('workspaces.management.workspace.default.name', {
             defaultMessage: 'Management',
           }),
-          features: [`@${DEFAULT_APP_CATEGORIES.management.id}`, WORKSPACE_OVERVIEW_APP_ID],
+          features: [
+            `@${DEFAULT_APP_CATEGORIES.management.id}`,
+            WORKSPACE_OVERVIEW_APP_ID,
+            WORKSPACE_UPDATE_APP_ID,
+          ],
         },
         managementWorkspaceACL.getPermissions()
       ),
