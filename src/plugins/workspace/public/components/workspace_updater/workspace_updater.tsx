@@ -17,35 +17,47 @@ import { i18n } from '@osd/i18n';
 import { of } from 'rxjs';
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WorkspaceForm, WorkspaceFormData } from '../workspace_creator/workspace_form';
+import {
+  WorkspaceForm,
+  WorkspaceFormSubmitData,
+  WorkspaceFormData,
+} from '../workspace_creator/workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 import { formatUrlWithWorkspaceId } from '../../utils';
 import { WorkspaceClient } from '../../workspace_client';
+import { WorkspacePermissionSetting } from '../';
 
+interface WorkspaceWithPermission extends WorkspaceAttribute {
+  permissions?: WorkspacePermissionSetting[];
+}
+
+function getFormDataFromWorkspace(
+  currentWorkspace: WorkspaceAttribute | null | undefined
+): WorkspaceFormData {
+  const currentWorkspaceWithPermission = (currentWorkspace || {}) as WorkspaceWithPermission;
+  return {
+    ...currentWorkspaceWithPermission,
+    permissions: currentWorkspaceWithPermission.permissions || [],
+  };
+}
 export const WorkspaceUpdater = () => {
   const {
     services: { application, workspaces, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
-
-  const excludedAttribute = 'id';
-  const { [excludedAttribute]: removedProperty, ...otherAttributes } =
-    currentWorkspace || ({} as WorkspaceAttribute);
-
   const [deleteWorkspaceModalVisible, setDeleteWorkspaceModalVisible] = useState(false);
-  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<
-    Omit<WorkspaceAttribute, 'id'>
-  >(otherAttributes);
+  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<WorkspaceFormData>(
+    getFormDataFromWorkspace(currentWorkspace)
+  );
 
   useEffect(() => {
-    const { id, ...others } = currentWorkspace || ({} as WorkspaceAttribute);
-    setCurrentWorkspaceFormData(others);
-  }, [workspaces, currentWorkspace, excludedAttribute]);
+    setCurrentWorkspaceFormData(getFormDataFromWorkspace(currentWorkspace));
+  }, [currentWorkspace]);
 
   const handleWorkspaceFormSubmit = useCallback(
-    async (data: WorkspaceFormData) => {
+    async (data: WorkspaceFormSubmitData) => {
       let result;
       if (!currentWorkspace) {
         notifications?.toasts.addDanger({

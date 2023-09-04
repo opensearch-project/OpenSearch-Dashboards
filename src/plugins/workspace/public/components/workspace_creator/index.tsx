@@ -4,3 +4,4 @@
  */
 
 export { WorkspaceCreator } from './workspace_creator';
+export { WorkspacePermissionSetting } from './workspace_permission_setting_panel';
