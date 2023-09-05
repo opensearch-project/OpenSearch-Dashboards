@@ -38,6 +38,7 @@
   "author": "opensearch-project",
   "scripts": {
     "preinstall": "scripts/use_node ./preinstall_check",
+    "postinstall": "scripts/use_node scripts/postinstall",
     "osd": "scripts/use_node scripts/osd",
     "opensearch": "scripts/use_node scripts/opensearch",
     "test": "grunt test",
