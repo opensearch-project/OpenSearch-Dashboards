@@ -247,72 +247,110 @@ test('return error when manifest contains unrecognized properties', async () => 
   });
 });
 
-describe('requiredOpenSearchPlugins', () => {
-  test('return error when plugin `requiredOpenSearchPlugins` is a string and not an array of string', async () => {
+describe('requiredEnginePlugins', () => {
+  test('return error when plugin `requiredEnginePlugins` is a string and not an object', async () => {
     mockReadFilePromise.mockResolvedValue(
       Buffer.from(
         JSON.stringify({
-          id: 'id1',
+          id: 'invalid-manifest-plugin',
           version: '7.0.0',
           server: true,
-          requiredOpenSearchPlugins: 'abc',
+          requiredEnginePlugins: 'abc',
         })
       )
     );
 
     await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-      message: `The "requiredOpenSearchPlugins" in plugin manifest for "id1" should be an array of strings. (invalid-manifest, ${pluginManifestPath})`,
+      message: `The "requiredEnginePlugins" in plugin manifest for "invalid-manifest-plugin" should be an object that maps a plugin name to a version range. (invalid-manifest, ${pluginManifestPath})`,
       type: PluginDiscoveryErrorType.InvalidManifest,
       path: pluginManifestPath,
     });
   });
 
-  test('return error when `requiredOpenSearchPlugins` is not a string', async () => {
-    mockReadFilePromise.mockResolvedValue(
-      Buffer.from(JSON.stringify({ id: 'id2', version: '7.0.0', requiredOpenSearchPlugins: 2 }))
-    );
-
-    await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-      message: `The "requiredOpenSearchPlugins" in plugin manifest for "id2" should be an array of strings. (invalid-manifest, ${pluginManifestPath})`,
-      type: PluginDiscoveryErrorType.InvalidManifest,
-      path: pluginManifestPath,
-    });
-  });
-
-  test('return error when plugin requiredOpenSearchPlugins is an array that contains non-string values', async () => {
+  test('return error when plugin `requiredEnginePlugins` is an array and not an object', async () => {
     mockReadFilePromise.mockResolvedValue(
       Buffer.from(
-        JSON.stringify({ id: 'id3', version: '7.0.0', requiredOpenSearchPlugins: ['plugin1', 2] })
+        JSON.stringify({
+          id: 'invalid-manifest-plugin',
+          version: '7.0.0',
+          server: true,
+          requiredEnginePlugins: [{ 'plugin-1': '1.0.0.0', 'plugin-2': '^2.0.1' }],
+        })
       )
     );
 
     await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-      message: `The "requiredOpenSearchPlugins" in plugin manifest for "id3" should be an array of strings. (invalid-manifest, ${pluginManifestPath})`,
+      message: `The "requiredEnginePlugins" in plugin manifest for "invalid-manifest-plugin" should be an object that maps a plugin name to a version range. (invalid-manifest, ${pluginManifestPath})`,
       type: PluginDiscoveryErrorType.InvalidManifest,
       path: pluginManifestPath,
     });
   });
 
-  test('Happy path when plugin `requiredOpenSearchPlugins` is an array of string', async () => {
+  test('return error when plugin requiredEnginePlugins is an object but contains non-string version value', async () => {
     mockReadFilePromise.mockResolvedValue(
       Buffer.from(
         JSON.stringify({
-          id: 'id1',
+          id: 'test-invalid-version-type-plugin',
+          version: '7.0.0',
+          requiredEnginePlugins: { 'invalid-plugin-version-range': 2 },
+        })
+      )
+    );
+
+    await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
+      message: `The "requiredEnginePlugins" in plugin manifest for "test-invalid-version-type-plugin" should be an object that maps a plugin name to a version range. (invalid-manifest, ${pluginManifestPath})`,
+      type: PluginDiscoveryErrorType.InvalidManifest,
+      path: pluginManifestPath,
+    });
+  });
+
+  test('return error when plugin requiredEnginePlugins contains invalid version range', async () => {
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({
+          id: 'test-invalid-version-range-plugin',
+          version: '7.0.0',
+          requiredEnginePlugins: {
+            'invalid-version-range-plugin': '?1.0.0',
+            'valid-version-range-plugin': '^1.0.0',
+          },
+        })
+      )
+    );
+
+    await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
+      message: `The "requiredEnginePlugins" in the plugin manifest for "test-invalid-version-range-plugin" contains invalid version ranges: ?1.0.0 for invalid-version-range-plugin (invalid-manifest, ${pluginManifestPath})`,
+      type: PluginDiscoveryErrorType.InvalidManifest,
+      path: pluginManifestPath,
+    });
+  });
+
+  test('Happy path when plugin `requiredEnginePlugins` is a map of plugin name to its compatible version ranges', async () => {
+    mockReadFilePromise.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({
+          id: 'test-plugin-version-range-sanity',
           version: '7.0.0',
           server: true,
-          requiredOpenSearchPlugins: ['plugin1', 'plugin2'],
+          requiredEnginePlugins: {
+            'valid-plugin-1': '^1.0.0',
+            'valid-plugin-2': '1.0.0',
+          },
         })
       )
     );
 
     await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toEqual({
-      id: 'id1',
-      configPath: 'id_1',
+      id: 'test-plugin-version-range-sanity',
+      configPath: 'test_plugin_version_range_sanity',
       version: '7.0.0',
       opensearchDashboardsVersion: '7.0.0',
       optionalPlugins: [],
       requiredPlugins: [],
-      requiredOpenSearchPlugins: ['plugin1', 'plugin2'],
+      requiredEnginePlugins: {
+        'valid-plugin-1': '^1.0.0',
+        'valid-plugin-2': '1.0.0',
+      },
       requiredBundles: [],
       server: true,
       ui: false,
@@ -374,7 +412,7 @@ test('set defaults for all missing optional fields', async () => {
     opensearchDashboardsVersion: '7.0.0',
     optionalPlugins: [],
     requiredPlugins: [],
-    requiredOpenSearchPlugins: [],
+    requiredEnginePlugins: {},
     requiredBundles: [],
     server: true,
     ui: false,
@@ -391,7 +429,10 @@ test('return all set optional fields as they are in manifest', async () => {
         opensearchDashboardsVersion: '7.0.0',
         requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
         optionalPlugins: ['some-optional-plugin'],
-        requiredOpenSearchPlugins: ['test-opensearch-plugin-1', 'test-opensearch-plugin-2'],
+        requiredEnginePlugins: {
+          'test-opensearch-plugin-1': '^1.0.0',
+          'test-opensearch-plugin-2': '>=1.0.0',
+        },
         ui: true,
       })
     )
@@ -405,7 +446,10 @@ test('return all set optional fields as they are in manifest', async () => {
     optionalPlugins: ['some-optional-plugin'],
     requiredBundles: [],
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
-    requiredOpenSearchPlugins: ['test-opensearch-plugin-1', 'test-opensearch-plugin-2'],
+    requiredEnginePlugins: {
+      'test-opensearch-plugin-1': '^1.0.0',
+      'test-opensearch-plugin-2': '>=1.0.0',
+    },
     server: false,
     ui: true,
   });
@@ -420,7 +464,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version matches
         version: 'some-version',
         opensearchDashboardsVersion: '7.0.0-alpha2',
         requiredPlugins: ['some-required-plugin'],
-        requiredOpenSearchPlugins: [],
+        requiredEnginePlugins: {},
         server: true,
       })
     )
@@ -433,7 +477,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version matches
     opensearchDashboardsVersion: '7.0.0-alpha2',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
-    requiredOpenSearchPlugins: [],
+    requiredEnginePlugins: {},
     requiredBundles: [],
     server: true,
     ui: false,
@@ -461,7 +505,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version is `ope
     opensearchDashboardsVersion: 'opensearchDashboards',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
-    requiredOpenSearchPlugins: [],
+    requiredEnginePlugins: {},
     requiredBundles: [],
     server: true,
     ui: true,

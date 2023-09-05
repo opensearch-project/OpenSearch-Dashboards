@@ -43,6 +43,7 @@ export default function ({ getService, getPageObjects }) {
     'tileMap',
     'visChart',
     'timePicker',
+    'common',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -52,11 +53,17 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('dashboard state', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
+      await browser.refresh();
     });
 
     after(async function () {
@@ -88,6 +95,8 @@ export default function ({ getService, getPageObjects }) {
       expect(colorChoiceRetained).to.be(true);
     });
 
+    // the following three tests are skipped because of save search save window bug:
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4698
     it('Saved search with no changes will update when the saved object changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
@@ -107,6 +116,9 @@ export default function ({ getService, getPageObjects }) {
       expect(inViewMode).to.be(true);
 
       await PageObjects.header.clickDiscover();
+      // Add load save search here since discover link won't take it to the save search link for
+      // the legacy discover plugin
+      await PageObjects.discover.loadSavedSearch('my search');
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -126,6 +138,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
       await PageObjects.header.clickDiscover();
+      // Add load save search here since discover link won't take it to the save search link for
+      // the legacy discover plugin
+      await PageObjects.discover.loadSavedSearch('my search');
       await PageObjects.discover.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();

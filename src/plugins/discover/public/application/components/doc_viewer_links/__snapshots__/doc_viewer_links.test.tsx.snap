@@ -2,33 +2,47 @@
 
 exports[`Dont Render <DocViewerLink/> if generateCb.hide 1`] = `
 <EuiFlexGroup
-  gutterSize="xs"
+  gutterSize="m"
+  justifyContent="flexEnd"
 />
 `;
 
 exports[`Render <DocViewerLink/> with 2 different links 1`] = `
 <EuiFlexGroup
-  gutterSize="xs"
+  gutterSize="m"
+  justifyContent="flexEnd"
 >
   <EuiFlexItem
+    grow={false}
     key="0"
   >
-    <EuiListGroupItem
-      data-test-subj="docTableRowAction"
+    <EuiLink
       href="aaa"
-      label="generateCb link"
-      order={10}
-    />
+      style={
+        Object {
+          "fontWeight": "normal",
+        }
+      }
+      target="_blank"
+    >
+      generateCb link
+    </EuiLink>
   </EuiFlexItem>
   <EuiFlexItem
+    grow={false}
     key="1"
   >
-    <EuiListGroupItem
-      data-test-subj="docTableRowAction"
+    <EuiLink
       href="bbb"
-      label="href link"
-      order={20}
-    />
+      style={
+        Object {
+          "fontWeight": "normal",
+        }
+      }
+      target="_blank"
+    >
+      href link
+    </EuiLink>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
