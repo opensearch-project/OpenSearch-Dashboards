@@ -150,7 +150,7 @@ export function DiscoverLegacy({
     callOut = (
       <div>
         <EuiCallOut
-          title="This Discover app version will be retired in OpenSearch version 2.11. To switch to the new Discover 2.0 version, toggle the New Discover."
+          title="This Discover app version will be retired in OpenSearch version 2.11. To switch to the new Discover 2.0 version, turn on the New Discover toggle."
           iconType="alert"
           dismissible
           onDismiss={closeCallOut}
