@@ -51,7 +51,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
           <EuiCallOut
-            title="You're viewing Discover 2.0. The old Discover app will be retired in OpenSearch version 2.11. To switch back to the old version, toggle the New Discover."
+            title="You're viewing Discover 2.0. The old Discover app will be retired in OpenSearch version 2.11. To switch back to the old version, turn off the New Discover toggle."
             iconType="alert"
             dismissible
             onDismiss={closeCallOut}
@@ -64,21 +64,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
               .
             </p>
           </EuiCallOut>
-        </EuiPanel>
-        <EuiCallOut
-          title="You're viewing Discover 2.0. The old Discover app will be retired in OpenSearch version 2.11. To switch back to the old version, turn off the New Discover toggle."
-          iconType="alert"
-          dismissible
-          onDismiss={closeCallOut}
-        >
-          <p>
-            To provide feedback,{' '}
-            <EuiLink href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues">
-              open an issue
-            </EuiLink>
-            .
-          </p>
-        </EuiCallOut>
+         </EuiPanel>
       </EuiFlexItem>
     );
   }
