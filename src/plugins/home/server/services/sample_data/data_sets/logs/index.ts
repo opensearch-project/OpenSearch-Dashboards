@@ -53,6 +53,7 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
     description: logsDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard_dark.png',
+    hasNewThemeImages: true,
     overviewDashboard: DASHBOARD_ID,
     getDataSourceIntegratedDashboard: appendDataSourceId(DASHBOARD_ID),
     appLinks: initialAppLinks,
