@@ -25,7 +25,6 @@ import {
   WORKSPACE_NAV_CATEGORY,
   WORKSPACE_FATAL_ERROR_APP_ID,
 } from '../common/constants';
-import { mountDropdownList } from './mount';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
 import { getWorkspaceColumn } from './components/utils/workspace_column';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
@@ -249,12 +248,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     }
     this.coreStart = core;
 
-    mountDropdownList({
-      application: core.application,
-      workspaces: core.workspaces,
-      chrome: core.chrome,
-      http: core.http,
-    });
     this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     if (core) {
       this.filterNavLinks(core);
