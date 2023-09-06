@@ -64,7 +64,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
               .
             </p>
           </EuiCallOut>
-         </EuiPanel>
+        </EuiPanel>
       </EuiFlexItem>
     );
   }
