@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { isEqual } from 'lodash';
+
 import { CoreService, WorkspaceAttribute } from '../../types';
 import { InternalApplicationStart } from '../application';
 import { HttpSetup } from '../http';
@@ -23,7 +25,11 @@ export interface WorkspaceObservables {
   currentWorkspace$: BehaviorSubject<WorkspaceAttribute | null>;
   workspaceList$: BehaviorSubject<WorkspaceAttribute[]>;
   workspaceEnabled$: BehaviorSubject<boolean>;
-  hasFetchedWorkspaceList$: BehaviorSubject<boolean>;
+  initialized$: BehaviorSubject<boolean>;
+}
+
+enum WORKSPACE_ERROR_REASON_MAP {
+  WORKSPACE_STALED = 'WORKSPACE_STALED',
 }
 
 /**
@@ -41,16 +47,45 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
   private currentWorkspaceId$ = new BehaviorSubject<string>('');
   private workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
   private currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
-  private hasFetchedWorkspaceList$ = new BehaviorSubject<boolean>(false);
+  private initialized$ = new BehaviorSubject<boolean>(false);
   private workspaceEnabled$ = new BehaviorSubject<boolean>(false);
   private _renderWorkspaceMenu: WorkspaceMenuRenderFn | null = null;
+
+  constructor() {
+    combineLatest([this.initialized$, this.workspaceList$, this.currentWorkspaceId$]).subscribe(
+      ([workspaceInitialized, workspaceList, currentWorkspaceId]) => {
+        if (workspaceInitialized) {
+          const currentWorkspace = workspaceList.find((w) => w && w.id === currentWorkspaceId);
+
+          /**
+           * Do a simple idempotent verification here
+           */
+          if (!isEqual(currentWorkspace, this.currentWorkspace$.getValue())) {
+            this.currentWorkspace$.next(currentWorkspace ?? null);
+          }
+
+          if (currentWorkspaceId && !currentWorkspace?.id) {
+            /**
+             * Current workspace is staled
+             */
+            this.currentWorkspaceId$.error({
+              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+            });
+            this.currentWorkspace$.error({
+              reason: WORKSPACE_ERROR_REASON_MAP.WORKSPACE_STALED,
+            });
+          }
+        }
+      }
+    );
+  }
 
   public setup(): WorkspaceSetup {
     return {
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
-      hasFetchedWorkspaceList$: this.hasFetchedWorkspaceList$,
+      initialized$: this.initialized$,
       workspaceEnabled$: this.workspaceEnabled$,
       registerWorkspaceMenuRender: (render: WorkspaceMenuRenderFn) =>
         (this._renderWorkspaceMenu = render),
@@ -68,7 +103,7 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
-      hasFetchedWorkspaceList$: this.hasFetchedWorkspaceList$,
+      initialized$: this.initialized$,
       workspaceEnabled$: this.workspaceEnabled$,
     };
     return {
@@ -91,7 +126,7 @@ export class WorkspaceService implements CoreService<WorkspaceSetup, WorkspaceSt
     this.currentWorkspaceId$.unsubscribe();
     this.workspaceList$.unsubscribe();
     this.workspaceEnabled$.unsubscribe();
-    this.hasFetchedWorkspaceList$.unsubscribe();
+    this.initialized$.unsubscribe();
     this._renderWorkspaceMenu = null;
   }
 }

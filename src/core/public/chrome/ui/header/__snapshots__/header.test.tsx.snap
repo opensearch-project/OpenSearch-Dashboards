@@ -1947,7 +1947,7 @@ exports[`Header handles visibility and lock changes 1`] = `
         ],
         "thrownError": null,
       },
-      "hasFetchedWorkspaceList$": BehaviorSubject {
+      "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
         "closed": false,
@@ -6339,7 +6339,7 @@ exports[`Header handles visibility and lock changes 1`] = `
             ],
             "thrownError": null,
           },
-          "hasFetchedWorkspaceList$": BehaviorSubject {
+          "initialized$": BehaviorSubject {
             "_isScalar": false,
             "_value": false,
             "closed": false,
@@ -6542,7 +6542,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                         ],
                         "thrownError": null,
                       },
-                      "hasFetchedWorkspaceList$": BehaviorSubject {
+                      "initialized$": BehaviorSubject {
                         "_isScalar": false,
                         "_value": false,
                         "closed": false,
@@ -6684,9 +6684,9 @@ exports[`Header handles visibility and lock changes 1`] = `
                                     className="euiText euiText--medium"
                                   >
                                     <strong>
-                                       
+
                                       OpenSearch Dashboards
-                                       
+
                                     </strong>
                                   </div>
                                 </EuiText>
@@ -8883,7 +8883,7 @@ exports[`Header renders condensed header 1`] = `
         ],
         "thrownError": null,
       },
-      "hasFetchedWorkspaceList$": BehaviorSubject {
+      "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
         "closed": false,
@@ -12243,7 +12243,7 @@ exports[`Header renders condensed header 1`] = `
             ],
             "thrownError": null,
           },
-          "hasFetchedWorkspaceList$": BehaviorSubject {
+          "initialized$": BehaviorSubject {
             "_isScalar": false,
             "_value": false,
             "closed": false,

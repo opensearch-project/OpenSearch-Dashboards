@@ -398,7 +398,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         "observers": Array [],
         "thrownError": null,
       },
-      "hasFetchedWorkspaceList$": BehaviorSubject {
+      "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
         "closed": false,
@@ -568,7 +568,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     "observers": Array [],
                     "thrownError": null,
                   },
-                  "hasFetchedWorkspaceList$": BehaviorSubject {
+                  "initialized$": BehaviorSubject {
                     "_isScalar": false,
                     "_value": false,
                     "closed": false,
@@ -3497,7 +3497,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
         "observers": Array [],
         "thrownError": null,
       },
-      "hasFetchedWorkspaceList$": BehaviorSubject {
+      "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
         "closed": false,
@@ -3815,7 +3815,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
         "observers": Array [],
         "thrownError": null,
       },
-      "hasFetchedWorkspaceList$": BehaviorSubject {
+      "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
         "closed": false,
@@ -4133,7 +4133,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
         "observers": Array [],
         "thrownError": null,
       },
-      "hasFetchedWorkspaceList$": BehaviorSubject {
+      "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
         "closed": false,
@@ -4261,7 +4261,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                     "observers": Array [],
                     "thrownError": null,
                   },
-                  "hasFetchedWorkspaceList$": BehaviorSubject {
+                  "initialized$": BehaviorSubject {
                     "_isScalar": false,
                     "_value": false,
                     "closed": false,
@@ -5017,7 +5017,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
         "observers": Array [],
         "thrownError": null,
       },
-      "hasFetchedWorkspaceList$": BehaviorSubject {
+      "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
         "closed": false,
@@ -5298,7 +5298,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
                     "observers": Array [],
                     "thrownError": null,
                   },
-                  "hasFetchedWorkspaceList$": BehaviorSubject {
+                  "initialized$": BehaviorSubject {
                     "_isScalar": false,
                     "_value": false,
                     "closed": false,
@@ -7781,7 +7781,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
         "observers": Array [],
         "thrownError": null,
       },
-      "hasFetchedWorkspaceList$": BehaviorSubject {
+      "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
         "closed": false,
@@ -8062,7 +8062,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
                     "observers": Array [],
                     "thrownError": null,
                   },
-                  "hasFetchedWorkspaceList$": BehaviorSubject {
+                  "initialized$": BehaviorSubject {
                     "_isScalar": false,
                     "_value": false,
                     "closed": false,
@@ -9389,7 +9389,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
         "observers": Array [],
         "thrownError": null,
       },
-      "hasFetchedWorkspaceList$": BehaviorSubject {
+      "initialized$": BehaviorSubject {
         "_isScalar": false,
         "_value": false,
         "closed": false,
@@ -9633,7 +9633,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
                     "observers": Array [],
                     "thrownError": null,
                   },
-                  "hasFetchedWorkspaceList$": BehaviorSubject {
+                  "initialized$": BehaviorSubject {
                     "_isScalar": false,
                     "_value": false,
                     "closed": false,
