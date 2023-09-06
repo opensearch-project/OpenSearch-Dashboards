@@ -55,19 +55,36 @@ describe('ClusterClient', () => {
   let getAuthHeaders: jest.MockedFunction<GetAuthHeaders>;
   let internalClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
   let scopedClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
+  let internalClientWithLongNumeralsSupport: ReturnType<typeof opensearchClientMock.createInternalClient>;
+  let scopedClientWithLongNumeralsSupport: ReturnType<typeof opensearchClientMock.createInternalClient>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     internalClient = opensearchClientMock.createInternalClient();
     scopedClient = opensearchClientMock.createInternalClient();
+    internalClientWithLongNumeralsSupport = opensearchClientMock.createInternalClient({
+      withLongNumeralsSupport: true,
+    });
+    scopedClientWithLongNumeralsSupport = opensearchClientMock.createInternalClient({
+      withLongNumeralsSupport: true,
+    });
     getAuthHeaders = jest.fn().mockImplementation(() => ({
       authorization: 'auth',
       foo: 'bar',
     }));
 
-    configureClientMock.mockImplementation((config, { scoped = false }) => {
-      return scoped ? scopedClient : internalClient;
-    });
+    configureClientMock.mockImplementation(
+      (config, { scoped = false, withLongNumeralsSupport = false }) => {
+        // prettier-ignore
+        return withLongNumeralsSupport
+          ? scoped
+            ? scopedClientWithLongNumeralsSupport
+            : internalClientWithLongNumeralsSupport
+          : scoped
+            ? scopedClient
+            : internalClient;
+      }
+    );
   });
 
   afterEach(() => {
@@ -79,7 +96,7 @@ describe('ClusterClient', () => {
 
     new ClusterClient(config, logger, getAuthHeaders);
 
-    expect(configureClientMock).toHaveBeenCalledTimes(2);
+    expect(configureClientMock).toHaveBeenCalledTimes(4);
     expect(configureClientMock).toHaveBeenCalledWith(config, { logger });
     expect(configureClientMock).toHaveBeenCalledWith(config, { logger, scoped: true });
   });
@@ -99,11 +116,23 @@ describe('ClusterClient', () => {
 
       const scopedClusterClient = clusterClient.asScoped(request);
 
+      const expected = { headers: expect.any(Object) };
+
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({ headers: expect.any(Object) });
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
 
       expect(scopedClusterClient.asInternalUser).toBe(clusterClient.asInternalUser);
       expect(scopedClusterClient.asCurrentUser).toBe(scopedClient.child.mock.results[0].value);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClusterClient.asInternalUserWithLongNumeralsSupport).toBe(
+        clusterClient.asInternalUserWithLongNumeralsSupport
+      );
+      expect(scopedClusterClient.asCurrentUserWithLongNumeralsSupport).toBe(
+        scopedClientWithLongNumeralsSupport.child.mock.results[0].value
+      );
     });
 
     it('returns a distinct scoped cluster client on each call', () => {
@@ -114,9 +143,13 @@ describe('ClusterClient', () => {
       const scopedClusterClient2 = clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(2);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(2);
 
       expect(scopedClusterClient1).not.toBe(scopedClusterClient2);
       expect(scopedClusterClient1.asInternalUser).toBe(scopedClusterClient2.asInternalUser);
+      expect(scopedClusterClient1.asInternalUserWithLongNumeralsSupport).toBe(
+        scopedClusterClient2.asInternalUserWithLongNumeralsSupport
+      );
     });
 
     it('creates a scoped client with filtered request headers', () => {
@@ -135,10 +168,15 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: { ...DEFAULT_HEADERS, foo: 'bar', 'x-opaque-id': expect.any(String) },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('creates a scoped facade with filtered auth headers', () => {
@@ -155,10 +193,15 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('respects auth headers precedence', () => {
@@ -179,10 +222,15 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('includes the `customHeaders` from the config without filtering them', () => {
@@ -200,15 +248,20 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: {
           ...DEFAULT_HEADERS,
           foo: 'bar',
           hello: 'dolly',
           'x-opaque-id': expect.any(String),
         },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('adds the x-opaque-id header based on the request id', () => {
@@ -225,13 +278,18 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: {
           ...DEFAULT_HEADERS,
           'x-opaque-id': 'my-fake-id',
         },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('respect the precedence of auth headers over config headers', () => {
@@ -251,15 +309,20 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: {
           ...DEFAULT_HEADERS,
           foo: 'auth',
           hello: 'dolly',
           'x-opaque-id': expect.any(String),
         },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('respect the precedence of request headers over config headers', () => {
@@ -279,15 +342,20 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: {
           ...DEFAULT_HEADERS,
           foo: 'request',
           hello: 'dolly',
           'x-opaque-id': expect.any(String),
         },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('respect the precedence of config headers over default headers', () => {
@@ -304,13 +372,18 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: {
           [headerKey]: 'foo',
           'x-opaque-id': expect.any(String),
         },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('respect the precedence of request headers over default headers', () => {
@@ -327,13 +400,18 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: {
           [headerKey]: 'foo',
           'x-opaque-id': expect.any(String),
         },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('respect the precedence of x-opaque-id header over config headers', () => {
@@ -355,13 +433,18 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: {
           ...DEFAULT_HEADERS,
           'x-opaque-id': 'from request',
         },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('filter headers when called with a `FakeRequest`', () => {
@@ -380,10 +463,15 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: { ...DEFAULT_HEADERS, authorization: 'auth' },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
 
     it('does not add auth headers when called with a `FakeRequest`', () => {
@@ -404,34 +492,46 @@ describe('ClusterClient', () => {
 
       clusterClient.asScoped(request);
 
-      expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
+      const expected = {
         headers: { ...DEFAULT_HEADERS, foo: 'bar' },
-      });
+      };
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(expected);
+
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.child).toHaveBeenCalledWith(expected);
     });
   });
 
   describe('#close', () => {
-    it('closes both underlying clients', async () => {
+    it('closes all underlying clients', async () => {
       const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
 
       await clusterClient.close();
 
       expect(internalClient.close).toHaveBeenCalledTimes(1);
       expect(scopedClient.close).toHaveBeenCalledTimes(1);
+
+      expect(internalClientWithLongNumeralsSupport.close).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.close).toHaveBeenCalledTimes(1);
     });
 
-    it('waits for both clients to close', (done) => {
-      expect.assertions(4);
+    it('waits for all clients to close', (done) => {
+      expect.assertions(8);
 
       const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
 
       let internalClientClosed = false;
       let scopedClientClosed = false;
+      let internalClientWithLongNumeralsSupportClosed = false;
+      let scopedClientWithLongNumeralsSupportClosed = false;
       let clusterClientClosed = false;
 
       let closeInternalClient: () => void;
       let closeScopedClient: () => void;
+      let closeInternalClientWithLongNumeralsSupport: () => void;
+      let closeScopedClientWithLongNumeralsSupport: () => void;
 
       internalClient.close.mockReturnValue(
         new Promise((resolve) => {
@@ -449,16 +549,36 @@ describe('ClusterClient', () => {
           scopedClientClosed = true;
         })
       );
+      internalClientWithLongNumeralsSupport.close.mockReturnValue(
+        new Promise((resolve) => {
+          closeInternalClientWithLongNumeralsSupport = resolve;
+        }).then(() => {
+          expect(clusterClientClosed).toBe(false);
+          internalClientWithLongNumeralsSupportClosed = true;
+        })
+      );
+      scopedClientWithLongNumeralsSupport.close.mockReturnValue(
+        new Promise((resolve) => {
+          closeScopedClientWithLongNumeralsSupport = resolve;
+        }).then(() => {
+          expect(clusterClientClosed).toBe(false);
+          scopedClientWithLongNumeralsSupportClosed = true;
+        })
+      );
 
       clusterClient.close().then(() => {
         clusterClientClosed = true;
         expect(internalClientClosed).toBe(true);
         expect(scopedClientClosed).toBe(true);
+        expect(internalClientWithLongNumeralsSupportClosed).toBe(true);
+        expect(scopedClientWithLongNumeralsSupportClosed).toBe(true);
         done();
       });
 
       closeInternalClient!();
       closeScopedClient!();
+      closeInternalClientWithLongNumeralsSupport!();
+      closeScopedClientWithLongNumeralsSupport!();
     });
 
     it('return a rejected promise is any client rejects', async () => {
@@ -479,11 +599,17 @@ describe('ClusterClient', () => {
       expect(internalClient.close).toHaveBeenCalledTimes(1);
       expect(scopedClient.close).toHaveBeenCalledTimes(1);
 
+      expect(internalClientWithLongNumeralsSupport.close).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.close).toHaveBeenCalledTimes(1);
+
       await clusterClient.close();
       await clusterClient.close();
 
       expect(internalClient.close).toHaveBeenCalledTimes(1);
       expect(scopedClient.close).toHaveBeenCalledTimes(1);
+
+      expect(internalClientWithLongNumeralsSupport.close).toHaveBeenCalledTimes(1);
+      expect(scopedClientWithLongNumeralsSupport.close).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -2497,10 +2497,10 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
-"@opensearch-project/opensearch-next@npm:@opensearch-project/opensearch@^2.2.0":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.2.1.tgz#a400203afa6512ef73945663163a404763a10f5a"
-  integrity sha512-8zfQX1acL9eWG+ohIc9nJVT9LSqXCdbVEJs0rCPRtji3XF6ahzsiKmGNTeWLxCPDxWCjAIWq9t95xP3Y5Egi6Q==
+"@opensearch-project/opensearch-next@npm:@opensearch-project/opensearch@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.3.1.tgz#3596e2f1f0615a7555102f6f941f0e0ec645c2cd"
+  integrity sha512-Kg8tddAx6sinStnNi6IeGilfvLWlonIxaRdVNiJcNPr1yMqd0c9TSegn18zKr0Pb0IM9xBIGBSkRPuh67ZN6Hw==
   dependencies:
     aws4 "^1.11.0"
     debug "^4.3.1"

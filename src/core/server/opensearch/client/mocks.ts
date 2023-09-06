@@ -29,13 +29,22 @@
  */
 
 import { Client, ApiResponse } from '@opensearch-project/opensearch';
+import { Client as ClientNext } from '@opensearch-project/opensearch-next';
 import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
-import { OpenSearchClient } from './types';
+import { OpenSearchClient, OpenSearchClientNext } from './types';
 import { ICustomClusterClient } from './cluster_client';
 
-const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
+export interface IClientSelector {
+  withLongNumeralsSupport?: boolean;
+}
+
+type ClientType<T> = T extends { withLongNumeralsSupport: true } ? ClientNext : Client;
+
+const createInternalClientMock = <T extends IClientSelector>(
+  opts?: T
+): DeeplyMockedKeys<ClientType<T>> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
-  const client = new Client({
+  const client = new (opts?.withLongNumeralsSupport ? ClientNext : Client)({
     node: 'http://localhost',
   }) as any;
 
@@ -80,7 +89,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   mockify(client, omittedProps);
 
   client.close = jest.fn().mockReturnValue(Promise.resolve());
-  client.child = jest.fn().mockImplementation(() => createInternalClientMock());
+  client.child = jest.fn().mockImplementation(() => createInternalClientMock(opts));
 
   const mockGetter = (obj: Record<string, any>, propertyName: string) => {
     Object.defineProperty(obj, propertyName, {
@@ -101,23 +110,32 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     request: jest.fn(),
   };
 
-  return client as DeeplyMockedKeys<Client>;
+  return client as DeeplyMockedKeys<ClientType<T>>;
 };
 
-export type OpenSearchClientMock = DeeplyMockedKeys<OpenSearchClient>;
+type OpenSearchClientMockType<T> = T extends { withLongNumeralsSupport: true }
+  ? DeeplyMockedKeys<OpenSearchClientNext>
+  : DeeplyMockedKeys<OpenSearchClient>;
 
-const createClientMock = (): OpenSearchClientMock =>
-  (createInternalClientMock() as unknown) as OpenSearchClientMock;
+export type OpenSearchClientMock = DeeplyMockedKeys<OpenSearchClient>;
+export type OpenSearchClientNextMock = DeeplyMockedKeys<OpenSearchClientNext>;
+
+const createClientMock = <T extends IClientSelector>(opts?: T): OpenSearchClientMockType<T> =>
+  (createInternalClientMock(opts) as unknown) as OpenSearchClientMockType<T>;
 
 export interface ScopedClusterClientMock {
   asInternalUser: OpenSearchClientMock;
   asCurrentUser: OpenSearchClientMock;
+  asInternalUserWithLongNumeralsSupport: OpenSearchClientNextMock;
+  asCurrentUserWithLongNumeralsSupport: OpenSearchClientNextMock;
 }
 
 const createScopedClusterClientMock = () => {
   const mock: ScopedClusterClientMock = {
     asInternalUser: createClientMock(),
     asCurrentUser: createClientMock(),
+    asInternalUserWithLongNumeralsSupport: createClientMock({ withLongNumeralsSupport: true }),
+    asCurrentUserWithLongNumeralsSupport: createClientMock({ withLongNumeralsSupport: true }),
   };
 
   return mock;
@@ -125,12 +143,14 @@ const createScopedClusterClientMock = () => {
 
 export interface ClusterClientMock {
   asInternalUser: OpenSearchClientMock;
+  asInternalUserWithLongNumeralsSupport: OpenSearchClientNextMock;
   asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
 }
 
 const createClusterClientMock = () => {
   const mock: ClusterClientMock = {
     asInternalUser: createClientMock(),
+    asInternalUserWithLongNumeralsSupport: createClientMock({ withLongNumeralsSupport: true }),
     asScoped: jest.fn(),
   };
 
@@ -144,6 +164,7 @@ export type CustomClusterClientMock = jest.Mocked<ICustomClusterClient> & Cluste
 const createCustomClusterClientMock = () => {
   const mock: CustomClusterClientMock = {
     asInternalUser: createClientMock(),
+    asInternalUserWithLongNumeralsSupport: createClientMock({ withLongNumeralsSupport: true }),
     asScoped: jest.fn(),
     close: jest.fn(),
   };

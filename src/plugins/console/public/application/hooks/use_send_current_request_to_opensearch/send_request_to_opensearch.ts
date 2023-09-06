@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { stringify } from '@osd/std';
 import { HttpFetchError, HttpSetup } from 'opensearch-dashboards/public';
 import { extractDeprecationMessages } from '../../../lib/utils';
 import { XJson } from '../../../../../opensearch_ui_shared/public';
@@ -116,7 +117,7 @@ export function sendRequestToOpenSearch(
           const contentType = httpResponse.response.headers.get('Content-Type') as BaseResponseType;
           let value = '';
           if (contentType.includes('application/json')) {
-            value = JSON.stringify(httpResponse.body, null, 2);
+            value = stringify(httpResponse.body, null, 2);
           } else {
             value = httpResponse.body;
           }
@@ -155,7 +156,7 @@ export function sendRequestToOpenSearch(
           if (httpError.body) {
             contentType = httpResponse.headers.get('Content-Type') as string;
             if (contentType?.includes('application/json')) {
-              value = JSON.stringify(httpError.body, null, 2);
+              value = stringify(httpError.body, null, 2);
             } else {
               value = httpError.body;
             }
