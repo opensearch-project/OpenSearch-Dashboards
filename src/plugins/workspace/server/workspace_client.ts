@@ -9,8 +9,8 @@ import type {
   CoreSetup,
   WorkspaceAttribute,
   ISavedObjectsRepository,
-  WORKSPACE_TYPE,
 } from '../../../core/server';
+import { WORKSPACE_TYPE } from '../../../core/server';
 import {
   IWorkspaceDBImpl,
   WorkspaceFindOptions,
