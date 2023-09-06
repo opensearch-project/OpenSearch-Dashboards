@@ -13,5 +13,3 @@ export const getWorkspaceIdFromUrl = (url: string): string => {
 
   return '';
 };
-
-export const WORKSPACE_TYPE = 'workspace';

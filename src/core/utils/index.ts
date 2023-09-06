@@ -42,4 +42,5 @@ export {
   WorkspacePermissionMode,
   PUBLIC_WORKSPACE_ID,
   MANAGEMENT_WORKSPACE_ID,
+  WORKSPACE_TYPE,
 } from './constants';

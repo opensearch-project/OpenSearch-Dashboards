@@ -8,7 +8,7 @@ import { ensureRawRequest } from '../../http/router';
 import { SavedObjectsServiceStart } from '../saved_objects_service';
 import { SavedObjectsBulkGetObject } from '../service';
 import { ACL, Principals, TransformedPermission, PrincipalType } from './acl';
-import { WORKSPACE_TYPE } from '../constants';
+import { WORKSPACE_TYPE } from '../../../utils';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
