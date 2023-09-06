@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["savedObjects"],
+  "requiredPlugins": [],
   "optionalPlugins": [],
   "requiredBundles": []
 }

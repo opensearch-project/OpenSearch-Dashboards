@@ -34,7 +34,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   }
 
   public start() {
-    this.logger.debug('Starting SavedObjects service');
+    this.logger.debug('Starting Workspace service');
 
     return {
       client: this.client as IWorkspaceDBImpl,
