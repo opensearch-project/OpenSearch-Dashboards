@@ -29,7 +29,10 @@
  */
 
 import { SavedObjectsFindOptions } from '../../types';
-import { SavedObjectsFindResponse } from '..';
+import { SavedObjectsFindResponse, SavedObjectsRepository } from '..';
+import { Principals } from '../../permission_control/acl';
+import { SavedObjectsPermissionModes } from '../../permission_control/client';
+import { WORKSPACE_TYPE } from '../../../index';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';
@@ -86,5 +89,28 @@ export class SavedObjectsUtils {
     baseWorkspaces?: string[]
   ): string[] {
     return targetWorkspaces?.filter((item) => !baseWorkspaces?.includes(item)) || [];
+  }
+
+  public static async getPermittedWorkspaceIds(props: {
+    principals: Principals;
+    repository: SavedObjectsRepository;
+    permissionModes: SavedObjectsPermissionModes;
+  }) {
+    const { principals, repository, permissionModes } = props;
+    const queryDSL = await repository.getPermissionQuery({
+      permissionTypes: permissionModes,
+      principals,
+      savedObjectType: [WORKSPACE_TYPE],
+    });
+    try {
+      const result = await repository?.find({
+        type: [WORKSPACE_TYPE],
+        queryDSL,
+        perPage: 999,
+      });
+      return result?.saved_objects.map((item) => item.id);
+    } catch (e) {
+      return [];
+    }
   }
 }
