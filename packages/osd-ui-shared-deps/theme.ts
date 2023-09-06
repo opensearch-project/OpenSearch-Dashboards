@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// ToDo: Use `THEME_SOURCES` from `src/core/server/rendering/views/theme` to generate the logic below.
 import LightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
