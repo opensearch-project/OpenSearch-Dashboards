@@ -149,10 +149,15 @@ describe('logging service', () => {
         platformLogger.warn('warn');
         platformLogger.error('error');
 
-        expect(mockConsoleLog).toHaveBeenCalledTimes(3);
+        /* ToDo: change to `toHaveBeenCalledTimes(3) and clean the snapshot when the dependency
+         *       on `elasticsearch` is removed. There should only be 3 calls but we get an extra
+         *       one from `agentkeepalive:deprecated`.
+         */
+        expect(mockConsoleLog).toHaveBeenCalledTimes(4);
 
         expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
+            "[agentkeepalive:deprecated] %s",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
@@ -180,10 +185,15 @@ describe('logging service', () => {
         platformLogger.warn('warn');
         platformLogger.error('error');
 
-        expect(mockConsoleLog).toHaveBeenCalledTimes(3);
+        /* ToDo: change to `toHaveBeenCalledTimes(3) and clean the snapshot when the dependency
+         *       on `elasticsearch` is removed. There should only be 3 calls but we get an extra
+         *       one from `agentkeepalive:deprecated`.
+         */
+        expect(mockConsoleLog).toHaveBeenCalledTimes(4);
 
         expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
+            "[agentkeepalive:deprecated] %s",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
@@ -217,10 +227,15 @@ describe('logging service', () => {
         platformLogger.warn('warn');
         platformLogger.error('error');
 
-        expect(mockConsoleLog).toHaveBeenCalledTimes(3);
+        /* ToDo: change to `toHaveBeenCalledTimes(3) and clean the snapshot when the dependency
+         *       on `elasticsearch` is removed. There should only be 3 calls but we get an extra
+         *       one from `agentkeepalive:deprecated`.
+         */
+        expect(mockConsoleLog).toHaveBeenCalledTimes(4);
 
         expect(getPlatformLogsFromMock(mockConsoleLog)).toMatchInlineSnapshot(`
           Array [
+            "[agentkeepalive:deprecated] %s",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][INFO ][test-file] info",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][WARN ][test-file] warn",
             "[xxxx-xx-xxTxx:xx:xx.xxxZ][ERROR][test-file] error",
