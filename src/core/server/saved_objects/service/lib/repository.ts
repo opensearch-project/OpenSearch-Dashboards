@@ -31,6 +31,7 @@
 import { omit, intersection } from 'lodash';
 import type { opensearchtypes } from '@opensearch-project/opensearch';
 import uuid from 'uuid';
+import { i18n } from '@osd/i18n';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DeleteDocumentResponse, OpenSearchClient } from '../../../opensearch/';
@@ -87,7 +88,9 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import { PUBLIC_WORKSPACE_ID } from '../../../../utils/constants';
+import { PUBLIC_WORKSPACE_ID, WorkspacePermissionMode } from '../../../../utils/constants';
+import { ACL, Principals } from '../../permission_control/acl';
+import { WORKSPACE_TYPE } from '../../../../server';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -1766,6 +1769,111 @@ export class SavedObjectsRepository {
     };
   }
 
+  async getPermissionQuery(props: {
+    permissionTypes: string[];
+    principals: Principals;
+    savedObjectType?: string[];
+  }) {
+    return ACL.generateGetPermittedSavedObjectsQueryDSL(
+      props.permissionTypes,
+      props.principals,
+      props.savedObjectType
+    );
+  }
+
+  async processFindOptions(props: {
+    options: SavedObjectsFindOptions & { permissionModes?: string[] };
+    principals: Principals;
+  }): Promise<SavedObjectsFindOptions> {
+    const { principals } = props;
+    const options = { ...props.options };
+    if (this.isRelatedToWorkspace(options.type)) {
+      options.queryDSL = await this.getPermissionQuery({
+        permissionTypes: options.permissionModes ?? [
+          WorkspacePermissionMode.LibraryRead,
+          WorkspacePermissionMode.LibraryWrite,
+          WorkspacePermissionMode.Management,
+        ],
+        principals,
+        savedObjectType: [WORKSPACE_TYPE],
+      });
+    } else {
+      const permittedWorkspaceIds = await SavedObjectsUtils.getPermittedWorkspaceIds({
+        permissionModes: [
+          WorkspacePermissionMode.LibraryRead,
+          WorkspacePermissionMode.LibraryWrite,
+          WorkspacePermissionMode.Management,
+        ],
+        principals,
+        repository: this,
+      });
+
+      if (options.workspaces) {
+        const permittedWorkspaces = options.workspaces.filter((item) =>
+          (permittedWorkspaceIds || []).includes(item)
+        );
+        if (!permittedWorkspaces.length) {
+          /**
+           * If user does not have any one workspace access
+           * deny the request
+           */
+          throw SavedObjectsErrorHelpers.decorateNotAuthorizedError(
+            new Error(
+              i18n.translate('workspace.permission.invalidate', {
+                defaultMessage: 'Invalid workspace permission',
+              })
+            )
+          );
+        }
+
+        /**
+         * Overwrite the options.workspaces when user has access on partial workspaces.
+         */
+        options.workspaces = permittedWorkspaces;
+      } else {
+        const queryDSL = await this.getPermissionQuery({
+          permissionTypes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
+          principals,
+          savedObjectType: Array.isArray(options.type) ? options.type : [options.type],
+        });
+        options.workspaces = undefined;
+        /**
+         * Select all the docs that
+         * 1. ACL matches read or write permission OR
+         * 2. workspaces matches library_read or library_write or management OR
+         * 3. Advanced settings
+         */
+        options.queryDSL = {
+          query: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        term: {
+                          type: 'config',
+                        },
+                      },
+                      queryDSL.query,
+                      {
+                        terms: {
+                          workspaces: permittedWorkspaceIds,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        };
+      }
+    }
+
+    return options;
+  }
+
   /**
    * Returns index specified by the given type or the default index
    *
@@ -1893,6 +2001,16 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
     return body;
+  }
+
+  /**
+   * check if the type include workspace
+   * Workspace permission check is totally different from object permission check.
+   * @param type
+   * @returns
+   */
+  private isRelatedToWorkspace(type: string | string[]): boolean {
+    return type === WORKSPACE_TYPE || (Array.isArray(type) && type.includes(WORKSPACE_TYPE));
   }
 }
 

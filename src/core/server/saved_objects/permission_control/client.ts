@@ -6,9 +6,8 @@ import { i18n } from '@osd/i18n';
 import { OpenSearchDashboardsRequest } from '../../http';
 import { ensureRawRequest } from '../../http/router';
 import { SavedObjectsServiceStart } from '../saved_objects_service';
-import { SavedObjectsBulkGetObject } from '../service';
+import { SavedObjectsBulkGetObject, SavedObjectsRepository, SavedObjectsUtils } from '../service';
 import { ACL, Principals, TransformedPermission, PrincipalType } from './acl';
-import { WORKSPACE_TYPE } from '../../../utils';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
@@ -128,19 +127,11 @@ export class SavedObjectsPermissionControl {
     permissionModes: SavedObjectsPermissionModes
   ) {
     const principals = this.getPrincipalsFromRequest(request);
-    const queryDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(permissionModes, principals, [
-      WORKSPACE_TYPE,
-    ]);
-    const repository = this.getInternalRepository();
-    try {
-      const result = await repository?.find({
-        type: [WORKSPACE_TYPE],
-        queryDSL,
-        perPage: 999,
-      });
-      return result?.saved_objects.map((item) => item.id);
-    } catch (e) {
-      return [];
-    }
+    const repository = this.getInternalRepository() as SavedObjectsRepository;
+    return await SavedObjectsUtils.getPermittedWorkspaceIds({
+      principals,
+      repository,
+      permissionModes,
+    });
   }
 }

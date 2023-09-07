@@ -16,3 +16,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export const config: PluginConfigDescriptor = {
   schema: configSchema,
 };
+
+export { WorkspaceFindOptions } from './types';
