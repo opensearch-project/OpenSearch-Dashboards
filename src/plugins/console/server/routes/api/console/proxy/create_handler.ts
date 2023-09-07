@@ -31,8 +31,8 @@
 import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboards/server';
 import { trimStart } from 'lodash';
 import { Readable } from 'stream';
-
-import { ApiResponse } from '@opensearch-project/opensearch/';
+import { stringify } from '@osd/std';
+import { ApiResponse } from '@opensearch-project/opensearch';
 
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
@@ -90,7 +90,7 @@ export const createHandler = ({
   const { path, method, dataSourceId } = query;
   const client = dataSourceId
     ? await ctx.dataSource.opensearch.getClient(dataSourceId)
-    : ctx.core.opensearch.client.asCurrentUser;
+    : ctx.core.opensearch.client.asCurrentUserWithLongNumeralsSupport;
   let opensearchResponse: ApiResponse;
 
   if (!pathFilters.some((re) => re.test(path))) {
@@ -116,14 +116,24 @@ export const createHandler = ({
       { headers: requestHeaders }
     );
 
-    const { statusCode, body: responseContent, warnings } = opensearchResponse;
+    const {
+      statusCode,
+      body: responseContent,
+      warnings,
+      headers: responseHeaders,
+    } = opensearchResponse;
 
     if (method.toUpperCase() !== 'HEAD') {
+      /* If a response is a parse JSON object, we need to use a custom `stringify` to handle BigInt
+       * values.
+       */
+      const isJSONResponse = responseHeaders?.['content-type']?.includes?.('application/json');
       return response.custom({
         statusCode: statusCode!,
-        body: responseContent,
+        body: isJSONResponse ? stringify(responseContent) : responseContent,
         headers: {
           warning: warnings || '',
+          ...(isJSONResponse ? { 'Content-Type': 'application/json; charset=utf-8' } : {}),
         },
       });
     }
@@ -139,7 +149,7 @@ export const createHandler = ({
   } catch (e: any) {
     const isResponseErrorFlag = isResponseError(e);
     if (!isResponseError) log.error(e);
-    const errorMessage = isResponseErrorFlag ? JSON.stringify(e.meta.body) : e.message;
+    const errorMessage = isResponseErrorFlag ? stringify(e.meta.body) : e.message;
     // core http route handler has special logic that asks for stream readable input to pass error opaquely
     const errorResponseBody = new Readable({
       read() {
