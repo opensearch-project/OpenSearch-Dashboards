@@ -48,6 +48,8 @@ export const Header = ({
   filteredCount,
   title,
   selectedCount,
+  hideImport = false,
+  showDuplicateAll = false,
 }: {
   onExportAll: () => void;
   onImport: () => void;
@@ -56,6 +58,8 @@ export const Header = ({
   filteredCount: number;
   title: string;
   selectedCount: number;
+  hideImport: boolean;
+  showDuplicateAll: boolean;
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -67,19 +71,21 @@ export const Header = ({
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              data-test-subj="copyObjects"
-              onClick={onCopy}
-              disabled={selectedCount === 0}
-            >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
-                defaultMessage="Duplicate All"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {showDuplicateAll && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                data-test-subj="copyObjects"
+                onClick={onCopy}
+                disabled={selectedCount === 0}
+              >
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+                  defaultMessage="Duplicate All"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
@@ -96,19 +102,21 @@ export const Header = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="importAction"
-              data-test-subj="importObjects"
-              onClick={onImport}
-            >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-                defaultMessage="Import"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {!hideImport && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="importAction"
+                data-test-subj="importObjects"
+                onClick={onImport}
+              >
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.header.importButtonLabel"
+                  defaultMessage="Import"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
               <FormattedMessage
