@@ -9,14 +9,14 @@ import { WorkspaceAttribute } from '..';
 const currentWorkspaceId$ = new BehaviorSubject<string>('');
 const workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
 const currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
-const hasFetchedWorkspaceList$ = new BehaviorSubject<boolean>(false);
+const initialized$ = new BehaviorSubject<boolean>(false);
 const workspaceEnabled$ = new BehaviorSubject<boolean>(false);
 
 const createWorkspacesSetupContractMock = () => ({
   currentWorkspaceId$,
   workspaceList$,
   currentWorkspace$,
-  hasFetchedWorkspaceList$,
+  initialized$,
   workspaceEnabled$,
   registerWorkspaceMenuRender: jest.fn(),
 });
@@ -25,7 +25,7 @@ const createWorkspacesStartContractMock = () => ({
   currentWorkspaceId$,
   workspaceList$,
   currentWorkspace$,
-  hasFetchedWorkspaceList$,
+  initialized$,
   workspaceEnabled$,
   renderWorkspaceMenu: jest.fn(),
 });

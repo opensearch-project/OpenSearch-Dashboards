@@ -46,9 +46,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     core.workspaces.workspaceEnabled$.next(true);
     core.workspaces.registerWorkspaceMenuRender(renderWorkspaceMenu);
-    
+
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
-    workspaceClient.init();
+    await workspaceClient.init();
 
     /**
      * Retrieve workspace id from url
