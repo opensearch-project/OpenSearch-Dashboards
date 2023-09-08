@@ -5,6 +5,7 @@
 - Bump version of tinygradient from 0.4.3 to 1.1.5 ([#4742](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4742))
 - Bump lmdb from 2.8.0 to 2.8.5 ([#4804](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4804))
 - Alias and bump mocha ([#4874](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4874))
+- Remove examples and other unwanted artifacts from installed dependencies ([#4896](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4896))
 
 ### 📈 Features/Enhancements
 - [Vis colors] Update legacy mapped colors in charts plugin to use ouiPaletteColorBlind() ([#4398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4398))
@@ -23,20 +24,14 @@
 - Allow plugin manifest config to define semver compatible OpenSearch plugin and verify if it is installed on the cluster ([#4612](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4612))
 - Eliminate duplicate dashboard breadcrumb text ID ([#4805](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4805))
 - [@osd/pm] Automate multi-target bootstrap and build ([#4650](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4650))
-- [Data Explorer] Merge to main ([#4806](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4806))
-- [Data Explorer][Discover 2.0] Restore single and surroundings doc view ([#4816](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4816))
-- [Data Explorer][Discover 2.0] Add missing change interval on TimeChart and improve fetch ([#4850](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4850))
-- [Data Explorer][Discover 2.0] Replace hide column and add move left/right ([#4838](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4838))
-- [Data Explorer][Discover 2.0] Append popout icon to oui link for doc viewer links ([#4855](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4855))
-- [Data Explorer][Discover 2.0] Allow Top Nav to update based on index pattern change ([#4889](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4889))
-- [Data Explorer] Add dismissible callout for discover ([#4857](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4857))
 - [Next theme] Add modal to notify users of theme updates ([#4715](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4715))
 - Change color fn used to calculate icon colors for search typeahead suggestions ([#4884](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4884))
 - [Next Theme] Make next theme the default ([#4854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4854))
 - [Vis Colors] Update color mapper to prioritize unique colors per vis ([#4890](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4890))
-- Feat (Advanced Settings): Make new "Appearance" category ([#4845](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4845))
+- [Advanced Settings] Consolidate settings into new "Appearance" category and add category IDs ([#4845](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4845))
 - Feat (home): Add new theme dashboard screenshots ([#4906](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4906))
 - Modify call out text for discover ([#4932](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4932))
+- Adds Data explorer framework and implements Discover using it ([#4806](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4806))
 - Use themes' definitions to render the initial view. This impacts the loading screen font and colors ([#4936](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4936))
 
 ### 🐛 Bug Fixes
