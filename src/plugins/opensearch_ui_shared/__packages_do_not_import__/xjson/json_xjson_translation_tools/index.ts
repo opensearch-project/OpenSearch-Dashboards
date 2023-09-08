@@ -28,13 +28,12 @@
  * under the License.
  */
 
-import { parse, stringify } from '@osd/std';
 import { extractJSONStringValues } from './parser';
 
 export function collapseLiteralStrings(data: string) {
   const splitData = data.split(`"""`);
   for (let idx = 1; idx < splitData.length - 1; idx += 2) {
-    splitData[idx] = stringify(splitData[idx]);
+    splitData[idx] = JSON.stringify(splitData[idx]);
   }
   return splitData.join('');
 }
@@ -80,7 +79,7 @@ export function expandLiteralStrings(data: string) {
       (candidate[candidate.length - 2] === '"' && candidate[candidate.length - 3] === '\\');
 
     if (!skip && candidate.match(/\\./)) {
-      result += `"""${parse(candidate)}"""`;
+      result += `"""${JSON.parse(candidate)}"""`;
     } else {
       result += candidate;
     }
