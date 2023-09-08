@@ -8,7 +8,6 @@ import React from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { SavedSearch } from '../../../saved_searches';
-import { NEW_DISCOVER_APP } from '../../../../common';
 import { Adapters } from '../../../../../inspector/public';
 import { TopNavMenuData } from '../../../../../navigation/public';
 import { ISearchSource, unhashUrl } from '../../../opensearch_dashboards_services';
@@ -30,7 +29,6 @@ export const getTopNavLinks = (
     history,
     inspector,
     core,
-    uiSettings,
     capabilities,
     share,
     toastNotifications,
@@ -194,7 +192,7 @@ export const getTopNavLinks = (
       share?.toggleShareContextMenu({
         anchorElement,
         allowEmbed: false,
-        allowShortUrl: capabilities.discover.createShortUrl as boolean,
+        allowShortUrl: capabilities.discover?.createShortUrl as boolean,
         shareableUrl: unhashUrl(window.location.href),
         objectId: savedSearch.id,
         objectType: 'search',
@@ -223,27 +221,9 @@ export const getTopNavLinks = (
     },
   };
 
-  const legacyDiscover: TopNavMenuData = {
-    id: 'discover-new',
-    label: i18n.translate('discover.localMenu.newDiscoverTitle', {
-      defaultMessage: 'New Discover',
-    }),
-    description: i18n.translate('discover.localMenu.newDiscoverDescription', {
-      defaultMessage: 'New Discover Experience',
-    }),
-    testId: 'discoverNewButton',
-    run: async () => {
-      await uiSettings.set(NEW_DISCOVER_APP, false);
-      window.location.reload();
-    },
-    type: 'toggle' as const,
-    emphasize: true,
-  };
-
   return [
-    legacyDiscover,
     newSearch,
-    ...(capabilities.discover.save ? [saveSearch] : []),
+    ...(capabilities.discover?.save ? [saveSearch] : []),
     openSearch,
     ...(share ? [shareSearch] : []), // Show share option only if share plugin is available
     inspectSearch,

@@ -30,16 +30,13 @@
 
 require('./polyfills');
 
-// must load before angular
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
 require('./flot_charts');
 
 // stateful deps
 export const OsdI18n = require('@osd/i18n');
-export const OsdI18nAngular = require('@osd/i18n/angular');
 export const OsdI18nReact = require('@osd/i18n/react');
-export const Angular = require('angular');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 export const OsdMonaco = require('@osd/monaco');
