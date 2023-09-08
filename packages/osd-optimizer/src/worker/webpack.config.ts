@@ -237,6 +237,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.js$/,
+          /* reactflow and some of its dependencies don't have es5 builds
+           * so we need to build from source and transpile for webpack v4
+           */
           include: /node_modules[\\/]@?reactflow/,
           use: {
             loader: 'babel-loader',
