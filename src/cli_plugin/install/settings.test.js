@@ -157,7 +157,7 @@ describe('parse function', function () {
         "timeout": 0,
         "urls": Array [
           "plugin name",
-          "https://ci.opensearch.org/ci/dbc/distribution-build-opensearch-dashboards/1234/latest/windows/x64/tar/builds/opensearch-dashboards/plugins/plugin name-1234.zip",
+          "https://ci.opensearch.org/ci/dbc/distribution-build-opensearch-dashboards/1234/latest/windows/x64/zip/builds/opensearch-dashboards/plugins/plugin name-1234.zip",
         ],
         "version": 1234,
         "workingPath": <absolute path>/plugins/.plugin.installing,
