@@ -209,11 +209,13 @@ exports[`SavedObjectsTable should render normally 1`] = `
 >
   <Header
     filteredCount={4}
+    hideImport={false}
     onCopy={[Function]}
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
     selectedCount={0}
+    showDuplicateAll={false}
   />
   <EuiSpacer
     size="xs"
@@ -265,6 +267,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
+      availableWorkspaces={Array []}
       basePath={
         BasePath {
           "basePath": "",
@@ -390,6 +393,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "onSelectionChange": [Function],
         }
       }
+      showDuplicate={false}
       totalItemCount={4}
     />
   </RedirectAppLinks>

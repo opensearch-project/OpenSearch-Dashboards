@@ -146,14 +146,16 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
-  workspaceId: string | null;
-  availableWorkspace?: WorkspaceAttribute[];
+  currentWorkspaceId: string | null;
+  availableWorkspaces?: WorkspaceAttribute[];
+  workspaceEnabled: boolean;
 }
 
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
   private currentWorkspaceIdSubscription?: Subscription;
   private workspacesSubscription?: Subscription;
+  private workspacesEnabledSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -183,30 +185,31 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
-      workspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
-      availableWorkspace: this.props.workspaces.workspaceList$.getValue(),
+      currentWorkspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
+      availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
+      workspaceEnabled: this.props.workspaces.workspaceEnabled$.getValue(),
     };
   }
 
   private get workspaceIdQuery() {
-    const { availableWorkspace, workspaceId } = this.state;
+    const { availableWorkspaces, currentWorkspaceId, workspaceEnabled } = this.state;
     // workspace is turned off
-    if (!availableWorkspace?.length) {
+    if (!workspaceEnabled) {
       return undefined;
-    }
-    if (!workspaceId || workspaceId === MANAGEMENT_WORKSPACE_ID) {
-      return availableWorkspace.map((ws) => ws.id);
-    } else if (workspaceId === PUBLIC_WORKSPACE_ID) {
-      return [PUBLIC_WORKSPACE_ID];
     } else {
-      return [workspaceId, PUBLIC_WORKSPACE_ID];
+      // application home
+      if (!currentWorkspaceId) {
+        return availableWorkspaces?.map((ws) => ws.id);
+      } else {
+        return [currentWorkspaceId];
+      }
     }
   }
 
   private get wsNameIdLookup() {
-    const { availableWorkspace } = this.state;
+    const { availableWorkspaces } = this.state;
     //  Assumption: workspace name is unique across the system
-    return availableWorkspace?.reduce((map, ws) => {
+    return availableWorkspaces?.reduce((map, ws) => {
       return map.set(ws.name, ws.id);
     }, new Map<string, string>());
   }
@@ -224,6 +227,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.debouncedFetchObjects.cancel();
     this.currentWorkspaceIdSubscription?.unsubscribe();
     this.workspacesSubscription?.unsubscribe();
+    this.workspacesEnabledSubscription?.unsubscribe();
   }
 
   fetchCounts = async () => {
@@ -304,12 +308,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const workspace = this.props.workspaces;
     this.currentWorkspaceIdSubscription = workspace.currentWorkspaceId$.subscribe((workspaceId) =>
       this.setState({
-        workspaceId,
+        currentWorkspaceId: workspaceId,
       })
     );
 
     this.workspacesSubscription = workspace.workspaceList$.subscribe((workspaceList) => {
-      this.setState({ availableWorkspace: workspaceList });
+      this.setState({ availableWorkspaces: workspaceList });
+    });
+
+    this.workspacesEnabledSubscription = workspace.workspaceEnabled$.subscribe((enabled) => {
+      this.setState({ workspaceEnabled: enabled });
     });
   };
 
@@ -684,16 +692,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
     const { applications } = this.props;
-    const newIndexPatternUrl = applications.getUrlForApp('management', {
-      path: 'opensearch-dashboards/indexPatterns',
-    });
+    const newIndexPatternUrl = applications.getUrlForApp('indexPatterns');
 
     return (
       <Flyout
         close={this.hideImportFlyout}
         done={this.finishImport}
         http={this.props.http}
-        workspaces={this.state.workspaceId ? [this.state.workspaceId] : undefined}
+        workspaces={this.state.currentWorkspaceId ? [this.state.currentWorkspaceId] : undefined}
         serviceRegistry={this.props.serviceRegistry}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={newIndexPatternUrl}
@@ -956,7 +962,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       filteredItemCount,
       isSearching,
       savedObjectCounts,
-      availableWorkspace,
+      availableWorkspaces: availableWorkspace,
+      workspaceEnabled,
+      currentWorkspaceId: workspaceId,
     } = this.state;
     const { http, allowedTypes, applications, namespaceRegistry } = this.props;
 
@@ -1008,7 +1016,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
 
     // Add workspace filter
-    if (availableWorkspace?.length) {
+    if (workspaceEnabled && availableWorkspace?.length) {
       const wsCounts = savedObjectCounts.workspaces || {};
       const wsFilterOptions = availableWorkspace
         .filter((ws) => {
@@ -1035,6 +1043,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       });
     }
 
+    // workspace enable and no workspace is selected
+    const hideImport = workspaceEnabled && !workspaceId;
+
     return (
       <EuiPageContent
         horizontalPosition="center"
@@ -1053,6 +1064,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           filteredCount={filteredItemCount}
           title={this.props.title}
           selectedCount={selectedSavedObjects.length}
+          hideImport={hideImport}
+          showDuplicateAll={workspaceEnabled}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>
@@ -1080,6 +1093,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onShowRelationships={this.onShowRelationships}
             canGoInApp={this.props.canGoInApp}
             dateFormat={this.props.dateFormat}
+            availableWorkspaces={this.state.availableWorkspaces}
+            showDuplicate={workspaceEnabled}
           />
         </RedirectAppLinks>
       </EuiPageContent>
