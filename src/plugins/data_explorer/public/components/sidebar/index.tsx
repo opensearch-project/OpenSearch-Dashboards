@@ -73,7 +73,7 @@ export const Sidebar: FC = ({ children }) => {
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
-        <EuiSplitPanel.Inner paddingSize="s" grow={false}>
+        <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
           <EuiComboBox
             placeholder="Select a datasource"
             singleSelection={{ asPlainText: true }}
@@ -101,7 +101,8 @@ export const Sidebar: FC = ({ children }) => {
               dispatch(setIndexPattern(value));
             }}
           />
-          <EuiSpacer size="s" />
+          {/* Hidden for the 2.10 release of Data Explorer. Uncomment when Data explorer is released */}
+          {/* <EuiSpacer size="s" />
           <EuiSelect
             options={viewOptions}
             value={view?.id}
@@ -109,7 +110,7 @@ export const Sidebar: FC = ({ children }) => {
               dispatch(setView(e.target.value));
             }}
             fullWidth
-          />
+          /> */}
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
           {children}

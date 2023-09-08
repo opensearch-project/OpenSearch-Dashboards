@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './_histogram.scss';
+
 import React, { useCallback } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -26,7 +28,7 @@ interface DiscoverChartProps {
   hits: number;
   resetQuery: () => void;
   showResetButton?: boolean;
-  timeField?: string;
+  isTimeBased?: boolean;
   services: DiscoverServices;
 }
 
@@ -37,7 +39,7 @@ export const DiscoverChart = ({
   data,
   hits,
   resetQuery,
-  timeField,
+  isTimeBased,
   services,
   showResetButton = false,
 }: DiscoverChartProps) => {
@@ -73,7 +75,7 @@ export const DiscoverChart = ({
           onResetQuery={resetQuery}
         />
       </EuiFlexItem>
-      {timeField && (
+      {isTimeBased && (
         <EuiFlexItem className="dscChart__TimechartHeader">
           <TimechartHeader
             bucketInterval={bucketInterval}
@@ -85,7 +87,7 @@ export const DiscoverChart = ({
           />
         </EuiFlexItem>
       )}
-      {timeField && chartData && (
+      {isTimeBased && chartData && (
         <EuiFlexItem grow={false}>
           <section
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {

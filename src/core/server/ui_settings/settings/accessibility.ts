@@ -43,7 +43,7 @@ export const getAccessibilitySettings = (): Record<string, UiSettingsParams> => 
         defaultMessage:
           'Turn off all unnecessary animations in the OpenSearch Dashboards UI. Refresh the page to apply the changes.',
       }),
-      category: ['accessibility'],
+      category: ['appearance'],
       requiresPageReload: true,
       schema: schema.boolean(),
     },
