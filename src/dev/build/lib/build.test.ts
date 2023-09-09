@@ -40,6 +40,7 @@ const config = new Config(
   true,
   {
     darwin: false,
+    darwinArm: false,
     linux: false,
     linuxArm: false,
     windows: false,

@@ -133,6 +133,7 @@ export function readCliArgs(argv: string[]) {
     targetPlatforms: {
       windows: Boolean(flags.windows),
       darwin: Boolean(flags.darwin),
+      darwinArm: Boolean(flags['darwin-arm']),
       linux: Boolean(flags.linux),
       linuxArm: Boolean(flags['linux-arm']),
     },

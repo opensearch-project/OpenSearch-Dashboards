@@ -61,6 +61,7 @@ if (showHelp) {
         --linux                 {dim Produce archives only for linux x64 platform}
         --linux-arm             {dim Produce archives only for linux arm64 platform}
         --darwin                {dim Produce archives only for darwin x64 platform}
+        --darwin-arm            {dim Produce archives only for darwin arm64 platform}
         --windows               {dim Produce archives only for windows x64 platform}
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}

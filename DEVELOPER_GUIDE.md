@@ -304,6 +304,7 @@ You could pass one or multiple flags. If you don't pass any flag, `yarn build-pl
 Currently, the supported flags for this script are:
 
 - `darwin` (builds Darwin x64)
+- `darwin-arm` (builds Darwin ARM64)
 - `linux` (builds Linux x64)
 - `linux-arm` (builds Linux ARM64).
 - `windows` (builds Windows x64)
