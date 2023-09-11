@@ -188,7 +188,7 @@ export class SavedObjectsManagementPlugin
             'Import, export, and manage your saved searches, visualizations, and dashboards.',
         }),
         icon: 'savedObjectsApp',
-        path: '/app/management/opensearch-dashboards/objects',
+        path: '/app/objects',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
       });
@@ -218,12 +218,14 @@ export class SavedObjectsManagementPlugin
     // depends on `getStartServices`, should not be awaited
     registerServices(this.serviceRegistry, core.getStartServices);
 
+    this.registerLibrarySubApp(core);
+
     return {
       actions: actionSetup,
       columns: columnSetup,
       namespaces: namespaceSetup,
       serviceRegistry: this.serviceRegistry,
-      registerLibrarySubApp: () => this.registerLibrarySubApp(core),
+      registerLibrarySubApp: () => {},
     };
   }
 

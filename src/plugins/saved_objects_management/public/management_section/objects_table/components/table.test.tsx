@@ -126,7 +126,7 @@ describe('Table', () => {
       meta: {
         title: `My-Dashboard-test`,
         icon: 'indexPatternApp',
-        editUrl: '/management/opensearch-dashboards/objects/savedDashboards/dashboard-1',
+        editUrl: '/objects/savedDashboards/dashboard-1',
         inAppUrl: {
           path: '/app/dashboards#/view/dashboard-1',
           uiCapabilitiesPath: 'dashboard.show',

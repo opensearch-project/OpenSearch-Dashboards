@@ -86,6 +86,7 @@ export async function importSavedObjectsFromStream({
       savedObjectsClient,
       workspaces,
       objectLimit,
+      importIdMap,
     });
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
@@ -126,7 +127,7 @@ export async function importSavedObjectsFromStream({
     importIdMap,
     overwrite,
     namespace,
-    workspaces,
+    ...(workspaces ? { workspaces } : {}),
   };
   const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];

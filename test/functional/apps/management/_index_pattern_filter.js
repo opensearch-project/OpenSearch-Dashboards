@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
       await opensearchDashboardsServer.uiSettings.replace({});
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
     });
 
@@ -52,7 +51,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should filter indexed fields', async function () {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.getFieldTypes();

@@ -45,7 +45,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await opensearchArchiver.unload('logstash_functional');
       await opensearchArchiver.unload('makelogs');
       await opensearchDashboardsServer.uiSettings.replace({});
-      await PageObjects.settings.navigateTo();
     });
 
     after(async () => {

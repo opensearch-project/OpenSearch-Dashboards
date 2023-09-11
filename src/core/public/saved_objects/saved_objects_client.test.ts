@@ -481,9 +481,6 @@ describe('SavedObjectsClient', () => {
                 ],
                 "sort_field": "sort_field",
                 "type": "index-pattern",
-                "workspaces": Array [
-                  "public",
-                ],
               },
             },
           ],
@@ -507,11 +504,7 @@ describe('SavedObjectsClient', () => {
             Object {
               "body": undefined,
               "method": "GET",
-              "query": Object {
-                "workspaces": Array [
-                  "public",
-                ],
-              },
+              "query": Object {},
             },
           ],
         ]

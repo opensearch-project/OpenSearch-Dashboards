@@ -49,12 +49,13 @@ export const regenerateIdsWithReference = async (props: {
   savedObjectsClient: SavedObjectsClientContract;
   workspaces?: string[];
   objectLimit: number;
+  importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
 }): Promise<Map<string, { id?: string; omitOriginId?: boolean }>> => {
-  const { savedObjects, savedObjectsClient, workspaces } = props;
+  const { savedObjects, savedObjectsClient, workspaces, importIdMap } = props;
   if (!workspaces || !workspaces.length) {
     return savedObjects.reduce((acc, object) => {
       return acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: false });
-    }, new Map<string, { id: string; omitOriginId?: boolean }>());
+    }, importIdMap);
   }
 
   const bulkGetResult = await savedObjectsClient.bulkGet(
@@ -77,5 +78,5 @@ export const regenerateIdsWithReference = async (props: {
       acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: false });
     }
     return acc;
-  }, new Map<string, { id: string; omitOriginId?: boolean }>());
+  }, importIdMap);
 };

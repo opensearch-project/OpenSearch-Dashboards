@@ -46,7 +46,6 @@ export default function ({ getService, getPageObjects }) {
       beforeEach(async function () {
         // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
         await opensearchDashboardsServer.uiSettings.replace({});
-        await PageObjects.settings.navigateTo();
         await opensearchArchiver.load('management');
         await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
       });
@@ -215,7 +214,6 @@ export default function ({ getService, getPageObjects }) {
       beforeEach(async function () {
         // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
         await opensearchDashboardsServer.uiSettings.replace({});
-        await PageObjects.settings.navigateTo();
         await opensearchArchiver.load('saved_objects_imports');
         await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
       });
