@@ -78,6 +78,9 @@ export function registerRoutes({
         },
         id
       );
+      if (!result.success) {
+        return res.ok({ body: result });
+      }
 
       return res.ok({
         body: result,
@@ -102,7 +105,9 @@ export function registerRoutes({
           request: req,
           logger,
         },
-        attributes
+        {
+          ...attributes,
+        }
       );
       return res.ok({ body: result });
     })
@@ -130,7 +135,9 @@ export function registerRoutes({
           logger,
         },
         id,
-        attributes
+        {
+          ...attributes,
+        }
       );
       return res.ok({ body: result });
     })
