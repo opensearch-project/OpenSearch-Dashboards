@@ -99,6 +99,12 @@ import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectsCopyModal } from './components/copy_modal';
 import { PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../../../../../core/public';
 
+export enum CopyState {
+  Single = 'single',
+  Selected = 'selected',
+  All = 'all',
+}
+
 interface ExportAllOption {
   id: string;
   label: string;
@@ -134,8 +140,10 @@ export interface SavedObjectsTableState {
   savedObjectCounts: Record<string, Record<string, number>>;
   activeQuery: Query;
   selectedSavedObjects: SavedObjectWithMetadata[];
+  copySelectedSavedObjects: SavedObjectWithMetadata[];
   isShowingImportFlyout: boolean;
   isShowingCopyModal: boolean;
+  copyState: CopyState;
   isSearching: boolean;
   filteredItemCount: number;
   isShowingRelationships: boolean;
@@ -173,8 +181,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       savedObjectCounts: { type: typeCounts } as Record<string, Record<string, number>>,
       activeQuery: Query.parse(''),
       selectedSavedObjects: [],
+      copySelectedSavedObjects: [],
       isShowingImportFlyout: false,
       isShowingCopyModal: false,
+      copyState: CopyState.Selected,
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
@@ -521,13 +531,28 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   ) => {
     const { notifications, http } = this.props;
     const objectsToCopy = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
-
+    let result;
     try {
-      await copySavedObjects(http, objectsToCopy, includeReferencesDeep, targetWorkspace);
+      result = await copySavedObjects(http, objectsToCopy, includeReferencesDeep, targetWorkspace);
+      if (result.success) {
+        notifications.toasts.addSuccess({
+          title: i18n.translate('savedObjectsManagement.objectsTable.copy.successNotification', {
+            defaultMessage:
+              'Copy ' + savedObjects.length.toString() + ' saved objects successfully',
+          }),
+        });
+      } else {
+        const failedCount = savedObjects.length - result.successCount;
+        notifications.toasts.addSuccess({
+          title: i18n.translate('savedObjectsManagement.objectsTable.copy.dangerNotification', {
+            defaultMessage: 'Unable to copy ' + failedCount.toString() + ' saved objects',
+          }),
+        });
+      }
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.copy.dangerNotification', {
-          defaultMessage: 'Unable to copy saved objects',
+          defaultMessage: 'Unable to copy all saved objects',
         }),
       });
       throw e;
@@ -535,11 +560,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     this.hideCopyModal();
     this.refreshObjects();
-    notifications.toasts.addSuccess({
-      title: i18n.translate('savedObjectsManagement.objectsTable.copy.successNotification', {
-        defaultMessage: 'Copy saved objects successfully',
-      }),
-    });
   };
 
   onExport = async (includeReferencesDeep: boolean) => {
@@ -726,7 +746,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   renderCopyModal() {
-    const { isShowingCopyModal } = this.state;
+    const { workspaces } = this.props;
+    const { isShowingCopyModal, copySelectedSavedObjects, copyState } = this.state;
 
     if (!isShowingCopyModal) {
       return null;
@@ -734,9 +755,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     return (
       <SavedObjectsCopyModal
-        selectedSavedObjects={this.state.selectedSavedObjects}
-        workspaces={this.props.workspaces}
+        selectedSavedObjects={copySelectedSavedObjects}
+        workspaces={workspaces}
         getCopyWorkspaces={this.getCopyWorkspaces}
+        copyState={copyState}
         onCopy={this.onCopy}
         onClose={this.hideCopyModal}
       />
@@ -1074,13 +1096,19 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
-          onCopy={() => this.setState({ isShowingCopyModal: true })}
+          hideImport={hideImport}
+          showDuplicateAll={workspaceEnabled}
+          onCopy={() =>
+            this.setState({
+              copySelectedSavedObjects: savedObjects,
+              isShowingCopyModal: true,
+              copyState: CopyState.All,
+            })
+          }
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
           title={this.props.title}
-          selectedCount={selectedSavedObjects.length}
-          hideImport={hideImport}
-          showDuplicateAll={workspaceEnabled}
+          objectCount={savedObjects.length}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>
@@ -1097,7 +1125,20 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
-            onCopy={() => this.setState({ isShowingCopyModal: true })}
+            onCopySelected={() =>
+              this.setState({
+                isShowingCopyModal: true,
+                copyState: CopyState.Selected,
+                copySelectedSavedObjects: selectedSavedObjects,
+              })
+            }
+            onCopySingle={(object) =>
+              this.setState({
+                copySelectedSavedObjects: [object],
+                isShowingCopyModal: true,
+                copyState: CopyState.Single,
+              })
+            }
             onActionRefresh={this.refreshObject}
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}

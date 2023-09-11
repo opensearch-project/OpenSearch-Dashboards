@@ -47,7 +47,7 @@ export const Header = ({
   onRefresh,
   filteredCount,
   title,
-  selectedCount,
+  objectCount,
   hideImport = false,
   showDuplicateAll = false,
 }: {
@@ -57,7 +57,7 @@ export const Header = ({
   onRefresh: () => void;
   filteredCount: number;
   title: string;
-  selectedCount: number;
+  objectCount: number;
   hideImport: boolean;
   showDuplicateAll: boolean;
 }) => (
@@ -77,7 +77,7 @@ export const Header = ({
                 size="s"
                 data-test-subj="copyObjects"
                 onClick={onCopy}
-                disabled={selectedCount === 0}
+                disabled={objectCount === 0}
               >
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"

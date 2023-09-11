@@ -57,8 +57,7 @@ import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import {
-  ALL_LIBRARY_OBJECTS_TITLE_WORDINGS,
-  ALL_LIBRARY_OBJECTS_WORDINGS,
+  MANAGE_LIBRARY_TITLE_WORDINGS,
   SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
   SAVED_QUERIES_WORDINGS,
   SAVED_SEARCHES_WORDINGS,
@@ -136,11 +135,11 @@ export class SavedObjectsManagementPlugin
       id: 'objects_all',
       appRoute: '/app/objects',
       exactRoute: true,
-      title: ALL_LIBRARY_OBJECTS_WORDINGS,
+      title: MANAGE_LIBRARY_TITLE_WORDINGS,
       order: 10000,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: mountWrapper({
-        title: ALL_LIBRARY_OBJECTS_TITLE_WORDINGS,
+        title: MANAGE_LIBRARY_TITLE_WORDINGS,
       }),
     });
 

@@ -28,4 +28,4 @@
  * under the License.
  */
 
-export { SavedObjectsTable } from './saved_objects_table';
+export { SavedObjectsTable, CopyState } from './saved_objects_table';

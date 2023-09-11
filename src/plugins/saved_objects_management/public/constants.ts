@@ -5,10 +5,10 @@
 
 import { i18n } from '@osd/i18n';
 
-export const ALL_LIBRARY_OBJECTS_WORDINGS = i18n.translate(
-  'savedObjectsManagement.allLibraryObjects',
+export const MANAGE_LIBRARY_TITLE_WORDINGS = i18n.translate(
+  'savedObjectsManagement.manageLibrary',
   {
-    defaultMessage: 'All library objects',
+    defaultMessage: 'Manage library',
   }
 );
 

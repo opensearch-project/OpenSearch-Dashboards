@@ -70,7 +70,8 @@ export interface TableProps {
   filters: any[];
   canDelete: boolean;
   onDelete: () => void;
-  onCopy: () => void;
+  onCopySelected: () => void;
+  onCopySingle: (object: SavedObjectWithMetadata) => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
@@ -79,7 +80,7 @@ export interface TableProps {
   items: SavedObjectWithMetadata[];
   itemId: string | (() => string);
   totalItemCount: number;
-  onQueryChange: (query: any, filterFields: string[]) => void;
+  onQueryChange: (query: any, filterFields?: string[]) => void;
   onTableChange: (table: any) => void;
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
@@ -171,7 +172,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       filters,
       selectionConfig: selection,
       onDelete,
-      onCopy,
+      onCopySelected,
+      onCopySingle,
       onActionRefresh,
       selectedSavedObjects,
       onTableChange,
@@ -296,7 +298,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           {
             name: i18n.translate(
               'savedObjectsManagement.objectsTable.table.columnActions.viewRelationshipsActionName',
-              { defaultMessage: 'Relationships' }
+              { defaultMessage: 'View object relationships' }
             ),
             description: i18n.translate(
               'savedObjectsManagement.objectsTable.table.columnActions.viewRelationshipsActionDescription',
@@ -310,6 +312,25 @@ export class Table extends PureComponent<TableProps, TableState> {
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
+          ...(showDuplicate
+            ? [
+                {
+                  name: i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionName',
+                    { defaultMessage: 'Duplicate' }
+                  ),
+                  description: i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionDescription',
+                    { defaultMessage: 'Duplicate this saved object' }
+                  ),
+                  type: 'icon',
+                  icon: 'copyClipboard',
+                  isPrimary: true,
+                  onClick: (object: SavedObjectWithMetadata<unknown>) => onCopySingle(object),
+                  'data-test-subj': 'savedObjectsTableAction-duplicate',
+                },
+              ]
+            : []),
           ...actionRegistry.getAll().map((action) => {
             return {
               ...action.euiAction,
@@ -428,7 +449,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       <EuiButtonIcon
         key="copySO"
         iconType="copyClipboard"
-        onClick={onCopy}
+        onClick={onCopySelected}
         isDisabled={selectedSavedObjects.length === 0}
         data-test-subj="savedObjectsManagementCopy"
       />
