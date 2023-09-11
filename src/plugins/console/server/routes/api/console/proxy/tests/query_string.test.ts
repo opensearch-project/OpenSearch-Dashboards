@@ -63,9 +63,7 @@ describe('Console Proxy Route', () => {
       describe('contains full url', () => {
         it('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
-          const [
-            [args],
-          ] = opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mock.calls;
+          const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
 
           expect(args.path).toBe('/http://evil.com/test?pretty=true');
         });
@@ -73,18 +71,14 @@ describe('Console Proxy Route', () => {
       describe('starts with a slash', () => {
         it('keeps as it is', async () => {
           await request('GET', '/index/id');
-          const [
-            [args],
-          ] = opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mock.calls;
+          const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
           expect(args.path).toBe('/index/id?pretty=true');
         });
       });
       describe(`doesn't start with a slash`, () => {
         it('adds slash to path before sending request', async () => {
           await request('GET', 'index/id');
-          const [
-            [args],
-          ] = opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mock.calls;
+          const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
           expect(args.path).toBe('/index/id?pretty=true');
         });
       });
@@ -92,9 +86,7 @@ describe('Console Proxy Route', () => {
       describe(`contains query parameter`, () => {
         it('adds slash to path before sending request', async () => {
           await request('GET', '_cat/tasks?v');
-          const [
-            [args],
-          ] = opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mock.calls;
+          const [[args]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
           expect(args.path).toBe('/_cat/tasks?v=&pretty=true');
         });
       });
