@@ -6383,9 +6383,9 @@ exports[`Header handles visibility and lock changes 1`] = `
                                     className="euiText euiText--medium"
                                   >
                                     <strong>
-
+                                       
                                       OpenSearch Dashboards
-
+                                       
                                     </strong>
                                   </div>
                                 </EuiText>

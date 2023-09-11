@@ -1,20 +1,20 @@
 # Saved objects management
 
-Provides a UI (via the `management` plugin) to find and manage all saved objects in one place (you can see the primary page by navigating to `/app/management/opensearch-dashboards/objects`). Not to be confused with the `savedObjects` plugin, which provides all the core capabilities of saved objects.
+Provides a UI (via the `management` plugin) to find and manage all saved objects in one place (you can see the primary page by navigating to `/app/objects`). Not to be confused with the `savedObjects` plugin, which provides all the core capabilities of saved objects.
 
 From the primary UI page, this plugin allows you to:
 1. Search/view/delete saved objects and their relationships
 2. Import/export saved objects
 3. Inspect/edit raw saved object values without validation
 
-For 3., this plugin can also be used to provide a route/page for editing, such as `/app/management/opensearch-dashboards/objects/savedVisualizations/{visualizationId}`, although plugins are also free to provide or host alternate routes for this purpose (see index patterns, for instance, which provide their own integration and UI via the `management` plugin directly).
+For 3., this plugin can also be used to provide a route/page for editing, such as `/app/objects/savedVisualizations/{visualizationId}`, although plugins are also free to provide or host alternate routes for this purpose (see index patterns, for instance, which provide their own integration and UI via the `management` plugin directly).
 
 ## Making a new saved object type manageable
 
 1. Create a new `SavedObjectsType` or add the `management` property to an existing one. (See [`SavedObjectsTypeManagementDefinition`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/e1380f14deb98cc7cce55c3b82c2d501826a78c3/src/core/server/saved_objects/types.ts#L247-L285) for explanation of its properties)
 2. Register saved object type via `core.savedObjects.registerType(...)` as part of plugin server setup method
 3. Implement a way to save the object (e.g. via `savedObjectsClient.create(...)` or a `savedObjectLoader`)
-4. After these steps, you should be able to save objects and view/search for them in Saved Objects management (`/app/management/opensearch-dashboards/objects`)
+4. After these steps, you should be able to save objects and view/search for them in Saved Objects management (`/app/objects`)
 
 ## Enabling edit links from saved objects management
 
@@ -25,7 +25,7 @@ For 3., this plugin can also be used to provide a route/page for editing, such a
 
 ## Using saved objects management to inspect/edit new plugin objects
 
-You'll notice that when clicking on the "Inspect" button from the saved objects management table, you'll usually be routed to something like `/app/management/opensearch-dashboards/objects/savedVisualizations/` (where the route itself is determined by the `management.getEditUrl` method of the `SavedObjectsType`). But to register a similar route for a new saved object type, you'll need to create a new `savedObjectLoader` and register it with the management plugin.
+You'll notice that when clicking on the "Inspect" button from the saved objects management table, you'll usually be routed to something like `/app/objects/savedVisualizations/` (where the route itself is determined by the `management.getEditUrl` method of the `SavedObjectsType`). But to register a similar route for a new saved object type, you'll need to create a new `savedObjectLoader` and register it with the management plugin.
 
 ### Creating `savedObjectLoader`
 

@@ -20,8 +20,7 @@ export const visBuilderSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle: ({ attributes: { title } }: SavedObject<VisBuilderSavedObjectAttributes>) => title,
-    getEditUrl: ({ id }: SavedObject) =>
-      `/management/opensearch-dashboards/objects/savedVisBuilder/${encodeURIComponent(id)}`,
+    getEditUrl: ({ id }: SavedObject) => `/objects/savedVisBuilder/${encodeURIComponent(id)}`,
     getInAppUrl({ id }: SavedObject) {
       return {
         path: `/app/${PLUGIN_ID}${EDIT_PATH}/${encodeURIComponent(id)}`,

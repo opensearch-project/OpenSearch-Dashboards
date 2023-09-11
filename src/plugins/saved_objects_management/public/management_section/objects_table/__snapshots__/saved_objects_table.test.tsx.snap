@@ -340,7 +340,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "2",
             "meta": Object {
-              "editUrl": "/management/opensearch-dashboards/objects/savedSearches/2",
+              "editUrl": "/objects/savedSearches/2",
               "icon": "search",
               "inAppUrl": Object {
                 "path": "/discover/2",
@@ -353,7 +353,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "3",
             "meta": Object {
-              "editUrl": "/management/opensearch-dashboards/objects/savedDashboards/3",
+              "editUrl": "/objects/savedDashboards/3",
               "icon": "dashboardApp",
               "inAppUrl": Object {
                 "path": "/dashboard/3",
@@ -366,7 +366,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "4",
             "meta": Object {
-              "editUrl": "/management/opensearch-dashboards/objects/savedVisualizations/4",
+              "editUrl": "/objects/savedVisualizations/4",
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/edit/4",

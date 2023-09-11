@@ -70,7 +70,7 @@ export class AdvancedSettingsPlugin
             'Customize your OpenSearch Dashboards experience — change the date format, turn on dark mode, and more.',
         }),
         icon: 'gear',
-        path: '/app/management/opensearch-dashboards/settings',
+        path: '/app/settings',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
       });

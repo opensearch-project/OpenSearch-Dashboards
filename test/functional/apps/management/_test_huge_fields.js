@@ -45,7 +45,6 @@ export default function ({ getService, getPageObjects }) {
         false
       );
       await opensearchArchiver.loadIfNeeded('large_fields');
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 

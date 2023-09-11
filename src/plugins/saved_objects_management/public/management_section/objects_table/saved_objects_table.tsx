@@ -214,6 +214,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }, new Map<string, string>());
   }
 
+  private formatWorkspaceIdParams<T extends { workspaces?: string[] }>(
+    obj: T
+  ): T | Omit<T, 'workspaces'> {
+    const { workspaces, ...others } = obj;
+    if (workspaces) {
+      return obj;
+    }
+    return others;
+  }
+
   componentDidMount() {
     this._isMounted = true;
 
@@ -240,11 +250,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
 
-    const filteredCountOptions: SavedObjectCountOptions = {
+    const filteredCountOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
       typesToInclude: filteredTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
-    };
+    });
 
     if (availableNamespaces.length) {
       const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
@@ -278,11 +288,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions[id] = true;
     });
 
-    const countOptions: SavedObjectCountOptions = {
+    const countOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
       typesToInclude: allowedTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
-    };
+    });
 
     if (availableNamespaces.length) {
       countOptions.namespacesToInclude = availableNamespaces;
@@ -332,14 +342,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const filteredTypes = filterQuery(allowedTypes, visibleTypes);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions: SavedObjectsFindOptions = {
+    const findOptions: SavedObjectsFindOptions = this.formatWorkspaceIdParams({
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
       fields: ['id'],
       type: filteredTypes,
       workspaces: this.workspaceIdQuery,
-    };
+    });
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
     if (availableNamespaces.length) {
@@ -539,9 +549,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     let blob;
     try {
-      blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep, {
-        workspaces: this.workspaceIdQuery,
-      });
+      blob = await fetchExportObjects(
+        http,
+        objectsToExport,
+        includeReferencesDeep,
+        this.formatWorkspaceIdParams({
+          workspaces: this.workspaceIdQuery,
+        })
+      );
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
@@ -576,9 +591,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         exportTypes,
         queryText ? `${queryText}*` : undefined,
         isIncludeReferencesDeepChecked,
-        {
+        this.formatWorkspaceIdParams({
           workspaces: this.workspaceIdQuery,
-        }
+        })
       );
     } catch (e) {
       notifications.toasts.addDanger({

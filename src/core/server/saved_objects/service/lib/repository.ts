@@ -90,7 +90,7 @@ import {
 } from './utils';
 import { PUBLIC_WORKSPACE_ID, WorkspacePermissionMode } from '../../../../utils/constants';
 import { ACL, Principals } from '../../permission_control/acl';
-import { WORKSPACE_TYPE } from '../../../../server';
+import { WORKSPACE_TYPE } from '../../../../utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -447,9 +447,10 @@ export class SavedObjectsRepository {
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
-          ? bulkGetResponse?.body.docs[opensearchRequestIndex]
+          ? bulkGetResponse?.body.docs?.[opensearchRequestIndex]
           : undefined;
         const docFound = indexFound && actualResult?.found === true;
+        let hasSetNamespace = false;
         // @ts-expect-error MultiGetHit._source is optional
         if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
           const { id, type } = object;
@@ -464,11 +465,20 @@ export class SavedObjectsRepository {
               },
             },
           };
+        } else {
+          hasSetNamespace = true;
+          if (this._registry.isSingleNamespace(object.type)) {
+            savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
+          } else if (this._registry.isMultiNamespace(object.type)) {
+            savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
+          }
         }
-        savedObjectNamespaces =
-          initialNamespaces ||
-          // @ts-expect-error MultiGetHit._source is optional
-          getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+        if (!hasSetNamespace) {
+          savedObjectNamespaces =
+            initialNamespaces ||
+            // @ts-expect-error MultiGetHit._source is optional
+            getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+        }
         // @ts-expect-error MultiGetHit._source is optional
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {

@@ -32,7 +32,7 @@ import { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsFindResponse, SavedObjectsRepository } from '..';
 import { Principals } from '../../permission_control/acl';
 import { SavedObjectsPermissionModes } from '../../permission_control/client';
-import { WORKSPACE_TYPE } from '../../../index';
+import { WORKSPACE_TYPE } from '../../../../utils';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';

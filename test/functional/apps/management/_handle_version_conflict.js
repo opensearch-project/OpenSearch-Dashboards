@@ -55,7 +55,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Should be able to surface version conflict notification while creating scripted field', async function () {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
@@ -84,7 +83,6 @@ export default function ({ getService, getPageObjects }) {
 
     it('Should be able to surface version conflict notification while changing field format', async function () {
       const fieldName = 'geo.srcdest';
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       log.debug('Starting openControlsByName (' + fieldName + ')');

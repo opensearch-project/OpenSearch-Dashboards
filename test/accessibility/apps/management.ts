@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await opensearchDashboardsServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
-      await PageObjects.settings.navigateTo();
+      await PageObjects.common.navigateToApp('management');
     });
 
     after(async () => {

@@ -88,7 +88,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('allows to update the saved object when submitting', async () => {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
 
       let objects = await PageObjects.savedObjects.getRowTitles();
@@ -154,7 +153,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
       ];
 
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
 
       const objects = await PageObjects.savedObjects.getRowTitles();

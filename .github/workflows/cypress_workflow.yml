@@ -56,7 +56,7 @@ jobs:
           path: ${{ env.FTR_PATH }}
           repository: opensearch-project/opensearch-dashboards-functional-test
           # revert this to '${{ github.base_ref }}'
-          ref: 'main'
+          ref: 'workspace'
 
       - name: Get Cypress version
         id: cypress_version

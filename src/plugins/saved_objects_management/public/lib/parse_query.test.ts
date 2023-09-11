@@ -39,6 +39,8 @@ describe('getQueryText', () => {
           return [{ value: 'lala' }, { value: 'lolo' }];
         } else if (field === 'namespaces') {
           return [{ value: 'default' }];
+        } else if (field === 'workspaces') {
+          return [{ value: 'workspaces' }];
         }
         return [];
       },
@@ -47,6 +49,7 @@ describe('getQueryText', () => {
       queryText: 'foo bar',
       visibleTypes: 'lala',
       visibleNamespaces: 'default',
+      visibleWorkspaces: 'workspaces',
     });
   });
 });

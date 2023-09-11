@@ -41,14 +41,9 @@ export default function ({ getService, getPageObjects }) {
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
       // Delete .kibana index and then wait for OpenSearch Dashboards to re-create it
-      return opensearchDashboardsServer.uiSettings
-        .replace({})
-        .then(function () {
-          return PageObjects.settings.navigateTo();
-        })
-        .then(function () {
-          return PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
-        });
+      return opensearchDashboardsServer.uiSettings.replace({}).then(function () {
+        return PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
+      });
     });
 
     describe('special character handling', () => {
@@ -66,7 +61,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       after(async () => {
-        await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       });
     });
