@@ -94,9 +94,10 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         });
       }
 
-      const workspaces = req.query.workspaces
-        ? Array<string>().concat(req.query.workspaces)
-        : undefined;
+      let workspaces = req.query.workspaces;
+      if (typeof workspaces === 'string') {
+        workspaces = [workspaces];
+      }
 
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,
