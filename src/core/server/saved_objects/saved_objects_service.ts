@@ -349,7 +349,7 @@ export class SavedObjectsService
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
     });
 
-    this.permissionControl = new SavedObjectsPermissionControl();
+    this.permissionControl = new SavedObjectsPermissionControl(this.logger);
 
     registerPermissionCheckRoutes({
       http: setupDeps.http,
