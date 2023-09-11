@@ -32,6 +32,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
 
+const DEFAULT_INPUT_VALUE = `GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}`;
+
 export const useDataInit = () => {
   const [error, setError] = useState<Error | null>(null);
   const [done, setDone] = useState<boolean>(false);
@@ -58,7 +65,7 @@ export const useDataInit = () => {
           const newObject = await objectStorageClient.text.create({
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            text: '',
+            text: DEFAULT_INPUT_VALUE,
           });
           dispatch({ type: 'setCurrentTextObject', payload: newObject });
         } else {

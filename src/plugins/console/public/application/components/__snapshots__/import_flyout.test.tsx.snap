@@ -1,0 +1,489 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImportFlyout Component renders correctly 1`] = `
+<IntlProvider
+  locale="en"
+>
+  <ImportFlyout
+    close={[MockFunction]}
+    refresh={[MockFunction]}
+  >
+    <EuiFlyout
+      onClose={[MockFunction]}
+      size="s"
+    >
+      <div
+        data-eui="EuiFlyout"
+        role="dialog"
+      >
+        <button
+          data-test-subj="euiFlyoutCloseButton"
+          onClick={[Function]}
+          type="button"
+        />
+        <EuiFlyoutHeader
+          hasBorder={true}
+        >
+          <div
+            className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+          >
+            <EuiTitle
+              size="m"
+            >
+              <h2
+                className="euiTitle euiTitle--medium"
+              >
+                <FormattedMessage
+                  defaultMessage="Import queries"
+                  id="console.ImportFlyout.importQueriesTitle"
+                  values={Object {}}
+                >
+                  <span>
+                    Import queries
+                  </span>
+                </FormattedMessage>
+              </h2>
+            </EuiTitle>
+          </div>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <div
+            className="euiFlyoutBody"
+          >
+            <div
+              className="euiFlyoutBody__overflow"
+              tabIndex={0}
+            >
+              <div
+                className="euiFlyoutBody__overflowContent"
+              >
+                <EuiForm>
+                  <div
+                    className="euiForm"
+                  >
+                    <EuiFormRow
+                      describedByIds={Array []}
+                      display="row"
+                      fullWidth={true}
+                      hasChildLabel={true}
+                      hasEmptyLabelSpace={false}
+                      label={
+                        <FormattedMessage
+                          defaultMessage="Select a file to import"
+                          id="console.ImportFlyout.selectFileToImportFormRowLabel"
+                          values={Object {}}
+                        />
+                      }
+                      labelType="label"
+                    >
+                      <div
+                        className="euiFormRow euiFormRow--fullWidth"
+                        id="generated-id-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <EuiFormLabel
+                            className="euiFormRow__label"
+                            htmlFor="generated-id"
+                            isFocused={false}
+                            type="label"
+                          >
+                            <label
+                              className="euiFormLabel euiFormRow__label"
+                              htmlFor="generated-id"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Select a file to import"
+                                id="console.ImportFlyout.selectFileToImportFormRowLabel"
+                                values={Object {}}
+                              >
+                                <span>
+                                  Select a file to import
+                                </span>
+                              </FormattedMessage>
+                            </label>
+                          </EuiFormLabel>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <EuiFilePicker
+                            accept=".ndjson, .json"
+                            compressed={false}
+                            data-test-subj="queryFilePicker"
+                            display="large"
+                            fullWidth={true}
+                            id="generated-id"
+                            initialPromptText={
+                              <FormattedMessage
+                                defaultMessage="Import"
+                                id="console.ImportFlyout.importPromptText"
+                                values={Object {}}
+                              />
+                            }
+                            name="queryFileImport"
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                          >
+                            <EuiI18n
+                              defaults={
+                                Array [
+                                  "Clear selected files",
+                                  "files selected",
+                                ]
+                              }
+                              tokens={
+                                Array [
+                                  "euiFilePicker.clearSelectedFiles",
+                                  "euiFilePicker.filesSelected",
+                                ]
+                              }
+                            >
+                              <div
+                                className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+                              >
+                                <div
+                                  className="euiFilePicker__wrap"
+                                >
+                                  <EuiValidatableControl>
+                                    <input
+                                      accept=".ndjson, .json"
+                                      aria-describedby="generated-id-filePicker__prompt"
+                                      className="euiFilePicker__input"
+                                      data-test-subj="queryFilePicker"
+                                      id="generated-id"
+                                      name="queryFileImport"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onDragLeave={[Function]}
+                                      onDragOver={[Function]}
+                                      onDrop={[Function]}
+                                      onFocus={[Function]}
+                                      type="file"
+                                    />
+                                  </EuiValidatableControl>
+                                  <div
+                                    className="euiFilePicker__prompt"
+                                    id="generated-id-filePicker__prompt"
+                                  >
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiFilePicker__icon"
+                                      size="l"
+                                      type="importAction"
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className="euiFilePicker__icon"
+                                        data-euiicon-type="importAction"
+                                        size="l"
+                                      />
+                                    </EuiIcon>
+                                    <div
+                                      className="euiFilePicker__promptText"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Import"
+                                        id="console.ImportFlyout.importPromptText"
+                                        values={Object {}}
+                                      >
+                                        <span>
+                                          Import
+                                        </span>
+                                      </FormattedMessage>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </EuiI18n>
+                          </EuiFilePicker>
+                        </div>
+                      </div>
+                    </EuiFormRow>
+                    <EuiFormRow
+                      describedByIds={Array []}
+                      display="row"
+                      fullWidth={true}
+                      hasChildLabel={true}
+                      hasEmptyLabelSpace={false}
+                      labelType="label"
+                    >
+                      <div
+                        className="euiFormRow euiFormRow--fullWidth"
+                        id="generated-id-row"
+                      >
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <ImportModeControl
+                            id="generated-id"
+                            initialValues={
+                              Object {
+                                "overwrite": false,
+                              }
+                            }
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            updateSelection={[Function]}
+                          >
+                            <EuiFormFieldset
+                              legend={
+                                Object {
+                                  "children": <EuiTitle
+                                    size="xs"
+                                  >
+                                    <span>
+                                      Import options
+                                    </span>
+                                  </EuiTitle>,
+                                }
+                              }
+                            >
+                              <fieldset>
+                                <EuiFormLegend>
+                                  <legend
+                                    className="euiFormLegend"
+                                  >
+                                    <EuiTitle
+                                      size="xs"
+                                    >
+                                      <span
+                                        className="euiTitle euiTitle--xsmall"
+                                      >
+                                        Import options
+                                      </span>
+                                    </EuiTitle>
+                                  </legend>
+                                </EuiFormLegend>
+                                <EuiRadioGroup
+                                  idSelected="overwriteDisabled"
+                                  onChange={[Function]}
+                                  options={
+                                    Array [
+                                      Object {
+                                        "id": "overwriteDisabled",
+                                        "label": "Merge with existing queries",
+                                      },
+                                      Object {
+                                        "id": "overwriteEnabled",
+                                        "label": "Overwrite existing queries",
+                                      },
+                                    ]
+                                  }
+                                >
+                                  <div>
+                                    <EuiRadio
+                                      checked={true}
+                                      className="euiRadioGroup__item"
+                                      id="overwriteDisabled"
+                                      key="0"
+                                      label="Merge with existing queries"
+                                      onChange={[Function]}
+                                    >
+                                      <div
+                                        className="euiRadio euiRadioGroup__item"
+                                      >
+                                        <input
+                                          checked={true}
+                                          className="euiRadio__input"
+                                          id="overwriteDisabled"
+                                          onChange={[Function]}
+                                          type="radio"
+                                        />
+                                        <div
+                                          className="euiRadio__circle"
+                                        />
+                                        <label
+                                          className="euiRadio__label"
+                                          htmlFor="overwriteDisabled"
+                                        >
+                                          Merge with existing queries
+                                        </label>
+                                      </div>
+                                    </EuiRadio>
+                                    <EuiRadio
+                                      checked={false}
+                                      className="euiRadioGroup__item"
+                                      id="overwriteEnabled"
+                                      key="1"
+                                      label="Overwrite existing queries"
+                                      onChange={[Function]}
+                                    >
+                                      <div
+                                        className="euiRadio euiRadioGroup__item"
+                                      >
+                                        <input
+                                          checked={false}
+                                          className="euiRadio__input"
+                                          id="overwriteEnabled"
+                                          onChange={[Function]}
+                                          type="radio"
+                                        />
+                                        <div
+                                          className="euiRadio__circle"
+                                        />
+                                        <label
+                                          className="euiRadio__label"
+                                          htmlFor="overwriteEnabled"
+                                        >
+                                          Overwrite existing queries
+                                        </label>
+                                      </div>
+                                    </EuiRadio>
+                                  </div>
+                                </EuiRadioGroup>
+                              </fieldset>
+                            </EuiFormFieldset>
+                          </ImportModeControl>
+                        </div>
+                      </div>
+                    </EuiFormRow>
+                  </div>
+                </EuiForm>
+              </div>
+            </div>
+          </div>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <div
+            className="euiFlyoutFooter"
+          >
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiButtonEmpty
+                      data-test-subj="importQueriesCancelBtn"
+                      disabled={false}
+                      onClick={[MockFunction]}
+                      size="s"
+                    >
+                      <button
+                        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                        data-test-subj="importQueriesCancelBtn"
+                        disabled={false}
+                        onClick={[MockFunction]}
+                        type="button"
+                      >
+                        <EuiButtonContent
+                          className="euiButtonEmpty__content"
+                          iconSide="left"
+                          iconSize="m"
+                          textProps={
+                            Object {
+                              "className": "euiButtonEmpty__text",
+                            }
+                          }
+                        >
+                          <span
+                            className="euiButtonContent euiButtonEmpty__content"
+                          >
+                            <span
+                              className="euiButtonEmpty__text"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Cancel"
+                                id="console.importFlyout.import.cancelButtonLabel"
+                                values={Object {}}
+                              >
+                                <span>
+                                  Cancel
+                                </span>
+                              </FormattedMessage>
+                            </span>
+                          </span>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonEmpty>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiButton
+                      data-test-subj="importQueriesConfirmBtn"
+                      disabled={true}
+                      fill={true}
+                      isLoading={false}
+                      onClick={[Function]}
+                      size="s"
+                    >
+                      <EuiButtonDisplay
+                        baseClassName="euiButton"
+                        data-test-subj="importQueriesConfirmBtn"
+                        disabled={true}
+                        element="button"
+                        fill={true}
+                        isDisabled={true}
+                        isLoading={false}
+                        onClick={[Function]}
+                        size="s"
+                        type="button"
+                      >
+                        <button
+                          className="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                          data-test-subj="importQueriesConfirmBtn"
+                          disabled={true}
+                          onClick={[Function]}
+                          style={
+                            Object {
+                              "minWidth": undefined,
+                            }
+                          }
+                          type="button"
+                        >
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconSide="left"
+                            isLoading={false}
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Import"
+                                  id="console.importFlyout.import.confirmButtonLabel"
+                                  values={Object {}}
+                                >
+                                  <span>
+                                    Import
+                                  </span>
+                                </FormattedMessage>
+                              </span>
+                            </span>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonDisplay>
+                    </EuiButton>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiFlyoutFooter>
+      </div>
+    </EuiFlyout>
+  </ImportFlyout>
+</IntlProvider>
+`;
