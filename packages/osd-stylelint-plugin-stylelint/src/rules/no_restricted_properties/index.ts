@@ -73,7 +73,10 @@ const ruleFunction: stylelint.Rule = (
       }
 
       reportInfo.message = messages.expected(
-        getNotCompliantMessage(`Usage of property "${decl.prop}" is not allowed.`)
+        getNotCompliantMessage(
+          `Specifying the "${decl.prop}" property is not allowed.`,
+          propertyRule.explanation
+        )
       );
       report(reportInfo);
     });

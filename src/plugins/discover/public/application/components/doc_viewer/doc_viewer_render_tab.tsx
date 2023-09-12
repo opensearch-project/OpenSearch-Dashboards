@@ -29,7 +29,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { DocViewRenderFn, DocViewRenderProps } from '../../../doc_views/doc_views_types';
 
 interface Props {
   render: DocViewRenderFn;
@@ -37,7 +37,6 @@ interface Props {
 }
 /**
  * Responsible for rendering a tab provided by a render function.
- * So any other framework can be used (E.g. legacy Angular 3rd party plugin code)
  * The provided `render` function is called with a reference to the
  * component's `HTMLDivElement` as 1st arg and `renderProps` as 2nd arg
  */

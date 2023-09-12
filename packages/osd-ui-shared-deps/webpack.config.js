@@ -45,8 +45,8 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     'osd-ui-shared-deps': './entry.js',
     'osd-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
     'osd-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
-    'osd-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
-    'osd-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
+    'osd-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_next_dark.css'],
+    'osd-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_next_light.css'],
   },
   context: __dirname,
   devtool: dev ? '#cheap-source-map' : false,
@@ -76,7 +76,30 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'comment-stripper',
+            options: {
+              language: 'css',
+            },
+          },
+        ],
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'comment-stripper',
+            options: {
+              language: 'css',
+            },
+          },
+          'sass-loader',
+        ],
       },
       {
         include: [require.resolve('./theme.ts')],

@@ -28,8 +28,11 @@
  * under the License.
  */
 
-import { notificationServiceMock } from '../../../../../core/public/mocks';
-import { httpServiceMock } from '../../../../../core/public/mocks';
+import {
+  notificationServiceMock,
+  uiSettingsServiceMock,
+  httpServiceMock,
+} from '../../../../../core/public/mocks';
 
 import { HistoryMock } from '../../services/history.mock';
 import { SettingsMock } from '../../services/settings.mock';
@@ -53,7 +56,9 @@ export const serviceContextMock = {
         settings: new SettingsMock(storage),
         history: new HistoryMock(storage),
         notifications: notificationServiceMock.createSetupContract(),
+        uiSettings: uiSettingsServiceMock.createSetupContract(),
         objectStorageClient: {} as any,
+        http,
       },
       docLinkVersion: 'NA',
     };

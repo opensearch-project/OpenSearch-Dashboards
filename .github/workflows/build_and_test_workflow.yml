@@ -318,7 +318,7 @@ jobs:
         working-directory: ./artifacts
     strategy:
       matrix:
-        version: [osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0, osd-2.6.0, osd-2.7.0]
+        version: [osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0, osd-2.6.0, osd-2.7.0, osd-2.8.0, osd-2.9.0]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -346,7 +346,7 @@ jobs:
 
       - name: Set OpenSearch URL
         run: |
-          echo "OPENSEARCH_URL=https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.VERSION }}/latest/linux/x64/tar/dist/opensearch/opensearch-${{ env.VERSION }}-linux-x64.tar.gz" >> $GITHUB_ENV
+          echo "OPENSEARCH_URL=https://artifacts.opensearch.org/snapshots/core/opensearch/${{ env.VERSION }}-SNAPSHOT/opensearch-min-${{ env.VERSION }}-SNAPSHOT-linux-x64-latest.tar.gz" >> $GITHUB_ENV
 
       - name: Verify if OpenSearch is available for version
         id: verify-opensearch-exists

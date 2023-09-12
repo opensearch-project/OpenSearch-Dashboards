@@ -32,13 +32,14 @@ import { i18n } from '@osd/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { CoreStart, ScopedHistory } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import { EmbeddableFactory, EmbeddableStart } from '../../../../embeddable/public';
 import {
   ContainerOutput,
   EmbeddableFactoryDefinition,
   ErrorEmbeddable,
   Container,
-} from '../../embeddable_plugin';
+  EmbeddableFactory,
+  EmbeddableStart,
+} from '../../../../embeddable/public';
 import { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 
@@ -46,6 +47,7 @@ interface StartServices {
   capabilities: CoreStart['application']['capabilities'];
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
+  chrome: CoreStart['chrome'];
   notifications: CoreStart['notifications'];
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;

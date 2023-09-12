@@ -47,6 +47,7 @@ import {
 } from 'src/core/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { isEmpty } from 'lodash';
+import { createHashHistory } from 'history';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -72,7 +73,12 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../opensearch_dashboards_react/public';
-import { createOsdUrlTracker, Storage } from '../../opensearch_dashboards_utils/public';
+import {
+  createOsdUrlTracker,
+  Storage,
+  createOsdUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../opensearch_dashboards_utils/public';
 import {
   initAngularBootstrap,
   OpenSearchDashboardsLegacySetup,
@@ -93,7 +99,6 @@ import {
   DashboardContainerFactoryDefinition,
   ExpandPanelAction,
   ExpandPanelActionContext,
-  RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
   ACTION_UNLINK_FROM_LIBRARY,
@@ -121,7 +126,7 @@ import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
-import { DashboardProvider } from './types';
+import { DashboardProvider, DashboardServices } from './types';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -263,6 +268,7 @@ export class DashboardPlugin
       return {
         capabilities: coreStart.application.capabilities,
         application: coreStart.application,
+        chrome: coreStart.chrome,
         notifications: coreStart.notifications,
         overlays: coreStart.overlays,
         embeddable: deps.embeddable,
@@ -351,7 +357,7 @@ export class DashboardPlugin
       createSortText: 'Dashboard',
       createLinkText: (
         <FormattedMessage
-          id="opensearch-dashboards-react.tableListView.listing.createNewItemButtonLabel"
+          id="dashboard.tableListView.listing.createNewItemButtonLabel"
           defaultMessage="{entityName}"
           values={{ entityName: 'Dashboard' }}
         />
@@ -369,6 +375,13 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;
+
+        // make sure the index pattern list is up to date
+        pluginsStart.data.indexPatterns.clearCache();
+        // make sure a default index pattern exists
+        // if not, the page will be redirected to management and dashboard won't be rendered
+        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
+
         appMounted();
         const {
           embeddable: embeddableStart,
@@ -380,8 +393,23 @@ export class DashboardPlugin
           savedObjects,
         } = pluginsStart;
 
-        const deps: RenderDeps = {
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
+
+        const history = createHashHistory(); // need more research
+        const services: DashboardServices = {
+          ...coreStart,
           pluginInitializerContext: this.initializerContext,
+          opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
+          history,
+          osdUrlStateStorage: createOsdUrlStateStorage({
+            history,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          }),
           core: coreStart,
           dashboardConfig,
           navigateToDefaultApp,
@@ -404,23 +432,27 @@ export class DashboardPlugin
           },
           localStorage: new Storage(localStorage),
           usageCollection,
-          scopedHistory: () => this.currentHistory!,
+          scopedHistory: params.history,
           setHeaderActionMenu: params.setHeaderActionMenu,
-          savedObjects,
+          savedObjectsPublic: savedObjects,
           restorePreviousUrl,
+          toastNotifications: coreStart.notifications.toasts,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
         params.element.classList.add('dshAppContainer');
-        const unmount = renderApp(params.element, params.appBasePath, deps);
+        const { renderApp } = await import('./application');
+        const unmount = renderApp(params, services);
         return () => {
+          params.element.classList.remove('dshAppContainer');
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };
       },
     };
 
+    // TODO: delete this when discover de-angular is completed
     initAngularBootstrap();
 
     core.application.register(app);

@@ -49,8 +49,8 @@ export const opensearchDashboards: ExpressionFunctionOpenSearchDashboards = {
 
   inputTypes: ['opensearch_dashboards_context', 'null'],
 
-  help: i18n.translate('expressions.functions.kibana.help', {
-    defaultMessage: 'Gets opensearch dashboards global context',
+  help: i18n.translate('expressions.functions.opensearchDashboards.help', {
+    defaultMessage: 'Gets OpenSearch Dashboards global context',
   }),
 
   args: {},

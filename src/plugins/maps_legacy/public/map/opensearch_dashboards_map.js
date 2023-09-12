@@ -62,7 +62,7 @@ function makeFitControl(fitContainer, opensearchDashboardsMap) {
       );
       $(this._fitContainer)
         .html(
-          `<a class="kuiIcon fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`
+          `<a class="mapButton fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`
         )
         .on('click', (e) => {
           e.preventDefault();
@@ -243,7 +243,7 @@ export class OpenSearchDashboardsMap extends EventEmitter {
 
   addLayer(opensearchDashboardsLayer) {
     const onshowTooltip = (event) => {
-      if (!this._showTooltip) {
+      if (!this._showTooltip || !event.content) {
         return;
       }
 

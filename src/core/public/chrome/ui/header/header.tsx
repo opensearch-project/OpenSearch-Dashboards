@@ -64,6 +64,7 @@ import { HomeLoader } from './home_loader';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
+import type { Logos } from '../../../../common/types';
 
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
@@ -90,6 +91,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   branding: ChromeBranding;
+  logos: Logos;
   survey: string | undefined;
 }
 
@@ -102,6 +104,7 @@ export function Header({
   homeHref,
   branding,
   survey,
+  logos,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -115,9 +118,9 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
-  const { useExpandedHeader = true, darkMode } = branding;
+  const { useExpandedHeader = true } = branding;
 
-  const headerTheme: EuiHeaderProps['theme'] = 'dark';
+  const expandedHeaderColorScheme: EuiHeaderProps['theme'] = 'dark';
 
   return (
     <>
@@ -126,7 +129,7 @@ export function Header({
           {useExpandedHeader && (
             <EuiHeader
               className="expandedHeader"
-              theme={headerTheme}
+              theme={expandedHeaderColorScheme}
               position="fixed"
               sections={[
                 {
@@ -137,9 +140,9 @@ export function Header({
                       navLinks$={observables.navLinks$}
                       navigateToApp={application.navigateToApp}
                       branding={branding}
-                      basePath={basePath}
-                      /* This `theme` should match the theme of EuiHeader */
-                      theme={headerTheme}
+                      logos={logos}
+                      /* This color-scheme should match the `theme` of the parent EuiHeader */
+                      backgroundColorScheme={expandedHeaderColorScheme}
                     />,
                   ],
                   borders: 'none',
@@ -200,6 +203,7 @@ export function Header({
                   navLinks$={observables.navLinks$}
                   navigateToApp={application.navigateToApp}
                   branding={branding}
+                  logos={logos}
                   loadingCount$={observables.loadingCount$}
                 />
               </EuiHeaderSectionItem>
@@ -208,7 +212,6 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
-              isDarkMode={darkMode}
             />
 
             <EuiHeaderSectionItem border="none">
@@ -260,7 +263,7 @@ export function Header({
             }
           }}
           customNavLink$={observables.customNavLink$}
-          branding={branding}
+          logos={logos}
         />
       </header>
     </>

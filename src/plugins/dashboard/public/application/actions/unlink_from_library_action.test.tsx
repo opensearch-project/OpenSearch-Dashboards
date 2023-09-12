@@ -28,25 +28,27 @@
  * under the License.
  */
 
-import { isErrorEmbeddable, IContainer, ReferenceOrValueEmbeddable } from '../../embeddable_plugin';
-import { DashboardContainer } from '../embeddable';
-import { getSampleDashboardInput } from '../test_helpers';
+import {
+  isErrorEmbeddable,
+  IContainer,
+  ReferenceOrValueEmbeddable,
+  ViewMode,
+  SavedObjectEmbeddableInput,
+  ErrorEmbeddable,
+} from '../../../../embeddable/public';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
+} from '../../../../embeddable/public/lib/test_samples';
+import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+import { DashboardContainer } from '../embeddable';
+import { getSampleDashboardInput } from '../test_helpers';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { UnlinkFromLibraryAction } from '.';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import {
-  ViewMode,
-  SavedObjectEmbeddableInput,
-  ErrorEmbeddable,
-} from '../../../../embeddable/public';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -66,6 +68,7 @@ beforeEach(async () => {
     SavedObjectFinder: () => null,
     application: {} as any,
     embeddable: start,
+    chrome: {} as any,
     inspector: {} as any,
     notifications: {} as any,
     overlays: coreStart.overlays,

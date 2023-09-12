@@ -32,12 +32,11 @@ import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { I18nProvider } from '@osd/i18n/react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
-import { CoreStart } from 'src/core/public';
+import { CoreStart, Logos } from 'src/core/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { FetchResult } from 'src/plugins/newsfeed/public';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from 'src/plugins/home/public';
 import { Overview } from './overview';
-import { OverviewPluginBranding } from '../plugin';
 
 interface OpenSearchDashboardsOverviewAppDeps {
   basename: string;
@@ -47,7 +46,7 @@ interface OpenSearchDashboardsOverviewAppDeps {
   newsfeed$?: Observable<FetchResult | null | void>;
   solutions: FeatureCatalogueSolution[];
   features: FeatureCatalogueEntry[];
-  branding: OverviewPluginBranding;
+  logos: Logos;
 }
 
 export const OpenSearchDashboardsOverviewApp = ({
@@ -55,7 +54,7 @@ export const OpenSearchDashboardsOverviewApp = ({
   newsfeed$,
   solutions,
   features,
-  branding,
+  logos,
 }: OpenSearchDashboardsOverviewAppDeps) => {
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
 
@@ -78,7 +77,7 @@ export const OpenSearchDashboardsOverviewApp = ({
               newsFetchResult={newsFetchResult}
               solutions={solutions}
               features={features}
-              branding={branding}
+              logos={logos}
             />
           </Route>
         </Switch>
