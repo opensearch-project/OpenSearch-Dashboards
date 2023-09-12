@@ -34,7 +34,7 @@ import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
 import { getSplits } from '../../helpers/get_splits';
 import { mapBucket } from '../../helpers/map_bucket';
-import { evaluate } from 'tinymath';
+import { evaluate } from './evaluate';
 
 export function mathAgg(resp, panel, series, meta) {
   return (next) => (results) => {
