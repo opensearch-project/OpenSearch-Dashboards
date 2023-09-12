@@ -249,12 +249,14 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       status: 'loading',
       loadingMessage: undefined,
     });
+    const { workspaces } = this.props;
 
     try {
       const updatedState = await resolveImportErrors({
         http: this.props.http,
         state: this.state,
         getConflictResolutions: this.getConflictResolutions,
+        workspaces,
       });
       this.setState(updatedState);
     } catch (e) {
