@@ -176,9 +176,10 @@ export class PluginsSystem {
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`For plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
-      await this.crossCompatibilityService.checkPluginVersionCompatibility(
+      this.crossCompatibilityService.checkPluginVersionCompatibility(
         plugin.requiredEnginePlugins,
-        opensearchInstalledPlugins
+        opensearchInstalledPlugins,
+        pluginName
       );
     }
   }

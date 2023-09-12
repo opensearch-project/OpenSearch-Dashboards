@@ -20,15 +20,15 @@ export class CrossCompatibilityService {
   private readonly log: Logger;
 
   constructor(coreContext: CoreContext) {
-    this.log = coreContext.logger.get('version-compatibility-service');
+    this.log = coreContext.logger.get('cross-compatibility-service');
   }
 
   start({ opensearch, plugins }: StartDeps): CrossCompatibilityServiceStart {
-    this.log.warn('Starting version compatibility service');
+    this.log.warn('Starting cross compatibility service');
     return {
       verifyOpenSearchPluginsState: (pluginName: string) => {
         const pluginOpenSearchDeps = plugins.get(pluginName) || {};
-        return this.verifyOpenSearchPluginsState(opensearch, pluginOpenSearchDeps);
+        return this.verifyOpenSearchPluginsState(opensearch, pluginOpenSearchDeps, pluginName);
       },
     };
   }
@@ -48,17 +48,15 @@ export class CrossCompatibilityService {
     }
   }
 
-  public async checkPluginVersionCompatibility(
+  public checkPluginVersionCompatibility(
     pluginOpenSearchDeps: CompatibleEnginePluginVersions,
-    opensearchInstalledPlugins: CatPluginsResponse
+    opensearchInstalledPlugins: CatPluginsResponse,
+    dashboardsPluginName: string
   ) {
     const results: CrossCompatibilityResult[] = [];
     for (const [pluginName, versionRange] of Object.entries(pluginOpenSearchDeps)) {
       // add check to see if the Dashboards plugin version is compatible with installed OpenSearch plugin
-      const {
-        isCompatible,
-        installedPluginVersions,
-      } = await this.isVersionCompatibleOSPluginInstalled(
+      const { isCompatible, installedPluginVersions } = this.isVersionCompatibleOSPluginInstalled(
         opensearchInstalledPlugins,
         pluginName,
         versionRange
@@ -66,7 +64,7 @@ export class CrossCompatibilityService {
       results.push({
         pluginName,
         isCompatible: !isCompatible ? false : true,
-        incompatibleReason: !isCompatible
+        incompatibilityReason: !isCompatible
           ? `OpenSearch plugin "${pluginName}" in the version range "${versionRange}" is not installed on the OpenSearch for the OpenSearch Dashboards plugin to function as expected.`
           : '',
         installedVersions: installedPluginVersions,
@@ -74,7 +72,7 @@ export class CrossCompatibilityService {
 
       if (!isCompatible) {
         this.log.warn(
-          `OpenSearch plugin "${pluginName}" is not installed on the cluster for the OpenSearch Dashboards plugin to function as expected.`
+          `OpenSearch plugin "${pluginName}" is not installed on the cluster for the OpenSearch Dashboards plugin "${dashboardsPluginName}" to function as expected.`
         );
       }
     }
@@ -83,19 +81,21 @@ export class CrossCompatibilityService {
 
   private async verifyOpenSearchPluginsState(
     opensearch: OpenSearchServiceStart,
-    pluginOpenSearchDeps: CompatibleEnginePluginVersions
+    pluginOpenSearchDeps: CompatibleEnginePluginVersions,
+    pluginName: string
   ): Promise<CrossCompatibilityResult[]> {
-    this.log.warn('Checking OpenSearch Plugin version compatibility');
+    this.log.info('Checking OpenSearch Plugin version compatibility');
     // make _cat/plugins?format=json call to the OpenSearch instance
     const opensearchInstalledPlugins = await this.getOpenSearchPlugins(opensearch);
-    const results = await this.checkPluginVersionCompatibility(
+    const results = this.checkPluginVersionCompatibility(
       pluginOpenSearchDeps,
-      opensearchInstalledPlugins
+      opensearchInstalledPlugins,
+      pluginName
     );
     return results;
   }
 
-  private async isVersionCompatibleOSPluginInstalled(
+  private isVersionCompatibleOSPluginInstalled(
     opensearchInstalledPlugins: CatPluginsResponse,
     depPluginName: string,
     depPluginVersionRange: string
@@ -110,6 +110,6 @@ export class CrossCompatibilityService {
         }
       }
     });
-    return { isCompatible, installedPluginVersions };
+    return { isCompatible, installedPluginVersions: [...installedPluginVersions] };
   }
 }

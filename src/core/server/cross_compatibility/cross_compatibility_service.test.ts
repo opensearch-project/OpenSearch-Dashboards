@@ -26,7 +26,7 @@ describe('CrossCompatibilityService', () => {
     } as any);
 
     plugins?.set('foo', { 'os-plugin': '1.0.0 - 2.0.0' });
-    plugins?.set('bar', { 'os-plugin': '^3.0.0' });
+    plugins?.set('incompatiblePlugin', { 'os-plugin': '^3.0.0' });
     plugins?.set('test', {});
     service = new CrossCompatibilityService(mockCoreContext.create());
   });
@@ -48,8 +48,8 @@ describe('CrossCompatibilityService', () => {
     expect(results.length).toEqual(1);
     expect(results[0].pluginName).toEqual('os-plugin');
     expect(results[0].isCompatible).toEqual(true);
-    expect(results[0].incompatibleReason).toEqual('');
-    expect(results[0].installedVersions).toEqual(new Set(['1.1.0.0']));
+    expect(results[0].incompatibilityReason).toEqual('');
+    expect(results[0].installedVersions).toEqual(['1.1.0.0']);
     expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
   });
 
@@ -64,7 +64,7 @@ describe('CrossCompatibilityService', () => {
   });
 
   it('should return an array of CrossCompatibilityResult objects with the incompatible reason if the plugin is not installed', async () => {
-    const pluginName = 'bar';
+    const pluginName = 'incompatiblePlugin';
     const startDeps = { opensearch, plugins };
     const startResult = await service.start(startDeps);
     const results = await startResult.verifyOpenSearchPluginsState(pluginName);
@@ -72,10 +72,10 @@ describe('CrossCompatibilityService', () => {
     expect(results.length).toEqual(1);
     expect(results[0].pluginName).toEqual('os-plugin');
     expect(results[0].isCompatible).toEqual(false);
-    expect(results[0].incompatibleReason).toEqual(
+    expect(results[0].incompatibilityReason).toEqual(
       'OpenSearch plugin "os-plugin" in the version range "^3.0.0" is not installed on the OpenSearch for the OpenSearch Dashboards plugin to function as expected.'
     );
-    expect(results[0].installedVersions).toEqual(new Set(['1.1.0.0']));
+    expect(results[0].installedVersions).toEqual(['1.1.0.0']);
     expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
   });
 });

@@ -15,11 +15,11 @@ export interface CrossCompatibilityResult {
    * The reason the OpenSearch Plugin version is not compatible with the plugin.
    * This will be `undefined` if the OpenSearch Plugin version is compatible.
    */
-  incompatibleReason?: string;
+  incompatibilityReason?: string;
 
   /**
-   * The set of versions of dependency OpenSearch Plugin if any present on the cluster.
-   * This will be empty set if the OpenSearch Plugin is not present.
+   * The array of versions of dependency OpenSearch Plugin if any present on the cluster.
+   * This will be empty if the OpenSearch Plugin is not present.
    */
-  installedVersions: Set<string>;
+  installedVersions: string[];
 }
