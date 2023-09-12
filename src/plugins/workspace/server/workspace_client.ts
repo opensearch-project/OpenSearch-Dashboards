@@ -166,9 +166,14 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
         }
       }
-      await client.update<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, id, attributes, {
+
+      await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
+        id,
         permissions,
+        overwrite: true,
+        version: workspaceInDB.version,
       });
+
       return {
         success: true,
         result: true,
