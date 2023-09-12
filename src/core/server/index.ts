@@ -323,6 +323,7 @@ export {
   SavedObjectsShareObjects,
   SavedObjectsAddToWorkspacesOptions,
   SavedObjectsAddToWorkspacesResponse,
+  SavedObjectsDeleteByWorkspaceOptions,
   Permissions,
   ACL,
   SavedObjectsPermissionControlContract,

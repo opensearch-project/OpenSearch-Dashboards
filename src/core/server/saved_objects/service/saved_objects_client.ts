@@ -228,6 +228,16 @@ export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBas
   refresh?: MutatingOperationRefreshSetting;
 }
 
+export interface SavedObjectsDeleteFromWorkspacesOptions {
+  /** The OpenSearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+export interface SavedObjectsDeleteByWorkspaceOptions {
+  /** The OpenSearch supports only boolean flag for this operation */
+  refresh?: boolean;
+}
+
 /**
  *
  * @public
@@ -235,6 +245,11 @@ export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBas
 export interface SavedObjectsDeleteFromNamespacesResponse {
   /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
   namespaces: string[];
+}
+
+export interface SavedObjectsDeleteFromWorkspacesResponse {
+  /** The workspaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
+  workspaces: string[];
 }
 
 /**
@@ -483,6 +498,18 @@ export class SavedObjectsClient {
     principals: Principals;
   }): Promise<SavedObjectsFindOptions> => {
     return await this._repository.processFindOptions(props);
+  };
+
+  /**
+   * delete saved objects by workspace id
+   * @param workspace
+   * @param options
+   */
+  deleteByWorkspace = async (
+    workspace: string,
+    options: SavedObjectsDeleteByWorkspaceOptions = {}
+  ): Promise<any> => {
+    return await this._repository.deleteByWorkspace(workspace, options);
   };
 
   /**

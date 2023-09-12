@@ -168,7 +168,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   const getMockGetResponse = (
-    { type, id, references, namespace: objectNamespace, originId },
+    { type, id, references, namespace: objectNamespace, originId, workspaces },
     namespace
   ) => {
     const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
@@ -182,6 +182,7 @@ describe('SavedObjectsRepository', () => {
       _source: {
         ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
         ...(registry.isMultiNamespace(type) && { namespaces: [namespaceId ?? 'default'] }),
+        workspaces,
         ...(originId && { originId }),
         type,
         [type]: { title: 'Testing' },
@@ -2213,32 +2214,33 @@ describe('SavedObjectsRepository', () => {
     const type = 'index-pattern';
     const id = 'logstash-*';
     const namespace = 'foo-namespace';
+    const workspaces = ['bar-workspace'];
+
+    const mockGet = async (type, id, options) => {
+      const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace, workspaces);
+      client.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
+      );
+    };
 
     const deleteSuccess = async (type, id, options) => {
-      if (registry.isMultiNamespace(type)) {
-        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
-        client.get.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
-        );
-      }
+      mockGet(type, id, options);
       client.delete.mockResolvedValueOnce(
         opensearchClientMock.createSuccessTransportRequestPromise({ result: 'deleted' })
       );
       const result = await savedObjectsRepository.delete(type, id, options);
-      expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
+      expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 2 : 1);
       return result;
     };
 
     describe('client calls', () => {
       it(`should use the OpenSearch delete action when not using a multi-namespace type`, async () => {
         await deleteSuccess(type, id);
-        expect(client.get).not.toHaveBeenCalled();
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
       it(`should use OpenSearch get action then delete action when using a multi-namespace type`, async () => {
         await deleteSuccess(MULTI_NAMESPACE_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(1);
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
@@ -2294,6 +2296,7 @@ describe('SavedObjectsRepository', () => {
         );
 
         client.delete.mockClear();
+        client.get.mockClear();
         await deleteSuccess(MULTI_NAMESPACE_TYPE, id, { namespace });
         expect(client.delete).toHaveBeenCalledWith(
           expect.objectContaining({ id: `${MULTI_NAMESPACE_TYPE}:${id}` }),
@@ -2364,6 +2367,25 @@ describe('SavedObjectsRepository', () => {
         expect(client.get).toHaveBeenCalledTimes(1);
       });
 
+      it(`throws when the document has multiple workspaces and the force option is not enabled`, async () => {
+        const workspaces = ['foo-workspace', 'bar-workspace'];
+        const response = getMockGetResponse({
+          type: NAMESPACE_AGNOSTIC_TYPE,
+          id,
+          namespace,
+          workspaces,
+        });
+        client.get.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+        await expect(
+          savedObjectsRepository.delete(NAMESPACE_AGNOSTIC_TYPE, id, { namespace })
+        ).rejects.toThrowError(
+          'Unable to delete saved object that exists in multiple workspaces, use the `force` option to delete it anyway'
+        );
+        expect(client.get).toHaveBeenCalledTimes(1);
+      });
+
       it(`throws when the type is multi-namespace and the document has all namespaces and the force option is not enabled`, async () => {
         const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
         response._source.namespaces = ['*'];
@@ -2379,6 +2401,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when OpenSearch is unable to find the document during delete`, async () => {
+        mockGet(type, id);
         client.delete.mockResolvedValueOnce(
           opensearchClientMock.createSuccessTransportRequestPromise({ result: 'not_found' })
         );
@@ -2387,6 +2410,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when OpenSearch is unable to find the index during delete`, async () => {
+        mockGet(type, id);
         client.delete.mockResolvedValueOnce(
           opensearchClientMock.createSuccessTransportRequestPromise({
             error: { type: 'index_not_found_exception' },
@@ -2397,6 +2421,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when OpenSearch returns an unexpected response`, async () => {
+        mockGet(type, id);
         client.delete.mockResolvedValueOnce(
           opensearchClientMock.createSuccessTransportRequestPromise({
             result: 'something unexpected',

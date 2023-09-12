@@ -28,6 +28,7 @@ import {
   SavedObjectsPermissionControlContract,
   WORKSPACE_TYPE,
   WorkspacePermissionMode,
+  SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsErrorHelpers,
 } from '../../../../core/server';
 import { ConfigSchema } from '../../config';
@@ -385,6 +386,18 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.addToWorkspaces(objects, targetWorkspaces, options);
     };
 
+    const deleteByWorkspaceWithPermissionControl = async (
+      workspace: string,
+      options: SavedObjectsDeleteByWorkspaceOptions = {}
+    ) => {
+      await this.validateMultiWorkspacesPermissions([workspace], wrapperOptions.request, [
+        WorkspacePermissionMode.LibraryWrite,
+        WorkspacePermissionMode.Management,
+      ]);
+
+      return await wrapperOptions.client.deleteByWorkspace(workspace, options);
+    };
+
     const isDashboardAdmin = this.isDashboardAdmin(wrapperOptions.request);
 
     if (isDashboardAdmin) {
@@ -406,6 +419,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       update: updateWithWorkspacePermissionControl,
       bulkUpdate: bulkUpdateWithWorkspacePermissionControl,
       addToWorkspaces: addToWorkspacesWithPermissionControl,
+      deleteByWorkspace: deleteByWorkspaceWithPermissionControl,
     };
   };
 
