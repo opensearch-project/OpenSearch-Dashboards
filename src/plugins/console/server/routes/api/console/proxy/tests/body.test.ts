@@ -50,7 +50,9 @@ describe('Console Proxy Route', () => {
       const requestHandlerContextMock = coreMock.createRequestHandlerContext();
       opensearchClient = requestHandlerContextMock.opensearch.client;
 
-      opensearchClient.asCurrentUser.transport.request.mockResolvedValueOnce(mockResponse);
+      opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mockResolvedValueOnce(
+        mockResponse
+      );
       const handler = createHandler(getProxyRouteHandlerDeps({}));
 
       return handler(
