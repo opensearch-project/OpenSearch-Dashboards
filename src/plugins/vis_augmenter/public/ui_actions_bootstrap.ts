@@ -71,8 +71,15 @@ export const bootstrapUiActions = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(externalActionTrigger);
   uiActions.registerTrigger(pluginResourceDeleteTrigger);
 
-  uiActions.addTriggerAction(EXTERNAL_ACTION_TRIGGER, openEventsFlyoutAction);
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, viewEventsOptionAction);
-  uiActions.addTriggerAction(SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteAction);
   uiActions.addTriggerAction(PLUGIN_RESOURCE_DELETE_TRIGGER, pluginResourceDeleteAction);
+  uiActions.addTriggerAction(EXTERNAL_ACTION_TRIGGER, openEventsFlyoutAction);
+
+  // These triggers are registered by other plugins. If they are disabled can throw an error.
+  try {
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, viewEventsOptionAction);
+    uiActions.addTriggerAction(SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteAction);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(e);
+  }
 };

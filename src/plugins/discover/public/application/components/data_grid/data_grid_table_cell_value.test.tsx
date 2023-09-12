@@ -147,7 +147,9 @@ describe('Testing fetchTableDataCell function', () => {
         compressed={true}
         type="inline"
       >
-        <EuiDescriptionListTitle>
+        <EuiDescriptionListTitle
+          className="osdDescriptionListFieldTitle"
+        >
           order_date
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription

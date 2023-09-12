@@ -36,7 +36,6 @@ export const NewThemeModal: FC<Props> = ({ addBasePath, onClose }) => {
     services: { application },
   } = useOpenSearchDashboards<CoreStart>();
 
-  // TODO: Finalize copy
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
@@ -71,20 +70,18 @@ export const NewThemeModal: FC<Props> = ({ addBasePath, onClose }) => {
           </EuiText>
         </RedirectAppLinks>
         <EuiSpacer />
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
-            {/* TODO: Replace with actual next theme preview images. Using welcome graphics as placeholders */}
             <EuiImage
-              url={addBasePath('/plugins/home/assets/welcome_graphic_light_2x.png')}
+              url={addBasePath('/plugins/home/assets/new_theme_light.png')}
               alt={i18n.translate('home.newThemeModal.lightModeImageAltDescription', {
                 defaultMessage: 'screenshot of new theme in light mode',
               })}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {/* TODO: Replace with actual next theme preview images. Using welcome graphics as placeholders */}
             <EuiImage
-              url={addBasePath('/plugins/home/assets/welcome_graphic_dark_2x.png')}
+              url={addBasePath('/plugins/home/assets/new_theme_dark.png')}
               alt={i18n.translate('home.newThemeModal.darkModeImageAltDescription', {
                 defaultMessage: 'screenshot of new theme in dark mode',
               })}

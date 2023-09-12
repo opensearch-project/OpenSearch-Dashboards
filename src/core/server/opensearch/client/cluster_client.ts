@@ -90,10 +90,27 @@ export class ClusterClient implements ICustomClusterClient {
 
   asScoped(request: ScopeableRequest) {
     const scopedHeaders = this.getScopedHeaders(request);
+
     const scopedClient = this.rootScopedClient.child({
       headers: scopedHeaders,
     });
-    return new ScopedClusterClient(this.asInternalUser, scopedClient);
+
+    const asInternalUserWithLongNumeralsSupport = this.asInternalUser.child({
+      // @ts-expect-error - Remove ignoring after https://github.com/opensearch-project/opensearch-js/pull/598 is included in a release
+      enableLongNumeralSupport: true,
+    });
+
+    const scopedClientWithLongNumeralsSupport = this.rootScopedClient.child({
+      headers: scopedHeaders,
+      // @ts-expect-error - Remove ignoring after https://github.com/opensearch-project/opensearch-js/pull/598 is included in a release
+      enableLongNumeralSupport: true,
+    });
+    return new ScopedClusterClient(
+      this.asInternalUser,
+      scopedClient,
+      asInternalUserWithLongNumeralsSupport,
+      scopedClientWithLongNumeralsSupport
+    );
   }
 
   public async close() {

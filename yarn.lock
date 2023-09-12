@@ -1273,10 +1273,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@npm:@opensearch-project/oui@1.3.0-beta.2":
-  version "1.3.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.3.0-beta.2.tgz#ee8a0ca50adeec17f6572f38cf009948cdea84c9"
-  integrity sha512-mKSBUpwH1o856cngliGqTIXSsMoYm/S3DyZtFB5iFd/rnpZeceO0W+Olfvoy+/cmOdFnuVJXY3IDX1kfrSIBZw==
+"@elastic/eui@npm:@opensearch-project/oui@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.3.0.tgz#f0a55833b4fb3589ec11ca7344fa4cbd54db39a7"
+  integrity sha512-3hHNtZJevMQUGnTXuyrrj49C/f4Atlp/4xgsj7ErUyf0YMBFH6s5gReznk92s2u+9iUXg+AkU63C36BgAG62ow==
   dependencies:
     "@types/chroma-js" "^2.4.0"
     "@types/lodash" "4.14.192"
@@ -2497,10 +2497,10 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
-"@opensearch-project/opensearch@^2.2.0":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.2.1.tgz#a400203afa6512ef73945663163a404763a10f5a"
-  integrity sha512-8zfQX1acL9eWG+ohIc9nJVT9LSqXCdbVEJs0rCPRtji3XF6ahzsiKmGNTeWLxCPDxWCjAIWq9t95xP3Y5Egi6Q==
+"@opensearch-project/opensearch@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.3.1.tgz#3596e2f1f0615a7555102f6f941f0e0ec645c2cd"
+  integrity sha512-Kg8tddAx6sinStnNi6IeGilfvLWlonIxaRdVNiJcNPr1yMqd0c9TSegn18zKr0Pb0IM9xBIGBSkRPuh67ZN6Hw==
   dependencies:
     aws4 "^1.11.0"
     debug "^4.3.1"

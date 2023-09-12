@@ -86,6 +86,27 @@ describe('test sendRequestToOpenSearch', () => {
     });
   });
 
+  it('test request success, json with long numerals', () => {
+    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n;
+    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n;
+    const mockHttpResponse = createMockHttpResponse(
+      200,
+      'ok',
+      [['Content-Type', 'application/json, utf-8']],
+      {
+        'long-max': longPositive,
+        'long-min': longNegative,
+      }
+    );
+
+    jest.spyOn(opensearch, 'send').mockResolvedValue(mockHttpResponse);
+    sendRequestToOpenSearch(dummyArgs).then((result) => {
+      const value = (result as any)[0].response.value;
+      expect(value).toMatch(new RegExp(`"long-max": ${longPositive}[,\n]`));
+      expect(value).toMatch(new RegExp(`"long-min": ${longNegative}[,\n]`));
+    });
+  });
+
   it('test request success, text', () => {
     const mockHttpResponse = createMockHttpResponse(
       200,
