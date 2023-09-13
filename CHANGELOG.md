@@ -36,6 +36,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2022-1537] Bump grunt from `1.4.1` to `1.5.3` ([#3723](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3723))
 - [CVE-2022-0436] Bump grunt from `1.4.1` to `1.5.3` ([#3723](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3723))
 - [CVE-2023-26136] Resolve `tough-cookie` to `4.1.3` ([#4682](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4682))
+- [CVE-2022-33987] Partially fix security issues for `got` by bumping `@elastic/makelogs` from `6.0.0` to `6.1.1` and updating yarn.lock ([#5006](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5006))
 
 ### 📈 Features/Enhancements
 
