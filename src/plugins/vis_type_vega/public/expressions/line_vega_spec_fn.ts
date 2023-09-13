@@ -47,7 +47,7 @@ export const createLineVegaSpecFn = (
   name: 'line_vega_spec',
   type: 'string',
   inputTypes: ['opensearch_dashboards_datatable'],
-  help: i18n.translate('visTypeVega.function.help', {
+  help: i18n.translate('visTypeVega.function.helpSpec', {
     defaultMessage: 'Construct line vega spec',
   }),
   args: {
