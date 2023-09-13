@@ -52,7 +52,7 @@ export function SingleDocApp() {
       ...getRootBreadcrumbs(),
       {
         text: i18n.translate('discover.single.breadcrumb', {
-          defaultMessage: `${index}#${docId}`,
+          defaultMessage: '{index}#{docId}',
           values: {
             index,
             docId,

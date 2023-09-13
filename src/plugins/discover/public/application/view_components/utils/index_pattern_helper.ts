@@ -76,9 +76,9 @@ export function resolveIndexPattern(
 
   if (stateVal && !stateValFound) {
     const warningTitle = i18n.translate('discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
-      defaultMessage: '{stateVal} is not a configured index pattern ID',
+      defaultMessage: '{id} is not a configured index pattern ID',
       values: {
-        stateVal: `"${stateVal}"`,
+        id: `"${stateVal}"`,
       },
     });
 
