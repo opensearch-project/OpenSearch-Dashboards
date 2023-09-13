@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import { Permissions, Principals } from '../permission_control/acl';
-import { ISavedObjectsRepository, SavedObjectsRepository } from './lib';
+import { Permissions } from '../permission_control/acl';
+import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
   SavedObjectError,
@@ -478,26 +478,6 @@ export class SavedObjectsClient {
     options: SavedObjectsAddToWorkspacesOptions = {}
   ): Promise<SavedObjectsAddToWorkspacesResponse[]> => {
     return await this._repository.addToWorkspaces(objects, workspaces, options);
-  };
-
-  /**
-   * Different DB may have different query DSL for given params
-   */
-  getPermissionQuery = async (
-    props: Parameters<SavedObjectsRepository['getPermissionQuery']>[0]
-  ) => {
-    return await this._repository.getPermissionQuery(props);
-  };
-
-  /**
-   * Different DB may have different query to find granted objects,
-   * provide a placeholder here for other query implementation
-   */
-  processFindOptions = async (props: {
-    options: SavedObjectsFindOptions;
-    principals: Principals;
-  }): Promise<SavedObjectsFindOptions> => {
-    return await this._repository.processFindOptions(props);
   };
 
   /**

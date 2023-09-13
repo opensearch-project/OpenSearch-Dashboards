@@ -136,6 +136,16 @@ export class WorkspaceSavedObjectsClientWrapper {
     return matchAny;
   }
 
+  /**
+   * check if the type include workspace
+   * Workspace permission check is totally different from object permission check.
+   * @param type
+   * @returns
+   */
+  private isRelatedToWorkspace(type: string | string[]): boolean {
+    return type === WORKSPACE_TYPE || (Array.isArray(type) && type.includes(WORKSPACE_TYPE));
+  }
+
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     const deleteWithWorkspacePermissionControl = async (
       type: string,
@@ -348,11 +358,66 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsFindOptions & Pick<WorkspaceFindOptions, 'permissionModes'>
     ) => {
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
-      const processedOptions = await wrapperOptions.client.processFindOptions({
-        options,
-        principals,
-      });
-      return await wrapperOptions.client.find<T>(processedOptions);
+      if (!options.ACLSearchParams) {
+        options.ACLSearchParams = {};
+      }
+      if (this.isRelatedToWorkspace(options.type)) {
+        options.ACLSearchParams.permissionModes = [
+          WorkspacePermissionMode.LibraryRead,
+          WorkspacePermissionMode.LibraryWrite,
+          WorkspacePermissionMode.Management,
+        ];
+        options.ACLSearchParams.principals = principals;
+      } else {
+        const permittedWorkspaceIds = await this.permissionControl.getPermittedWorkspaceIds(
+          wrapperOptions.request,
+          [
+            WorkspacePermissionMode.LibraryRead,
+            WorkspacePermissionMode.LibraryWrite,
+            WorkspacePermissionMode.Management,
+          ]
+        );
+
+        if (options.workspaces) {
+          const permittedWorkspaces = options.workspaces.filter((item) =>
+            (permittedWorkspaceIds || []).includes(item)
+          );
+          if (!permittedWorkspaces.length) {
+            /**
+             * If user does not have any one workspace access
+             * deny the request
+             */
+            throw SavedObjectsErrorHelpers.decorateNotAuthorizedError(
+              new Error(
+                i18n.translate('workspace.permission.invalidate', {
+                  defaultMessage: 'Invalid workspace permission',
+                })
+              )
+            );
+          }
+
+          /**
+           * Overwrite the options.workspaces when user has access on partial workspaces.
+           */
+          options.workspaces = permittedWorkspaces;
+        } else {
+          /**
+           * Select all the docs that
+           * 1. ACL matches read or write permission OR
+           * 2. workspaces matches library_read or library_write or management OR
+           * 3. Advanced settings
+           */
+          options.workspaces = undefined;
+          options.ACLSearchParams.workspaces = permittedWorkspaceIds;
+          options.ACLSearchParams.permissionModes = [
+            WorkspacePermissionMode.Read,
+            WorkspacePermissionMode.Write,
+          ];
+          options.ACLSearchParams.principals = principals;
+        }
+      }
+
+      return await wrapperOptions.client.find<T>(options);
     };
 
     const addToWorkspacesWithPermissionControl = async (

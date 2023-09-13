@@ -373,7 +373,6 @@ export class SavedObjectsClient {
       namespaces: 'namespaces',
       preference: 'preference',
       workspaces: 'workspaces',
-      queryDSL: 'queryDSL',
     };
 
     const currentWorkspaceId = this._getCurrentWorkspace();
@@ -384,14 +383,17 @@ export class SavedObjectsClient {
       finalWorkspaces = Array.from(new Set([currentWorkspaceId]));
     }
 
-    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
-      ...options,
-      ...(finalWorkspaces
-        ? {
-            workspaces: finalWorkspaces,
-          }
-        : {}),
-    });
+    const renamedQuery = renameKeys<Omit<SavedObjectsFindOptions, 'ACLSearchParams'>, any>(
+      renameMap,
+      {
+        ...options,
+        ...(finalWorkspaces
+          ? {
+              workspaces: finalWorkspaces,
+            }
+          : {}),
+      }
+    );
     const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Partial<
       Record<string, any>
     >;
