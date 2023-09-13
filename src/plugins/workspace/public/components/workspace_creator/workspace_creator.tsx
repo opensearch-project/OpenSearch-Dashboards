@@ -75,6 +75,7 @@ export const WorkspaceCreator = () => {
               application={application}
               onSubmit={handleWorkspaceFormSubmit}
               opType={WORKSPACE_OP_TYPE_CREATE}
+              permissionFirstRowDeletable
             />
           )}
         </EuiPageContent>
