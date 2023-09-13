@@ -21,7 +21,7 @@
     "terminal-link": "^2.1.1"
   },
   "devDependencies": {
-    "markdown-it": "^10.0.0",
+    "markdown-it": "^12.3.2",
     "typescript": "4.0.2"
   }
 }
