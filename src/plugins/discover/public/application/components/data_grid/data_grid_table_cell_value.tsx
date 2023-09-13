@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import './data_grid_table_cell_value.scss';
 
 import React, { Fragment } from 'react';
 import dompurify from 'dompurify';
@@ -30,7 +31,9 @@ function fetchSourceTypeDataCell(
     <EuiDescriptionList type="inline" compressed>
       {Object.keys(formattedRow).map((key) => (
         <Fragment key={key}>
-          <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+          <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
+            {key}
+          </EuiDescriptionListTitle>
           <EuiDescriptionListDescription
             dangerouslySetInnerHTML={{ __html: dompurify.sanitize(formattedRow[key]) }}
           />

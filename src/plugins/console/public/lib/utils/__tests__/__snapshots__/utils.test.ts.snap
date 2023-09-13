@@ -1,0 +1,118 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Utils class formatRequestBodyDoc changed with indenting 1`] = `
+Object {
+  "changed": true,
+  "data": Array [
+    "{
+  \\"data\\": {
+    \\"long-max\\": 18014398509481982,
+    \\"long-min\\": -18014398509481982,
+    \\"num\\": 2
+  }
+}",
+    "{
+  \\"'\\\\\\"key\\\\\\"'\\": \\"\\"\\"'oddly' 'quoted \\"value\\"'\\"\\"\\",
+  \\"obj\\": \\"\\"\\"{\\"nested\\": \\"inner-value\\", \\"inner-max\\": 18014398509481982\\"\\"\\"
+}",
+    "{
+  \\"version\\": true,
+  \\"size\\": 500,
+  \\"sort\\": [
+    {
+      \\"time\\": {
+        \\"order\\": \\"desc\\",
+        \\"unmapped_type\\": \\"boolean\\"
+      }
+    }
+  ],
+  \\"aggs\\": {
+    \\"2\\": {
+      \\"date_histogram\\": {
+        \\"field\\": \\"time\\",
+        \\"fixed_interval\\": \\"30s\\",
+        \\"time_zone\\": \\"America/Los_Angeles\\",
+        \\"min_doc_count\\": 1
+      }
+    }
+  },
+  \\"_source\\": {
+    \\"excludes\\": []
+  },
+  \\"query\\": {
+    \\"bool\\": {
+      \\"filter\\": [
+        {
+          \\"match_all\\": {}
+        },
+        {
+          \\"range\\": {
+            \\"time\\": {
+              \\"gte\\": \\"2222-22-22T22:22:22.222Z\\",
+              \\"lte\\": \\"3333-33-33T33:33:33.333Z\\",
+              \\"format\\": \\"strict_date_optional_time\\"
+            }
+          }
+        }
+      ]
+    }
+  }
+}",
+    "{
+  \\"version\\": true,
+  \\"size\\": 500,
+  \\"sort\\": [
+    {
+      \\"time\\": {
+        \\"order\\": \\"desc\\",
+        \\"unmapped_type\\": \\"boolean\\"
+      }
+    }
+  ],
+  \\"aggs\\": {
+    \\"2\\": {
+      \\"date_histogram\\": {
+        \\"field\\": \\"time\\",
+        \\"fixed_interval\\": \\"30s\\",
+        \\"time_zone\\": \\"America/Los_Angeles\\",
+        \\"min_doc_count\\": 1
+      }
+    }
+  },
+  \\"_source\\": {
+    \\"excludes\\": []
+  },
+  \\"query\\": {
+    \\"bool\\": {
+      \\"filter\\": [
+        {
+          \\"match_all\\": {}
+        },
+        {
+          \\"range\\": {
+            \\"time\\": {
+              \\"gte\\": \\"2222-22-22T22:22:22.222Z\\",
+              \\"lte\\": \\"3333-33-33T33:33:33.333Z\\",
+              \\"format\\": \\"strict_date_optional_time\\"
+            }
+          }
+        }
+      ]
+    }
+  }
+}",
+  ],
+}
+`;
+
+exports[`Utils class formatRequestBodyDoc changed with no-indenting 1`] = `
+Object {
+  "changed": true,
+  "data": Array [
+    "{\\"data\\":{\\"long-max\\":18014398509481982,\\"long-min\\":-18014398509481982,\\"num\\":2}}",
+    "{\\"'\\\\\\"key\\\\\\"'\\":\\"'oddly' 'quoted \\\\\\"value\\\\\\"'\\",\\"obj\\":\\"{\\\\\\"nested\\\\\\": \\\\\\"inner-value\\\\\\", \\\\\\"inner-max\\\\\\": 18014398509481982\\"}",
+    "{\\"version\\":true,\\"size\\":500,\\"sort\\":[{\\"time\\":{\\"order\\":\\"desc\\",\\"unmapped_type\\":\\"boolean\\"}}],\\"aggs\\":{\\"2\\":{\\"date_histogram\\":{\\"field\\":\\"time\\",\\"fixed_interval\\":\\"30s\\",\\"time_zone\\":\\"America/Los_Angeles\\",\\"min_doc_count\\":1}}},\\"_source\\":{\\"excludes\\":[]},\\"query\\":{\\"bool\\":{\\"filter\\":[{\\"match_all\\":{}},{\\"range\\":{\\"time\\":{\\"gte\\":\\"2222-22-22T22:22:22.222Z\\",\\"lte\\":\\"3333-33-33T33:33:33.333Z\\",\\"format\\":\\"strict_date_optional_time\\"}}}]}}}",
+    "{\\"version\\":true,\\"size\\":500,\\"sort\\":[{\\"time\\":{\\"order\\":\\"desc\\",\\"unmapped_type\\":\\"boolean\\"}}],\\"aggs\\":{\\"2\\":{\\"date_histogram\\":{\\"field\\":\\"time\\",\\"fixed_interval\\":\\"30s\\",\\"time_zone\\":\\"America/Los_Angeles\\",\\"min_doc_count\\":1}}},\\"_source\\":{\\"excludes\\":[]},\\"query\\":{\\"bool\\":{\\"filter\\":[{\\"match_all\\":{}},{\\"range\\":{\\"time\\":{\\"gte\\":\\"2222-22-22T22:22:22.222Z\\",\\"lte\\":\\"3333-33-33T33:33:33.333Z\\",\\"format\\":\\"strict_date_optional_time\\"}}}]}}}",
+  ],
+}
+`;

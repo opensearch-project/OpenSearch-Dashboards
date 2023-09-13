@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`json can apply a replacer and spaces values while stringifying BigInts 1`] = `
+"{
+    \\"\\\\\\": 18014398509481982\\": \\"<![CDATA[[ -18014398509481982, 18014398509481982 ]]]>\\",
+    \\"positive\\": 54043195528445946,
+    \\"negative\\": -54043195528445946,
+    \\"array\\": [
+        -54043195528445946,
+        54043195528445946,
+        [
+            \\"<![CDATA[<empty>]]>\\"
+        ]
+    ],
+    \\"number\\": \\"5d9d89cc6b13\\"
+}"
+`;
+
+exports[`json can handle BigInt values while stringifying 1`] = `"{\\"\\\\\\": 18014398509481982\\":\\"[ -18014398509481982, 18014398509481982 ]\\",\\"positive\\":18014398509481982,\\"negative\\":-18014398509481982,\\"array\\":[-18014398509481982,18014398509481982],\\"number\\":102931203123987}"`;
