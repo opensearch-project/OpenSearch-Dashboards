@@ -76,6 +76,7 @@ import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
+import { SecurityServiceSetup } from './security/types';
 
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
@@ -437,6 +438,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
+  /** {@link SecurityServiceSetup} */
+  security: SecurityServiceSetup;
   /** {@link StatusServiceSetup} */
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */

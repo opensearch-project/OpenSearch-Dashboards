@@ -28,45 +28,20 @@
  * under the License.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from 'opensearch-dashboards/server';
-import { capabilitiesProvider } from './capabilities_provider';
+import { Capabilities, OpenSearchDashboardsRequest } from '../index';
 
-export class VisualizeServerPlugin implements Plugin<object, object> {
-  private readonly logger: Logger;
+export interface SecurityServiceSetup {
+  registerReadonlyService(service: IReadOnlyService): void;
+  readonlyService(): IReadOnlyService;
+}
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
+export type InternalSecurityServiceSetup = SecurityServiceSetup;
 
-  public setup(core: CoreSetup) {
-    this.logger.debug('visualize: Setup');
-
-    core.capabilities.registerProvider(capabilitiesProvider);
-
-    core.capabilities.registerSwitcher(async (request, capabilites) => {
-      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
-        visualize: {
-          createShortUrl: false,
-          delete: false,
-          save: false,
-          saveQuery: false,
-        },
-      });
-    });
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    this.logger.debug('visualize: Started');
-    return {};
-  }
-
-  public stop() {}
+export interface IReadOnlyService {
+  isReadonly(request: OpenSearchDashboardsRequest): Promise<boolean>;
+  hideForReadonly(
+    request: OpenSearchDashboardsRequest,
+    capabilites: Capabilities,
+    hideCapabilities: Partial<Capabilities>
+  ): Promise<Partial<Capabilities>>;
 }

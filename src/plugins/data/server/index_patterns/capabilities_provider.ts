@@ -31,6 +31,5 @@
 export const capabilitiesProvider = () => ({
   indexPatterns: {
     save: true,
-    hide_for_read_only: ['save'],
   },
 });

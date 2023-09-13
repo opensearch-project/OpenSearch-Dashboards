@@ -28,45 +28,39 @@
  * under the License.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from 'opensearch-dashboards/server';
-import { capabilitiesProvider } from './capabilities_provider';
+import { CoreService } from '../../types';
+import { IReadOnlyService, InternalSecurityServiceSetup } from './types';
+import { CoreContext } from '../core_context';
+import { Logger } from '../logging';
 
-export class VisualizeServerPlugin implements Plugin<object, object> {
-  private readonly logger: Logger;
+export class SecurityService implements CoreService<InternalSecurityServiceSetup> {
+  private logger: Logger;
+  private readonlyService?: IReadOnlyService;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('security-service');
   }
 
-  public setup(core: CoreSetup) {
-    this.logger.debug('visualize: Setup');
+  public setup() {
+    this.logger.debug('Setting up Security service');
 
-    core.capabilities.registerProvider(capabilitiesProvider);
+    const securityService = this;
 
-    core.capabilities.registerSwitcher(async (request, capabilites) => {
-      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
-        visualize: {
-          createShortUrl: false,
-          delete: false,
-          save: false,
-          saveQuery: false,
-        },
-      });
-    });
-
-    return {};
+    return {
+      registerReadonlyService(service: IReadOnlyService) {
+        securityService.readonlyService = service;
+      },
+      readonlyService() {
+        return securityService.readonlyService!;
+      },
+    };
   }
 
-  public start(core: CoreStart) {
-    this.logger.debug('visualize: Started');
-    return {};
+  public start() {
+    this.logger.debug('Starting plugin');
   }
 
-  public stop() {}
+  public stop() {
+    this.logger.debug('Stopping plugin');
+  }
 }

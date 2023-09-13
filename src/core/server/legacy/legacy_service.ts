@@ -301,6 +301,7 @@ export class LegacyService implements CoreService {
       },
       auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
+      security: setupDeps.core.security,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires

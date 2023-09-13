@@ -34,6 +34,5 @@ export const capabilitiesProvider = () => ({
     createShortUrl: true,
     save: true,
     saveQuery: true,
-    hide_for_read_only: ['createShortUrl', 'save', 'saveQuery'],
   },
 });
