@@ -50,6 +50,7 @@ import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
+import { securityServiceMock } from './security/security_service.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -157,6 +158,7 @@ function createCoreSetupMock({
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
+    security: securityServiceMock.createSetupContract(),
   };
 
   return mock;
@@ -192,6 +194,7 @@ function createInternalCoreSetupMock() {
     auditTrail: auditTrailServiceMock.createSetupContract(),
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
+    security: securityServiceMock.createSetupContract(),
   };
   return setupDeps;
 }

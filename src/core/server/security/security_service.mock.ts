@@ -28,39 +28,16 @@
  * under the License.
  */
 
-import { CoreService } from '../../types';
-import { IReadOnlyService, InternalSecurityServiceSetup } from './types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
+import { SecurityServiceSetup } from './types';
 
-export class SecurityService implements CoreService<InternalSecurityServiceSetup> {
-  private logger: Logger;
-  private readonlyService?: IReadOnlyService;
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<SecurityServiceSetup> = {
+    readonlyService: jest.fn(),
+    registerReadonlyService: jest.fn(),
+  };
+  return setupContract;
+};
 
-  constructor(coreContext: CoreContext) {
-    this.logger = coreContext.logger.get('security-service');
-  }
-
-  public setup() {
-    this.logger.debug('Setting up Security service');
-
-    const securityService = this;
-
-    return {
-      registerReadonlyService(service: IReadOnlyService) {
-        securityService.readonlyService = service;
-      },
-      readonlyService() {
-        return securityService.readonlyService!;
-      },
-    };
-  }
-
-  public start() {
-    this.logger.debug('Starting plugin');
-  }
-
-  public stop() {
-    this.logger.debug('Stopping plugin');
-  }
-}
+export const securityServiceMock = {
+  createSetupContract: createSetupContractMock,
+};
