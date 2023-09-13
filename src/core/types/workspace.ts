@@ -11,4 +11,5 @@ export interface WorkspaceAttribute {
   color?: string;
   icon?: string;
   defaultVISTheme?: string;
+  reserved?: boolean;
 }

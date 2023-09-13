@@ -47,6 +47,8 @@ const create = (): jest.Mocked<ISavedObjectsRepository> => ({
   addToWorkspaces: jest.fn(),
   getPermissionQuery: jest.fn(),
   processFindOptions: jest.fn(),
+  deleteByWorkspace: jest.fn(),
+  deleteFromWorkspaces: jest.fn(),
 });
 
 export const savedObjectsRepositoryMock = { create };

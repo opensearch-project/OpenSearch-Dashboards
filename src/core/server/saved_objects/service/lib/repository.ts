@@ -65,8 +65,11 @@ import {
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
   SavedObjectsCreateOptions,
+  SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsDeleteFromWorkspacesOptions,
+  SavedObjectsDeleteFromWorkspacesResponse,
   SavedObjectsDeleteOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -727,6 +730,14 @@ export class SavedObjectsRepository {
       }
     }
 
+    const obj = await this.get(type, id, { namespace });
+    const existingWorkspace = obj.workspaces || [];
+    if (!force && existingWorkspace.length > 1) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Unable to delete saved object that exists in multiple workspaces, use the `force` option to delete it anyway'
+      );
+    }
+
     const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
       {
         id: rawId,
@@ -798,6 +809,55 @@ export class SavedObjectsRepository {
           ...getSearchDsl(this._mappings, this._registry, {
             namespaces: namespace ? [namespace] : undefined,
             type: typesToUpdate,
+          }),
+        },
+      },
+      { ignore: [404] }
+    );
+
+    return body;
+  }
+
+  /**
+   * Deletes all objects from the provided workspace.
+   *
+   * @param {string} workspace
+   * @param options SavedObjectsDeleteByWorkspaceOptions
+   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
+   */
+  async deleteByWorkspace(
+    workspace: string,
+    options: SavedObjectsDeleteByWorkspaceOptions = {}
+  ): Promise<any> {
+    if (!workspace || workspace === '*') {
+      throw new TypeError(`workspace is required, and must be a string that is not equal to '*'`);
+    }
+
+    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
+
+    const { body } = await this.client.updateByQuery(
+      {
+        index: this.getIndicesForTypes(allTypes),
+        refresh: options.refresh,
+        body: {
+          script: {
+            source: `
+              if (!ctx._source.containsKey('workspaces')) {
+                ctx.op = "delete";
+              } else {
+                ctx._source['workspaces'].removeAll(Collections.singleton(params['workspace']));
+                if (ctx._source['workspaces'].empty) {
+                  ctx.op = "delete";
+                }
+              }
+            `,
+            lang: 'painless',
+            params: { workspace },
+          },
+          conflicts: 'proceed',
+          ...getSearchDsl(this._mappings, this._registry, {
+            workspaces: [workspace],
+            type: allTypes,
           }),
         },
       },
@@ -1457,6 +1517,101 @@ export class SavedObjectsRepository {
         workspaces: savedObjectIdWorkspaceMap.get(rawId),
       } as SavedObjectsAddToWorkspacesResponse;
     });
+  }
+
+  /**
+   * Removes one or more workspace from a given saved object. If no workspace remain, the saved object is deleted
+   * entirely. This method and [`addToWorkspaces`]{@link SavedObjectsRepository.addToWorkspaces} are the only ways to change which workspace a
+   * saved object is shared to.
+   */
+  async deleteFromWorkspaces(
+    type: string,
+    id: string,
+    workspaces: string[],
+    options: SavedObjectsDeleteFromWorkspacesOptions = {}
+  ): Promise<SavedObjectsDeleteFromWorkspacesResponse> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    if (!workspaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'workspaces must be a non-empty array of strings'
+      );
+    }
+
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+
+    const rawId = this._serializer.generateRawId(undefined, type, id);
+    const savedObject = await this.get(type, id);
+    const existingWorkspaces = savedObject.workspaces;
+    // if there are somehow no existing workspaces, allow the operation to proceed and delete this saved object
+    const remainingWorkspaces = existingWorkspaces?.filter((x) => !workspaces.includes(x));
+
+    if (remainingWorkspaces?.length) {
+      // if there is 1 or more workspace remaining, update the saved object
+      const time = this._getCurrentTime();
+
+      const doc = {
+        updated_at: time,
+        workspaces: remainingWorkspaces,
+      };
+
+      const { statusCode } = await this.client.update(
+        {
+          id: rawId,
+          index: this.getIndexForType(type),
+          ...decodeRequestVersion(savedObject.version),
+          refresh,
+
+          body: {
+            doc,
+          },
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      if (statusCode === 404) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      return { workspaces: doc.workspaces };
+    } else {
+      // if there are no namespaces remaining, delete the saved object
+      const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
+        {
+          id: rawId,
+          index: this.getIndexForType(type),
+          refresh,
+          ...decodeRequestVersion(savedObject.version),
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      const deleted = body.result === 'deleted';
+      if (deleted) {
+        return { workspaces: [] };
+      }
+
+      const deleteDocNotFound = body.result === 'not_found';
+      const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
+      if (deleteDocNotFound || deleteIndexNotFound) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+
+      throw new Error(
+        `Unexpected OpenSearch DELETE response: ${JSON.stringify({
+          type,
+          id,
+          response: { body, statusCode },
+        })}`
+      );
+    }
   }
 
   /**
