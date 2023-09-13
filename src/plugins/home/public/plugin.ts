@@ -122,6 +122,7 @@ export class HomePublicPlugin
           featureCatalogue: this.featuresCatalogueRegistry,
           injectedMetadata: coreStart.injectedMetadata,
           dataSource,
+          workspaces: coreStart.workspaces,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
