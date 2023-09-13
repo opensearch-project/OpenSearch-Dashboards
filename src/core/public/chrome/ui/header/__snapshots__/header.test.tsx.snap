@@ -2015,20 +2015,6 @@ exports[`Header handles visibility and lock changes 1`] = `
               "borders": "none",
               "items": Array [
                 <HeaderLogo
-<<<<<<< HEAD
-=======
-                  basePath={
-                    BasePath {
-                      "basePath": "/test",
-                      "get": [Function],
-                      "getBasePath": [Function],
-                      "prepend": [Function],
-                      "remove": [Function],
-                      "serverBasePath": "/test",
-                      "workspaceBasePath": "",
-                    }
-                  }
->>>>>>> 356e96dfed (Integrate workspace service into saved object management (#31))
                   branding={
                     Object {
                       "applicationTitle": "OpenSearch Dashboards",
@@ -2466,20 +2452,6 @@ exports[`Header handles visibility and lock changes 1`] = `
                   className="euiHeaderSectionItem"
                 >
                   <HeaderLogo
-<<<<<<< HEAD
-=======
-                    basePath={
-                      BasePath {
-                        "basePath": "/test",
-                        "get": [Function],
-                        "getBasePath": [Function],
-                        "prepend": [Function],
-                        "remove": [Function],
-                        "serverBasePath": "/test",
-                        "workspaceBasePath": "",
-                      }
-                    }
->>>>>>> 356e96dfed (Integrate workspace service into saved object management (#31))
                     branding={
                       Object {
                         "applicationTitle": "OpenSearch Dashboards",
@@ -3785,16 +3757,24 @@ exports[`Header handles visibility and lock changes 1`] = `
                   className="euiBreadcrumbs euiHeaderBreadcrumbs osdHeaderBreadcrumbs euiBreadcrumbs--truncate"
                   data-test-subj="breadcrumbs"
                 >
-                  <EuiInnerText>
-                    <span
-                      aria-current="page"
-                      className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
-                      data-test-subj="breadcrumb first last"
-                      title="test"
+                  <div
+                    className="euiBreadcrumbWall euiBreadcrumbWall--single"
+                  >
+                    <div
+                      className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first euiBreadcrumbWrapper--last"
                     >
-                      test
-                    </span>
-                  </EuiInnerText>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
+                          data-test-subj="breadcrumb first last"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </div>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>
@@ -9479,16 +9459,24 @@ exports[`Header renders condensed header 1`] = `
                   className="euiBreadcrumbs euiHeaderBreadcrumbs osdHeaderBreadcrumbs euiBreadcrumbs--truncate"
                   data-test-subj="breadcrumbs"
                 >
-                  <EuiInnerText>
-                    <span
-                      aria-current="page"
-                      className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
-                      data-test-subj="breadcrumb first"
-                      title="test"
+                  <div
+                    className="euiBreadcrumbWall euiBreadcrumbWall--single"
+                  >
+                    <div
+                      className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first euiBreadcrumbWrapper--last"
                     >
-                      test
-                    </span>
-                  </EuiInnerText>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
+                          data-test-subj="breadcrumb first"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </div>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>

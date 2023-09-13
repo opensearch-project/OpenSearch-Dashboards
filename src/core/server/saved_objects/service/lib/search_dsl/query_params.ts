@@ -27,13 +27,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mergeWith, isArray } from 'lodash';
 // @ts-expect-error no ts
 import { opensearchKuery } from '../../../opensearch_query';
 type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
+import { SavedObjectsFindOptions } from '../../../types';
+import { ACL } from '../../../permission_control/acl';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -166,7 +167,7 @@ interface QueryParams {
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
   workspaces?: string[];
-  queryDSL?: Record<string, any>;
+  ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
 }
 
 export function getClauseForReference(reference: HasReferenceQueryParams) {
@@ -224,7 +225,7 @@ export function getQueryParams({
   hasReference,
   kueryNode,
   workspaces,
-  queryDSL,
+  ACLSearchParams,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -283,12 +284,43 @@ export function getQueryParams({
 
   const result = { query: { bool } };
 
-  if (queryDSL) {
-    return mergeWith({}, result, queryDSL, (objValue, srcValue) => {
-      if (isArray(objValue)) {
-        return objValue.concat(srcValue);
-      }
-    });
+  if (ACLSearchParams) {
+    const shouldClause: any = [];
+    if (ACLSearchParams.permissionModes && ACLSearchParams.principals) {
+      const permissionDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
+        ACLSearchParams.permissionModes,
+        ACLSearchParams.principals
+      );
+      shouldClause.push(permissionDSL.query);
+    }
+
+    if (ACLSearchParams.workspaces) {
+      shouldClause.push({
+        terms: {
+          workspaces: ACLSearchParams.workspaces,
+        },
+      });
+    }
+
+    if (shouldClause.length) {
+      bool.filter.push({
+        bool: {
+          should: [
+            /**
+             * TODO remove this clause once advanced settings has attached with permission
+             */
+            {
+              term: {
+                type: 'config',
+              },
+            },
+            ...shouldClause,
+          ],
+        },
+      });
+    }
+
+    return result;
   }
   return result;
 }

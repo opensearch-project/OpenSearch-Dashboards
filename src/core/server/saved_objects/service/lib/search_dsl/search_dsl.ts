@@ -34,6 +34,7 @@ import { IndexMapping } from '../../../mappings';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import { SavedObjectsFindOptions } from '../../../types';
 
 type KueryNode = any;
 
@@ -53,7 +54,7 @@ interface GetSearchDslOptions {
   };
   kueryNode?: KueryNode;
   workspaces?: string[];
-  queryDSL?: Record<string, any>;
+  ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
 }
 
 export function getSearchDsl(
@@ -74,7 +75,7 @@ export function getSearchDsl(
     hasReference,
     kueryNode,
     workspaces,
-    queryDSL,
+    ACLSearchParams,
   } = options;
 
   if (!type) {
@@ -98,7 +99,7 @@ export function getSearchDsl(
       hasReference,
       kueryNode,
       workspaces,
-      queryDSL,
+      ACLSearchParams,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
