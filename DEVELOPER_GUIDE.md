@@ -260,20 +260,7 @@ $ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tm
 
 _This feature will only work if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
 
-Whenever a plugin registers capabilities that should be limited (in other words, set to false) for read-only tenants, such capabilities should be listed in a separate capability called `hide_for_read_only` that is an array of strings, containing capabilities that are set to false whenever Dashboards Security Plugin detects a read-only tenant.
-
-For example:
-
-```js
-export const capabilitiesProvider = () => ({
-  indexPatterns: {
-    save: true,
-    hide_for_read_only: ['save'],
-  },
-});
-```
-
-In this case, we might assume that a plugin relies on the `save` capability to limit saving changes somewhere in the UI. Therefore, this `save` capability is listed in the `hide_for_read_only` array and will be set to `false` whenever a read-only tenant is accessed.
+Please follow the design described in [the docs](https://github.com/opensearch-project/OpenSearch/blob/main/docs/capabilities/read_only_mode.md#design)
 
 ### Alternative - Run OpenSearch from tarball
 
