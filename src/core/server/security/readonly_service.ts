@@ -28,41 +28,20 @@
  * under the License.
  */
 
-import { CoreService } from '../../types';
-import { IReadOnlyService, InternalSecurityServiceSetup } from './types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { ReadonlyService } from './readonly_service';
+import { merge } from 'lodash';
+import { OpenSearchDashboardsRequest, Capabilities } from '../index';
+import { IReadOnlyService } from './types';
 
-export class SecurityService implements CoreService<InternalSecurityServiceSetup> {
-  private logger: Logger;
-  private readonlyService: IReadOnlyService;
-
-  constructor(coreContext: CoreContext) {
-    this.logger = coreContext.logger.get('security-service');
-    this.readonlyService = new ReadonlyService();
+export class ReadonlyService implements IReadOnlyService {
+  async isReadonly(request: OpenSearchDashboardsRequest): Promise<boolean> {
+    return false;
   }
 
-  public setup() {
-    this.logger.debug('Setting up Security service');
-
-    const securityService = this;
-
-    return {
-      registerReadonlyService(service: IReadOnlyService) {
-        securityService.readonlyService = service;
-      },
-      readonlyService() {
-        return securityService.readonlyService;
-      },
-    };
-  }
-
-  public start() {
-    this.logger.debug('Starting plugin');
-  }
-
-  public stop() {
-    this.logger.debug('Stopping plugin');
+  async hideForReadonly(
+    request: OpenSearchDashboardsRequest,
+    capabilites: Partial<Capabilities>,
+    hideCapabilities: Partial<Capabilities>
+  ): Promise<Partial<Capabilities>> {
+    return (await this.isReadonly(request)) ? merge(capabilites, hideCapabilities) : capabilites;
   }
 }

@@ -28,41 +28,32 @@
  * under the License.
  */
 
-import { CoreService } from '../../types';
-import { IReadOnlyService, InternalSecurityServiceSetup } from './types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
+import { OpenSearchDashboardsRequest } from '../index';
 import { ReadonlyService } from './readonly_service';
+import { httpServerMock } from '../http/http_server.mocks';
 
-export class SecurityService implements CoreService<InternalSecurityServiceSetup> {
-  private logger: Logger;
-  private readonlyService: IReadOnlyService;
+describe('ReadonlyService', () => {
+  let readonlyService: ReadonlyService;
+  let request: OpenSearchDashboardsRequest;
 
-  constructor(coreContext: CoreContext) {
-    this.logger = coreContext.logger.get('security-service');
-    this.readonlyService = new ReadonlyService();
-  }
+  beforeEach(() => {
+    readonlyService = new ReadonlyService();
+    request = httpServerMock.createOpenSearchDashboardsRequest();
+  });
 
-  public setup() {
-    this.logger.debug('Setting up Security service');
+  it('isReadonly returns false by default', () => {
+    expect(readonlyService.isReadonly(request)).resolves.toBeFalsy();
+  });
 
-    const securityService = this;
+  it('hideForReadonly merges capabilites to hide', () => {
+    readonlyService.isReadonly = jest.fn(() => new Promise(() => true));
+    const result = readonlyService.hideForReadonly(
+      request,
+      { foo: { show: true } },
+      { foo: { show: false } }
+    );
 
-    return {
-      registerReadonlyService(service: IReadOnlyService) {
-        securityService.readonlyService = service;
-      },
-      readonlyService() {
-        return securityService.readonlyService;
-      },
-    };
-  }
-
-  public start() {
-    this.logger.debug('Starting plugin');
-  }
-
-  public stop() {
-    this.logger.debug('Stopping plugin');
-  }
-}
+    expect(readonlyService.isReadonly).toBeCalledTimes(1);
+    expect(result).resolves.toEqual({ foo: { show: false } });
+  });
+});
