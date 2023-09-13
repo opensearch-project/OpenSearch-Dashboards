@@ -29,7 +29,6 @@
  */
 
 import * as utils from '../';
-import { stringify } from '@osd/std';
 
 describe('Utils class', () => {
   test('extract deprecation messages', function () {
@@ -104,72 +103,5 @@ describe('Utils class', () => {
       'd\\"',
       'e", f"',
     ]);
-  });
-
-  describe('formatRequestBodyDoc', () => {
-    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n;
-    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n;
-    const sample = {
-      version: true,
-      size: 500,
-      sort: [{ time: { order: 'desc', unmapped_type: 'boolean' } }],
-      aggs: {
-        '2': {
-          date_histogram: {
-            field: 'time',
-            fixed_interval: '30s',
-            time_zone: 'America/Los_Angeles',
-            min_doc_count: 1,
-          },
-        },
-      },
-      _source: { excludes: [] },
-      query: {
-        bool: {
-          filter: [
-            {
-              match_all: {},
-            },
-            {
-              range: {
-                time: {
-                  gte: '2222-22-22T22:22:22.222Z',
-                  lte: '3333-33-33T33:33:33.333Z',
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
-          ],
-        },
-      },
-    };
-    const objStringSample = {
-      [`'"key"'`]: `'oddly' 'quoted "value"'`,
-      obj: `{"nested": "inner-value", "inner-max": ${longPositive}`,
-    };
-    const data = [
-      stringify({ data: { 'long-max': longPositive, 'long-min': longNegative, num: 2 } }),
-      JSON.stringify(objStringSample),
-      JSON.stringify(sample),
-      JSON.stringify(sample, null, 3),
-    ];
-
-    test('changed with indenting', () => {
-      expect(utils.formatRequestBodyDoc(data, true)).toMatchSnapshot();
-    });
-
-    test('changed with no-indenting', () => {
-      expect(utils.formatRequestBodyDoc(data, false)).toMatchSnapshot();
-    });
-
-    test('unchanged with indenting', () => {
-      const result = utils.formatRequestBodyDoc([JSON.stringify(sample, null, 2)], true);
-      expect(result.changed).toStrictEqual(false);
-    });
-
-    test('unchanged with no-indenting', () => {
-      const result = utils.formatRequestBodyDoc([JSON.stringify(sample)], false);
-      expect(result.changed).toStrictEqual(false);
-    });
   });
 });

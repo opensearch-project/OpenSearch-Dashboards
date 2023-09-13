@@ -31,7 +31,7 @@
 import { omitBy } from 'lodash';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
-import { isRelativeUrl, parse } from '@osd/std';
+import { isRelativeUrl } from '@osd/std';
 
 import {
   IBasePath,
@@ -190,12 +190,12 @@ export class Fetch {
       if (NDJSON_CONTENT.test(contentType)) {
         body = await response.blob();
       } else if (JSON_CONTENT.test(contentType)) {
-        body = fetchOptions.withLongNumerals ? parse(await response.text()) : await response.json();
+        body = await response.json();
       } else {
         const text = await response.text();
 
         try {
-          body = fetchOptions.withLongNumerals ? parse(text) : JSON.parse(text);
+          body = JSON.parse(text);
         } catch (err) {
           body = text;
         }

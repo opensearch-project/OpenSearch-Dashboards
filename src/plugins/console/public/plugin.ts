@@ -68,6 +68,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
         const {
           i18n: { Context: I18nContext },
           docLinks: { DOC_LINK_VERSION },
+          uiSettings,
         } = core;
 
         const { renderApp } = await import('./application');
@@ -80,6 +81,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           usageCollection,
           element,
           dataSourceId,
+          uiSettings,
         });
       },
     });

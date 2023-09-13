@@ -75,9 +75,7 @@ describe('Console Proxy Route', () => {
           );
 
           const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise('foo');
-          opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mockResolvedValueOnce(
-            mockResponse
-          );
+          opensearchClient.asCurrentUser.transport.request.mockResolvedValueOnce(mockResponse);
 
           const { status } = await handler(
             { core: requestHandlerContextMock, dataSource: {} as any },
@@ -95,9 +93,7 @@ describe('Console Proxy Route', () => {
           );
 
           const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise('foo');
-          opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mockResolvedValueOnce(
-            mockResponse
-          );
+          opensearchClient.asCurrentUser.transport.request.mockResolvedValueOnce(mockResponse);
 
           const { status } = await handler(
             { core: requestHandlerContextMock, dataSource: {} as any },

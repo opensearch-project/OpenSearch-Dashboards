@@ -36,12 +36,7 @@ describe('ScopedClusterClient', () => {
     const internalClient = opensearchClientMock.createOpenSearchClient();
     const scopedClient = opensearchClientMock.createOpenSearchClient();
 
-    const scopedClusterClient = new ScopedClusterClient(
-      internalClient,
-      scopedClient,
-      internalClient,
-      scopedClient
-    );
+    const scopedClusterClient = new ScopedClusterClient(internalClient, scopedClient);
 
     expect(scopedClusterClient.asInternalUser).toBe(internalClient);
   });
@@ -50,12 +45,7 @@ describe('ScopedClusterClient', () => {
     const internalClient = opensearchClientMock.createOpenSearchClient();
     const scopedClient = opensearchClientMock.createOpenSearchClient();
 
-    const scopedClusterClient = new ScopedClusterClient(
-      internalClient,
-      scopedClient,
-      internalClient,
-      scopedClient
-    );
+    const scopedClusterClient = new ScopedClusterClient(internalClient, scopedClient);
 
     expect(scopedClusterClient.asCurrentUser).toBe(scopedClient);
   });

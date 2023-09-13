@@ -112,16 +112,12 @@ const createClientMock = (): OpenSearchClientMock =>
 export interface ScopedClusterClientMock {
   asInternalUser: OpenSearchClientMock;
   asCurrentUser: OpenSearchClientMock;
-  asInternalUserWithLongNumeralsSupport: OpenSearchClientMock;
-  asCurrentUserWithLongNumeralsSupport: OpenSearchClientMock;
 }
 
 const createScopedClusterClientMock = () => {
   const mock: ScopedClusterClientMock = {
     asInternalUser: createClientMock(),
     asCurrentUser: createClientMock(),
-    asInternalUserWithLongNumeralsSupport: createClientMock(),
-    asCurrentUserWithLongNumeralsSupport: createClientMock(),
   };
 
   return mock;
@@ -130,16 +126,12 @@ const createScopedClusterClientMock = () => {
 export interface ClusterClientMock {
   asInternalUser: OpenSearchClientMock;
   asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
-  asInternalUserWithLongNumeralsSupport: OpenSearchClientMock;
-  asCurrentUserWithLongNumeralsSupport: jest.MockedFunction<() => ScopedClusterClientMock>;
 }
 
 const createClusterClientMock = () => {
   const mock: ClusterClientMock = {
     asInternalUser: createClientMock(),
     asScoped: jest.fn(),
-    asInternalUserWithLongNumeralsSupport: createClientMock(),
-    asCurrentUserWithLongNumeralsSupport: jest.fn(),
   };
 
   mock.asScoped.mockReturnValue(createScopedClusterClientMock());
@@ -153,8 +145,6 @@ const createCustomClusterClientMock = () => {
   const mock: CustomClusterClientMock = {
     asInternalUser: createClientMock(),
     asScoped: jest.fn(),
-    asInternalUserWithLongNumeralsSupport: createClientMock(),
-    asCurrentUserWithLongNumeralsSupport: jest.fn(),
     close: jest.fn(),
   };
 
