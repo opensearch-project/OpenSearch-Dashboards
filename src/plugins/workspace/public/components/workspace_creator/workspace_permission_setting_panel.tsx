@@ -218,12 +218,14 @@ interface WorkspacePermissionSettingPanelProps {
   errors?: string[];
   value?: Array<Partial<WorkspacePermissionSetting>>;
   onChange?: (value: Array<Partial<WorkspacePermissionSetting>>) => void;
+  firstRowDeletable?: boolean;
 }
 
 export const WorkspacePermissionSettingPanel = ({
   errors,
   value,
   onChange,
+  firstRowDeletable,
 }: WorkspacePermissionSettingPanelProps) => {
   const valueRef = useRef(value);
   valueRef.current = value;
@@ -286,7 +288,7 @@ export const WorkspacePermissionSettingPanel = ({
             <WorkspacePermissionSettingInput
               {...item}
               index={index}
-              deletable={index !== 0}
+              deletable={firstRowDeletable || index !== 0}
               onDelete={handleDelete}
               onTypeChange={handleTypeChange}
               onGroupOrUserIdChange={handleGroupOrUserIdChange}

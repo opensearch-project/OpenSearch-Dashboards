@@ -112,6 +112,7 @@ interface WorkspaceFormProps {
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
   opType?: string;
+  permissionFirstRowDeletable?: boolean;
 }
 
 export const WorkspaceForm = ({
@@ -119,6 +120,7 @@ export const WorkspaceForm = ({
   onSubmit,
   defaultValues,
   opType,
+  permissionFirstRowDeletable,
 }: WorkspaceFormProps) => {
   const workspaceId = defaultValues?.id;
   const workspaceNameReadOnly =
@@ -140,7 +142,7 @@ export const WorkspaceForm = ({
   >(
     defaultValues?.permissions && defaultValues.permissions.length > 0
       ? defaultValues.permissions
-      : [{}]
+      : []
   );
 
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
@@ -477,6 +479,7 @@ export const WorkspaceForm = ({
           errors={formErrors.permissions}
           value={permissionSettings}
           onChange={setPermissionSettings}
+          firstRowDeletable={permissionFirstRowDeletable}
         />
       </EuiPanel>
       <EuiSpacer />
