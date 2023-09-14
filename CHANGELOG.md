@@ -10,6 +10,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🛡 Security
 - [CVE-2023-26136] Bump `word-wrap` from `1.2.3` to `1.2.4` ([#5002](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5002))
 - [CVE-2022-21670] Bump `markdown-it` from `10.0.0` to `12.3.2` ([#5016](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5016))
+- [CVE-2022-33987] Partially fix security issues for `got` by bumping `@elastic/makelogs` from `6.0.0` to `6.1.1` and updating yarn.lock ([#5006](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5006))
 
 ### 📈 Features/Enhancements
 
