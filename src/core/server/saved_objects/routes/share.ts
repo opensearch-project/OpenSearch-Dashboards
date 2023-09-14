@@ -8,7 +8,7 @@ import { IRouter } from '../../http';
 import { exportSavedObjectsToStream } from '../export';
 import { validateObjects } from './utils';
 import { collectSavedObjects } from '../import/collect_saved_objects';
-import { PUBLIC_WORKSPACE_ID, WORKSPACE_TYPE } from '../../../utils';
+import { WORKSPACE_TYPE } from '../../../utils';
 
 const SHARE_LIMIT = 10000;
 
@@ -66,17 +66,11 @@ export const registerShareRoute = (router: IRouter) => {
 
       const savedObjects = collectSavedObjectsResult.collectedObjects;
 
-      const nonPublicSharedObjects = savedObjects
-        // non-public
-        .filter(
-          (obj) =>
-            obj.workspaces &&
-            obj.workspaces.length > 0 &&
-            !obj.workspaces.includes(PUBLIC_WORKSPACE_ID)
-        )
+      const sharedObjects = savedObjects
+        .filter((obj) => obj.workspaces && obj.workspaces.length > 0)
         .map((obj) => ({ id: obj.id, type: obj.type, workspaces: obj.workspaces }));
 
-      if (nonPublicSharedObjects.length === 0) {
+      if (sharedObjects.length === 0) {
         return res.ok({
           body: savedObjects.map((savedObject) => ({
             type: savedObject.type,
@@ -86,13 +80,9 @@ export const registerShareRoute = (router: IRouter) => {
         });
       }
 
-      const response = await savedObjectsClient.addToWorkspaces(
-        nonPublicSharedObjects,
-        targetWorkspaceIds,
-        {
-          workspaces: sourceWorkspaceId ? [sourceWorkspaceId] : undefined,
-        }
-      );
+      const response = await savedObjectsClient.addToWorkspaces(sharedObjects, targetWorkspaceIds, {
+        workspaces: sourceWorkspaceId ? [sourceWorkspaceId] : undefined,
+      });
       return res.ok({
         body: response,
       });

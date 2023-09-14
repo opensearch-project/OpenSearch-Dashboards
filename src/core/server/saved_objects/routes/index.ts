@@ -74,7 +74,6 @@ export function registerRoutes({
   registerImportRoute(router, config);
   registerCopyRoute(router, config);
   registerResolveImportErrorsRoute(router, config);
-  // TODO disable when workspace is not enabled
   registerShareRoute(router);
 
   const internalRouter = http.createRouter('/internal/saved_objects/');

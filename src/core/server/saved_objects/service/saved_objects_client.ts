@@ -468,16 +468,16 @@ export class SavedObjectsClient {
   /**
    * Adds workspace to SavedObjects
    *
-   * @param objects
+   * @param savedObjects
    * @param workspaces
    * @param options
    */
   addToWorkspaces = async (
-    objects: SavedObjectsShareObjects[],
+    savedObjects: SavedObjectsShareObjects[],
     workspaces: string[],
     options: SavedObjectsAddToWorkspacesOptions = {}
   ): Promise<SavedObjectsAddToWorkspacesResponse[]> => {
-    return await this._repository.addToWorkspaces(objects, workspaces, options);
+    return await this._repository.addToWorkspaces(savedObjects, workspaces, options);
   };
 
   /**

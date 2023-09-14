@@ -90,8 +90,6 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import { PUBLIC_WORKSPACE_ID } from '../../../../utils/constants';
-
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
@@ -1424,11 +1422,7 @@ export class SavedObjectsRepository {
     // saved objects must exist in specified workspace
     if (options.workspaces) {
       const invalidObjects = savedObjects.filter((obj) => {
-        if (
-          obj.workspaces &&
-          obj.workspaces.length > 0 &&
-          !obj.workspaces.includes(PUBLIC_WORKSPACE_ID)
-        ) {
+        if (obj.workspaces && obj.workspaces.length > 0) {
           return intersection(obj.workspaces, options.workspaces).length === 0;
         }
         return false;
@@ -1469,7 +1463,7 @@ export class SavedObjectsRepository {
         {
           script: {
             source: `
-              if (params.workspaces != null && ctx._source.workspaces != null && !ctx._source.workspaces?.contains(params.globalWorkspaceId)) {
+              if (params.workspaces != null && ctx._source.workspaces != null) {
                 ctx._source.workspaces.addAll(params.workspaces);
                 HashSet workspacesSet = new HashSet(ctx._source.workspaces);
                 ctx._source.workspaces = new ArrayList(workspacesSet);
@@ -1480,7 +1474,6 @@ export class SavedObjectsRepository {
             params: {
               time,
               workspaces,
-              globalWorkspaceId: PUBLIC_WORKSPACE_ID,
             },
           },
         },
