@@ -8,6 +8,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Deprecations
 
 ### 🛡 Security
+- [CVE-2023-0842] Bump `xml2js` from `0.4.22` to `0.6.2` ([#5024](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5024))
 
 ### 📈 Features/Enhancements
 
@@ -36,7 +37,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2022-1537] Bump grunt from `1.4.1` to `1.5.3` ([#3723](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3723))
 - [CVE-2022-0436] Bump grunt from `1.4.1` to `1.5.3` ([#3723](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3723))
 - [CVE-2023-26136] Resolve `tough-cookie` to `4.1.3` ([#4682](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4682))
-- [CVE-2023-0842] Bump `xml2js` from `0.4.22` to `0.6.2` ([#5024](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5024))
 
 ### 📈 Features/Enhancements
 
