@@ -8,6 +8,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Deprecations
 
 ### 🛡 Security
+- [CVE-2023-26136] Bump `word-wrap` from `1.2.3` to `1.2.4` ([#5002](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5002))
 
 ### 📈 Features/Enhancements
 
