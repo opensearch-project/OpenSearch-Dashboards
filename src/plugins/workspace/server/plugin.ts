@@ -26,7 +26,11 @@ import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
-import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_UPDATE_APP_ID } from '../common/constants';
+import {
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_UPDATE_APP_ID,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+} from '../common/constants';
 import { ConfigSchema } from '../config';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
@@ -71,7 +75,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
     core.savedObjects.addClientWrapper(
       0,
-      'workspace',
+      WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
       workspaceSavedObjectsClientWrapper.wrapperFactory
     );
 
@@ -122,7 +126,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   private async setupWorkspaces(startDeps: CoreStart) {
     const internalRepository = startDeps.savedObjects.createInternalRepository();
-    this.client?.setInternalRepository(internalRepository);
     const publicWorkspaceACL = new ACL().addPermission(
       [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
       {
@@ -165,7 +168,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   public start(core: CoreStart) {
     this.logger.debug('Starting SavedObjects service');
-
+    this.client?.setSavedObjectes(core.savedObjects);
     this.setupWorkspaces(core);
 
     return {
