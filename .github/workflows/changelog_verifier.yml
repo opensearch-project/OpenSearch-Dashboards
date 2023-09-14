@@ -7,7 +7,7 @@ on:
 jobs:
   # Enforces the update of a changelog file on every pull request
   verify-changelog:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     steps:
       - uses: actions/checkout@v3
         with:

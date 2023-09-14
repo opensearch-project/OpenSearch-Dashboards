@@ -6,7 +6,7 @@ on:
 
 jobs:
   apply-label:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     steps:
       - uses: actions/github-script@v6
         with:

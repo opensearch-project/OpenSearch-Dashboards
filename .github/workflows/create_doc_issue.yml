@@ -9,7 +9,7 @@ env:
 jobs:
   create-issue:
     if: ${{ github.event.label.name == 'needs-documentation' }}
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     name: Create Documentation Issue
     steps:
       - name: GitHub App token
