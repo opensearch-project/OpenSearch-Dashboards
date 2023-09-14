@@ -58,7 +58,6 @@ import { bootstrap } from './ui_actions_bootstrap';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import {
   MANAGE_LIBRARY_TITLE_WORDINGS,
-  SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
   SAVED_QUERIES_WORDINGS,
   SAVED_SEARCHES_WORDINGS,
 } from './constants';
@@ -68,7 +67,6 @@ export interface SavedObjectsManagementPluginSetup {
   columns: SavedObjectsManagementColumnServiceSetup;
   namespaces: SavedObjectsManagementNamespaceServiceSetup;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
-  registerLibrarySubApp: () => void;
 }
 
 export interface SavedObjectsManagementPluginStart {
@@ -170,7 +168,7 @@ export class SavedObjectsManagementPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, management, uiActions }: SetupDependencies
+    { home, uiActions }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
@@ -193,24 +191,6 @@ export class SavedObjectsManagementPlugin
       });
     }
 
-    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-    opensearchDashboardsSection.registerApp({
-      id: 'objects',
-      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
-        defaultMessage: 'Saved objects',
-      }),
-      order: 1,
-      mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./management_section');
-        return mountManagementSection({
-          core,
-          serviceRegistry: this.serviceRegistry,
-          mountParams,
-          title: SAVED_OBJECT_MANAGEMENT_TITLE_WORDINGS,
-        });
-      },
-    });
-
     // sets up the context mappings and registers any triggers/actions for the plugin
     bootstrap(uiActions);
 
@@ -224,7 +204,6 @@ export class SavedObjectsManagementPlugin
       columns: columnSetup,
       namespaces: namespaceSetup,
       serviceRegistry: this.serviceRegistry,
-      registerLibrarySubApp: () => {},
     };
   }
 

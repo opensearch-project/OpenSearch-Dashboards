@@ -93,9 +93,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
-    // register apps for library object management
-    savedObjectsManagement?.registerLibrarySubApp();
-
     type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
       const [coreStart] = await core.getStartServices();
