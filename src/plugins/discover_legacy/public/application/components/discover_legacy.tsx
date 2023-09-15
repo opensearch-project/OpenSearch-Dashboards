@@ -101,6 +101,8 @@ export interface DiscoverLegacyProps {
   vis?: Vis;
 }
 
+const KEY_SHOW_NOTICE = 'discover:deprecation-notice:show';
+
 export function DiscoverLegacy({
   addColumn,
   fetch,
@@ -132,7 +134,9 @@ export function DiscoverLegacy({
   vis,
 }: DiscoverLegacyProps) {
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const [isCallOutVisible, setIsCallOutVisible] = useState(true);
+  const [isCallOutVisible, setIsCallOutVisible] = useState(
+    localStorage.getItem(KEY_SHOW_NOTICE) !== 'false'
+  );
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, indexPatternList } = opts;
   const bucketAggConfig = vis?.data?.aggs?.aggs[1];
@@ -142,7 +146,10 @@ export function DiscoverLegacy({
       : undefined;
   const [fixedScrollEl, setFixedScrollEl] = useState<HTMLElement | undefined>();
 
-  const closeCallOut = () => setIsCallOutVisible(false);
+  const closeCallOut = () => {
+    localStorage.setItem(KEY_SHOW_NOTICE, 'false');
+    setIsCallOutVisible(false);
+  };
 
   let callOut;
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ViewProps } from '../../../../../data_explorer/public';
 import {
   addColumn,
@@ -15,9 +15,18 @@ import {
 import { DiscoverSidebar } from '../../components/sidebar';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
+import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DiscoverViewServices } from '../../../build_services';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverPanel(props: ViewProps) {
+  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+  const {
+    data: {
+      query: { filterManager },
+    },
+  } = services;
   const { data$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
 
@@ -35,6 +44,22 @@ export default function DiscoverPanel(props: ViewProps) {
       subscription.unsubscribe();
     };
   }, [data$, fetchState]);
+
+  const onAddFilter = useCallback(
+    (field: string | IndexPatternField, values: string, operation: '+' | '-') => {
+      if (!indexPattern) return;
+
+      const newFilters = opensearchFilters.generateFilters(
+        filterManager,
+        field,
+        values,
+        operation,
+        indexPattern.id ?? ''
+      );
+      return filterManager.addFilters(newFilters);
+    },
+    [filterManager, indexPattern]
+  );
 
   return (
     <DiscoverSidebar
@@ -61,7 +86,7 @@ export default function DiscoverPanel(props: ViewProps) {
         );
       }}
       selectedIndexPattern={indexPattern}
-      onAddFilter={() => {}}
+      onAddFilter={onAddFilter}
     />
   );
 }

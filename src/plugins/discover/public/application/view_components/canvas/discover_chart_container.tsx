@@ -20,22 +20,22 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
     indexPattern,
   ]);
 
+  if (!hits || !chartData || !bucketInterval) return null;
+
   return (
-    hits && (
-      <DiscoverChart
-        bucketInterval={bucketInterval}
-        chartData={chartData}
-        config={uiSettings}
-        data={data}
-        hits={hits}
-        resetQuery={() => {
-          window.location.href = `#/view/${savedSearch?.id}`;
-          window.location.reload();
-        }}
-        services={services}
-        showResetButton={!!savedSearch && !!savedSearch.id}
-        isTimeBased={isTimeBased}
-      />
-    )
+    <DiscoverChart
+      bucketInterval={bucketInterval}
+      chartData={chartData}
+      config={uiSettings}
+      data={data}
+      hits={hits}
+      resetQuery={() => {
+        window.location.href = `#/view/${savedSearch?.id}`;
+        window.location.reload();
+      }}
+      services={services}
+      showResetButton={!!savedSearch && !!savedSearch.id}
+      isTimeBased={isTimeBased}
+    />
   );
 };
