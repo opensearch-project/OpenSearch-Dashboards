@@ -61,11 +61,12 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, observables }: Props) =>
       defaultMessage: 'OpenSearch Dashboards',
     }
   );
-  const managementWorkspaceName =
-    workspaceList.find((workspace) => workspace.id === MANAGEMENT_WORKSPACE_ID)?.name ??
-    i18n.translate('core.ui.primaryNav.workspacePickerMenu.managementWorkspaceName', {
+  const managementWorkspaceName = i18n.translate(
+    'core.ui.primaryNav.workspacePickerMenu.managementWorkspaceName',
+    {
       defaultMessage: 'Management',
-    });
+    }
+  );
   const filteredWorkspaceList = getFilteredWorkspaceList(workspaceList, currentWorkspace);
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
