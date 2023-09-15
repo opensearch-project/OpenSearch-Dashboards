@@ -8,6 +8,7 @@ import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
+import { cloneDeep } from 'lodash';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverServices } from '../../../build_services';
 import { search } from '../../../../../data/public';
@@ -30,7 +31,6 @@ import {
   getResponseInspectorStats,
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
-import { SortOrder } from '../../../saved_searches/types';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -253,9 +253,29 @@ export const useSearch = (services: DiscoverServices) => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId || '');
       setSavedSearch(savedSearchInstance);
+
+      // sync initial app filters from savedObject to filterManager
+      const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
+      const query =
+        savedSearchInstance.searchSource.getField('query') ||
+        data.query.queryString.getDefaultQuery();
+      const actualFilters = [];
+
+      if (filters !== undefined) {
+        const result = typeof filters === 'function' ? filters() : filters;
+        if (result !== undefined) {
+          actualFilters.push(...(Array.isArray(result) ? result : [result]));
+        }
+      }
+
+      filterManager.setAppFilters(actualFilters);
+      data.query.queryString.setQuery(query);
     })();
 
     return () => {};
+    // This effect will only run when getSavedSearchById is called, which is
+    // only called when the component is first mounted.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getSavedSearchById, savedSearchId]);
 
   return {

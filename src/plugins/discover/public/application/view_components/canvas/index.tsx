@@ -20,6 +20,8 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { filterColumns } from '../utils/filter_columns';
 import { DEFAULT_COLUMNS_SETTING } from '../../../../common';
 
+const KEY_SHOW_NOTICE = 'discover:deprecation-notice:show';
+
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
   const { data$, refetch$, indexPattern } = useDiscoverContext();
@@ -41,8 +43,13 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     bucketInterval: {},
   });
 
-  const [isCallOutVisible, setIsCallOutVisible] = useState(true);
-  const closeCallOut = () => setIsCallOutVisible(false);
+  const [isCallOutVisible, setIsCallOutVisible] = useState(
+    localStorage.getItem(KEY_SHOW_NOTICE) !== 'false'
+  );
+  const closeCallOut = () => {
+    localStorage.setItem(KEY_SHOW_NOTICE, 'false');
+    setIsCallOutVisible(false);
+  };
 
   let callOut;
 
