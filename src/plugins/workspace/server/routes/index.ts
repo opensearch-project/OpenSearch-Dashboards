@@ -14,7 +14,7 @@ import {
 } from '../../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceRoutePermissionItem } from '../types';
 
-const WORKSPACES_API_BASE_URL = '/api/workspaces';
+export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
 const workspacePermissionMode = schema.oneOf([
   schema.literal(WorkspacePermissionMode.LibraryRead),

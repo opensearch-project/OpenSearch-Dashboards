@@ -3,13 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { OpenSearchDashboardsRequest } from '../../http';
-import { ensureRawRequest } from '../../http/router';
-import { SavedObjectsServiceStart } from '../saved_objects_service';
-import { SavedObjectsBulkGetObject } from '../service';
-import { ACL, Principals, TransformedPermission, PrincipalType } from './acl';
-import { Logger } from '../../logging';
-import { WORKSPACE_TYPE } from '../../../utils';
+import { ensureRawRequest, OpenSearchDashboardsRequest } from '../../../../core/server';
+import {
+  ACL,
+  Principals,
+  TransformedPermission,
+  PrincipalType,
+  SavedObjectsBulkGetObject,
+  SavedObjectsServiceStart,
+  Logger,
+  WORKSPACE_TYPE,
+} from '../../../../core/server';
+import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
@@ -25,9 +30,11 @@ export interface AuthInfo {
 
 export class SavedObjectsPermissionControl {
   private readonly logger: Logger;
-  private createInternalRepository?: SavedObjectsServiceStart['createInternalRepository'];
-  private getInternalRepository() {
-    return this.createInternalRepository?.();
+  private _getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
+  private getScopedClient(request: OpenSearchDashboardsRequest) {
+    return this._getScopedClient?.(request, {
+      excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+    });
   }
 
   constructor(logger: Logger) {
@@ -65,12 +72,10 @@ export class SavedObjectsPermissionControl {
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[]
   ) {
-    return (await this.getInternalRepository()?.bulkGet(savedObjects))?.saved_objects || [];
+    return (await this.getScopedClient?.(request)?.bulkGet(savedObjects))?.saved_objects || [];
   }
-  public async setup(
-    createInternalRepository: SavedObjectsServiceStart['createInternalRepository']
-  ) {
-    this.createInternalRepository = createInternalRepository;
+  public async setup(getScopedClient: SavedObjectsServiceStart['getScopedClient']) {
+    this._getScopedClient = getScopedClient;
   }
   public async validate(
     request: OpenSearchDashboardsRequest,
@@ -164,9 +169,9 @@ export class SavedObjectsPermissionControl {
     permissionModes: SavedObjectsPermissionModes
   ) {
     const principals = this.getPrincipalsFromRequest(request);
-    const repository = this.getInternalRepository();
+    const savedObjectClient = this.getScopedClient?.(request);
     try {
-      const result = await repository?.find({
+      const result = await savedObjectClient?.find({
         type: [WORKSPACE_TYPE],
         ACLSearchParams: {
           permissionModes,

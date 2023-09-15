@@ -4,8 +4,9 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter } from '../../../http';
+import { IRouter } from '../../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../client';
+import { WORKSPACES_API_BASE_URL } from '../../routes';
 
 export const registerValidateRoute = (
   router: IRouter,
@@ -13,7 +14,7 @@ export const registerValidateRoute = (
 ) => {
   router.post(
     {
-      path: '/validate/{type}/{id}',
+      path: `${WORKSPACES_API_BASE_URL}/validate/{type}/{id}`,
       validate: {
         params: schema.object({
           type: schema.string(),

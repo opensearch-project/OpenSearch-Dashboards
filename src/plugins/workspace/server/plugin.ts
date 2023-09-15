@@ -31,11 +31,17 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../common/constants';
 import { ConfigSchema } from '../config';
+import {
+  SavedObjectsPermissionControl,
+  SavedObjectsPermissionControlContract,
+} from './permission_control/client';
+import { registerPermissionCheckRoutes } from './permission_control/routes';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
   private config$: Observable<ConfigSchema>;
+  private permissionControl?: SavedObjectsPermissionControlContract;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -65,8 +71,15 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.client = new WorkspaceClientWithSavedObject(core);
 
     await this.client.setup(core);
+    this.permissionControl = new SavedObjectsPermissionControl(this.logger);
+
+    registerPermissionCheckRoutes({
+      http: core.http,
+      permissionControl: this.permissionControl,
+    });
+
     const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-      core.savedObjects.permissionControl,
+      this.permissionControl,
       {
         config$: this.config$,
       }
@@ -171,6 +184,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   public start(core: CoreStart) {
     this.logger.debug('Starting SavedObjects service');
+    this.permissionControl?.setup(core.savedObjects.getScopedClient);
     this.client?.setSavedObjectes(core.savedObjects);
     this.setupWorkspaces(core);
 
