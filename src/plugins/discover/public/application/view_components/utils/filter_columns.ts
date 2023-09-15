@@ -16,7 +16,7 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
  */
 export function filterColumns(
   columns: string[],
-  indexPattern: IndexPattern,
+  indexPattern: IndexPattern | undefined,
   defaultColumns: string[]
 ) {
   const fieldsName = indexPattern?.fields.getAll().map((fld) => fld.name) || [];

@@ -51,13 +51,15 @@ export const DiscoverTable = ({ history }: Props) => {
     refetch$.next();
   };
   const onAddFilter = useCallback(
-    (field: IndexPatternField, values: string, operation: '+' | '-') => {
+    (field: string | IndexPatternField, values: string, operation: '+' | '-') => {
+      if (!indexPattern) return;
+
       const newFilters = opensearchFilters.generateFilters(
         filterManager,
         field,
         values,
         operation,
-        indexPattern.id
+        indexPattern.id ?? ''
       );
       return filterManager.addFilters(newFilters);
     },
