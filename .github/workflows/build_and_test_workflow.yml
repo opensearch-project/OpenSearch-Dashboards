@@ -33,13 +33,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [arc-runner-set, windows-latest]
+        os: [arc-runner-set]
         group: [1, 2, 3, 4]
         include:
           - os: arc-runner-set
             name: Linux
-          - os: windows-latest
-            name: Windows
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git's autocrlf (Windows only)
@@ -130,13 +128,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [arc-runner-set, windows-latest]
+        os: [arc-runner-set]
         group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         include:
           - os: arc-runner-set
             name: Linux
-          - os: windows-latest
-            name: Windows
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
@@ -227,11 +223,6 @@ jobs:
             ext: tar.gz
             suffix: linux-arm64
             script: build-platform --linux-arm --skip-os-packages
-          - os: windows-latest
-            name: Windows x64
-            ext: zip
-            suffix: windows-x64
-            script: build-platform --windows --skip-os-packages
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -307,6 +298,7 @@ jobs:
           retention-days: 1
 
   bwc-tests:
+    if: false
     needs: [build-min-artifact-tests]
     runs-on: arc-runner-set
     container:

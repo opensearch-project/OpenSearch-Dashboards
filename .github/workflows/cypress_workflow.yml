@@ -19,7 +19,7 @@ env:
 
 jobs:
   cypress-tests:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
