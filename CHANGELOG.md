@@ -13,6 +13,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2022-33987] Partially fix security issues for `got` by bumping `@elastic/makelogs` from `6.0.0` to `6.1.1` and updating yarn.lock ([#5006](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5006))
 - Bump `yo` from `2.0.6` to `3.1.1` ([#5005]( https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5005))
 - [CVE-2023-0842] Bump `xml2js` from `0.4.22` to `0.6.2` ([#5024](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5024))
+- [CVE-2021-23364] Bump `browserslist` from `4.12.0` to `4.21.10` ([#5023](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5023))
 
 ### 📈 Features/Enhancements
 
