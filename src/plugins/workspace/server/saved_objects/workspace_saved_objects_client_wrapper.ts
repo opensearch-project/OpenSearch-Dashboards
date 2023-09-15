@@ -4,8 +4,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 
 import {
   OpenSearchDashboardsRequest,
@@ -31,7 +29,6 @@ import {
   SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsErrorHelpers,
 } from '../../../../core/server';
-import { ConfigSchema } from '../../config';
 import { WorkspaceFindOptions } from '../types';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
@@ -55,7 +52,6 @@ const generateSavedObjectsPermissionError = () =>
   );
 
 export class WorkspaceSavedObjectsClientWrapper {
-  private config?: ConfigSchema;
   private formatWorkspacePermissionModeToStringArray(
     permission: WorkspacePermissionMode | WorkspacePermissionMode[]
   ): string[] {
@@ -126,14 +122,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       }
     }
     return false;
-  }
-
-  private isDashboardAdmin(request: OpenSearchDashboardsRequest): boolean {
-    const config = this.config || ({} as ConfigSchema);
-    const principals = this.permissionControl.getPrincipalsFromRequest(request);
-    const adminBackendRoles = config?.dashboardAdmin?.backendRoles || [];
-    const matchAny = principals?.groups?.some((item) => adminBackendRoles.includes(item)) || false;
-    return matchAny;
   }
 
   /**
@@ -463,12 +451,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);
     };
 
-    const isDashboardAdmin = this.isDashboardAdmin(wrapperOptions.request);
-
-    if (isDashboardAdmin) {
-      return wrapperOptions.client;
-    }
-
     return {
       ...wrapperOptions.client,
       get: getWithWorkspacePermissionControl,
@@ -488,20 +470,5 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
   };
 
-  constructor(
-    private readonly permissionControl: SavedObjectsPermissionControlContract,
-    private readonly options: {
-      config$: Observable<ConfigSchema>;
-    }
-  ) {
-    this.options.config$.subscribe((config) => {
-      this.config = config;
-    });
-    this.options.config$
-      .pipe(first())
-      .toPromise()
-      .then((config) => {
-        this.config = config;
-      });
-  }
+  constructor(private readonly permissionControl: SavedObjectsPermissionControlContract) {}
 }
