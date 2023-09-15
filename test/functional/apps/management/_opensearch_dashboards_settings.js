@@ -110,8 +110,7 @@ export default function ({ getService, getPageObjects }) {
 
       it("changing 'state:storeInSessionStorage' also takes effect without full page reload", async () => {
         await PageObjects.dashboard.preserveCrossAppState();
-        await PageObjects.header.clickStackManagement();
-        await PageObjects.settings.clickOpenSearchDashboardsSettings();
+        await PageObjects.settings.navigateTo();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         await PageObjects.header.clickDashboard();
         const [globalState, appState] = await getStateFromUrl();
