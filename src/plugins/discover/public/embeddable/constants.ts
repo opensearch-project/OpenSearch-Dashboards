@@ -28,15 +28,4 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'opensearch-dashboards/public';
-import { DiscoverPlugin } from './plugin';
-
-export { DiscoverSetup, DiscoverStart } from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DiscoverPlugin(initializerContext);
-}
-
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
-
-export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './embeddable';
-export { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from './url_generator';
+export const SEARCH_EMBEDDABLE_TYPE = 'search';

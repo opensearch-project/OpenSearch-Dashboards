@@ -59,7 +59,7 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGenerator,
 } from './url_generator';
-// import { SearchEmbeddableFactory } from './application/embeddable';
+import { SearchEmbeddableFactory } from './embeddable';
 import { PLUGIN_ID } from '../common';
 import { DataExplorerPluginSetup } from '../../data_explorer/public';
 import { registerFeature } from './register_feature';
@@ -338,7 +338,7 @@ export class DiscoverPlugin
       Context: lazy(() => import('./application/view_components/context')),
     });
 
-    // this.registerEmbeddable(core, plugins);
+    this.registerEmbeddable(core, plugins);
 
     return {
       docViews: {
@@ -384,9 +384,8 @@ export class DiscoverPlugin
     }
   }
 
-  // TODO: Use this registration when legacy discover is removed
   /**
-   * register embeddable with a slimmer embeddable version of inner angular
+   * register embeddable
    */
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     const getStartServices = async () => {
@@ -397,8 +396,7 @@ export class DiscoverPlugin
       };
     };
 
-    // TODO: Refactor to remove angular
-    // const factory = new SearchEmbeddableFactory(getStartServices, this.getEmbeddableInjector);
-    // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    const factory = new SearchEmbeddableFactory(getStartServices);
+    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }
