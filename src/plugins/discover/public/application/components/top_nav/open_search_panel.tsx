@@ -109,7 +109,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
               fill
               onClick={onClose}
               href={addBasePath(
-                `/app/management/opensearch-dashboards/objects?_a=${rison.encode({
+                `/app/objects?_a=${rison.encode({
                   tab: SAVED_OBJECT_TYPE,
                 })}`
               )}
