@@ -319,6 +319,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  exitWorkspace={[Function]}
   forceAppSwitcherNavigation$={
     BehaviorSubject {
       "_isScalar": false,
@@ -405,6 +406,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  getWorkspaceUrl={[Function]}
   helpExtension$={
     BehaviorSubject {
       "_isScalar": false,
@@ -7156,6 +7158,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  exitWorkspace={[Function]}
   forceAppSwitcherNavigation$={
     BehaviorSubject {
       "_isScalar": false,
@@ -7205,6 +7208,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  getWorkspaceUrl={[Function]}
   helpExtension$={
     BehaviorSubject {
       "_isScalar": false,
