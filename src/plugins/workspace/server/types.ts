@@ -36,7 +36,7 @@ export interface IRequestDetail {
 
 export interface IWorkspaceDBImpl {
   setup(dep: CoreSetup): Promise<IResponse<boolean>>;
-  setSavedObjectes(savedObjectes: SavedObjectsServiceStart): void;
+  setSavedObjects(savedObjects: SavedObjectsServiceStart): void;
   create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'>

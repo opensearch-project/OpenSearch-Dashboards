@@ -185,7 +185,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   public start(core: CoreStart) {
     this.logger.debug('Starting SavedObjects service');
     this.permissionControl?.setup(core.savedObjects.getScopedClient);
-    this.client?.setSavedObjectes(core.savedObjects);
+    this.client?.setSavedObjects(core.savedObjects);
     this.setupWorkspaces(core);
 
     return {
