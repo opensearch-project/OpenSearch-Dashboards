@@ -128,14 +128,6 @@ export class WorkspaceClient {
     }
   }
 
-  public async exitWorkspace(): Promise<IResponse<null>> {
-    this.workspaces.currentWorkspaceId$.next('');
-    return {
-      success: true,
-      result: null,
-    };
-  }
-
   public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
     const currentWorkspaceId = this.workspaces.currentWorkspaceId$.getValue();
     if (!currentWorkspaceId) {
