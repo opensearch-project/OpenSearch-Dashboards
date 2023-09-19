@@ -16,3 +16,6 @@ export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
 export const CONTEXT_STEP_SETTING = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
+export const DEFAULT_DATASOURCE_TYPE = 'DEFAULT_INDEX_PATTERNS';
+export const DEFAULT_DATASOURCE_NAME = 'OpenSearch Default';
+export const INDEX_PATTERN_DATASOURCE_TYPE = 'Index patterns';
