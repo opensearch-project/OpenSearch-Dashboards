@@ -5,12 +5,14 @@
 
 import {
   DataSource,
+  DataSourceFactory,
   IDataSetParams,
   IDataSourceMetaData,
   IDataSourceQueryParams,
   IDataSourceQueryResult,
   ISourceDataSet,
 } from '../datasource';
+import { DataSourceService } from './datasource_service';
 
 export interface IDataSourceFilters {
   names: string[];
@@ -29,6 +31,11 @@ export class DataSourceRegisterationError extends Error {
     this.success = false;
     this.info = message;
   }
+}
+
+export interface DataSourceStart {
+  dataSourceService: DataSourceService;
+  dataSourceFactory: DataSourceFactory;
 }
 
 export type DataSourceType = DataSource<

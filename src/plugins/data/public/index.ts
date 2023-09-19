@@ -514,6 +514,9 @@ export {
   DataSourceType,
   IDataSourceFilters,
   IDataSourceRegisterationResult,
-  IDataSourceService,
 } from './data_sources/datasource_services';
-export { DataSourceSelector, DataSourceSelectable } from './data_sources/datasource_selector';
+export {
+  DataSourceSelector,
+  DataSourceSelectable,
+  DataSourceSelectableProps,
+} from './data_sources/datasource_selector';

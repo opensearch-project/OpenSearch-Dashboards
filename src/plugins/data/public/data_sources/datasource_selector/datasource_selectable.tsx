@@ -6,17 +6,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { DataSourceSelector } from './datasource_selector';
 import { DataSourceType } from '../datasource_services';
-import { DataSourceList, DataSourceOption } from './types';
-
-interface DataSourceSelectableProps {
-  dataSources: DataSourceType[];
-  dataSourceOptionList: DataSourceList[];
-  selectedSources: DataSourceOption[];
-  setSelectedSources: (dataSourceOption: DataSourceOption[]) => void;
-  setDataSourceOptionList: (dataSourceList: DataSourceList) => void;
-  singleSelection: boolean;
-  onFetchDataSetError: (error: Error) => void;
-}
+import { DataSourceList, DataSourceSelectableProps } from './types';
 
 export const DataSourceSelectable = ({
   dataSources,

@@ -383,7 +383,7 @@ export class DiscoverPlugin
 
     this.initializeServices();
 
-    /* Datasources registrations for default datasource (local cluster) */
+    // Datasources registrations for index patterns datasource
     const { dataSourceService, dataSourceFactory } = plugins.data.dataSources;
     dataSourceFactory.registerDataSourceType(DEFAULT_DATASOURCE_TYPE, DefaultDslDataSource);
     dataSourceService.registerDataSource(
