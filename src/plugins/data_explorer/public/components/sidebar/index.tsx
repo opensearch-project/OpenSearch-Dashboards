@@ -41,10 +41,10 @@ export const Sidebar: FC = ({ children }) => {
     };
   }, [indexPatterns, dataSources]);
 
-  const getMatchedOption = (dataSourceList, indexPatternId: string) => {
+  const getMatchedOption = (dataSourceList, ipId: string) => {
     for (const dsGroup of dataSourceList) {
       return dsGroup.options.find((item) => {
-        return item.value === indexPatternId;
+        return item.value === ipId;
       });
     }
   };
@@ -56,14 +56,18 @@ export const Sidebar: FC = ({ children }) => {
     }
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
-  const handleSourceSelection = (selectedSources) => {
+  const handleSourceSelection = (selectedDataSources) => {
     // Temperary redirection solution for 2.11, where clicking non-index-pattern datasource
-    // will redirect user to Observability Event explorer
-    if (selectedSources[0].ds?.getType() !== 'Index patterns') {
-      return application.navigateToUrl(`../observability-logs#/explorer?metadata:($datasource:{})`);
+    // will redirect user to Observability event explorer
+    if (selectedDataSources[0].ds?.getType() !== 'Index patterns') {
+      return application.navigateToUrl(
+        `../observability-logs#/explorer?metadata:(datasource:${JSON.stringify(
+          selectedDataSources[0]
+        )})`
+      );
     }
-    setSelectedSources(selectedSources);
-    dispatch(setIndexPattern(selectedSources[0].value));
+    setSelectedSources(selectedDataSources);
+    dispatch(setIndexPattern(selectedDataSources[0].value));
   };
 
   return (

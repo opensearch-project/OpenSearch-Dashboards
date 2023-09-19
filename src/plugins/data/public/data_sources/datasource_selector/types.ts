@@ -4,6 +4,7 @@
  */
 
 import { OuiComboBoxOptionOption } from '@elastic/eui';
+import { DataSourceType } from '../datasource_services';
 
 export interface DataSourceList {
   label: string;
@@ -15,3 +16,13 @@ export interface DataSourceOption {
 }
 
 export type DataSourceOptionType = OuiComboBoxOptionOption<unknown>;
+
+export interface DataSourceSelectableProps {
+  dataSources: DataSourceType[];
+  dataSourceOptionList: DataSourceList[];
+  selectedSources: DataSourceOption[];
+  setSelectedSources: (dataSourceOption: DataSourceOption[]) => void;
+  setDataSourceOptionList: (dataSourceList: DataSourceList) => void;
+  singleSelection: boolean;
+  onFetchDataSetError: (error: Error) => void;
+}
