@@ -47,6 +47,7 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
+import { workspacesServiceMock } from './workspace/workspaces_service.mock';
 
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
@@ -60,6 +61,7 @@ export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { applicationServiceMock } from './application/application_service.mock';
+export { workspacesServiceMock } from './workspace/workspaces_service.mock';
 
 function createCoreSetupMock({
   basePath = '',
@@ -85,6 +87,7 @@ function createCoreSetupMock({
       getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
       getBranding: injectedMetadataServiceMock.createSetupContract().getBranding,
     },
+    workspaces: workspacesServiceMock.createSetupContractMock(),
   };
 
   return mock;
@@ -106,6 +109,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
       getBranding: injectedMetadataServiceMock.createStartContract().getBranding,
     },
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
+    workspaces: workspacesServiceMock.createStartContract(),
   };
 
   return mock;

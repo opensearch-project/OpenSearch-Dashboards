@@ -54,6 +54,7 @@ import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { WorkspacesService } from './workspace';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -110,6 +111,7 @@ export class CoreSystem {
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
+  private readonly workspaces: WorkspacesService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -138,6 +140,7 @@ export class CoreSystem {
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
+    this.workspaces = new WorkspacesService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
@@ -160,6 +163,7 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      const workspaces = this.workspaces.setup();
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
@@ -176,6 +180,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
+        workspaces,
       };
 
       // Services that do not expose contracts at setup
@@ -220,6 +225,7 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
       });
       const application = await this.application.start({ http, overlays });
+      const workspaces = this.workspaces.start({ application, http });
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -242,6 +248,7 @@ export class CoreSystem {
         overlays,
         savedObjects,
         uiSettings,
+        workspaces,
       }));
 
       const core: InternalCoreStart = {
@@ -256,6 +263,7 @@ export class CoreSystem {
         overlays,
         uiSettings,
         fatalErrors,
+        workspaces,
       };
 
       await this.plugins.start(core);
