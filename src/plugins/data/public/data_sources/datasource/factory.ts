@@ -15,7 +15,7 @@ export class DataSourceFactory {
   private static factory: DataSourceFactory;
 
   // A dictionary holding the data source type as the key and its corresponding class constructor as the value.
-  private static dataSourceClasses: { [type: string]: new (config: any) => DataSourceType } = {};
+  private dataSourceClasses: { [type: string]: new (config: any) => DataSourceType } = {};
 
   /**
    * Private constructor to ensure only one instance of DataSourceFactory is created.
@@ -42,10 +42,7 @@ export class DataSourceFactory {
    * @param {new (config: any) => DataSourceType} dataSourceClass - The constructor of the data source class.
    * @throws {Error} Throws an error if the data source type has already been registered.
    */
-  static registerDataSourceType(
-    type: string,
-    dataSourceClass: new (config: any) => DataSourceType
-  ): void {
+  registerDataSourceType(type: string, dataSourceClass: new (config: any) => DataSourceType): void {
     if (this.dataSourceClasses[type]) {
       throw new Error('This data source type has already been registered');
     }
@@ -61,7 +58,7 @@ export class DataSourceFactory {
    * @returns {DataSourceType} An instance of the specified data source type.
    * @throws {Error} Throws an error if the data source type is not supported.
    */
-  static getDataSourceInstance(type: string, config: any): DataSourceType {
+  getDataSourceInstance(type: string, config: any): DataSourceType {
     const DataSourceClass = this.dataSourceClasses[type];
     if (!DataSourceClass) {
       throw new Error('Unsupported data source type');
