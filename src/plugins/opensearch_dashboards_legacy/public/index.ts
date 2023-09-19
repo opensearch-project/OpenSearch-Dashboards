@@ -36,6 +36,5 @@ export const plugin = (initializerContext: PluginInitializerContext) =>
 
 export * from './plugin';
 
-export { PaginateDirectiveProvider, PaginateControlsDirectiveProvider } from './paginate/paginate';
 export * from './notify';
 export * from './utils';
