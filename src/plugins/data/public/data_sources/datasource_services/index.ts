@@ -7,7 +7,6 @@ export { DataSourceService } from './datasource_service';
 export {
   IDataSourceFilters,
   IDataSourceRegisterationResult,
-  IDataSourceService,
   DataSourceRegisterationError,
   DataSourceType,
 } from './types';
