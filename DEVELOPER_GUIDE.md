@@ -67,7 +67,7 @@ If it's the only version of node installed, it will automatically be set to the 
 OpenSearch Dashboards is set up using yarn v1. To install it, run:
 
 ```bash
-$ corepack prepare yarn@1 --activate
+$ corepack enable
 ```
 
 (See the [Yarn installation documentation](https://classic.yarnpkg.com/en/docs/install) for more information.)
