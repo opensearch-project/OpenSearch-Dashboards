@@ -88,6 +88,9 @@ import {
 
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { DataSourceService } from './data_sources/datasource_services';
+import { DataSourceFactory } from './data_sources/datasource';
+import { DataSourceSelector } from './data_sources/datasource_selector/datasource_selector';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -212,6 +215,10 @@ export class DataPublicPlugin
       uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
     );
 
+    // Create or fetch the singleton instance
+    const dataSourceService = DataSourceService.getInstance();
+    const dataSourceFactory = DataSourceFactory.getInstance();
+
     const dataServices = {
       actions: {
         createFiltersFromValueClickAction,
@@ -222,6 +229,11 @@ export class DataPublicPlugin
       indexPatterns,
       query,
       search,
+      dataSources: {
+        dataSourceService,
+        dataSourceFactory,
+        DataSourceSelector,
+      },
     };
 
     const SearchBar = createSearchBar({

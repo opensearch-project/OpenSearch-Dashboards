@@ -41,6 +41,8 @@ import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { IDataSourceService } from './data_sources/datasource_services';
+import { DataSourceFactory } from './data_sources/datasource';
 
 export interface DataPublicPluginEnhancements {
   search: SearchEnhancements;
