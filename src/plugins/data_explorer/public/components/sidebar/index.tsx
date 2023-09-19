@@ -3,78 +3,83 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, FC, useEffect, useState } from 'react';
-import { i18n } from '@osd/i18n';
-import {
-  EuiComboBox,
-  EuiSelect,
-  EuiComboBoxOptionOption,
-  EuiSpacer,
-  EuiSplitPanel,
-  EuiPageSideBar,
-} from '@elastic/eui';
+import React, { FC, useEffect, useState } from 'react';
+import { EuiSplitPanel, EuiPageSideBar } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { useView } from '../../utils/use';
 import { DataExplorerServices } from '../../types';
 import { useTypedDispatch, useTypedSelector, setIndexPattern } from '../../utils/state_management';
-import { setView } from '../../utils/state_management/metadata_slice';
+import { DataSourceSelectable } from '../../../../data/public';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
   const dispatch = useTypedDispatch();
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-  const [selectedOption, setSelectedOption] = useState<EuiComboBoxOptionOption<string>>();
-  const { view, viewRegistry } = useView();
-  const views = viewRegistry.all();
-  const viewOptions = useMemo(
-    () =>
-      views.map(({ id, title }) => ({
-        value: id,
-        text: title,
-      })),
-    [views]
-  );
+  const [selectedSources, setSelectedSources] = useState([]);
+  const [dataSourceOptionList, setDataSourceOptionList] = useState([]);
+  const [activeDataSources, setActiveDataSources] = useState([]);
 
   const {
     services: {
-      data: { indexPatterns },
+      data: { indexPatterns, dataSources },
       notifications: { toasts },
+      application,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
   useEffect(() => {
     let isMounted = true;
-    const fetchIndexPatterns = async () => {
-      await indexPatterns.ensureDefaultIndexPattern();
-      const cache = await indexPatterns.getCache();
-      const currentOptions = (cache || []).map((indexPattern) => ({
-        label: indexPattern.attributes.title,
-        value: indexPattern.id,
-      }));
-      if (isMounted) {
-        setOptions(currentOptions);
+    const subscription = dataSources.dataSourceService.dataSources$.subscribe(
+      (currentDataSources) => {
+        if (isMounted) {
+          setActiveDataSources([...Object.values(currentDataSources)]);
+        }
       }
-    };
-    fetchIndexPatterns();
+    );
 
     return () => {
+      subscription.unsubscribe();
       isMounted = false;
     };
-  }, [indexPatterns]);
+  }, [indexPatterns, dataSources]);
 
-  // Set option to the current index pattern
+  const getMatchedOption = (dataSourceList, indexPatternId: string) => {
+    for (const dsGroup of dataSourceList) {
+      return dsGroup.options.find((item) => {
+        return item.value === indexPatternId;
+      });
+    }
+  };
+
   useEffect(() => {
     if (indexPatternId) {
-      const option = options.find((o) => o.value === indexPatternId);
-      setSelectedOption(option);
+      const option = getMatchedOption(dataSourceOptionList, indexPatternId);
+      setSelectedSources(option ? [option] : []);
     }
-  }, [indexPatternId, options]);
+  }, [indexPatternId, activeDataSources, dataSourceOptionList]);
+
+  const handleSourceSelection = (selectedSources) => {
+    // Temperary redirection solution for 2.11, where clicking non-index-pattern datasource
+    // will redirect user to Observability Event explorer
+    if (selectedSources[0].ds?.getType() !== 'Index patterns') {
+      return application.navigateToUrl(`../observability-logs#/explorer?metadata:($datasource:{})`);
+    }
+    setSelectedSources(selectedSources);
+    dispatch(setIndexPattern(selectedSources[0].value));
+  };
 
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
-        <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
-          <EuiComboBox
+        {/* <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
+          <EuiComboBox */}
+        <EuiSplitPanel.Inner paddingSize="s" grow={false}>
+          <DataSourceSelectable
+            dataSources={activeDataSources}
+            dataSourceOptionList={dataSourceOptionList}
+            setDataSourceOptionList={setDataSourceOptionList}
+            setSelectedSources={handleSourceSelection}
+            selectedSources={selectedSources}
+          />
+          {/* <EuiComboBox
             placeholder="Select a datasource"
             singleSelection={{ asPlainText: true }}
             options={options}
@@ -100,7 +105,7 @@ export const Sidebar: FC = ({ children }) => {
 
               dispatch(setIndexPattern(value));
             }}
-          />
+          /> */}
           {/* Hidden for the 2.10 release of Data Explorer. Uncomment when Data explorer is released */}
           {/* <EuiSpacer size="s" />
           <EuiSelect
