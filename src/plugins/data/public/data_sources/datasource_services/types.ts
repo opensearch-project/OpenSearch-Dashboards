@@ -38,8 +38,3 @@ export type DataSourceType = DataSource<
   IDataSourceQueryParams,
   IDataSourceQueryResult
 >;
-
-export interface IDataSourceService {
-  registerDataSource: (ds: DataSourceType) => Promise<IDataSourceRegisterationResult>;
-  getDataSources: (filters?: IDataSourceFilters) => Record<string, DataSourceType>;
-}

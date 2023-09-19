@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { isEmpty, forEach } from 'lodash';
 import {
   DataSource,
@@ -13,7 +14,6 @@ import {
   ISourceDataSet,
 } from '../datasource';
 import {
-  IDataSourceService,
   IDataSourceFilters,
   IDataSourceRegisterationResult,
   DataSourceRegisterationError,
@@ -27,14 +27,17 @@ export type DataSourceType = DataSource<
   IDataSourceQueryResult
 >;
 
-export class DataSourceService implements IDataSourceService {
-  private static dataSourceService: IDataSourceService;
+export class DataSourceService {
+  private static dataSourceService: DataSourceService;
   // A record to store all registered data sources, using the data source name as the key.
   private dataSources: Record<string, DataSourceType> = {};
+  private _dataSourcesSubject: BehaviorSubject<Record<string, DataSourceType>>;
 
-  private constructor() {}
+  private constructor() {
+    this._dataSourcesSubject = new BehaviorSubject(this.dataSources);
+  }
 
-  static getInstance(): IDataSourceService {
+  static getInstance(): DataSourceService {
     if (!this.dataSourceService) {
       this.dataSourceService = new DataSourceService();
     }
@@ -70,8 +73,13 @@ export class DataSourceService implements IDataSourceService {
         ...this.dataSources,
         [dsName]: ds,
       };
+      this._dataSourcesSubject.next(this.dataSources);
       return { success: true, info: '' } as IDataSourceRegisterationResult;
     }
+  }
+
+  public get dataSources$() {
+    return this._dataSourcesSubject.asObservable();
   }
 
   /**
