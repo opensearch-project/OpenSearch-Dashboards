@@ -77,7 +77,6 @@ import {
   SavedObjectCountOptions,
   getRelationships,
   getSavedObjectLabel,
-  getWorkspacesWithWritePermission,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   filterQuery,
@@ -85,7 +84,7 @@ import {
   findObject,
   extractExportDetails,
   SavedObjectsExportResultDetails,
-  copySavedObjects,
+  duplicateSavedObjects,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -94,22 +93,15 @@ import {
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
-import { Header, Table, Flyout, Relationships } from './components';
+import { Header, Table, Flyout, Relationships, SavedObjectsDuplicateModal } from './components';
 import { DataPublicPluginStart } from '../../../../data/public';
-import { SavedObjectsCopyModal } from './components/copy_modal';
-import { PUBLIC_WORKSPACE_ID, MANAGEMENT_WORKSPACE_ID } from '../../../../../core/public';
-
-export enum CopyState {
-  Single = 'single',
-  Selected = 'selected',
-  All = 'all',
-}
+import { PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
+import { DuplicateMode } from './';
 
 interface ExportAllOption {
   id: string;
   label: string;
 }
-
 export interface SavedObjectsTableProps {
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
@@ -140,10 +132,10 @@ export interface SavedObjectsTableState {
   savedObjectCounts: Record<string, Record<string, number>>;
   activeQuery: Query;
   selectedSavedObjects: SavedObjectWithMetadata[];
-  copySelectedSavedObjects: SavedObjectWithMetadata[];
+  duplicateSelectedSavedObjects: SavedObjectWithMetadata[];
   isShowingImportFlyout: boolean;
-  isShowingCopyModal: boolean;
-  copyState: CopyState;
+  duplicateMode: DuplicateMode;
+  isShowingDuplicateModal: boolean;
   isSearching: boolean;
   filteredItemCount: number;
   isShowingRelationships: boolean;
@@ -181,10 +173,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       savedObjectCounts: { type: typeCounts } as Record<string, Record<string, number>>,
       activeQuery: Query.parse(''),
       selectedSavedObjects: [],
-      copySelectedSavedObjects: [],
+      duplicateSelectedSavedObjects: [],
       isShowingImportFlyout: false,
-      isShowingCopyModal: false,
-      copyState: CopyState.Selected,
+      duplicateMode: DuplicateMode.Selected,
+      isShowingDuplicateModal: false,
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
@@ -501,67 +493,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
   };
 
-  getCopyWorkspaces = async (): Promise<WorkspaceAttribute[]> => {
-    const { notifications, http } = this.props;
-    let result;
-    try {
-      result = await getWorkspacesWithWritePermission(http);
-    } catch (error) {
-      notifications?.toasts.addDanger({
-        title: i18n.translate(
-          'savedObjectsManagement.objectsTable.copyWorkspaces.dangerNotification',
-          {
-            defaultMessage: 'Unable to get workspaces with write permission',
-          }
-        ),
-        text: error instanceof Error ? error.message : JSON.stringify(error),
-      });
-    }
-    if (result?.success) {
-      return result.result?.workspaces ?? [];
-    } else {
-      return [];
-    }
-  };
-
-  onCopy = async (
-    savedObjects: SavedObjectWithMetadata[],
-    includeReferencesDeep: boolean,
-    targetWorkspace: string
-  ) => {
-    const { notifications, http } = this.props;
-    const objectsToCopy = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
-    let result;
-    try {
-      result = await copySavedObjects(http, objectsToCopy, includeReferencesDeep, targetWorkspace);
-      if (result.success) {
-        notifications.toasts.addSuccess({
-          title: i18n.translate('savedObjectsManagement.objectsTable.copy.successNotification', {
-            defaultMessage:
-              'Copy ' + savedObjects.length.toString() + ' saved objects successfully',
-          }),
-        });
-      } else {
-        const failedCount = savedObjects.length - result.successCount;
-        notifications.toasts.addSuccess({
-          title: i18n.translate('savedObjectsManagement.objectsTable.copy.dangerNotification', {
-            defaultMessage: 'Unable to copy ' + failedCount.toString() + ' saved objects',
-          }),
-        });
-      }
-    } catch (e) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.copy.dangerNotification', {
-          defaultMessage: 'Unable to copy all saved objects',
-        }),
-      });
-      throw e;
-    }
-
-    this.hideCopyModal();
-    this.refreshObjects();
-  };
-
   onExport = async (includeReferencesDeep: boolean) => {
     const { selectedSavedObjects } = this.state;
     const { notifications, http } = this.props;
@@ -668,14 +599,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.setState({ isShowingImportFlyout: false });
   };
 
-  showCopyModal = () => {
-    this.setState({ isShowingCopyModal: true });
-  };
-
-  hideCopyModal = () => {
-    this.setState({ isShowingCopyModal: false });
-  };
-
   onDelete = () => {
     this.setState({ isShowingDeleteConfirmModal: true });
   };
@@ -745,22 +668,95 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     );
   }
 
-  renderCopyModal() {
-    const { workspaces } = this.props;
-    const { isShowingCopyModal, copySelectedSavedObjects, copyState } = this.state;
+  showDuplicateModal = () => {
+    this.setState({ isShowingDuplicateModal: true });
+  };
 
-    if (!isShowingCopyModal) {
+  hideDuplicateModal = () => {
+    this.setState({ isShowingDuplicateModal: false });
+  };
+
+  renderDuplicateModal() {
+    const { workspaces, http, notifications } = this.props;
+    const { isShowingDuplicateModal, duplicateSelectedSavedObjects, duplicateMode } = this.state;
+
+    if (!isShowingDuplicateModal) {
       return null;
     }
 
+    const onDuplicate = async (
+      savedObjects: SavedObjectWithMetadata[],
+      includeReferencesDeep: boolean,
+      targetWorkspace: string
+    ) => {
+      const objectsToDuplicate = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
+      let result;
+      try {
+        result = await duplicateSavedObjects(
+          http,
+          objectsToDuplicate,
+          includeReferencesDeep,
+          targetWorkspace
+        );
+        if (result.success) {
+          notifications.toasts.addSuccess({
+            title: i18n.translate(
+              'savedObjectsManagement.objectsTable.duplicate.successNotification',
+              {
+                defaultMessage:
+                  'Duplicate ' + savedObjects.length.toString() + ' saved objects successfully',
+              }
+            ),
+          });
+        } else if (result.errors) {
+          const errorsIds = result.errors.map((item: { id: string }) => item.id);
+          notifications.toasts.addDanger({
+            title: i18n.translate(
+              'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
+              {
+                defaultMessage:
+                  'Unable to duplicate ' +
+                  savedObjects.length.toString() +
+                  ' saved objects. These objects cannot be duplicated:' +
+                  errorsIds.join(','),
+              }
+            ),
+          });
+        } else {
+          notifications.toasts.addDanger({
+            title: i18n.translate(
+              'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
+              {
+                defaultMessage:
+                  'Unable to duplicate ' + savedObjects.length.toString() + ' saved objects',
+              }
+            ),
+          });
+        }
+      } catch (e) {
+        notifications.toasts.addDanger({
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
+            {
+              defaultMessage:
+                'Unable to duplicate ' + savedObjects.length.toString() + ' saved objects',
+            }
+          ),
+        });
+      }
+      this.hideDuplicateModal();
+      await this.refreshObjects();
+    };
+
     return (
-      <SavedObjectsCopyModal
-        selectedSavedObjects={copySelectedSavedObjects}
+      <SavedObjectsDuplicateModal
+        http={http}
         workspaces={workspaces}
-        getCopyWorkspaces={this.getCopyWorkspaces}
-        copyState={copyState}
-        onCopy={this.onCopy}
-        onClose={this.hideCopyModal}
+        onDuplicate={onDuplicate}
+        notifications={notifications}
+        duplicateMode={duplicateMode}
+        onClose={this.hideDuplicateModal}
+        selectedSavedObjects={duplicateSelectedSavedObjects}
       />
     );
   }
@@ -1092,17 +1088,17 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
-        {this.renderCopyModal()}
+        {this.renderDuplicateModal()}
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
           hideImport={hideImport}
           showDuplicateAll={workspaceEnabled}
-          onCopy={() =>
+          onDuplicate={() =>
             this.setState({
-              copySelectedSavedObjects: savedObjects,
-              isShowingCopyModal: true,
-              copyState: CopyState.All,
+              duplicateSelectedSavedObjects: savedObjects,
+              isShowingDuplicateModal: true,
+              duplicateMode: DuplicateMode.All,
             })
           }
           onRefresh={this.refreshObjects}
@@ -1125,18 +1121,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
-            onCopySelected={() =>
+            onDuplicateSelected={() =>
               this.setState({
-                isShowingCopyModal: true,
-                copyState: CopyState.Selected,
-                copySelectedSavedObjects: selectedSavedObjects,
+                isShowingDuplicateModal: true,
+                duplicateMode: DuplicateMode.Selected,
+                duplicateSelectedSavedObjects: selectedSavedObjects,
               })
             }
-            onCopySingle={(object) =>
+            onDuplicateSingle={(object) =>
               this.setState({
-                copySelectedSavedObjects: [object],
-                isShowingCopyModal: true,
-                copyState: CopyState.Single,
+                duplicateSelectedSavedObjects: [object],
+                isShowingDuplicateModal: true,
+                duplicateMode: DuplicateMode.Selected,
               })
             }
             onActionRefresh={this.refreshObject}

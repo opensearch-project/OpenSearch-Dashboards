@@ -211,7 +211,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
     filteredCount={4}
     hideImport={false}
     objectCount={4}
-    onCopy={[Function]}
+    onDuplicate={[Function]}
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
@@ -379,9 +379,9 @@ exports[`SavedObjectsTable should render normally 1`] = `
         ]
       }
       onActionRefresh={[Function]}
-      onCopySelected={[Function]}
-      onCopySingle={[Function]}
       onDelete={[Function]}
+      onDuplicateSelected={[Function]}
+      onDuplicateSingle={[Function]}
       onExport={[Function]}
       onQueryChange={[Function]}
       onShowRelationships={[Function]}

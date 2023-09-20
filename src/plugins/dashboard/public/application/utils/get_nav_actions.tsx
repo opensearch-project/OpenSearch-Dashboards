@@ -8,9 +8,9 @@ import { i18n } from '@osd/i18n';
 import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 import {
-  SaveResult,
-  SavedObjectSaveOpts,
   getSavedObjectFinder,
+  SavedObjectSaveOpts,
+  SaveResult,
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { DashboardAppStateContainer, DashboardServices, NavAction } from '../../types';
@@ -24,15 +24,21 @@ import {
 import {
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
-  ViewMode,
   isErrorEmbeddable,
   openAddPanelFlyout,
+  ViewMode,
 } from '../../../../embeddable/public';
 import { saveDashboard } from '../utils';
 import { DashboardContainer } from '../embeddable/dashboard_container';
-import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
+import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_constants';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
+import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
+import {
+  DuplicateMode,
+  showDuplicateModal,
+  duplicateSavedObjects,
+} from '../../../../saved_objects_management/public';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
@@ -65,10 +71,13 @@ export const getNavActions = (
     share,
     dashboardConfig,
     dashboardCapabilities,
+    http,
+    workspaces,
   } = services;
   const navActions: {
     [key: string]: NavAction;
   } = {};
+  const workspaceEnabled = workspaces.workspaceEnabled$.value;
 
   if (!stateContainer) {
     return navActions;
@@ -133,7 +142,7 @@ export const getNavActions = (
         title={currentTitle}
         description={currentDescription}
         timeRestore={currentTimeRestore}
-        showCopyOnSave={savedDashboard.id ? true : false}
+        showCopyOnSave={!!savedDashboard.id}
       />
     );
     showSaveModal(dashboardSaveModal, I18nContext);
@@ -165,6 +174,59 @@ export const getNavActions = (
 
     showCloneModal(onClone, currentTitle);
   };
+
+  if (workspaceEnabled) {
+    navActions[TopNavIds.DUPLICATE] = () => {
+      const onDuplicate = async (
+        dashboardSavedObjects: SavedObjectWithMetadata[],
+        includeReferencesDeep: boolean,
+        targetWorkspace: string
+      ) => {
+        const objectsToDuplicate = dashboardSavedObjects.map((obj) => ({
+          id: obj.id,
+          type: obj.type,
+        }));
+
+        try {
+          await duplicateSavedObjects(
+            http,
+            objectsToDuplicate,
+            includeReferencesDeep,
+            targetWorkspace
+          );
+
+          notifications.toasts.addSuccess({
+            title: i18n.translate('dashboard.dashboardWasDuplicatedSuccessMessage', {
+              defaultMessage: 'Duplicate dashboard successfully',
+            }),
+          });
+        } catch (e) {
+          notifications.toasts.addDanger({
+            title: i18n.translate('dashboard.dashboardWasNotDuplicatedDangerMessage', {
+              defaultMessage: 'Unable to duplicate dashboard',
+            }),
+          });
+        }
+      };
+
+      const dashboardSavedObject = ({
+        ...currentContainer,
+        ...savedDashboard,
+      } as unknown) as SavedObjectWithMetadata;
+      dashboardSavedObject.meta = { title: savedDashboard.title };
+
+      const showDuplicateModalProps = {
+        http,
+        workspaces,
+        onDuplicate,
+        notifications,
+        duplicateMode: DuplicateMode.Selected,
+        selectedSavedObjects: [dashboardSavedObject],
+      };
+
+      showDuplicateModal(showDuplicateModalProps, I18nContext);
+    };
+  }
 
   navActions[TopNavIds.ADD_EXISTING] = () => {
     if (currentContainer && !isErrorEmbeddable(currentContainer)) {
@@ -203,7 +265,7 @@ export const getNavActions = (
   };
 
   if (share) {
-    // the share button is only availabale if "share" plugin contract enabled
+    // the share button is only available if "share" plugin contract enabled
     navActions[TopNavIds.SHARE] = (anchorElement) => {
       const EmbedUrlParamExtension = ({
         setParamValue,

@@ -40,4 +40,4 @@ export const SAVED_QUERIES_WORDINGS = i18n.translate(
   }
 );
 
-export const SAVED_OBJECT_TYPE_WORKSAPCE = 'workspace';
+export const SAVED_OBJECT_TYPE_WORKSPACE = 'workspace';

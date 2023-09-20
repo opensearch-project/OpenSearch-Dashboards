@@ -14,5 +14,5 @@
   "optionalPlugins": ["home", "share", "usageCollection"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "home"]
+  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "home", "savedObjectsManagement"]
 }

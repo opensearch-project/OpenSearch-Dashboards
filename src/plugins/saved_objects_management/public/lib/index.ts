@@ -57,5 +57,4 @@ export { extractExportDetails, SavedObjectsExportResultDetails } from './extract
 export { createFieldList } from './create_field_list';
 export { getAllowedTypes } from './get_allowed_types';
 export { filterQuery } from './filter_query';
-export { copySavedObjects } from './copy_saved_objects';
-export { getWorkspacesWithWritePermission } from './get_workspaces_with_write_permission';
+export { duplicateSavedObjects } from './duplicate_saved_objects';

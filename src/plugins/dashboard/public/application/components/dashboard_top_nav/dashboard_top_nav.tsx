@@ -89,7 +89,8 @@ const TopNav = ({
         getTopNavConfig(
           currentAppState?.viewMode,
           navActions,
-          dashboardConfig.getHideWriteControls()
+          dashboardConfig.getHideWriteControls(),
+          services.workspaces.workspaceEnabled$.value
         )
       );
     }

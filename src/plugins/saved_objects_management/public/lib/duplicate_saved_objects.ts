@@ -10,12 +10,18 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { WorkspacePermissionMode } from '../../../../core/public';
 
-export async function getWorkspacesWithWritePermission(http: HttpStart) {
-  return await http.post('/api/workspaces/_list', {
+export async function duplicateSavedObjects(
+  http: HttpStart,
+  objects: any[],
+  includeReferencesDeep: boolean = true,
+  targetWorkspace: string
+) {
+  return await http.post('/api/saved_objects/_copy', {
     body: JSON.stringify({
-      permissionModes: [WorkspacePermissionMode.Management, WorkspacePermissionMode.LibraryWrite],
+      objects,
+      includeReferencesDeep,
+      targetWorkspace,
     }),
   });
 }

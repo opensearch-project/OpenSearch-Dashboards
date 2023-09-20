@@ -42,7 +42,8 @@ import { NavAction } from '../../../../types';
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean
+  hideWriteControls: boolean,
+  workspaceEnabled?: boolean
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:
@@ -54,7 +55,9 @@ export function getTopNavConfig(
         : [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
-            getCloneConfig(actions[TopNavIds.CLONE]),
+            ...(workspaceEnabled
+              ? [getDuplicateConfig(actions[TopNavIds.DUPLICATE])]
+              : [getCloneConfig(actions[TopNavIds.CLONE])]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
           ];
     case ViewMode.EDIT:
@@ -154,6 +157,23 @@ function getCloneConfig(action: NavAction) {
       defaultMessage: 'Create a copy of your dashboard',
     }),
     testId: 'dashboardClone',
+    run: action,
+  };
+}
+
+/**
+ * @returns {osdTopNavConfig}
+ */
+function getDuplicateConfig(action: NavAction) {
+  return {
+    id: 'duplicate',
+    label: i18n.translate('dashboard.topNave.duplicateButtonAriaLabel', {
+      defaultMessage: 'Duplicate',
+    }),
+    description: i18n.translate('dashboard.topNave.duplicateConfigDescription', {
+      defaultMessage: 'Duplicate your dashboard',
+    }),
+    testId: 'dashboardDuplicate',
     run: action,
   };
 }

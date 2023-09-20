@@ -204,7 +204,7 @@ const TopNav = ({
     /**
      * Most visualizations have all search bar components enabled.
      * Some visualizations have fewer options, but all visualizations have the search bar.
-     * That's is why the showSearchBar prop is set.
+     * That is why the showSearchBar prop is set.
      * All visualizations also have the timepicker\autorefresh component,
      * it is enabled by default in the TopNavMenu component.
      */

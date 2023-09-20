@@ -31,26 +31,37 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
-import { WorkspaceAttribute, WorkspaceStart } from 'opensearch-dashboards/public';
+import {
+  HttpSetup,
+  NotificationsStart,
+  WorkspaceAttribute,
+  WorkspaceStart,
+} from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import { SavedObjectWithMetadata } from '../../../types';
-import { getSavedObjectLabel } from '../../../lib';
-import { SAVED_OBJECT_TYPE_WORKSAPCE } from '../../../constants';
-import { CopyState } from '../';
+import { SavedObjectWithMetadata } from '../../../../common';
+import { getSavedObjectLabel, SAVED_OBJECT_TYPE_WORKSPACE } from '../../../../public';
 
 type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
 
-interface Props {
-  workspaces: WorkspaceStart;
-  onCopy: (
+export enum DuplicateMode {
+  Selected = 'selected',
+  All = 'all',
+}
+export interface ShowDuplicateModalProps {
+  onDuplicate: (
     savedObjects: SavedObjectWithMetadata[],
     includeReferencesDeep: boolean,
     targetWorkspace: string
   ) => Promise<void>;
-  onClose: () => void;
-  copyState: CopyState;
-  getCopyWorkspaces: () => Promise<WorkspaceAttribute[]>;
+  http: HttpSetup;
+  workspaces: WorkspaceStart;
+  duplicateMode: DuplicateMode;
+  notifications: NotificationsStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
+}
+
+interface Props extends ShowDuplicateModalProps {
+  onClose: () => void;
 }
 
 interface State {
@@ -67,7 +78,7 @@ function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export class SavedObjectsCopyModal extends React.Component<Props, State> {
+export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
   private isMounted = false;
 
   constructor(props: Props) {
@@ -101,15 +112,15 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
   };
 
   async componentDidMount() {
-    const { workspaces, getCopyWorkspaces } = this.props;
-    const workspaceList = await getCopyWorkspaces();
+    const { workspaces } = this.props;
     const currentWorkspace = workspaces.currentWorkspace$.value;
     const currentWorkspaceName = currentWorkspace?.name;
+    const targetWorkspaces = this.getTargetWorkspaces();
 
     // current workspace is the first option
     const workspaceOptions = [
       ...(currentWorkspace ? [this.workspaceToOption(currentWorkspace, currentWorkspaceName)] : []),
-      ...workspaceList
+      ...targetWorkspaces
         .filter((workspace: WorkspaceAttribute) => workspace.name !== currentWorkspaceName)
         .map((workspace: WorkspaceAttribute) =>
           this.workspaceToOption(workspace, currentWorkspaceName)
@@ -121,8 +132,8 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       allWorkspaceOptions: workspaceOptions,
     });
 
-    const { copyState } = this.props;
-    if (copyState === CopyState.All) {
+    const { duplicateMode } = this.props;
+    if (duplicateMode === DuplicateMode.All) {
       const { allSelectedObjects } = this.state;
       const categorizedObjects = groupBy(allSelectedObjects, (object) => object.type);
       const savedObjectTypeInfoMap = new Map<string, [number, boolean]>();
@@ -139,14 +150,20 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
     this.isMounted = false;
   }
 
-  copySavedObjects = async (savedObjects: SavedObjectWithMetadata[]) => {
+  getTargetWorkspaces = () => {
+    const { workspaces } = this.props;
+    const workspaceList = workspaces.workspaceList$.value;
+    return workspaceList.filter((workspace) => !workspace.libraryReadonly);
+  };
+
+  duplicateSavedObjects = async (savedObjects: SavedObjectWithMetadata[]) => {
     this.setState({
       isLoading: true,
     });
 
     const targetWorkspace = this.state.targetWorkspaceOption[0].key;
 
-    await this.props.onCopy(
+    await this.props.onDuplicate(
       savedObjects,
       this.state.isIncludeReferencesDeepChecked,
       targetWorkspace!
@@ -189,7 +206,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
     }
   };
 
-  renderCopyObjectCategory = (
+  renderDuplicateObjectCategory = (
     savedObjectType: string,
     savedObjectTypeCount: number,
     savedObjectTypeChecked: boolean
@@ -200,7 +217,10 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
         key={savedObjectType}
         label={
           <FormattedMessage
-            id={'savedObjectsManagement.objectsTable.copyModal.savedObjectType.' + savedObjectType}
+            id={
+              'savedObjectsManagement.objectsTable.duplicateModal.savedObjectType.' +
+              savedObjectType
+            }
             defaultMessage={
               capitalizeFirstLetter(savedObjectType) + ` (${savedObjectTypeCount.toString()})`
             }
@@ -212,13 +232,13 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
     );
   };
 
-  renderCopyObjectCategories = () => {
+  renderDuplicateObjectCategories = () => {
     const { savedObjectTypeInfoMap } = this.state;
     const checkboxList: JSX.Element[] = [];
     savedObjectTypeInfoMap.forEach(
       ([savedObjectTypeCount, savedObjectTypeChecked], savedObjectType) =>
         checkboxList.push(
-          this.renderCopyObjectCategory(
+          this.renderDuplicateObjectCategory(
             savedObjectType,
             savedObjectTypeCount,
             savedObjectTypeChecked
@@ -241,31 +261,25 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
       isIncludeReferencesDeepChecked,
       allSelectedObjects,
     } = this.state;
-    const { copyState } = this.props;
+    const { duplicateMode, onClose } = this.props;
     const targetWorkspaceId = targetWorkspaceOption?.at(0)?.key;
     let selectedObjects = allSelectedObjects;
-    if (copyState === CopyState.All) {
+    if (duplicateMode === DuplicateMode.All) {
       selectedObjects = selectedObjects.filter((item) => this.isSavedObjectTypeIncluded(item.type));
     }
     const includedSelectedObjects = selectedObjects.filter((item) =>
       !!targetWorkspaceId && !!item.workspaces
         ? !item.workspaces.includes(targetWorkspaceId)
-        : item.type !== SAVED_OBJECT_TYPE_WORKSAPCE
+        : item.type !== SAVED_OBJECT_TYPE_WORKSPACE
     );
 
     const ignoredSelectedObjectsLength = selectedObjects.length - includedSelectedObjects.length;
 
-    let confirmCopyButtonEnabled = false;
+    let confirmDuplicateButtonEnabled = false;
     if (!!targetWorkspaceId && includedSelectedObjects.length > 0) {
-      confirmCopyButtonEnabled = true;
+      confirmDuplicateButtonEnabled = true;
     }
 
-    const confirmMessageForAllObjects = `Duplicate (${includedSelectedObjects.length})`;
-    const confirmMessageForSingleOrSelectedObjects = 'Duplicate';
-    const confirmMessage =
-      copyState === CopyState.All
-        ? confirmMessageForAllObjects
-        : confirmMessageForSingleOrSelectedObjects;
     const warningMessageForOnlyOneSavedObject = (
       <p>
         <b style={{ color: '#000' }}>1</b> saved object will <b style={{ color: '#000' }}>not</b> be
@@ -298,17 +312,17 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
 
     return (
       <EuiModal
-        data-test-subj="savedObjectsCopyModal"
+        data-test-subj="savedObjectsDuplicateModal"
         className="savedObjectsModal"
-        onClose={this.props.onClose}
+        onClose={onClose}
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="savedObjectsManagement.objectsTable.copyModal.title"
-              defaultMessage="Duplicate {copyState, select, all {all objects} other {{objectCount, plural, =1 {{objectName}} other {# objects}}}}?"
+              id="savedObjectsManagement.objectsTable.duplicateModal.title"
+              defaultMessage="Duplicate {duplicateMode, select, all {all objects} other {{objectCount, plural, =1 {{objectName}} other {# objects}}}}?"
               values={{
-                copyState,
+                duplicateMode,
                 objectName: allSelectedObjects[0].meta.title,
                 objectCount: allSelectedObjects.length,
               }}
@@ -321,7 +335,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
             fullWidth
             label={
               <FormattedMessage
-                id="savedObjectsManagement.objectsTable.copyModal.targetWorkspacelabel"
+                id="savedObjectsManagement.objectsTable.duplicateModal.targetWorkspacelabel"
                 defaultMessage="Destination workspace"
               />
             }
@@ -338,20 +352,20 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
                 singleSelection={{ asPlainText: true }}
                 onSearchChange={this.onSearchWorkspaceChange}
                 isClearable={false}
-                isInvalid={!confirmCopyButtonEnabled}
+                isInvalid={!confirmDuplicateButtonEnabled}
               />
             </>
           </EuiFormRow>
 
           <EuiSpacer size="m" />
-          {copyState && this.renderCopyObjectCategories()}
-          {copyState && <EuiSpacer size="m" />}
+          {duplicateMode === DuplicateMode.All && this.renderDuplicateObjectCategories()}
+          {duplicateMode === DuplicateMode.All && <EuiSpacer size="m" />}
 
           <EuiFormRow
             fullWidth
             label={
               <FormattedMessage
-                id="savedObjectsManagement.objectsTable.copyModal.relatedObjects"
+                id="savedObjectsManagement.objectsTable.duplicateModal.relatedObjects"
                 defaultMessage="Related Objects"
               />
             }
@@ -367,7 +381,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
                 id={'includeReferencesDeep'}
                 label={
                   <FormattedMessage
-                    id="savedObjectsManagement.objectsTable.copyModal.includeReferencesDeepLabel"
+                    id="savedObjectsManagement.objectsTable.duplicateModal.includeReferencesDeepLabel"
                     defaultMessage="Duplicate related objects"
                   />
                 }
@@ -381,7 +395,7 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
           {ignoredSelectedObjectsLength === 0 ? null : ignoreSomeObjectsChildren}
           <p>
             <FormattedMessage
-              id="savedObjectsManagement.objectsTable.copyModal.tableTitle"
+              id="savedObjectsManagement.objectsTable.duplicateModal.tableTitle"
               defaultMessage="The following saved objects will be copied:"
             />
           </p>
@@ -392,26 +406,29 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
               {
                 field: 'type',
                 name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.copyModal.typeColumnName',
+                  'savedObjectsManagement.objectsTable.duplicateModal.typeColumnName',
                   { defaultMessage: 'Type' }
                 ),
                 width: '50px',
                 render: (type, object) => (
                   <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                    <EuiIcon type={object.meta.icon || 'apps'} />
+                    <EuiIcon type={object.meta?.icon || 'apps'} />
                   </EuiToolTip>
                 ),
               },
               {
                 field: 'id',
-                name: i18n.translate('savedObjectsManagement.objectsTable.copyModal.idColumnName', {
-                  defaultMessage: 'Id',
-                }),
+                name: i18n.translate(
+                  'savedObjectsManagement.objectsTable.duplicateModal.idColumnName',
+                  {
+                    defaultMessage: 'Id',
+                  }
+                ),
               },
               {
                 field: 'meta.title',
                 name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.copyModal.titleColumnName',
+                  'savedObjectsManagement.objectsTable.duplicateModal.titleColumnName',
                   { defaultMessage: 'Title' }
                 ),
               },
@@ -422,23 +439,27 @@ export class SavedObjectsCopyModal extends React.Component<Props, State> {
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="copyCancelButton" onClick={this.props.onClose}>
+          <EuiButtonEmpty data-test-subj="duplicateCancelButton" onClick={this.props.onClose}>
             <FormattedMessage
-              id="savedObjectsManagement.objectsTable.copyModal.copyCancelButton"
+              id="savedObjectsManagement.objectsTable.duplicateModal.duplicateCancelButton"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
 
           <EuiButton
             fill
-            data-test-subj="copyConfirmButton"
-            onClick={() => this.copySavedObjects(includedSelectedObjects)}
+            data-test-subj="duplicateConfirmButton"
+            onClick={() => this.duplicateSavedObjects(includedSelectedObjects)}
             isLoading={this.state.isLoading}
-            disabled={!confirmCopyButtonEnabled}
+            disabled={!confirmDuplicateButtonEnabled}
           >
             <FormattedMessage
-              id="savedObjectsManagement.objectsTable.copyModal.confirmButtonLabel"
-              defaultMessage={confirmMessage}
+              id="savedObjectsManagement.objectsTable.duplicateModal.confirmButtonLabel"
+              defaultMessage="Duplicate{duplicateMode, select, all {({objectCount})} other {}}"
+              values={{
+                duplicateMode,
+                objectCount: includedSelectedObjects.length,
+              }}
             />
           </EuiButton>
         </EuiModalFooter>

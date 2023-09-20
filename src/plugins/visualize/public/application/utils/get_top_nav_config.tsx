@@ -30,26 +30,29 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-
 import { TopNavMenuData } from 'src/plugins/navigation/public';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
-  showSaveModal,
+  OnSaveProps,
   SavedObjectSaveModalOrigin,
   SavedObjectSaveOpts,
-  OnSaveProps,
+  showSaveModal,
 } from '../../../../saved_objects/public';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
-
 import {
-  VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
+  VisualizeServices,
 } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
+import {
+  duplicateSavedObjects,
+  SavedObjectWithMetadata,
+} from '../../../../saved_objects_management/public/';
+import { DuplicateMode, showDuplicateModal } from '../../../../saved_objects_management/public';
 
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
@@ -91,10 +94,15 @@ export const getTopNavConfig = (
     visualizeCapabilities,
     i18n: { Context: I18nContext },
     dashboard,
+    http,
+    notifications,
+    workspaces,
   }: VisualizeServices
 ) => {
+  const workspaceEnabled = workspaces.workspaceEnabled$.value;
   const { vis, embeddableHandler } = visInstance;
   const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
+
   /**
    * Called when the user clicks "Save" button.
    */
@@ -245,6 +253,89 @@ export const getTopNavConfig = (
       // disable the Share button if no action specified
       disableButton: !share || !!embeddableId,
     },
+    ...(savedVis?.id && workspaceEnabled
+      ? [
+          {
+            id: 'duplicate',
+            label: i18n.translate('visualize.topNavMenu.duplicateVisualizationButtonLabel', {
+              defaultMessage: 'duplicate',
+            }),
+            description: i18n.translate(
+              'visualize.topNavMenu.duplicateVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Duplicate Visualization',
+              }
+            ),
+            testId: 'visualizeDuplicateButton',
+            disableButton: hasUnappliedChanges,
+            tooltip() {
+              if (hasUnappliedChanges) {
+                return i18n.translate(
+                  'visualize.topNavMenu.duplicateVisualizationDisabledButtonTooltip',
+                  {
+                    defaultMessage: 'Apply or Discard your changes before duplicating',
+                  }
+                );
+              }
+            },
+            run: (anchorElement: HTMLElement) => {
+              const onDuplicate = async (
+                visualizationSavedObjects: SavedObjectWithMetadata[],
+                includeReferencesDeep: boolean,
+                targetWorkspace: string
+              ) => {
+                const objectsToDuplicate = visualizationSavedObjects.map((obj) => ({
+                  id: obj.id,
+                  type: obj.type,
+                }));
+
+                try {
+                  await duplicateSavedObjects(
+                    http,
+                    objectsToDuplicate,
+                    includeReferencesDeep,
+                    targetWorkspace
+                  );
+                  notifications.toasts.addSuccess({
+                    title: i18n.translate('visualize.topNavMenu.duplicate.successNotification', {
+                      defaultMessage: 'Duplicate visualization successfully',
+                    }),
+                  });
+                } catch (e) {
+                  notifications.toasts.addDanger({
+                    title: i18n.translate('visualize.topNavMenu.duplicate.dangerNotification', {
+                      defaultMessage: 'Unable to duplicate visualization',
+                    }),
+                  });
+                }
+              };
+
+              const visualizationSavedObject = ({
+                ...embeddableHandler,
+                ...savedVis,
+              } as unknown) as SavedObjectWithMetadata;
+              visualizationSavedObject.meta = { title: savedVis.title }; // meta is missing in savedVis
+
+              const showDuplicateModalProps = {
+                http,
+                workspaces,
+                onDuplicate,
+                notifications,
+                duplicateMode: DuplicateMode.Selected,
+                selectedSavedObjects: [visualizationSavedObject],
+              };
+
+              onAppLeave((actions) => {
+                return actions.default();
+              });
+
+              if (savedVis) {
+                showDuplicateModal(showDuplicateModalProps, I18nContext);
+              }
+            },
+          },
+        ]
+      : []),
     ...(originatingApp === 'dashboards' || originatingApp === 'canvas'
       ? [
           {

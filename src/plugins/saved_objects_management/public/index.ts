@@ -46,11 +46,22 @@ export {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementServiceRegistryEntry,
 } from './services';
-export { ProcessedImportResponse, processImportResponse, FailedImport } from './lib';
+export {
+  ProcessedImportResponse,
+  processImportResponse,
+  FailedImport,
+  duplicateSavedObjects,
+  getSavedObjectLabel,
+} from './lib';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 export { SAVED_OBJECT_DELETE_TRIGGER, savedObjectDeleteTrigger } from './triggers';
 export { SavedObjectDeleteContext } from './ui_actions_bootstrap';
-
+export { SAVED_OBJECT_TYPE_WORKSPACE } from './constants';
+export {
+  showDuplicateModal,
+  SavedObjectsDuplicateModal,
+  DuplicateMode,
+} from './management_section';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();
 }
