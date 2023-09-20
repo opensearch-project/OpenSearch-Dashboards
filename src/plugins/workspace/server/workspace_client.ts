@@ -14,6 +14,7 @@ import { WORKSPACE_TYPE } from '../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
+import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -29,8 +30,12 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     this.setupDep = core;
   }
 
-  private getScopedClient(requestDetail: IRequestDetail): SavedObjectsClientContract | undefined {
-    return this.savedObjects?.getScopedClient(requestDetail.request);
+  private getScopedClientWithoutPermission(
+    requestDetail: IRequestDetail
+  ): SavedObjectsClientContract | undefined {
+    return this.savedObjects?.getScopedClient(requestDetail.request, {
+      excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+    });
   }
 
   private getSavedObjectClientsFromRequestDetail(
@@ -64,11 +69,13 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       const attributes = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
-      const existingWorkspaceRes = await this.getScopedClient(requestDetail)?.find({
-        type: WORKSPACE_TYPE,
-        search: attributes.name,
-        searchFields: ['name'],
-      });
+      const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
+        {
+          type: WORKSPACE_TYPE,
+          search: attributes.name,
+          searchFields: ['name'],
+        }
+      );
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
@@ -149,7 +156,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
       if (workspaceInDB.attributes.name !== attributes.name) {
-        const existingWorkspaceRes = await this.getScopedClient(requestDetail)?.find({
+        const existingWorkspaceRes = await this.getScopedClientWithoutPermission(
+          requestDetail
+        )?.find({
           type: WORKSPACE_TYPE,
           search: attributes.name,
           searchFields: ['name'],
