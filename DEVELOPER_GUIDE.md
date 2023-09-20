@@ -74,7 +74,7 @@ $ # Install the correct version of yarn
 $ corepack install
 ```
 
-(See the [corepack documentation](https://github.com/nodejs/corepack?tab=readme-ov-file#-corepack) for more information.)
+(See the [corepack documentation](https://github.com/nodejs/corepack#-corepack) for more information.)
 
 ### Fork and clone OpenSearch Dashboards
 
