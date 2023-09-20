@@ -43,7 +43,7 @@ env:
 
 jobs:
   cypress-tests:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     strategy:
       fail-fast: false
       matrix:
@@ -156,7 +156,7 @@ jobs:
           name: ftr-cypress-screenshots
           path: ${{ env.FTR_PATH }}/cypress/screenshots
           retention-days: 1
-      
+
       - uses: actions/upload-artifact@v3
         if: always()
         with:
