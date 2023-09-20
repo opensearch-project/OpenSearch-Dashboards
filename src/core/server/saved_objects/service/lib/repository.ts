@@ -243,6 +243,7 @@ export class SavedObjectsRepository {
       originId,
       initialNamespaces,
       version,
+      workspaces,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -279,6 +280,20 @@ export class SavedObjectsRepository {
       }
     }
 
+    let savedObjectWorkspaces = workspaces;
+
+    if (id && overwrite && workspaces) {
+      try {
+        const currentItem = await this.get(type, id);
+        if (currentItem && currentItem.workspaces) {
+          // do not overwrite workspaces
+          savedObjectWorkspaces = currentItem.workspaces;
+        }
+      } catch (e) {
+        // this.get will throw an error when no items can be found
+      }
+    }
+
     const migrated = this._migrator.migrateDocument({
       id,
       type,
@@ -289,6 +304,7 @@ export class SavedObjectsRepository {
       migrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
+      ...(Array.isArray(savedObjectWorkspaces) && { workspaces: savedObjectWorkspaces }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -402,12 +418,16 @@ export class SavedObjectsRepository {
         object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
+      let savedObjectWorkspaces: string[] | undefined;
+      let finalMethod = method;
+      let finalObjectId = object.id;
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
           ? bulkGetResponse?.body.docs[opensearchRequestIndex]
           : undefined;
         const docFound = indexFound && actualResult?.found === true;
+        let hasSetNamespace = false;
         // @ts-expect-error MultiGetHit._source is optional
         if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
           const { id, type } = object;
@@ -422,11 +442,20 @@ export class SavedObjectsRepository {
               },
             },
           };
+        } else {
+          hasSetNamespace = true;
+          if (this._registry.isSingleNamespace(object.type)) {
+            savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
+          } else if (this._registry.isMultiNamespace(object.type)) {
+            savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
+          }
         }
-        savedObjectNamespaces =
-          initialNamespaces ||
-          // @ts-expect-error MultiGetHit._source is optional
-          getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+        if (!hasSetNamespace) {
+          savedObjectNamespaces =
+            initialNamespaces ||
+            // @ts-expect-error MultiGetHit._source is optional
+            getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+        }
         // @ts-expect-error MultiGetHit._source is optional
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
@@ -438,12 +467,57 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      if (expectedBulkGetResult.value.method === 'create') {
+        savedObjectWorkspaces = options.workspaces;
+      } else {
+        const changeToCreate = () => {
+          finalMethod = 'create';
+          finalObjectId = object.id;
+          savedObjectWorkspaces = options.workspaces;
+          versionProperties = {};
+        };
+        /**
+         * When overwrite, need to check if the object is workspace-specific
+         * if so, copy object to target workspace instead of refering it.
+         */
+        const rawId = this._serializer.generateRawId(namespace, object.type, object.id);
+        const findObject =
+          bulkGetResponse?.statusCode !== 404
+            ? bulkGetResponse?.body.docs?.find((item) => item._id === rawId)
+            : null;
+        if (findObject && findObject.found) {
+          const transformedObject = this._serializer.rawToSavedObject(
+            findObject as SavedObjectsRawDoc
+          ) as SavedObject;
+          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+            options.workspaces,
+            transformedObject.workspaces
+          );
+          /**
+           * We need to create a new object when the object
+           * is about to import into workspaces it is not belong to
+           */
+          if (filteredWorkspaces.length) {
+            /**
+             * Create a new object but only belong to the set of (target workspaces - original workspace)
+             */
+            changeToCreate();
+            finalObjectId = uuid.v1();
+            savedObjectWorkspaces = filteredWorkspaces;
+          } else {
+            savedObjectWorkspaces = transformedObject.workspaces;
+          }
+        } else {
+          savedObjectWorkspaces = options.workspaces;
+        }
+      }
+
       const expectedResult = {
         opensearchRequestIndex: bulkRequestIndexCounter++,
-        requestedId: object.id,
+        requestedId: finalObjectId,
         rawMigratedDoc: this._serializer.savedObjectToRaw(
           this._migrator.migrateDocument({
-            id: object.id,
+            id: finalObjectId,
             type: object.type,
             attributes: object.attributes,
             migrationVersion: object.migrationVersion,
@@ -452,13 +526,14 @@ export class SavedObjectsRepository {
             updated_at: time,
             references: object.references || [],
             originId: object.originId,
+            workspaces: savedObjectWorkspaces,
           }) as SavedObjectSanitizedDoc
         ),
       };
 
       bulkCreateParams.push(
         {
-          [method]: {
+          [finalMethod]: {
             _id: expectedResult.rawMigratedDoc._id,
             _index: this.getIndexForType(object.type),
             ...(overwrite && versionProperties),
@@ -736,6 +811,7 @@ export class SavedObjectsRepository {
       typeToNamespacesMap,
       filter,
       preference,
+      workspaces,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -809,6 +885,7 @@ export class SavedObjectsRepository {
           typeToNamespacesMap,
           hasReference,
           kueryNode,
+          workspaces,
         }),
       },
     };
@@ -976,7 +1053,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt } = body._source;
+    const { originId, updated_at: updatedAt, workspaces } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
@@ -991,6 +1068,7 @@ export class SavedObjectsRepository {
       namespaces,
       ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
+      ...(workspaces && { workspaces }),
       version: encodeHitVersion(body),
       attributes: body._source[type],
       references: body._source.references || [],
@@ -1055,7 +1133,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId } = body.get?._source ?? {};
+    const { originId, workspaces } = body.get?._source ?? {};
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
       namespaces = body.get?._source.namespaces ?? [
@@ -1070,6 +1148,7 @@ export class SavedObjectsRepository {
       version: encodeHitVersion(body),
       namespaces,
       ...(originId && { originId }),
+      ...(workspaces && { workspaces }),
       references,
       attributes,
     };
@@ -1452,12 +1531,13 @@ export class SavedObjectsRepository {
           };
         }
 
-        const { originId } = get._source;
+        const { originId, workspaces } = get._source;
         return {
           id,
           type,
           ...(namespaces && { namespaces }),
           ...(originId && { originId }),
+          ...(workspaces && { workspaces }),
           updated_at,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
@@ -1754,7 +1834,7 @@ function getSavedObjectFromSource<T>(
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt } = doc._source;
+  const { originId, updated_at: updatedAt, workspaces } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -1769,6 +1849,7 @@ function getSavedObjectFromSource<T>(
     namespaces,
     ...(originId && { originId }),
     ...(updatedAt && { updated_at: updatedAt }),
+    ...(workspaces && { workspaces }),
     version: encodeHitVersion(doc),
     attributes: doc._source[type],
     references: doc._source.references || [],

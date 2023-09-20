@@ -60,6 +60,9 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
           {
             overwrite: schema.boolean({ defaultValue: false }),
             createNewCopies: schema.boolean({ defaultValue: false }),
+            workspaces: schema.maybe(
+              schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+            ),
           },
           {
             validate: (object) => {
@@ -91,6 +94,11 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         });
       }
 
+      let workspaces = req.query.workspaces;
+      if (typeof workspaces === 'string') {
+        workspaces = [workspaces];
+      }
+
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,
         typeRegistry: context.core.savedObjects.typeRegistry,
@@ -98,6 +106,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         objectLimit: maxImportExportSize,
         overwrite,
         createNewCopies,
+        workspaces,
       });
 
       return res.ok({ body: result });

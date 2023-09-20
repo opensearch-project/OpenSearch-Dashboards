@@ -13,6 +13,7 @@ Object {
       "references": "7997cf5a56cc02bdc9c93361bde732b0",
       "type": "2f4316de49999235636386fe51dc06c1",
       "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+      "workspaces": "2f4316de49999235636386fe51dc06c1",
     },
   },
   "dynamic": "strict",
@@ -56,6 +57,9 @@ Object {
     "updated_at": Object {
       "type": "date",
     },
+    "workspaces": Object {
+      "type": "keyword",
+    },
   },
 }
 `;
@@ -74,6 +78,7 @@ Object {
       "thirdType": "510f1f0adb69830cf8a1c5ce2923ed82",
       "type": "2f4316de49999235636386fe51dc06c1",
       "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+      "workspaces": "2f4316de49999235636386fe51dc06c1",
     },
   },
   "dynamic": "strict",
@@ -133,6 +138,9 @@ Object {
     },
     "updated_at": Object {
       "type": "date",
+    },
+    "workspaces": Object {
+      "type": "keyword",
     },
   },
 }
