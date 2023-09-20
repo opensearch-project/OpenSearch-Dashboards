@@ -8,7 +8,7 @@ import type {
   SavedObjectsClientContract,
   CoreSetup,
   WorkspaceAttribute,
-  ISavedObjectsRepository,
+  SavedObjectsServiceStart,
 } from '../../../core/server';
 import { WORKSPACE_TYPE } from '../../../core/server';
 import { IWorkspaceDBImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
@@ -23,15 +23,16 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
 
 export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   private setupDep: CoreSetup;
-
-  private internalSavedObjectsRepository?: ISavedObjectsRepository;
-  setInternalRepository(repository: ISavedObjectsRepository) {
-    this.internalSavedObjectsRepository = repository;
-  }
+  private savedObjects?: SavedObjectsServiceStart;
 
   constructor(core: CoreSetup) {
     this.setupDep = core;
   }
+
+  private getScopedClient(requestDetail: IRequestDetail): SavedObjectsClientContract | undefined {
+    return this.savedObjects?.getScopedClient(requestDetail.request);
+  }
+
   private getSavedObjectClientsFromRequestDetail(
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract {
@@ -63,7 +64,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       const attributes = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
-      const existingWorkspaceRes = await this.internalSavedObjectsRepository?.find({
+      const existingWorkspaceRes = await this.getScopedClient(requestDetail)?.find({
         type: WORKSPACE_TYPE,
         search: attributes.name,
         searchFields: ['name'],
@@ -148,7 +149,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
       if (workspaceInDB.attributes.name !== attributes.name) {
-        const existingWorkspaceRes = await this.internalSavedObjectsRepository?.find({
+        const existingWorkspaceRes = await this.getScopedClient(requestDetail)?.find({
           type: WORKSPACE_TYPE,
           search: attributes.name,
           searchFields: ['name'],
@@ -183,6 +184,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
         error: this.formatError(e),
       };
     }
+  }
+  public setSavedObjects(savedObjects: SavedObjectsServiceStart) {
+    this.savedObjects = savedObjects;
   }
   public async destroy(): Promise<IResponse<boolean>> {
     return {

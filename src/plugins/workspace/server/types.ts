@@ -9,7 +9,7 @@ import {
   SavedObjectsFindResponse,
   CoreSetup,
   WorkspaceAttribute,
-  ISavedObjectsRepository,
+  SavedObjectsServiceStart,
 } from '../../../core/server';
 
 export interface WorkspaceFindOptions {
@@ -29,7 +29,7 @@ export interface IRequestDetail {
 
 export interface IWorkspaceDBImpl {
   setup(dep: CoreSetup): Promise<IResponse<boolean>>;
-  setInternalRepository(repository: ISavedObjectsRepository): void;
+  setSavedObjects(savedObjects: SavedObjectsServiceStart): void;
   create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttribute, 'id'>

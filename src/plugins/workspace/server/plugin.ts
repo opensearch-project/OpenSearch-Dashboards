@@ -2,7 +2,13 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '../../../core/server';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  Plugin,
+  Logger,
+  CoreStart,
+} from '../../../core/server';
 import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { registerRoutes } from './routes';
@@ -33,8 +39,9 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     };
   }
 
-  public start() {
+  public start(core: CoreStart) {
     this.logger.debug('Starting Workspace service');
+    this.client?.setSavedObjects(core.savedObjects);
 
     return {
       client: this.client as IWorkspaceDBImpl,
