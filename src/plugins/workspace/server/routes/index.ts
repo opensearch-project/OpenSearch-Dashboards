@@ -55,15 +55,7 @@ export function registerRoutes({
         return res.ok({ body: result });
       }
       return res.ok({
-        body: {
-          ...result,
-          result: {
-            ...result.result,
-            workspaces: result.result.workspaces.map((workspace) => ({
-              ...workspace,
-            })),
-          },
-        },
+        body: result,
       });
     })
   );

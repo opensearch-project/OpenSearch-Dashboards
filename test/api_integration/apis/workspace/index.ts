@@ -5,6 +5,7 @@
 
 import expect from '@osd/expect';
 import { WorkspaceAttribute } from 'opensearch-dashboards/server';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const testWorkspace: WorkspaceAttribute = {
@@ -15,25 +16,117 @@ const testWorkspace: WorkspaceAttribute = {
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const opensearch = getService('legacyOpenSearch');
-
-  const MILLISECOND_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
   describe('Workspace CRUD apis', () => {
-    it('basic CRUD', async () => {
-      const resp = await supertest
-        .post(`/api/workspaces`)
+    afterEach(async () => {
+      const listResult = await supertest
+        .post(`/api/workspaces/_list`)
+        .send({
+          page: 1,
+        })
         .set('osd-xsrf', 'opensearch-dashboards')
-        .send(
-          JSON.stringify({
-            attributes: testWorkspace,
-          })
+        .expect(200);
+      await Promise.all(
+        listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
+          supertest
+            .delete(`/api/workspaces/${item.id}`)
+            .set('osd-xsrf', 'opensearch-dashboards')
+            .expect(200)
         )
+      );
+    });
+    it('create', async () => {
+      await supertest
+        .post(`/api/workspaces`)
+        .send({
+          attributes: testWorkspace,
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(400);
+
+      const result: any = await supertest
+        .post(`/api/workspaces`)
+        .send({
+          attributes: omit(testWorkspace, 'id'),
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
 
-      expect(resp.body).to.be.an('array');
-      expect(resp.body.length).to.be.above(0);
-      expect(resp.body[0].status).to.be('not_installed');
+      expect(result.body.success).equal(true);
+      expect(result.body.result.id).to.be.a('string');
     });
-  });
+    it('get', async () => {
+      const result = await supertest
+        .post(`/api/workspaces`)
+        .send({
+          attributes: omit(testWorkspace, 'id'),
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(200);
+
+      const getResult = await supertest.get(`/api/workspaces/${result.body.result.id}`);
+      expect(getResult.body.result.name).equal(testWorkspace.name);
+    });
+    it('update', async () => {
+      const result: any = await supertest
+        .post(`/api/workspaces`)
+        .send({
+          attributes: omit(testWorkspace, 'id'),
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(200);
+
+      await supertest
+        .put(`/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            ...omit(testWorkspace, 'id'),
+            name: 'updated',
+          },
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(200);
+
+      const getResult = await supertest.get(`/api/workspaces/${result.body.result.id}`);
+
+      expect(getResult.body.success).equal(true);
+      expect(getResult.body.result.name).equal('updated');
+    });
+    it('delete', async () => {
+      const result: any = await supertest
+        .post(`/api/workspaces`)
+        .send({
+          attributes: omit(testWorkspace, 'id'),
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(200);
+
+      await supertest
+        .delete(`/api/workspaces/${result.body.result.id}`)
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(200);
+
+      const getResult = await supertest.get(`/api/workspaces/${result.body.result.id}`);
+
+      expect(getResult.body.success).equal(false);
+    });
+    it('list', async () => {
+      await supertest
+        .post(`/api/workspaces`)
+        .send({
+          attributes: omit(testWorkspace, 'id'),
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(200);
+
+      const listResult = await supertest
+        .post(`/api/workspaces/_list`)
+        .send({
+          page: 1,
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(200);
+      expect(listResult.body.result.total).equal(1);
+    });
+  }).tags('is:workspace');
 }
