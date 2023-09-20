@@ -64,12 +64,10 @@ If it's the only version of node installed, it will automatically be set to the 
 
 #### Install `yarn`
 
-Take a look at the [latest Yarn release](https://github.com/yarnpkg/berry/releases/latest), note the version number, and run:
+To install yarn run:
 
 ```bash
-$ npm i -g corepack
-
-$ corepack prepare yarn@<version> --activate
+$ npm i -g yarn
 ```
 
 (See the [Yarn installation documentation](https://yarnpkg.com/getting-started/install) for more information.)
