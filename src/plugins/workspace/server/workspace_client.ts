@@ -228,11 +228,13 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
     options: WorkspaceFindOptions
   ): ReturnType<IWorkspaceDBImpl['list']> {
     try {
+      const { permissionModes, ...restOptions } = options;
       const resultResp = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<
         WorkspaceAttribute
       >({
-        ...options,
+        ...restOptions,
         type: WORKSPACE_TYPE,
+        ...(permissionModes ? { ACLSearchParams: { permissionModes } } : {}),
       });
       const others = omit(resultResp, 'saved_objects');
       let savedObjects = resultResp.saved_objects;
@@ -284,8 +286,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
           const retryFindResp = await this.getSavedObjectClientsFromRequestDetail(
             requestDetail
           ).find<WorkspaceAttribute>({
-            ...options,
+            ...restOptions,
             type: WORKSPACE_TYPE,
+            ...(permissionModes ? { ACLSearchParams: { permissionModes } } : {}),
           });
           savedObjects = retryFindResp.saved_objects;
         }

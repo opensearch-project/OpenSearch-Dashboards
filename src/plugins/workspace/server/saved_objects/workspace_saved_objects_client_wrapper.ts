@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { intersection } from 'lodash';
 
 import {
   OpenSearchDashboardsRequest,
@@ -29,8 +30,13 @@ import {
   SavedObjectsErrorHelpers,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
-import { WorkspaceFindOptions } from '../types';
 import { getPrincipalsFromRequest } from '../utils';
+
+const ALL_WORKSPACE_INNER_DATA_PERMISSION_MODES: string[] = [
+  WorkspacePermissionMode.LibraryRead,
+  WorkspacePermissionMode.LibraryWrite,
+  WorkspacePermissionMode.Management,
+];
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () => {
@@ -354,28 +360,33 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
 
     const findWithWorkspacePermissionControl = async <T = unknown>(
-      options: SavedObjectsFindOptions & Pick<WorkspaceFindOptions, 'permissionModes'>
+      options: SavedObjectsFindOptions
     ) => {
       const principals = getPrincipalsFromRequest(wrapperOptions.request);
       if (!options.ACLSearchParams) {
         options.ACLSearchParams = {};
       }
+      const workspaceInnerPermissionModes = options.ACLSearchParams.permissionModes
+        ? intersection(
+            options.ACLSearchParams.permissionModes,
+            ALL_WORKSPACE_INNER_DATA_PERMISSION_MODES
+          )
+        : ALL_WORKSPACE_INNER_DATA_PERMISSION_MODES;
+
       if (this.isRelatedToWorkspace(options.type)) {
-        options.ACLSearchParams.permissionModes = options.permissionModes ?? [
-          WorkspacePermissionMode.LibraryRead,
-          WorkspacePermissionMode.LibraryWrite,
-          WorkspacePermissionMode.Management,
-        ];
+        options.ACLSearchParams.permissionModes = workspaceInnerPermissionModes;
         options.ACLSearchParams.principals = principals;
       } else {
-        const permittedWorkspaceIds = await this.permissionControl.getPermittedWorkspaceIds(
-          wrapperOptions.request,
-          [
-            WorkspacePermissionMode.LibraryRead,
-            WorkspacePermissionMode.LibraryWrite,
-            WorkspacePermissionMode.Management,
-          ]
-        );
+        const permittedWorkspaceIds = (
+          await wrapperOptions.client.find({
+            type: WORKSPACE_TYPE,
+            perPage: 999,
+            ACLSearchParams: {
+              principals,
+              permissionModes: workspaceInnerPermissionModes,
+            },
+          })
+        ).saved_objects.map((item) => item.id);
 
         if (options.workspaces) {
           const permittedWorkspaces = options.workspaces.filter((item) =>
@@ -408,10 +419,12 @@ export class WorkspaceSavedObjectsClientWrapper {
            */
           options.workspaces = undefined;
           options.ACLSearchParams.workspaces = permittedWorkspaceIds;
-          options.ACLSearchParams.permissionModes = [
-            WorkspacePermissionMode.Read,
-            WorkspacePermissionMode.Write,
-          ];
+          options.ACLSearchParams.permissionModes = options.ACLSearchParams.permissionModes
+            ? intersection(options.ACLSearchParams.permissionModes, [
+                WorkspacePermissionMode.Read,
+                WorkspacePermissionMode.Write,
+              ])
+            : [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write];
           options.ACLSearchParams.principals = principals;
         }
       }

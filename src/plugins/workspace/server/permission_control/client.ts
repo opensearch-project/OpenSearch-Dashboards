@@ -10,7 +10,6 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsServiceStart,
   Logger,
-  WORKSPACE_TYPE,
 } from '../../../../core/server';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { getPrincipalsFromRequest } from '../utils';
@@ -129,26 +128,5 @@ export class SavedObjectsPermissionControl {
         [current.id]: new ACL(current.permissions).toFlatList(),
       };
     }, {});
-  }
-
-  public async getPermittedWorkspaceIds(
-    request: OpenSearchDashboardsRequest,
-    permissionModes: SavedObjectsPermissionModes
-  ) {
-    const principals = getPrincipalsFromRequest(request);
-    const savedObjectClient = this.getScopedClient?.(request);
-    try {
-      const result = await savedObjectClient?.find({
-        type: [WORKSPACE_TYPE],
-        ACLSearchParams: {
-          permissionModes,
-          principals,
-        },
-        perPage: 999,
-      });
-      return result?.saved_objects.map((item) => item.id);
-    } catch (e) {
-      return [];
-    }
   }
 }
