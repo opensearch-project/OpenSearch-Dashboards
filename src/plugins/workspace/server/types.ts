@@ -81,3 +81,8 @@ export type WorkspaceRoutePermissionItem = {
     | WorkspacePermissionMode.Management
   >;
 } & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
+
+export interface AuthInfo {
+  backend_roles?: string[];
+  user_name?: string;
+}

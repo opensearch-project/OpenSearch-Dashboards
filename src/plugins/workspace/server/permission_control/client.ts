@@ -3,18 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { ensureRawRequest, OpenSearchDashboardsRequest } from '../../../../core/server';
+import { OpenSearchDashboardsRequest } from '../../../../core/server';
 import {
   ACL,
-  Principals,
   TransformedPermission,
-  PrincipalType,
   SavedObjectsBulkGetObject,
   SavedObjectsServiceStart,
   Logger,
   WORKSPACE_TYPE,
 } from '../../../../core/server';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
+import { getPrincipalsFromRequest } from '../utils';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
@@ -22,11 +21,6 @@ export type SavedObjectsPermissionControlContract = Pick<
 >;
 
 export type SavedObjectsPermissionModes = string[];
-
-export interface AuthInfo {
-  backend_roles?: string[];
-  user_name?: string;
-}
 
 export class SavedObjectsPermissionControl {
   private readonly logger: Logger;
@@ -41,33 +35,6 @@ export class SavedObjectsPermissionControl {
     this.logger = logger;
   }
 
-  public getPrincipalsFromRequest(request: OpenSearchDashboardsRequest): Principals {
-    const rawRequest = ensureRawRequest(request);
-    const authInfo = rawRequest?.auth?.credentials?.authInfo as AuthInfo | null;
-    const payload: Principals = {};
-    if (!authInfo) {
-      /**
-       * Login user have access to all the workspaces when no authentication is presented.
-       * The logic will be used when users create workspaces with authentication enabled but turn off authentication for any reason.
-       */
-      return payload;
-    }
-    if (!authInfo?.backend_roles?.length && !authInfo.user_name) {
-      /**
-       * It means OSD can not recognize who the user is even if authentication is enabled,
-       * use a fake user that won't be granted permission explicitly.
-       */
-      payload[PrincipalType.Users] = [`_user_fake_${Date.now()}_`];
-      return payload;
-    }
-    if (authInfo?.backend_roles) {
-      payload[PrincipalType.Groups] = authInfo.backend_roles;
-    }
-    if (authInfo?.user_name) {
-      payload[PrincipalType.Users] = [authInfo.user_name];
-    }
-    return payload;
-  }
   private async bulkGetSavedObjects(
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[]
@@ -114,7 +81,7 @@ export class SavedObjectsPermissionControl {
       };
     }
 
-    const principals = this.getPrincipalsFromRequest(request);
+    const principals = getPrincipalsFromRequest(request);
     let savedObjectsBasicInfo: any[] = [];
     const hasAllPermission = savedObjectsGet.every((item) => {
       // for object that doesn't contain ACL like config, return true
@@ -168,7 +135,7 @@ export class SavedObjectsPermissionControl {
     request: OpenSearchDashboardsRequest,
     permissionModes: SavedObjectsPermissionModes
   ) {
-    const principals = this.getPrincipalsFromRequest(request);
+    const principals = getPrincipalsFromRequest(request);
     const savedObjectClient = this.getScopedClient?.(request);
     try {
       const result = await savedObjectClient?.find({

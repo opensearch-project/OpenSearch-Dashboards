@@ -2,35 +2,19 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { i18n } from '@osd/i18n';
-import { Observable } from 'rxjs';
 import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-  ISavedObjectsRepository,
-  WORKSPACE_TYPE,
-  ACL,
-  PUBLIC_WORKSPACE_ID,
-  MANAGEMENT_WORKSPACE_ID,
-  Permissions,
-  WorkspacePermissionMode,
   SavedObjectsClient,
-  WorkspaceAttribute,
-  DEFAULT_APP_CATEGORIES,
 } from '../../../core/server';
 import { IWorkspaceDBImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
-import {
-  WORKSPACE_OVERVIEW_APP_ID,
-  WORKSPACE_UPDATE_APP_ID,
-  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-} from '../common/constants';
-import { ConfigSchema } from '../config';
+import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
 import {
   SavedObjectsPermissionControl,
   SavedObjectsPermissionControlContract,
@@ -40,7 +24,6 @@ import { registerPermissionCheckRoutes } from './permission_control/routes';
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
-  private config$: Observable<ConfigSchema>;
   private permissionControl?: SavedObjectsPermissionControlContract;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
@@ -62,13 +45,12 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
-    this.config$ = initializerContext.config.create<ConfigSchema>();
   }
 
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
 
-    this.client = new WorkspaceClientWithSavedObject(core);
+    this.client = new WorkspaceClientWithSavedObject(core, this.logger);
 
     await this.client.setup(core);
     this.permissionControl = new SavedObjectsPermissionControl(this.logger);
@@ -79,10 +61,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     });
 
     const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-      this.permissionControl,
-      {
-        config$: this.config$,
-      }
+      this.permissionControl
     );
 
     core.savedObjects.addClientWrapper(
@@ -108,85 +87,10 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     };
   }
 
-  private async checkAndCreateWorkspace(
-    internalRepository: ISavedObjectsRepository,
-    workspaceId: string,
-    workspaceAttribute: Omit<WorkspaceAttribute, 'id' | 'permissions'>,
-    permissions?: Permissions
-  ) {
-    /**
-     * Internal repository is attached to global tenant.
-     */
-    try {
-      await internalRepository.get(WORKSPACE_TYPE, workspaceId);
-    } catch (error) {
-      this.logger.debug(error?.toString() || '');
-      this.logger.info(`Workspace ${workspaceId} is not found, create it by using internal user`);
-      try {
-        const createResult = await internalRepository.create(WORKSPACE_TYPE, workspaceAttribute, {
-          id: workspaceId,
-          permissions,
-        });
-        if (createResult.id) {
-          this.logger.info(`Created workspace ${createResult.id} in global tenant.`);
-        }
-      } catch (e) {
-        this.logger.error(`Create ${workspaceId} workspace error: ${e?.toString() || ''}`);
-      }
-    }
-  }
-
-  private async setupWorkspaces(startDeps: CoreStart) {
-    const internalRepository = startDeps.savedObjects.createInternalRepository();
-    const publicWorkspaceACL = new ACL().addPermission(
-      [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
-      {
-        users: ['*'],
-      }
-    );
-    const managementWorkspaceACL = new ACL().addPermission([WorkspacePermissionMode.LibraryRead], {
-      users: ['*'],
-    });
-    const DSM_APP_ID = 'dataSources';
-    const DEV_TOOLS_APP_ID = 'dev_tools';
-
-    await Promise.all([
-      this.checkAndCreateWorkspace(
-        internalRepository,
-        PUBLIC_WORKSPACE_ID,
-        {
-          name: i18n.translate('workspaces.public.workspace.default.name', {
-            defaultMessage: 'public',
-          }),
-          features: ['*', `!@${DEFAULT_APP_CATEGORIES.management.id}`],
-        },
-        publicWorkspaceACL.getPermissions()
-      ),
-      this.checkAndCreateWorkspace(
-        internalRepository,
-        MANAGEMENT_WORKSPACE_ID,
-        {
-          name: i18n.translate('workspaces.management.workspace.default.name', {
-            defaultMessage: 'Management',
-          }),
-          features: [
-            `@${DEFAULT_APP_CATEGORIES.management.id}`,
-            WORKSPACE_OVERVIEW_APP_ID,
-            WORKSPACE_UPDATE_APP_ID,
-            DSM_APP_ID,
-            DEV_TOOLS_APP_ID,
-          ],
-        },
-        managementWorkspaceACL.getPermissions()
-      ),
-    ]);
-  }
-
   public start(core: CoreStart) {
     this.logger.debug('Starting SavedObjects service');
     this.permissionControl?.setup(core.savedObjects.getScopedClient);
     this.client?.setSavedObjects(core.savedObjects);
-    this.setupWorkspaces(core);
 
     return {
       client: this.client as IWorkspaceDBImpl,
