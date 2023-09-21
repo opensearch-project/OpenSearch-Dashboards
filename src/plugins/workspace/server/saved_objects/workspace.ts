@@ -25,16 +25,19 @@ export const workspace: SavedObjectsType = {
        * In opensearch, string[] is also mapped to text
        */
       features: {
-        type: 'text',
+        type: 'keyword',
       },
       color: {
-        type: 'text',
+        type: 'keyword',
       },
       icon: {
-        type: 'text',
+        type: 'keyword',
       },
       defaultVISTheme: {
-        type: 'text',
+        type: 'keyword',
+      },
+      reserved: {
+        type: 'boolean',
       },
     },
   },
