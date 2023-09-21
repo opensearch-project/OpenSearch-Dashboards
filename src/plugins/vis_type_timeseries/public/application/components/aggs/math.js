@@ -134,12 +134,12 @@ export function MathAgg(props) {
                 values={{
                   link: (
                     <EuiLink
-                      href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
+                      href="https://mathjs.org/docs/reference/functions.html"
                       target="_blank"
                     >
                       <FormattedMessage
-                        id="visTypeTimeseries.math.expressionDescription.tinyMathLinkText"
-                        defaultMessage="TinyMath"
+                        id="visTypeTimeseries.math.expressionDescription.linkText"
+                        defaultMessage="Math.js"
                       />
                     </EuiLink>
                   ),

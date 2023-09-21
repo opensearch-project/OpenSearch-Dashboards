@@ -131,7 +131,7 @@ export function useQueryActions(anchorId: string, indexPattern: IndexPattern) {
           }));
         }
         toastNotifications.addDanger({
-          title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
+          title: i18n.translate('discover.context.unableToLoadSurroundingDocumentDescription', {
             defaultMessage: 'Unable to fetch surrounding documents',
           }),
           text: 'fail',
