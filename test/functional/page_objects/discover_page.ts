@@ -43,6 +43,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const opensearchChart = getService('opensearchChart');
   const docTable = getService('docTable');
 
+  /*
+   * This page is left unchanged since some of the other selenium tests, ex. dashboard tests, visualization tests
+   * are still using some of the below helper functions.
+   */
   class DiscoverPage {
     public async getChartTimespan() {
       const el = await find.byCssSelector('[data-test-subj="discoverIntervalDateRange"]');

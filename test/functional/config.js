@@ -80,7 +80,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/status',
       },
       discover: {
-        pathname: '/app/discoverLegacy',
+        pathname: '/app/data-explorer/discover',
         hash: '/',
       },
       context: {

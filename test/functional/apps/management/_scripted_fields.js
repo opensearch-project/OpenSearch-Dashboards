@@ -71,9 +71,6 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await opensearchArchiver.load('discover');
-      await opensearchDashboardsServer.uiSettings.replace({
-        'discover:v2': false,
-      });
       await opensearchDashboardsServer.uiSettings.update({});
     });
 
