@@ -13047,11 +13047,6 @@ next-tick@1, next-tick@^1.1.0:
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.1.0.tgz#1836ee30ad56d67ef281b22bd199f709449b35eb"
   integrity sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==
 
-ngreact@^0.5.1:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/ngreact/-/ngreact-0.5.2.tgz#d48180b578b186ad70861a3de9ba508b3f22b2ae"
-  integrity sha512-FCQGtTkDrnI3ywhvK9wUf7C6SYfqKDdRW+cPvy358GFe3AnA4rfvWisDVUQyf5YwNr439ito9xUuuEv80QXhSQ==
-
 nice-try@^1.0.4:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
