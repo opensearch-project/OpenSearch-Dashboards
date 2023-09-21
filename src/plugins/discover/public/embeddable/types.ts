@@ -28,20 +28,35 @@
  * under the License.
  */
 
-export function registerListenEventListener($rootScope) {
-  /**
-   * Helper that registers an event listener, and removes that listener when
-   * the $scope is destroyed.
-   *
-   * @param  {EventEmitter} emitter - the event emitter to listen to
-   * @param  {string} eventName - the event name
-   * @param  {Function} handler - the event handler
-   * @return {undefined}
-   */
-  $rootScope.constructor.prototype.$listen = function (emitter, eventName, handler) {
-    emitter.on(eventName, handler);
-    this.$on('$destroy', function () {
-      emitter.off(eventName, handler);
-    });
-  };
+import {
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from 'src/plugins/embeddable/public';
+import { Filter, IIndexPattern, TimeRange, Query } from '../../../../data/public';
+import { SortOrder } from '../saved_searches/types';
+import { SavedSearch } from '../saved_searches';
+
+export interface SearchInput extends EmbeddableInput {
+  timeRange: TimeRange;
+  query?: Query;
+  filters?: Filter[];
+  hidePanelTitles?: boolean;
+  columns?: string[];
+  sort?: SortOrder[];
+}
+
+export interface SearchOutput extends EmbeddableOutput {
+  editUrl: string;
+  indexPatterns?: IIndexPattern[];
+  editable: boolean;
+}
+
+export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
+  getSavedSearch(): SavedSearch;
+}
+
+export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
+  type: string;
 }

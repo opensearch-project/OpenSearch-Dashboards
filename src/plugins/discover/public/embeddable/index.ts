@@ -28,10 +28,6 @@
  * under the License.
  */
 
-export * from './system_api';
-// @ts-ignore
-export { OsdAccessibleClickProvider } from './osd_accessible_click';
-// @ts-ignore
-export { PrivateProvider, IPrivate } from './private';
-// @ts-ignore
-export { registerListenEventListener } from './register_listen_event_listener';
+export { SEARCH_EMBEDDABLE_TYPE } from './constants';
+export * from './types';
+export * from './search_embeddable_factory';
