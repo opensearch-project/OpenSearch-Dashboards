@@ -17,14 +17,19 @@ describe('workspace service', () => {
   let root: ReturnType<typeof osdTestServer.createRoot>;
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
   beforeAll(async () => {
-    const { startOpenSearch } = osdTestServer.createTestServers({
+    const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
+      settings: {
+        osd: {
+          workspace: {
+            enabled: true,
+          },
+        },
+      },
     });
     opensearchServer = await startOpenSearch();
-    root = osdTestServer.createRootWithCorePlugins();
-
-    await root.setup();
-    await root.start();
+    const startOSDResp = await startOpenSearchDashboards();
+    root = startOSDResp.root;
   }, 30000);
   afterAll(async () => {
     await root.shutdown();
