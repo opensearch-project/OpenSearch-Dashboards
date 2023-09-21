@@ -21,46 +21,66 @@ describe('SavedObjectTypeRegistry', () => {
         groups: [],
       })
     ).toEqual(true);
+
     expect(
       acl.hasPermission(['read'], {
         users: ['user2'],
         groups: [],
       })
     ).toEqual(false);
+
+    expect(
+      acl.hasPermission([], {
+        users: ['user2'],
+        groups: [],
+      })
+    ).toEqual(false);
+
+    const nullValue: unknown = undefined;
+    expect(acl.hasPermission(['read'], nullValue as Principals)).toEqual(false);
   });
 
   it('test add permission', () => {
     const acl = new ACL();
-    const result1 = acl
+    let result = acl
       .addPermission(['read'], {
         users: ['user1'],
         groups: [],
       })
       .getPermissions();
-    expect(result1?.read?.users).toEqual(['user1']);
+    expect(result?.read?.users).toEqual(['user1']);
 
     acl.resetPermissions();
-    const result2 = acl
+    result = acl
       .addPermission(['write', 'management'], {
         users: ['user2'],
         groups: ['group1', 'group2'],
       })
       .getPermissions();
-    expect(result2?.write?.users).toEqual(['user2']);
-    expect(result2?.management?.groups).toEqual(['group1', 'group2']);
+    expect(result?.write?.users).toEqual(['user2']);
+    expect(result?.management?.groups).toEqual(['group1', 'group2']);
+
+    acl.resetPermissions();
+    const nullValue: unknown = undefined;
+    result = acl.addPermission([], nullValue as Principals).getPermissions();
+    expect(result).toEqual({});
+
+    acl.resetPermissions();
+    result = acl.addPermission(nullValue as string[], {} as Principals).getPermissions();
+    expect(result).toEqual({});
   });
 
   it('test remove permission', () => {
-    const principals1: Principals = {
+    let principals: Principals = {
       users: ['user1'],
       groups: ['group1', 'group2'],
     };
-    const permissions1 = {
-      read: principals1,
-      write: principals1,
+    let permissions = {
+      read: principals,
+      write: principals,
     };
-    const acl1 = new ACL(permissions1);
-    const result1 = acl1
+    let acl = new ACL(permissions);
+    let result = acl
       .removePermission(['read'], {
         users: ['user1'],
         groups: [],
@@ -70,28 +90,35 @@ describe('SavedObjectTypeRegistry', () => {
         groups: ['group2'],
       })
       .getPermissions();
-    expect(result1?.read?.users).toEqual([]);
-    expect(result1?.write?.groups).toEqual(['group1']);
+    expect(result?.read?.users).toEqual([]);
+    expect(result?.write?.groups).toEqual(['group1']);
 
-    const principals2: Principals = {
+    principals = {
       users: ['*'],
       groups: ['*'],
     };
-
-    const permissions2 = {
-      read: principals2,
-      write: principals2,
+    permissions = {
+      read: principals,
+      write: principals,
     };
-
-    const acl2 = new ACL(permissions2);
-    const result2 = acl2
+    acl = new ACL(permissions);
+    result = acl
       .removePermission(['read', 'write'], {
         users: ['user1'],
         groups: ['group1'],
       })
       .getPermissions();
-    expect(result2?.read?.users).toEqual(['*']);
-    expect(result2?.write?.groups).toEqual(['*']);
+    expect(result?.read?.users).toEqual(['*']);
+    expect(result?.write?.groups).toEqual(['*']);
+
+    acl.resetPermissions();
+    const nullValue: unknown = undefined;
+    result = acl.addPermission([], nullValue as Principals).getPermissions();
+    expect(result).toEqual({});
+
+    acl.resetPermissions();
+    result = acl.addPermission(nullValue as string[], principals).getPermissions();
+    expect(result).toEqual({});
   });
 
   it('test transform permission', () => {
@@ -118,11 +145,27 @@ describe('SavedObjectTypeRegistry', () => {
   });
 
   it('test generate query DSL', () => {
+    const nullValue: unknown = undefined;
+    let result = ACL.generateGetPermittedSavedObjectsQueryDSL(['read'], nullValue as Principals);
+    expect(result).toEqual({
+      query: {
+        match_none: {},
+      },
+    });
+
     const principals = {
       users: ['user1'],
       groups: ['group1'],
     };
-    const result = ACL.generateGetPermittedSavedObjectsQueryDSL(['read'], principals, 'workspace');
+
+    result = ACL.generateGetPermittedSavedObjectsQueryDSL(nullValue as string[], principals);
+    expect(result).toEqual({
+      query: {
+        match_none: {},
+      },
+    });
+
+    result = ACL.generateGetPermittedSavedObjectsQueryDSL(['read'], principals, 'workspace');
     expect(result).toEqual({
       query: {
         bool: {
@@ -156,6 +199,50 @@ describe('SavedObjectTypeRegistry', () => {
             {
               terms: {
                 type: ['workspace'],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    result = ACL.generateGetPermittedSavedObjectsQueryDSL(['read'], principals, [
+      'workspace',
+      'index-pattern',
+    ]);
+    expect(result).toEqual({
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    terms: {
+                      'permissions.read.users': ['user1'],
+                    },
+                  },
+                  {
+                    term: {
+                      'permissions.read.users': '*',
+                    },
+                  },
+                  {
+                    terms: {
+                      'permissions.read.groups': ['group1'],
+                    },
+                  },
+                  {
+                    term: {
+                      'permissions.read.groups': '*',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              terms: {
+                type: ['workspace', 'index-pattern'],
               },
             },
           ],
