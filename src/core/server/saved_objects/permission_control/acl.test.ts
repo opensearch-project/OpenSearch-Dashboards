@@ -89,6 +89,14 @@ describe('SavedObjectTypeRegistry', () => {
         users: [],
         groups: ['group2'],
       })
+      .removePermission(['write'], {
+        users: ['user3'],
+        groups: ['group3'],
+      })
+      .removePermission(['library_write'], {
+        users: ['user1'],
+        groups: ['group1'],
+      })
       .getPermissions();
     expect(result?.read?.users).toEqual([]);
     expect(result?.write?.groups).toEqual(['group1']);
@@ -113,11 +121,11 @@ describe('SavedObjectTypeRegistry', () => {
 
     acl.resetPermissions();
     const nullValue: unknown = undefined;
-    result = acl.addPermission([], nullValue as Principals).getPermissions();
+    result = acl.removePermission([], nullValue as Principals).getPermissions();
     expect(result).toEqual({});
 
     acl.resetPermissions();
-    result = acl.addPermission(nullValue as string[], principals).getPermissions();
+    result = acl.removePermission(nullValue as string[], principals).getPermissions();
     expect(result).toEqual({});
   });
 
