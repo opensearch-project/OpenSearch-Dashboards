@@ -38,7 +38,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
     displayTimeColumn: searchProps.displayTimeColumn,
     services: searchProps.services,
     totalHitCount: searchProps.totalHitCount,
-  } as DiscoverEmbeddableProps & { totalHitCount: number };
+  } as DiscoverEmbeddableProps;
 
   return (
     <I18nProvider>

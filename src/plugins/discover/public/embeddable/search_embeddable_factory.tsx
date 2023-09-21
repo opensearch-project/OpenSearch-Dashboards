@@ -36,9 +36,8 @@ import {
   Container,
   ErrorEmbeddable,
 } from '../../../embeddable/public';
-
 import { TimeRange } from '../../../data/public';
-
+import { SearchEmbeddable } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
@@ -82,14 +81,14 @@ export class SearchEmbeddableFactory
     const services = getServices();
     const filterManager = services.filterManager;
     const url = await services.getSavedSearchUrlById(savedObjectId);
-    const editUrl = services.addBasePath(`/app/discover${url}`);
+    const editUrl = services.addBasePath(`/app/data-explorer/discover${url}`);
 
     try {
       const savedObject = await services.getSavedSearchById(savedObjectId);
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
-      const { SearchEmbeddable } = await import('./search_embeddable');
-      return new SearchEmbeddable(
+      const { SearchEmbeddable: SearchEmbeddableClass } = await import('./search_embeddable');
+      return new SearchEmbeddableClass(
         {
           savedSearch: savedObject,
           editUrl,

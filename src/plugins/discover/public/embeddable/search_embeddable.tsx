@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import './search_embeddable.scss';
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import React from 'react';
@@ -379,9 +378,9 @@ export class SearchEmbeddable
   private async pushContainerStateParamsToProps(searchProps: SearchProps) {
     const isFetchRequired =
       !opensearchFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
-      !_.isEqual(this.prevQuery, this.input.query) ||
-      !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !_.isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort);
+      !isEqual(this.prevQuery, this.input.query) ||
+      !isEqual(this.prevTimeRange, this.input.timeRange) ||
+      !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort);
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
