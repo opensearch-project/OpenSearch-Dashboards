@@ -240,18 +240,29 @@ export const useSearch = (services: DiscoverServices) => {
       })();
     });
 
-    // kick off initial fetch
-    refetch$.next();
+    // kick off initial refetch on page load
+    if (shouldSearchOnPageLoad()) {
+      refetch$.next();
+    }
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [data$, data.query.queryString, filterManager, refetch$, timefilter, fetch, core.fatalErrors]);
+  }, [
+    data$,
+    data.query.queryString,
+    filterManager,
+    refetch$,
+    timefilter,
+    fetch,
+    core.fatalErrors,
+    shouldSearchOnPageLoad,
+  ]);
 
   // Get savedSearch if it exists
   useEffect(() => {
     (async () => {
-      const savedSearchInstance = await getSavedSearchById(savedSearchId || '');
+      const savedSearchInstance = await getSavedSearchById(savedSearchId);
       setSavedSearch(savedSearchInstance);
 
       // sync initial app filters from savedObject to filterManager
