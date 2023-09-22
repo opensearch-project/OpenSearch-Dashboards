@@ -55,6 +55,8 @@ import {
   MockIntegrationsService,
   CoreAppConstructor,
   MockCoreApp,
+  WorkspacesServiceConstructor,
+  MockWorkspacesService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -99,6 +101,7 @@ describe('constructor', () => {
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
     expect(IntegrationsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
+    expect(WorkspacesServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -223,6 +226,11 @@ describe('#setup()', () => {
     expect(MockIntegrationsService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('calls workspaces#setup()', async () => {
+    await setupCore();
+    expect(MockWorkspacesService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls coreApp#setup()', async () => {
     await setupCore();
     expect(MockCoreApp.setup).toHaveBeenCalledTimes(1);
@@ -310,6 +318,15 @@ describe('#start()', () => {
     expect(MockIntegrationsService.start).toHaveBeenCalledTimes(1);
   });
 
+  it('calls workspaces#start()', async () => {
+    await startCore();
+    expect(MockWorkspacesService.start).toHaveBeenCalledTimes(1);
+    expect(MockWorkspacesService.start).toHaveBeenCalledWith({
+      application: expect.any(Object),
+      http: expect.any(Object),
+    });
+  });
+
   it('calls coreApp#start()', async () => {
     await startCore();
     expect(MockCoreApp.start).toHaveBeenCalledTimes(1);
@@ -362,6 +379,14 @@ describe('#stop()', () => {
     expect(MockIntegrationsService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(MockIntegrationsService.stop).toHaveBeenCalled();
+  });
+
+  it('calls workspaces.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockWorkspacesService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockWorkspacesService.stop).toHaveBeenCalled();
   });
 
   it('calls coreApp.stop()', () => {

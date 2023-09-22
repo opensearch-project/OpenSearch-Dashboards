@@ -8,7 +8,7 @@ import { isEqual } from 'lodash';
 
 import { CoreService, WorkspaceAttribute } from '../../types';
 import { InternalApplicationStart } from '../application';
-import { HttpSetup } from '../http';
+import { HttpStart } from '../http';
 
 type WorkspaceMenuRenderFn = ({
   basePath,
@@ -16,7 +16,7 @@ type WorkspaceMenuRenderFn = ({
   observables,
 }: {
   getUrlForApp: InternalApplicationStart['getUrlForApp'];
-  basePath: HttpSetup['basePath'];
+  basePath: HttpStart['basePath'];
   observables: WorkspaceObservables;
 }) => JSX.Element | null;
 
@@ -99,7 +99,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
     application,
   }: {
     application: InternalApplicationStart;
-    http: HttpSetup;
+    http: HttpStart;
   }): WorkspacesStart {
     const observables = {
       currentWorkspaceId$: this.currentWorkspaceId$,

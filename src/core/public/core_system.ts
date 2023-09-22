@@ -311,6 +311,7 @@ export class CoreSystem {
     this.chrome.stop();
     this.i18n.stop();
     this.application.stop();
+    this.workspaces.stop();
     this.rootDomElement.textContent = '';
   }
 }
