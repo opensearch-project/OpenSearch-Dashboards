@@ -109,7 +109,10 @@ async function fetchObjectsToExport({
     if (typeof search === 'string') {
       throw Boom.badRequest(`Can't specify both "search" and "objects" properties when exporting`);
     }
-    const bulkGetResult = await savedObjectsClient.bulkGet(objects, { namespace, workspaces });
+    const bulkGetResult = await savedObjectsClient.bulkGet(objects, {
+      namespace,
+      ...(workspaces ? { workspaces } : {}),
+    });
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
       const err = Boom.badRequest();
@@ -125,7 +128,7 @@ async function fetchObjectsToExport({
       search,
       perPage: exportSizeLimit,
       namespaces: namespace ? [namespace] : undefined,
-      workspaces,
+      ...(workspaces ? { workspaces } : {}),
     });
     if (findResponse.total > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
