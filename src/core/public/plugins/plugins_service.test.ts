@@ -109,7 +109,7 @@ describe('PluginsService', () => {
       injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
-      workspaces: workspacesServiceMock.createSetupContractMock(),
+      workspaces: workspacesServiceMock.createSetupContract(),
     };
     mockSetupContext = {
       ...mockSetupDeps,

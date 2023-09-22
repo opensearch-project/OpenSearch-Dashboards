@@ -87,7 +87,7 @@ function createCoreSetupMock({
       getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
       getBranding: injectedMetadataServiceMock.createSetupContract().getBranding,
     },
-    workspaces: workspacesServiceMock.createSetupContractMock(),
+    workspaces: workspacesServiceMock.createSetupContract(),
   };
 
   return mock;
