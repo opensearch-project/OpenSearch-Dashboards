@@ -16,7 +16,7 @@ export const DataSourceSelector = ({
   dataSourceList: DataSourceList[];
   selectedOptions: DataSourceOptionType[];
   onDataSourceChange: (selectedDataSourceOptions: DataSourceOptionType[]) => void;
-  singleSelection: boolean;
+  singleSelection?: boolean;
 }) => {
   const onDataSourceSelectionChange = (selectedDataSourceOptions: DataSourceOptionType[]) => {
     onDataSourceChange(selectedDataSourceOptions);
