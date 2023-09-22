@@ -23,6 +23,7 @@
   "bugs": {
     "url": "http://github.com/opensearch-project/OpenSearch-Dashboards/issues"
   },
+  "packageManager": "yarn@1.22.19",
   "opensearchDashboards": {
     "clean": {
       "extraPatterns": [
