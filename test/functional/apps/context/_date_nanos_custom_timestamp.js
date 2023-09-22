@@ -52,7 +52,6 @@ export default function ({ getService, getPageObjects }) {
       await opensearchDashboardsServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
-        'discover:v2': false,
       });
     });
 
