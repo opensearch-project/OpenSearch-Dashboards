@@ -59,7 +59,7 @@ const checkPermission = (currentPrincipals: Principals | undefined, principals: 
       principals?.users &&
       checkPermissionForSinglePrincipalType(currentPrincipals.users, principals.users)) ||
     (currentPrincipals?.groups &&
-      principals.groups &&
+      principals?.groups &&
       checkPermissionForSinglePrincipalType(currentPrincipals.groups, principals.groups))
   );
 };

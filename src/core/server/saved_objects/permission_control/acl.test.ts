@@ -38,6 +38,12 @@ describe('acl', () => {
 
     const nullValue: unknown = undefined;
     expect(acl.hasPermission(['read'], nullValue as Principals)).toEqual(false);
+    expect(acl.hasPermission(['read'], {})).toEqual(false);
+
+    acl.resetPermissions();
+    expect(acl.hasPermission(['read'], nullValue as Principals)).toEqual(false);
+    expect(acl.hasPermission(['read'], {})).toEqual(false);
+    expect(acl.hasPermission(['read'], principals)).toEqual(false);
   });
 
   it('test add permission', () => {
@@ -59,6 +65,20 @@ describe('acl', () => {
       .getPermissions();
     expect(result?.write?.users).toEqual(['user2']);
     expect(result?.management?.groups).toEqual(['group1', 'group2']);
+
+    acl.resetPermissions();
+    result = acl
+      .addPermission(['write', 'management'], {
+        users: ['user2'],
+      })
+      .addPermission(['write', 'management'], {
+        groups: ['group1'],
+      })
+      .getPermissions();
+    expect(result?.write?.users).toEqual(['user2']);
+    expect(result?.write?.groups).toEqual(['group1']);
+    expect(result?.management?.users).toEqual(['user2']);
+    expect(result?.management?.groups).toEqual(['group1']);
 
     acl.resetPermissions();
     const nullValue: unknown = undefined;
@@ -83,10 +103,8 @@ describe('acl', () => {
     let result = acl
       .removePermission(['read'], {
         users: ['user1'],
-        groups: [],
       })
       .removePermission(['write'], {
-        users: [],
         groups: ['group2'],
       })
       .removePermission(['write'], {
@@ -130,20 +148,53 @@ describe('acl', () => {
   });
 
   it('test toFlatList', () => {
-    const principals: Principals = {
+    let principals: Principals = {
       users: ['user1'],
       groups: ['group1', 'group2'],
     };
-    const permissions = {
+    let permissions = {
       read: principals,
       write: principals,
     };
-    const acl = new ACL(permissions);
-    const result = acl.toFlatList();
+    let acl = new ACL(permissions);
+    let result = acl.toFlatList();
     expect(result).toHaveLength(3);
     expect(result).toEqual(
       expect.arrayContaining([{ type: 'users', name: 'user1', permissions: ['read', 'write'] }])
     );
+    expect(result).toEqual(
+      expect.arrayContaining([{ type: 'groups', name: 'group1', permissions: ['read', 'write'] }])
+    );
+    expect(result).toEqual(
+      expect.arrayContaining([{ type: 'groups', name: 'group2', permissions: ['read', 'write'] }])
+    );
+
+    acl.resetPermissions();
+    principals = {
+      users: ['user1'],
+    };
+    permissions = {
+      read: principals,
+      write: principals,
+    };
+    acl = new ACL(permissions);
+    result = acl.toFlatList();
+    expect(result).toHaveLength(1);
+    expect(result).toEqual(
+      expect.arrayContaining([{ type: 'users', name: 'user1', permissions: ['read', 'write'] }])
+    );
+
+    acl.resetPermissions();
+    principals = {
+      groups: ['group1', 'group2'],
+    };
+    permissions = {
+      read: principals,
+      write: principals,
+    };
+    acl = new ACL(permissions);
+    result = acl.toFlatList();
+    expect(result).toHaveLength(2);
     expect(result).toEqual(
       expect.arrayContaining([{ type: 'groups', name: 'group1', permissions: ['read', 'write'] }])
     );
