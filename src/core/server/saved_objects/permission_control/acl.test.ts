@@ -5,7 +5,7 @@
 
 import { Principals, Permissions, ACL } from './acl';
 
-describe('SavedObjectTypeRegistry', () => {
+describe('acl', () => {
   it('test has permission', () => {
     const principals: Principals = {
       users: ['user1'],
@@ -129,7 +129,7 @@ describe('SavedObjectTypeRegistry', () => {
     expect(result).toEqual({});
   });
 
-  it('test transform permission', () => {
+  it('test toFlatList', () => {
     const principals: Principals = {
       users: ['user1'],
       groups: ['group1', 'group2'],
@@ -251,6 +251,42 @@ describe('SavedObjectTypeRegistry', () => {
             {
               terms: {
                 type: ['workspace', 'index-pattern'],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    result = ACL.generateGetPermittedSavedObjectsQueryDSL(['read'], principals);
+    expect(result).toEqual({
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    terms: {
+                      'permissions.read.users': ['user1'],
+                    },
+                  },
+                  {
+                    term: {
+                      'permissions.read.users': '*',
+                    },
+                  },
+                  {
+                    terms: {
+                      'permissions.read.groups': ['group1'],
+                    },
+                  },
+                  {
+                    term: {
+                      'permissions.read.groups': '*',
+                    },
+                  },
+                ],
               },
             },
           ],

@@ -138,7 +138,8 @@ export class ACL {
   }
 
   /**
-   * transform permissions format
+   * transform permissions format, change the format from permissionType->principals to principal->permissionTypes,
+   * which is used to clearyly dispaly user/group list and their granted permissions in the UI
    * original permissions:   {
    *     read: {
    *         users:['user1']
