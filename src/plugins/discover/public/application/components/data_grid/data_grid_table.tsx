@@ -141,9 +141,6 @@ export const DataGridTable = ({
         sorting={sorting}
         toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
         rowHeightsOptions={rowHeightsOptions}
-        data-description={'searchDescription'}
-        data-shared-item
-        data-title={'searchTitle'}
       />
     ),
     [
