@@ -197,7 +197,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
+        await PageObjects.discover.clickFieldListItemDetails(scriptedPainlessFieldName);
         await log.debug('filter by the first value (14) in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -314,7 +314,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.discover.clickFieldListItemDetails(scriptedPainlessFieldName2);
         await log.debug('filter by "bad" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -388,7 +388,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.discover.clickFieldListItemDetails(scriptedPainlessFieldName2);
         await log.debug('filter by "true" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -506,7 +506,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.discover.clickFieldListItemDetails(scriptedPainlessFieldName2);
         await log.debug('filter by "Sep 18, 2015 @ 7:52" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(
           scriptedPainlessFieldName2,

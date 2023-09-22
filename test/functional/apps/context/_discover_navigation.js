@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
+        await PageObjects.discover.clickFieldListItemDetails(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
     });

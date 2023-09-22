@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
+        await PageObjects.discover.clickFieldListItemDetails(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
     });
