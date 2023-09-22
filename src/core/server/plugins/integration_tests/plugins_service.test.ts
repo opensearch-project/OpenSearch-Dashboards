@@ -42,7 +42,7 @@ import { config } from '../plugins_config';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
-import { Plugin } from '../types';
+import { Plugin, CompatibleEnginePluginVersions } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
@@ -57,7 +57,7 @@ describe('PluginsService', () => {
       disabled = false,
       version = 'some-version',
       requiredPlugins = [],
-      requiredOpenSearchPlugins = [],
+      requiredEnginePlugins = {},
       requiredBundles = [],
       optionalPlugins = [],
       opensearchDashboardsVersion = '7.0.0',
@@ -69,7 +69,7 @@ describe('PluginsService', () => {
       disabled?: boolean;
       version?: string;
       requiredPlugins?: string[];
-      requiredOpenSearchPlugins?: string[];
+      requiredEnginePlugins?: CompatibleEnginePluginVersions;
       requiredBundles?: string[];
       optionalPlugins?: string[];
       opensearchDashboardsVersion?: string;
@@ -86,7 +86,7 @@ describe('PluginsService', () => {
         configPath: `${configPath}${disabled ? '-disabled' : ''}`,
         opensearchDashboardsVersion,
         requiredPlugins,
-        requiredOpenSearchPlugins,
+        requiredEnginePlugins,
         requiredBundles,
         optionalPlugins,
         server,

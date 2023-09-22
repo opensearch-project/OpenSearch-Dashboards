@@ -53,6 +53,7 @@ export const ecommerceSpecProvider = function (): SampleDatasetSchema {
     description: ecommerceDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard_dark.png',
+    hasNewThemeImages: true,
     overviewDashboard: DASHBOARD_ID,
     getDataSourceIntegratedDashboard: appendDataSourceId(DASHBOARD_ID),
     appLinks: initialAppLinks,

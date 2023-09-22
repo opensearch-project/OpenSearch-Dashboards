@@ -22,8 +22,13 @@ interface ManagementOverviewSetupDeps {
 export interface ManagementOverViewPluginSetup {
   register: (overviewApp: OverviewApp) => void;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ManagementOverViewPluginStart {}
+
 /** @public */
-export class ManagementOverViewPlugin implements Plugin<ManagementOverViewPluginSetup, void> {
+export class ManagementOverViewPlugin
+  implements Plugin<ManagementOverViewPluginSetup, ManagementOverViewPluginStart> {
   private readonly overviewApps = new Map<string, OverviewApp>();
 
   private getSortedOverviewApps(): OverviewApp[] {
@@ -57,7 +62,7 @@ export class ManagementOverViewPlugin implements Plugin<ManagementOverViewPlugin
       title: i18n.translate('management.overview.overviewTitle', {
         defaultMessage: 'Overview',
       }),
-      icon: '/plugins/home/public/assets/logos/opensearch_mark_default.svg',
+      icon: '/ui/logos/opensearch_mark.svg',
       order: 9000,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
@@ -82,5 +87,7 @@ export class ManagementOverViewPlugin implements Plugin<ManagementOverViewPlugin
     };
   }
 
-  public start(core: CoreStart): void {}
+  public start(core: CoreStart): ManagementOverViewPluginStart {
+    return {};
+  }
 }

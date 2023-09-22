@@ -29,6 +29,8 @@
  */
 
 import { withTimeout } from '@osd/std';
+import semver from 'semver';
+import { CatPluginsResponse } from '@opensearch-project/opensearch/api/types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
@@ -167,19 +169,38 @@ export class PluginsSystem {
 
   private async healthCheckOpenSearchPlugins(deps: PluginsServiceStartDeps) {
     // make _cat/plugins?format=json call to the OpenSearch instance
-    const opensearchPlugins = await this.getOpenSearchPlugins(deps);
+    const opensearchInstalledPlugins = await this.getOpenSearchPlugins(deps);
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`For plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
-      const pluginBackendDeps = new Set([...plugin.requiredOpenSearchPlugins]);
-      pluginBackendDeps.forEach((opensearchPlugin) => {
-        if (!opensearchPlugins.find((obj) => obj.component === opensearchPlugin)) {
+      const pluginOpenSearchDeps = Object.entries(plugin.requiredEnginePlugins);
+      for (const [enginePluginName, versionRange] of pluginOpenSearchDeps) {
+        // add check to see if the installing Dashboards plugin version is compatible with installed OpenSearch plugin
+        if (
+          !this.isVersionCompatibleOSPluginInstalled(
+            opensearchInstalledPlugins,
+            enginePluginName,
+            versionRange
+          )
+        ) {
           this.log.warn(
-            `OpenSearch plugin "${opensearchPlugin}" is not installed on the cluster for the OpenSearch Dashboards plugin to function as expected.`
+            `OpenSearch plugin "${enginePluginName}" is not installed on the engine for the OpenSearch Dashboards plugin to function as expected.`
           );
         }
-      });
+      }
     }
+  }
+
+  private isVersionCompatibleOSPluginInstalled(
+    opensearchInstalledPlugins: CatPluginsResponse,
+    depPlugin: string,
+    versionRange: string
+  ) {
+    return opensearchInstalledPlugins.find(
+      (obj) =>
+        obj.component === depPlugin &&
+        semver.satisfies(semver.coerce(obj.version)!.version, versionRange)
+    );
   }
 
   private async getOpenSearchPlugins(deps: PluginsServiceStartDeps) {

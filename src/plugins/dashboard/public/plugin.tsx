@@ -268,6 +268,7 @@ export class DashboardPlugin
       return {
         capabilities: coreStart.application.capabilities,
         application: coreStart.application,
+        chrome: coreStart.chrome,
         notifications: coreStart.notifications,
         overlays: coreStart.overlays,
         embeddable: deps.embeddable,

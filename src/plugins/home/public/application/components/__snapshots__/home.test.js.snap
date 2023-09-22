@@ -650,6 +650,61 @@ exports[`home isNewOpenSearchDashboardsInstance should set isNewOpenSearchDashbo
 </main>
 `;
 
+exports[`home new theme modal should show the new theme modal if not previously dismissed 1`] = `
+<main
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="homWrapper"
+  data-test-subj="homeApp"
+>
+  <mockConstructor
+    addBasePath={[Function]}
+    branding={Object {}}
+    overlap={0}
+    showDevToolsLink={true}
+    showManagementLink={true}
+    title={
+      <FormattedMessage
+        defaultMessage="Home"
+        id="home.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="homContent"
+  >
+    <EuiFlexGroup
+      className="homData homData--expanded"
+    >
+      <EuiFlexItem>
+        <AddData
+          addBasePath={[Function]}
+          features={Array []}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ManageData
+          addBasePath={[Function]}
+          features={Array []}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <NewThemeModal
+      addBasePath={[Function]}
+      onClose={[Function]}
+    />
+    <mockConstructor
+      addBasePath={[Function]}
+      path="/app/home"
+    />
+  </div>
+</main>
+`;
+
 exports[`home should render home component 1`] = `
 <main
   aria-labelledby="osdOverviewPageHeader__title"
@@ -743,6 +798,10 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
+    />
+    <NewThemeModal
+      addBasePath={[Function]}
+      onClose={[Function]}
     />
     <mockConstructor
       addBasePath={[Function]}
@@ -853,6 +912,10 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     <EuiHorizontalRule
       aria-hidden="true"
       margin="xl"
+    />
+    <NewThemeModal
+      addBasePath={[Function]}
+      onClose={[Function]}
     />
     <mockConstructor
       addBasePath={[Function]}

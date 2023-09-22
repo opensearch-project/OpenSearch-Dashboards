@@ -38,16 +38,17 @@ export default function ({ getService, getPageObjects }) {
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
-      // delete .kibana index and update configDoc
-      await opensearchDashboardsServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-      });
-
       log.debug('load opensearch-dashboards index with default index pattern');
       await opensearchArchiver.load('discover');
 
       // and load a set of makelogs data
       await opensearchArchiver.loadIfNeeded('logstash_functional');
+
+      // delete .kibana index and update configDoc
+      await opensearchDashboardsServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+        'discover:v2': false,
+      });
 
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');

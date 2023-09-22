@@ -41,7 +41,10 @@ export default function ({ getService, getPageObjects }) {
   describe('date_nanos_mixed', function () {
     before(async function () {
       await opensearchArchiver.loadIfNeeded('date_nanos_mixed');
-      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
+      await opensearchDashboardsServer.uiSettings.replace({
+        defaultIndex: 'timestamp-*',
+        'discover:v2': false,
+      });
       await security.testUser.setRoles([
         'opensearch_dashboards_admin',
         'opensearch_dashboards_date_nanos_mixed',

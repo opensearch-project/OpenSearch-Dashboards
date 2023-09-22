@@ -23,7 +23,7 @@ export const setBreadcrumbsForNewDashboard = (viewMode: ViewMode, isDirty: boole
     return [
       ...getLandingBreadcrumbs(),
       {
-        text: i18n.translate('dashboard.strings.dashboardViewTitle', {
+        text: i18n.translate('dashboard.strings.newDashboardViewTitle', {
           defaultMessage: 'New Dashboard',
         }),
       },
@@ -33,7 +33,7 @@ export const setBreadcrumbsForNewDashboard = (viewMode: ViewMode, isDirty: boole
       return [
         ...getLandingBreadcrumbs(),
         {
-          text: i18n.translate('dashboard.strings.dashboardEditTitle', {
+          text: i18n.translate('dashboard.strings.newDashboardEditTitleUnsaved', {
             defaultMessage: 'Editing New Dashboard (unsaved)',
           }),
         },
@@ -42,7 +42,7 @@ export const setBreadcrumbsForNewDashboard = (viewMode: ViewMode, isDirty: boole
       return [
         ...getLandingBreadcrumbs(),
         {
-          text: i18n.translate('dashboard.strings.dashboardEditTitle', {
+          text: i18n.translate('dashboard.strings.newDashboardEditTitle', {
             defaultMessage: 'Editing New Dashboard',
           }),
         },
@@ -60,7 +60,7 @@ export const setBreadcrumbsForExistingDashboard = (
     return [
       ...getLandingBreadcrumbs(),
       {
-        text: i18n.translate('dashboard.strings.dashboardViewTitle', {
+        text: i18n.translate('dashboard.strings.existingDashboardViewTitle', {
           defaultMessage: '{title}',
           values: { title },
         }),
@@ -71,7 +71,7 @@ export const setBreadcrumbsForExistingDashboard = (
       return [
         ...getLandingBreadcrumbs(),
         {
-          text: i18n.translate('dashboard.strings.dashboardEditTitle', {
+          text: i18n.translate('dashboard.strings.existingDashboardEditTitleUnsaved', {
             defaultMessage: 'Editing {title} (unsaved)',
             values: { title },
           }),
@@ -81,7 +81,7 @@ export const setBreadcrumbsForExistingDashboard = (
       return [
         ...getLandingBreadcrumbs(),
         {
-          text: i18n.translate('dashboard.strings.dashboardEditTitle', {
+          text: i18n.translate('dashboard.strings.existingDashboardEditTitle', {
             defaultMessage: 'Editing {title}',
             values: { title },
           }),

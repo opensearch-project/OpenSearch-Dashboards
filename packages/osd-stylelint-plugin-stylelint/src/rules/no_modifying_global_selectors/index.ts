@@ -79,7 +79,10 @@ const ruleFunction: stylelint.Rule = (
       }
 
       reportInfo.message = messages.expected(
-        getNotCompliantMessage(`Modifying global selector "${rule.selector}" not allowed.`)
+        getNotCompliantMessage(
+          `Modifying the global selector "${rule.selector}" is not allowed.`,
+          selectorRule.explanation
+        )
       );
       report(reportInfo);
     });

@@ -29,6 +29,7 @@
  */
 
 import { transform, keys, startsWith } from 'lodash';
+import { parse, stringify } from '@osd/std';
 
 type IStorageEngine = typeof window.localStorage;
 
@@ -40,12 +41,12 @@ export class Storage {
   constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
 
   encode(val: any) {
-    return JSON.stringify(val);
+    return stringify(val);
   }
 
   decode(val: any) {
     if (typeof val === 'string') {
-      return JSON.parse(val);
+      return parse(val);
     }
   }
 

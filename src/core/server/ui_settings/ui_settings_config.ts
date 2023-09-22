@@ -56,7 +56,7 @@ const configSchema = schema.object({
   overrides: schema.object({}, { unknowns: 'allow' }),
   defaults: schema.object({
     'theme:darkMode': schema.maybe(schema.boolean({ defaultValue: false })),
-    'theme:version': schema.maybe(schema.string({ defaultValue: 'v7' })),
+    'theme:version': schema.maybe(schema.string({ defaultValue: 'v8' })),
   }),
 });
 

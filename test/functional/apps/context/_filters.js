@@ -38,11 +38,17 @@ export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
+  const browser = getService('browser');
 
   const PageObjects = getPageObjects(['common', 'context']);
 
   describe('context filters', function contextSize() {
     beforeEach(async function () {
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
+      await browser.refresh();
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });

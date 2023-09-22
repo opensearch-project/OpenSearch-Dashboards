@@ -45,6 +45,8 @@ export interface TopNavMenuData {
   emphasize?: boolean;
   iconType?: EuiIconType;
   iconSide?: EuiButtonProps['iconSide'];
+  // @deprecated - experimental, do not use yet. Will be removed in a future minor version
+  type?: 'toggle' | 'button';
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

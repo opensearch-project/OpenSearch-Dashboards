@@ -32,6 +32,7 @@ import expect from '@osd/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const opensearch = getService('legacyOpenSearch');
   const retry = getService('retry');
   const security = getService('security');
@@ -42,6 +43,9 @@ export default function ({ getService, getPageObjects }) {
       await security.testUser.setRoles(['opensearch_dashboards_admin', 'test_alias_reader']);
       await opensearchArchiver.loadIfNeeded('alias');
       await opensearchArchiver.load('empty_opensearch_dashboards');
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
       await opensearch.indices.updateAliases({
         body: {
           actions: [

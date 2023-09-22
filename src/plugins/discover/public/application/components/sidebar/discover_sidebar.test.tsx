@@ -29,19 +29,15 @@
  */
 
 import _ from 'lodash';
-import { ReactWrapper } from 'enzyme';
-import { findTestSubject } from 'test_utils/helpers';
 // @ts-ignore
 import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
-import { IndexPatternAttributes } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
-import { SavedObject } from '../../../../../../core/types';
 
 jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: () => ({
@@ -74,7 +70,7 @@ jest.mock('./lib/get_index_pattern_field_list', () => ({
   getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
 }));
 
-function getCompProps() {
+function getCompProps(): DiscoverSidebarProps {
   const indexPattern = getStubIndexPattern(
     'logstash-*',
     (cfg: any) => cfg,
@@ -88,12 +84,6 @@ function getCompProps() {
     Record<string, unknown>
   >;
 
-  const indexPatternList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
-  ];
-
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
@@ -105,44 +95,48 @@ function getCompProps() {
     columns: ['extension'],
     fieldCounts,
     hits,
-    indexPatternList,
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
-    setIndexPattern: jest.fn(),
-    state: {},
+    onReorderFields: jest.fn(),
   };
 }
 
 describe('discover sidebar', function () {
-  let props: DiscoverSidebarProps;
-  let comp: ReactWrapper<DiscoverSidebarProps>;
+  it('should have Selected Fields and Available Fields with Popular Fields sections', async function () {
+    render(<DiscoverSidebar {...getCompProps()} />);
 
-  beforeAll(() => {
-    props = getCompProps();
-    comp = mountWithIntl(<DiscoverSidebar {...props} />);
-  });
+    const popular = screen.getByTestId('fieldList-popular');
+    const selected = screen.getByTestId('fieldList-selected');
+    const unpopular = screen.getByTestId('fieldList-unpopular');
 
-  it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
-    const popular = findTestSubject(comp, 'fieldList-popular');
-    const selected = findTestSubject(comp, 'fieldList-selected');
-    const unpopular = findTestSubject(comp, 'fieldList-unpopular');
-    expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(7);
-    expect(selected.children().length).toBe(1);
+    expect(within(popular).getAllByTestId('fieldList-field').length).toBe(1);
+    expect(within(unpopular).getAllByTestId('fieldList-field').length).toBe(7);
+    expect(within(selected).getAllByTestId('fieldList-field').length).toBe(1);
   });
-  it('should allow selecting fields', function () {
-    findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
+  it('should allow selecting fields', async function () {
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    await fireEvent.click(screen.getByTestId('fieldToggle-bytes'));
+
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
-  it('should allow deselecting fields', function () {
-    findTestSubject(comp, 'fieldToggle-extension').simulate('click');
+  it('should allow deselecting fields', async function () {
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    await fireEvent.click(screen.getByTestId('fieldToggle-extension'));
+
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
-  it('should allow adding filters', function () {
-    findTestSubject(comp, 'field-extension-showDetails').simulate('click');
-    findTestSubject(comp, 'plus-extension-gif').simulate('click');
+  it('should allow adding filters', async function () {
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    await fireEvent.click(screen.getByTestId('field-extension-showDetails'));
+    await fireEvent.click(screen.getByTestId('plus-extension-gif'));
     expect(props.onAddFilter).toHaveBeenCalled();
   });
 });

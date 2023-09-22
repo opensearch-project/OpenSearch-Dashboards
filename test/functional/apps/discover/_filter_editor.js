@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'discover:v2': false,
   };
 
   describe('discover filter editor', function describeIndexTests() {

@@ -53,6 +53,7 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and update configDoc
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
+        'discover:v2': false,
       });
 
       await PageObjects.common.navigateToApp('discover');

@@ -43,7 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'opensearch_dashboards_timefield',
       ]);
       await opensearchArchiver.loadIfNeeded('index_pattern_without_timefield');
-      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
+      await opensearchDashboardsServer.uiSettings.replace({
+        defaultIndex: 'without-timefield',
+        'discover:v2': false,
+      });
       await PageObjects.common.navigateToApp('discover');
     });
 

@@ -5,28 +5,28 @@
 
 import ReactDOM from 'react-dom';
 import { I18nProvider, FormattedMessage } from '@osd/i18n/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer, EuiTitle } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { ApplicationStart, ChromeStart, CoreStart } from '../../../core/public';
+import { ApplicationStart, AppNavLinkStatus, CoreStart } from '../../../core/public';
 import { OverviewApp } from '.';
 import { OverviewCard } from './components/overview_card';
 
 export interface ManagementOverviewProps {
   application: ApplicationStart;
-  chrome: ChromeStart;
   overviewApps?: OverviewApp[];
 }
 
-function ManagementOverviewWrapper(props: ManagementOverviewProps) {
-  const { chrome, application, overviewApps } = props;
+export function ManagementOverviewWrapper(props: ManagementOverviewProps) {
+  const { application, overviewApps } = props;
+  const applications = useObservable(application.applications$);
 
-  const hiddenAppIds =
-    useObservable(chrome.navLinks.getNavLinks$())
-      ?.filter((link) => link.hidden)
-      .map((link) => link.id) || [];
-
-  const availableApps = overviewApps?.filter((app) => hiddenAppIds.indexOf(app.id) === -1);
+  const availableApps = useMemo(() => {
+    return overviewApps?.filter((overviewApp) => {
+      const app = applications?.get(overviewApp.id);
+      return app && app.navLinkStatus !== AppNavLinkStatus.hidden;
+    });
+  }, [applications, overviewApps]);
 
   return (
     <EuiPage restrictWidth={1200}>
@@ -61,11 +61,7 @@ export function renderApp(
 ) {
   ReactDOM.render(
     <I18nProvider>
-      <ManagementOverviewWrapper
-        chrome={chrome}
-        application={application}
-        overviewApps={overviewApps}
-      />
+      <ManagementOverviewWrapper application={application} overviewApps={overviewApps} />
     </I18nProvider>,
     element
   );

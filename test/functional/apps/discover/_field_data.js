@@ -46,6 +46,7 @@ export default function ({ getService, getPageObjects }) {
       await opensearchArchiver.load('discover');
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
+        'discover:v2': false,
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');

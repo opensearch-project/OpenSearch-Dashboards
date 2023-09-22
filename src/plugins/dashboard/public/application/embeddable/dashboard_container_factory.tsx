@@ -47,6 +47,7 @@ interface StartServices {
   capabilities: CoreStart['application']['capabilities'];
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
+  chrome: CoreStart['chrome'];
   notifications: CoreStart['notifications'];
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiListGroupItem, EuiListGroupItemProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiListGroupItemProps, EuiLink } from '@elastic/eui';
 import { getDocViewsLinksRegistry } from '../../../opensearch_dashboards_services';
 import { DocViewLinkRenderProps } from '../../doc_views_links/doc_views_links_types';
 
@@ -24,10 +24,17 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
     });
 
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       {listItems.map((item, index) => (
-        <EuiFlexItem key={index}>
-          <EuiListGroupItem {...item} />
+        <EuiFlexItem key={index} grow={false}>
+          <EuiLink
+            href={item.href}
+            target="_blank"
+            style={{ fontWeight: 'normal' }}
+            data-test-subj={item['data-test-subj']}
+          >
+            {item.label}
+          </EuiLink>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

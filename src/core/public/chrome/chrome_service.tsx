@@ -49,6 +49,9 @@ import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_acce
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 import { Branding } from '../';
+import { getLogos } from '../../common';
+import type { Logos } from '../../common/types';
+
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -58,12 +61,6 @@ export interface ChromeBadge {
   text: string;
   tooltip: string;
   iconType?: IconType;
-}
-
-/** @public */
-export interface ChromeBrand {
-  logo?: string;
-  smallLogo?: string;
 }
 
 /** @public */
@@ -156,7 +153,6 @@ export class ChromeService {
     this.initVisibility(application);
 
     const appTitle$ = new BehaviorSubject<string>('Overview');
-    const brand$ = new BehaviorSubject<ChromeBrand>({});
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
@@ -184,6 +180,8 @@ export class ChromeService {
     };
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
+
+    const logos = getLogos(injectedMetadata.getBranding(), http.basePath.serverBasePath);
 
     const isIE = () => {
       const ua = window.navigator.userAgent;
@@ -234,6 +232,7 @@ export class ChromeService {
       navLinks,
       recentlyAccessed,
       docTitle,
+      logos,
 
       getHeaderComponent: () => (
         <Header
@@ -261,22 +260,12 @@ export class ChromeService {
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
+          logos={logos}
           survey={injectedMetadata.getSurvey()}
         />
       ),
 
       setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
-
-      getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
-
-      setBrand: (brand: ChromeBrand) => {
-        brand$.next(
-          Object.freeze({
-            logo: brand.logo,
-            smallLogo: brand.smallLogo,
-          })
-        );
-      },
 
       getIsVisible$: () => this.isVisible$,
 
@@ -371,6 +360,8 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
+  /** {@inheritdoc Logos} */
+  readonly logos: Logos;
 
   /**
    * Sets the current app's title
@@ -380,31 +371,6 @@ export interface ChromeStart {
    * of mounting applications.
    */
   setAppTitle(appTitle: string): void;
-
-  /**
-   * Get an observable of the current brand information.
-   */
-  getBrand$(): Observable<ChromeBrand>;
-
-  /**
-   * Set the brand configuration.
-   *
-   * @remarks
-   * Normally the `logo` property will be rendered as the
-   * CSS background for the home link in the chrome navigation, but when the page is
-   * rendered in a small window the `smallLogo` will be used and rendered at about
-   * 45px wide.
-   *
-   * @example
-   * ```js
-   * chrome.setBrand({
-   *   logo: 'url(/plugins/app/logo.png) center no-repeat'
-   *   smallLogo: 'url(/plugins/app/logo-small.png) center no-repeat'
-   * })
-   * ```
-   *
-   */
-  setBrand(brand: ChromeBrand): void;
 
   /**
    * Get an observable of the current visibility state of the chrome.

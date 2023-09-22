@@ -76,7 +76,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       id: MANAGEMENT_APP_ID,
       title: this.title,
       order: 9030,
-      icon: '/plugins/home/assets/logos/opensearch_mark_default.svg',
+      icon: '/ui/logos/opensearch_mark.svg',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
       async mount(params: AppMountParameters) {

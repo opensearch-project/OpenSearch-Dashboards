@@ -266,6 +266,30 @@ describe('#setup', () => {
       expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('opensearchNodeVersionCompatibility$ avoid polling when opensearch hosts is empty', async () => {
+    const mockedClient = mockClusterClientInstance.asInternalUser;
+    configService.atPath.mockReturnValueOnce(
+      new BehaviorSubject({
+        hosts: [],
+        healthCheck: {
+          delay: duration(2000),
+        },
+        ssl: {
+          verificationMode: 'none',
+        },
+      } as any)
+    );
+    opensearchService = new OpenSearchService(coreContext);
+    const setupContract = await opensearchService.setup(setupDeps);
+
+    // reset all mocks called during setup phase
+    MockLegacyClusterClient.mockClear();
+
+    setupContract.opensearchNodesCompatibility$.subscribe(async () => {
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
+    });
+  });
 });
 
 describe('#start', () => {

@@ -15,4 +15,10 @@ export const getUntrackedMessage = (nodeInfo: { selector: string; prop: string; 
 export const getTrackedMessage = (nodeInfo: { selector: string; prop: string; value: string }) =>
   `Tracked but missing approval: "${nodeInfo.selector}.${nodeInfo.prop}: ${nodeInfo.value}"`;
 
-export const getNotCompliantMessage = (message: string) => `${message}`;
+export const getNotCompliantMessage = (message: string, explanation?: string) => {
+  if (explanation) {
+    return `${message} ${explanation}`;
+  }
+
+  return message;
+};

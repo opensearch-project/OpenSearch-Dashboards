@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       log.debug('Clicked new dashboard');
       await dashboardVisualizations.createAndAddSavedSearch({
-        name: 'saved search',
+        name: 'saved search 1',
         fields: ['bytes', 'agent'],
       });
       log.debug('added saved search');

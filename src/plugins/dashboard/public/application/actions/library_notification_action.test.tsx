@@ -67,6 +67,7 @@ beforeEach(async () => {
     SavedObjectFinder: () => null,
     application: {} as any,
     embeddable: start,
+    chrome: {} as any,
     inspector: {} as any,
     notifications: {} as any,
     overlays: coreStart.overlays,

@@ -1,37 +1,10 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
  */
 
 import { i18n } from '@osd/i18n';
-import angular, { auto } from 'angular';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 import {
   AppMountParameters,
@@ -56,12 +29,14 @@ import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
+import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
-import { createOsdUrlTracker, url } from '../../opensearch_dashboards_utils/public';
+import { url } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
+import { generateDocViewsUrl } from './application/components/doc_views/generate_doc_views_url';
 import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
@@ -70,25 +45,30 @@ import { JsonCodeBlock } from './application/components/json_code_block/json_cod
 import {
   setDocViewsRegistry,
   setDocViewsLinksRegistry,
-  setUrlTracker,
-  setAngularModule,
   setServices,
   setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
-  getScopedHistory,
   syncHistoryLocations,
   getServices,
 } from './opensearch_dashboards_services';
 import { createSavedSearchesLoader } from './saved_searches';
-import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import {
   DiscoverUrlGeneratorState,
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGenerator,
 } from './url_generator';
-import { SearchEmbeddableFactory } from './application/embeddable';
+// import { SearchEmbeddableFactory } from './application/embeddable';
+import { NEW_DISCOVER_APP, PLUGIN_ID } from '../common';
+import { DataExplorerPluginSetup } from '../../data_explorer/public';
+import { registerFeature } from './register_feature';
+import {
+  DiscoverState,
+  discoverSlice,
+  getPreloadedState,
+} from './application/utils/state_management/discover_slice';
+import { migrateUrlState } from './migrate_state';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -103,7 +83,6 @@ export interface DiscoverSetup {
   docViews: {
     /**
      * Add new doc view shown along with table view and json view in the details of each document in Discover.
-     * Both react and angular doc views are supported.
      * @param docViewRaw
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
@@ -148,6 +127,7 @@ export interface DiscoverSetupPlugins {
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
+  dataExplorer: DataExplorerPluginSetup;
 }
 
 /**
@@ -166,13 +146,9 @@ export interface DiscoverStartPlugins {
   visualizations: VisualizationsStart;
 }
 
-const innerAngularName = 'app/discover';
-const embeddableAngularName = 'app/discoverEmbeddable';
-
 /**
  * Contains Discover, one of the oldest parts of OpenSearch Dashboards
- * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
- * Discover provides embeddables, those contain a slimmer Angular
+ * Discover provides embeddables for Dashboards
  */
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
@@ -181,18 +157,10 @@ export class DiscoverPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private docViewsLinksRegistry: DocViewsLinksRegistry | null = null;
-  private embeddableInjector: auto.IInjectorService | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
-  private innerAngularInitialized: boolean = false;
   private urlGenerator?: DiscoverStart['urlGenerator'];
-
-  /**
-   * why are those functions public? they are needed for some mocha tests
-   * can be removed once all is Jest
-   */
-  public initializeInnerAngular?: () => void;
-  public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
+  private initializeServices?: () => { core: CoreStart; plugins: DiscoverStartPlugins };
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
@@ -248,10 +216,12 @@ export class DiscoverPlugin
           { encode: false, sort: false }
         );
 
+        const contextUrl = `#/context/${encodeURIComponent(
+          renderProps.indexPattern.id
+        )}/${encodeURIComponent(renderProps.hit._id)}?${hash}`;
+
         return {
-          url: `#/context/${encodeURIComponent(renderProps.indexPattern.id)}/${encodeURIComponent(
-            renderProps.hit._id
-          )}?${hash}`,
+          url: generateDocViewsUrl(contextUrl),
           hide: !renderProps.indexPattern.isTimeBased(),
         };
       },
@@ -262,53 +232,19 @@ export class DiscoverPlugin
       label: i18n.translate('discover.docTable.tableRow.viewSingleDocumentLinkText', {
         defaultMessage: 'View single document',
       }),
-      generateCb: (renderProps) => ({
-        url: `#/doc/${renderProps.indexPattern.id}/${
+      generateCb: (renderProps) => {
+        const docUrl = `#/doc/${renderProps.indexPattern.id}/${
           renderProps.hit._index
-        }?id=${encodeURIComponent(renderProps.hit._id)}`,
-      }),
+        }?id=${encodeURIComponent(renderProps.hit._id)}`;
+        return {
+          url: generateDocViewsUrl(docUrl),
+        };
+      },
       order: 2,
     });
 
-    const {
-      appMounted,
-      appUnMounted,
-      stop: stopUrlTracker,
-      setActiveUrl: setTrackedUrl,
-      restorePreviousUrl,
-    } = createOsdUrlTracker({
-      // we pass getter here instead of plain `history`,
-      // so history is lazily created (when app is mounted)
-      // this prevents redundant `#` when not in discover app
-      getHistory: getScopedHistory,
-      baseUrl,
-      defaultSubUrl: '#/',
-      storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
-      navLinkUpdater$: this.appStateUpdater,
-      toastNotifications: core.notifications.toasts,
-      stateParams: [
-        {
-          osdUrlKey: '_g',
-          stateUpdate$: plugins.data.query.state$.pipe(
-            filter(
-              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-            ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
-            }))
-          ),
-        },
-      ],
-    });
-    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
-    this.stopUrlTracking = () => {
-      stopUrlTracker();
-    };
-
-    this.docViewsRegistry.setAngularInjectorGetter(this.getEmbeddableInjector);
     core.application.register({
-      id: 'discover',
+      id: PLUGIN_ID,
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
@@ -319,58 +255,100 @@ export class DiscoverPlugin
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
         }
-        if (!this.initializeInnerAngular) {
-          throw Error('Discover plugin method initializeInnerAngular is undefined');
-        }
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
-        appMounted();
         const {
-          plugins: { data: dataStart },
+          core: {
+            application: { navigateToApp },
+          },
         } = await this.initializeServices();
-        await this.initializeInnerAngular();
 
-        // make sure the index pattern list is up to date
-        await dataStart.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
-        params.element.classList.add('dscAppWrapper');
-        const unmount = await renderApp(innerAngularName, params.element);
-        return () => {
-          params.element.classList.remove('dscAppWrapper');
-          unmount();
-          appUnMounted();
-        };
+        // This is for instances where the user navigates to the app from the application nav menu
+        const path = window.location.hash;
+        const v2Enabled = await core.uiSettings.get<boolean>(NEW_DISCOVER_APP);
+
+        if (!v2Enabled) {
+          navigateToApp('discoverLegacy', {
+            replace: true,
+            path,
+          });
+        } else {
+          const newPath = migrateUrlState(path);
+          if (newPath.startsWith('#/context') || newPath.startsWith('#/doc')) {
+            const { renderDocView } = await import('./application/components/doc_views');
+            const unmount = renderDocView(params.element);
+            return () => {
+              unmount();
+            };
+          } else {
+            navigateToApp('data-explorer', {
+              replace: true,
+              path: `/${PLUGIN_ID}${newPath}`,
+            });
+          }
+        }
+
+        return () => {};
       },
     });
 
-    plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
-      return `#${path}`;
-    });
-    plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
-      const urlParts = path.split('/');
-      // take care of urls containing legacy url, those split in the following way
-      // ["", "context", indexPatternId, _type, id + params]
-      if (urlParts[4]) {
-        // remove _type part
-        const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
-        return `#${newPath}`;
-      }
-      return `#${path}`;
-    });
-    plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
-      const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
-      if (!id) {
-        return `#${path.replace('/discover', '') || '/'}`;
-      }
-      return `#/view/${id}${tail || ''}`;
-    });
+    // TODO: These routes need to be handled for Discover 2.0 to support legacy saved URLS's
+    // plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
+    //   return `#${path}`;
+    // });
+    // plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
+    //   const urlParts = path.split('/');
+    //   // take care of urls containing legacy url, those split in the following way
+    //   // ["", "context", indexPatternId, _type, id + params]
+    //   if (urlParts[4]) {
+    //     // remove _type part
+    //     const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
+    //     return `#${newPath}`;
+    //   }
+    //   return `#${path}`;
+    // });
+    // plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
+    //   const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
+    //   if (!id) {
+    //     return `#${path.replace('/discover', '') || '/'}`;
+    //   }
+    //   return `#/view/${id}${tail || ''}`;
+    // });
 
     if (plugins.home) {
       registerFeature(plugins.home);
     }
 
-    this.registerEmbeddable(core, plugins);
+    plugins.dataExplorer.registerView<DiscoverState>({
+      id: PLUGIN_ID,
+      title: 'Discover',
+      defaultPath: '#/',
+      appExtentions: {
+        savedObject: {
+          docTypes: ['search'],
+          toListItem: (obj) => ({
+            id: obj.id,
+            label: obj.title,
+          }),
+        },
+      },
+      ui: {
+        defaults: async () => {
+          this.initializeServices?.();
+          const services = getServices();
+          return await getPreloadedState(services);
+        },
+        slice: discoverSlice,
+      },
+      shouldShow: () => true,
+      // ViewComponent
+      Canvas: lazy(() => import('./application/view_components/canvas')),
+      Panel: lazy(() => import('./application/view_components/panel')),
+      Context: lazy(() => import('./application/view_components/context')),
+    });
+
+    // this.registerEmbeddable(core, plugins);
 
     return {
       docViews: {
@@ -383,43 +361,20 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
-    // we need to register the application service at setup, but to render it
-    // there are some start dependencies necessary, for this reason
-    // initializeInnerAngular + initializeServices are assigned at start and used
-    // when the application/embeddable is mounted
-    this.initializeInnerAngular = async () => {
-      if (this.innerAngularInitialized) {
-        return;
-      }
-      // this is used by application mount and tests
-      const { getInnerAngularModule } = await import('./get_inner_angular');
-      const module = getInnerAngularModule(
-        innerAngularName,
-        core,
-        plugins,
-        this.initializerContext
-      );
-      setAngularModule(module);
-      this.innerAngularInitialized = true;
-    };
-
     setUiActions(plugins.uiActions);
 
-    this.initializeServices = async () => {
+    this.initializeServices = () => {
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(
-        core,
-        plugins,
-        this.initializerContext,
-        this.getEmbeddableInjector
-      );
+      const services = buildServices(core, plugins, this.initializerContext);
       setServices(services);
       this.servicesInitialized = true;
 
       return { core, plugins };
     };
+
+    this.initializeServices();
 
     return {
       urlGenerator: this.urlGenerator,
@@ -439,14 +394,11 @@ export class DiscoverPlugin
     }
   }
 
+  // TODO: Use this registration when legacy discover is removed
   /**
    * register embeddable with a slimmer embeddable version of inner angular
    */
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
-    if (!this.getEmbeddableInjector) {
-      throw Error('Discover plugin method getEmbeddableInjector is undefined');
-    }
-
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
       return {
@@ -455,23 +407,8 @@ export class DiscoverPlugin
       };
     };
 
-    const factory = new SearchEmbeddableFactory(getStartServices, this.getEmbeddableInjector);
-    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    // TODO: Refactor to remove angular
+    // const factory = new SearchEmbeddableFactory(getStartServices, this.getEmbeddableInjector);
+    // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
-
-  private getEmbeddableInjector = async () => {
-    if (!this.embeddableInjector) {
-      if (!this.initializeServices) {
-        throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
-      }
-      const { core, plugins } = await this.initializeServices();
-      getServices().opensearchDashboardsLegacy.loadFontAwesome();
-      const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
-      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
-      const mountpoint = document.createElement('div');
-      this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);
-    }
-
-    return this.embeddableInjector;
-  };
 }

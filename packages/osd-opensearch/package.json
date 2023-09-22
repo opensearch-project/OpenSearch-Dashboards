@@ -12,7 +12,7 @@
     "osd:watch": "../../scripts/use_node scripts/build --watch"
   },
   "dependencies": {
-    "@opensearch-project/opensearch": "^2.2.0",
+    "@opensearch-project/opensearch": "^2.3.1",
     "@osd/dev-utils": "1.0.0",
     "abort-controller": "^3.0.0",
     "chalk": "^4.1.0",

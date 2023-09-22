@@ -34,7 +34,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
 import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/public';
-import { CoreStart } from 'src/core/public';
+import { CoreStart, Logos } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import uuid from 'uuid';
 import {
@@ -98,6 +98,7 @@ export interface DashboardContainerOptions {
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  chrome: CoreStart['chrome'];
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
@@ -119,6 +120,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     | (({ replace, pathname }: { replace: boolean; pathname?: string }) => void);
 
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
+  private readonly logos: Logos;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -135,6 +137,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       parent
     );
     this.embeddablePanel = options.embeddable.getEmbeddablePanel(stateTransfer);
+    this.logos = options.chrome.logos;
   }
 
   protected createNewPanelState<
@@ -237,6 +240,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         <OpenSearchDashboardsContextProvider services={this.options}>
           <DashboardViewport
             renderEmpty={this.renderEmpty}
+            logos={this.logos}
             container={this}
             PanelComponent={this.embeddablePanel}
           />

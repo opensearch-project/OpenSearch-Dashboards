@@ -28,20 +28,24 @@
  * under the License.
  */
 
+import './loading_spinner.scss';
 import React from 'react';
-import { EuiLoadingSpinner, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 export function LoadingSpinner() {
   return (
-    <>
-      <EuiTitle size="s" data-test-subj="loadingSpinnerText">
-        <h2>
-          <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
-    </>
+    <EuiPanel hasBorder={false} hasShadow={false} color="transparent" className="discoverNoResults">
+      <EuiEmptyPrompt
+        icon={<EuiLoadingSpinner data-test-subj="loadingSpinner" size="xl" />}
+        title={
+          <EuiTitle size="s" data-test-subj="loadingSpinnerText">
+            <h2>
+              <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />
+            </h2>
+          </EuiTitle>
+        }
+      />
+    </EuiPanel>
   );
 }

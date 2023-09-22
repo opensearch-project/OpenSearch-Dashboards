@@ -36,7 +36,7 @@ import { RenderingMetadata } from '../types';
 
 interface Props {
   url: RenderingMetadata['uiPublicUrl'];
-  theme: string;
+  theme: RenderingMetadata['themeVersion'];
 }
 
 interface FontFace {

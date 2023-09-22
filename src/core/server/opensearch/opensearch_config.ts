@@ -53,7 +53,7 @@ export const configSchema = schema.object({
     defaultValue: false,
   }),
   sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
-  hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
+  hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema)], {
     defaultValue: 'http://localhost:9200',
   }),
   username: schema.maybe(

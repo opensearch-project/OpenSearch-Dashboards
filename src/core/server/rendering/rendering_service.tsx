@@ -198,7 +198,7 @@ export class RenderingService {
 
   /**
    * Assign values for branding related configurations based on branding validation
-   * by calling checkBrandingValid(). For dark mode URLs, add additonal validation
+   * by calling checkBrandingValid(). For dark mode URLs, add additional validation
    * to see if there is a valid default mode URL exist first. If URL is valid, pass in
    * the actual URL; if not, pass in undefined.
    *

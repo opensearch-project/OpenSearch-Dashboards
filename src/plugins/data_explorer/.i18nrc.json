@@ -1,0 +1,7 @@
+{
+  "prefix": "dataExplorer",
+  "paths": {
+    "dataExplorer": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

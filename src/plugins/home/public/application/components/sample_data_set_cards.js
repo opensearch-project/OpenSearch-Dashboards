@@ -201,9 +201,18 @@ export class SampleDataSetCards extends React.Component {
   };
 
   lightOrDarkImage = (sampleDataSet) => {
-    return getServices().uiSettings.get('theme:darkMode') && sampleDataSet.darkPreviewImagePath
-      ? sampleDataSet.darkPreviewImagePath
-      : sampleDataSet.previewImagePath;
+    let imagePath = sampleDataSet.previewImagePath;
+
+    if (sampleDataSet.darkPreviewImagePath && getServices().uiSettings.get('theme:darkMode')) {
+      imagePath = sampleDataSet.darkPreviewImagePath;
+    }
+
+    // For `next` theme, append `_new`
+    if (sampleDataSet.hasNewThemeImages && getServices().uiSettings.get('theme:version') !== 'v7') {
+      imagePath = imagePath.replace(/.png/, '_new.png');
+    }
+
+    return imagePath;
   };
 
   render() {

@@ -30,13 +30,6 @@ Array [
       "message": "Message 4",
     },
   ],
-  Array [
-    "plugin_1.id_7",
-    Object {
-      "description": undefined,
-      "message": "Message 7",
-    },
-  ],
 ]
 `;
 

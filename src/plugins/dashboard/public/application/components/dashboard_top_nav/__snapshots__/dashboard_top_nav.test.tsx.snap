@@ -129,13 +129,75 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
-              "getBrand$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "logos": Object {
+                "AnimatedMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                },
+                "Application": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                },
+                "CenterMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                },
+                "Mark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                },
+                "OpenSearch": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_on_light.svg",
+                },
+                "colorScheme": "light",
+              },
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
@@ -162,7 +224,6 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "removeApplicationClass": [MockFunction],
               "setAppTitle": [MockFunction],
               "setBadge": [MockFunction],
-              "setBrand": [MockFunction],
               "setBreadcrumbs": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
@@ -985,13 +1046,75 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
-              "getBrand$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "logos": Object {
+                "AnimatedMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                },
+                "Application": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                },
+                "CenterMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                },
+                "Mark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                },
+                "OpenSearch": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_on_light.svg",
+                },
+                "colorScheme": "light",
+              },
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
@@ -1018,7 +1141,6 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "removeApplicationClass": [MockFunction],
               "setAppTitle": [MockFunction],
               "setBadge": [MockFunction],
-              "setBrand": [MockFunction],
               "setBreadcrumbs": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
@@ -1841,13 +1963,75 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
-              "getBrand$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "logos": Object {
+                "AnimatedMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                },
+                "Application": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                },
+                "CenterMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                },
+                "Mark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                },
+                "OpenSearch": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_on_light.svg",
+                },
+                "colorScheme": "light",
+              },
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
@@ -1874,7 +2058,6 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "removeApplicationClass": [MockFunction],
               "setAppTitle": [MockFunction],
               "setBadge": [MockFunction],
-              "setBrand": [MockFunction],
               "setBreadcrumbs": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
@@ -2697,13 +2880,75 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
-              "getBrand$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "logos": Object {
+                "AnimatedMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                },
+                "Application": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                },
+                "CenterMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                },
+                "Mark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                },
+                "OpenSearch": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_on_light.svg",
+                },
+                "colorScheme": "light",
+              },
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
@@ -2730,7 +2975,6 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "removeApplicationClass": [MockFunction],
               "setAppTitle": [MockFunction],
               "setBadge": [MockFunction],
-              "setBrand": [MockFunction],
               "setBreadcrumbs": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
@@ -3553,13 +3797,75 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
-              "getBrand$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "logos": Object {
+                "AnimatedMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                },
+                "Application": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                },
+                "CenterMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                },
+                "Mark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                },
+                "OpenSearch": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_on_light.svg",
+                },
+                "colorScheme": "light",
+              },
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
@@ -3586,7 +3892,6 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "removeApplicationClass": [MockFunction],
               "setAppTitle": [MockFunction],
               "setBadge": [MockFunction],
-              "setBrand": [MockFunction],
               "setBreadcrumbs": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
@@ -4409,13 +4714,75 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
-              "getBrand$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "logos": Object {
+                "AnimatedMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                },
+                "Application": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                },
+                "CenterMark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                },
+                "Mark": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                },
+                "OpenSearch": Object {
+                  "dark": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_dark.svg",
+                  },
+                  "light": Object {
+                    "type": "default",
+                    "url": "/ui/logos/opensearch_on_light.svg",
+                  },
+                  "type": "default",
+                  "url": "/ui/logos/opensearch_on_light.svg",
+                },
+                "colorScheme": "light",
+              },
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
@@ -4442,7 +4809,6 @@ exports[`Dashboard top nav render with all components 1`] = `
               "removeApplicationClass": [MockFunction],
               "setAppTitle": [MockFunction],
               "setBadge": [MockFunction],
-              "setBrand": [MockFunction],
               "setBreadcrumbs": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],

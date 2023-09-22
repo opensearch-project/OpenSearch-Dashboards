@@ -30,22 +30,13 @@
 
 import { i18n } from '@osd/i18n';
 
-export function getRootBreadcrumbs() {
+export function getRootBreadcrumbs(baseUrl: string) {
   return [
     {
       text: i18n.translate('discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
-      href: '#/',
-    },
-  ];
-}
-
-export function getSavedSearchBreadcrumbs($route: any) {
-  return [
-    ...getRootBreadcrumbs(),
-    {
-      text: $route.current.locals.savedObjects.savedSearch.id,
+      href: baseUrl,
     },
   ];
 }

@@ -58,6 +58,7 @@ import { findTestSubject } from 'test_utils/helpers';
 const options: DashboardContainerOptions = {
   application: {} as any,
   embeddable: {} as any,
+  chrome: {} as any,
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
@@ -179,6 +180,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const containerOptions: DashboardContainerOptions = {
     application: applicationServiceMock.createStartContract(),
     embeddable: start,
+    chrome: {} as any,
     notifications: {} as any,
     overlays: {} as any,
     inspector: {} as any,

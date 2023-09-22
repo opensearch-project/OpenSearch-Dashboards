@@ -71,6 +71,7 @@ export const sampleDataSchema = {
   description: Joi.string().required(),
   previewImagePath: Joi.string().required(),
   darkPreviewImagePath: Joi.string(),
+  hasNewThemeImages: Joi.boolean(),
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: Joi.string().required(),

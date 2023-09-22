@@ -29,6 +29,7 @@
  */
 
 import { readFile, stat } from 'fs/promises';
+import semver from 'semver';
 import { resolve } from 'path';
 import { coerce } from 'semver';
 import { snakeCase } from 'lodash';
@@ -61,7 +62,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     version: true,
     configPath: true,
     requiredPlugins: true,
-    requiredOpenSearchPlugins: true,
+    requiredEnginePlugins: true,
     optionalPlugins: true,
     ui: true,
     server: true,
@@ -157,26 +158,42 @@ export async function parseManifest(
     );
   }
 
-  if (
-    manifest.requiredOpenSearchPlugins !== undefined &&
-    (!Array.isArray(manifest.requiredOpenSearchPlugins) ||
-      !manifest.requiredOpenSearchPlugins.every((plugin) => typeof plugin === 'string'))
-  ) {
-    throw PluginDiscoveryError.invalidManifest(
-      manifestPath,
-      new Error(
-        `The "requiredOpenSearchPlugins" in plugin manifest for "${manifest.id}" should be an array of strings.`
+  if ('requiredEnginePlugins' in manifest) {
+    if (
+      typeof manifest.requiredEnginePlugins !== 'object' ||
+      !Object.entries(manifest.requiredEnginePlugins).every(
+        ([pluginId, pluginVersion]) =>
+          typeof pluginId === 'string' && typeof pluginVersion === 'string'
       )
-    );
-  }
+    ) {
+      throw PluginDiscoveryError.invalidManifest(
+        manifestPath,
+        new Error(
+          `The "requiredEnginePlugins" in plugin manifest for "${manifest.id}" should be an object that maps a plugin name to a version range.`
+        )
+      );
+    }
+    const invalidPluginVersions: string[] = [];
+    for (const [pluginName, versionRange] of Object.entries(manifest.requiredEnginePlugins)) {
+      log.info(
+        `Plugin ${manifest.id} has a dependency on engine plugin: [${pluginName}@${versionRange}]`
+      );
 
-  if (
-    Array.isArray(manifest.requiredOpenSearchPlugins) &&
-    manifest.requiredOpenSearchPlugins.length > 0
-  ) {
-    log.info(
-      `Plugin ${manifest.id} has a dependency on following OpenSearch plugin(s): "${manifest.requiredOpenSearchPlugins}".`
-    );
+      if (!isOpenSearchPluginVersionRangeValid(versionRange)) {
+        invalidPluginVersions.push(`${versionRange} for ${pluginName}`);
+      }
+    }
+
+    if (invalidPluginVersions.length > 0) {
+      throw PluginDiscoveryError.invalidManifest(
+        manifestPath,
+        new Error(
+          `The "requiredEnginePlugins" in the plugin manifest for "${
+            manifest.id
+          }" contains invalid version ranges: ${invalidPluginVersions.join(', ')}`
+        )
+      );
+    }
   }
 
   const expectedOpenSearchDashboardsVersion =
@@ -221,9 +238,8 @@ export async function parseManifest(
     opensearchDashboardsVersion: expectedOpenSearchDashboardsVersion,
     configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
-    requiredOpenSearchPlugins: Array.isArray(manifest.requiredOpenSearchPlugins)
-      ? manifest.requiredOpenSearchPlugins
-      : [],
+    requiredEnginePlugins:
+      manifest.requiredEnginePlugins !== undefined ? manifest.requiredEnginePlugins : {},
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
     requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
     ui: includesUiPlugin,
@@ -275,4 +291,15 @@ function isVersionCompatible(
     coercedActualOpenSearchDashboardsVersion.compare(coercedExpectedOpenSearchDashboardsVersion) ===
     0
   );
+}
+/**
+ * Checks whether specified version range is valid.
+ * @param versionRange Version range to be checked.
+ */
+function isOpenSearchPluginVersionRangeValid(versionRange: string) {
+  try {
+    return semver.validRange(versionRange);
+  } catch (err) {
+    return false;
+  }
 }

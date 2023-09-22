@@ -47,23 +47,19 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@osd/analytics';
 import { FormattedMessage } from '@osd/i18n/react';
+import { Logos } from 'opensearch-dashboards/public';
 import { getServices } from '../opensearch_dashboards_services';
 import { TelemetryPluginStart } from '../../../../telemetry/public';
-
 import { SampleDataCard } from './sample_data';
-import OpenSearchMarkCentered from '../../assets/logos/opensearch_mark_centered.svg';
+
 interface Props {
   urlBasePath: string;
   onSkip: () => void;
   telemetry?: TelemetryPluginStart;
   branding: {
-    darkMode: boolean;
-    mark: {
-      defaultUrl?: string;
-      darkModeUrl?: string;
-    };
     applicationTitle?: string;
   };
+  logos: Logos;
 }
 
 /**
@@ -146,72 +142,32 @@ export class Welcome extends React.Component<Props> {
     }
   };
 
-  private darkMode = this.props.branding.darkMode;
-  private markDefault = this.props.branding.mark.defaultUrl;
-  private markDarkMode = this.props.branding.mark.darkModeUrl;
   private applicationTitle = this.props.branding.applicationTitle;
 
   /**
-   * Use branding configurations to check which URL to use for rendering
-   * welcome logo in default mode. In default mode, welcome logo will
-   * proritize default mode mark URL. If it is invalid, default opensearch logo
-   * will be rendered.
-   *
-   * @returns a valid custom URL or undefined if no valid URL is provided
+   * Returns Welcome logo, wrapped in a container, using the custom branded logos or,
+   * the centered opensearch mark if no branding is provided.
    */
-  private customWelcomeLogoDefaultMode = () => {
-    return this.markDefault ?? undefined;
-  };
+  private renderWelcomeLogo = () => {
+    const { url: centerMarkURL, type: centerMarkType } = this.props.logos.CenterMark;
 
-  /**
-   * Use branding configurations to check which URL to use for rendering
-   * welcome logo in dark mode. In dark mode, welcome logo will render
-   * dark mode mark URL if valid. Otherwise, it will render the default
-   * mode mark URL if valid. If both dark mode mark URL and default mode mark
-   * URL are invalid, the default opensearch logo will be rendered.
-   *
-   * @returns a valid custom URL or undefined if no valid URL is provided
-   */
-  private customWelcomeLogoDarkMode = () => {
-    return this.markDarkMode ?? this.markDefault ?? undefined;
-  };
-
-  /**
-   * Render custom welcome logo for both default mode and dark mode
-   *
-   * @returns a valid custom loading logo URL, or undefined
-   */
-  private customWelcomeLogo = () => {
-    if (this.darkMode) {
-      return this.customWelcomeLogoDarkMode();
-    }
-    return this.customWelcomeLogoDefaultMode();
-  };
-
-  /**
-   * Check if we render a custom welcome logo or the default opensearch spinner.
-   * If customWelcomeLogo() returns undefined(no valid custom URL is found), we
-   * render the default opensearch logo
-   *
-   * @returns a image component with custom logo URL, or the default opensearch logo
-   */
-  private renderBrandingEnabledOrDisabledLogo = () => {
-    if (this.customWelcomeLogo()) {
+    if (centerMarkType === 'custom') {
       return (
         <div className="homWelcome__customLogoContainer">
           <img
             className="homWelcome__customLogo"
             data-test-subj="welcomeCustomLogo"
-            data-test-image-url={this.customWelcomeLogo()}
+            data-test-image-url={centerMarkURL}
             alt={this.applicationTitle + ' logo'}
-            src={this.customWelcomeLogo()}
+            src={centerMarkURL}
           />
         </div>
       );
     }
+
     return (
       <span className="homWelcome__logo">
-        <EuiIcon type={OpenSearchMarkCentered} size="original" />
+        <EuiIcon type={centerMarkURL} size="original" />
       </span>
     );
   };
@@ -224,7 +180,7 @@ export class Welcome extends React.Component<Props> {
           <header className="homWelcome__header">
             <div className="homWelcome__content eui-textCenter">
               <EuiSpacer size="xl" />
-              {this.renderBrandingEnabledOrDisabledLogo()}
+              {this.renderWelcomeLogo()}
               <EuiTitle
                 size="l"
                 className="homWelcome__title"

@@ -47,7 +47,10 @@ export default function ({ getService, getPageObjects }) {
       ]);
       await opensearchArchiver.load('empty_opensearch_dashboards');
       await opensearchArchiver.loadIfNeeded('hamlet');
-      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
+      await opensearchDashboardsServer.uiSettings.replace({
+        defaultIndex: 'testlargestring',
+        'discover:v2': false,
+      });
     });
 
     it('verify the large string book present', async function () {

@@ -24,7 +24,12 @@ function setup_opensearch() {
 function run_opensearch() {
   echo "[ Attempting to start OpenSearch... ]"
   cd "$OPENSEARCH_DIR"
-  spawn_process_and_save_PID "./opensearch-tar-install.sh > ${LOGS_DIR}/opensearch.log 2>&1 &"
+  # Check if opensearch-tar-install.sh exists
+  if [ -f "./opensearch-tar-install.sh" ]; then
+    spawn_process_and_save_PID "./opensearch-tar-install.sh > ${LOGS_DIR}/opensearch.log 2>&1 &"
+  else
+    spawn_process_and_save_PID "./bin/opensearch > ${LOGS_DIR}/opensearch.log 2>&1 &"
+  fi
 }
 
 # Checks the running status of OpenSearch

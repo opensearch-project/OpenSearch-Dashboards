@@ -50,7 +50,6 @@ import './index.scss';
 
 import {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
@@ -89,6 +88,7 @@ import {
 } from './context';
 import { Branding } from '../types';
 
+export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
@@ -193,7 +193,7 @@ export {
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+export { MountPoint, UnmountCallback, PublicUiSettingsParams, ChromeBrand } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
 
@@ -298,7 +298,6 @@ export interface CoreStart {
 export {
   Capabilities,
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,

@@ -33,6 +33,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
@@ -40,6 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await opensearchArchiver.loadIfNeeded('logstash_functional');
       await opensearchArchiver.load('invalid_scripted_field');
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });

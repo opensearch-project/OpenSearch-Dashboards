@@ -32,6 +32,12 @@
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"
 
+# Set the value to true to disable the welcome screen
+#home.disableWelcomeScreen: false
+
+# Set the value to true to disable the new theme introduction modal
+#home.disableNewThemeModal: false
+
 # Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
 # This settings should be used for large clusters or for clusters with ingest heavy nodes.
 # It allows Dashboards to only healthcheck using the local OpenSearch node rather than fan out requests across all nodes.
@@ -267,4 +273,3 @@
 
 # Set the value of this setting to true to enable plugin augmentation on Dashboard
 # vis_augmenter.pluginAugmentationEnabled: true
-

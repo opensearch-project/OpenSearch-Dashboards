@@ -71,8 +71,9 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await opensearchArchiver.load('discover');
-      // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
-      await opensearchDashboardsServer.uiSettings.replace({});
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
       await opensearchDashboardsServer.uiSettings.update({});
     });
 

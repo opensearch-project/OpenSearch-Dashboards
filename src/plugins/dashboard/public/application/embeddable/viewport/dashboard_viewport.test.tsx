@@ -73,6 +73,7 @@ function getProps(
       getEmbeddableFactories: start.getEmbeddableFactories,
       getEmbeddableFactory: start.getEmbeddableFactory,
     } as any,
+    chrome: {} as any,
     notifications: {} as any,
     overlays: {} as any,
     inspector: {
@@ -103,6 +104,7 @@ function getProps(
   dashboardContainer = new DashboardContainer(input, options);
   const defaultTestProps: DashboardViewportProps = {
     container: dashboardContainer,
+    logos: options.chrome.logos,
     PanelComponent: () => <div />,
   };
 
