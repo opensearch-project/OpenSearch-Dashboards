@@ -31,7 +31,7 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
           # opensearch-trigger-bot installation ID
-          installation_id: 22958780
+          installation_id: 41494816
 
       - name: Backport
         uses: VachaShah/backport@v2.2.0
