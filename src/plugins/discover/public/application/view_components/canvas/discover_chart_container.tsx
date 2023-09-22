@@ -20,7 +20,7 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
     indexPattern,
   ]);
 
-  if (!hits || !chartData || !bucketInterval) return null;
+  if (!hits) return null;
 
   return (
     <DiscoverChart
