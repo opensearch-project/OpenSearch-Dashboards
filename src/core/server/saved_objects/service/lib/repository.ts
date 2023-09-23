@@ -282,7 +282,7 @@ export class SavedObjectsRepository {
 
     let savedObjectWorkspaces = workspaces;
 
-    if (id && overwrite && workspaces) {
+    if (id && overwrite) {
       try {
         const currentItem = await this.get(type, id);
         if (
