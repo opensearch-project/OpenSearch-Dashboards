@@ -31,8 +31,8 @@ describe('buildPointSeriesData', () => {
           intervalOpenSearchUnit: 'h',
           format: 'number',
           bounds: {
-            min: moment('2023-01-01'),
-            max: moment('2023-01-02'),
+            min: moment('2023-01-01T00:00:00Z'),
+            max: moment('2023-01-02T00:00:00Z'),
           },
         },
       },
