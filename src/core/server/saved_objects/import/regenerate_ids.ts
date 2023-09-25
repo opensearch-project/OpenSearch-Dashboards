@@ -29,7 +29,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { SavedObject } from '../types';
+import { SavedObject, SavedObjectsClientContract } from '../types';
+import { SavedObjectsUtils } from '../service';
 
 /**
  * Takes an array of saved objects and returns an importIdMap of randomly-generated new IDs.
@@ -41,4 +42,41 @@ export const regenerateIds = (objects: SavedObject[]) => {
     return acc.set(`${object.type}:${object.id}`, { id: uuidv4(), omitOriginId: true });
   }, new Map<string, { id: string; omitOriginId?: boolean }>());
   return importIdMap;
+};
+
+export const regenerateIdsWithReference = async (props: {
+  savedObjects: SavedObject[];
+  savedObjectsClient: SavedObjectsClientContract;
+  workspaces?: string[];
+  objectLimit: number;
+  importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
+}): Promise<Map<string, { id?: string; omitOriginId?: boolean }>> => {
+  const { savedObjects, savedObjectsClient, workspaces, importIdMap } = props;
+  if (!workspaces || !workspaces.length) {
+    return savedObjects.reduce((acc, object) => {
+      return acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: false });
+    }, importIdMap);
+  }
+
+  const bulkGetResult = await savedObjectsClient.bulkGet(
+    savedObjects.map((item) => ({ type: item.type, id: item.id }))
+  );
+
+  return bulkGetResult.saved_objects.reduce((acc, object) => {
+    if (object.error?.statusCode === 404) {
+      acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: true });
+      return acc;
+    }
+
+    const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+      workspaces,
+      object.workspaces
+    );
+    if (filteredWorkspaces.length) {
+      acc.set(`${object.type}:${object.id}`, { id: uuidv4(), omitOriginId: true });
+    } else {
+      acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: false });
+    }
+    return acc;
+  }, importIdMap);
 };

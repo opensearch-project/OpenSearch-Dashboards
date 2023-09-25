@@ -42,7 +42,7 @@ import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 
 import { collectSavedObjects } from './collect_saved_objects';
-import { regenerateIds } from './regenerate_ids';
+import { regenerateIds, regenerateIdsWithReference } from './regenerate_ids';
 import { validateReferences } from './validate_references';
 import { checkConflicts } from './check_conflicts';
 import { checkOriginConflicts } from './check_origin_conflicts';
@@ -68,6 +68,7 @@ describe('#importSavedObjectsFromStream', () => {
       importIdMap: new Map(),
     });
     getMockFn(regenerateIds).mockReturnValue(new Map());
+    getMockFn(regenerateIdsWithReference).mockReturnValue(Promise.resolve(new Map()));
     getMockFn(validateReferences).mockResolvedValue([]);
     getMockFn(checkConflicts).mockResolvedValue({
       errors: [],
@@ -240,6 +241,15 @@ describe('#importSavedObjectsFromStream', () => {
           ]),
         });
         getMockFn(validateReferences).mockResolvedValue([errors[1]]);
+        getMockFn(regenerateIdsWithReference).mockResolvedValue(
+          Promise.resolve(
+            new Map([
+              ['foo', {}],
+              ['bar', {}],
+              ['baz', {}],
+            ])
+          )
+        );
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [errors[2]],
           filteredObjects,
