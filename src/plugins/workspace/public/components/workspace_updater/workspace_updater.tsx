@@ -47,6 +47,7 @@ export const WorkspaceUpdater = () => {
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
+  const hideDeleteButton = !!currentWorkspace?.reserved; // hide delete button for reserved workspace
   const [deleteWorkspaceModalVisible, setDeleteWorkspaceModalVisible] = useState(false);
   const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<WorkspaceFormData>(
     getFormDataFromWorkspace(currentWorkspace)
@@ -157,11 +158,15 @@ export const WorkspaceUpdater = () => {
         <EuiPageHeader
           restrictWidth
           pageTitle="Update Workspace"
-          rightSideItems={[
-            <EuiButton color="danger" onClick={() => setDeleteWorkspaceModalVisible(true)}>
-              Delete
-            </EuiButton>,
-          ]}
+          rightSideItems={
+            hideDeleteButton
+              ? []
+              : [
+                  <EuiButton color="danger" onClick={() => setDeleteWorkspaceModalVisible(true)}>
+                    Delete
+                  </EuiButton>,
+                ]
+          }
         />
         <EuiPageContent
           verticalPosition="center"

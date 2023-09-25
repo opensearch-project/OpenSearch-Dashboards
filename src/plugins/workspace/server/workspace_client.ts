@@ -44,6 +44,10 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
   defaultMessage: 'workspace name has already been used, try with a different name',
 });
 
+const RESERVED_WORKSPACE_NAME_ERROR = i18n.translate('workspace.reserved.name.error', {
+  defaultMessage: 'reserved workspace name cannot be changed',
+});
+
 export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   private setupDep: CoreSetup;
   private logger: Logger;
@@ -338,6 +342,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
       if (workspaceInDB.attributes.name !== attributes.name) {
+        if (workspaceInDB.attributes.reserved) {
+          throw new Error(RESERVED_WORKSPACE_NAME_ERROR);
+        }
         const existingWorkspaceRes = await this.getScopedClientWithoutPermission(
           requestDetail
         )?.find({
