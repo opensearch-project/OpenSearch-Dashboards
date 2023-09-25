@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 export {
-  WorkspaceStart,
-  WorkspaceService,
-  WorkspaceSetup,
+  WorkspacesStart,
+  WorkspacesService,
+  WorkspacesSetup,
   WorkspaceObservables,
 } from './workspaces_service';

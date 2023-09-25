@@ -87,7 +87,7 @@ import {
   HandlerParameters,
 } from './context';
 import { Branding } from '../types';
-import { WorkspaceStart, WorkspaceSetup } from './workspace';
+import { WorkspacesStart, WorkspacesSetup } from './workspace';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -241,8 +241,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   };
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
-  /** {@link WorkspaceSetup} */
-  workspaces: WorkspaceSetup;
+  /** {@link WorkspacesSetup} */
+  workspaces: WorkspacesSetup;
 }
 
 /**
@@ -297,8 +297,8 @@ export interface CoreStart {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
     getBranding: () => Branding;
   };
-  /** {@link WorkspaceStart} */
-  workspaces: WorkspaceStart;
+  /** {@link WorkspacesStart} */
+  workspaces: WorkspacesStart;
 }
 
 export {
@@ -349,9 +349,9 @@ export {
 export { __osdBootstrap__ } from './osd_bootstrap';
 
 export {
-  WorkspaceStart,
-  WorkspaceSetup,
-  WorkspaceService,
+  WorkspacesStart,
+  WorkspacesSetup,
+  WorkspacesService,
   WorkspaceObservables,
 } from './workspace';
 

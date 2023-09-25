@@ -35,7 +35,7 @@ import {
   HttpSetup,
   NotificationsStart,
   WorkspaceAttribute,
-  WorkspaceStart,
+  WorkspacesStart,
 } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { SavedObjectWithMetadata } from '../../../../common';
@@ -54,7 +54,7 @@ export interface ShowDuplicateModalProps {
     targetWorkspace: string
   ) => Promise<void>;
   http: HttpSetup;
-  workspaces: WorkspaceStart;
+  workspaces: WorkspacesStart;
   duplicateMode: DuplicateMode;
   notifications: NotificationsStart;
   selectedSavedObjects: SavedObjectWithMetadata[];

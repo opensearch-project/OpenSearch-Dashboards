@@ -4,6 +4,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@osd/utility-types';
+
+import { WorkspacesService } from './workspaces_service';
 import { WorkspaceAttribute } from '..';
 
 const currentWorkspaceId$ = new BehaviorSubject<string>('');
@@ -30,7 +33,15 @@ const createWorkspacesStartContractMock = () => ({
   renderWorkspaceMenu: jest.fn(),
 });
 
+export type WorkspacesServiceContract = PublicMethodsOf<WorkspacesService>;
+const createMock = (): jest.Mocked<WorkspacesServiceContract> => ({
+  setup: jest.fn().mockReturnValue(createWorkspacesSetupContractMock()),
+  start: jest.fn().mockReturnValue(createWorkspacesStartContractMock()),
+  stop: jest.fn(),
+});
+
 export const workspacesServiceMock = {
-  createSetupContractMock: createWorkspacesSetupContractMock,
+  create: createMock,
+  createSetupContract: createWorkspacesSetupContractMock,
   createStartContract: createWorkspacesStartContractMock,
 };

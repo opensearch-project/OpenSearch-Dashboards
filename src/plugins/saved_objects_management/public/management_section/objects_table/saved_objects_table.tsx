@@ -61,7 +61,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
-  WorkspaceStart,
+  WorkspacesStart,
   HttpStart,
   OverlayStart,
   NotificationsStart,
@@ -111,7 +111,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
-  workspaces: WorkspaceStart;
+  workspaces: WorkspacesStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;

@@ -54,7 +54,7 @@ import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
-import { WorkspaceService } from './workspace';
+import { WorkspacesService } from './workspace';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -111,7 +111,7 @@ export class CoreSystem {
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
-  private readonly workspaces: WorkspaceService;
+  private readonly workspaces: WorkspacesService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -140,7 +140,7 @@ export class CoreSystem {
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
-    this.workspaces = new WorkspaceService();
+    this.workspaces = new WorkspacesService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
@@ -312,6 +312,7 @@ export class CoreSystem {
     this.chrome.stop();
     this.i18n.stop();
     this.application.stop();
+    this.workspaces.stop();
     this.rootDomElement.textContent = '';
   }
 }

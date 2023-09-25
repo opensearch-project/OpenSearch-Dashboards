@@ -37,7 +37,7 @@ import {
   SavedObjectsClientContract,
   IUiSettingsClient,
   ApplicationStart,
-  WorkspaceStart,
+  WorkspacesStart,
 } from 'opensearch-dashboards/public';
 import { UiStatsMetricType } from '@osd/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
@@ -74,7 +74,7 @@ export interface HomeOpenSearchDashboardsServices {
     getBranding: () => HomePluginBranding;
   };
   dataSource?: DataSourcePluginStart;
-  workspaces: WorkspaceStart;
+  workspaces: WorkspacesStart;
 }
 
 let services: HomeOpenSearchDashboardsServices | null = null;

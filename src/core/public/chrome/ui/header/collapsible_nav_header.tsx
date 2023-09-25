@@ -6,10 +6,10 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiCollapsibleNavGroup } from '@elastic/eui';
-import { WorkspaceStart } from '../../../../public';
+import { WorkspacesStart } from '../../../../public';
 
 interface Props {
-  workspaces: WorkspaceStart;
+  workspaces: WorkspacesStart;
 }
 
 export function CollapsibleNavHeader({ workspaces }: Props) {
