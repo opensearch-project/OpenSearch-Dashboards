@@ -33,7 +33,8 @@ type WorkspaceRoutePermissionItem = {
   modes: Array<
     | WorkspacePermissionMode.LibraryRead
     | WorkspacePermissionMode.LibraryWrite
-    | WorkspacePermissionMode.Management
+    | WorkspacePermissionMode.Read
+    | WorkspacePermissionMode.Write
   >;
 } & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
 
