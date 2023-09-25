@@ -43,6 +43,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const opensearchChart = getService('opensearchChart');
   const docTable = getService('docTable');
   const dataGridTable = getService('dataGrid');
+  const comboBox = getService('comboBox');
 
   /*
    * This page is left unchanged since some of the other selenium tests, ex. dashboard tests, visualization tests
@@ -345,12 +346,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async selectIndexPattern(indexPattern: string) {
-      await testSubjects.click('indexPattern-switch-link');
-      await find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
-      await find.clickByCssSelector(
-        `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
-      );
+    public async selectIndexPattern(indexPatternTitle: string) {
+      const dataExplorerComboBoxElement = await testSubjects.find('dataExplorerDSSelect');
+      await comboBox.setElement(dataExplorerComboBoxElement, indexPatternTitle);
       await header.waitUntilLoadingHasFinished();
     }
 
