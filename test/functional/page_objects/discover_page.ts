@@ -286,6 +286,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.click(`field-${field}`);
     }
 
+    public async clickFieldListItemDetails(field: string) {
+      return await testSubjects.click(`field-${field}-showDetails`);
+    }
+
     public async clickFieldSort(field: string) {
       return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
     }

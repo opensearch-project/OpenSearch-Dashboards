@@ -40,6 +40,8 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   class DataGrid {
+    // This test no longer works in the new data explorer data grid table
+    // since each data grid table cell is now rendered differently
     async getDataGridTableData(): Promise<TabbedGridData> {
       const table = await find.byCssSelector('.euiDataGrid');
       const $ = await table.parseDomContent();
@@ -95,6 +97,24 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
     async clickRemoveColumn(columnName: string) {
       await testSubjects.click(`dataGridHeaderCell-${columnName}`);
       await find.clickByButtonText('Remove column');
+    }
+
+    async getDataGridTableColumn(selector: string): Promise<string[]> {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+
+      const columnValues: string[] = [];
+      $.findTestSubjects('dataGridRowCell')
+        .toArray()
+        .forEach((cell) => {
+          const cCell = $(cell);
+          if (cCell.hasClass(`euiDataGridRowCell--${selector}`)) {
+            // The column structure is very nested to get the actual text
+            columnValues.push(cCell.children().children().children().children().text());
+          }
+        });
+
+      return columnValues;
     }
   }
 
