@@ -39,7 +39,7 @@ const ALL_WORKSPACE_INNER_DATA_PERMISSION_MODES: string[] = [
 ];
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
-const generateWorkspacePermissionError = () => {
+const generateWorkspacePermissionError = () =>
   SavedObjectsErrorHelpers.decorateForbiddenError(
     new Error(
       i18n.translate('workspace.permission.invalidate', {
@@ -47,7 +47,6 @@ const generateWorkspacePermissionError = () => {
       })
     )
   );
-};
 
 const generateSavedObjectsPermissionError = () =>
   SavedObjectsErrorHelpers.decorateForbiddenError(
