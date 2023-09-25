@@ -55,21 +55,21 @@ export default function ({ getService, getPageObjects }) {
     it('should open a new tab after loading surrounding documents', async function () {
       await retry.waitFor('user navigating to context', async () => {
         const initialHitCount = await PageObjects.discover.getHitCount();
-        
+
         // click inspect row
-        await testSubjects.click('docTableExpandToggleColumn-0')
+        await testSubjects.click('docTableExpandToggleColumn-0');
         // click view surrounding documents
-        await testSubjects.click('docTableRowAction-0')
+        await testSubjects.click('docTableRowAction-0');
 
         //navigate to the new window
         await testSubjects.exists('docTable');
-        await browser.switchTab(1)
+        await browser.switchTab(1);
 
         //close the new tab and get back to the old tab
         await browser.closeCurrentWindow();
-        await browser.switchTab(0)
+        await browser.switchTab(0);
 
-        await testSubjects.click('euiFlyoutCloseButton')
+        await testSubjects.click('euiFlyoutCloseButton');
         const hitCount = await PageObjects.discover.getHitCount();
         return initialHitCount === hitCount;
       });

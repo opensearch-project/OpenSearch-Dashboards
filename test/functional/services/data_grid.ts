@@ -40,6 +40,8 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   class DataGrid {
+    // This test no longer works in the new data explorer data grid table
+    // since each data grid table cell is now rendered differently
     async getDataGridTableData(): Promise<TabbedGridData> {
       const table = await find.byCssSelector('.euiDataGrid');
       const $ = await table.parseDomContent();
@@ -96,6 +98,24 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
       await testSubjects.click(`dataGridHeaderCell-${columnName}`);
       await find.clickByButtonText('Remove column');
     }
+
+    async getDataGridTableTimestamp(): Promise<string[]> {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+
+      const timestamps: string[] = [];
+      $.findTestSubjects('dataGridRowCell')
+        .toArray()
+        .forEach((cell) => {
+          const cCell = $(cell);
+          if (cCell.hasClass('euiDataGridRowCell--date')) {
+            // The timestamp column structure is very nested to get the actual text
+            timestamps.push(cCell.children().children().children().children().text());
+          }
+        });
+
+      return timestamps;
+      }
   }
 
   return new DataGrid();

@@ -37,8 +37,8 @@ const TEST_FILTER_COLUMN_NAMES = [
 ];
 
 export default function ({ getService, getPageObjects }) {
-  const retry = getService('retry');
-  const docTable = getService('docTable');
+  const browser = getService('browser');
+  const dataGrid = getService('dataGrid');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const testSubjects = getService('testSubjects');
@@ -62,25 +62,26 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should open the context view with the selected document as anchor', async () => {
-      // check the anchor timestamp in the context view
-      await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
-        // get the timestamp of the first row
-        //const discoverFields = await docTable.getFields();
-        //const firstTimestamp = discoverFields[0][0];
-debugger
-        // click inspect row
-        await testSubjects.click('docTableExpandToggleColumn-0')
+      // get the timestamps
+      const dataGridTableTimeStamps = await dataGrid.getDataGridTableTimestamp();
 
-        // click view surrounding documents
-        await testSubjects.click('docTableRowAction-0')
-debugger
-        const table = await testSubjects.find('docTable')
-        const tableCells = await table.find('[data-test-subj="docTableRow"]')
-             .toArray()
+      // click inspect row
+      await testSubjects.click('docTableExpandToggleColumn-10');
 
-        console.log(tableCells)
-        return anchorTimestamp === firstTimestamp;
-      });
+      // click view surrounding documents
+      await testSubjects.click('docTableRowAction-0');
+
+      //navigate to the new window and get the new timestamp
+      await testSubjects.exists('docTable');
+      await browser.switchTab(1);
+      const surroundingTableTimeStamps = await dataGrid.getDataGridTableTimestamp();
+
+      //close the new tab and get back to the old tab
+      await browser.closeCurrentWindow();
+      await browser.switchTab(0);
+
+      await testSubjects.click('euiFlyoutCloseButton');
+      return dataGridTableTimeStamps[10] === surroundingTableTimeStamps[5];
     });
 
     it('should open the context view with the same columns', async () => {
