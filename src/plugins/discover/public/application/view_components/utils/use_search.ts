@@ -66,6 +66,7 @@ export type RefetchSubject = Subject<SearchRefetch>;
  * }, [data$]);
  */
 export const useSearch = (services: DiscoverServices) => {
+  const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
   const indexPattern = useIndexPattern(services);
@@ -204,6 +205,8 @@ export const useSearch = (services: DiscoverServices) => {
       });
 
       data.search.showError(error as Error);
+    } finally {
+      initalSearchComplete.current = true;
     }
   }, [
     indexPattern,
@@ -240,7 +243,7 @@ export const useSearch = (services: DiscoverServices) => {
     });
 
     // kick off initial refetch on page load
-    if (shouldSearchOnPageLoad()) {
+    if (shouldSearchOnPageLoad() || initalSearchComplete.current === true) {
       refetch$.next();
     }
 
