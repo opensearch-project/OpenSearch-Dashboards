@@ -41,6 +41,7 @@ export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const testSubjects = getService('testSubjects');
 
   describe('context link in discover', () => {
     before(async () => {
@@ -64,15 +65,20 @@ export default function ({ getService, getPageObjects }) {
       // check the anchor timestamp in the context view
       await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
         // get the timestamp of the first row
-        const discoverFields = await docTable.getFields();
-        const firstTimestamp = discoverFields[0][0];
+        //const discoverFields = await docTable.getFields();
+        //const firstTimestamp = discoverFields[0][0];
+debugger
+        // click inspect row
+        await testSubjects.click('docTableExpandToggleColumn-0')
 
-        // navigate to the context view
-        await docTable.clickRowToggle({ rowIndex: 0 });
-        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
-        await rowActions[0].click();
-        const contextFields = await docTable.getFields({ isAnchorRow: true });
-        const anchorTimestamp = contextFields[0][0];
+        // click view surrounding documents
+        await testSubjects.click('docTableRowAction-0')
+debugger
+        const table = await testSubjects.find('docTable')
+        const tableCells = await table.find('[data-test-subj="docTableRow"]')
+             .toArray()
+
+        console.log(tableCells)
         return anchorTimestamp === firstTimestamp;
       });
     });
