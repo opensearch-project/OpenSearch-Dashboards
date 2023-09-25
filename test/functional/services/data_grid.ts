@@ -42,6 +42,7 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
   class DataGrid {
     // This test no longer works in the new data explorer data grid table
     // since each data grid table cell is now rendered differently
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5108
     async getDataGridTableData(): Promise<TabbedGridData> {
       const table = await find.byCssSelector('.euiDataGrid');
       const $ = await table.parseDomContent();

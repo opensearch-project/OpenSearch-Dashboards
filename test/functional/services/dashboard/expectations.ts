@@ -36,6 +36,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const dataGrid = getService('dataGrid');
   const find = getService('find');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['dashboard', 'visualize']);
@@ -233,11 +234,10 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
     async savedSearchRowCount(expectedCount: number) {
       log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
       await retry.try(async () => {
-        const savedSearchRows = await testSubjects.findAll(
-          'docTableExpandToggleColumn',
-          findTimeout
-        );
-        expect(savedSearchRows.length).to.be(expectedCount);
+        debugger
+        // Need to change it here to find out how many rows there are
+        const timeStamps = await dataGrid.getDataGridTableColumn('date');
+        expect(timeStamps.length).to.be(expectedCount);
       });
     }
 
