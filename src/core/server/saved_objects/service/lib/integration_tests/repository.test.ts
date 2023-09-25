@@ -299,5 +299,43 @@ describe('repository integration test', () => {
         )
       );
     });
+
+    it('find by workspaces', async () => {
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=foo`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(200);
+
+      const createResultBar = await osdTestServer.request
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=bar`)
+        .send([
+          {
+            ...dashboard,
+            id: 'bar',
+          },
+        ])
+        .expect(200);
+
+      const findResult = await osdTestServer.request
+        .get(root, `/api/saved_objects/_find?workspaces=bar&type=${dashboard.type}`)
+        .expect(200);
+
+      expect(findResult.body.total).toEqual(1);
+      expect(findResult.body.saved_objects[0].workspaces).toEqual(['bar']);
+
+      await Promise.all(
+        [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
+          deleteItem({
+            type: item.type,
+            id: item.id,
+          })
+        )
+      );
+    });
   });
 });
