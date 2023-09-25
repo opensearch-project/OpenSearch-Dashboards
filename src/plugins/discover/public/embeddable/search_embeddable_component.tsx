@@ -42,7 +42,12 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
 
   return (
     <I18nProvider>
-      <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
+      <EuiFlexGroup
+        gutterSize="xs"
+        direction="column"
+        responsive={false}
+        data-test-subj="embeddedSavedSearchDocTable"
+      >
         {discoverEmbeddableProps.totalHitCount !== 0 ? (
           <EuiFlexItem>
             <DataGridTableMemoized {...discoverEmbeddableProps} />
