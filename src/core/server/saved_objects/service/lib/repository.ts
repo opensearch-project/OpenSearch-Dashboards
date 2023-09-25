@@ -283,8 +283,13 @@ export class SavedObjectsRepository {
     let savedObjectWorkspaces = workspaces;
 
     if (id && overwrite) {
+      let currentItem;
       try {
-        const currentItem = await this.get(type, id);
+        currentItem = await this.get(type, id);
+      } catch (e) {
+        // this.get will throw an error when no items can be found
+      }
+      if (currentItem) {
         if (
           SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
             workspaces,
@@ -295,8 +300,6 @@ export class SavedObjectsRepository {
         } else {
           savedObjectWorkspaces = currentItem.workspaces;
         }
-      } catch (e) {
-        // this.get will throw an error when no items can be found
       }
     }
 
@@ -377,15 +380,28 @@ export class SavedObjectsRepository {
 
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
+      /**
+       * Only when importing an object to a target workspace should we check if the object is workspace-specific.
+       */
+      const requiresWorkspaceCheck = object.id;
 
       if (object.id == null) object.id = uuid.v1();
+
+      let opensearchRequestIndexPayload = {};
+
+      if (requiresNamespacesCheck || requiresWorkspaceCheck) {
+        opensearchRequestIndexPayload = {
+          opensearchRequestIndex: bulkGetRequestIndexCounter,
+        };
+        bulkGetRequestIndexCounter++;
+      }
 
       return {
         tag: 'Right' as 'Right',
         value: {
           method,
           object,
-          ...(requiresNamespacesCheck && { opensearchRequestIndex: bulkGetRequestIndexCounter++ }),
+          ...opensearchRequestIndexPayload,
         },
       };
     });
@@ -396,7 +412,7 @@ export class SavedObjectsRepository {
       .map(({ value: { object: { type, id } } }) => ({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
+        _source: ['type', 'namespaces', 'workspaces'],
       }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
@@ -618,7 +634,7 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
       _id: this._serializer.generateRawId(namespace, type, id),
       _index: this.getIndexForType(type),
-      _source: ['type', 'namespaces'],
+      _source: ['type', 'namespaces', 'workspaces'],
     }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(

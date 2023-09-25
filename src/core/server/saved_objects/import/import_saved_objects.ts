@@ -87,6 +87,7 @@ export async function importSavedObjectsFromStream({
       savedObjectsClient,
       namespace,
       ignoreRegularConflicts: overwrite,
+      workspaces,
     };
     const checkConflictsResult = await checkConflicts(checkConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
