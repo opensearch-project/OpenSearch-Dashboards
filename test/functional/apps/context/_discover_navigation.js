@@ -80,9 +80,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should open the context view with the same columns', async () => {
-      const data = await dataGrid.getDataGridTableData();
-
-      expect(data.columns).to.eql(['', 'Time (@timestamp)', ...TEST_COLUMN_NAMES]);
+      const data = await dataGrid.getHeaderFields();
+      expect(data.columns).to.eql(['Time (@timestamp)', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {
