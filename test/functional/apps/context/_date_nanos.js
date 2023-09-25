@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('displays predessors - anchor - successors in right order ', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
-      const actualRowsText = await dataGrid.getDataGridTableTimestamp();
+      const actualRowsText = await dataGrid.getDataGridTableColumn('date');
       const expectedRowsText = [
         'Sep 18, 2019 @ 06:50:13.000000000',
         'Sep 18, 2019 @ 06:50:12.999999999',
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
-      const actualRowsText = await dataGrid.getDataGridTableTimestamp();
+      const actualRowsText = await dataGrid.getDataGridTableColumn('date');
       const expectedRowsText = [
         'Sep 22, 2019 @ 23:50:13.253123345',
         'Sep 18, 2019 @ 06:50:13.000000104',

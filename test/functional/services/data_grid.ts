@@ -99,25 +99,7 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
       await find.clickByButtonText('Remove column');
     }
 
-    async getDataGridTableTimestamp(): Promise<string[]> {
-      const table = await find.byCssSelector('.euiDataGrid');
-      const $ = await table.parseDomContent();
-
-      const timestamps: string[] = [];
-      $.findTestSubjects('dataGridRowCell')
-        .toArray()
-        .forEach((cell) => {
-          const cCell = $(cell);
-          if (cCell.hasClass('euiDataGridRowCell--date')) {
-            // The timestamp column structure is very nested to get the actual text
-            timestamps.push(cCell.children().children().children().children().text());
-          }
-        });
-
-      return timestamps;
-    }
-
-    async getLastColumns(): Promise<string[]> {
+    async getDataGridTableColumn(selector: string): Promise<string[]> {
       const table = await find.byCssSelector('.euiDataGrid');
       const $ = await table.parseDomContent();
 
@@ -126,8 +108,8 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
         .toArray()
         .forEach((cell) => {
           const cCell = $(cell);
-          if (cCell.hasClass('euiDataGridRowCell--lastColumn')) {
-            // The timestamp column structure is very nested to get the actual text
+          if (cCell.hasClass(`euiDataGridRowCell--${selector}`)) {
+            // The column structure is very nested to get the actual text
             columnValues.push(cCell.children().children().children().children().text());
           }
         });

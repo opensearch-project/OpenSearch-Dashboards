@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true);
       });
       await retry.waitFor(`filter matching docs in docTable`, async () => {
-        const fields = await dataGrid.getLastColumns();
+        const fields = await dataGrid.getDataGridTableColumn('lastColumn');
         return fields.every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
       });
     });
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       await retry.waitFor('filters are disabled', async () => {
-        const fields = await dataGrid.getLastColumns();
+        const fields = await dataGrid.getDataGridTableColumn('lastColumn');
         const hasOnlyFilteredRows = fields.every(
           (fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE
         );

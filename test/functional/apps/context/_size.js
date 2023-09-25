@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.waitFor(
         `number of rows displayed initially is ${expectedRowLength}`,
         async function () {
-          const rows = await dataGrid.getDataGridTableTimestamp();
+          const rows = await dataGrid.getDataGridTableColumn('date');
           return rows.length === expectedRowLength;
         }
       );
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.waitFor(
         `number of rows displayed after clicking load more predecessors is ${expectedRowLength}`,
         async function () {
-          const data = await dataGrid.getDataGridTableTimestamp();
+          const data = await dataGrid.getDataGridTableColumn('date');
           return data.length === expectedRowLength;
         }
       );
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.waitFor(
         `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
         async function () {
-          const data = await dataGrid.getDataGridTableTimestamp();
+          const data = await dataGrid.getDataGridTableColumn('date');
           return data.length === expectedRowLength;
         }
       );

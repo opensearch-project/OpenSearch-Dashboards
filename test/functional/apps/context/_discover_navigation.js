@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should open the context view with the selected document as anchor', async () => {
       // get the timestamps
-      const dataGridTableTimeStamps = await dataGrid.getDataGridTableTimestamp();
+      const dataGridTableTimeStamps = await dataGrid.getDataGridTableColumn('date');
 
       // click inspect row
       await testSubjects.click('docTableExpandToggleColumn-10');
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
       //navigate to the new window and get the new timestamp
       await testSubjects.exists('docTable');
       await browser.switchTab(1);
-      const surroundingTableTimeStamps = await dataGrid.getDataGridTableTimestamp();
+      const surroundingTableTimeStamps = await dataGrid.getDataGridTableColumn('date');
 
       return dataGridTableTimeStamps[10] === surroundingTableTimeStamps[5];
     });
