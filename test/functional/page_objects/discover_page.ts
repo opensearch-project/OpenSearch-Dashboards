@@ -42,6 +42,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const defaultFindTimeout = config.get('timeouts.find');
   const opensearchChart = getService('opensearchChart');
   const docTable = getService('docTable');
+  const dataGridTable = getService('dataGrid');
 
   /*
    * This page is left unchanged since some of the other selenium tests, ex. dashboard tests, visualization tests
@@ -104,7 +105,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
-      return await docTable.getHeaderFields('embeddedSavedSearchDocTable');
+      return await dataGridTable.getHeaderFields();
     }
 
     public async openLoadSavedSearchPanel() {
@@ -353,9 +354,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async removeHeaderColumn(name: string) {
-      await testSubjects.moveMouseTo(`docTableHeader-${name}`);
-      await testSubjects.click(`docTableRemoveHeader-${name}`);
+    public async removeHeaderColumn(columnName: string) {
+      await dataGridTable.clickRemoveColumn(columnName);
     }
 
     public async openSidebarFieldFilter() {

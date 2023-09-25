@@ -69,10 +69,10 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       });
     }
 
-    async docTableFieldCount(expectedCount: number) {
-      log.debug(`DashboardExpect.docTableFieldCount(${expectedCount})`);
+    async dataGridTableCellCount(expectedCount: number) {
+      log.debug(`DashboardExpect.dataGridTableCellCount(${expectedCount})`);
       await retry.try(async () => {
-        const docTableCells = await testSubjects.findAll('docTableField', findTimeout);
+        const docTableCells = await testSubjects.findAll('dataGridRowCell', findTimeout);
         expect(docTableCells.length).to.be(expectedCount);
       });
     }
