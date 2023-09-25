@@ -115,7 +115,25 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
         });
 
       return timestamps;
-      }
+    }
+
+    async getLastColumns(): Promise<string[]> {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+
+      const columnValues: string[] = [];
+      $.findTestSubjects('dataGridRowCell')
+        .toArray()
+        .forEach((cell) => {
+          const cCell = $(cell);
+          if (cCell.hasClass('euiDataGridRowCell--lastColumn')) {
+            // The timestamp column structure is very nested to get the actual text
+            columnValues.push(cCell.children().children().children().children().text());
+          }
+        });
+
+      return columnValues;
+    }
   }
 
   return new DataGrid();

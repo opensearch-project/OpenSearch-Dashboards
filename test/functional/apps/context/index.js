@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('context app', function () {
-    this.tags('ciGroupx');
+    this.tags('ciGroup1');
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
@@ -51,10 +51,10 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       return opensearchArchiver.unload('logstash_functional');
     });
 
-    //loadTestFile(require.resolve('./_context_navigation'));
+    loadTestFile(require.resolve('./_context_navigation'));
     loadTestFile(require.resolve('./_discover_navigation'));
-    // loadTestFile(require.resolve('./_filters'));
-    // loadTestFile(require.resolve('./_size'));
-    // loadTestFile(require.resolve('./_date_nanos'));
+    loadTestFile(require.resolve('./_filters'));
+    loadTestFile(require.resolve('./_size'));
+    loadTestFile(require.resolve('./_date_nanos'));
   });
 }

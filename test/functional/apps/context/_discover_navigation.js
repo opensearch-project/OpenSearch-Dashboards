@@ -76,17 +76,13 @@ export default function ({ getService, getPageObjects }) {
       await browser.switchTab(1);
       const surroundingTableTimeStamps = await dataGrid.getDataGridTableTimestamp();
 
-      //close the new tab and get back to the old tab
-      await browser.closeCurrentWindow();
-      await browser.switchTab(0);
-
-      await testSubjects.click('euiFlyoutCloseButton');
       return dataGridTableTimeStamps[10] === surroundingTableTimeStamps[5];
     });
 
     it('should open the context view with the same columns', async () => {
-      const columnNames = await docTable.getHeaderFields();
-      expect(columnNames).to.eql(['Time', ...TEST_COLUMN_NAMES]);
+      const data = await dataGrid.getDataGridTableData();
+
+      expect(data.columns).to.eql(['', 'Time (@timestamp)', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {
@@ -97,6 +93,11 @@ export default function ({ getService, getPageObjects }) {
         }
       }
       expect(disabledFilterCounter).to.be(TEST_FILTER_COLUMN_NAMES.length);
+      //close the new tab and get back to the old tab
+      await browser.closeCurrentWindow();
+      await browser.switchTab(0);
+
+      await testSubjects.click('euiFlyoutCloseButton');
     });
   });
 }
