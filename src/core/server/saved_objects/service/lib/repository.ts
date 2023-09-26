@@ -282,7 +282,7 @@ export class SavedObjectsRepository {
 
     let savedObjectWorkspaces = workspaces;
 
-    if (id && overwrite) {
+    if (id && overwrite && workspaces) {
       let currentItem;
       try {
         currentItem = await this.get(type, id);
@@ -383,7 +383,7 @@ export class SavedObjectsRepository {
       /**
        * Only when importing an object to a target workspace should we check if the object is workspace-specific.
        */
-      const requiresWorkspaceCheck = object.id;
+      const requiresWorkspaceCheck = object.id && options.workspaces;
 
       if (object.id == null) object.id = uuid.v1();
 
