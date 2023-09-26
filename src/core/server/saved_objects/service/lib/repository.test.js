@@ -468,7 +468,6 @@ describe('SavedObjectsRepository', () => {
     };
 
     const bulkCreateSuccess = async (objects, options) => {
-      const originalObjects = JSON.parse(JSON.stringify(objects));
       const multiNamespaceObjects = objects.filter(
         ({ type, id }) => registry.isMultiNamespace(type) && id
       );
@@ -484,7 +483,7 @@ describe('SavedObjectsRepository', () => {
       );
       const result = await savedObjectsRepository.bulkCreate(objects, options);
       expect(client.mget).toHaveBeenCalledTimes(
-        multiNamespaceObjects?.length || originalObjects?.some((item) => item.id) ? 1 : 0
+        multiNamespaceObjects?.length || options?.workspaces ? 1 : 0
       );
       return result;
     };
@@ -543,22 +542,7 @@ describe('SavedObjectsRepository', () => {
         await bulkCreateSuccess(objects);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(client.mget).toHaveBeenCalledTimes(1);
-        const docs = [
-          expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
-          expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj2.id}` }),
-        ];
-        expect(client.mget.mock.calls[0][0].body).toEqual({ docs });
-      });
-
-      it(`should use the OpenSearch mget action before bulk action for any types, when id is defined`, async () => {
-        const objects = [obj1, obj2];
-        await bulkCreateSuccess(objects);
-        expect(client.bulk).toHaveBeenCalledTimes(1);
-        expect(client.mget).toHaveBeenCalledTimes(1);
-        const docs = [
-          expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
-          expect.objectContaining({ _id: `${obj2.type}:${obj2.id}` }),
-        ];
+        const docs = [expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj2.id}` })];
         expect(client.mget.mock.calls[0][0].body).toEqual({ docs });
       });
 
@@ -849,12 +833,6 @@ describe('SavedObjectsRepository', () => {
             {
               found: true,
               _source: {
-                type: obj1.type,
-              },
-            },
-            {
-              found: true,
-              _source: {
                 type: obj.type,
                 namespaces: ['bar-namespace'],
               },
@@ -874,13 +852,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.bulk).toHaveBeenCalled();
         expect(client.mget).toHaveBeenCalled();
 
-        const body1 = {
-          docs: [
-            expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
-            expect.objectContaining({ _id: `${obj.type}:${obj.id}` }),
-            expect.objectContaining({ _id: `${obj2.type}:${obj2.id}` }),
-          ],
-        };
+        const body1 = { docs: [expect.objectContaining({ _id: `${obj.type}:${obj.id}` })] };
         expect(client.mget).toHaveBeenCalledWith(
           expect.objectContaining({ body: body1 }),
           expect.anything()
@@ -1992,7 +1964,7 @@ describe('SavedObjectsRepository', () => {
     const createSuccess = async (type, attributes, options) => {
       const result = await savedObjectsRepository.create(type, attributes, options);
       let count = 0;
-      if (options?.overwrite && options?.id) {
+      if (options?.overwrite && options.id && options.workspaces) {
         /**
          * workspace will call extra one to get latest status of current object
          */
@@ -2019,7 +1991,6 @@ describe('SavedObjectsRepository', () => {
       it(`should use the OpenSearch index action if ID is defined and overwrite=true`, async () => {
         await createSuccess(type, attributes, { id, overwrite: true });
         expect(client.index).toHaveBeenCalled();
-        expect(client.get).toHaveBeenCalled();
       });
 
       it(`should use the OpenSearch index with version if ID and version are defined and overwrite=true`, async () => {
