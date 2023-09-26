@@ -21,7 +21,6 @@ const createWorkspacesSetupContractMock = () => ({
   currentWorkspace$,
   initialized$,
   workspaceEnabled$,
-  registerWorkspaceMenuRender: jest.fn(),
 });
 
 const createWorkspacesStartContractMock = () => ({
@@ -30,7 +29,6 @@ const createWorkspacesStartContractMock = () => ({
   currentWorkspace$,
   initialized$,
   workspaceEnabled$,
-  renderWorkspaceMenu: jest.fn(),
 });
 
 export type WorkspacesServiceContract = PublicMethodsOf<WorkspacesService>;
