@@ -321,10 +321,6 @@ describe('#start()', () => {
   it('calls workspaces#start()', async () => {
     await startCore();
     expect(MockWorkspacesService.start).toHaveBeenCalledTimes(1);
-    expect(MockWorkspacesService.start).toHaveBeenCalledWith({
-      application: expect.any(Object),
-      http: expect.any(Object),
-    });
   });
 
   it('calls coreApp#start()', async () => {

@@ -1021,7 +1021,6 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
@@ -2161,7 +2160,6 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
@@ -3362,7 +3360,6 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
@@ -4563,7 +4560,6 @@ exports[`dashboard listing renders table rows 1`] = `
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
@@ -5764,7 +5760,6 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,

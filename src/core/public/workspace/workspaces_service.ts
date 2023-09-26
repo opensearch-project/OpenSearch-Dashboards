@@ -7,18 +7,6 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
 
 import { CoreService, WorkspaceAttribute } from '../../types';
-import { InternalApplicationStart } from '../application';
-import { HttpStart } from '../http';
-
-type WorkspaceMenuRenderFn = ({
-  basePath,
-  getUrlForApp,
-  observables,
-}: {
-  getUrlForApp: InternalApplicationStart['getUrlForApp'];
-  basePath: HttpStart['basePath'];
-  observables: WorkspaceObservables;
-}) => JSX.Element | null;
 
 type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean };
 
@@ -34,16 +22,8 @@ enum WORKSPACE_ERROR {
   WORKSPACE_STALED = 'WORKSPACE_STALED',
 }
 
-/**
- * @public
- */
-export interface WorkspacesSetup extends WorkspaceObservables {
-  registerWorkspaceMenuRender: (render: WorkspaceMenuRenderFn) => void;
-}
-
-export interface WorkspacesStart extends WorkspaceObservables {
-  renderWorkspaceMenu: () => JSX.Element | null;
-}
+export type WorkspacesSetup = WorkspaceObservables;
+export type WorkspacesStart = WorkspaceObservables;
 
 export class WorkspacesService implements CoreService<WorkspacesSetup, WorkspacesStart> {
   private currentWorkspaceId$ = new BehaviorSubject<string>('');
@@ -51,7 +31,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
   private currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   private initialized$ = new BehaviorSubject<boolean>(false);
   private workspaceEnabled$ = new BehaviorSubject<boolean>(false);
-  private _renderWorkspaceMenu: WorkspaceMenuRenderFn | null = null;
 
   constructor() {
     combineLatest([this.initialized$, this.workspaceList$, this.currentWorkspaceId$]).subscribe(
@@ -89,37 +68,16 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
       workspaceEnabled$: this.workspaceEnabled$,
-      registerWorkspaceMenuRender: (render: WorkspaceMenuRenderFn) =>
-        (this._renderWorkspaceMenu = render),
     };
   }
 
-  public start({
-    http,
-    application,
-  }: {
-    application: InternalApplicationStart;
-    http: HttpStart;
-  }): WorkspacesStart {
-    const observables = {
+  public start(): WorkspacesStart {
+    return {
       currentWorkspaceId$: this.currentWorkspaceId$,
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
       workspaceEnabled$: this.workspaceEnabled$,
-    };
-    return {
-      ...observables,
-      renderWorkspaceMenu: () => {
-        if (this._renderWorkspaceMenu) {
-          return this._renderWorkspaceMenu({
-            basePath: http.basePath,
-            getUrlForApp: application.getUrlForApp,
-            observables,
-          });
-        }
-        return null;
-      },
     };
   }
 
@@ -129,6 +87,5 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
     this.workspaceList$.unsubscribe();
     this.workspaceEnabled$.unsubscribe();
     this.initialized$.unsubscribe();
-    this._renderWorkspaceMenu = null;
   }
 }
