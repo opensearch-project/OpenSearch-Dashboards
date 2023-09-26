@@ -27,7 +27,12 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       {listItems.map((item, index) => (
         <EuiFlexItem key={index} grow={false}>
-          <EuiLink href={item.href} target="_blank" style={{ fontWeight: 'normal' }}>
+          <EuiLink
+            href={item.href}
+            target="_blank"
+            style={{ fontWeight: 'normal' }}
+            data-test-subj={item['data-test-subj']}
+          >
             {item.label}
           </EuiLink>
         </EuiFlexItem>
