@@ -45,11 +45,9 @@ export const getTopNavLinks = (
       defaultMessage: 'New Search',
     }),
     run() {
-      setTimeout(() => {
-        history().push('/');
-        // TODO: figure out why a history push doesn't update the app state. The page reload is a hack around it
-        window.location.reload();
-      }, 0);
+      core.application.navigateToApp('discover', {
+        path: '#/',
+      });
     },
     testId: 'discoverNewButton',
   };
