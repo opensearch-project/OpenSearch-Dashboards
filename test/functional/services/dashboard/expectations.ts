@@ -234,7 +234,6 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
     async savedSearchRowCount(expectedCount: number) {
       log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
       await retry.try(async () => {
-        debugger
         // Need to change it here to find out how many rows there are
         const timeStamps = await dataGrid.getDataGridTableColumn('date');
         expect(timeStamps.length).to.be(expectedCount);
