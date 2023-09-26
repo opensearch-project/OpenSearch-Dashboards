@@ -38,6 +38,8 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
     displayTimeColumn: searchProps.displayTimeColumn,
     services: searchProps.services,
     totalHitCount: searchProps.totalHitCount,
+    title: searchProps.title,
+    description: searchProps.description,
   } as DiscoverEmbeddableProps;
 
   return (
