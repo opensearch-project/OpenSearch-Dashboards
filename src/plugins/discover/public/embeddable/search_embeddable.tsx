@@ -87,6 +87,7 @@ export interface SearchProps {
   isLoading?: boolean;
   displayTimeColumn?: boolean;
   services: DiscoverServices;
+  title?: string;
 }
 
 interface SearchEmbeddableConfig {
@@ -226,6 +227,7 @@ export class SearchEmbeddable
       inspectorAdapters: this.inspectorAdaptors,
       rows: [],
       description: this.savedSearch.description,
+      title: this.savedSearch.title,
       services: this.services,
       indexPattern,
       isLoading: false,
