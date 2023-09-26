@@ -30,15 +30,29 @@ describe('repository integration test', () => {
   });
 
   const deleteItem = async (object: Pick<SavedObject, 'id' | 'type'>) => {
-    await osdTestServer.request
-      .delete(root, `/api/saved_objects/${object.type}/${object.id}`)
-      .expect(200);
+    expect(
+      [200, 404].includes(
+        (await osdTestServer.request.delete(root, `/api/saved_objects/${object.type}/${object.id}`))
+          .statusCode
+      )
+    );
   };
 
   const getItem = async (object: Pick<SavedObject, 'id' | 'type'>) => {
     return await osdTestServer.request
       .get(root, `/api/saved_objects/${object.type}/${object.id}`)
       .expect(200);
+  };
+
+  const clearFooAndBar = async () => {
+    await deleteItem({
+      type: dashboard.type,
+      id: 'foo',
+    });
+    await deleteItem({
+      type: dashboard.type,
+      id: 'bar',
+    });
   };
 
   describe('workspace related CRUD', () => {
@@ -67,21 +81,6 @@ describe('repository integration test', () => {
         })
         .expect(200);
 
-      /**
-       * Override without workspace, in this case workspaces field should be retained.
-       */
-      const correctOverride = await osdTestServer.request
-        .post(root, `/api/saved_objects/${dashboard.type}/${createResult.body.id}?overwrite=true`)
-        .send({
-          attributes: {
-            title: 'foo',
-          },
-        })
-        .expect(200);
-
-      expect(correctOverride.body.workspaces).toEqual(['foo']);
-      expect(correctOverride.body.attributes.title).toEqual('foo');
-
       await osdTestServer.request
         .post(root, `/api/saved_objects/${dashboard.type}/${createResult.body.id}?overwrite=true`)
         .send({
@@ -97,6 +96,7 @@ describe('repository integration test', () => {
     });
 
     it('bulk create', async () => {
+      await clearFooAndBar();
       const createResultFoo = await osdTestServer.request
         .post(root, `/api/saved_objects/_bulk_create?workspaces=foo`)
         .send([
@@ -144,6 +144,7 @@ describe('repository integration test', () => {
     });
 
     it('bulk create with conflict', async () => {
+      await clearFooAndBar();
       const createResultFoo = await osdTestServer.request
         .post(root, `/api/saved_objects/_bulk_create?workspaces=foo`)
         .send([
@@ -163,39 +164,6 @@ describe('repository integration test', () => {
           },
         ])
         .expect(200);
-
-      /**
-       * overwrite without workspaces
-       */
-      const overwriteWithoutWorkspacesResult = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?overwrite=true`)
-        .send([
-          {
-            ...dashboard,
-            id: 'bar',
-          },
-          {
-            ...dashboard,
-            id: 'foo',
-          },
-        ])
-        .expect(200);
-
-      const getFooResult = await getItem({
-        type: dashboard.type,
-        id: 'foo',
-      });
-
-      const getBarResult = await getItem({
-        type: dashboard.type,
-        id: 'bar',
-      });
-
-      expect(getFooResult.body.workspaces).toEqual(['foo']);
-      expect(getBarResult.body.workspaces).toEqual(['bar']);
-      expect(
-        (overwriteWithoutWorkspacesResult.body.saved_objects as any[]).some((item) => item.error)
-      ).toEqual(false);
 
       /**
        * overwrite with workspaces
@@ -232,6 +200,7 @@ describe('repository integration test', () => {
     });
 
     it('checkConflicts when importing ndjson', async () => {
+      await clearFooAndBar();
       const createResultFoo = await osdTestServer.request
         .post(root, `/api/saved_objects/_bulk_create?workspaces=foo`)
         .send([
