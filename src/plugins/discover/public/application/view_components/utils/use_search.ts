@@ -67,6 +67,7 @@ export type RefetchSubject = Subject<SearchRefetch>;
  * }, [data$]);
  */
 export const useSearch = (services: DiscoverServices) => {
+  const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
   const indexPattern = useIndexPattern(services);
@@ -205,6 +206,8 @@ export const useSearch = (services: DiscoverServices) => {
       });
 
       data.search.showError(error as Error);
+    } finally {
+      initalSearchComplete.current = true;
     }
   }, [
     indexPattern,
@@ -240,18 +243,29 @@ export const useSearch = (services: DiscoverServices) => {
       })();
     });
 
-    // kick off initial fetch
-    refetch$.next();
+    // kick off initial refetch on page load
+    if (shouldSearchOnPageLoad() || initalSearchComplete.current === true) {
+      refetch$.next();
+    }
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [data$, data.query.queryString, filterManager, refetch$, timefilter, fetch, core.fatalErrors]);
+  }, [
+    data$,
+    data.query.queryString,
+    filterManager,
+    refetch$,
+    timefilter,
+    fetch,
+    core.fatalErrors,
+    shouldSearchOnPageLoad,
+  ]);
 
   // Get savedSearch if it exists
   useEffect(() => {
     (async () => {
-      const savedSearchInstance = await getSavedSearchById(savedSearchId || '');
+      const savedSearchInstance = await getSavedSearchById(savedSearchId);
       setSavedSearch(savedSearchInstance);
 
       // sync initial app filters from savedObject to filterManager
