@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
 import { WorkspacePlugin } from './plugin';
 import { configSchema } from '../config';

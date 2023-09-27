@@ -2,8 +2,10 @@
   "id": "workspace",
   "version": "opensearchDashboards",
   "server": true,
-  "ui": true,
-  "requiredPlugins": [],
+  "ui": false,
+  "requiredPlugins": [
+    "savedObjects"
+  ],
   "optionalPlugins": [],
   "requiredBundles": []
 }

@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { i18n } from '@osd/i18n';
 import type {
   SavedObject,
@@ -11,7 +12,7 @@ import type {
   SavedObjectsServiceStart,
 } from '../../../core/server';
 import { WORKSPACE_TYPE } from '../../../core/server';
-import { IWorkspaceDBImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
+import { IWorkspaceClientImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
@@ -22,7 +23,7 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
   defaultMessage: 'workspace name has already been used, try with a different name',
 });
 
-export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
+export class WorkspaceClient implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
   private savedObjects?: SavedObjectsServiceStart;
 
@@ -64,7 +65,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   public async create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttribute, 'id'>
-  ): ReturnType<IWorkspaceDBImpl['create']> {
+  ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
       const attributes = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
@@ -102,7 +103,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   public async list(
     requestDetail: IRequestDetail,
     options: WorkspaceFindOptions
-  ): ReturnType<IWorkspaceDBImpl['list']> {
+  ): ReturnType<IWorkspaceClientImpl['list']> {
     try {
       const {
         saved_objects: savedObjects,

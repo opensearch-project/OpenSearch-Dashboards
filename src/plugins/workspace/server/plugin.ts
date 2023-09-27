@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -9,13 +10,13 @@ import {
   Logger,
   CoreStart,
 } from '../../../core/server';
-import { IWorkspaceDBImpl } from './types';
-import { WorkspaceClientWithSavedObject } from './workspace_client';
+import { IWorkspaceClientImpl } from './types';
+import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
-  private client?: IWorkspaceDBImpl;
+  private client?: IWorkspaceClientImpl;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
@@ -24,14 +25,14 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
 
-    this.client = new WorkspaceClientWithSavedObject(core);
+    this.client = new WorkspaceClient(core);
 
     await this.client.setup(core);
 
     registerRoutes({
       http: core.http,
       logger: this.logger,
-      client: this.client as IWorkspaceDBImpl,
+      client: this.client as IWorkspaceClientImpl,
     });
 
     return {
@@ -44,7 +45,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.client?.setSavedObjects(core.savedObjects);
 
     return {
-      client: this.client as IWorkspaceDBImpl,
+      client: this.client as IWorkspaceClientImpl,
     };
   }
 

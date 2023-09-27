@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import {
   Logger,
   OpenSearchDashboardsRequest,
@@ -27,7 +28,7 @@ export interface IRequestDetail {
   logger: Logger;
 }
 
-export interface IWorkspaceDBImpl {
+export interface IWorkspaceClientImpl {
   setup(dep: CoreSetup): Promise<IResponse<boolean>>;
   setSavedObjects(savedObjects: SavedObjectsServiceStart): void;
   create(

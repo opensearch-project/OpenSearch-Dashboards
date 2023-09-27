@@ -21,9 +21,6 @@ export const workspace: SavedObjectsType = {
       description: {
         type: 'text',
       },
-      /**
-       * In opensearch, string[] is also mapped to text
-       */
       features: {
         type: 'keyword',
       },
