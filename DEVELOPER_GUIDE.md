@@ -62,6 +62,17 @@ We recommend using [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm) t
 
 If it's the only version of node installed, it will automatically be set to the `default` alias. Otherwise, use `nvm list` to see all installed `node` versions, and `nvm use` to select the node version required by OpenSearch Dashboards.
 
+### Fork and clone OpenSearch Dashboards
+
+All local development should be done in a [forked repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
+Fork OpenSearch Dashboards by clicking the "Fork" button at the top of the [GitHub repository](https://github.com/opensearch-project/OpenSearch-Dashboards).
+
+Clone your forked version of OpenSearch Dashboards to your local machine (replace `opensearch-project` in the command below with your GitHub username):
+
+```bash
+$ git clone git@github.com:opensearch-project/OpenSearch-Dashboards.git
+```
+
 #### Install `yarn`
 
 OpenSearch Dashboards is set up using yarn, which can be installed through corepack. To install yarn, run:
@@ -75,17 +86,6 @@ $ corepack install
 ```
 
 (See the [corepack documentation](https://github.com/nodejs/corepack#-corepack) for more information.)
-
-### Fork and clone OpenSearch Dashboards
-
-All local development should be done in a [forked repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
-Fork OpenSearch Dashboards by clicking the "Fork" button at the top of the [GitHub repository](https://github.com/opensearch-project/OpenSearch-Dashboards).
-
-Clone your forked version of OpenSearch Dashboards to your local machine (replace `opensearch-project` in the command below with your GitHub username):
-
-```bash
-$ git clone git@github.com:opensearch-project/OpenSearch-Dashboards.git
-```
 
 ### Bootstrap OpenSearch Dashboards
 
