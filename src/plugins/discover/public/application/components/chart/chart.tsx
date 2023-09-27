@@ -21,8 +21,8 @@ import { useDiscoverContext } from '../../view_components/context';
 import { setInterval, useDispatch, useSelector } from '../../utils/state_management';
 
 interface DiscoverChartProps {
-  bucketInterval: TimechartHeaderBucketInterval;
-  chartData: Chart;
+  bucketInterval?: TimechartHeaderBucketInterval;
+  chartData?: Chart;
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
   hits: number;
