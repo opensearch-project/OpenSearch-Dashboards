@@ -22,6 +22,7 @@ export const DocViewInspectButton = ({ rowIndex }: EuiDataGridCellValueElementPr
         onClick={() => setInspectedHit(isCurrentInspected ? undefined : currentInspected)}
         iconType={isCurrentInspected ? 'minimize' : 'inspect'}
         aria-label={inspectHintMsg}
+        data-test-subj={`docTableExpandToggleColumn-${rowIndex}`}
       />
     </EuiToolTip>
   );
