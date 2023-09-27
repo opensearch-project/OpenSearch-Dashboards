@@ -42,6 +42,7 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
   class DataGrid {
     // This test no longer works in the new data explorer data grid table
     // since each data grid table cell is now rendered differently
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5108
     async getDataGridTableData(): Promise<TabbedGridData> {
       const table = await find.byCssSelector('.euiDataGrid');
       const $ = await table.parseDomContent();
@@ -68,6 +69,34 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
         columns,
         rows,
       };
+    }
+
+    /**
+     * Retrieves the values from a data grid table.
+     *
+     * The function fetches values present in a data grid table and organizes them into rows and columns.
+     * Each row is an array of strings, and the entire table is an array of such rows.
+     *
+     * @returns {Promise<string[][]>} A promise resolving to a 2D array of table values.
+     */
+    async getDataGridTableValues(): Promise<string[][]> {
+      const table = await testSubjects.find('docTable');
+      const $ = await table.parseDomContent();
+      const cellsArr = $.findTestSubjects('dataGridRowCell').toArray();
+      const rows: string[][] = [];
+      let rowIdx = -1;
+
+      for (const cell of cellsArr) {
+        const cCell = $(cell);
+        const isFirstColumn = cCell.attr('class').includes('euiDataGridRowCell--firstColumn');
+        if (isFirstColumn) {
+          rowIdx++;
+          rows[rowIdx] = [];
+        } else {
+          rows[rowIdx].push(this.getTextFromCell(cCell));
+        }
+      }
+      return Promise.resolve(rows);
     }
 
     /**
@@ -99,6 +128,15 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
       await find.clickByButtonText('Remove column');
     }
 
+    /**
+     * Retrieves values from a specific column in a data grid table.
+     *
+     * This function targets a column based on a CSS class selector and retrieves its cell values.
+     * It makes use of the Cheerio library to parse and navigate the DOM.
+     *
+     * @param {string} selector - The CSS class suffix used to identify cells of the desired column.
+     * @returns {Promise<string[]>} A promise resolving to an array of cell values from the specified column.
+     */
     async getDataGridTableColumn(selector: string): Promise<string[]> {
       const table = await find.byCssSelector('.euiDataGrid');
       const $ = await table.parseDomContent();
@@ -110,11 +148,25 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
           const cCell = $(cell);
           if (cCell.hasClass(`euiDataGridRowCell--${selector}`)) {
             // The column structure is very nested to get the actual text
-            columnValues.push(cCell.children().children().children().children().text());
+            columnValues.push(this.getTextFromCell(cCell));
           }
         });
 
       return columnValues;
+    }
+
+    /**
+     * Extracts the text from a cell in the data grid.
+     *
+     * Given a cell represented by a Cheerio object, this function navigates its nested structure
+     * to extract the contained text.
+     *
+     * @param {any} cCell - The Cheerio representation of the cell from which text needs to be extracted.
+     * @returns {string} The extracted text from the cell.
+     */
+    getTextFromCell(cCell: any): string {
+      // navigate the nested structure and get the text
+      return cCell.children().children().children().children().text();
     }
   }
 
