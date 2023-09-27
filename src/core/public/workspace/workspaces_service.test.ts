@@ -35,7 +35,7 @@ describe('WorkspacesService', () => {
     expect(workspacesStart.workspaceList$.value.length).toBe(0);
   });
 
-  it('the current workspace should also updated after changing current workspace id', () => {
+  it('currentWorkspace is updated when currentWorkspaceId changes', () => {
     expect(workspacesStart.currentWorkspace$.value).toBe(null);
 
     workspacesStart.initialized$.next(true);
