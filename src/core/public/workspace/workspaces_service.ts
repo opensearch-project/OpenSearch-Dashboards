@@ -14,7 +14,6 @@ export interface WorkspaceObservables {
   currentWorkspaceId$: BehaviorSubject<string>;
   currentWorkspace$: BehaviorSubject<WorkspaceObject | null>;
   workspaceList$: BehaviorSubject<WorkspaceObject[]>;
-  workspaceEnabled$: BehaviorSubject<boolean>;
   initialized$: BehaviorSubject<boolean>;
 }
 
@@ -30,7 +29,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
   private workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([]);
   private currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   private initialized$ = new BehaviorSubject<boolean>(false);
-  private workspaceEnabled$ = new BehaviorSubject<boolean>(false);
 
   constructor() {
     combineLatest([this.initialized$, this.workspaceList$, this.currentWorkspaceId$]).subscribe(
@@ -67,7 +65,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
-      workspaceEnabled$: this.workspaceEnabled$,
     };
   }
 
@@ -77,7 +74,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
-      workspaceEnabled$: this.workspaceEnabled$,
     };
   }
 
@@ -85,7 +81,6 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
     this.currentWorkspace$.unsubscribe();
     this.currentWorkspaceId$.unsubscribe();
     this.workspaceList$.unsubscribe();
-    this.workspaceEnabled$.unsubscribe();
     this.initialized$.unsubscribe();
   }
 }

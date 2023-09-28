@@ -22,10 +22,6 @@ describe('WorkspacesService', () => {
     expect(workspacesStart.initialized$.value).toBe(false);
   });
 
-  it('workspace is not enabled by default', () => {
-    expect(workspacesStart.workspaceEnabled$.value).toBe(false);
-  });
-
   it('currentWorkspace is not set by default', () => {
     expect(workspacesStart.currentWorkspace$.value).toBe(null);
     expect(workspacesStart.currentWorkspaceId$.value).toBe('');
@@ -70,7 +66,6 @@ describe('WorkspacesService', () => {
     expect(workspacesStart.currentWorkspaceId$.isStopped).toBe(true);
     expect(workspacesStart.currentWorkspace$.isStopped).toBe(true);
     expect(workspacesStart.workspaceList$.isStopped).toBe(true);
-    expect(workspacesStart.workspaceEnabled$.isStopped).toBe(true);
     expect(workspacesStart.initialized$.isStopped).toBe(true);
   });
 });
