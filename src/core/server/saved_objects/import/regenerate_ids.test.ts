@@ -29,8 +29,10 @@
  */
 
 import { mockUuidv4 } from './__mocks__';
-import { regenerateIds } from './regenerate_ids';
+import { regenerateIds, regenerateIdsWithReference } from './regenerate_ids';
 import { SavedObject } from '../types';
+import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
+import { SavedObjectsBulkResponse } from '../service';
 
 describe('#regenerateIds', () => {
   const objects = ([
@@ -56,6 +58,73 @@ describe('#regenerateIds', () => {
         },
         "baz:3" => Object {
           "id": "uuidv4 #3",
+          "omitOriginId": true,
+        },
+      }
+    `);
+  });
+});
+
+describe('#regenerateIdsWithReference', () => {
+  const objects = ([
+    { type: 'foo', id: '1' },
+    { type: 'bar', id: '2' },
+    { type: 'baz', id: '3' },
+  ] as any) as SavedObject[];
+
+  test('returns expected values', async () => {
+    const mockedSavedObjectsClient = savedObjectsClientMock.create();
+    mockUuidv4.mockReturnValueOnce('uuidv4 #1');
+    const result: SavedObjectsBulkResponse<unknown> = {
+      saved_objects: [
+        {
+          error: {
+            statusCode: 404,
+            error: '',
+            message: '',
+          },
+          id: '1',
+          type: 'foo',
+          attributes: {},
+          references: [],
+        },
+        {
+          id: '2',
+          type: 'bar',
+          attributes: {},
+          references: [],
+          workspaces: ['bar'],
+        },
+        {
+          id: '3',
+          type: 'baz',
+          attributes: {},
+          references: [],
+          workspaces: ['foo'],
+        },
+      ],
+    };
+    mockedSavedObjectsClient.bulkGet.mockResolvedValue(result);
+    expect(
+      await regenerateIdsWithReference({
+        savedObjects: objects,
+        savedObjectsClient: mockedSavedObjectsClient,
+        workspaces: ['bar'],
+        objectLimit: 1000,
+        importIdMap: new Map(),
+      })
+    ).toMatchInlineSnapshot(`
+      Map {
+        "foo:1" => Object {
+          "id": "1",
+          "omitOriginId": true,
+        },
+        "bar:2" => Object {
+          "id": "2",
+          "omitOriginId": false,
+        },
+        "baz:3" => Object {
+          "id": "uuidv4 #1",
           "omitOriginId": true,
         },
       }
