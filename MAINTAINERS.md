@@ -21,6 +21,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Zilong Xia                | [ZilongX](https://github.com/ZilongX)               | Amazon      |
 | Matt Provost              | [BSFishy](https://github.com/BSFishy)               | Amazon      |
 | Sirazh Gabdullin          | [curq](https://github.com/curq)                     | External contributor |
+| Bandini Bhopi             | [bandinib-amzn](https://github.com/bandinib-amzn)   | Amazon      |
 
 ## Emeritus
 
