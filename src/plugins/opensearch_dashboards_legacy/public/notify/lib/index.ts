@@ -31,9 +31,3 @@
 export { formatOpenSearchMsg } from './format_opensearch_msg';
 export { formatMsg } from './format_msg';
 export { formatStack } from './format_stack';
-export {
-  isAngularHttpError,
-  formatAngularHttpError,
-  AngularHttpError,
-} from './format_angular_http_error';
-export { addFatalError } from './add_fatal_error';

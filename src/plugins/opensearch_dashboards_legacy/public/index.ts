@@ -37,4 +37,3 @@ export const plugin = (initializerContext: PluginInitializerContext) =>
 export * from './plugin';
 
 export * from './notify';
-export * from './utils';
