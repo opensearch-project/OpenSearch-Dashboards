@@ -22,20 +22,20 @@ on:
         required: false
         type: number
       specs:
-        description: 'Additional tests to run'
+        description: 'Tests to run (default: core)'
+        default: 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,'
         required: false
         type: string
 
 env:
   SOURCE_REPO: ${{ github.repository }}
-  SOURCE_BRANCH: ${{ github.base_ref }}
+  SOURCE_BRANCH: "${{ github.base_ref }}"
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
   START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch'
   OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot'
-  SPEC: 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,'
-  ADDITIONAL_SPEC: ${{ inputs.specs != '' && inputs.specs || '' }}
+  SPEC: ${{ inputs.specs != '' && inputs.specs || 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,' }} 
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
@@ -129,7 +129,7 @@ jobs:
           working-directory: ${{ env.FTR_PATH }}
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
-          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}${{ env.ADDITIONAL_SPEC }}
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - uses: actions/upload-artifact@v3
@@ -180,9 +180,12 @@ jobs:
 
             #### Inputs:
             Source repo: `${{ env.SOURCE_REPO }}`
-            Source branch: `${{ env.SOURCE_BRANCH }}`
+            Source branch: ``${{ env.SOURCE_BRANCH }}``
             Test repo: `${{ env.TEST_REPO }}`
             Test branch: ``${{ env.TEST_BRANCH }}``
+
+            Test spec:
+            `${{ env.SPEC }}`
 
             #### Link to results: 
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
