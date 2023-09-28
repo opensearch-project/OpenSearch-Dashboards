@@ -363,7 +363,7 @@ export class SavedObjectsClient {
    */
   async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
-    options: SavedObjectsBaseOptions = {}
+    options: Omit<SavedObjectsBaseOptions, 'workspaces'> = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     return await this._repository.bulkGet(objects, options);
   }

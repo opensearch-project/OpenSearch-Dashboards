@@ -60,6 +60,8 @@ export interface SavedObjectsExportOptions {
   excludeExportDetails?: boolean;
   /** optional namespace to override the namespace used by the savedObjectsClient. */
   namespace?: string;
+  /** optional workspaces to override the workspaces used by the savedObjectsClient. */
+  workspaces?: string[];
 }
 
 /**
@@ -87,6 +89,7 @@ async function fetchObjectsToExport({
   exportSizeLimit,
   savedObjectsClient,
   namespace,
+  workspaces,
 }: {
   objects?: SavedObjectsExportOptions['objects'];
   types?: string[];
@@ -94,6 +97,7 @@ async function fetchObjectsToExport({
   exportSizeLimit: number;
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
+  workspaces?: string[];
 }) {
   if ((types?.length ?? 0) > 0 && (objects?.length ?? 0) > 0) {
     throw Boom.badRequest(`Can't specify both "types" and "objects" properties when exporting`);
@@ -105,7 +109,9 @@ async function fetchObjectsToExport({
     if (typeof search === 'string') {
       throw Boom.badRequest(`Can't specify both "search" and "objects" properties when exporting`);
     }
-    const bulkGetResult = await savedObjectsClient.bulkGet(objects, { namespace });
+    const bulkGetResult = await savedObjectsClient.bulkGet(objects, {
+      namespace,
+    });
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
       const err = Boom.badRequest();
@@ -121,6 +127,7 @@ async function fetchObjectsToExport({
       search,
       perPage: exportSizeLimit,
       namespaces: namespace ? [namespace] : undefined,
+      ...(workspaces ? { workspaces } : {}),
     });
     if (findResponse.total > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
@@ -153,6 +160,7 @@ export async function exportSavedObjectsToStream({
   includeReferencesDeep = false,
   excludeExportDetails = false,
   namespace,
+  workspaces,
 }: SavedObjectsExportOptions) {
   const rootObjects = await fetchObjectsToExport({
     types,
@@ -161,6 +169,7 @@ export async function exportSavedObjectsToStream({
     savedObjectsClient,
     exportSizeLimit,
     namespace,
+    workspaces,
   });
   let exportedObjects: Array<SavedObject<unknown>> = [];
   let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];

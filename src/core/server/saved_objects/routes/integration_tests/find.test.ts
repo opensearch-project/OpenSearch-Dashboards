@@ -288,4 +288,38 @@ describe('GET /api/saved_objects/_find', () => {
       defaultSearchOperator: 'OR',
     });
   });
+
+  it('accepts the query parameter workspaces as a string', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=index-pattern&workspaces=foo')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual({
+      defaultSearchOperator: 'OR',
+      perPage: 20,
+      page: 1,
+      type: ['index-pattern'],
+      workspaces: ['foo'],
+    });
+  });
+
+  it('accepts the query parameter workspaces as an array', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=index-pattern&workspaces=default&workspaces=foo')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual({
+      perPage: 20,
+      page: 1,
+      type: ['index-pattern'],
+      workspaces: ['default', 'foo'],
+      defaultSearchOperator: 'OR',
+    });
+  });
 });

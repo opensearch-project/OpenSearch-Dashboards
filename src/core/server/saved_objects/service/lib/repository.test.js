@@ -27,7 +27,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -53,6 +52,12 @@ const createGenericNotFoundError = (...args) =>
   SavedObjectsErrorHelpers.createGenericNotFoundError(...args).output.payload;
 const createUnsupportedTypeError = (...args) =>
   SavedObjectsErrorHelpers.createUnsupportedTypeError(...args).output.payload;
+
+const omitWorkspace = (object) => {
+  const newObject = JSON.parse(JSON.stringify(object));
+  delete newObject.workspaces;
+  return newObject;
+};
 
 describe('SavedObjectsRepository', () => {
   let client;
@@ -168,7 +173,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   const getMockGetResponse = (
-    { type, id, references, namespace: objectNamespace, originId },
+    { type, id, references, namespace: objectNamespace, originId, workspaces },
     namespace
   ) => {
     const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
@@ -182,6 +187,7 @@ describe('SavedObjectsRepository', () => {
       _source: {
         ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
         ...(registry.isMultiNamespace(type) && { namespaces: [namespaceId ?? 'default'] }),
+        workspaces,
         ...(originId && { originId }),
         type,
         [type]: { title: 'Testing' },
@@ -444,6 +450,7 @@ describe('SavedObjectsRepository', () => {
       references: [{ name: 'ref_0', type: 'test', id: '2' }],
     };
     const namespace = 'foo-namespace';
+    const workspace = 'foo-workspace';
 
     const getMockBulkCreateResponse = (objects, namespace) => {
       return {
@@ -480,7 +487,9 @@ describe('SavedObjectsRepository', () => {
         opensearchClientMock.createSuccessTransportRequestPromise(response)
       );
       const result = await savedObjectsRepository.bulkCreate(objects, options);
-      expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
+      expect(client.mget).toHaveBeenCalledTimes(
+        multiNamespaceObjects?.length || options?.workspaces ? 1 : 0
+      );
       return result;
     };
 
@@ -683,6 +692,7 @@ describe('SavedObjectsRepository', () => {
             expect.anything()
           );
           client.bulk.mockClear();
+          client.mget.mockClear();
         };
         await test(undefined);
         await test(namespace);
@@ -729,6 +739,16 @@ describe('SavedObjectsRepository', () => {
         ];
         await bulkCreateSuccess(objects, { namespace });
         expectClientCallArgsAction(objects, { method: 'create', getId });
+      });
+
+      it(`adds workspaces to request body for any types`, async () => {
+        await bulkCreateSuccess([obj1, obj2], { workspaces: [workspace] });
+        const expected = expect.objectContaining({ workspaces: [workspace] });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
     });
 
@@ -876,6 +896,74 @@ describe('SavedObjectsRepository', () => {
         const opensearchError = { foo: 'some_other_error' };
         const expectedError = expectErrorResult(obj3, { message: JSON.stringify(opensearchError) });
         await bulkCreateError(obj3, opensearchError, expectedError);
+      });
+
+      it(`returns error when there is a conflict with an existing saved object according to workspaces`, async () => {
+        const obj = { ...obj3, workspaces: ['foo'] };
+        const response1 = {
+          status: 200,
+          docs: [
+            {
+              found: true,
+              _id: `${obj1.type}:${obj1.id}`,
+              _source: {
+                type: obj1.type,
+                workspaces: ['bar'],
+              },
+            },
+            {
+              found: true,
+              _id: `${obj.type}:${obj.id}`,
+              _source: {
+                type: obj.type,
+                workspaces: obj.workspaces,
+              },
+            },
+            {
+              found: true,
+              _id: `${obj2.type}:${obj2.id}`,
+              _source: {
+                type: obj2.type,
+              },
+            },
+          ],
+        };
+        client.mget.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise(response1)
+        );
+        const response2 = getMockBulkCreateResponse([obj1, obj, obj2]);
+        client.bulk.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise(response2)
+        );
+
+        const options = { overwrite: true, workspaces: ['bar'] };
+        const result = await savedObjectsRepository.bulkCreate([obj1, obj, obj2], options);
+        expect(client.bulk).toHaveBeenCalled();
+        expect(client.mget).toHaveBeenCalled();
+
+        const body1 = {
+          docs: [
+            expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
+            expect.objectContaining({ _id: `${obj.type}:${obj.id}` }),
+            expect.objectContaining({ _id: `${obj2.type}:${obj2.id}` }),
+          ],
+        };
+        expect(client.mget).toHaveBeenCalledWith(
+          expect.objectContaining({ body: body1 }),
+          expect.anything()
+        );
+        const body2 = [...expectObjArgs(obj1)];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body: body2 }),
+          expect.anything()
+        );
+        expect(result).toEqual({
+          saved_objects: [
+            expectSuccess(obj1),
+            expectErrorConflict(obj, { metadata: { isNotOverwritable: true } }),
+            expectErrorConflict(obj2, { metadata: { isNotOverwritable: true } }),
+          ],
+        });
       });
     });
 
@@ -1699,6 +1787,8 @@ describe('SavedObjectsRepository', () => {
     const obj5 = { type: MULTI_NAMESPACE_TYPE, id: 'five' };
     const obj6 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'six' };
     const obj7 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'seven' };
+    const obj8 = { type: 'dashboard', id: 'eight', workspaces: ['foo'] };
+    const obj9 = { type: 'dashboard', id: 'nine', workspaces: ['bar'] };
     const namespace = 'foo-namespace';
 
     const checkConflicts = async (objects, options) =>
@@ -1790,6 +1880,8 @@ describe('SavedObjectsRepository', () => {
             { found: false },
             getMockGetResponse(obj6),
             { found: false },
+            getMockGetResponse(obj7),
+            getMockGetResponse(obj8),
           ],
         };
         client.mget.mockResolvedValue(
@@ -1815,6 +1907,36 @@ describe('SavedObjectsRepository', () => {
             // obj5 was not found so it does not result in a conflict error
             { ...obj6, error: createConflictError(obj6.type, obj6.id) },
             // obj7 was not found so it does not result in a conflict error
+          ],
+        });
+      });
+
+      it(`expected results with workspaces`, async () => {
+        const objects = [obj8, obj9];
+        const response = {
+          status: 200,
+          docs: [getMockGetResponse(obj8), getMockGetResponse(obj9)],
+        };
+        client.mget.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+
+        const result = await checkConflicts(objects, {
+          workspaces: ['foo'],
+        });
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({
+          errors: [
+            { ...omitWorkspace(obj8), error: createConflictError(obj8.type, obj8.id) },
+            {
+              ...omitWorkspace(obj9),
+              error: {
+                ...createConflictError(obj9.type, obj9.id),
+                metadata: {
+                  isNotOverwritable: true,
+                },
+              },
+            },
           ],
         });
       });
@@ -1846,9 +1968,17 @@ describe('SavedObjectsRepository', () => {
 
     const createSuccess = async (type, attributes, options) => {
       const result = await savedObjectsRepository.create(type, attributes, options);
-      expect(client.get).toHaveBeenCalledTimes(
-        registry.isMultiNamespace(type) && options.overwrite ? 1 : 0
-      );
+      let count = 0;
+      if (options?.overwrite && options.id && options.workspaces) {
+        /**
+         * workspace will call extra one to get latest status of current object
+         */
+        count++;
+      }
+      if (registry.isMultiNamespace(type) && options.overwrite) {
+        count++;
+      }
+      expect(client.get).toHaveBeenCalledTimes(count);
       return result;
     };
 
@@ -2040,6 +2170,29 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
       });
+
+      it(`doesn't modify workspaces when overwrite without target workspaces`, async () => {
+        const response = getMockGetResponse({ workspaces: ['foo'], id });
+        client.get.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+
+        await savedObjectsRepository.create('dashboard', attributes, {
+          id,
+          overwrite: true,
+          workspaces: [],
+        });
+
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `dashboard:${id}`,
+            body: expect.objectContaining({
+              workspaces: ['foo'],
+            }),
+          }),
+          expect.anything()
+        );
+      });
     });
 
     describe('errors', () => {
@@ -2097,6 +2250,21 @@ describe('SavedObjectsRepository', () => {
             namespace,
           })
         ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_TYPE, id));
+        expect(client.get).toHaveBeenCalled();
+      });
+
+      it(`throws error when there is a conflict with an existing workspaces saved object`, async () => {
+        const response = getMockGetResponse({ workspaces: ['foo'], id });
+        client.get.mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+        await expect(
+          savedObjectsRepository.create('dashboard', attributes, {
+            id,
+            overwrite: true,
+            workspaces: ['bar'],
+          })
+        ).rejects.toThrowError(createConflictError('dashboard', id));
         expect(client.get).toHaveBeenCalled();
       });
 
@@ -2186,10 +2354,11 @@ describe('SavedObjectsRepository', () => {
     const type = 'index-pattern';
     const id = 'logstash-*';
     const namespace = 'foo-namespace';
+    const workspaces = ['bar-workspace'];
 
     const deleteSuccess = async (type, id, options) => {
       if (registry.isMultiNamespace(type)) {
-        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
+        const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace, workspaces);
         client.get.mockResolvedValueOnce(
           opensearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
         );

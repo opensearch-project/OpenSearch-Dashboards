@@ -59,6 +59,9 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         query: schema.object({
           createNewCopies: schema.boolean({ defaultValue: false }),
           dataSourceId: schema.maybe(schema.string({ defaultValue: '' })),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
         body: schema.object({
           file: schema.stream(),
@@ -117,6 +120,11 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         });
       }
 
+      let workspaces = req.query.workspaces;
+      if (typeof workspaces === 'string') {
+        workspaces = [workspaces];
+      }
+
       const result = await resolveSavedObjectsImportErrors({
         typeRegistry: context.core.savedObjects.typeRegistry,
         savedObjectsClient: context.core.savedObjects.client,
@@ -126,6 +134,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         createNewCopies: req.query.createNewCopies,
         dataSourceId,
         dataSourceTitle,
+        workspaces,
       });
 
       return res.ok({ body: result });

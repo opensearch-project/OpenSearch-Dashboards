@@ -186,6 +186,9 @@ function defaultMapping(): IndexMapping {
           },
         },
       },
+      workspaces: {
+        type: 'keyword',
+      },
       permissions: {
         properties: {
           read: principals,

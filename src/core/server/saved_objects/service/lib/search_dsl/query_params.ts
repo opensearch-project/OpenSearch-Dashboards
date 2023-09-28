@@ -127,6 +127,20 @@ function getClauseForType(
     },
   };
 }
+/**
+ *  Gets the clause that will filter for the workspace.
+ */
+function getClauseForWorkspace(workspace: string) {
+  if (!workspace) {
+    return {};
+  }
+
+  return {
+    bool: {
+      must: [{ term: { workspaces: workspace } }],
+    },
+  };
+}
 
 interface HasReferenceQueryParams {
   type: string;
@@ -144,6 +158,7 @@ interface QueryParams {
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
+  workspaces?: string[];
 }
 
 export function getClauseForReference(reference: HasReferenceQueryParams) {
@@ -200,6 +215,7 @@ export function getQueryParams({
   defaultSearchOperator,
   hasReference,
   kueryNode,
+  workspaces,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -223,6 +239,19 @@ export function getQueryParams({
       },
     ],
   };
+
+  if (workspaces?.filter((workspace) => workspace).length) {
+    bool.filter.push({
+      bool: {
+        should: workspaces
+          .filter((workspace) => workspace)
+          .map((workspace) => {
+            return getClauseForWorkspace(workspace);
+          }),
+        minimum_should_match: 1,
+      },
+    });
+  }
 
   if (search) {
     const useMatchPhrasePrefix = shouldUseMatchPhrasePrefix(search);
