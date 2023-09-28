@@ -76,6 +76,7 @@ describe('resolveCapabilities', () => {
         },
         "management": Object {},
         "navLinks": Object {},
+        "workspaces": Object {},
       }
     `);
   });
