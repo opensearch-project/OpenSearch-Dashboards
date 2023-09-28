@@ -383,7 +383,7 @@ export class SavedObjectsRepository {
       /**
        * It requires a check when overwriting objects to target workspaces
        */
-      const requiresWorkspaceCheck = !!(object.id && overwrite && options.workspaces);
+      const requiresWorkspaceCheck = !!(object.id && options.workspaces);
 
       if (object.id == null) object.id = uuid.v1();
 
