@@ -113,6 +113,7 @@ export interface SavedObject<T = unknown> {
    * space.
    */
   originId?: string;
+  /** Workspaces that this saved object exists in. */
   workspaces?: string[];
 }
 

@@ -81,13 +81,15 @@ export async function importSavedObjectsFromStream({
   if (createNewCopies) {
     importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
   } else {
-    importIdMap = await regenerateIdsWithReference({
-      savedObjects: collectSavedObjectsResult.collectedObjects,
-      savedObjectsClient,
-      workspaces,
-      objectLimit,
-      importIdMap,
-    });
+    if (workspaces) {
+      importIdMap = await regenerateIdsWithReference({
+        savedObjects: collectSavedObjectsResult.collectedObjects,
+        savedObjectsClient,
+        workspaces,
+        objectLimit,
+        importIdMap,
+      });
+    }
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
       objects: collectSavedObjectsResult.collectedObjects,

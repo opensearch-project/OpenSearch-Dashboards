@@ -113,7 +113,7 @@ export const createSavedObjects = async <T>({
   // remap results to reflect the object IDs that were submitted for import
   // this ensures that consumers understand the results
   const remappedResults = expectedResults.map<CreatedObject<T>>((result) => {
-    const { id } = objectIdMap.get(`${result.type}:${result.id}`) || ({} as SavedObject<T>);
+    const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
     // also, include a `destinationId` field if the object create attempt was made with a different ID
     return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
   });

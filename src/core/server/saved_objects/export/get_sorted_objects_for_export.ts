@@ -111,7 +111,6 @@ async function fetchObjectsToExport({
     }
     const bulkGetResult = await savedObjectsClient.bulkGet(objects, {
       namespace,
-      ...(workspaces ? { workspaces } : {}),
     });
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {

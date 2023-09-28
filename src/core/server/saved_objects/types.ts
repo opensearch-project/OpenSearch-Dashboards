@@ -110,6 +110,7 @@ export interface SavedObjectsFindOptions {
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   /** An optional OpenSearch preference value to be used for the query **/
   preference?: string;
+  /** If specified, will find all objects belong to specified workspaces **/
   workspaces?: string[];
 }
 
@@ -120,6 +121,7 @@ export interface SavedObjectsFindOptions {
 export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
+  /** Specify the workspaces for this operation */
   workspaces?: string[];
 }
 

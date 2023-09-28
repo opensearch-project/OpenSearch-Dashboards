@@ -381,9 +381,9 @@ export class SavedObjectsRepository {
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
       /**
-       * Only when importing an object to a target workspace should we check if the object is workspace-specific.
+       * It requires a check when overwriting objects to target workspaces
        */
-      const requiresWorkspaceCheck = object.id && options.workspaces;
+      const requiresWorkspaceCheck = !!(object.id && overwrite && options.workspaces);
 
       if (object.id == null) object.id = uuid.v1();
 
@@ -440,14 +440,12 @@ export class SavedObjectsRepository {
         object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
-      let savedObjectWorkspaces: string[] | undefined;
       if (opensearchRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound
           ? bulkGetResponse?.body.docs?.[opensearchRequestIndex]
           : undefined;
         const docFound = indexFound && actualResult?.found === true;
-        let hasSetNamespace = false;
         // @ts-expect-error MultiGetHit._source is optional
         if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
           const { id, type } = object;
@@ -462,20 +460,11 @@ export class SavedObjectsRepository {
               },
             },
           };
-        } else {
-          hasSetNamespace = true;
-          if (this._registry.isSingleNamespace(object.type)) {
-            savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
-          } else if (this._registry.isMultiNamespace(object.type)) {
-            savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
-          }
         }
-        if (!hasSetNamespace) {
-          savedObjectNamespaces =
-            initialNamespaces ||
-            // @ts-expect-error MultiGetHit._source is optional
-            getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
-        }
+        savedObjectNamespaces =
+          initialNamespaces ||
+          // @ts-expect-error MultiGetHit._source is optional
+          getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
         // @ts-expect-error MultiGetHit._source is optional
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
@@ -487,7 +476,7 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
-      savedObjectWorkspaces = options.workspaces;
+      let savedObjectWorkspaces: string[] | undefined = options.workspaces;
 
       if (expectedBulkGetResult.value.method !== 'create') {
         const rawId = this._serializer.generateRawId(namespace, object.type, object.id);
@@ -495,6 +484,11 @@ export class SavedObjectsRepository {
           bulkGetResponse?.statusCode !== 404
             ? bulkGetResponse?.body.docs?.find((item) => item._id === rawId)
             : null;
+        /**
+         * When it is about to overwrite a object into options.workspace.
+         * We need to check if the options.workspaces is the subset of object.workspaces,
+         * Or it will be treated as a conflict
+         */
         if (findObject && findObject.found) {
           const transformedObject = this._serializer.rawToSavedObject(
             findObject as SavedObjectsRawDoc
@@ -504,6 +498,10 @@ export class SavedObjectsRepository {
             transformedObject.workspaces
           );
           if (filteredWorkspaces.length) {
+            /**
+             * options.workspaces is not a subset of object.workspaces,
+             * return a conflict error.
+             */
             const { id, type } = object;
             return {
               tag: 'Left' as 'Left',

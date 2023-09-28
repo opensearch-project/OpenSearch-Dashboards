@@ -27,7 +27,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { omit } from 'lodash';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -53,6 +52,12 @@ const createGenericNotFoundError = (...args) =>
   SavedObjectsErrorHelpers.createGenericNotFoundError(...args).output.payload;
 const createUnsupportedTypeError = (...args) =>
   SavedObjectsErrorHelpers.createUnsupportedTypeError(...args).output.payload;
+
+const omitWorkspace = (object) => {
+  const newObject = JSON.parse(JSON.stringify(object));
+  delete newObject.workspaces;
+  return newObject;
+};
 
 describe('SavedObjectsRepository', () => {
   let client;
@@ -1922,9 +1927,9 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           errors: [
-            { ...omit(obj8, 'workspaces'), error: createConflictError(obj8.type, obj8.id) },
+            { ...omitWorkspace(obj8), error: createConflictError(obj8.type, obj8.id) },
             {
-              ...omit(obj9, 'workspaces'),
+              ...omitWorkspace(obj9),
               error: {
                 ...createConflictError(obj9.type, obj9.id),
                 metadata: {

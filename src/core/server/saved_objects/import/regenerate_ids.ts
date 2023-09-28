@@ -47,16 +47,11 @@ export const regenerateIds = (objects: SavedObject[]) => {
 export const regenerateIdsWithReference = async (props: {
   savedObjects: SavedObject[];
   savedObjectsClient: SavedObjectsClientContract;
-  workspaces?: string[];
+  workspaces: string[];
   objectLimit: number;
   importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
 }): Promise<Map<string, { id?: string; omitOriginId?: boolean }>> => {
   const { savedObjects, savedObjectsClient, workspaces, importIdMap } = props;
-  if (!workspaces || !workspaces.length) {
-    return savedObjects.reduce((acc, object) => {
-      return acc.set(`${object.type}:${object.id}`, { id: object.id, omitOriginId: false });
-    }, importIdMap);
-  }
 
   const bulkGetResult = await savedObjectsClient.bulkGet(
     savedObjects.map((item) => ({ type: item.type, id: item.id }))
