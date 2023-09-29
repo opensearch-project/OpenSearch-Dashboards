@@ -5,7 +5,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { AppMountParameters } from '../../../../../../core/public';
-import { NEW_DISCOVER_APP, PLUGIN_ID } from '../../../../common';
+import { PLUGIN_ID } from '../../../../common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
@@ -25,30 +25,17 @@ export const TopNav = ({ opts }: TopNavProps) => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
 
   const {
-    uiSettings,
     navigation: {
       ui: { TopNavMenu },
     },
     core: {
-      application: { navigateToApp, getUrlForApp },
+      application: { getUrlForApp },
     },
     data,
     chrome,
   } = services;
 
   const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
-
-  useEffect(() => {
-    if (uiSettings.get(NEW_DISCOVER_APP) === false) {
-      const path = window.location.hash;
-      navigateToApp('discoverLegacy', {
-        replace: true,
-        path,
-      });
-    }
-
-    return () => {};
-  }, [navigateToApp, uiSettings]);
 
   useEffect(() => {
     let isMounted = true;

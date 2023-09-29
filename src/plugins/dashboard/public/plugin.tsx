@@ -80,7 +80,6 @@ import {
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
 import {
-  initAngularBootstrap,
   OpenSearchDashboardsLegacySetup,
   OpenSearchDashboardsLegacyStart,
 } from '../../opensearch_dashboards_legacy/public';
@@ -451,9 +450,6 @@ export class DashboardPlugin
         };
       },
     };
-
-    // TODO: delete this when discover de-angular is completed
-    initAngularBootstrap();
 
     core.application.register(app);
     urlForwarding.forwardApp(
