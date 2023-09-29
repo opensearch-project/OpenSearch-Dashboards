@@ -84,8 +84,30 @@ it('runs task with the expected values for DEB x64', async () => {
             "optional",
           ],
         ],
+        Array [
+          <Config>,
+          <ToolingLog>,
+          Build {
+            "config": <Config>,
+            "name": "opensearch-dashboards",
+          },
+          "deb",
+          "x64",
+          Array [
+            "--architecture",
+            "amd64",
+            "--deb-priority",
+            "optional",
+          ],
+        ],
       ],
       "results": Array [
+        Object {
+          "type": "return",
+          "value": Object {
+            "package": "deb:x64:--architecture,amd64,--deb-priority,optional",
+          },
+        },
         Object {
           "type": "return",
           "value": Object {
@@ -195,8 +217,30 @@ it('runs task with the expected values for RPM ARM64', async () => {
             "linux",
           ],
         ],
+        Array [
+          <Config>,
+          <ToolingLog>,
+          Build {
+            "config": <Config>,
+            "name": "opensearch-dashboards",
+          },
+          "rpm",
+          "arm64",
+          Array [
+            "--architecture",
+            "arm64",
+            "--rpm-os",
+            "linux",
+          ],
+        ],
       ],
       "results": Array [
+        Object {
+          "type": "return",
+          "value": Object {
+            "package": "rpm:arm64:--architecture,arm64,--rpm-os,linux",
+          },
+        },
         Object {
           "type": "return",
           "value": Object {
