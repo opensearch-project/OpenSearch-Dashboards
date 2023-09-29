@@ -36,7 +36,7 @@ const TEST_STEP_SIZE = 2;
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const retry = getService('retry');
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['context']);
   let expectedRowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.waitFor(
         `number of rows displayed initially is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
+          const rows = await dataGrid.getDataGridTableColumn('date');
           return rows.length === expectedRowLength;
         }
       );
@@ -74,8 +74,8 @@ export default function ({ getService, getPageObjects }) {
       await retry.waitFor(
         `number of rows displayed after clicking load more predecessors is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
-          return rows.length === expectedRowLength;
+          const data = await dataGrid.getDataGridTableColumn('date');
+          return data.length === expectedRowLength;
         }
       );
     });
@@ -87,8 +87,8 @@ export default function ({ getService, getPageObjects }) {
       await retry.waitFor(
         `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
-          return rows.length === expectedRowLength;
+          const data = await dataGrid.getDataGridTableColumn('date');
+          return data.length === expectedRowLength;
         }
       );
     });
