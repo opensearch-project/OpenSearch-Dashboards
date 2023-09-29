@@ -4,7 +4,8 @@ exports[`TelemetryManagementSectionComponent does not show the endpoint link whe
 <React.Fragment>
   <p>
     <FormattedMessage
-      defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
+      defaultMessage="Enabling data usage collection helps us manage and improve our products and services.
+ See our {privacyStatementLink} for more details."
       id="telemetry.telemetryConfigAndLinkDescription"
       values={
         Object {
@@ -106,7 +107,8 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
             "description": <React.Fragment>
               <p>
                 <FormattedMessage
-                  defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
+                  defaultMessage="Enabling data usage collection helps us manage and improve our products and services.
+ See our {privacyStatementLink} for more details."
                   id="telemetry.telemetryConfigAndLinkDescription"
                   values={
                     Object {
