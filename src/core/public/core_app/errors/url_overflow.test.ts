@@ -100,7 +100,8 @@ describe('url overflow detection', () => {
         <code>
           state:storeInSessionStorage
         </code>
-         option in 
+         option
+       in 
         <a
           href="/test-123/app/management/opensearch-dashboards/settings"
         >

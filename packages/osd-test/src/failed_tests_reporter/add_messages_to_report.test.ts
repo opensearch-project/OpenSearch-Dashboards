@@ -81,76 +81,114 @@ it('rewrites ftr reports with minimal changes', async () => {
     --- ftr.xml	[object Object]
     +++ ftr.xml
     @@ -1,53 +1,56 @@
-     ‹?xml version="1.0" encoding="utf-8"?›
-     ‹testsuites›
-       ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71"›
-         ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378"›
+    -‹?xml version="1.0" encoding="utf-8"?›
+    -‹testsuites›
+    -  ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71"›
+    -    ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378"›
     -      ‹system-out›
     -        ‹![CDATA[[00:00:00]       │
+    -[00:07:04]         └-: maps app
+    -...
+    -[00:15:02]                   │
+    -]]›
+    -      ‹/system-out›
+    -      ‹failure›
+    -        ‹![CDATA[Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj~="layerTocActionsPanelToggleButtonRoad_Map_-_Bright"])
+    -Wait timed out after 10055ms
+    -    at /var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:834:17
+    -    at process._tickCallback (internal/process/next_tick.js:68:7)
+    -    at lastError (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:28:9)
+    -    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)]]›
+    -      ‹/failure›
+    -    ‹/testcase›
+    -    ‹testcase name="maps app &quot;after all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps" time="0.179" metadata-json="{&quot;messages&quot;:[&quot;foo&quot;],&quot;screenshots&quot;:[{&quot;name&quot;:&quot;failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]&quot;,&quot;url&quot;:&quot;https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png&quot;}]}"›
+    -      ‹system-out›
+    -        ‹![CDATA[[00:00:00]       │
+    -[00:07:04]         └-: maps app
+    -...
+    -]]›
+    -      ‹/system-out›
+    -      ‹failure›
+    -        ‹![CDATA[{ NoSuchSessionError: This driver instance does not have a valid session ID (did you call WebDriver.quit()?) and may no longer be used.
+    -    at promise.finally (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:726:38)
+    -    at Object.thenFinally [as finally] (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/promise.js:124:12)
+    -    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }]]›
+    -      ‹/failure›
+    -    ‹/testcase›
+    -    ‹testcase name="InfraOps app feature controls infrastructure security global infrastructure all privileges shows infrastructure navlink" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/infra/feature_controls/infrastructure_security·ts"›
+    -      ‹system-out›
+    -        ‹![CDATA[[00:00:00]       │
+    -[00:05:13]         └-: InfraOps app
+    -...
+    -]]›
+    -      ‹/system-out›
+    -      ‹skipped/›
+    -    ‹/testcase›
+    -    ‹testcase name="machine learning anomaly detection saved search  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040"›
+    -      ‹system-out›‹![CDATA[[00:21:57]         └-: machine learning...]]›‹/system-out›
+    -      ‹failure›‹![CDATA[{ NoSuchSessionError: Tried to run command without establishing a connection
+    -    at Object.throwDecodedError (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/error.js:550:15)
+    -    at parseHttpResponse (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:563:13)
+    -    at Executor.execute (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:489:26)
+    -    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }]]›‹/failure›
+    -    ‹/testcase›
+    -  ‹/testsuite›
+    -‹/testsuites›
+    +‹?xml version="1.0" encoding="utf-8"?›
+    +‹testsuites›
+    +  ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71"›
+    +    ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378"›
     +      ‹system-out›Failed Tests Reporter:
     +  - foo bar
     +
-    +
-    +        [00:00:00]       │
-     [00:07:04]         └-: maps app
-     ...
-     [00:15:02]                   │
-    -]]›
-    +
-           ‹/system-out›
-           ‹failure›
-    -        ‹![CDATA[Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj~="layerTocActionsPanelToggleButtonRoad_Map_-_Bright"])
-    +        Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj~="layerTocActionsPanelToggleButtonRoad_Map_-_Bright"])
-     Wait timed out after 10055ms
-         at /var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:834:17
-         at process._tickCallback (internal/process/next_tick.js:68:7)
-         at lastError (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:28:9)
-    -    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)]]›
-    +    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)
-           ‹/failure›
-         ‹/testcase›
-         ‹testcase name="maps app &quot;after all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps" time="0.179" metadata-json="{&quot;messages&quot;:[&quot;foo&quot;],&quot;screenshots&quot;:[{&quot;name&quot;:&quot;failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]&quot;,&quot;url&quot;:&quot;https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png&quot;}]}"›
-           ‹system-out›
-    -        ‹![CDATA[[00:00:00]       │
-    +        [00:00:00]       │
-     [00:07:04]         └-: maps app
-     ...
-    -]]›
-    +
-           ‹/system-out›
-           ‹failure›
-    -        ‹![CDATA[{ NoSuchSessionError: This driver instance does not have a valid session ID (did you call WebDriver.quit()?) and may no longer be used.
-    +        { NoSuchSessionError: This driver instance does not have a valid session ID (did you call WebDriver.quit()?) and may no longer be used.
-         at promise.finally (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:726:38)
-         at Object.thenFinally [as finally] (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/promise.js:124:12)
-    -    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }]]›
-    +    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }
-           ‹/failure›
-         ‹/testcase›
-         ‹testcase name="InfraOps app feature controls infrastructure security global infrastructure all privileges shows infrastructure navlink" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/infra/feature_controls/infrastructure_security·ts"›
-           ‹system-out›
-    -        ‹![CDATA[[00:00:00]       │
-    +        [00:00:00]       │
-     [00:05:13]         └-: InfraOps app
-     ...
-    -]]›
-    +
-           ‹/system-out›
-           ‹skipped/›
-         ‹/testcase›
-         ‹testcase name="machine learning anomaly detection saved search  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040"›
-    -      ‹system-out›‹![CDATA[[00:21:57]         └-: machine learning...]]›‹/system-out›
-    -      ‹failure›‹![CDATA[{ NoSuchSessionError: Tried to run command without establishing a connection
+    +&#xD;
+    +        [00:00:00]       │&#xD;
+    +[00:07:04]         └-: maps app&#xD;
+    +...&#xD;
+    +[00:15:02]                   │&#xD;
+    +&#xD;
+    +      ‹/system-out›
+    +      ‹failure›&#xD;
+    +        Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj~="layerTocActionsPanelToggleButtonRoad_Map_-_Bright"])&#xD;
+    +Wait timed out after 10055ms&#xD;
+    +    at /var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:834:17&#xD;
+    +    at process._tickCallback (internal/process/next_tick.js:68:7)&#xD;
+    +    at lastError (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:28:9)&#xD;
+    +    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)&#xD;
+    +      ‹/failure›
+    +    ‹/testcase›
+    +    ‹testcase name="maps app &quot;after all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps" time="0.179" metadata-json="{&quot;messages&quot;:[&quot;foo&quot;],&quot;screenshots&quot;:[{&quot;name&quot;:&quot;failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]&quot;,&quot;url&quot;:&quot;https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png&quot;}]}"›
+    +      ‹system-out›&#xD;
+    +        [00:00:00]       │&#xD;
+    +[00:07:04]         └-: maps app&#xD;
+    +...&#xD;
+    +&#xD;
+    +      ‹/system-out›
+    +      ‹failure›&#xD;
+    +        { NoSuchSessionError: This driver instance does not have a valid session ID (did you call WebDriver.quit()?) and may no longer be used.&#xD;
+    +    at promise.finally (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:726:38)&#xD;
+    +    at Object.thenFinally [as finally] (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/promise.js:124:12)&#xD;
+    +    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }&#xD;
+    +      ‹/failure›
+    +    ‹/testcase›
+    +    ‹testcase name="InfraOps app feature controls infrastructure security global infrastructure all privileges shows infrastructure navlink" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/infra/feature_controls/infrastructure_security·ts"›
+    +      ‹system-out›&#xD;
+    +        [00:00:00]       │&#xD;
+    +[00:05:13]         └-: InfraOps app&#xD;
+    +...&#xD;
+    +&#xD;
+    +      ‹/system-out›
+    +      ‹skipped/›
+    +    ‹/testcase›
+    +    ‹testcase name="machine learning anomaly detection saved search  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040"›
     +      ‹system-out›[00:21:57]         └-: machine learning...‹/system-out›
-    +      ‹failure›{ NoSuchSessionError: Tried to run command without establishing a connection
-         at Object.throwDecodedError (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/error.js:550:15)
-         at parseHttpResponse (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:563:13)
-         at Executor.execute (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:489:26)
-    -    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }]]›‹/failure›
+    +      ‹failure›{ NoSuchSessionError: Tried to run command without establishing a connection&#xD;
+    +    at Object.throwDecodedError (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/error.js:550:15)&#xD;
+    +    at parseHttpResponse (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:563:13)&#xD;
+    +    at Executor.execute (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:489:26)&#xD;
     +    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }‹/failure›
-         ‹/testcase›
-       ‹/testsuite›
-    -‹/testsuites›
+    +    ‹/testcase›
+    +  ‹/testsuite›
     +‹/testsuites›
     \\ No newline at end of file
 
@@ -176,15 +214,28 @@ it('rewrites jest reports with minimal changes', async () => {
     ===================================================================
     --- jest.xml	[object Object]
     +++ jest.xml
-    @@ -3,13 +3,17 @@
-       ‹testsuite name="x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts"›
-         ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can start and end a process" time="1.316"/›
-         ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can force kill the process if langServer can not exit" time="3.182"/›
-         ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can reconnect if process died" time="7.060"›
+    @@ -1,15 +1,19 @@
+    -‹?xml version="1.0" encoding="utf-8"?›
+    -‹testsuites name="jest" timestamp="2019-06-07T03:36:23" time="781.292" tests="5487" skipped="9"›
+    -  ‹testsuite name="x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts"›
+    -    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can start and end a process" time="1.316"/›
+    -    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can force kill the process if langServer can not exit" time="3.182"/›
+    -    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can reconnect if process died" time="7.060"›
     -      ‹failure›
     -        ‹![CDATA[TypeError: Cannot read property '0' of undefined
     -    at Object.‹anonymous›.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)]]›
     -      ‹/failure›
+    -    ‹/testcase›
+    -    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="passive launcher can start and end a process" time="0.435"/›
+    -    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="passive launcher should restart a process if a process died before connected" time="1.502"/›
+    -  ‹/testsuite›
+    -‹/testsuites›
+    +‹?xml version="1.0" encoding="utf-8"?›
+    +‹testsuites name="jest" timestamp="2019-06-07T03:36:23" time="781.292" tests="5487" skipped="9"›
+    +  ‹testsuite name="x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts"›
+    +    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can start and end a process" time="1.316"/›
+    +    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can force kill the process if langServer can not exit" time="3.182"/›
+    +    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can reconnect if process died" time="7.060"›
     +      ‹failure›‹![CDATA[
     +        TypeError: Cannot read property '0' of undefined
     +    at Object.‹anonymous›.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
@@ -193,11 +244,10 @@ it('rewrites jest reports with minimal changes', async () => {
     +  - foo bar
     +
     +‹/system-out›
-         ‹/testcase›
-         ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="passive launcher can start and end a process" time="0.435"/›
-         ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="passive launcher should restart a process if a process died before connected" time="1.502"/›
-       ‹/testsuite›
-    -‹/testsuites›
+    +    ‹/testcase›
+    +    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="passive launcher can start and end a process" time="0.435"/›
+    +    ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="passive launcher should restart a process if a process died before connected" time="1.502"/›
+    +  ‹/testsuite›
     +‹/testsuites›
     \\ No newline at end of file
 
@@ -223,58 +273,77 @@ it('rewrites mocha reports with minimal changes', async () => {
     ===================================================================
     --- mocha.xml	[object Object]
     +++ mocha.xml
-    @@ -1,13 +1,16 @@
-     ‹?xml version="1.0" encoding="utf-8"?›
-     ‹testsuites›
-       ‹testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3"›
-         ‹testcase name="code in multiple nodes &quot;before all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.121"›
+    @@ -1,38 +1,41 @@
+    -‹?xml version="1.0" encoding="utf-8"?›
+    -‹testsuites›
+    -  ‹testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3"›
+    -    ‹testcase name="code in multiple nodes &quot;before all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.121"›
     -      ‹system-out›
     -        ‹![CDATA[]]›
+    -      ‹/system-out›
+    -      ‹failure›
+    -        ‹![CDATA[Error: Unable to read artifact info from https://artifacts-api.opensearch.org/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
+    +‹?xml version="1.0" encoding="utf-8"?›
+    +‹testsuites›
+    +  ‹testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3"›
+    +    ‹testcase name="code in multiple nodes &quot;before all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.121"›
     +      ‹system-out›Failed Tests Reporter:
     +  - foo bar
     +
-    +
-    +
-           ‹/system-out›
-    -      ‹failure›
-    -        ‹![CDATA[Error: Unable to read artifact info from https://artifacts-api.opensearch.org/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
+    +&#xD;
+    +        &#xD;
+    +      ‹/system-out›
     +      ‹failure›‹![CDATA[
     +        Error: Unable to read artifact info from https://artifacts-api.opensearch.org/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
        ‹html›
      ‹head›‹title›503 Service Temporarily Unavailable‹/title›‹/head›
      ‹body bgcolor="white"›
      ‹center›‹h1›503 Service Temporarily Unavailable‹/h1›‹/center›
-    @@ -15,24 +18,24 @@
+     ‹hr›‹center›nginx/1.13.7‹/center›
      ‹/body›
      ‹/html›
-
+    -
+    +
          at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/osd-opensearch/src/artifact.js:95:13)
     -    at process._tickCallback (internal/process/next_tick.js:68:7)]]›
     -      ‹/failure›
+    -    ‹/testcase›
+    -    ‹testcase name="code in multiple nodes &quot;after all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.003"›
+    -      ‹system-out›
+    -        ‹![CDATA[]]›
+    -      ‹/system-out›
+    -      ‹failure›
+    -        ‹![CDATA[TypeError: Cannot read property 'shutdown' of undefined
+    -    at Context.shutdown (plugins/code/server/__tests__/multi_node.ts:125:23)
+    -    at process.topLevelDomainCallback (domain.js:120:23)]]›
+    -      ‹/failure›
+    -    ‹/testcase›
+    -    ‹testcase name="repository service test can not clone a repo by ssh without a key" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/repository_service·ts" time="0.005"›
+    -      ‹system-out›
+    -        ‹![CDATA[]]›
+    -      ‹/system-out›
+    -    ‹/testcase›
+    -  ‹/testsuite›
+    -‹/testsuites›
     +    at process._tickCallback (internal/process/next_tick.js:68:7)
     +      ]]›‹/failure›
-         ‹/testcase›
-         ‹testcase name="code in multiple nodes &quot;after all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.003"›
-           ‹system-out›
-    -        ‹![CDATA[]]›
-    +
-           ‹/system-out›
-           ‹failure›
-    -        ‹![CDATA[TypeError: Cannot read property 'shutdown' of undefined
-    +        TypeError: Cannot read property 'shutdown' of undefined
-         at Context.shutdown (plugins/code/server/__tests__/multi_node.ts:125:23)
-    -    at process.topLevelDomainCallback (domain.js:120:23)]]›
-    +    at process.topLevelDomainCallback (domain.js:120:23)
-           ‹/failure›
-         ‹/testcase›
-         ‹testcase name="repository service test can not clone a repo by ssh without a key" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/repository_service·ts" time="0.005"›
-           ‹system-out›
-    -        ‹![CDATA[]]›
-    +
-           ‹/system-out›
-         ‹/testcase›
-       ‹/testsuite›
-    -‹/testsuites›
+    +    ‹/testcase›
+    +    ‹testcase name="code in multiple nodes &quot;after all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.003"›
+    +      ‹system-out›&#xD;
+    +        &#xD;
+    +      ‹/system-out›
+    +      ‹failure›&#xD;
+    +        TypeError: Cannot read property 'shutdown' of undefined&#xD;
+    +    at Context.shutdown (plugins/code/server/__tests__/multi_node.ts:125:23)&#xD;
+    +    at process.topLevelDomainCallback (domain.js:120:23)&#xD;
+    +      ‹/failure›
+    +    ‹/testcase›
+    +    ‹testcase name="repository service test can not clone a repo by ssh without a key" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/repository_service·ts" time="0.005"›
+    +      ‹system-out›&#xD;
+    +        &#xD;
+    +      ‹/system-out›
+    +    ‹/testcase›
+    +  ‹/testsuite›
     +‹/testsuites›
     \\ No newline at end of file
 
@@ -300,44 +369,68 @@ it('rewrites cypress reports with minimal changes', async () => {
     ===================================================================
     --- cypress.xml	[object Object]
     +++ cypress.xml
-    @@ -1,25 +1,16 @@
+    @@ -1,34 +1,25 @@
     -‹?xml version="1.0" encoding="UTF-8"?›
-    +‹?xml version="1.0" encoding="utf-8"?›
-     ‹testsuites name="Mocha Tests" time="16.198" tests="2" failures="1"›
+    -‹testsuites name="Mocha Tests" time="16.198" tests="2" failures="1"›
     -  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/integration/timeline_flyout_button.spec.ts" failures="0" time="0"›
     -  ‹/testsuite›
-    +  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/integration/timeline_flyout_button.spec.ts" failures="0" time="0"/›
-       ‹testsuite name="timeline flyout button" timestamp="2020-07-22T15:06:26" tests="2" failures="1" time="16.198"›
+    -  ‹testsuite name="timeline flyout button" timestamp="2020-07-22T15:06:26" tests="2" failures="1" time="16.198"›
     -    ‹testcase name="timeline flyout button toggles open the timeline" time="8.099" classname="toggles open the timeline"›
     -    ‹/testcase›
-    +    ‹testcase name="timeline flyout button toggles open the timeline" time="8.099" classname="toggles open the timeline"/›
-         ‹testcase name="timeline flyout button &quot;after each&quot; hook for &quot;toggles open the timeline&quot;" time="8.099" classname="&quot;after each&quot; hook for &quot;toggles open the timeline&quot;"›
+    -    ‹testcase name="timeline flyout button &quot;after each&quot; hook for &quot;toggles open the timeline&quot;" time="8.099" classname="&quot;after each&quot; hook for &quot;toggles open the timeline&quot;"›
     -      ‹failure message="Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
-    +      ‹failure message="Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:&#xA;&#xA;\`&lt;button class=&quot;euiButtonEmpty euiButtonEmpty--text&quot; type=&quot;button&quot; data-test-subj=&quot;timeline-new&quot;›...&lt;/button›\`&#xA;&#xA;You can fix this problem by:&#xA;  - Passing \`{force: true}\` which disables all error checking&#xA;  - Passing \`{waitForAnimations: false}\` which disables waiting on animations&#xA;  - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity&#xA;&#xA;https://on.cypress.io/element-is-animating&#xA;&#xA;Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`timeline flyout button\`" type="CypressError"›‹![CDATA[Failed Tests Reporter:
-    +  - Some extra content
-
+    -
     -\`&lt;button class=&quot;euiButtonEmpty euiButtonEmpty--text&quot; type=&quot;button&quot; data-test-subj=&quot;timeline-new&quot;&gt;...&lt;/button&gt;\`
-
+    -
     -You can fix this problem by:
     -  - Passing \`{force: true}\` which disables all error checking
     -  - Passing \`{waitForAnimations: false}\` which disables waiting on animations
     -  - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity
-    +CypressError: Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
-
+    -
     -https://on.cypress.io/element-is-animating
     -
     -Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`timeline flyout button\`" type="CypressError"›‹![CDATA[CypressError: Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
     -
+    +‹?xml version="1.0" encoding="utf-8"?›
+    +‹testsuites name="Mocha Tests" time="16.198" tests="2" failures="1"›
+    +  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/integration/timeline_flyout_button.spec.ts" failures="0" time="0"/›
+    +  ‹testsuite name="timeline flyout button" timestamp="2020-07-22T15:06:26" tests="2" failures="1" time="16.198"›
+    +    ‹testcase name="timeline flyout button toggles open the timeline" time="8.099" classname="toggles open the timeline"/›
+    +    ‹testcase name="timeline flyout button &quot;after each&quot; hook for &quot;toggles open the timeline&quot;" time="8.099" classname="&quot;after each&quot; hook for &quot;toggles open the timeline&quot;"›
+    +      ‹failure message="Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:&#xD;&#xA;&#xD;&#xA;\`&lt;button class=&quot;euiButtonEmpty euiButtonEmpty--text&quot; type=&quot;button&quot; data-test-subj=&quot;timeline-new&quot;›...&lt;/button›\`&#xD;&#xA;&#xD;&#xA;You can fix this problem by:&#xD;&#xA;  - Passing \`{force: true}\` which disables all error checking&#xD;&#xA;  - Passing \`{waitForAnimations: false}\` which disables waiting on animations&#xD;&#xA;  - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity&#xD;&#xA;&#xD;&#xA;https://on.cypress.io/element-is-animating&#xD;&#xA;&#xD;&#xA;Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`timeline flyout button\`" type="CypressError"›‹![CDATA[Failed Tests Reporter:
+    +  - Some extra content
+    +
+    +
+    +CypressError: Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
+    +
      \`‹button class="euiButtonEmpty euiButtonEmpty--text" type="button" data-test-subj="timeline-new"›...‹/button›\`
-
+    -
+    +
      You can fix this problem by:
        - Passing \`{force: true}\` which disables all error checking
-    @@ -46,5 +37,5 @@
+       - Passing \`{waitForAnimations: false}\` which disables waiting on animations
+       - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity
+    -
+    +
+     https://on.cypress.io/element-is-animating
+    -
+    +
+     Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`timeline flyout button\`
+         at cypressErr (https://example.com/__cypress/runner/cypress_runner.js:146621:16)
+         at cypressErrByPath (https://example.com/__cypress/runner/cypress_runner.js:146630:10)
+         at Object.throwErrByPath (https://example.com/__cypress/runner/cypress_runner.js:146593:11)
+    @@ -43,8 +34,8 @@
+         at https://example.com/__cypress/runner/cypress_runner.js:140259:16
+         at tryCatcher (https://example.com/__cypress/runner/cypress_runner.js:9065:23)
+         at Promise._settlePromiseFromHandler (https://example.com/__cypress/runner/cypress_runner.js:7000:31)
          at Promise._settlePromise (https://example.com/__cypress/runner/cypress_runner.js:7057:18)
-         at Promise._settlePromise0 (https://example.com/__cypress/runner/cypress_runner.js:7102:10)]]›‹/failure›
-         ‹/testcase›
-       ‹/testsuite›
+    -    at Promise._settlePromise0 (https://example.com/__cypress/runner/cypress_runner.js:7102:10)]]›‹/failure›
+    -    ‹/testcase›
+    -  ‹/testsuite›
     -‹/testsuites›
+    +    at Promise._settlePromise0 (https://example.com/__cypress/runner/cypress_runner.js:7102:10)]]›‹/failure›
+    +    ‹/testcase›
+    +  ‹/testsuite›
     +‹/testsuites›
     \\ No newline at end of file
 
