@@ -35,9 +35,9 @@ import { FatalErrorsSetup } from '../../../../../core/public';
  * @deprecated Use `core.fatalErrors.add` instead
  */
 export function addFatalError(
-    fatalErrors: FatalErrorsSetup,
-    error: Error | string,
-    location?: string
-  ) {
-    fatalErrors.add(error, location);
-  }
+  fatalErrors: FatalErrorsSetup,
+  error: Error | string,
+  location?: string
+) {
+  fatalErrors.add(error, location);
+}

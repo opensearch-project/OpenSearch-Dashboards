@@ -31,3 +31,4 @@
 export { formatOpenSearchMsg } from './format_opensearch_msg';
 export { formatMsg } from './format_msg';
 export { formatStack } from './format_stack';
+export { addFatalError } from './add_fatal_error';
