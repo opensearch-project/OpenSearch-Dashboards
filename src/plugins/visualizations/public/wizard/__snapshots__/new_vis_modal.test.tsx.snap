@@ -665,7 +665,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         className="euiScreenReaderOnly"
                                       >
                                         <FormattedMessage
-                                          defaultMessage="{resultCount} {resultCount, plural, one {type} other {types} } found"
+                                          defaultMessage="{resultCount} {resultCount, plural,
+ one {type}
+ other {types}
+ } found"
                                           id="visualizations.newVisWizard.resultsFound"
                                           values={
                                             Object {

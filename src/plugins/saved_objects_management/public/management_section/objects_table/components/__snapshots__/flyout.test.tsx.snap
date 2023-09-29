@@ -38,7 +38,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          defaultMessage="The following saved objects use index patterns that do not exist.
+ Please select the index patterns you'd like re-associated with
+ them. You can {indexPatternLink} if necessary."
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
           values={
             Object {
@@ -325,7 +327,9 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          defaultMessage="The following saved objects use index patterns that do not exist.
+ Please select the index patterns you'd like re-associated with
+ them. You can {indexPatternLink} if necessary."
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
           values={
             Object {
@@ -488,7 +492,9 @@ Array [
   >
     <p>
       <FormattedMessage
-        defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+        defaultMessage="The following saved objects use index patterns that do not exist.
+ Please select the index patterns you'd like re-associated with
+ them. You can {indexPatternLink} if necessary."
         id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {

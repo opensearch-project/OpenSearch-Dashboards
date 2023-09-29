@@ -59,7 +59,8 @@ exports[`share url panel content render 1`] = `
                   <EuiIconTip
                     content={
                       <FormattedMessage
-                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
+                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+ Edits to the saved {objectType} won't be visible via this URL."
                         id="share.urlPanel.snapshotDescription"
                         values={
                           Object {
@@ -149,7 +150,10 @@ exports[`share url panel content render 1`] = `
           <EuiIconTip
             content={
               <FormattedMessage
-                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
+                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
+ Internet Explorer has URL length restrictions,
+ and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
+ but the short URL should work great."
                 id="share.urlPanel.shortUrlHelpText"
                 values={Object {}}
               />
@@ -221,7 +225,8 @@ exports[`share url panel content should enable saved object export option when o
                   <EuiIconTip
                     content={
                       <FormattedMessage
-                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
+                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+ Edits to the saved {objectType} won't be visible via this URL."
                         id="share.urlPanel.snapshotDescription"
                         values={
                           Object {
@@ -311,7 +316,10 @@ exports[`share url panel content should enable saved object export option when o
           <EuiIconTip
             content={
               <FormattedMessage
-                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
+                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
+ Internet Explorer has URL length restrictions,
+ and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
+ but the short URL should work great."
                 id="share.urlPanel.shortUrlHelpText"
                 values={Object {}}
               />
@@ -383,7 +391,8 @@ exports[`share url panel content should hide short url section when allowShortUr
                   <EuiIconTip
                     content={
                       <FormattedMessage
-                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
+                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+ Edits to the saved {objectType} won't be visible via this URL."
                         id="share.urlPanel.snapshotDescription"
                         values={
                           Object {
@@ -500,7 +509,8 @@ exports[`should show url param extensions 1`] = `
                   <EuiIconTip
                     content={
                       <FormattedMessage
-                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
+                        defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+ Edits to the saved {objectType} won't be visible via this URL."
                         id="share.urlPanel.snapshotDescription"
                         values={
                           Object {
@@ -603,7 +613,10 @@ exports[`should show url param extensions 1`] = `
           <EuiIconTip
             content={
               <FormattedMessage
-                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
+                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
+ Internet Explorer has URL length restrictions,
+ and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
+ but the short URL should work great."
                 id="share.urlPanel.shortUrlHelpText"
                 values={Object {}}
               />
