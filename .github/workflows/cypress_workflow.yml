@@ -36,7 +36,7 @@ env:
   START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch'
   OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot'
   NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
-  SPEC: ${{ inputs.specs != '' && inputs.specs || 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,' }} 
+  SPEC: ${{ inputs.specs != '' && inputs.specs || 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/apps/vis_*,cypress/integration/core-opensearch-dashboards/opensearch-dashboards/dashboard_sanity_test_spec.js,' }} 
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false

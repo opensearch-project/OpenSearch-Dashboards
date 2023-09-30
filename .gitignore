@@ -26,6 +26,8 @@ target
 /test/*/screenshots/failure
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
+/scripts/random
+/scripts/random.tar.gz
 /html_docs
 .eslintcache
 /data
