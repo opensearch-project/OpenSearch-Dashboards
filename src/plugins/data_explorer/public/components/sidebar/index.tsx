@@ -61,9 +61,7 @@ export const Sidebar: FC = ({ children }) => {
     // will redirect user to Observability event explorer
     if (selectedDataSources[0].ds?.getType() !== 'Index patterns') {
       return application.navigateToUrl(
-        `../observability-logs#/explorer?metadata:(datasource:${JSON.stringify(
-          selectedDataSources[0]
-        )})`
+        `../observability-logs#/explorer?datasourceName=${selectedDataSources[0].label}&datasourceType=${selectedDataSources[0].type}`
       );
     }
     setSelectedSources(selectedDataSources);
@@ -73,8 +71,6 @@ export const Sidebar: FC = ({ children }) => {
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
-        {/* <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
-          <EuiComboBox */}
         <EuiSplitPanel.Inner paddingSize="s" grow={false}>
           <DataSourceSelectable
             dataSources={activeDataSources}
