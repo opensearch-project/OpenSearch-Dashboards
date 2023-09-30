@@ -60,7 +60,12 @@ import {
   DiscoverUrlGenerator,
 } from './url_generator';
 import { SearchEmbeddableFactory } from './embeddable';
-import { PLUGIN_ID } from '../common';
+import {
+  DEFAULT_DATASOURCE_TYPE,
+  PLUGIN_ID,
+  DEFAULT_DATASOURCE_NAME,
+  INDEX_PATTERN_DATASOURCE_TYPE,
+} from '../common';
 import { DataExplorerPluginSetup } from '../../data_explorer/public';
 import { registerFeature } from './register_feature';
 import {
@@ -69,6 +74,7 @@ import {
   getPreloadedState,
 } from './application/utils/state_management/discover_slice';
 import { migrateUrlState } from './migrate_state';
+import { DefaultDslDataSource } from './datasources';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -365,6 +371,18 @@ export class DiscoverPlugin
     };
 
     this.initializeServices();
+
+    // Datasources registrations for index patterns datasource
+    const { dataSourceService, dataSourceFactory } = plugins.data.dataSources;
+    dataSourceFactory.registerDataSourceType(DEFAULT_DATASOURCE_TYPE, DefaultDslDataSource);
+    dataSourceService.registerDataSource(
+      dataSourceFactory.getDataSourceInstance(DEFAULT_DATASOURCE_TYPE, {
+        name: DEFAULT_DATASOURCE_NAME,
+        type: INDEX_PATTERN_DATASOURCE_TYPE,
+        metadata: null,
+        indexPatterns: plugins.data.indexPatterns,
+      })
+    );
 
     return {
       urlGenerator: this.urlGenerator,
