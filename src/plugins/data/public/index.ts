@@ -519,4 +519,6 @@ export {
   DataSourceSelector,
   DataSourceSelectable,
   DataSourceSelectableProps,
+  DataSourceGroup,
+  DataSourceOption,
 } from './data_sources/datasource_selector';

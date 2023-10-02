@@ -5,4 +5,4 @@
 
 export { DataSourceSelector } from './datasource_selector';
 export { DataSourceSelectable } from './datasource_selectable';
-export { DataSourceSelectableProps, DataSourceGroup } from './types';
+export { DataSourceSelectableProps, DataSourceGroup, DataSourceOption } from './types';

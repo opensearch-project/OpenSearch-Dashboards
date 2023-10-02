@@ -3,19 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useCallback } from 'react';
 import { EuiSplitPanel, EuiPageSideBar } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { useTypedDispatch, useTypedSelector, setIndexPattern } from '../../utils/state_management';
-import { DataSourceSelectable } from '../../../../data/public';
+import { DataSourceGroup, DataSourceSelectable, DataSourceType } from '../../../../data/public';
+import { DataSourceOption } from '../../../../data/public/';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
   const dispatch = useTypedDispatch();
-  const [selectedSources, setSelectedSources] = useState([]);
-  const [dataSourceOptionList, setDataSourceOptionList] = useState([]);
-  const [activeDataSources, setActiveDataSources] = useState([]);
+  const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
+  const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
+  const [activeDataSources, setActiveDataSources] = useState<DataSourceType[]>([]);
 
   const {
     services: {
@@ -30,7 +31,7 @@ export const Sidebar: FC = ({ children }) => {
     const subscription = dataSources.dataSourceService.dataSources$.subscribe(
       (currentDataSources) => {
         if (isMounted) {
-          setActiveDataSources([...Object.values(currentDataSources)]);
+          setActiveDataSources(Object.values(currentDataSources));
         }
       }
     );
@@ -41,7 +42,7 @@ export const Sidebar: FC = ({ children }) => {
     };
   }, [indexPatterns, dataSources]);
 
-  const getMatchedOption = (dataSourceList, ipId: string) => {
+  const getMatchedOption = (dataSourceList: DataSourceGroup[], ipId: string) => {
     for (const dsGroup of dataSourceList) {
       return dsGroup.options.find((item) => {
         return item.value === ipId;
@@ -56,7 +57,7 @@ export const Sidebar: FC = ({ children }) => {
     }
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
-  const handleSourceSelection = (selectedDataSources) => {
+  const handleSourceSelection = (selectedDataSources: DataSourceOption[]) => {
     // Temperary redirection solution for 2.11, where clicking non-index-pattern datasource
     // will redirect user to Observability event explorer
     if (selectedDataSources[0].ds?.getType() !== 'Index patterns') {
@@ -68,6 +69,13 @@ export const Sidebar: FC = ({ children }) => {
     dispatch(setIndexPattern(selectedDataSources[0].value));
   };
 
+  const handleDataSetFetchError = useCallback(
+    () => (error: Error) => {
+      toasts.addError(error, { title: `Data set fetching error: ${error}` });
+    },
+    [toasts]
+  );
+
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
@@ -78,6 +86,7 @@ export const Sidebar: FC = ({ children }) => {
             setDataSourceOptionList={setDataSourceOptionList}
             setSelectedSources={handleSourceSelection}
             selectedSources={selectedSources}
+            onFetchDataSetError={handleDataSetFetchError}
           />
           {/* <EuiComboBox
             placeholder="Select a datasource"
