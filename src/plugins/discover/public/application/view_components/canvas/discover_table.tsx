@@ -34,6 +34,7 @@ export const DiscoverTable = ({ history }: Props) => {
     data: {
       query: { filterManager },
     },
+    store,
   } = services;
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>({
@@ -71,7 +72,7 @@ export const DiscoverTable = ({ history }: Props) => {
   );
 
   const { rows } = fetchState || {};
-  const { savedSearch } = useSearch(services);
+  const { savedSearch } = useSearch(services, store);
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {

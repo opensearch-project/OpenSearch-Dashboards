@@ -5,6 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { DataExplorerServices, ViewProps } from '../../../../../data_explorer/public';
+import { DiscoverViewServices } from '../../../build_services';
 import {
   OpenSearchDashboardsContextProvider,
   useOpenSearchDashboards,
@@ -19,10 +20,13 @@ const SearchContext = React.createContext<SearchContextValue>({} as SearchContex
 export default function DiscoverContext({ children }: React.PropsWithChildren<ViewProps>) {
   const { services: deServices } = useOpenSearchDashboards<DataExplorerServices>();
   const services = getServices();
-  const searchParams = useSearch({
-    ...deServices,
-    ...services,
-  });
+  const searchParams = useSearch(
+    {
+      ...deServices,
+      ...services,
+    },
+    store
+  );
 
   const { osdUrlStateStorage } = deServices;
 

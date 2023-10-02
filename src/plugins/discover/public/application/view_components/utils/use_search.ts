@@ -25,7 +25,7 @@ import {
   Chart,
 } from '../../components/chart/utils';
 import { SavedSearch } from '../../../saved_searches';
-import { useSelector } from '../../utils/state_management';
+import { useSelector, StoreType } from '../../utils/state_management';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -66,11 +66,11 @@ export type RefetchSubject = Subject<SearchRefetch>;
  * return () => subscription.unsubscribe();
  * }, [data$]);
  */
-export const useSearch = (services: DiscoverViewServices) => {
+export const useSearch = (services: DiscoverViewServices, store: StoreType) => {
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
-  const indexPattern = useIndexPattern(services);
+  const indexPattern = useIndexPattern(services, store);
   const { data, filterManager, getSavedSearchById, core, toastNotifications } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
