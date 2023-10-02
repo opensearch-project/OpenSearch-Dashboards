@@ -57,7 +57,7 @@ export function juniperLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-juniper.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/juniper.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/juniper.svg',
     artifacts: {
       dashboards: [],
       application: {

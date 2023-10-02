@@ -62,12 +62,13 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
         defaultMessage: 'Console',
       }),
       enableRouting: false,
-      mount: async ({ element }) => {
+      mount: async ({ element, dataSourceId }) => {
         const [core] = await getStartServices();
 
         const {
           i18n: { Context: I18nContext },
           docLinks: { DOC_LINK_VERSION },
+          uiSettings,
         } = core;
 
         const { renderApp } = await import('./application');
@@ -79,6 +80,8 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           notifications,
           usageCollection,
           element,
+          dataSourceId,
+          uiSettings,
         });
       },
     });

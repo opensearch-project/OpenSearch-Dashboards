@@ -3,6 +3,7 @@
 /.chromium
 /build
 /built_assets
+/bwc_tmp
 /config/apm.dev.js
 /data
 /html_docs

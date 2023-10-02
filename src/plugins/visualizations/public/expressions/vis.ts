@@ -55,6 +55,7 @@ export interface ExprVisAPIEvents {
   filter: (data: any) => void;
   brush: (data: any) => void;
   applyFilter: (data: any) => void;
+  externalAction: (data: any) => void;
 }
 
 export interface ExprVisAPI {
@@ -98,6 +99,10 @@ export class ExprVis extends EventEmitter {
         applyFilter: (data: any) => {
           if (!this.eventsSubject) return;
           this.eventsSubject.next({ name: 'applyFilter', data });
+        },
+        externalAction: (data: any) => {
+          if (!this.eventsSubject) return;
+          this.eventsSubject.next({ name: 'externalAction', data });
         },
       },
     };

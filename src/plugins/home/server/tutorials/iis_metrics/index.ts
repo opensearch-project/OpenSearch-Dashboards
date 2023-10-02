@@ -57,7 +57,7 @@ export function iisMetricsSpecProvider(context: TutorialContext): TutorialSchema
       },
     }),
     isBeta: true,
-    euiIconType: '/plugins/home/assets/logos/iis.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/iis.svg',
     artifacts: {
       dashboards: [
         {

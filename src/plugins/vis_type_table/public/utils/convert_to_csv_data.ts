@@ -46,7 +46,7 @@ interface CSVDataProps {
   uiSettings: CoreStart['uiSettings'];
 }
 
-const toCsv = function (formatted: boolean, { rows, columns, uiSettings }: CSVDataProps) {
+export const toCsv = function (formatted: boolean, { rows, columns, uiSettings }: CSVDataProps) {
   const separator = uiSettings.get(CSV_SEPARATOR_SETTING);
   const quoteValues = uiSettings.get(CSV_QUOTE_VALUES_SETTING);
 

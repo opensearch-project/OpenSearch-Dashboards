@@ -1,14 +1,12 @@
-.visTable__group {
-  padding: $euiSizeS;
-  margin-bottom: $euiSizeL;
+// Container for the Table Visualization component
+.visTable {
+  flex: 1 0 0;
+  overflow: auto;
 
-  > h3 {
-    text-align: center;
-  }
+  @include euiScrollBar;
 }
 
-.visTable__groupInColumns {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+// Group container for table visualization components
+.visTable__group {
+  flex: 0 0 auto;
 }

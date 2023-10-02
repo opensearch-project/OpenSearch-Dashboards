@@ -28,12 +28,12 @@
  * under the License.
  */
 
-// @ts-ignore
 import { ConstantComponent } from './constant_component';
+import { SharedComponent } from './shared_component';
 
 export class FullRequestComponent extends ConstantComponent {
-  private readonly name: string;
-  constructor(name: string, parent: any, private readonly template: string) {
+  readonly name: string;
+  constructor(name: string, parent: SharedComponent, private readonly template: string) {
     super(name, parent);
     this.name = name;
   }

@@ -44,7 +44,7 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
       defaultMessage: 'Munin metrics',
     }),
     moduleName,
-    euiIconType: '/plugins/home/assets/logos/munin.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/munin.svg',
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.muninMetrics.shortDescription', {

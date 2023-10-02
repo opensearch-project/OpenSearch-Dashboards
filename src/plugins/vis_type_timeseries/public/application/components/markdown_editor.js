@@ -126,7 +126,7 @@ export class MarkdownEditor extends Component {
           <EuiCodeEditor
             onLoad={this.handleOnLoad}
             mode="markdown"
-            theme="github"
+            theme="textmate"
             width="100%"
             height="100%"
             name={`ace-${model.id}`}

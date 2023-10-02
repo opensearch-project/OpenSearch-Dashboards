@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import Url from 'url';
 import { OsdClient } from '@osd/dev-utils';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -37,7 +36,7 @@ export function OpenSearchDashboardsServerProvider({ getService }: FtrProviderCo
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
-  const url = Url.format(config.get('servers.opensearchDashboards'));
+  const url = config.get('servers.opensearchDashboards.serverUrl');
   const defaults = config.get('uiSettings.defaults');
   const osd = new OsdClient({
     log,

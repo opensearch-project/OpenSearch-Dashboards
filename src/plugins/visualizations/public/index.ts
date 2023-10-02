@@ -41,9 +41,18 @@ export function plugin(initializerContext: PluginInitializerContext) {
 /** @public static code */
 export { Vis } from './vis';
 export { TypesService } from './vis_types/types_service';
-export { VISUALIZE_EMBEDDABLE_TYPE, VIS_EVENT_TO_TRIGGER } from './embeddable';
+export {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VIS_EVENT_TO_TRIGGER,
+  VisualizeEmbeddable,
+  DisabledLabEmbeddable,
+} from './embeddable';
 export { VisualizationContainer, VisualizationNoResults } from './components';
-export { getSchemas as getVisSchemas, buildVislibDimensions } from './legacy/build_pipeline';
+export {
+  getSchemas as getVisSchemas,
+  buildVislibDimensions,
+  VislibDimensions,
+} from './legacy/build_pipeline';
 
 /** @public types */
 export { VisualizationsSetup, VisualizationsStart };
@@ -67,3 +76,4 @@ export {
 export { ExprVisAPIEvents } from './expressions/vis';
 export { VisualizationListItem } from './vis_types/vis_type_alias_registry';
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+export { createSavedVisLoader } from './saved_visualizations';

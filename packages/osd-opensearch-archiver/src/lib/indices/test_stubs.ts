@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Client } from 'elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 import sinon from 'sinon';
 import { ToolingLog } from '@osd/dev-utils';
 import { Stats } from '../stats';
@@ -113,14 +113,13 @@ export const createStubClient = (
       getAlias: sinon.spy(async ({ index, name }) => {
         if (index && existingIndices.indexOf(index) >= 0) {
           const result = indexAlias(aliases, index);
-          return { [index]: { aliases: result ? { [result]: {} } : {} } };
+          return { body: { [index]: { aliases: result ? { [result]: {} } : {} } } };
         }
 
         if (name && aliases[name]) {
-          return { [aliases[name]]: { aliases: { [name]: {} } } };
+          return { body: { [aliases[name]]: { aliases: { [name]: {} } } } };
         }
-
-        return { status: 404 };
+        return { statusCode: 404 };
       }),
       updateAliases: sinon.spy(async ({ body }) => {
         body.actions.forEach(

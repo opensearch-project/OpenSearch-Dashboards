@@ -8,6 +8,7 @@
 .node_binaries
 .native_modules
 node_modules
+opensearch-dashboards-docker-dev/
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
 trash

@@ -106,7 +106,7 @@ export function verifyMessages(
           typeof message === 'string' ? message : message.text,
           messageId
         );
-      } catch (err) {
+      } catch (err: any) {
         if (options.ignoreIncompatible) {
           localizedMessagesMap.delete(messageId);
           options.log.warning(`Incompatible translation ignored: ${err.message}`);

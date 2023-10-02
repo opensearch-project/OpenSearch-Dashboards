@@ -33,7 +33,7 @@ import Color from 'color';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { seedColors } from './seed_colors';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { MappedColors } from './mapped_colors';
 
 // Local state for config
@@ -65,19 +65,19 @@ describe('Mapped Colors', () => {
   });
 
   it('should not include colors used by the config', () => {
-    const newConfig = { bar: seedColors[0] };
+    const newConfig = { bar: euiPaletteColorBlind()[9] };
     config.set(COLOR_MAPPING_SETTING, newConfig);
 
     const arr = ['foo', 'baz', 'qux'];
     mappedColors.mapKeys(arr);
 
     const colorValues = _(mappedColors.mapping).values();
-    expect(colorValues).not.toContain(seedColors[0]);
+    expect(colorValues).not.toContain(euiPaletteColorBlind()[9]);
     expect(colorValues.uniq().size()).toBe(arr.length);
   });
 
   it('should create a unique array of colors even when config is set', () => {
-    const newConfig = { bar: seedColors[0] };
+    const newConfig = { bar: euiPaletteColorBlind()[9] };
     config.set(COLOR_MAPPING_SETTING, newConfig);
 
     const arr = ['foo', 'bar', 'baz', 'qux'];
@@ -85,11 +85,11 @@ describe('Mapped Colors', () => {
 
     const expectedSize = _(arr).difference(_.keys(newConfig)).size();
     expect(_(mappedColors.mapping).values().uniq().size()).toBe(expectedSize);
-    expect(mappedColors.get(arr[0])).not.toBe(seedColors[0]);
+    expect(mappedColors.get(arr[0])).not.toBe(euiPaletteColorBlind()[9]);
   });
 
   it('should treat different formats of colors as equal', () => {
-    const color = new Color(seedColors[0]);
+    const color = new Color(euiPaletteColorBlind()[9]);
     const rgb = `rgb(${color.red()}, ${color.green()}, ${color.blue()})`;
     const newConfig = { bar: rgb };
     config.set(COLOR_MAPPING_SETTING, newConfig);
@@ -99,8 +99,8 @@ describe('Mapped Colors', () => {
 
     const expectedSize = _(arr).difference(_.keys(newConfig)).size();
     expect(_(mappedColors.mapping).values().uniq().size()).toBe(expectedSize);
-    expect(mappedColors.get(arr[0])).not.toBe(seedColors[0]);
-    expect(mappedColors.get('bar')).toBe(seedColors[0]);
+    expect(mappedColors.get(arr[0])).not.toBe(euiPaletteColorBlind()[9]);
+    expect(mappedColors.get('bar')).toBe(euiPaletteColorBlind()[9].toLowerCase());
   });
 
   it('should have a flush method that moves the current map to the old map', function () {

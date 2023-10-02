@@ -33,12 +33,15 @@ import { CoreStart, NotificationsStart, IUiSettingsClient } from 'src/core/publi
 import { DataPublicPluginStart } from '../../data/public';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { MapsLegacyConfig } from '../../maps_legacy/config';
+import { UiActionsStart } from '../../ui_actions/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
+
+export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UIActions');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Client, CreateDocumentParams } from 'elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 import { ToolingLog, OsdClient } from '@osd/dev-utils';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
@@ -52,15 +52,17 @@ export async function deleteOpenSearchDashboardsIndices({
 
   await client.indices.putSettings({
     index: indexNames,
-    body: { index: { blocks: { read_only: false } } },
+    body: { blocks: { read_only: false } },
   });
 
-  await deleteIndex({
-    client,
-    stats,
-    index: indexNames,
-    log,
-  });
+  for (const indexName of indexNames) {
+    await deleteIndex({
+      client,
+      stats,
+      index: indexName,
+      log,
+    });
+  }
 
   return indexNames;
 }
@@ -101,8 +103,8 @@ async function fetchOpenSearchDashboardsIndices(client: Client) {
     format: 'json',
   });
   const isOpenSearchDashboardsIndex = (index: string) => /^\.kibana(:?_\d*)?$/.test(index);
-  return opensearchDashboardsIndices
-    .map((x: { index: string }) => x.index)
+  return opensearchDashboardsIndices.body
+    .map((x) => x.index?.toString() ?? '')
     .filter(isOpenSearchDashboardsIndex);
 }
 
@@ -133,21 +135,19 @@ export async function cleanOpenSearchDashboardsIndices({
           bool: {
             must_not: {
               ids: {
-                type: '_doc',
                 values: ['space:default'],
               },
             },
           },
         },
       },
-      ignore: [409],
     });
 
-    if (resp.total !== resp.deleted) {
+    if (resp.body.total !== resp.body.deleted) {
       log.warning(
         'delete by query deleted %d of %d total documents, trying again',
-        resp.deleted,
-        resp.total
+        resp.body.deleted,
+        resp.body.total
       );
       continue;
     }
@@ -166,9 +166,7 @@ export async function cleanOpenSearchDashboardsIndices({
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
   await client.create({
     index,
-    type: '_doc',
     id: 'space:default',
-    ignore: 409,
     body: {
       type: 'space',
       updated_at: new Date().toISOString(),
@@ -179,5 +177,5 @@ export async function createDefaultSpace({ index, client }: { index: string; cli
         _reserved: true,
       },
     },
-  } as CreateDocumentParams);
+  });
 }

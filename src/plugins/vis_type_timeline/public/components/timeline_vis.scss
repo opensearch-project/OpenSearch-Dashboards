@@ -7,12 +7,16 @@
   // Custom Jquery FLOT / schema selectors
   // Cannot change at the moment
 
-  .chart-top-title {
+  .chart-top-title,
+  .axisLabels {
     @include euiFontSizeXS;
 
+    font-weight: $euiFontWeightBold;
+  }
+
+  .chart-top-title {
     flex: 0;
     text-align: center;
-    font-weight: $euiFontWeightBold;
   }
 
   .chart-canvas {

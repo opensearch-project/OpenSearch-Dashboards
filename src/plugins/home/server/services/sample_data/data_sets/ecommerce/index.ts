@@ -33,6 +33,7 @@ import { i18n } from '@osd/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
+import { getSavedObjectsWithDataSource, appendDataSourceId } from '../util';
 
 const ecommerceName = i18n.translate('home.sampleData.ecommerceSpecTitle', {
   defaultMessage: 'Sample eCommerce orders',
@@ -42,6 +43,9 @@ const ecommerceDescription = i18n.translate('home.sampleData.ecommerceSpecDescri
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
+const DEFAULT_INDEX = 'ff959d40-b880-11e8-a6d9-e546fe2bba5f';
+const DASHBOARD_ID = '722b74f0-b882-11e8-a6d9-e546fe2bba5f';
+
 export const ecommerceSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'ecommerce',
@@ -49,10 +53,15 @@ export const ecommerceSpecProvider = function (): SampleDatasetSchema {
     description: ecommerceDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard_dark.png',
-    overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+    hasNewThemeImages: true,
+    overviewDashboard: DASHBOARD_ID,
+    getDataSourceIntegratedDashboard: appendDataSourceId(DASHBOARD_ID),
     appLinks: initialAppLinks,
-    defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+    defaultIndex: DEFAULT_INDEX,
+    getDataSourceIntegratedDefaultIndex: appendDataSourceId(DEFAULT_INDEX),
     savedObjects: getSavedObjects(),
+    getDataSourceIntegratedSavedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
+      getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
     dataIndices: [
       {
         id: 'ecommerce',

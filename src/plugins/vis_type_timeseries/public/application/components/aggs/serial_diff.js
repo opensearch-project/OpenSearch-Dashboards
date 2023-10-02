@@ -57,7 +57,8 @@ export const SerialDiffAgg = (props) => {
   const handleNumberChange = createNumberHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
-  const docLinks = useOpenSearchDashboards().services.docLinks;
+  const serialDiffDoc = useOpenSearchDashboards().services.docLinks?.links.opensearch.aggregations
+    .pipeline.serial_diff;
 
   return (
     <AggRow
@@ -111,7 +112,7 @@ export const SerialDiffAgg = (props) => {
                 id="visTypeTimeseries.serialDiff.lagLabel"
                 defaultMessage="Lag"
                 description={`'Lag' refers to the parameter name of the serial diff translation
-                ${docLinks.services.links.opensearch.aggregations.pipeline.serial_diff}.
+                ${serialDiffDoc}.
                 This should only be translated if there is a reasaonable word explaining what that parameter does.`}
               />
             }

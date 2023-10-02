@@ -1,0 +1,38 @@
+@startuml
+
+title: Proposed Saved Object Service Flow
+
+actor User
+
+participant "OpenSearch-Dashboards" as OSD
+
+box "Saved Object Service" #LightBlue
+participant "Saved Object Client" as Client
+participant "Repository Factory Provider" as Factory
+end box
+
+box "Dashboards Storage Plugin" #LightYellow
+participant "Repository\n(e.g. PostgresRepository,\nDynamoDBRepository)" as Repo
+participant "Metadata Storage\n(e.g. Postgres, \nDynamoDB etc)" as Meta
+end box
+
+autonumber
+group OSD Bootstrap
+Repo -> Factory: Register custom repository
+Factory -> Client: Returns repository
+Client -> OSD: Returns Saved Object Client
+end group
+User -> Client: Create Saved Object
+Client -> Repo: Create Saved Object
+Repo -> Meta: Create/Update Record
+Meta --> Repo: Saved Object Saved
+Client -> User: Saved Object Created
+User -> Client: Get Saved Object
+Client -> Repo: Get Saved Object
+Repo -> Meta: Fetch Saved Object from storage
+Meta --> Repo: Return Saved Object
+Repo -> Client: Return Saved Object
+Client -> User: Saved Object Data
+
+skinparam BoxPadding 15
+@enduml

@@ -42,9 +42,14 @@ import {
   EuiPopoverProps,
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 
-import { legendColors, LegendItem } from './models';
+import { LegendItem } from './models';
+
+// starting from the default categorical colors, we generate 6 additional variants,
+// 3 lighter and 3 darker
+export const legendColors = euiPaletteColorBlind({ rotations: 7, direction: 'both' });
 
 interface Props {
   item: LegendItem;

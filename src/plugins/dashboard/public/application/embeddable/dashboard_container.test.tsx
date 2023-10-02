@@ -28,22 +28,37 @@
  * under the License.
  */
 
+import { I18nProvider } from '@osd/i18n/react';
 import { nextTick } from 'test_utils/enzyme_helpers';
-import { isErrorEmbeddable, ViewMode } from '../../embeddable_plugin';
-import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddablePanel,
+  isErrorEmbeddable,
+  ViewMode,
+} from '../../../../embeddable/public';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
+  createEditModeAction,
+} from '../../../../embeddable/public/lib/test_samples';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
+import { applicationServiceMock } from '../../../../../core/public/mocks';
+import React from 'react';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { mount } from 'enzyme';
+import { findTestSubject } from 'test_utils/helpers';
 
 const options: DashboardContainerOptions = {
   application: {} as any,
   embeddable: {} as any,
+  chrome: {} as any,
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
@@ -144,4 +159,90 @@ test('Container view mode change propagates to new children', async () => {
   container.updateInput({ viewMode: ViewMode.EDIT });
 
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+});
+
+test('DashboardContainer in edit mode shows edit mode actions', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  const uiActionsSetup = uiActionsPluginMock.createSetupContract();
+
+  const editModeAction = createEditModeAction();
+  uiActionsSetup.registerAction(editModeAction);
+  uiActionsSetup.addTriggerAction(CONTEXT_MENU_TRIGGER, editModeAction);
+  setup.registerEmbeddableFactory(
+    CONTACT_CARD_EMBEDDABLE,
+    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
+  );
+
+  const start = doStart();
+
+  const initialInput = getSampleDashboardInput({ viewMode: ViewMode.VIEW });
+  const containerOptions: DashboardContainerOptions = {
+    application: applicationServiceMock.createStartContract(),
+    embeddable: start,
+    chrome: {} as any,
+    notifications: {} as any,
+    overlays: {} as any,
+    inspector: {} as any,
+    SavedObjectFinder: () => null,
+    ExitFullScreenButton: () => null,
+    uiActions: {} as any,
+  };
+  const container = new DashboardContainer(initialInput, containerOptions);
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Bob',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <OpenSearchDashboardsContextProvider services={containerOptions}>
+        <EmbeddablePanel
+          embeddable={embeddable}
+          getActions={() => Promise.resolve([])}
+          getAllEmbeddableFactories={(() => []) as any}
+          getEmbeddableFactory={(() => null) as any}
+          notifications={{} as any}
+          application={containerOptions.application}
+          overlays={{} as any}
+          inspector={inspector}
+          SavedObjectFinder={() => null}
+        />
+      </OpenSearchDashboardsContextProvider>
+    </I18nProvider>
+  );
+
+  const button = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
+
+  expect(button.length).toBe(1);
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+
+  expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
+
+  const editAction = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
+
+  expect(editAction.length).toBe(0);
+
+  container.updateInput({ viewMode: ViewMode.EDIT });
+  await nextTick();
+  component.update();
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  await nextTick();
+  component.update();
+  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(0);
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  await nextTick();
+  component.update();
+  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
+
+  await nextTick();
+  component.update();
+
+  // TODO: Address this.
+  // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
+  // expect(action.length).toBe(1);
 });

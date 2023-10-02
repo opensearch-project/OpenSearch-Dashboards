@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import url, { format as formatUrl } from 'url';
 import pkg from '../../../../package.json';
 import { adminTestUser } from '../osd';
 
@@ -42,7 +41,7 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
   }
 
   getUrl() {
-    return formatUrl(this.getUrlParts());
+    return this.getUrlParts().serverUrl;
   }
 
   getBuildFrom() {
@@ -56,30 +55,39 @@ export const opensearchTestConfig = new (class OpenSearchTestConfig {
   getUrlParts() {
     // Allow setting one complete TEST_OPENSEARCH_URL for opensearch like https://opensearch:changeme@example.com:9200
     if (process.env.TEST_OPENSEARCH_URL) {
-      const testOpenSearchUrl = url.parse(process.env.TEST_OPENSEARCH_URL);
+      const testOpenSearchUrl = new URL('', process.env.TEST_OPENSEARCH_URL);
+      testOpenSearchUrl.pathname = '';
       return {
         // have to remove the ":" off protocol
         protocol: testOpenSearchUrl.protocol.slice(0, -1),
         hostname: testOpenSearchUrl.hostname,
         port: parseInt(testOpenSearchUrl.port, 10),
-        username: testOpenSearchUrl.auth.split(':')[0],
-        password: testOpenSearchUrl.auth.split(':')[1],
-        auth: testOpenSearchUrl.auth,
+        username: testOpenSearchUrl.username,
+        password: testOpenSearchUrl.password,
+        auth: `${testOpenSearchUrl.username}:${testOpenSearchUrl.password}`,
+        fullURL: testOpenSearchUrl,
+        serverUrl: testOpenSearchUrl.toString().slice(0, -1),
       };
     }
 
     const username = process.env.TEST_OPENSEARCH_USERNAME || adminTestUser.username;
     const password = process.env.TEST_OPENSEARCH_PASSWORD || adminTestUser.password;
+    const protocol = process.env.TEST_OPENSEARCH_PROTOCOL || 'http';
+    const hostname = process.env.TEST_OPENSEARCH_HOSTNAME || 'localhost';
+    const port = parseInt(process.env.TEST_OPENSEARCH_PORT, 10) || 9220;
+    const fullURL = new URL('', `${protocol}://${username}:${password}@${hostname}:${port}`);
 
     return {
       // Allow setting any individual component(s) of the URL,
       // or use default values (username and password from ../osd/users.js)
-      protocol: process.env.TEST_OPENSEARCH_PROTOCOL || 'http',
-      hostname: process.env.TEST_OPENSEARCH_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_OPENSEARCH_PORT, 10) || 9220,
+      protocol,
+      hostname,
+      port,
       auth: `${username}:${password}`,
       username: username,
       password: password,
+      fullURL,
+      serverUrl: fullURL.toString().slice(0, -1),
     };
   }
 })();

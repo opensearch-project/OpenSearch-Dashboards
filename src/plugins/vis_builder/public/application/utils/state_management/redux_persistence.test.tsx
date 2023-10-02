@@ -5,8 +5,8 @@
 
 import { VisBuilderServices } from '../../../types';
 import { createVisBuilderServicesMock } from '../mocks';
-import { getPreloadedState } from './preload';
-import { loadReduxState, saveReduxState } from './redux_persistence';
+import { loadReduxState, persistReduxState } from './redux_persistence';
+import { RootState } from './store';
 
 describe('test redux state persistence', () => {
   let mockServices: jest.Mocked<VisBuilderServices>;
@@ -18,11 +18,12 @@ describe('test redux state persistence', () => {
       style: 'style',
       visualization: 'visualization',
       metadata: 'metadata',
+      ui: 'ui',
     };
   });
 
   test('test load redux state when url is empty', async () => {
-    const defaultStates = {
+    const defaultStates: RootState = {
       style: 'style default states',
       visualization: {
         searchField: '',
@@ -30,9 +31,10 @@ describe('test redux state persistence', () => {
         indexPattern: 'id',
       },
       metadata: {
-        editor: { validity: {}, state: 'loading' },
+        editor: { errors: {}, state: 'loading' },
         originatingApp: undefined,
       },
+      ui: {},
     };
 
     const returnStates = await loadReduxState(mockServices);
@@ -45,8 +47,8 @@ describe('test redux state persistence', () => {
     expect(returnStates).toStrictEqual(reduxStateParams);
   });
 
-  test('test save redux state', () => {
-    saveReduxState(reduxStateParams, mockServices);
+  test('test persist redux state', () => {
+    persistReduxState(reduxStateParams, mockServices);
     const urlStates = mockServices.osdUrlStateStorage.get('_a');
     expect(urlStates).toStrictEqual(reduxStateParams);
   });

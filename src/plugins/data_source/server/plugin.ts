@@ -58,7 +58,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     const dataSourceSavedObjectsClientWrapper = new DataSourceSavedObjectsClientWrapper(
       cryptographyServiceSetup,
-      this.logger.get('data-source-saved-objects-client-wrapper-factory')
+      this.logger.get('data-source-saved-objects-client-wrapper-factory'),
+      config.endpointDeniedIPs
     );
 
     // Add data source saved objects client wrapper factory

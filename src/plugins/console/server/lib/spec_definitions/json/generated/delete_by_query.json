@@ -56,6 +56,6 @@
     "patterns": [
       "{indices}/_delete_by_query"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/delete-by-query/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/document-apis/delete-by-query/"
   }
 }

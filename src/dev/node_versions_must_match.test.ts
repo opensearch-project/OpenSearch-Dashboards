@@ -29,11 +29,13 @@
  */
 
 import fs from 'fs';
+import semver from 'semver';
 import { engines } from '../../package.json';
 import { promisify } from 'util';
 const readFile = promisify(fs.readFile);
 import expect from '@osd/expect';
 
+// ToDo: `.node-version` seems to exist for no good reason; find out if we can get rid of it and this test.
 describe('All configs should use a single version of Node', () => {
   it('should compare .node-version and .nvmrc', async () => {
     const [nodeVersion, nvmrc] = await Promise.all([
@@ -48,6 +50,6 @@ describe('All configs should use a single version of Node', () => {
     const nodeVersion = await readFile('./.node-version', {
       encoding: 'utf-8',
     });
-    expect(nodeVersion.trim()).to.be(engines.node);
+    expect(semver.satisfies(nodeVersion.trim(), engines.node)).to.be(true);
   });
 });

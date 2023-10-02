@@ -183,6 +183,27 @@ The production build process relies on both the Grunt setup at the root of the
 OpenSearch Dashboards project and code in `@osd/pm`. The full process is described in
 `tasks/build/packages.js`.
 
+## Targeted builds
+
+Packages that are only compiled to CommonJS for consumption by server code, simply use a `tsconfig.json`
+that extends the `tsconfig.base.json` found at the root of the project. Similarly, packages that need to be
+compiled into ES modules, to be consumed in the browser and benefit from tree-shaking, use a`tsconfig.json`
+that extends the `tsconfig.browser.json` available at the root of the project. However, some packages need 
+to be compiled for consumption by both server code and the browser. This can be achieved by retaining the 
+`tsconfig.json` and adding the following block to the `package.json` of the package:
+```json
+"@osd/pm": {
+  "node": true,
+  "web": true
+}
+```
+With that, the relevant presets from `@osd/babel-preset` are applied to the code to produce bootstrap and 
+production build artifacts for the selected targets. It is acceptable to have only one target and that is
+the same as setting the appropriate `extends` in the `tsconfig.json`.
+
+Targeted builds call `babel` on the `src` folder and place artifacts into `target/node` and `target/web`
+folders after calling `tsc` in the package root to generate type definitions.
+
 ## Development
 
 This package is run from OpenSearch Dashboards root, using `yarn osd`. This will run the

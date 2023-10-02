@@ -1,0 +1,70 @@
+FROM abbyhu/opensearch-dashboards-dev:latest
+
+# Switch to root user
+USER root
+
+# Install the locales package
+# Uncomment the en_US.UTF-8 UTF-8 line in the sytstem /etc/locale.gen file
+# Then generate the locales and update the system locale to en_US.UTF-8
+# Install all other requested packages
+RUN apt-get update && \
+    apt-get install -y locales && \
+    sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale LANG=en_US.UTF-8 && \
+    apt-get install -y xvfb x11vnc openbox lxde-core lxterminal wget apt-transport-https sudo
+
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
+# Create the LXTerminal configuration directory and set the encoding
+RUN mkdir -p /etc/xdg/lxterminal && \
+    echo '[General]' >> /etc/xdg/lxterminal/lxterminal.conf && \
+    echo 'encoding=UTF-8' >> /etc/xdg/lxterminal/lxterminal.conf
+
+# Specify the version of Chrome that matches the version of chromedriver in the package.json.
+#ARG CHROME_VERSION=107.0.5304.121-1
+
+## Install Google Chrome version 107
+#RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+#    echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list && \
+#    apt-get update && \
+#    wget -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb && \
+#    apt-get install -y /tmp/chrome.deb --no-install-recommends && \
+#    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install Google Chrome
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+    echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update && \
+    apt-get install -y google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Create the directory and set the ownership for osd-dev user
+RUN mkdir -p /docker-workspace/OpenSearch-Dashboards/.opensearch && \
+    chown -R osd-dev /docker-workspace/OpenSearch-Dashboards/.opensearch
+
+COPY entrypoint.sh /entrypoint.sh
+COPY start-vnc.sh /start-vnc.sh
+
+RUN chmod +x /entrypoint.sh /start-vnc.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Create a Google Chrome desktop file with the specified launch options.
+# Currently Google Chrome is not available in the menu of your VNC Viewer session.
+# To enable that, you need to open the terminal and run:
+# google-chrome --no-sandbox --disable-gpu --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222
+# This part is added to automate this process by creating a desktop file for Google Chrome.
+RUN echo '[Desktop Entry]\n\
+Version=1.0\n\
+Name=Google Chrome\n\
+GenericName=Web Browser\n\
+Comment=Access the Internet\n\
+Exec=google-chrome --no-sandbox --disable-gpu --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222 %U\n\
+Terminal=false\n\
+Icon=google-chrome\n\
+Type=Application\n\
+Categories=Network;WebBrowser;\n\
+MimeType=text/html;text/xml;application/xhtml_xml;x-scheme-handler/http;x-scheme-handler/https;'\
+> /usr/share/applications/google-chrome.desktop

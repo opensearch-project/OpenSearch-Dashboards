@@ -51,6 +51,7 @@ export const routeValidationConfig = {
   query: schema.object({
     method: acceptedHttpVerb,
     path: nonEmptyString,
+    dataSourceId: schema.maybe(schema.string()),
   }),
   body: schema.stream(),
 };

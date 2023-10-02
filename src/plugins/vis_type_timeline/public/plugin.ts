@@ -77,16 +77,11 @@ export interface VisTypeTimelinePluginStart {
   getArgValueSuggestions: typeof getArgValueSuggestions;
 }
 
-/** @public */
-export interface VisTypeTimelinePluginSetup {
-  isUiEnabled: boolean;
-}
-
 /** @internal */
 export class TimelineVisPlugin
   implements
     Plugin<
-      VisTypeTimelinePluginSetup,
+      void,
       VisTypeTimelinePluginStart,
       TimelineVisSetupDependencies,
       TimelineVisStartDependencies
@@ -106,10 +101,6 @@ export class TimelineVisPlugin
     expressions.registerFunction(() => getTimelineVisualizationConfig(dependencies));
     expressions.registerRenderer(getTimelineVisRenderer(dependencies));
     visualizations.createBaseVisualization(getTimelineVisDefinition(dependencies));
-
-    return {
-      isUiEnabled: this.initializerContext.config.get().ui.enabled,
-    };
   }
 
   public start(core: CoreStart, plugins: TimelineVisStartDependencies) {

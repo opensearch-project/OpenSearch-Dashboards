@@ -55,6 +55,7 @@ export const createVisBuilderServicesMock = () => {
           },
         },
       ],
+      get: jest.fn(),
     },
   };
 

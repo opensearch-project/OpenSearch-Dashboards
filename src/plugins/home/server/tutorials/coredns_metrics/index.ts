@@ -56,7 +56,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-coredns.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/coredns.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/coredns.svg',
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.corednsMetrics.artifacts.application.label', {

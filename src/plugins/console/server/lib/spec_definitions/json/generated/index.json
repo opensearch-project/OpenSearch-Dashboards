@@ -32,6 +32,6 @@
       "{indices}/_doc/{id}",
       "{indices}/_doc"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/document-apis/index-document/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/document-apis/index-document/"
   }
 }

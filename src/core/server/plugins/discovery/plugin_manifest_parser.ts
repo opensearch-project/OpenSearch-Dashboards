@@ -28,19 +28,16 @@
  * under the License.
  */
 
-import { readFile, stat } from 'fs';
+import { readFile, stat } from 'fs/promises';
+import semver from 'semver';
 import { resolve } from 'path';
 import { coerce } from 'semver';
-import { promisify } from 'util';
 import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '../../config';
 import { Logger } from '../../logging';
 import { PluginManifest } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
-
-const fsReadFileAsync = promisify(readFile);
-const fsStatAsync = promisify(stat);
 
 /**
  * Name of the JSON manifest file that should be located in the plugin directory.
@@ -65,6 +62,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     version: true,
     configPath: true,
     requiredPlugins: true,
+    requiredEnginePlugins: true,
     optionalPlugins: true,
     ui: true,
     server: true,
@@ -92,7 +90,7 @@ export async function parseManifest(
 
   let manifestContent;
   try {
-    manifestContent = await fsReadFileAsync(manifestPath);
+    manifestContent = await readFile(manifestPath);
   } catch (err) {
     throw PluginDiscoveryError.missingManifest(manifestPath, err);
   }
@@ -160,6 +158,44 @@ export async function parseManifest(
     );
   }
 
+  if ('requiredEnginePlugins' in manifest) {
+    if (
+      typeof manifest.requiredEnginePlugins !== 'object' ||
+      !Object.entries(manifest.requiredEnginePlugins).every(
+        ([pluginId, pluginVersion]) =>
+          typeof pluginId === 'string' && typeof pluginVersion === 'string'
+      )
+    ) {
+      throw PluginDiscoveryError.invalidManifest(
+        manifestPath,
+        new Error(
+          `The "requiredEnginePlugins" in plugin manifest for "${manifest.id}" should be an object that maps a plugin name to a version range.`
+        )
+      );
+    }
+    const invalidPluginVersions: string[] = [];
+    for (const [pluginName, versionRange] of Object.entries(manifest.requiredEnginePlugins)) {
+      log.info(
+        `Plugin ${manifest.id} has a dependency on engine plugin: [${pluginName}@${versionRange}]`
+      );
+
+      if (!isOpenSearchPluginVersionRangeValid(versionRange)) {
+        invalidPluginVersions.push(`${versionRange} for ${pluginName}`);
+      }
+    }
+
+    if (invalidPluginVersions.length > 0) {
+      throw PluginDiscoveryError.invalidManifest(
+        manifestPath,
+        new Error(
+          `The "requiredEnginePlugins" in the plugin manifest for "${
+            manifest.id
+          }" contains invalid version ranges: ${invalidPluginVersions.join(', ')}`
+        )
+      );
+    }
+  }
+
   const expectedOpenSearchDashboardsVersion =
     typeof manifest.opensearchDashboardsVersion === 'string' && manifest.opensearchDashboardsVersion
       ? manifest.opensearchDashboardsVersion
@@ -202,6 +238,8 @@ export async function parseManifest(
     opensearchDashboardsVersion: expectedOpenSearchDashboardsVersion,
     configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
+    requiredEnginePlugins:
+      manifest.requiredEnginePlugins !== undefined ? manifest.requiredEnginePlugins : {},
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
     requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
     ui: includesUiPlugin,
@@ -219,7 +257,7 @@ export async function parseManifest(
  */
 export async function isNewPlatformPlugin(pluginPath: string) {
   try {
-    return (await fsStatAsync(resolve(pluginPath, MANIFEST_FILE_NAME))).isFile();
+    return (await stat(resolve(pluginPath, MANIFEST_FILE_NAME))).isFile();
   } catch (err) {
     return false;
   }
@@ -253,4 +291,15 @@ function isVersionCompatible(
     coercedActualOpenSearchDashboardsVersion.compare(coercedExpectedOpenSearchDashboardsVersion) ===
     0
   );
+}
+/**
+ * Checks whether specified version range is valid.
+ * @param versionRange Version range to be checked.
+ */
+function isOpenSearchPluginVersionRangeValid(versionRange: string) {
+  try {
+    return semver.validRange(versionRange);
+  } catch (err) {
+    return false;
+  }
 }

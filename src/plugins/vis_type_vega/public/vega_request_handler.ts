@@ -34,7 +34,7 @@ import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
-import { VisParams } from './vega_fn';
+import { VisParams } from './expressions/vega_fn';
 import { getData, getInjectedMetadata } from './services';
 import { VegaInspectorAdapters } from './vega_inspector';
 

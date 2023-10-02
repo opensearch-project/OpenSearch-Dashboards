@@ -11,7 +11,8 @@
     "expressions",
     "navigation",
     "savedObjects",
-    "visualizations"
+    "visualizations",
+    "uiActions"
   ],
   "requiredBundles": [
     "charts",

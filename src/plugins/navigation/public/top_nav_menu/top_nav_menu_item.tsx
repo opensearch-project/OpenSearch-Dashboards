@@ -30,7 +30,7 @@
 
 import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink } from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiHeaderLink, EuiSwitch } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
@@ -58,21 +58,36 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     className: props.className,
   };
 
-  const btn = props.emphasize ? (
-    <EuiButton size="s" {...commonButtonProps}>
-      {upperFirst(props.label || props.id!)}
-    </EuiButton>
-  ) : (
-    <EuiHeaderLink size="xs" color="primary" {...commonButtonProps}>
-      {upperFirst(props.label || props.id!)}
-    </EuiHeaderLink>
-  );
+  let component;
+  if (props.type === 'toggle') {
+    component = (
+      <EuiSwitch
+        label={upperFirst(props.label || props.id!)}
+        checked={props.emphasize || false}
+        onChange={(e) => {
+          handleClick((e as unknown) as MouseEvent<HTMLButtonElement>);
+        }}
+        data-test-subj={props.testId}
+        className={props.className}
+      />
+    );
+  } else {
+    component = props.emphasize ? (
+      <EuiButton size="s" {...commonButtonProps}>
+        {upperFirst(props.label || props.id!)}
+      </EuiButton>
+    ) : (
+      <EuiHeaderLink size="xs" color="primary" {...commonButtonProps}>
+        {upperFirst(props.label || props.id!)}
+      </EuiHeaderLink>
+    );
+  }
 
   const tooltip = getTooltip();
   if (tooltip) {
-    return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
+    return <EuiToolTip content={tooltip}>{component}</EuiToolTip>;
   }
-  return btn;
+  return component;
 }
 
 TopNavMenuItem.defaultProps = {

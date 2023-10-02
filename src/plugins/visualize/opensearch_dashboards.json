@@ -19,6 +19,7 @@
     "opensearchDashboardsReact",
     "home",
     "discover",
-    "visDefaultEditor"
+    "visDefaultEditor",
+    "savedObjectsManagement"
   ]
 }

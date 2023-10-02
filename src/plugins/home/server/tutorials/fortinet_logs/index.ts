@@ -57,7 +57,7 @@ export function fortinetLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-fortinet.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/fortinet.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/fortinet.svg',
     artifacts: {
       dashboards: [],
       application: {

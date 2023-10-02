@@ -31,7 +31,7 @@
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
-import { Client } from 'elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 import { ToolingLog, OsdClient } from '@osd/dev-utils';
 
 import { createPromiseFromStreams } from '../lib/streams';

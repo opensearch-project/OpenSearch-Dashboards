@@ -123,7 +123,7 @@ export const Header = ({
       >
         <FormattedMessage
           id="dataSourcesManagement.createDataSource.testConnectionButton"
-          defaultMessage="Test Connection"
+          defaultMessage="Test connection"
         />
       </EuiButton>
     );

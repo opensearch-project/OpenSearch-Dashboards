@@ -116,6 +116,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
         <CreateDataSourceForm
           handleSubmit={handleSubmit}
           handleTestConnection={handleTestConnection}
+          handleCancel={() => props.history.push('')}
           existingDatasourceNamesList={existingDatasourceNamesList}
         />
         {isLoading ? <LoadingMask /> : null}

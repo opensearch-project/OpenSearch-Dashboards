@@ -57,6 +57,7 @@ import { getHistory } from './opensearch_dashboards_services';
 import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { DataExplorerServices } from '../../data_explorer/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -77,19 +78,17 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id: string) => Promise<SavedSearch>;
+  getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
 }
 
-export async function buildServices(
+export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext,
-  getEmbeddableInjector: any
-): Promise<DiscoverServices> {
+  context: PluginInitializerContext
+): DiscoverServices {
   const services: SavedObjectOpenSearchDashboardsServices = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
@@ -108,8 +107,7 @@ export async function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
-    getEmbeddableInjector,
-    getSavedSearchById: async (id: string) => savedObjectService.get(id),
+    getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
@@ -127,3 +125,6 @@ export async function buildServices(
     visualizations: plugins.visualizations,
   };
 }
+
+// Any component inside the panel and canvas views has access to both these services.
+export type DiscoverViewServices = DiscoverServices & DataExplorerServices;

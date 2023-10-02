@@ -105,11 +105,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     private readonly logger: Logger
   ) {}
 
-  public setup(
+  public async setup(
     core: CoreSetup<{}, DataPluginStart>,
     { registerFunction, usageCollection, dataSource }: SearchServiceSetupDependencies
-  ): ISearchSetup {
-    const usage = usageCollection ? usageProvider(core, this.initializerContext) : undefined;
+  ): Promise<ISearchSetup> {
+    const config = await this.initializerContext.config
+      .create<ConfigSchema>()
+      .pipe(first())
+      .toPromise();
+    const usage = usageCollection ? usageProvider(core, config) : undefined;
 
     const router = core.http.createRouter();
     const routeDependencies = {

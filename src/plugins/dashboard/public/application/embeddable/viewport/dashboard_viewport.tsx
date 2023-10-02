@@ -30,7 +30,8 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, EmbeddableStart } from '../../../embeddable_plugin';
+import { Logos } from 'opensearch-dashboards/public';
+import { PanelState, EmbeddableStart } from '../../../../../embeddable/public';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../../opensearch_dashboards_react/public';
@@ -39,6 +40,7 @@ export interface DashboardViewportProps {
   container: DashboardContainer;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
   renderEmpty?: () => React.ReactNode;
+  logos: Logos;
 }
 
 interface State {
@@ -124,6 +126,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           <this.context.services.ExitFullScreenButton
             onExitFullScreenMode={this.onExitFullScreenMode}
             toggleChrome={!isEmbeddedExternally}
+            logos={this.props.logos}
           />
         )}
         {renderEmpty && renderEmpty()}
@@ -153,6 +156,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           <this.context.services.ExitFullScreenButton
             onExitFullScreenMode={this.onExitFullScreenMode}
             toggleChrome={!isEmbeddedExternally}
+            logos={this.props.logos}
           />
         )}
         <DashboardGrid container={container} PanelComponent={PanelComponent} />

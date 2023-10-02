@@ -56,7 +56,7 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-couchdb.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/couchdb.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/couchdb.svg',
     artifacts: {
       dashboards: [
         {

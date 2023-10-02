@@ -286,7 +286,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         await testSubjects.click(`legend-${name}`);
         await this.waitForVisualizationRenderingStabilized();
         // arbitrary color chosen, any available would do
-        const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
+        const isOpen = await this.doesLegendColorChoiceExist('#e09e64');
         if (!isOpen) {
           throw new Error('legend color selector not open');
         }

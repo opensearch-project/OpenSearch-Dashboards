@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
     const clonedDashboardName = dashboardName + ' Copy';
 
     before(async function () {
-      return PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.initTests();
     });
 
     it('Clone saves a copy', async function () {

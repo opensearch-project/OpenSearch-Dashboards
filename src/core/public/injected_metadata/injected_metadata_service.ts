@@ -75,6 +75,7 @@ export interface InjectedMetadataParams {
       };
     };
     branding: Branding;
+    survey?: string;
   };
 }
 
@@ -146,6 +147,10 @@ export class InjectedMetadataService {
       getBranding: () => {
         return this.state.branding;
       },
+
+      getSurvey: () => {
+        return this.state.survey;
+      },
     };
   }
 }
@@ -180,6 +185,7 @@ export interface InjectedMetadataSetup {
     [key: string]: unknown;
   };
   getBranding: () => Branding;
+  getSurvey: () => string | undefined;
 }
 
 /** @internal */

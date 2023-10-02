@@ -82,7 +82,6 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
       const output = props.embeddable.getChild(id).getOutput();
       hasMatch[id] = hasHasMatchOutput(output) && output.hasMatch;
     });
-    props.embeddable.getChildIds().forEach((id) => (checked[id] = false));
     this.state = {
       checked,
       hasMatch,

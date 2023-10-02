@@ -29,7 +29,6 @@
  */
 
 import { Request, ResponseToolkit, Server } from '@hapi/hapi';
-import { format as formatUrl } from 'url';
 
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
@@ -62,17 +61,9 @@ export class HttpsRedirectServer {
     );
 
     this.server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {
-      return responseToolkit
-        .redirect(
-          formatUrl({
-            hostname: config.host,
-            pathname: request.url.pathname,
-            port: config.port,
-            protocol: 'https',
-            search: request.url.search,
-          })
-        )
-        .takeover();
+      const redirectUrl = new URL(request.url.pathname, `https://${config.host}:${config.port}`);
+      redirectUrl.search = request.url.search;
+      return responseToolkit.redirect(redirectUrl.toString()).takeover();
     });
 
     try {

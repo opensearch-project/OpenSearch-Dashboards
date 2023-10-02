@@ -19,6 +19,6 @@
       "_alias/{name}",
       "{indices}/_alias/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/index-alias/"
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/index-templates/#delete-a-template"
   }
 }

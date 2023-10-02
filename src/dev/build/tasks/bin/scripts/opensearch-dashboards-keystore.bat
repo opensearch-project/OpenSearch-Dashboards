@@ -1,35 +1,20 @@
 @echo off
 
+::
+:: SPDX-License-Identifier: Apache-2.0
+::
+:: The OpenSearch Contributors require contributions made to
+:: this file be licensed under the Apache-2.0 license or a
+:: compatible open source license.
+::
+:: Any modifications Copyright OpenSearch Contributors. See
+:: GitHub history for details.
+::
+
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-set SCRIPT_DIR=%~dp0
-for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
-
-set NODE=%DIR%\node\node.exe
-
-If Not Exist "%NODE%" (
-  Echo unable to find usable node.js executable.
-  Exit /B 1
-)
-
-set CONFIG_DIR=%OSD_PATH_CONF%
-If [%OSD_PATH_CONF%] == [] (
-  set CONFIG_DIR=%DIR%\config
-)
-
-IF EXIST "%CONFIG_DIR%\node.options" (
-  for /F "eol=# tokens=*" %%i in (%CONFIG_DIR%\node.options) do (
-    If [!NODE_OPTIONS!] == [] (
-      set "NODE_OPTIONS=%%i"
-    )	Else (
-      set "NODE_OPTIONS=!NODE_OPTIONS! %%i"
-    )
-  )
-)
-
 TITLE OpenSearch Dashboards Keystore
-"%NODE%" "%DIR%\src\cli_keystore\dist" %*
-
-:finally
+SET OSD_USE_NODE_JS_FILE_PATH=src\cli_keystore\dist
+call %~dp0\use_node.bat %*
 
 ENDLOCAL

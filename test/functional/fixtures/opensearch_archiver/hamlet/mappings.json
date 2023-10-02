@@ -19,7 +19,6 @@
           "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
           "search": "181661168bbadd1eff5902361e2a0d5c",
           "server": "ec97f1c5da1a19609a60874e5af1100c",
-          "timeline-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "type": "2f4316de49999235636386fe51dc06c1",
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
@@ -227,47 +226,6 @@
           "properties": {
             "uuid": {
               "type": "keyword"
-            }
-          }
-        },
-        "timeline-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timeline_chart_height": {
-              "type": "integer"
-            },
-            "timeline_columns": {
-              "type": "integer"
-            },
-            "timeline_interval": {
-              "type": "keyword"
-            },
-            "timeline_other_interval": {
-              "type": "keyword"
-            },
-            "timeline_rows": {
-              "type": "integer"
-            },
-            "timeline_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
             }
           }
         },

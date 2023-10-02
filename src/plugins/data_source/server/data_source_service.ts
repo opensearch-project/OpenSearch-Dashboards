@@ -5,11 +5,10 @@
 
 import { LegacyCallAPIOptions, Logger, OpenSearchClient } from '../../../../src/core/server';
 import { DataSourcePluginConfigType } from '../config';
-import { configureClient, OpenSearchClientPool } from './client';
+import { OpenSearchClientPool } from './client';
 import { configureLegacyClient } from './legacy';
 import { DataSourceClientParams } from './types';
-import { DataSourceAttributes } from '../common/data_sources';
-import { configureTestClient } from './client/configure_client';
+import { configureClient } from './client/configure_client';
 export interface DataSourceServiceSetup {
   getDataSourceClient: (params: DataSourceClientParams) => Promise<OpenSearchClient>;
 
@@ -22,11 +21,6 @@ export interface DataSourceServiceSetup {
       options?: LegacyCallAPIOptions
     ) => Promise<unknown>;
   };
-
-  getTestingClient: (
-    params: DataSourceClientParams,
-    dataSource: DataSourceAttributes
-  ) => Promise<OpenSearchClient>;
 }
 export class DataSourceService {
   private readonly openSearchClientPool: OpenSearchClientPool;
@@ -49,19 +43,6 @@ export class DataSourceService {
       return configureClient(params, opensearchClientPoolSetup, config, this.logger);
     };
 
-    const getTestingClient = (
-      params: DataSourceClientParams,
-      dataSource: DataSourceAttributes
-    ): Promise<OpenSearchClient> => {
-      return configureTestClient(
-        params,
-        dataSource,
-        opensearchClientPoolSetup,
-        config,
-        this.logger
-      );
-    };
-
     const getDataSourceLegacyClient = (params: DataSourceClientParams) => {
       return {
         callAPI: (
@@ -79,7 +60,7 @@ export class DataSourceService {
       };
     };
 
-    return { getDataSourceClient, getDataSourceLegacyClient, getTestingClient };
+    return { getDataSourceClient, getDataSourceLegacyClient };
   }
 
   start() {}

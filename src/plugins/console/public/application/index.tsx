@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpSetup, NotificationsSetup } from 'src/core/public';
+import { HttpSetup, IUiSettingsClient, NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings } from '../services';
@@ -46,6 +46,8 @@ export interface BootDependencies {
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
+  dataSourceId?: string;
+  uiSettings: IUiSettingsClient;
 }
 
 export function renderApp({
@@ -55,6 +57,8 @@ export function renderApp({
   usageCollection,
   element,
   http,
+  dataSourceId,
+  uiSettings,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -83,12 +87,13 @@ export function renderApp({
             trackUiMetric,
             objectStorageClient,
             http,
+            uiSettings,
           },
         }}
       >
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
-            <Main />
+            <Main dataSourceId={dataSourceId} />
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>

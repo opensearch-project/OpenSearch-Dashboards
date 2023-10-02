@@ -37,13 +37,27 @@ const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => 
   renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
 ];
 
+/* There are 4 levels of uiSettings:
+ *   1) defaults hardcoded in code
+ *   2) defaults provided in the opensearch_dashboards.yml
+ *   3) values selected by the user and received from savedObjects
+ *   4) overrides provided in the opensearch_dashboards.yml
+ *
+ * Each of these levels override the one above them.
+ *
+ * The schema below exposes only a limited set of settings to be set in the config file.
+ *
+ * ToDo: Remove overrides; these were added to force the lock down the theme version.
+ * The schema is temporarily relaxed to allow overriding the `darkMode` and setting
+ * `defaults`. An upcoming change would relax them further to allow setting them.
+ */
+
 const configSchema = schema.object({
-  overrides: schema.object(
-    {
-      'theme:version': schema.string({ defaultValue: 'v7' }),
-    },
-    { unknowns: 'allow' }
-  ),
+  overrides: schema.object({}, { unknowns: 'allow' }),
+  defaults: schema.object({
+    'theme:darkMode': schema.maybe(schema.boolean({ defaultValue: false })),
+    'theme:version': schema.maybe(schema.string({ defaultValue: 'v8' })),
+  }),
 });
 
 export type UiSettingsConfigType = TypeOf<typeof configSchema>;

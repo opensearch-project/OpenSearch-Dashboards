@@ -25,13 +25,6 @@ describe('verify the advanced settings are saved', () => {
       .should('eq', 'true');
   });
 
-  it('the Timeline default columns field is set to 4', () => {
-    cy.get('[data-test-subj="advancedSetting-editField-timeline:default_columns"]').should(
-      'have.value',
-      4
-    );
-  });
-
   it('the Timeline Maximum buckets field is set to 4', () => {
     cy.get('[data-test-subj="advancedSetting-editField-timeline:max_buckets"]').should(
       'have.value',

@@ -57,7 +57,7 @@ export function auditdLogsSpecProvider(context: TutorialContext): TutorialSchema
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-auditd.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/linux.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/linux.svg',
     artifacts: {
       dashboards: [
         {

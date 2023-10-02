@@ -57,7 +57,7 @@ export function rabbitmqLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-rabbitmq.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/rabbitmq.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/rabbitmq.svg',
     artifacts: {
       dashboards: [],
       application: {

@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
-
 import * as legacyOpenSearch from 'elasticsearch';
 
 import { DEFAULT_API_VERSION } from '../../../src/core/server/opensearch/opensearch_config';
@@ -42,7 +40,7 @@ export function LegacyOpenSearchProvider({
 
   return new legacyOpenSearch.Client({
     apiVersion: DEFAULT_API_VERSION,
-    host: formatUrl(config.get('servers.opensearch')),
+    host: config.get('servers.opensearch.serverUrl'),
     requestTimeout: config.get('timeouts.opensearchRequestTimeout'),
   });
 }

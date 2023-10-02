@@ -28,6 +28,6 @@
       "_cat/fielddata",
       "_cat/fielddata/{fields}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-field-data/#cat-fielddata"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-field-data/"
   }
 }

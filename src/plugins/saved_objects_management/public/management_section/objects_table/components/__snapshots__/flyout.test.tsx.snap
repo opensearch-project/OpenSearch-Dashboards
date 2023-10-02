@@ -21,43 +21,41 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <span>
-      <EuiSpacer
-        size="s"
-      />
-      <EuiCallOut
-        color="warning"
-        data-test-subj="importSavedObjectsConflictsWarning"
-        iconType="help"
-        title={
-          <FormattedMessage
-            defaultMessage="Index Pattern Conflicts"
-            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
-            values={Object {}}
-          />
-        }
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
-            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
-            values={
-              Object {
-                "indexPatternLink": <EuiLink
-                  href=""
-                >
-                  <FormattedMessage
-                    defaultMessage="create a new index pattern"
-                    id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                    values={Object {}}
-                  />
-                </EuiLink>,
-              }
+    <EuiSpacer
+      size="s"
+    />
+    <EuiCallOut
+      color="warning"
+      data-test-subj="importSavedObjectsConflictsWarning"
+      iconType="help"
+      title={
+        <FormattedMessage
+          defaultMessage="Index Pattern Conflicts"
+          id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
+          values={Object {}}
+        />
+      }
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
+          values={
+            Object {
+              "indexPatternLink": <EuiLink
+                href=""
+              >
+                <FormattedMessage
+                  defaultMessage="create a new index pattern"
+                  id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>,
             }
-          />
-        </p>
-      </EuiCallOut>
-    </span>
+          }
+        />
+      </p>
+    </EuiCallOut>
     <EuiInMemoryTable
       columns={
         Array [
@@ -284,71 +282,67 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <span>
-      <EuiSpacer
-        size="s"
-      />
-      <EuiCallOut
-        color="warning"
-        data-test-subj="importSavedObjectsLegacyWarning"
-        iconType="help"
-        title={
-          <FormattedMessage
-            defaultMessage="Support for JSON files is going away"
-            id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
-            values={Object {}}
-          />
-        }
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
-            id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
-            values={Object {}}
-          />
-        </p>
-      </EuiCallOut>
-      <EuiSpacer
-        size="m"
-      />
-    </span>
-    <span>
-      <EuiSpacer
-        size="s"
-      />
-      <EuiCallOut
-        color="warning"
-        data-test-subj="importSavedObjectsConflictsWarning"
-        iconType="help"
-        title={
-          <FormattedMessage
-            defaultMessage="Index Pattern Conflicts"
-            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
-            values={Object {}}
-          />
-        }
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
-            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
-            values={
-              Object {
-                "indexPatternLink": <EuiLink
-                  href=""
-                >
-                  <FormattedMessage
-                    defaultMessage="create a new index pattern"
-                    id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                    values={Object {}}
-                  />
-                </EuiLink>,
-              }
+    <EuiSpacer
+      size="s"
+    />
+    <EuiCallOut
+      color="warning"
+      data-test-subj="importSavedObjectsLegacyWarning"
+      iconType="help"
+      title={
+        <FormattedMessage
+          defaultMessage="Support for JSON files is going away"
+          id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
+          values={Object {}}
+        />
+      }
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
+          id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
+          values={Object {}}
+        />
+      </p>
+    </EuiCallOut>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiSpacer
+      size="s"
+    />
+    <EuiCallOut
+      color="warning"
+      data-test-subj="importSavedObjectsConflictsWarning"
+      iconType="help"
+      title={
+        <FormattedMessage
+          defaultMessage="Index Pattern Conflicts"
+          id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
+          values={Object {}}
+        />
+      }
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
+          values={
+            Object {
+              "indexPatternLink": <EuiLink
+                href=""
+              >
+                <FormattedMessage
+                  defaultMessage="create a new index pattern"
+                  id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                  values={Object {}}
+                />
+              </EuiLink>,
             }
-          />
-        </p>
-      </EuiCallOut>
-    </span>
+          }
+        />
+      </p>
+    </EuiCallOut>
     <EuiInMemoryTable
       columns={
         Array [

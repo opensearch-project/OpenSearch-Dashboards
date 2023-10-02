@@ -56,7 +56,7 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-activemq.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/activemq.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/activemq.svg',
     artifacts: {
       dashboards: [
         {

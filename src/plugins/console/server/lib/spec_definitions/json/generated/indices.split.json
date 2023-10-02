@@ -13,6 +13,6 @@
     "patterns": [
       "{indices}/_split/{target}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-split-index.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/split/"
   }
 }

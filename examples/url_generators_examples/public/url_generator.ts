@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import url from 'url';
 import { UrlGeneratorState, UrlGeneratorsDefinition } from '../../../src/plugins/share/public';
 
 /**
@@ -53,16 +52,11 @@ export const createHelloPageLinkGenerator = (
   createUrl: async (state) => {
     const startServices = await getStartServices();
     const appBasePath = startServices.appBasePath;
-    const parsedUrl = url.parse(window.location.href);
 
-    return url.format({
-      protocol: parsedUrl.protocol,
-      host: parsedUrl.host,
-      pathname: `${appBasePath}/hello`,
-      query: {
-        ...state,
-      },
-    });
+    const url = new URL(`${appBasePath}/hello`, window.location.origin);
+    url.search = new URLSearchParams({ ...state }).toString();
+
+    return url.toString();
   },
 });
 

@@ -43,7 +43,7 @@ interface Deps {
 
 export class PluginsStatusService {
   private readonly pluginStatuses = new Map<PluginName, Observable<ServiceStatus>>();
-  private readonly update$ = new BehaviorSubject(true);
+  private readonly update$ = new BehaviorSubject<boolean>(true);
   private readonly defaultInheritedStatus$: Observable<ServiceStatus>;
 
   constructor(private readonly deps: Deps) {
@@ -121,7 +121,7 @@ export class PluginsStatusService {
 
         return combineLatest(pluginStatuses).pipe(
           map((statuses) => Object.fromEntries(statuses)),
-          distinctUntilChanged(isDeepStrictEqual)
+          distinctUntilChanged<Record<PluginName, ServiceStatus>>(isDeepStrictEqual)
         );
       })
     );

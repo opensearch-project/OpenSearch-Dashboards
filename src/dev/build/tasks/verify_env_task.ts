@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import semver from 'semver';
 import { GlobalTask } from '../lib';
 
 export const VerifyEnv: GlobalTask = {
@@ -35,10 +36,12 @@ export const VerifyEnv: GlobalTask = {
   description: 'Verifying environment meets requirements',
 
   async run(config, log) {
-    const version = `v${config.getNodeVersion()}`;
+    const range = config.getNodeRange();
 
-    if (version !== process.version) {
-      throw new Error(`Invalid nodejs version, please use ${version}`);
+    if (!semver.satisfies(process.version, range)) {
+      throw new Error(
+        `Invalid Node.js version (${process.version}); please use a version that satisfies ${range}.`
+      );
     }
 
     log.success('Node.js version verified');

@@ -11,6 +11,6 @@
       "_component_template",
       "_component_template/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/"
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/index-templates/#retrieve-a-template"
   }
 }

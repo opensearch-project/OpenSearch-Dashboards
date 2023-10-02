@@ -95,9 +95,17 @@ export class RenderingService {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
-        const darkMode = settings.user?.['theme:darkMode']?.userValue
-          ? Boolean(settings.user['theme:darkMode'].userValue)
-          : false;
+        // Cannot use `uiSettings.get()` since a user might not be authenticated
+        const darkMode =
+          (settings.user?.['theme:darkMode']?.userValue ??
+            uiSettings.getOverrideOrDefault('theme:darkMode')) ||
+          false;
+
+        // At the very least, the schema should define a default theme; the '' will be unreachable
+        const themeVersion =
+          (settings.user?.['theme:version']?.userValue ??
+            uiSettings.getOverrideOrDefault('theme:version')) ||
+          '';
 
         const brandingAssignment = await this.assignBrandingConfig(
           darkMode,
@@ -111,6 +119,7 @@ export class RenderingService {
           i18n: i18n.translate,
           locale: i18n.getLocale(),
           darkMode,
+          themeVersion,
           injectedMetadata: {
             version: env.packageInfo.version,
             buildNumber: env.packageInfo.buildNum,
@@ -153,6 +162,7 @@ export class RenderingService {
               applicationTitle: brandingAssignment.applicationTitle,
               useExpandedHeader: brandingAssignment.useExpandedHeader,
             },
+            survey: opensearchDashboardsConfig.survey.url,
           },
         };
 
@@ -188,7 +198,7 @@ export class RenderingService {
 
   /**
    * Assign values for branding related configurations based on branding validation
-   * by calling checkBrandingValid(). For dark mode URLs, add additonal validation
+   * by calling checkBrandingValid(). For dark mode URLs, add additional validation
    * to see if there is a valid default mode URL exist first. If URL is valid, pass in
    * the actual URL; if not, pass in undefined.
    *

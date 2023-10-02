@@ -30,6 +30,7 @@
 
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { Logos } from 'opensearch-dashboards/public';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { SolutionTitle } from './solution_title';
@@ -64,9 +65,10 @@ interface Props {
   solution: FeatureCatalogueSolution;
   apps?: FeatureCatalogueEntry[];
   branding: HomePluginBranding;
+  logos: Logos;
 }
 
-export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [], branding }) => (
+export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [], branding, logos }) => (
   <EuiFlexItem
     key={solution.id}
     data-test-subj={`homSolutionPanel homSolutionPanel_${solution.id}`}
@@ -90,6 +92,7 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution, apps = [], bra
               title={solution.title}
               subtitle={solution.subtitle}
               branding={branding}
+              logos={logos}
             />
           </EuiFlexItem>
 

@@ -12,6 +12,6 @@
       "{indices}/_alias/{name}",
       "{indices}/_aliases/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/index-alias/"
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/index-alias/#create-aliases"
   }
 }

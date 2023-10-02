@@ -57,7 +57,7 @@ export function sonicwallLogsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-sonicwall.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/sonicwall.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/sonicwall.svg',
     artifacts: {
       dashboards: [],
       application: {

@@ -57,7 +57,7 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-cisco.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/cisco.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/cisco.svg',
     artifacts: {
       dashboards: [
         {

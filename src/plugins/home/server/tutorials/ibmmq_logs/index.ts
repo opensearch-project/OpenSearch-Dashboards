@@ -56,7 +56,7 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-ibmmq.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/ibmmq.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/ibmmq.svg',
     artifacts: {
       dashboards: [
         {

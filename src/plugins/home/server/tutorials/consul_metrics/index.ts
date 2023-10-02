@@ -56,7 +56,7 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-consul.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/consul.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/consul.svg',
     artifacts: {
       dashboards: [
         {

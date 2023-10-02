@@ -61,6 +61,8 @@ export {
   visualizeFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeGeoFieldTrigger,
+  EXTERNAL_ACTION_TRIGGER,
+  externalActionTrigger,
 } from './triggers';
 export {
   TriggerContextMapping,

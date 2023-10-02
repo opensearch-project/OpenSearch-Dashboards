@@ -27,9 +27,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { resolve, join } from 'path';
-import { ErrorReporter, I18nConfig, assignConfigFromPath, arrayify } from '..';
+import { ListrContext } from '.';
+import { assignConfigFromPath, arrayify } from '..';
 
 export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
@@ -38,7 +38,7 @@ export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   const configPaths = [opensearchDashboardsRC, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
-    task: async (context: { reporter: ErrorReporter; config?: I18nConfig }) => {
+    task: async (context: ListrContext) => {
       try {
         context.config = await assignConfigFromPath(context.config, configPath);
       } catch (err) {

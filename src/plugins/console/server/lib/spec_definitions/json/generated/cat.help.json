@@ -10,6 +10,6 @@
     "patterns": [
       "_cat"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/index/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/index"
   }
 }

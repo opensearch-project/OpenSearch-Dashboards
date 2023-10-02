@@ -1,0 +1,9 @@
+$osdHeaderOffset: $euiHeaderHeightCompensation;
+
+.dePageTemplate {
+  height: calc(100vh - #{$osdHeaderOffset});
+}
+
+.headerIsExpanded .dePageTemplate {
+  height: calc(100vh - #{$osdHeaderOffset * 2});
+}

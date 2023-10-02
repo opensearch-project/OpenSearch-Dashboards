@@ -79,10 +79,10 @@ describe('#getOpenSearchDashboardsPkg()', () => {
   });
 });
 
-describe('#getNodeVersion()', () => {
-  it('returns the node version from the OpenSearch Dashboards package.json', async () => {
+describe('#getNodeRange()', () => {
+  it('returns the node version range from the OpenSearch Dashboards package.json', async () => {
     const config = await setup();
-    expect(config.getNodeVersion()).toEqual(pkg.engines.node);
+    expect(config.getNodeRange()).toEqual(pkg.engines.node);
   });
 });
 

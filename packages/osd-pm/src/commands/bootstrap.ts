@@ -85,7 +85,7 @@ export const BootstrapCommand: ICommand = {
     let cachedProjectCount = 0;
 
     for (const project of projects.values()) {
-      if (project.hasScript('osd:bootstrap')) {
+      if (project.hasScript('osd:bootstrap') || project.hasBuildTargets()) {
         const file = new BootstrapCacheFile(osd, project, checksums);
         const valid = options.cache && file.isValid();
 
@@ -105,9 +105,25 @@ export const BootstrapCommand: ICommand = {
     await parallelizeBatches(batchedProjects, async (project) => {
       const cache = caches.get(project);
       if (cache && !cache.valid) {
-        log.info(`[${project.name}] running [osd:bootstrap] script`);
-        cache.file.delete();
-        await project.runScriptStreaming('osd:bootstrap');
+        // Explicitly defined targets override any bootstrap scripts
+        if (project.hasBuildTargets()) {
+          if (project.hasScript('osd:bootstrap')) {
+            log.debug(
+              `[${project.name}] ignoring [osd:bootstrap] script since build targets are provided`
+            );
+          }
+
+          log.info(`[${project.name}] running [osd:bootstrap] build targets`);
+
+          cache.file.delete();
+          await project.buildForTargets({ sourceMaps: true });
+        } else {
+          log.info(`[${project.name}] running [osd:bootstrap] script`);
+
+          cache.file.delete();
+          await project.runScriptStreaming('osd:bootstrap');
+        }
+
         cache.file.write();
         log.success(`[${project.name}] bootstrap complete`);
       }

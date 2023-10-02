@@ -17,18 +17,20 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
-  EuiRadioGroup,
+  EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import { Header } from '../header';
 import {
   AuthType,
   credentialSourceOptions,
   DataSourceAttributes,
   DataSourceManagementContextValue,
+  sigV4ServiceOptions,
   ToastMessageItem,
   UsernamePasswordTypedContent,
 } from '../../../../types';
@@ -40,13 +42,14 @@ import {
   performDataSourceFormValidation,
 } from '../../../validation';
 import { UpdatePasswordModal } from '../update_password_modal';
+import { UpdateAwsCredentialModal } from '../update_aws_credential_modal';
 
 export interface EditDataSourceProps {
   existingDataSource: DataSourceAttributes;
   existingDatasourceNamesList: string[];
-  handleSubmit: (formValues: DataSourceAttributes) => void;
-  handleTestConnection: (formValues: DataSourceAttributes) => void;
-  onDeleteDataSource?: () => void;
+  handleSubmit: (formValues: DataSourceAttributes) => Promise<void>;
+  handleTestConnection: (formValues: DataSourceAttributes) => Promise<void>;
+  onDeleteDataSource?: () => Promise<void>;
   displayToastMessage: (info: ToastMessageItem) => void;
 }
 export interface EditDataSourceState {
@@ -56,9 +59,10 @@ export interface EditDataSourceState {
   endpoint: string;
   auth: {
     type: AuthType;
-    credentials: UsernamePasswordTypedContent;
+    credentials: UsernamePasswordTypedContent | SigV4Content;
   };
   showUpdatePasswordModal: boolean;
+  showUpdateAwsCredentialModal: boolean;
   showUpdateOptions: boolean;
   isLoading: boolean;
 }
@@ -81,9 +85,13 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         credentials: {
           username: '',
           password: '',
+          region: '',
+          accessKey: '',
+          secretKey: '',
         },
       },
       showUpdatePasswordModal: false,
+      showUpdateAwsCredentialModal: false,
       showUpdateOptions: false,
       isLoading: false,
     };
@@ -102,6 +110,11 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     if (this.props.existingDataSource) {
       const { title, description, endpoint, auth } = this.props.existingDataSource;
 
+      const authTypeCheckResults = {
+        isUserNamePassword: auth.type === AuthType.UsernamePasswordType,
+        isSigV4: auth.type === AuthType.SigV4,
+      };
+
       this.setState({
         title,
         description: description || '',
@@ -109,8 +122,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         auth: {
           type: auth.type,
           credentials: {
-            username: auth.type === AuthType.NoAuth ? '' : auth.credentials?.username || '',
-            password: auth.type === AuthType.NoAuth ? '' : this.maskedPassword,
+            username: authTypeCheckResults.isUserNamePassword ? auth.credentials?.username : '',
+            password: authTypeCheckResults.isUserNamePassword ? this.maskedPassword : '',
+            service: authTypeCheckResults.isSigV4
+              ? auth.credentials?.service || SigV4ServiceName.OpenSearch
+              : '',
+            region: authTypeCheckResults.isSigV4 ? auth.credentials!.region : '',
+            accessKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
+            secretKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
           },
         },
       });
@@ -147,23 +166,25 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
-  onChangeAuthType = (value: string) => {
-    const valueToSave =
-      value === AuthType.UsernamePasswordType ? AuthType.UsernamePasswordType : AuthType.NoAuth;
-
-    const formErrorsByField = {
-      ...this.state.formErrorsByField,
-      createCredential: { ...this.state.formErrorsByField.createCredential },
-    };
-    if (valueToSave === AuthType.NoAuth) {
-      formErrorsByField.createCredential = {
-        username: [],
-        password: [],
-      };
-    }
-    this.setState({ auth: { ...this.state.auth, type: valueToSave }, formErrorsByField }, () => {
-      this.onChangeFormValues();
-    });
+  onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const authType = e.target.value as AuthType;
+    this.setState(
+      {
+        auth: {
+          ...this.state.auth,
+          type: authType,
+          credentials: {
+            ...this.state.auth.credentials,
+            service:
+              (this.state.auth.credentials?.service as SigV4ServiceName) ||
+              SigV4ServiceName.OpenSearch,
+          },
+        },
+      },
+      () => {
+        this.onChangeFormValues();
+      }
+    );
   };
 
   onChangeDescription = (e: { target: { value: any } }) => {
@@ -174,10 +195,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     this.setState({
       auth: {
         ...this.state.auth,
-        credentials: { ...this.state.auth.credentials, username: e.target.value },
+        credentials: {
+          ...this.state.auth.credentials,
+          username: e.target.value,
+        } as UsernamePasswordTypedContent,
       },
     });
   };
+
   validateUsername = () => {
     const isValid = !!this.state.auth.credentials.username?.trim().length;
     this.setState({
@@ -208,7 +233,88 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     this.setState({
       auth: {
         ...this.state.auth,
-        credentials: { ...this.state.auth.credentials, password: e.target.value },
+        credentials: {
+          ...this.state.auth.credentials,
+          password: e.target.value,
+        } as UsernamePasswordTypedContent,
+      },
+    });
+  };
+
+  onChangeSigV4ServiceName = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: {
+          ...this.state.auth.credentials,
+          service: e.target.value as SigV4ServiceName,
+        } as SigV4Content,
+      },
+    });
+  };
+
+  onChangeRegion = (e: { target: { value: any } }) => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: { ...this.state.auth.credentials, region: e.target.value } as SigV4Content,
+      },
+    });
+  };
+
+  validateRegion = () => {
+    const isValid = !!this.state.auth.credentials.region?.trim().length;
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        awsCredential: {
+          ...this.state.formErrorsByField.awsCredential,
+          region: isValid ? [] : [''],
+        },
+      },
+    });
+  };
+
+  onChangeAccessKey = (e: { target: { value: any } }) => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: { ...this.state.auth.credentials, accessKey: e.target.value } as SigV4Content,
+      },
+    });
+  };
+
+  validateAccessKey = () => {
+    const isValid = !!this.state.auth.credentials?.accessKey;
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        awsCredential: {
+          ...this.state.formErrorsByField.awsCredential,
+          accessKey: isValid ? [] : [''],
+        },
+      },
+    });
+  };
+
+  onChangeSecretKey = (e: { target: { value: any } }) => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        credentials: { ...this.state.auth.credentials, secretKey: e.target.value } as SigV4Content,
+      },
+    });
+  };
+
+  validateSecretKey = () => {
+    const isValid = !!this.state.auth.credentials?.secretKey;
+    this.setState({
+      formErrorsByField: {
+        ...this.state.formErrorsByField,
+        awsCredential: {
+          ...this.state.formErrorsByField.awsCredential,
+          secretKey: isValid ? [] : [''],
+        },
       },
     });
   };
@@ -221,12 +327,30 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         description: this.state.description,
         auth: this.state.auth,
       };
-      /* Remove credentials object for NoAuth */
-      if (this.state.auth.type === AuthType.NoAuth) {
-        delete formValues.auth.credentials;
-      } else if (this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType) {
-        /* Remove password if previously & currently username & password method is selected*/
-        delete formValues.auth.credentials?.password;
+
+      switch (this.state.auth.type) {
+        case AuthType.NoAuth:
+          delete formValues.auth.credentials;
+          break;
+        case AuthType.SigV4:
+          delete formValues.auth.credentials?.username;
+          delete formValues.auth.credentials?.password;
+          /* Remove access key and secret key if previously & currently SigV4 auth method is selected*/
+          if (this.props.existingDataSource.auth.type === this.state.auth.type) {
+            delete formValues.auth.credentials?.accessKey;
+            delete formValues.auth.credentials?.secretKey;
+          }
+          break;
+        case AuthType.UsernamePasswordType:
+          delete formValues.auth.credentials?.accessKey;
+          delete formValues.auth.credentials?.secretKey;
+          delete formValues.auth.credentials?.region;
+          /* Remove password if previously & currently username & password auth method is selected*/
+          if (this.props.existingDataSource.auth.type === this.state.auth.type)
+            delete formValues.auth.credentials?.password;
+          break;
+        default:
+          break;
       }
 
       /* Submit */
@@ -246,33 +370,49 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     }
   };
 
-  onClickDeleteDataSource = () => {
+  onClickDeleteDataSource = async () => {
     if (this.props.onDeleteDataSource) {
-      this.props.onDeleteDataSource();
+      await this.props.onDeleteDataSource();
     }
   };
 
   onClickTestConnection = async () => {
     this.setState({ isLoading: true });
-    const existingAuthType = this.props.existingDataSource.auth.type;
+    const isNewCredential = !!(this.state.auth.type !== this.props.existingDataSource.auth.type);
+
+    let credentials = this.state.auth.credentials;
+
+    switch (this.state.auth.type) {
+      case AuthType.UsernamePasswordType:
+        credentials = {
+          username: this.state.auth.credentials?.username,
+          password: isNewCredential ? this.state.auth.credentials?.password : '',
+        } as UsernamePasswordTypedContent;
+        break;
+      case AuthType.SigV4:
+        credentials = {
+          service: this.state.auth.credentials?.service,
+          region: this.state.auth.credentials?.region,
+          accessKey: isNewCredential ? this.state.auth.credentials?.accessKey : '',
+          secretKey: isNewCredential ? this.state.auth.credentials?.secretKey : '',
+        } as SigV4Content;
+        break;
+      case AuthType.NoAuth:
+        credentials = undefined;
+        break;
+
+      default:
+        break;
+    }
+
+    const formValues: DataSourceAttributes = {
+      title: this.state.title,
+      description: this.state.description,
+      endpoint: this.state.endpoint,
+      auth: { ...this.state.auth, credentials },
+    };
 
     try {
-      const isNewCredential = !!(
-        existingAuthType === AuthType.NoAuth && this.state.auth.type !== existingAuthType
-      );
-      const formValues: DataSourceAttributes = {
-        title: this.state.title,
-        description: this.state.description,
-        endpoint: this.props.existingDataSource.endpoint,
-        auth: {
-          ...this.state.auth,
-          credentials: {
-            ...this.state.auth.credentials,
-            password: isNewCredential ? this.state.auth.credentials.password : '',
-          },
-        },
-      };
-
       await this.props.handleTestConnection(formValues);
 
       this.props.displayToastMessage({
@@ -303,6 +443,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     this.setState({ showUpdatePasswordModal: true });
   };
 
+  onClickUpdateAwsCredential = () => {
+    this.setState({ showUpdateAwsCredentialModal: true });
+  };
+
   /* Update password */
   updatePassword = async (password: string) => {
     const { title, description, auth } = this.props.existingDataSource;
@@ -315,7 +459,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         credentials: {
           username: auth.credentials ? auth.credentials.username : '',
           password,
-        },
+        } as UsernamePasswordTypedContent,
       },
     };
     this.closePasswordModal();
@@ -335,11 +479,48 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     }
   };
 
+  /* Update aws credential */
+  updateAwsCredential = async (accessKey: string, secretKey: string) => {
+    const { title, description, auth } = this.props.existingDataSource;
+    const updateAttributes: DataSourceAttributes = {
+      title,
+      description,
+      endpoint: undefined,
+      auth: {
+        type: auth.type,
+        credentials: {
+          region: auth.credentials ? auth.credentials.region : '',
+          accessKey,
+          secretKey,
+        } as SigV4Content,
+      },
+    };
+    this.closeAwsCredentialModal();
+
+    try {
+      await this.props.handleSubmit(updateAttributes);
+      this.props.displayToastMessage({
+        id: 'dataSourcesManagement.editDataSource.updatePasswordSuccessMsg',
+        defaultMessage: 'Password updated successfully.',
+        success: true,
+      });
+    } catch (e) {
+      this.props.displayToastMessage({
+        id: 'dataSourcesManagement.editDataSource.updatePasswordFailMsg',
+        defaultMessage: 'Updating the stored password failed with some errors.',
+      });
+    }
+  };
+
   /* Render methods */
 
-  /* Render Modal for new credential */
+  /* Render modal for new credential */
   closePasswordModal = () => {
     this.setState({ showUpdatePasswordModal: false });
+  };
+
+  closeAwsCredentialModal = () => {
+    this.setState({ showUpdateAwsCredentialModal: false });
   };
 
   renderUpdatePasswordModal = () => {
@@ -367,14 +548,40 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       </>
     );
   };
+
+  renderUpdateAwsCredentialModal = () => {
+    return (
+      <>
+        <EuiButton
+          onClick={this.onClickUpdateAwsCredential}
+          data-test-subj="editDatasourceUpdateAwsCredentialBtn"
+        >
+          {
+            <FormattedMessage
+              id="dataSourcesManagement.editDataSource.updateStoredAwsCredential"
+              defaultMessage="Update stored AWS credential"
+            />
+          }
+        </EuiButton>
+
+        {this.state.showUpdateAwsCredentialModal ? (
+          <UpdateAwsCredentialModal
+            region={this.state.auth.credentials!.region}
+            service={this.state.auth.credentials!.service}
+            handleUpdateAwsCredential={this.updateAwsCredential}
+            closeUpdateAwsCredentialModal={this.closeAwsCredentialModal}
+          />
+        ) : null}
+      </>
+    );
+  };
+
   /* Render header*/
   renderHeader = () => {
     return (
       <Header
         showDeleteIcon={true}
-        isFormValid={
-          !!this.state.auth?.credentials?.username || this.state.auth.type === AuthType.NoAuth
-        }
+        isFormValid={this.isFormValid()}
         onClickDeleteIcon={this.onClickDeleteDataSource}
         dataSourceName={this.props.existingDataSource.title}
         onClickTestConnection={this.onClickTestConnection}
@@ -565,18 +772,129 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             defaultMessage: 'Credential',
           })}
         >
-          <EuiRadioGroup
+          <EuiSelect
             options={credentialSourceOptions}
-            idSelected={this.state.auth.type}
-            onChange={(id) => this.onChangeAuthType(id)}
+            value={this.state.auth.type}
+            onChange={this.onChangeAuthType}
             name="Credential"
             data-test-subj="editDataSourceSelectAuthType"
           />
         </EuiFormRow>
 
         <EuiSpacer />
+        {this.renderSelectedAuthType(this.state.auth.type)}
+      </>
+    );
+  };
 
-        {this.state.auth.type !== AuthType.NoAuth ? this.renderUsernamePasswordFields() : null}
+  renderSelectedAuthType = (type: AuthType) => {
+    switch (type) {
+      case AuthType.UsernamePasswordType:
+        return this.renderUsernamePasswordFields();
+      case AuthType.SigV4:
+        return this.renderSigV4ContentFields();
+      default:
+        return null;
+    }
+  };
+
+  renderSigV4ContentFields = () => {
+    return (
+      <>
+        <EuiFormRow
+          label={i18n.translate('dataSourcesManagement.createDataSource.region', {
+            defaultMessage: 'Region',
+          })}
+          isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
+          error={this.state.formErrorsByField.awsCredential.region}
+        >
+          <EuiFieldText
+            placeholder={i18n.translate(
+              'dataSourcesManagement.createDataSource.regionPlaceholder',
+              {
+                defaultMessage: 'AWS Region, e.g. us-west-2',
+              }
+            )}
+            isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
+            value={this.state.auth.credentials?.region || ''}
+            onChange={this.onChangeRegion}
+            onBlur={this.validateRegion}
+            data-test-subj="editDataSourceFormRegionField"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('dataSourcesManagement.createDataSource.serviceName', {
+            defaultMessage: 'Service Name',
+          })}
+        >
+          <EuiSelect
+            options={sigV4ServiceOptions}
+            value={this.state.auth.credentials?.service}
+            onChange={(e) => this.onChangeSigV4ServiceName(e)}
+            name="ServiceName"
+            data-test-subj="editDataSourceFormSigV4ServiceTypeSelect"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('dataSourcesManagement.createDataSource.accessKey', {
+            defaultMessage: 'Access Key',
+          })}
+          isInvalid={!!this.state.formErrorsByField.awsCredential.accessKey.length}
+          error={this.state.formErrorsByField.awsCredential.accessKey}
+        >
+          <EuiFieldPassword
+            isInvalid={!!this.state.formErrorsByField.awsCredential.accessKey.length}
+            placeholder={i18n.translate(
+              'dataSourcesManagement.createDataSource.accessKeyPlaceholder',
+              {
+                defaultMessage: 'AWS access key',
+              }
+            )}
+            type={'dual'}
+            value={
+              this.props.existingDataSource.auth.type === AuthType.SigV4
+                ? this.maskedPassword
+                : this.state.auth.credentials?.accessKey
+            }
+            onChange={this.onChangeAccessKey}
+            onBlur={this.validateAccessKey}
+            spellCheck={false}
+            disabled={this.props.existingDataSource.auth.type === AuthType.SigV4}
+            data-test-subj="editDataSourceFormAccessKeyField"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('dataSourcesManagement.createDataSource.secretKey', {
+            defaultMessage: 'Secret Key',
+          })}
+          isInvalid={!!this.state.formErrorsByField.awsCredential.secretKey.length}
+          error={this.state.formErrorsByField.awsCredential.secretKey}
+        >
+          <EuiFieldPassword
+            isInvalid={!!this.state.formErrorsByField.awsCredential.secretKey.length}
+            placeholder={i18n.translate(
+              'dataSourcesManagement.createDataSource.secretKeyPlaceholder',
+              {
+                defaultMessage: 'AWS secret key',
+              }
+            )}
+            type={'dual'}
+            value={
+              this.props.existingDataSource.auth.type === AuthType.SigV4
+                ? this.maskedPassword
+                : this.state.auth.credentials?.secretKey
+            }
+            onChange={this.onChangeSecretKey}
+            onBlur={this.validateSecretKey}
+            spellCheck={false}
+            disabled={this.props.existingDataSource.auth.type === AuthType.SigV4}
+            data-test-subj="editDataSourceFormSecretKeyField"
+          />
+        </EuiFormRow>
+        <EuiSpacer />
+        {this.props.existingDataSource.auth.type === AuthType.SigV4
+          ? this.renderUpdateAwsCredentialModal()
+          : null}
       </>
     );
   };
@@ -600,7 +918,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 defaultMessage: 'Username to connect to data source',
               }
             )}
-            value={this.state.auth.credentials.username || ''}
+            value={this.state.auth.credentials?.username || ''}
             isInvalid={!!this.state.formErrorsByField.createCredential?.username?.length}
             onChange={this.onChangeUsername}
             onBlur={this.validateUsername}
@@ -625,19 +943,19 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 )}
                 type={'dual'}
                 value={
-                  this.props.existingDataSource.auth.type !== AuthType.NoAuth
-                    ? '********'
-                    : this.state.auth.credentials.password
+                  this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType
+                    ? this.maskedPassword
+                    : this.state.auth.credentials?.password
                 }
                 isInvalid={!!this.state.formErrorsByField.createCredential?.password?.length}
                 spellCheck={false}
                 onChange={this.onChangePassword}
                 onBlur={this.validatePassword}
-                disabled={this.props.existingDataSource.auth.type !== AuthType.NoAuth}
+                disabled={this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType}
                 data-test-subj="updateDataSourceFormPasswordField"
               />
             </EuiFlexItem>
-            {this.props.existingDataSource.auth.type !== AuthType.NoAuth ? (
+            {this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType ? (
               <EuiFlexItem>{this.renderUpdatePasswordModal()}</EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
@@ -659,12 +977,21 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       auth.type === formValues.auth.type &&
       auth.type === AuthType.UsernamePasswordType &&
       formValues.auth.credentials?.username !== auth.credentials?.username;
+    const isAuthTypeSigV4Unchanged =
+      auth.type === formValues.auth.type && auth.type === AuthType.SigV4;
+    const isRegionChanged =
+      isAuthTypeSigV4Unchanged && formValues.auth.credentials?.region !== auth.credentials?.region;
+    const isServiceNameChanged =
+      isAuthTypeSigV4Unchanged &&
+      formValues.auth.credentials?.service !== auth.credentials?.service;
 
     if (
       formValues.title !== title ||
       formValues.description !== description ||
       formValues.auth.type !== auth.type ||
-      isUsernameChanged
+      isUsernameChanged ||
+      isRegionChanged ||
+      isServiceNameChanged
     ) {
       this.setState({ showUpdateOptions: true });
     } else {

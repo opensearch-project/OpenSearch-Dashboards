@@ -275,6 +275,10 @@ export class LegacyService implements CoreService {
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
         registerType: setupDeps.core.savedObjects.registerType,
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
+        setRepositoryFactoryProvider: setupDeps.core.savedObjects.setRepositoryFactoryProvider,
+        setStatus: () => {
+          throw new Error(`core.savedObjects.setStatus is unsupported in legacy`);
+        },
       },
       status: {
         isStatusPageAnonymous: setupDeps.core.status.isStatusPageAnonymous,

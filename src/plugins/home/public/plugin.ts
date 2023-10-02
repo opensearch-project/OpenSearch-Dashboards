@@ -56,11 +56,13 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
+import { DataSourcePluginStart } from '../../data_source/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   telemetry?: TelemetryPluginStart;
   urlForwarding: UrlForwardingStart;
+  dataSource?: DataSourcePluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -96,7 +98,7 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          { telemetry, data, urlForwarding: urlForwardingStart },
+          { telemetry, data, urlForwarding: urlForwardingStart, dataSource },
         ] = await core.getStartServices();
         setServices({
           trackUiMetric,
@@ -119,6 +121,7 @@ export class HomePublicPlugin
           tutorialService: this.tutorialService,
           featureCatalogue: this.featuresCatalogueRegistry,
           injectedMetadata: coreStart.injectedMetadata,
+          dataSource,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

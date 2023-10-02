@@ -105,6 +105,9 @@ export type PluginName = string;
 /** @public */
 export type PluginOpaqueId = symbol;
 
+/** @public */
+export type CompatibleEnginePluginVersions = Record<string, string>;
+
 /** @internal */
 export interface PluginDependencies {
   asNames: ReadonlyMap<PluginName, PluginName[]>;
@@ -153,6 +156,12 @@ export interface PluginManifest {
    * for this plugin to function properly.
    */
   readonly requiredPlugins: readonly PluginName[];
+
+  /**
+   * An optional list of the OpenSearch plugins that **must be** installed on the cluster
+   * for this plugin to function properly.
+   */
+  readonly requiredEnginePlugins: CompatibleEnginePluginVersions;
 
   /**
    * List of plugin ids that this plugin's UI code imports modules from that are

@@ -36,7 +36,7 @@ const OPENSEARCH_DASHBOARDS_INSTALL_DIR =
   `./build/oss/opensearch-dashboards-${version}-SNAPSHOT-${process.platform}-x64`;
 
 module.exports = function () {
-  const NODE = 'node';
+  const NODE = process.execPath;
   const YARN = 'yarn';
 
   return {

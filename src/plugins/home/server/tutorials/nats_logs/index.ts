@@ -58,7 +58,7 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-nats.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/nats.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/nats.svg',
     artifacts: {
       dashboards: [
         {

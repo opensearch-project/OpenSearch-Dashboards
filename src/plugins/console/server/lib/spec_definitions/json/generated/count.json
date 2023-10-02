@@ -33,6 +33,6 @@
       "_count",
       "{indices}/_count"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/count/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/count/"
   }
 }

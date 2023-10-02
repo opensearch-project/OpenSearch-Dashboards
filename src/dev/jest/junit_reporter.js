@@ -53,7 +53,7 @@ export default class JestJUnitReporter {
   /**
    * Called by jest when all tests complete
    * @param {Object} contexts
-   * @param {JestResults} results see https://facebook.github.io/jest/docs/en/configuration.html#testresultsprocessor-string
+   * @param {JestResults} results see https://jestjs.io/docs/configuration/#testresultsprocessor-string
    * @return {undefined}
    */
   onRunComplete(contexts, results) {

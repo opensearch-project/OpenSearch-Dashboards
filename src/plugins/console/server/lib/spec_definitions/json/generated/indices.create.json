@@ -11,6 +11,6 @@
     "patterns": [
       "{indices}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/create-index/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/create-index/"
   }
 }

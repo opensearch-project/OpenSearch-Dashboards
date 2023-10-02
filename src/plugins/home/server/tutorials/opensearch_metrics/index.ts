@@ -57,7 +57,7 @@ export function opensearchMetricsSpecProvider(context: TutorialContext): Tutoria
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-opensearch.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/opensearch_mark_default.svg',
+    euiIconType: '/ui/logos/opensearch_mark.svg',
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.opensearchMetrics.artifacts.application.label', {

@@ -32,6 +32,7 @@ import { cloneDeep, defaults, mergeWith, compact } from 'lodash';
 import $ from 'jquery';
 import moment, { Moment } from 'moment-timezone';
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { TimefilterContract } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 
@@ -65,18 +66,7 @@ interface TimeRangeBounds {
 export const ACTIVE_CURSOR = 'ACTIVE_CURSOR_TIMELINE';
 export const eventBus = $({});
 
-const colors = [
-  '#01A4A4',
-  '#C66',
-  '#D0D102',
-  '#616161',
-  '#00A1CB',
-  '#32742C',
-  '#F18D05',
-  '#113F8C',
-  '#61AE24',
-  '#D70060',
-];
+const colors = euiPaletteColorBlind();
 
 const SERIES_ID_ATTR = 'data-series-id';
 

@@ -37,6 +37,7 @@ import {
   IUiSettingsClient,
   OverlayStart,
   SavedObjectsStart,
+  NotificationsStart,
 } from '../../../core/public';
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/common';
@@ -52,6 +53,7 @@ import { UiActionsStart } from '../../ui_actions/public';
 import { SavedVisualizationsLoader } from './saved_visualizations';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
+import { SavedObjectLoaderAugmentVis } from '../../vis_augmenter/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -106,3 +108,11 @@ export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 export const [getSavedSearchLoader, setSavedSearchLoader] = createGetterSetter<SavedObjectLoader>(
   'savedSearchLoader'
 );
+
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
+
+export const [getSavedAugmentVisLoader, setSavedAugmentVisLoader] = createGetterSetter<
+  SavedObjectLoaderAugmentVis
+>('savedAugmentVisLoader');

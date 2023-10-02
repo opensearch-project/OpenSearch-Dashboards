@@ -29,13 +29,8 @@
  */
 
 import { createFailError } from '@osd/dev-utils';
-import {
-  I18nConfig,
-  matchEntriesWithExctractors,
-  normalizePath,
-  readFileAsync,
-  ErrorReporter,
-} from '..';
+import { ListrContext } from '.';
+import { I18nConfig, matchEntriesWithExctractors, normalizePath, readFileAsync } from '..';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>
@@ -104,8 +99,11 @@ export async function extractUntrackedMessagesTask({
 export function extractUntrackedMessages(inputPaths: string[]) {
   return inputPaths.map((inputPath) => ({
     title: `Checking untracked messages in ${inputPath}`,
-    task: async (context: { reporter: ErrorReporter; config: I18nConfig }) => {
+    task: async (context: ListrContext) => {
       const { reporter, config } = context;
+      if (!config) {
+        throw new Error('Config is not defined');
+      }
       const initialErrorsNumber = reporter.errors.length;
       const result = await extractUntrackedMessagesTask({ path: inputPath, config, reporter });
       if (reporter.errors.length === initialErrorsNumber) {

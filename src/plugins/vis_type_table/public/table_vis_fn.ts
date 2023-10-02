@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
+import { tableVisResponseHandler, TableVisData } from './table_vis_response_handler';
 import {
   ExpressionFunctionDefinition,
   OpenSearchDashboardsDatatable,
@@ -19,7 +19,7 @@ interface Arguments {
 }
 
 export interface TableVisRenderValue {
-  visData: TableContext;
+  visData: TableVisData;
   visType: 'table';
   visConfig: TableVisConfig;
 }

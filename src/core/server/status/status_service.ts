@@ -95,7 +95,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         this.logger.debug(`Recalculated overall status`, { status: summary });
         return summary;
       }),
-      distinctUntilChanged(isDeepStrictEqual),
+      distinctUntilChanged<ServiceStatus<unknown>>(isDeepStrictEqual),
       shareReplay(1)
     );
 
@@ -149,7 +149,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         opensearch: opensearchStatus,
         savedObjects: savedObjectsStatus,
       })),
-      distinctUntilChanged(isDeepStrictEqual),
+      distinctUntilChanged<CoreStatus>(isDeepStrictEqual),
       shareReplay(1)
     );
   }

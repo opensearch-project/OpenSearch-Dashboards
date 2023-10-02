@@ -32,14 +32,19 @@ import { i18n } from '@osd/i18n';
 import { schema } from '@osd/config-schema';
 
 import { UiSettingsParams } from 'opensearch-dashboards/server';
-import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
+import {
+  PER_PAGE_SETTING,
+  PER_PAGE_VALUE,
+  LISTING_LIMIT_SETTING,
+  LISTING_LIMIT_VALUE,
+} from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
   [PER_PAGE_SETTING]: {
     name: i18n.translate('savedObjects.advancedSettings.perPageTitle', {
       defaultMessage: 'Objects per page',
     }),
-    value: 20,
+    value: PER_PAGE_VALUE,
     type: 'number',
     description: i18n.translate('savedObjects.advancedSettings.perPageText', {
       defaultMessage: 'Number of objects to show per page in the load dialog',
@@ -51,7 +56,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       defaultMessage: 'Objects listing limit',
     }),
     type: 'number',
-    value: 1000,
+    value: LISTING_LIMIT_VALUE,
     description: i18n.translate('savedObjects.advancedSettings.listingLimitText', {
       defaultMessage: 'Number of objects to fetch for the listing pages',
     }),

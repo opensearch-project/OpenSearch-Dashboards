@@ -57,7 +57,7 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-microsoft.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/microsoft.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/microsoft.svg',
     artifacts: {
       dashboards: [
         {

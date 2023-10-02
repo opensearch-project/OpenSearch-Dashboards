@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview render 1`] = `
+exports[`Overview renders with solutions and features 1`] = `
 <main
   aria-labelledby="osdOverviewPageHeader__title"
   className="osdOverviewWrapper"
@@ -70,17 +70,73 @@ exports[`Overview render 1`] = `
         ],
       }
     }
-    branding={
+    hideToolbar={false}
+    logos={
       Object {
-        "darkMode": false,
-        "mark": Object {
-          "darkModeUrl": "/darkModeUrl",
-          "defaultUrl": "/defaultModeUrl",
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
         },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
       }
     }
-    hideToolbar={false}
-    iconType="inputOutput"
+    showIcon={true}
     title={
       <FormattedMessage
         defaultMessage="OpenSearch Dashboards"
@@ -182,7 +238,7 @@ exports[`Overview render 1`] = `
               id="osdOverviewMore__title"
             >
               <FormattedMessage
-                defaultMessage="Do more with Elastic"
+                defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
                 values={Object {}}
               />
@@ -373,7 +429,7 @@ exports[`Overview render 1`] = `
 </main>
 `;
 
-exports[`Overview without features 1`] = `
+exports[`Overview renders with solutions and without features 1`] = `
 <main
   aria-labelledby="osdOverviewPageHeader__title"
   className="osdOverviewWrapper"
@@ -499,17 +555,73 @@ exports[`Overview without features 1`] = `
         ],
       }
     }
-    branding={
+    hideToolbar={false}
+    logos={
       Object {
-        "darkMode": false,
-        "mark": Object {
-          "darkModeUrl": "/darkModeUrl",
-          "defaultUrl": "/defaultModeUrl",
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
         },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
       }
     }
-    hideToolbar={false}
-    iconType="inputOutput"
+    showIcon={true}
     title={
       <FormattedMessage
         defaultMessage="OpenSearch Dashboards"
@@ -611,7 +723,7 @@ exports[`Overview without features 1`] = `
               id="osdOverviewMore__title"
             >
               <FormattedMessage
-                defaultMessage="Do more with Elastic"
+                defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
                 values={Object {}}
               />
@@ -858,7 +970,7 @@ exports[`Overview without features 1`] = `
 </main>
 `;
 
-exports[`Overview without solutions 1`] = `
+exports[`Overview renders without solutions and with features 1`] = `
 <main
   aria-labelledby="osdOverviewPageHeader__title"
   className="osdOverviewWrapper"
@@ -928,17 +1040,73 @@ exports[`Overview without solutions 1`] = `
         ],
       }
     }
-    branding={
+    hideToolbar={false}
+    logos={
       Object {
-        "darkMode": false,
-        "mark": Object {
-          "darkModeUrl": "/darkModeUrl",
-          "defaultUrl": "/defaultModeUrl",
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
         },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
       }
     }
-    hideToolbar={false}
-    iconType="inputOutput"
+    showIcon={true}
     title={
       <FormattedMessage
         defaultMessage="OpenSearch Dashboards"

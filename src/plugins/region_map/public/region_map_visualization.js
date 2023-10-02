@@ -158,7 +158,6 @@ export function createRegionMapVisualization({
       let selectedLayer;
       if (DEFAULT_MAP_CHOICE === this._params.layerChosenByUser && this._params.selectedLayer) {
         selectedLayer = await this._loadConfig(this._params.selectedLayer);
-        this._params.selectedJoinField = selectedLayer?.fields[0];
       } else if (
         CUSTOM_MAP_CHOICE === this._params.layerChosenByUser &&
         this._params.selectedCustomLayer
@@ -231,7 +230,8 @@ export function createRegionMapVisualization({
           await getServiceSettings(),
           (await lazyLoadMapsLegacyModules()).L,
           this._params.layerChosenByUser,
-          http
+          http,
+          uiSettings
         );
       } else {
         const { ChoroplethLayer } = await import('./choropleth_layer');
@@ -245,7 +245,8 @@ export function createRegionMapVisualization({
           await getServiceSettings(),
           (await lazyLoadMapsLegacyModules()).L,
           this._params.layerChosenByUser,
-          http
+          http,
+          uiSettings
         );
       }
       this._choroplethLayer.setLayerChosenByUser(this._params.layerChosenByUser);

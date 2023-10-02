@@ -60,7 +60,7 @@ export function o365LogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-o365.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/o365.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/o365.svg',
     artifacts: {
       dashboards: [
         {

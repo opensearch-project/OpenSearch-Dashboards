@@ -32,13 +32,15 @@ import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import uuid from 'uuid';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
+import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import {
   PanelNotFoundError,
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
+  ViewMode,
+  PanelState,
+  IEmbeddable,
 } from '../../../../embeddable/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 

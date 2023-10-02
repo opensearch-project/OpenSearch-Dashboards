@@ -13,6 +13,6 @@
       "{alias}/_rollover",
       "{alias}/_rollover/{new_index}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-rollover-index.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/index/"
   }
 }

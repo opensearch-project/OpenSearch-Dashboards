@@ -6,11 +6,10 @@
 import expect from '@osd/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+// TODO: Remove selenium functional tests since cypress tests exist
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visBuilder', 'visChart']);
-  const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const retry = getService('retry');
 
   describe('Basic tests for visBuilder app ', function () {
     before(async () => {
@@ -41,20 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const isEmptyWorkspace = await PageObjects.visBuilder.isEmptyWorkspace();
       expect(isEmptyWorkspace).to.be(true);
-    });
-
-    it('should show warning before changing visualization type', async () => {
-      await PageObjects.visBuilder.selectVisType('metric', false);
-      const confirmModalExists = await testSubjects.exists('confirmVisChangeModal');
-      expect(confirmModalExists).to.be(true);
-
-      await testSubjects.click('confirmModalCancelButton');
-    });
-
-    it('should change visualization type', async () => {
-      const pickerValue = await PageObjects.visBuilder.selectVisType('metric');
-
-      expect(pickerValue).to.eql('Metric');
     });
   });
 }

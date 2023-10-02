@@ -59,7 +59,7 @@ export const mountManagementSection = async ({
   mountParams,
   serviceRegistry,
 }: MountParams) => {
-  const [coreStart, { data }, pluginStart] = await core.getStartServices();
+  const [coreStart, { data, uiActions }, pluginStart] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
@@ -88,6 +88,7 @@ export const mountManagementSection = async ({
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsEditionPage
                   coreStart={coreStart}
+                  uiActionsStart={uiActions}
                   serviceRegistry={serviceRegistry}
                   setBreadcrumbs={setBreadcrumbs}
                   history={history}

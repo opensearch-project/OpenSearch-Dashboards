@@ -41,7 +41,6 @@ describe('getSavedObjectsCounts', () => {
       search: { total: 0 },
       index_pattern: { total: 0 },
       graph_workspace: { total: 0 },
-      timelion_sheet: { total: 0 },
     });
   });
 
@@ -51,7 +50,6 @@ describe('getSavedObjectsCounts', () => {
         types: {
           buckets: [
             { key: 'dashboard', doc_count: 1 },
-            { key: 'timelion-sheet', doc_count: 2 },
             { key: 'index-pattern', value: 2 }, // Malformed on purpose
             { key: 'graph_workspace', doc_count: 3 }, // already snake_cased
           ],
@@ -66,7 +64,6 @@ describe('getSavedObjectsCounts', () => {
       search: { total: 0 },
       index_pattern: { total: 0 },
       graph_workspace: { total: 3 },
-      timelion_sheet: { total: 2 },
     });
   });
 });

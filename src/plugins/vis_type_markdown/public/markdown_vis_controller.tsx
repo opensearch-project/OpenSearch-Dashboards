@@ -29,6 +29,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { Markdown } from '../../opensearch_dashboards_react/public';
 import { MarkdownVisParams } from './types';
 
@@ -47,13 +48,18 @@ const MarkdownVisComponent = ({
   useEffect(renderComplete); // renderComplete will be called after each render to signal, that we are done with rendering.
 
   return (
-    <div className="mkdVis" style={{ fontSize: `${fontSize}pt` }}>
+    <EuiPanel
+      style={{ fontSize: `${fontSize}pt` }}
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="s"
+    >
       <Markdown
         data-test-subj="markdownBody"
         markdown={markdown}
         openLinksInNewTab={openLinksInNewTab}
       />
-    </div>
+    </EuiPanel>
   );
 };
 

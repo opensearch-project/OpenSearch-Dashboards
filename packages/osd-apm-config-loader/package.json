@@ -13,7 +13,7 @@
   "dependencies": {
     "@elastic/safer-lodash-set": "0.0.0",
     "@osd/utils": "1.0.0",
-    "js-yaml": "^3.14.0",
+    "js-yaml": "^4.1.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

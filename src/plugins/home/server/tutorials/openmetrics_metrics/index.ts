@@ -56,7 +56,7 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-openmetrics.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/openmetrics.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/openmetrics.svg',
     artifacts: {
       dashboards: [],
       exportedFields: {

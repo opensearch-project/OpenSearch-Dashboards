@@ -1,0 +1,16 @@
+{
+  "id": "visAugmenter",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "savedObjects",
+    "opensearchDashboardsUtils",
+    "expressions",
+    "visualizations",
+    "uiActions",
+    "embeddable"
+  ],
+  "requiredBundles": ["opensearchDashboardsReact", "savedObjectsManagement"]
+}

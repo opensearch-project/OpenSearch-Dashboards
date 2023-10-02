@@ -103,7 +103,10 @@ async function deleteTarget(project: Project) {
 }
 
 async function buildProject(project: Project) {
-  if (project.hasScript('build')) {
+  // Explicitly defined targets override any bootstrap scripts
+  if (project.hasBuildTargets()) {
+    await project.buildForTargets();
+  } else if (project.hasScript('build')) {
     await project.runScript('build');
   }
 }

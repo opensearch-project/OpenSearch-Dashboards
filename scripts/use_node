@@ -1,0 +1,103 @@
+#!/bin/sh
+
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# The OpenSearch Contributors require contributions made to
+# this file be licensed under the Apache-2.0 license or a
+# compatible open source license.
+#
+# Any modifications Copyright OpenSearch Contributors. See
+# GitHub history for details.
+#
+
+# This script will find the appropriate Node.js runtime binary and execute it with any
+# parameters passed in.
+#
+# Set a variable named OSD_USE_NODE_JS_FILE_PATH to have it prefixed with OSD_HOME and executed
+# Example: SET OSD_USE_NODE_JS_FILE_PATH=\src\cli\dist
+#
+# NODE_OPTIONS is built using config/node.options and overridden by any previously set NODE_OPTIONS.
+# To pass in any specific defaults that can be overridden by both of them, use OSD_NODE_OPTS_PREFIX.
+
+SCRIPT="$0"
+
+UNAME=$(uname -s)
+if [ $UNAME = "FreeBSD" ]; then
+  OS="freebsd"
+elif [ $UNAME = "Darwin" ]; then
+  OS="darwin"
+else
+  OS="other"
+fi
+
+# SCRIPT may be an arbitrarily deep series of symlinks. Loop until we have the concrete path.
+while [ -h "$SCRIPT" ] ; do
+  loc=$(ls -ld "$SCRIPT")
+  # Drop everything prior to ->
+  link=$(expr "$loc" : '.*-> \(.*\)$')
+  if expr "$link" : '/.*' > /dev/null; then
+    SCRIPT="$link"
+  else
+    SCRIPT=$(dirname "$SCRIPT")/"$link"
+  fi
+done
+
+# Get an absolute path for OSD_HOME
+OSD_HOME="$(cd "$(dirname "${SCRIPT}")/.."; pwd)"
+CONFIG_DIR=${OSD_PATH_CONF:-"OSD_HOME/config"}
+
+# Places to look for the Node.js binary in order: OSD_NODE_HOME > NODE_HOME > bundled with OSD > system-wide
+if [ ! -z "$OSD_NODE_HOME" ]; then
+  NODE="$OSD_NODE_HOME/bin/node"
+  NODE_ERROR_MSG="in OSD_NODE_HOME"
+  NODE_ERROR_SHOW=true
+elif [ ! -z "$NODE_HOME" ]; then
+  NODE="$NODE_HOME/bin/node"
+  NODE_ERROR_MSG="in NODE_HOME"
+  NODE_ERROR_SHOW=true
+else
+  # Set these variables outside, as catchalls, to show meaningful errors if needed
+  NODE="$OSD_HOME/node/bin/node"
+  NODE_ERROR_MSG="bundled with OpenSearch Dashboards"
+  # A bin folder at the root is only present in release builds that have a bundled Node.js binary
+  if [ -d "${OSD_HOME}/bin" ]; then
+    NODE_ERROR_SHOW=true
+    # Not all operating systems can run the latest Node.js and the fallback is for them
+    "${NODE}" -v > /dev/null 2>&1
+    if [ $? -ne 0 ] && [ -d "${OSD_HOME}/node/fallback" ]; then
+      NODE="$OSD_HOME/node/fallback/bin/node"
+    fi
+  fi
+fi
+
+if [ -x "$NODE" ]; then
+  # Node.js binary was found where it was expected; no need to show an error
+  NODE_ERROR_SHOW=
+elif [ $OS = "freebsd" ]; then
+  NODE="${LOCALBASE}/bin/node"
+else
+  NODE="$(command -v node)"
+fi
+
+if [ ! -x "$NODE" ]; then
+  # Irrespective of NODE_ERROR_SHOW, if NODE is not found or executable, show the error
+  echo "Could not find a Node.js runtime binary $NODE_ERROR_MSG or on the system" >&2
+  exit 1
+fi
+
+# Node.js binary was found but not where it was told to be, so show a warning
+if [ ! -z "$NODE_ERROR_SHOW" ]; then
+  echo "Could not find a Node.js runtime binary $NODE_ERROR_MSG but found one at $NODE" >&2
+fi
+
+if [ -f "${CONFIG_DIR}/node.options" ]; then
+  OSD_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
+fi
+
+# If a file path was provided for execution, prefix with OSD_HOME; use relative paths to avoid the need for this.
+if [ ! -z "$OSD_USE_NODE_JS_FILE_PATH" ]; then
+  NODE_OPTIONS="$OSD_NODE_OPTS_PREFIX $OSD_NODE_OPTS $NODE_OPTIONS" exec "${NODE}" "${OSD_HOME}${OSD_USE_NODE_JS_FILE_PATH}" "${@}"
+elif [ $# -ne 0 ]; then
+  NODE_OPTIONS="$OSD_NODE_OPTS_PREFIX $OSD_NODE_OPTS $NODE_OPTIONS" exec "${NODE}" "${@}"
+fi

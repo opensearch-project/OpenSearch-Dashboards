@@ -50,6 +50,7 @@ opensearch_dashboards_vars=(
     opensearch.ssl.truststore.password
     opensearch.ssl.verificationMode
     opensearch.username
+    opensearch.disablePrototypePoisoningProtection
     i18n.locale
     interpreter.enableInVisualize
     opensearchDashboards.autocompleteTerminateAfter
@@ -134,7 +135,6 @@ opensearch_dashboards_vars=(
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
-    timeline.enabled
     vega.enableExternalUrls
     apm_oss.apmAgentConfigurationIndex
     apm_oss.indexPattern

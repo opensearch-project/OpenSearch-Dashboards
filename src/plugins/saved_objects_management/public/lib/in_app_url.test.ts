@@ -77,6 +77,22 @@ describe('canViewInApp', () => {
     expect(canViewInApp(uiCapabilities, 'visualizations')).toEqual(false);
   });
 
+  it('should handle augment-vis', () => {
+    let uiCapabilities = createCapabilities({
+      visAugmenter: {
+        show: true,
+      },
+    });
+    expect(canViewInApp(uiCapabilities, 'augment-vis')).toEqual(true);
+
+    uiCapabilities = createCapabilities({
+      visAugmenter: {
+        show: false,
+      },
+    });
+    expect(canViewInApp(uiCapabilities, 'augment-vis')).toEqual(false);
+  });
+
   it('should handle index patterns', () => {
     let uiCapabilities = createCapabilities({
       management: {

@@ -34,11 +34,19 @@ import { AppUpdater } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
+import { ManagementOverViewPluginSetup } from '../../management_overview/public';
+
+export interface DevToolsSetupDependencies {
+  dataSource?: DataSourcePluginSetup;
+  urlForwarding: UrlForwardingSetup;
+  managementOverview?: ManagementOverViewPluginSetup;
+}
 
 export interface DevToolsSetup {
   /**
@@ -54,7 +62,7 @@ export interface DevToolsSetup {
   register: (devTool: CreateDevToolArgs) => DevToolApp;
 }
 
-export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
+export class DevToolsPlugin implements Plugin<DevToolsSetup> {
   private readonly devTools = new Map<string, DevToolApp>();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
@@ -62,28 +70,41 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
-  public setup(coreSetup: CoreSetup, { urlForwarding }: { urlForwarding: UrlForwardingSetup }) {
+  private title = i18n.translate('devTools.devToolsTitle', {
+    defaultMessage: 'Dev Tools',
+  });
+
+  public setup(coreSetup: CoreSetup, deps: DevToolsSetupDependencies) {
     const { application: applicationSetup, getStartServices } = coreSetup;
+    const { urlForwarding, managementOverview } = deps;
 
     applicationSetup.register({
       id: 'dev_tools',
-      title: i18n.translate('devTools.devToolsTitle', {
-        defaultMessage: 'Dev Tools',
-      }),
+      title: this.title,
       updater$: this.appStateUpdater,
-      euiIconType: '/plugins/home/assets/logos/opensearch_mark_default.svg',
-      order: 9010,
+      icon: '/ui/logos/opensearch_mark.svg',
+      /* the order of dev tools, it shows as last item of management section */
+      order: 9070,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const { element, history } = params;
         element.classList.add('devAppWrapper');
 
         const [core] = await getStartServices();
-        const { application, chrome } = core;
 
         const { renderApp } = await import('./application');
-        return renderApp(element, application, chrome, history, this.getSortedDevTools());
+        return renderApp(core, element, history, this.getSortedDevTools(), deps);
       },
+    });
+
+    managementOverview?.register({
+      id: 'dev_tools',
+      title: this.title,
+      description: i18n.translate('devTools.devToolsDescription', {
+        defaultMessage:
+          'Use the console to set up and troubleshoot your OpenSearch environment with the REST API.',
+      }),
+      order: 9070,
     });
 
     urlForwarding.forwardApp('dev_tools', 'dev_tools');

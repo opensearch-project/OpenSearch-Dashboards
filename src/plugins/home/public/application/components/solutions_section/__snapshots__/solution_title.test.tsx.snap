@@ -1,98 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SolutionTitle  in dark mode renders the home dashboard logo using mark dark mode URL 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="none"
->
-  <EuiFlexItem
-    className="eui-textCenter"
-  >
-    <div
-      className="homSolutionPanel__customIcon"
-    >
-      <img
-        alt="custom title logo"
-        className="homSolutionPanel__customIconContainer"
-        data-test-image-url="/darkModeUrl"
-        data-test-subj="dashboardCustomLogo"
-        src="/darkModeUrl"
-      />
-    </div>
-    <EuiTitle
-      className="homSolutionPanel__title eui-textInheritColor"
-      data-test-subj="dashboardCustomTitle"
-      data-test-title="custom title"
-      size="s"
-    >
-      <h3>
-        custom title
-      </h3>
-    </EuiTitle>
-    <EuiText
-      size="s"
-    >
-      <p
-        className="homSolutionPanel__subtitle"
-      >
-        Visualize & analyze
-         
-        <EuiIcon
-          type="sortRight"
-        />
-      </p>
-    </EuiText>
-  </EuiFlexItem>
-</EuiFlexGroup>
-`;
-
-exports[`SolutionTitle  in dark mode renders the home dashboard logo using mark default mode URL 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="none"
->
-  <EuiFlexItem
-    className="eui-textCenter"
-  >
-    <div
-      className="homSolutionPanel__customIcon"
-    >
-      <img
-        alt="custom title logo"
-        className="homSolutionPanel__customIconContainer"
-        data-test-image-url="/defaultModeUrl"
-        data-test-subj="dashboardCustomLogo"
-        src="/defaultModeUrl"
-      />
-    </div>
-    <EuiTitle
-      className="homSolutionPanel__title eui-textInheritColor"
-      data-test-subj="dashboardCustomTitle"
-      data-test-title="custom title"
-      size="s"
-    >
-      <h3>
-        custom title
-      </h3>
-    </EuiTitle>
-    <EuiText
-      size="s"
-    >
-      <p
-        className="homSolutionPanel__subtitle"
-      >
-        Visualize & analyze
-         
-        <EuiIcon
-          type="sortRight"
-        />
-      </p>
-    </EuiText>
-  </EuiFlexItem>
-</EuiFlexGroup>
-`;
-
-exports[`SolutionTitle  in dark mode renders the home dashboard logo using original in and out door logo 1`] = `
+exports[`SolutionTitle  renders correctly by default 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="none"
@@ -103,18 +11,18 @@ exports[`SolutionTitle  in dark mode renders the home dashboard logo using origi
     <EuiToken
       className="homSolutionPanel__icon"
       fill="light"
-      iconType="undefined/opensearch_mark_dark_mode.svg"
+      iconType="/ui/logos/opensearch_mark_on_light.svg"
       shape="circle"
       size="l"
     />
     <EuiTitle
       className="homSolutionPanel__title eui-textInheritColor"
       data-test-subj="dashboardCustomTitle"
-      data-test-title="custom title"
+      data-test-title="Page Title"
       size="s"
     >
       <h3>
-        custom title
+        Page Title
       </h3>
     </EuiTitle>
     <EuiText
@@ -134,7 +42,7 @@ exports[`SolutionTitle  in dark mode renders the home dashboard logo using origi
 </EuiFlexGroup>
 `;
 
-exports[`SolutionTitle  in default mode renders the home dashboard logo using mark default mode URL 1`] = `
+exports[`SolutionTitle  renders correctly when branded 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="none"
@@ -146,109 +54,21 @@ exports[`SolutionTitle  in default mode renders the home dashboard logo using ma
       className="homSolutionPanel__customIcon"
     >
       <img
-        alt="custom title logo"
+        alt="Page Title logo"
         className="homSolutionPanel__customIconContainer"
-        data-test-image-url="/defaultModeUrl"
+        data-test-image-url="/custom/branded/mark.svg"
         data-test-subj="dashboardCustomLogo"
-        src="/defaultModeUrl"
+        src="/custom/branded/mark.svg"
       />
     </div>
     <EuiTitle
       className="homSolutionPanel__title eui-textInheritColor"
       data-test-subj="dashboardCustomTitle"
-      data-test-title="custom title"
+      data-test-title="Page Title"
       size="s"
     >
       <h3>
-        custom title
-      </h3>
-    </EuiTitle>
-    <EuiText
-      size="s"
-    >
-      <p
-        className="homSolutionPanel__subtitle"
-      >
-        Visualize & analyze
-         
-        <EuiIcon
-          type="sortRight"
-        />
-      </p>
-    </EuiText>
-  </EuiFlexItem>
-</EuiFlexGroup>
-`;
-
-exports[`SolutionTitle  in default mode renders the home dashboard logo using original in and out door logo 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="none"
->
-  <EuiFlexItem
-    className="eui-textCenter"
-  >
-    <EuiToken
-      className="homSolutionPanel__icon"
-      fill="light"
-      iconType="undefined/opensearch_mark_default_mode.svg"
-      shape="circle"
-      size="l"
-    />
-    <EuiTitle
-      className="homSolutionPanel__title eui-textInheritColor"
-      data-test-subj="dashboardCustomTitle"
-      data-test-title="custom title"
-      size="s"
-    >
-      <h3>
-        custom title
-      </h3>
-    </EuiTitle>
-    <EuiText
-      size="s"
-    >
-      <p
-        className="homSolutionPanel__subtitle"
-      >
-        Visualize & analyze
-         
-        <EuiIcon
-          type="sortRight"
-        />
-      </p>
-    </EuiText>
-  </EuiFlexItem>
-</EuiFlexGroup>
-`;
-
-exports[`SolutionTitle  in default mode renders the title section of the solution panel 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="none"
->
-  <EuiFlexItem
-    className="eui-textCenter"
-  >
-    <div
-      className="homSolutionPanel__customIcon"
-    >
-      <img
-        alt="custom title logo"
-        className="homSolutionPanel__customIconContainer"
-        data-test-image-url="/defaultModeUrl"
-        data-test-subj="dashboardCustomLogo"
-        src="/defaultModeUrl"
-      />
-    </div>
-    <EuiTitle
-      className="homSolutionPanel__title eui-textInheritColor"
-      data-test-subj="dashboardCustomTitle"
-      data-test-title="custom title"
-      size="s"
-    >
-      <h3>
-        custom title
+        Page Title
       </h3>
     </EuiTitle>
     <EuiText

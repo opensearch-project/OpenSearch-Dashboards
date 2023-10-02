@@ -78,7 +78,7 @@ export const getTimelineVisualizationConfig = (
     expression: {
       types: ['string'],
       aliases: ['_'],
-      default: '".es(*)"',
+      default: '".opensearch(*)"',
       help: '',
     },
     interval: {

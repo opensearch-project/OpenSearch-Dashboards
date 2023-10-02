@@ -52,7 +52,7 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
 
   return (
     <EuiPanel paddingSize="s">
-      <EuiFlexGroup direction="column" gutterSize="m" className="mkdEditor">
+      <EuiFlexGroup direction="column" gutterSize="m" className="eui-fullHeight">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
             <EuiFlexItem grow={false}>
@@ -83,7 +83,7 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
         <EuiFlexItem>
           <EuiTextArea
             id="markdownVisInput"
-            className="visEditor--markdown__textarea"
+            className="eui-fullHeight"
             value={stateParams.markdown}
             onChange={({ target: { value } }) => onMarkdownUpdate(value)}
             fullWidth={true}

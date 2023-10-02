@@ -58,6 +58,8 @@ interface StatusAppState {
 }
 
 export class StatusApp extends Component<StatusAppProps, StatusAppState> {
+  private _isMounted: boolean = false;
+
   constructor(props: StatusAppProps) {
     super(props);
     this.state = {
@@ -68,13 +70,23 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
   }
 
   async componentDidMount() {
+    this._isMounted = true;
     const { http, notifications } = this.props;
     try {
       const data = await loadStatus({ http, notifications });
+
+      if (!this._isMounted) return;
+
       this.setState({ loading: false, fetchError: false, data });
     } catch (e) {
+      if (!this._isMounted) return;
+
       this.setState({ fetchError: true, loading: false, data: null });
     }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   render() {

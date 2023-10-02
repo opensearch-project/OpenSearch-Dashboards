@@ -43,7 +43,7 @@ import { ComponentRegistry } from '../types';
 import './index.scss';
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
-  defaultMessage: 'Advanced Settings',
+  defaultMessage: 'Advanced settings',
 });
 const crumb = [{ text: title }];
 

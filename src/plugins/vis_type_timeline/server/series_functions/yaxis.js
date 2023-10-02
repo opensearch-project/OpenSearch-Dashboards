@@ -143,7 +143,7 @@ export default new Chainable('yaxis', {
       myAxis.axisLabelFontSizePixels = 11;
       myAxis.axisLabel = label;
       myAxis.axisLabelColour = color;
-      myAxis.axisLabelUseCanvas = true;
+      myAxis.axisLabelUseCanvas = false;
 
       if (tickDecimals) {
         myAxis.tickDecimals = tickDecimals < 0 ? 0 : tickDecimals;

@@ -1,6 +1,6 @@
 // Font
 
-$kuiFontFamily: $euiFontFamily;
+$kuiFontFamily: var(--font-text);
 $kuiFontSize: $euiFontSize;
 $kuiLineHeight: $euiLineHeight;
 $kuiSubTextFontSize: $euiFontSizeS;

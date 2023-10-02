@@ -32,6 +32,7 @@ import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 import {
   App,
@@ -45,6 +46,8 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { isEmpty } from 'lodash';
+import { createHashHistory } from 'history';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -70,9 +73,13 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../opensearch_dashboards_react/public';
-import { createOsdUrlTracker, Storage } from '../../opensearch_dashboards_utils/public';
 import {
-  initAngularBootstrap,
+  createOsdUrlTracker,
+  Storage,
+  createOsdUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../opensearch_dashboards_utils/public';
+import {
   OpenSearchDashboardsLegacySetup,
   OpenSearchDashboardsLegacyStart,
 } from '../../opensearch_dashboards_legacy/public';
@@ -91,7 +98,6 @@ import {
   DashboardContainerFactoryDefinition,
   ExpandPanelAction,
   ExpandPanelActionContext,
-  RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
   ACTION_UNLINK_FROM_LIBRARY,
@@ -119,6 +125,7 @@ import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
+import { DashboardProvider, DashboardServices } from './types';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -156,7 +163,11 @@ interface StartDependencies {
   savedObjects: SavedObjectsStart;
 }
 
-export type DashboardSetup = void;
+export type RegisterDashboardProviderFn = (provider: DashboardProvider) => void;
+
+export interface DashboardSetup {
+  registerDashboardProvider: RegisterDashboardProviderFn;
+}
 
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
@@ -200,6 +211,7 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
+  private dashboardProviders: { [key: string]: DashboardProvider } = {};
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
   public setup(
@@ -255,6 +267,7 @@ export class DashboardPlugin
       return {
         capabilities: coreStart.application.capabilities,
         application: coreStart.application,
+        chrome: coreStart.chrome,
         notifications: coreStart.notifications,
         overlays: coreStart.overlays,
         embeddable: deps.embeddable,
@@ -308,9 +321,51 @@ export class DashboardPlugin
       stopUrlTracker();
     };
 
+    const registerDashboardProvider: RegisterDashboardProviderFn = (
+      provider: DashboardProvider
+    ) => {
+      const found = this.dashboardProviders[provider.savedObjectsType];
+      if (found) {
+        throw new Error(`DashboardProvider ${provider.savedObjectsType} is registered twice`);
+      }
+      if (
+        isEmpty(provider.createSortText) ||
+        isEmpty(provider.createUrl) ||
+        isEmpty(provider.createLinkText)
+      ) {
+        throw new Error(
+          `DashboardProvider ${provider.savedObjectsType} requires 'createSortText', 'createLinkText', and 'createUrl'`
+        );
+      }
+      if (isEmpty(provider.savedObjectsType || isEmpty(provider.savedObjectsName))) {
+        throw new Error(
+          `DashboardProvider ${provider.savedObjectsType} requires 'savedObjectsId', and 'savedObjectsType'`
+        );
+      }
+
+      this.dashboardProviders[provider.savedObjectsType] = provider;
+    };
+
+    registerDashboardProvider({
+      savedObjectsType: 'dashboard',
+      savedObjectsName: 'Dashboard',
+      appId: 'dashboard',
+      viewUrlPathFn: (obj) => `#/view/${obj.id}`,
+      editUrlPathFn: (obj) => `/view/${obj.id}?_a=(viewMode:edit)`,
+      createUrl: core.http.basePath.prepend('/app/dashboards#/create'),
+      createSortText: 'Dashboard',
+      createLinkText: (
+        <FormattedMessage
+          id="dashboard.tableListView.listing.createNewItemButtonLabel"
+          defaultMessage="{entityName}"
+          values={{ entityName: 'Dashboard' }}
+        />
+      ),
+    });
+
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
-      title: 'Dashboard',
+      title: 'Dashboards',
       order: 2500,
       euiIconType: 'inputOutput',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
@@ -319,6 +374,13 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;
+
+        // make sure the index pattern list is up to date
+        pluginsStart.data.indexPatterns.clearCache();
+        // make sure a default index pattern exists
+        // if not, the page will be redirected to management and dashboard won't be rendered
+        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
+
         appMounted();
         const {
           embeddable: embeddableStart,
@@ -330,8 +392,23 @@ export class DashboardPlugin
           savedObjects,
         } = pluginsStart;
 
-        const deps: RenderDeps = {
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
+
+        const history = createHashHistory(); // need more research
+        const services: DashboardServices = {
+          ...coreStart,
           pluginInitializerContext: this.initializerContext,
+          opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
+          history,
+          osdUrlStateStorage: createOsdUrlStateStorage({
+            history,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          }),
           core: coreStart,
           dashboardConfig,
           navigateToDefaultApp,
@@ -341,6 +418,7 @@ export class DashboardPlugin
           data: dataStart,
           savedObjectsClient: coreStart.savedObjects.client,
           savedDashboards: dashboardStart.getSavedDashboardLoader(),
+          dashboardProviders: () => this.dashboardProviders,
           chrome: coreStart.chrome,
           addBasePath: coreStart.http.basePath.prepend,
           uiSettings: coreStart.uiSettings,
@@ -353,24 +431,25 @@ export class DashboardPlugin
           },
           localStorage: new Storage(localStorage),
           usageCollection,
-          scopedHistory: () => this.currentHistory!,
+          scopedHistory: params.history,
           setHeaderActionMenu: params.setHeaderActionMenu,
-          savedObjects,
+          savedObjectsPublic: savedObjects,
           restorePreviousUrl,
+          toastNotifications: coreStart.notifications.toasts,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
         params.element.classList.add('dshAppContainer');
-        const unmount = renderApp(params.element, params.appBasePath, deps);
+        const { renderApp } = await import('./application');
+        const unmount = renderApp(params, services);
         return () => {
+          params.element.classList.remove('dshAppContainer');
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };
       },
     };
-
-    initAngularBootstrap();
 
     core.application.register(app);
     urlForwarding.forwardApp(
@@ -420,6 +499,10 @@ export class DashboardPlugin
         order: 100,
       });
     }
+
+    return {
+      registerDashboardProvider,
+    };
   }
 
   private addEmbeddableToDashboard(

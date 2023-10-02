@@ -44,6 +44,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
     'header',
     'discover',
     'timePicker',
+    'common',
+    'settings',
   ]);
 
   return new (class DashboardVisualizations {
@@ -69,6 +71,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       fields?: string[];
     }) {
       log.debug(`createSavedSearch(${name})`);
+
       await PageObjects.header.clickDiscover();
 
       await PageObjects.timePicker.setHistoricalDataRange();

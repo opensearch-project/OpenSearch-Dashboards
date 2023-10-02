@@ -77,7 +77,7 @@ describe('share url panel content', () => {
       component.find(EuiRadioGroup).prop('onChange')!(ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT);
     });
     expect(component.find(EuiCopy).prop('textToCopy')).toEqual(
-      'http://localhost:5601/app/myapp#/?_g=()'
+      'http://localhost:5601/app/myapp#/?_g=%28%29'
     );
   });
 
@@ -168,7 +168,7 @@ describe('share url panel content', () => {
         component.find(EuiRadioGroup).prop('onChange')!(ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT);
       });
       expect(component.find(EuiCopy).prop('textToCopy')).toEqual(
-        asIframe('http://localhost:5601/app/myapp#/?embed=true&_g=()')
+        asIframe('http://localhost:5601/app/myapp#/?embed=true&_g=%28%29')
       );
     });
 

@@ -52,7 +52,8 @@ export const OverviewPageFooter: FC<Props> = ({ addBasePath, path }) => {
     },
   } = useOpenSearchDashboards<CoreStart>();
 
-  const { show, save } = application.capabilities.advancedSettings;
+  const { show, save } = application.capabilities.advancedSettings ?? {};
+
   const isAdvancedSettingsEnabled = show && save;
 
   const defaultRoutebutton =

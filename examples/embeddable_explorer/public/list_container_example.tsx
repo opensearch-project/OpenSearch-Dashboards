@@ -164,6 +164,15 @@ export function ListContainerExample({
               The first HelloWorldEmbeddable does not emit the hasMatch output variable, so the
               container chooses to hide it.
             </p>
+            <p>
+              Type some strings in the search bar, and press Check matching button. If the search
+              string matches with any strings from the title or the description of the children
+              embeddables, the child embeddable&#39;s check box will be checked. Noted that the
+              search filter is case sensitive. However, even if the search string matches with the
+              strings in the HelloWorldEmbeddable, its check box will not be checked because of the
+              reason explained above. If we click Delete checked, all the selected child embeddables
+              will be deleted from the container.
+            </p>
 
             <p>
               Check out the &quot;Dynamically adding children&quot; section, to see how to add

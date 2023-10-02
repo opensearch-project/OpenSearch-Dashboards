@@ -14,6 +14,6 @@
     "patterns": [
       "_cat/master"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-master/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-cluster_manager/"
   }
 }

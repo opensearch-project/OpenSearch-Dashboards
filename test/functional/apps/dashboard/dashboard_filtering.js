@@ -123,13 +123,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await testSubjects.missingOrFail('euiDataGrid');
       });
-
-      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timeline is filtered', async () => {
-      //   await dashboardExpect.timelineLegendCount(0);
-      // });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
@@ -176,13 +171,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await testSubjects.missingOrFail('euiDataGrid');
       });
-
-      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timeline is filtered', async () => {
-      //   await dashboardExpect.timelineLegendCount(0);
-      // });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);

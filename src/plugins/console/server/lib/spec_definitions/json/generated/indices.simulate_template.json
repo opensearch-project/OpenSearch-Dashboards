@@ -12,6 +12,6 @@
       "_index_template/_simulate",
       "_index_template/_simulate/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/index/"
   }
 }

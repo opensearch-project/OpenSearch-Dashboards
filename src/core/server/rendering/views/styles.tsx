@@ -33,16 +33,26 @@
 import React, { FunctionComponent } from 'react';
 
 import { RenderingMetadata } from '../types';
+import { getThemeDefinition, ThemeColorSchemes } from './theme';
 
 interface Props {
   darkMode: RenderingMetadata['darkMode'];
+  theme: RenderingMetadata['themeVersion'];
 }
 
-export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
+export const Styles: FunctionComponent<Props> = ({ theme, darkMode }) => {
+  const themeDefinition = getThemeDefinition(
+    theme,
+    darkMode ? ThemeColorSchemes.DARK : ThemeColorSchemes.LIGHT
+  );
+
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: `
+          :root {
+            color-scheme: ${darkMode ? 'dark' : 'light'};
+          }
 
           *, *:before, *:after {
             box-sizing: border-box;
@@ -62,9 +72,10 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             display: block;
           }
 
+          {/* used on loading page */}
           .osdWelcomeView {
             line-height: 1.5;
-            background-color: ${darkMode ? '#1D1E24' : '#FFF'};
+            background-color: ${themeDefinition.ouiHeaderBackgroundColor};
             height: 100%;
             display: -webkit-box;
             display: -webkit-flex;
@@ -89,10 +100,13 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
                     justify-content: center;
           }
 
+          .legacyBrowserErrorLogo {
+            height: 64px;
+          }
+
           .osdWelcomeTitle {
-            color: #000;
+            color: ${themeDefinition.ouiColorFullShade};
             font-size: 20px;
-            font-family: sans-serif;
             margin: 16px 0;
             animation: fadeIn 1s ease-in-out;
             animation-fill-mode: forwards;
@@ -101,21 +115,17 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .osdWelcomeText {
-            font-family:
             display: inline-block;
             font-size: 14px;
-            font-family: sans-serif;
             line-height: 40px !important;
             height: 40px !important;
-            color: #98a2b3;
-            color: ${darkMode ? '#98A2B3' : '#69707D'};
+            color: ${themeDefinition.euiColorDarkShade};
           }
 
           .osdLoaderWrap {
             text-align: center;
             line-height: 1;
             text-align: center;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial !important;
             letter-spacing: -.005em;
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
@@ -140,7 +150,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             width: 32px;
             height: 4px;
             overflow: hidden;
-            background-color: ${darkMode ? '#25262E' : '#F5F7FA'};
+            background-color: ${themeDefinition.euiColorLightestShade};
             line-height: 1;
           }
 
@@ -158,8 +168,8 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .loadingLogoContainer {
-            height: 60px;
-            padding: 10px 10px 10px 10px;
+            height: 80px;
+            padding: 8px;
           }
 
           .loadingLogo {

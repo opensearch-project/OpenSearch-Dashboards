@@ -44,7 +44,9 @@ jest.mock('../../lib/get_build_number');
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
-const { getNodeDownloadInfo } = jest.requireMock('./node_download_info');
+const { getNodeDownloadInfo, getNodeVersionDownloadInfo } = jest.requireMock(
+  './node_download_info'
+);
 const { getNodeShasums } = jest.requireMock('./node_shasums');
 const { download } = jest.requireMock('../../lib/download');
 
@@ -73,6 +75,16 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
       url: `${platform.getName()}:url`,
       downloadPath: `${platform.getName()}:downloadPath`,
       downloadName: `${platform.getName()}:downloadName`,
+    };
+  });
+
+  getNodeVersionDownloadInfo.mockImplementation((version, architecture, isWindows, repoRoot) => {
+    return {
+      url: `https://mirrors.nodejs.org/dist/v${version}/node-v${version}-${architecture}.tar.gz`,
+      downloadName: `node-v${version}-${architecture}.tar.gz`,
+      downloadPath: `/mocked/path/.node_binaries/${version}/node-v${version}-${architecture}.tar.gz`,
+      extractDir: `/mocked/path/.node_binaries/${version}/${architecture}`,
+      version,
     };
   });
 
@@ -132,6 +144,42 @@ it('downloads node builds for each platform', async () => {
           "retries": 3,
           "sha256": "win32:sha256",
           "url": "win32:url",
+        },
+      ],
+      Array [
+        Object {
+          "destination": "/mocked/path/.node_binaries/14.21.3/node-v14.21.3-linux-x64.tar.gz",
+          "log": <ToolingLog>,
+          "retries": 3,
+          "sha256": undefined,
+          "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-linux-x64.tar.gz",
+        },
+      ],
+      Array [
+        Object {
+          "destination": "/mocked/path/.node_binaries/14.21.3/node-v14.21.3-linux-arm64.tar.gz",
+          "log": <ToolingLog>,
+          "retries": 3,
+          "sha256": undefined,
+          "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-linux-arm64.tar.gz",
+        },
+      ],
+      Array [
+        Object {
+          "destination": "/mocked/path/.node_binaries/14.21.3/node-v14.21.3-darwin-x64.tar.gz",
+          "log": <ToolingLog>,
+          "retries": 3,
+          "sha256": undefined,
+          "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-darwin-x64.tar.gz",
+        },
+      ],
+      Array [
+        Object {
+          "destination": "/mocked/path/.node_binaries/14.21.3/node-v14.21.3-win32-x64.tar.gz",
+          "log": <ToolingLog>,
+          "retries": 3,
+          "sha256": undefined,
+          "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-win32-x64.tar.gz",
         },
       ],
     ]

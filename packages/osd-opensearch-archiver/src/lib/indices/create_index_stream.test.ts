@@ -83,7 +83,6 @@ describe('opensearchArchiver: createCreateIndexStream()', () => {
       expect((client.indices.getAlias as sinon.SinonSpy).calledOnce).to.be.ok();
       expect((client.indices.getAlias as sinon.SinonSpy).args[0][0]).to.eql({
         name: 'existing-index',
-        ignore: [404],
       });
       expect((client.indices.delete as sinon.SinonSpy).calledOnce).to.be.ok();
       expect((client.indices.delete as sinon.SinonSpy).args[0][0]).to.eql({

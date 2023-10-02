@@ -31,6 +31,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { SolutionTitle } from './solution_title';
+import { getLogosMock } from '../../../../../../core/common/mocks';
 
 const solutionEntry = {
   id: 'opensearchDashboards',
@@ -42,121 +43,51 @@ const solutionEntry = {
   order: 1,
 };
 
+const mockTitle = 'Page Title';
+const makeProps = () => ({
+  title: solutionEntry.title,
+  subtitle: solutionEntry.subtitle,
+  iconType: solutionEntry.icon,
+  branding: {
+    applicationTitle: mockTitle,
+  },
+  logos: getLogosMock.default,
+});
+
 describe('SolutionTitle ', () => {
-  describe('in default mode', () => {
-    test('renders the title section of the solution panel', () => {
-      const branding = {
-        darkMode: false,
-        mark: {
-          defaultUrl: '/defaultModeUrl',
-          darkModeUrl: '/darkModeUrl',
-        },
-        applicationTitle: 'custom title',
-      };
-      const component = shallow(
-        <SolutionTitle
-          title={solutionEntry.title}
-          subtitle={solutionEntry.subtitle}
-          iconType={solutionEntry.icon}
-          branding={branding}
-        />
-      );
-      expect(component).toMatchSnapshot();
-    });
+  it('renders correctly by default', () => {
+    const props = {
+      ...makeProps(),
+    };
+    const component = shallow(<SolutionTitle {...props} />);
+    const elements = component.find('EuiToken');
+    expect(elements.length).toEqual(1);
 
-    test('renders the home dashboard logo using mark default mode URL', () => {
-      const branding = {
-        darkMode: false,
-        mark: {
-          defaultUrl: '/defaultModeUrl',
-          darkModeUrl: '/darkModeUrl',
-        },
-        applicationTitle: 'custom title',
-      };
-      const component = shallow(
-        <SolutionTitle
-          title={solutionEntry.title}
-          subtitle={solutionEntry.subtitle}
-          iconType={solutionEntry.icon}
-          branding={branding}
-        />
-      );
-      expect(component).toMatchSnapshot();
-    });
+    const img = elements.first();
+    expect(img.prop('iconType')).toEqual(props.logos.Mark.url);
 
-    test('renders the home dashboard logo using original in and out door logo', () => {
-      const branding = {
-        darkMode: false,
-        mark: {},
-        applicationTitle: 'custom title',
-      };
-      const component = shallow(
-        <SolutionTitle
-          title={solutionEntry.title}
-          subtitle={solutionEntry.subtitle}
-          iconType={solutionEntry.icon}
-          branding={branding}
-        />
-      );
-      expect(component).toMatchSnapshot();
-    });
+    const titles = component.find('EuiTitle > h3');
+    expect(titles.length).toEqual(1);
+    expect(titles.first().text()).toEqual(mockTitle);
+
+    expect(component).toMatchSnapshot();
   });
 
-  describe('in dark mode', () => {
-    test('renders the home dashboard logo using mark dark mode URL', () => {
-      const branding = {
-        darkMode: true,
-        mark: {
-          defaultUrl: '/defaultModeUrl',
-          darkModeUrl: '/darkModeUrl',
-        },
-        applicationTitle: 'custom title',
-      };
-      const component = shallow(
-        <SolutionTitle
-          title={solutionEntry.title}
-          subtitle={solutionEntry.subtitle}
-          iconType={solutionEntry.icon}
-          branding={branding}
-        />
-      );
-      expect(component).toMatchSnapshot();
+  it('renders correctly when branded', () => {
+    const props = {
+      ...makeProps(),
+      logos: getLogosMock.branded,
+    };
+    const component = shallow(<SolutionTitle {...props} />);
+    const elements = component.find({
+      'data-test-subj': 'dashboardCustomLogo',
     });
+    expect(elements.length).toEqual(1);
 
-    test('renders the home dashboard logo using mark default mode URL', () => {
-      const branding = {
-        darkMode: true,
-        mark: {
-          defaultUrl: '/defaultModeUrl',
-        },
-        applicationTitle: 'custom title',
-      };
-      const component = shallow(
-        <SolutionTitle
-          title={solutionEntry.title}
-          subtitle={solutionEntry.subtitle}
-          iconType={solutionEntry.icon}
-          branding={branding}
-        />
-      );
-      expect(component).toMatchSnapshot();
-    });
+    const img = elements.first();
+    expect(img.prop('src')).toEqual(props.logos.Mark.url);
+    expect(img.prop('alt')).toEqual(`${mockTitle} logo`);
 
-    test('renders the home dashboard logo using original in and out door logo', () => {
-      const branding = {
-        darkMode: true,
-        mark: {},
-        applicationTitle: 'custom title',
-      };
-      const component = shallow(
-        <SolutionTitle
-          title={solutionEntry.title}
-          subtitle={solutionEntry.subtitle}
-          iconType={solutionEntry.icon}
-          branding={branding}
-        />
-      );
-      expect(component).toMatchSnapshot();
-    });
+    expect(component).toMatchSnapshot();
   });
 });

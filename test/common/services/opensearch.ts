@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
 import fs from 'fs';
 import { Client } from '@opensearch-project/opensearch';
 import { CA_CERT_PATH } from '@osd/dev-utils';
@@ -40,7 +39,7 @@ export function OpenSearchProvider({ getService }: FtrProviderContext) {
 
   if (process.env.TEST_CLOUD) {
     return new Client({
-      nodes: [formatUrl(config.get('servers.opensearch'))],
+      nodes: [config.get('servers.opensearch.serverUrl')],
       requestTimeout: config.get('timeouts.opensearchRequestTimeout'),
     });
   } else {
@@ -48,7 +47,7 @@ export function OpenSearchProvider({ getService }: FtrProviderContext) {
       ssl: {
         ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
       },
-      nodes: [formatUrl(config.get('servers.opensearch'))],
+      nodes: [config.get('servers.opensearch.serverUrl')],
       requestTimeout: config.get('timeouts.opensearchRequestTimeout'),
     });
   }

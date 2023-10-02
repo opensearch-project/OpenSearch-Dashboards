@@ -30,8 +30,19 @@
 
 import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'opensearch-dashboards/server';
+import { createReplaceSerializer } from '@osd/dev-utils';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+
+// ToDo: Remove this logic when Node 14 support is removed
+if (process.version.startsWith('v14.')) {
+  expect.addSnapshotSerializer(
+    createReplaceSerializer(
+      /Cannot read property '([^ ]+?)' of undefined/g,
+      "Cannot read properties of undefined (reading '$1')"
+    )
+  );
+}
 
 const testMigrateMatchAllQuery = (migrate: Function) => {
   it('should migrate obsolete match_all query', () => {
@@ -1003,7 +1014,7 @@ describe('migration visualization', () => {
       `);
       expect(logMsgArr).toMatchInlineSnapshot(`
         Array [
-          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read property 'gauge' of undefined",
+          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read properties of undefined (reading 'gauge')",
           "Exception @ migrateGaugeVerticalSplitToAlignment! Payload: {\\"type\\":\\"gauge\\"}",
         ]
       `);

@@ -32,19 +32,26 @@ import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { Home } from './home';
+import { NewThemeModal } from './new_theme_modal';
 
 import { FeatureCatalogueCategory } from '../../services';
+
+const mockHomeConfig = jest.fn();
+const mockUiSettings = jest.fn();
 
 jest.mock('../opensearch_dashboards_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
     tutorialVariables: () => ({}),
-    homeConfig: { disableWelcomeScreen: false },
+    homeConfig: mockHomeConfig(),
     chrome: {
       setBreadcrumbs: () => {},
     },
     injectedMetadata: {
       getBranding: () => ({}),
+    },
+    uiSettings: {
+      get: () => mockUiSettings(),
     },
   }),
 }));
@@ -80,7 +87,7 @@ describe('home', () => {
       },
       localStorage: {
         getItem: sinon.spy((path) => {
-          expect(path).toEqual('home:welcome:show');
+          expect(path).toMatch(/home:(welcome|newThemeModal):show/);
           return 'false';
         }),
         setItem: sinon.mock(),
@@ -93,7 +100,17 @@ describe('home', () => {
     };
   });
 
-  async function renderHome(props = {}) {
+  async function renderHome(props = {}, homeConfig, uiSettings) {
+    if (homeConfig) {
+      mockHomeConfig.mockReturnValue(homeConfig);
+    } else {
+      mockHomeConfig.mockReturnValue({ disableWelcomeScreen: false, disableNewThemeModal: false });
+    }
+    if (uiSettings) {
+      mockUiSettings.mockReturnValue(uiSettings);
+    } else {
+      mockUiSettings.mockReturnValue('v8');
+    }
     const component = shallow(<Home {...defaultProps} {...props} />);
 
     // Ensure all promises resolve
@@ -284,7 +301,7 @@ describe('home', () => {
         find: () => Promise.resolve({ total: 0 }),
       });
 
-      sinon.assert.calledOnce(defaultProps.localStorage.getItem);
+      sinon.assert.calledWith(defaultProps.localStorage.getItem, 'home:welcome:show');
 
       expect(component).toMatchSnapshot();
     });
@@ -348,6 +365,52 @@ describe('home', () => {
       });
 
       expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('new theme modal', () => {
+    test('should show the new theme modal if not previously dismissed', async () => {
+      defaultProps.localStorage.getItem = sinon.spy(() => undefined);
+
+      const component = await renderHome();
+
+      sinon.assert.calledWith(defaultProps.localStorage.getItem, 'home:newThemeModal:show');
+
+      expect(component.find(NewThemeModal).exists()).toBeTruthy();
+      expect(component).toMatchSnapshot();
+    });
+    test('should not show the new theme modal if v7 theme in use', async () => {
+      defaultProps.localStorage.getItem = sinon.spy(() => undefined);
+
+      const component = await renderHome({}, undefined, 'v7');
+
+      sinon.assert.neverCalledWith(defaultProps.localStorage.getItem, 'home:newThemeModal:show');
+
+      expect(component.find(NewThemeModal).exists()).toBeFalsy();
+    });
+    test('should not show the new theme modal if disabled in config', async () => {
+      defaultProps.localStorage.getItem = sinon.spy(() => undefined);
+
+      const component = await renderHome(
+        {},
+        {
+          disableWelcomeScreen: true,
+          disableNewThemeModal: true,
+        }
+      );
+
+      sinon.assert.neverCalledWith(defaultProps.localStorage.getItem, 'home:newThemeModal:show');
+
+      expect(component.find(NewThemeModal).exists()).toBeFalsy();
+    });
+    test('should not show the new theme modal if previously dismissed', async () => {
+      defaultProps.localStorage.getItem = sinon.spy(() => 'false');
+
+      const component = await renderHome();
+
+      sinon.assert.calledWith(defaultProps.localStorage.getItem, 'home:newThemeModal:show');
+
+      expect(component.find(NewThemeModal).exists()).toBeFalsy();
     });
   });
 });

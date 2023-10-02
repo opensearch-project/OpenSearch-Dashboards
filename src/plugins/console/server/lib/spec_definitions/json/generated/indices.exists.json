@@ -20,6 +20,6 @@
     "patterns": [
       "{indices}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/index-apis/exists/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/exists/"
   }
 }

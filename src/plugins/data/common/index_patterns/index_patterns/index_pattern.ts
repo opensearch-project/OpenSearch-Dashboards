@@ -366,7 +366,7 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
-  getSaveObjectReference() {
+  getSaveObjectReference = () => {
     return this.dataSourceRef
       ? [
           {
@@ -376,7 +376,7 @@ export class IndexPattern implements IIndexPattern {
           },
         ]
       : [];
-  }
+  };
 
   /**
    * Provide a field, get its formatter

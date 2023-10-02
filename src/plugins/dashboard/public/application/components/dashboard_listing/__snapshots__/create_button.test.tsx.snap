@@ -1,0 +1,558 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create button no props renders empty when no providers given 1`] = `
+<CreateButton
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+/>
+`;
+
+exports[`create button with props renders button dropdown menu when two providers given 1`] = `
+<CreateButton
+  dashboardProviders={
+    Array [
+      Object {
+        "appId": "test",
+        "createLinkText": "test2",
+        "createSortText": "test2",
+        "createUrl": "test2",
+        "editUrlPathFn": [Function],
+        "savedObjectsName": "test2",
+        "savedObjectsType": "test2",
+        "viewUrlPathFn": [Function],
+      },
+      Object {
+        "appId": "test",
+        "createLinkText": "test1",
+        "createSortText": "test1",
+        "createUrl": "test1",
+        "editUrlPathFn": [Function],
+        "savedObjectsName": "test1",
+        "savedObjectsType": "test1",
+        "viewUrlPathFn": [Function],
+      },
+    ]
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <EuiPopover
+        anchorPosition="downRight"
+        button={
+          <EuiButton
+            data-test-subj="createMenuDropdown"
+            fill={true}
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Create"
+              id="dashboard.listing.createButtonText"
+              values={Object {}}
+            />
+          </EuiButton>
+        }
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={true}
+        id="createMenuPopover"
+        isOpen={false}
+        ownFocus={true}
+        panelPaddingSize="none"
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownRight"
+          id="createMenuPopover"
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <EuiButton
+              data-test-subj="createMenuDropdown"
+              fill={true}
+              iconSide="right"
+              iconType="arrowDown"
+              onClick={[Function]}
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButton"
+                data-test-subj="createMenuDropdown"
+                disabled={false}
+                element="button"
+                fill={true}
+                iconSide="right"
+                iconType="arrowDown"
+                isDisabled={false}
+                onClick={[Function]}
+                type="button"
+              >
+                <button
+                  className="euiButton euiButton--primary euiButton--fill"
+                  data-test-subj="createMenuDropdown"
+                  disabled={false}
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                  type="button"
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="right"
+                    iconType="arrowDown"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                    >
+                      <EuiIcon
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        size="m"
+                        type="arrowDown"
+                      >
+                        <span
+                          className="euiButtonContent__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                          size="m"
+                        />
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Create"
+                          id="dashboard.listing.createButtonText"
+                          values={Object {}}
+                        >
+                          Create
+                        </FormattedMessage>
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
+            </EuiButton>
+          </div>
+        </div>
+      </EuiPopover>
+    </div>
+  </EuiFlexItem>
+</CreateButton>
+`;
+
+exports[`create button with props renders single button when one provider given 1`] = `
+<CreateButton
+  dashboardProviders={
+    Array [
+      Object {
+        "appId": "test",
+        "createLinkText": "TestModule",
+        "createSortText": "TestModule",
+        "createUrl": "createUrl",
+        "editUrlPathFn": [Function],
+        "savedObjectsName": "Test",
+        "savedObjectsType": "test",
+        "viewUrlPathFn": [Function],
+      },
+    ]
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <EuiButton
+        data-test-subj="newItemButton"
+        fill={true}
+        href="createUrl"
+        iconType="plusInCircle"
+      >
+        <EuiButtonDisplay
+          baseClassName="euiButton"
+          data-test-subj="newItemButton"
+          element="a"
+          fill={true}
+          href="createUrl"
+          iconType="plusInCircle"
+          isDisabled={false}
+          rel="noreferrer"
+        >
+          <a
+            className="euiButton euiButton--primary euiButton--fill"
+            data-test-subj="newItemButton"
+            disabled={false}
+            href="createUrl"
+            rel="noreferrer"
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+          >
+            <EuiButtonContent
+              className="euiButton__content"
+              iconSide="left"
+              iconType="plusInCircle"
+              textProps={
+                Object {
+                  "className": "euiButton__text",
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <EuiIcon
+                  className="euiButtonContent__icon"
+                  color="inherit"
+                  size="m"
+                  type="plusInCircle"
+                >
+                  <span
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    data-euiicon-type="plusInCircle"
+                    size="m"
+                  />
+                </EuiIcon>
+                <span
+                  className="euiButton__text"
+                >
+                  <FormattedMessage
+                    defaultMessage="Create"
+                    id="dashboard.listing.createButtonText"
+                    values={Object {}}
+                  >
+                    Create
+                  </FormattedMessage>
+                   
+                  TestModule
+                </span>
+              </span>
+            </EuiButtonContent>
+          </a>
+        </EuiButtonDisplay>
+      </EuiButton>
+    </div>
+  </EuiFlexItem>
+</CreateButton>
+`;

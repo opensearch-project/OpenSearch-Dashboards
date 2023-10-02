@@ -100,7 +100,7 @@ function RawJsonParamEditor({
       <>
         <EuiCodeEditor
           mode="json"
-          theme="github"
+          theme="textmate"
           width="100%"
           height="250px"
           value={value}

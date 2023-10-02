@@ -57,7 +57,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iis.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/iis.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/iis.svg',
     artifacts: {
       dashboards: [
         {

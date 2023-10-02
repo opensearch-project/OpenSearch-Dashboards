@@ -16,6 +16,7 @@ import { SavedObjectLoader } from '../../saved_objects/public';
 import { AppMountParameters, CoreStart, ToastsStart, ScopedHistory } from '../../../core/public';
 import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginSetup } from '../../data/public';
+import { UiActionsStart } from '../../ui_actions/public';
 
 export type VisBuilderSetup = TypeServiceSetup;
 export interface VisBuilderStart extends TypeServiceStart {
@@ -34,9 +35,11 @@ export interface VisBuilderPluginStartDependencies {
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   expressions: ExpressionsStart;
+  uiActions: UiActionsStart;
 }
 
 export interface VisBuilderServices extends CoreStart {
+  appName: string;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedVisBuilderLoader: VisBuilderStart['savedVisBuilderLoader'];
   toastNotifications: ToastsStart;
@@ -50,6 +53,7 @@ export interface VisBuilderServices extends CoreStart {
   scopedHistory: ScopedHistory;
   osdUrlStateStorage: IOsdUrlStateStorage;
   dashboard: DashboardStart;
+  uiActions: UiActionsStart;
 }
 
 export interface ISavedVis {
@@ -58,7 +62,8 @@ export interface ISavedVis {
   description?: string;
   visualizationState?: string;
   styleState?: string;
+  uiState?: string;
   version?: number;
 }
 
-export interface VisBuilderVisSavedObject extends SavedObject, ISavedVis {}
+export interface VisBuilderSavedObject extends SavedObject, ISavedVis {}

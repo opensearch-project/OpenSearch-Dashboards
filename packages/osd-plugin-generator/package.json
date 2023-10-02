@@ -5,8 +5,8 @@
   "license": "Apache-2.0",
   "main": "target/index.js",
   "scripts": {
-    "osd:bootstrap": "node scripts/build",
-    "osd:watch": "node scripts/build --watch"
+    "osd:bootstrap": "../../scripts/use_node scripts/build",
+    "osd:watch": "../../scripts/use_node scripts/build --watch"
   },
   "dependencies": {
     "@osd/cross-platform": "1.0.0",

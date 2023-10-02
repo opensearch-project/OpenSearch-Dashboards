@@ -1,0 +1,15 @@
+{
+  "name": "@osd/stylelint-config",
+  "version": "1.0.0",
+  "description": "The stylelint config used by OpenSearch Dashboards",
+  "main": ".stylelintrc.js",
+  "private": true,
+  "license": "Apache-2.0",
+  "opensearchDashboards": {
+    "devOnly": true
+  },
+  "peerDependencies": {
+    "@osd/stylelint-plugin-stylelint": "1.0.0",
+    "stylelint": "^14.5.2"
+  }
+}

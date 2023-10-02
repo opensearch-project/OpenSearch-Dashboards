@@ -231,20 +231,23 @@ describe('core lifecycle handlers', () => {
             .expect(200, 'ok');
         });
 
+        // ToDo: Remove next; `osd-version` incorrectly used for satisfying XSRF protection
         it('accepts requests with the version header', async () => {
           await getSupertest(method.toLowerCase(), testPath)
             .set(versionHeader, actualVersion)
             .expect(200, 'ok');
         });
 
+        // ToDo: Rename next; `osd-version` incorrectly used for satisfying XSRF protection
         it('rejects requests without either an xsrf or version header', async () => {
           await getSupertest(method.toLowerCase(), testPath).expect(400, {
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Request must contain a osd-xsrf header.',
+            message: 'Request must contain the osd-xsrf header.',
           });
         });
 
+        // ToDo: Rename next; `osd-version` incorrectly used for satisfying XSRF protection
         it('accepts whitelisted requests without either an xsrf or version header', async () => {
           await getSupertest(method.toLowerCase(), whitelistedTestPath).expect(200, 'ok');
         });

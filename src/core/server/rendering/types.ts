@@ -46,6 +46,7 @@ export interface RenderingMetadata {
   i18n: typeof i18n.translate;
   locale: string;
   darkMode: boolean;
+  themeVersion: string;
   injectedMetadata: {
     version: string;
     buildNumber: number;
@@ -74,6 +75,7 @@ export interface RenderingMetadata {
       };
     };
     branding: Branding;
+    survey?: string;
   };
 }
 

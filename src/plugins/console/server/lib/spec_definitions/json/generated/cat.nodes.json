@@ -38,6 +38,6 @@
     "patterns": [
       "_cat/nodes"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-nodes/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-nodes/"
   }
 }

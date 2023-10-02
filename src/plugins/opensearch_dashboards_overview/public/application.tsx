@@ -51,7 +51,6 @@ export const renderApp = (
     .filter(({ id }) => id !== 'opensearchDashboards')
     .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
   const features = home.featureCatalogue.get();
-  const branding = core.injectedMetadata.getBranding();
 
   ReactDOM.render(
     <I18nProvider>
@@ -64,7 +63,7 @@ export const renderApp = (
           newsfeed$={newsfeed$}
           solutions={solutions}
           features={features}
-          branding={branding}
+          logos={core.chrome.logos}
         />
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>,

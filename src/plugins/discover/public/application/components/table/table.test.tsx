@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from 'test_utils/helpers';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 

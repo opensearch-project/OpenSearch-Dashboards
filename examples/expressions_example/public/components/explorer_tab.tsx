@@ -43,7 +43,6 @@ export function ExplorerTab() {
     const allTypes = new Set(Object.values(functions).map((fn) => fn.type));
 
     // Catch all filter and remove
-    allTypes.delete(undefined);
     allTypes.add('all');
 
     return [...allTypes].map((type) => ({ text: type }));

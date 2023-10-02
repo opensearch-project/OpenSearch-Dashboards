@@ -57,7 +57,7 @@ export function icingaLogsSpecProvider(context: TutorialContext): TutorialSchema
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-icinga.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/icinga.svg',
+    euiIconType: '/plugins/home/assets/tutorials/logos/icinga.svg',
     artifacts: {
       dashboards: [
         {

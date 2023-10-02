@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { ViewMode } from '../embeddable_plugin';
+import { ViewMode } from '../../../embeddable/public';
 
 /**
  * @param title {string} the current title of the dashboard

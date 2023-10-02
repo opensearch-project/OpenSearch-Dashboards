@@ -101,6 +101,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'src/legacy/ui/public/flot-charts',
   'test/functional/fixtures/opensearch_archiver/visualize_source-filters',
   'packages/osd-pm/src/utils/__fixtures__/*',
+  'src/dev/build/tasks/__fixtures__/*',
 ];
 
 /**
