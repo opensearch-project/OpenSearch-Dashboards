@@ -118,6 +118,18 @@ export class ACL {
   /**
    * A permissions object build function that adds principal with specific permission to the object
    *
+   * This function is used to contruct a new permissions object or add principals with specified permissions to
+   * the existing permissions object. The usage is:
+   *
+   * const permissionObject = new ACL()
+   *  .addPermission(['write', 'management'], {
+   *     users: ['user2'],
+   *   })
+   *   .addPermission(['write', 'management'], {
+   *     groups: ['group1'],
+   *   })
+   *   .getPermissions();;
+   *
    * @param {Array} permissionTypes the permission types
    * @param {Object} principals the users or groups
    * @returns the permissions object
@@ -145,6 +157,18 @@ export class ACL {
 
   /**
    * A permissions object build function that removes specific permission of specific principal from the object
+   *
+   * This function is used to remove principals with specified permissions to
+   * the existing permissions object. The usage is:
+   *
+   * const newPermissionObject = new ACL()
+   *  .removePermission(['write', 'management'], {
+   *     users: ['user2'],
+   *   })
+   *   .removePermission(['write', 'management'], {
+   *     groups: ['group1'],
+   *   })
+   *   .getPermissions();;
    *
    * @param {Array} permissionTypes the permission types
    * @param {Object} principals the users or groups
