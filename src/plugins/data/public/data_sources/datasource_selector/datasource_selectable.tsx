@@ -23,7 +23,7 @@ export const DataSourceSelectable = ({
   dataSources, // list of all available datasource connections.
   dataSourceOptionList, // combo box renderable option list derived from dataSources
   selectedSources, // current selected datasource in the form of [{ label: xxx, value: xxx }]
-  setSelectedSources,
+  onDataSourceSelect,
   setDataSourceOptionList,
   onFetchDataSetError, //   onFetchDataSetError, Callback for handling dataset fetch errors. Ensure it's memoized.
   singleSelection = true,
@@ -100,9 +100,8 @@ export const DataSourceSelectable = ({
       .catch((e) => onFetchDataSetError(e));
   }, [dataSources, setDataSourceOptionList, onFetchDataSetError]);
 
-  const handleSourceChange = (selectedOptions: DataSourceOption[]) => {
-    setSelectedSources(selectedOptions);
-  };
+  const handleSourceChange = (selectedOptions: DataSourceOption[]) =>
+    onDataSourceSelect(selectedOptions);
 
   return (
     <DataSourceSelector

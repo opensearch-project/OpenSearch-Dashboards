@@ -84,7 +84,7 @@ export const Sidebar: FC = ({ children }) => {
             dataSources={activeDataSources}
             dataSourceOptionList={dataSourceOptionList}
             setDataSourceOptionList={setDataSourceOptionList}
-            setSelectedSources={handleSourceSelection}
+            onDataSourceSelect={handleSourceSelection}
             selectedSources={selectedSources}
             onFetchDataSetError={handleDataSetFetchError}
             singleSelection={{ asPlainText: true }}

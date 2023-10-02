@@ -22,7 +22,7 @@ export interface DataSourceSelectableProps {
   dataSources: DataSourceType[];
   dataSourceOptionList: DataSourceGroup[];
   selectedSources: DataSourceOption[];
-  setSelectedSources: (dataSourceOption: DataSourceOption[]) => void;
+  onDataSourceSelect: (dataSourceOption: DataSourceOption[]) => void;
   setDataSourceOptionList: (dataSourceList: DataSourceGroup[]) => void;
   singleSelection?: boolean | { asPlainText: boolean };
   onFetchDataSetError: (error: Error) => void;
