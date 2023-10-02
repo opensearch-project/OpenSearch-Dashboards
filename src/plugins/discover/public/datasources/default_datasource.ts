@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { SavedObject } from '../../../saved_objects/public';
+import { IndexPatternSavedObjectAttrs } from '../../../data/common/index_patterns/index_patterns';
 import { IndexPatternsContract } from '../../../data/public';
 import { DataSource } from '../../../data/public';
 
@@ -16,7 +18,7 @@ interface DataSourceConfig {
 export class DefaultDslDataSource extends DataSource<
   any,
   any,
-  Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>,
+  Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>> | null | undefined>,
   any,
   any
 > {
@@ -29,11 +31,7 @@ export class DefaultDslDataSource extends DataSource<
 
   async getDataSet(dataSetParams?: any) {
     await this.indexPatterns.ensureDefaultIndexPattern();
-    const ips = await this.indexPatterns.getCache();
-    return {
-      ds: this, // datasource instance
-      data_sets: ips || [], // original dataset
-    };
+    return await this.indexPatterns.getCache();
   }
 
   async testConnection(): Promise<void> {

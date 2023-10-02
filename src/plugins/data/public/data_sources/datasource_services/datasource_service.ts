@@ -50,8 +50,10 @@ export class DataSourceService {
    * @param datasources - An array of data sources to be registered.
    * @returns An array of registration results, one for each data source.
    */
-  registerMultipleDataSources(datasources: DataSourceType[]) {
-    return datasources.map(this.registerDataSource);
+  async registerMultipleDataSources(
+    datasources: DataSourceType[]
+  ): Promise<IDataSourceRegisterationResult[]> {
+    return Promise.all(datasources.map((ds) => this.registerDataSource(ds)));
   }
 
   /**
@@ -94,7 +96,7 @@ export class DataSourceService {
     const filteredDataSources: Record<string, DataSourceType> = {};
     forEach(filters.names, (dsName) => {
       if (dsName in this.dataSources) {
-        filteredDataSources[dsName] = this.dataSources.dsName;
+        filteredDataSources[dsName] = this.dataSources[dsName];
       }
     });
     return filteredDataSources;

@@ -3,71 +3,88 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { DataSourceSelector } from './datasource_selector';
 import { DataSourceType } from '../datasource_services';
-import { DataSourceGroup, DataSourceOptionType, DataSourceSelectableProps } from './types';
+import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';
 import { ISourceDataSet } from '../datasource/types';
 import { IndexPattern } from '../../index_patterns';
 
-const DATASOURCE_GRUOP_MAP = {
+// Mapping between datasource type and its display name.
+const DATASOURCE_TYPE_DISPLAY_NAME_MAP = {
   DEFAULT_INDEX_PATTERNS: 'Index patterns',
   s3glue: 'Amazon S3',
   spark: 'Spark',
 };
 
+type DataSetType = string | IndexPattern;
+
 export const DataSourceSelectable = ({
-  dataSources,
-  dataSourceOptionList,
-  selectedSources,
+  dataSources, // list of all available datasource connections.
+  dataSourceOptionList, // combo box renderable option list derived from dataSources
+  selectedSources, // current selected datasource in the form of [{ label: xxx, value: xxx }]
   setSelectedSources,
   setDataSourceOptionList,
-  onFetchDataSetError,
+  onFetchDataSetError, //   onFetchDataSetError, Callback for handling dataset fetch errors. Ensure it's memoized.
   singleSelection = true,
 }: DataSourceSelectableProps) => {
-  const fetchDataSets = useCallback(
-    () => dataSources.map((ds: DataSourceType) => ds.getDataSet()),
-    [dataSources]
-  );
-
-  const isIndexPatterns = (dataset: string | IndexPattern) =>
-    dataset.attributes?.title && dataset.id;
-
+  // This effect fetches datasets and prepares the datasource list for UI rendering.
   useEffect(() => {
-    const getSourceOptions = (dataSource: DataSourceType, dataSet: string | IndexPattern) => {
-      if (isIndexPatterns(dataSet)) {
-        return {
-          label: dataSet.attributes.title,
-          value: dataSet.id,
-          type: dataSource.getType(),
-          name: dataSource.getName(),
-          ds: dataSource,
-        };
-      }
+    // Fetches datasets for a given datasource and returns it along with the source.
+    const fetchDataSetWithSource = async (ds: DataSourceType): Promise<ISourceDataSet> => {
+      const dataSet = await ds.getDataSet();
       return {
-        label: dataSet,
+        ds,
+        data_sets: dataSet,
+      };
+    };
+
+    // Map through all data sources and fetch their respective datasets.
+    const fetchDataSets = () => dataSources.map((ds: DataSourceType) => fetchDataSetWithSource(ds));
+
+    const isIndexPatterns = (dataset: string | IndexPattern) =>
+      dataset.attributes?.title && dataset.id;
+
+    // Get the option format for the combo box from the dataSource and dataSet.
+    const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetType) => {
+      const optionContent = {
         type: dataSource.getType(),
         name: dataSource.getName(),
         ds: dataSource,
       };
+      if (isIndexPatterns(dataSet)) {
+        return {
+          ...optionContent,
+          label: dataSet.attributes.title,
+          value: dataSet.id,
+        };
+      }
+      return {
+        ...optionContent,
+        label: dataSource.getName(),
+        value: dataSource.getName(),
+      };
     };
 
+    // Convert fetched datasets into a structured format suitable for selector rendering.
     const getSourceList = (allDataSets: ISourceDataSet[]) => {
       const finalList = [] as DataSourceGroup[];
       allDataSets.forEach((curDataSet) => {
         const existingGroup = finalList.find(
-          (item) => item.label === DATASOURCE_GRUOP_MAP[curDataSet.ds.getType()]
+          (item) => item.label === DATASOURCE_TYPE_DISPLAY_NAME_MAP[curDataSet.ds.getType()]
         );
         // check if add new datasource group or add to existing one
         if (existingGroup) {
           existingGroup.options = [
             ...existingGroup.options,
-            ...curDataSet.data_sets?.map((dataSet) => getSourceOptions(curDataSet.ds, dataSet)),
+            ...curDataSet.data_sets?.map((dataSet: DataSetType) =>
+              getSourceOptions(curDataSet.ds, dataSet)
+            ),
           ];
         } else {
           finalList.push({
-            label: DATASOURCE_GRUOP_MAP[curDataSet.ds.getType()] || 'Default Group',
-            options: curDataSet.data_sets?.map((dataSet) =>
+            label: DATASOURCE_TYPE_DISPLAY_NAME_MAP[curDataSet.ds.getType()] || 'Default Group',
+            options: curDataSet.data_sets?.map((dataSet: DataSetType) =>
               getSourceOptions(curDataSet.ds, dataSet)
             ),
           });
@@ -81,9 +98,9 @@ export const DataSourceSelectable = ({
         setDataSourceOptionList(getSourceList(results));
       })
       .catch((e) => onFetchDataSetError(e));
-  }, [fetchDataSets, setDataSourceOptionList, onFetchDataSetError]);
+  }, [dataSources, setDataSourceOptionList, onFetchDataSetError]);
 
-  const handleSourceChange = (selectedOptions: DataSourceOptionType[]) => {
+  const handleSourceChange = (selectedOptions: DataSourceOption[]) => {
     setSelectedSources(selectedOptions);
   };
 

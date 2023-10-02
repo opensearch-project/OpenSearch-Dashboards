@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPatternsContract } from '../../index_patterns';
+import { IndexPattern } from '../../index_patterns';
 import { DataSourceType } from '../datasource_services';
 
 export interface IDataSourceMetaData {
@@ -16,13 +16,17 @@ export interface IDataSourceGroup {
 
 export interface ISourceDataSet {
   ds: DataSourceType;
-  data_sets: string[] | IndexPatternsContract;
+  data_sets: string[] | IndexPattern;
 }
 
+// to-dos: add common interfaces for datasource
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IDataSetParams {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IDataSourceQueryParams {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IDataSourceQueryResult {}
 
 export interface ConnectionStatus {
