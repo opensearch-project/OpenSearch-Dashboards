@@ -38,7 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const listingTable = getService('listingTable');
   const PageObjects = getPageObjects([
     'dashboard',
@@ -126,9 +125,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const searchName = 'my search';
 
       before(async () => {
-        await opensearchDashboardsServer.uiSettings.replace({
-          'discover:v2': false,
-        });
         await browser.refresh();
         await PageObjects.header.clickDiscover();
         await PageObjects.discover.clickNewSearchButton();
