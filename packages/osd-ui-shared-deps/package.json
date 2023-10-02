@@ -16,7 +16,6 @@
     "@osd/i18n": "1.0.0",
     "@osd/monaco": "1.0.0",
     "abortcontroller-polyfill": "^1.4.0",
-    "angular": "^1.8.2",
     "axios": "^0.27.2",
     "compression-webpack-plugin": "npm:@amoo-miki/compression-webpack-plugin@4.0.1-rc.1",
     "core-js": "^3.6.5",
