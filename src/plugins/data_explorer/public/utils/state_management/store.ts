@@ -80,17 +80,14 @@ export const getPreloadedStore = async (services: DataExplorerServices) => {
   // the store subscriber will automatically detect changes and call handleChange function
   const unsubscribe = store.subscribe(handleChange);
 
+  // This is necessary because browser navigation updates URL state that isnt reflected in the redux state
   services.scopedHistory.listen(async (location, action) => {
     const urlState = await loadReduxState(services);
     const currentState = store.getState();
 
-    if (isEqual(urlState, currentState)) {
-      return;
-    }
-
     // If the url state is different from the current state, then we need to update the store
     // the state should have a view property if it was loaded from the url
-    if (action === 'POP' && urlState.metadata?.view) {
+    if (action === 'POP' && urlState.metadata?.view && !isEqual(urlState, currentState)) {
       store.dispatch(hydrate(urlState as RootState));
     }
   });
