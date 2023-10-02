@@ -378,7 +378,7 @@ export class DiscoverPlugin
     dataSourceService.registerDataSource(
       dataSourceFactory.getDataSourceInstance(DEFAULT_DATASOURCE_TYPE, {
         name: DEFAULT_DATASOURCE_NAME,
-        type: INDEX_PATTERN_DATASOURCE_TYPE,
+        type: DEFAULT_DATASOURCE_TYPE,
         metadata: null,
         indexPatterns: plugins.data.indexPatterns,
       })
