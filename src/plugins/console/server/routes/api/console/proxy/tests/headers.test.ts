@@ -85,7 +85,9 @@ describe('Console Proxy Route', () => {
         opensearchDashboardsResponseFactory
       );
 
-      const [[, opts]] = opensearchClient.asCurrentUser.transport.request.mock.calls;
+      const [
+        [, opts],
+      ] = opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mock.calls;
       const headers = opts?.headers;
       expect(headers).to.have.property('x-forwarded-for');
       expect(headers!['x-forwarded-for']).to.be('0.0.0.0');

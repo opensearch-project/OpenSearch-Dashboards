@@ -60,7 +60,7 @@ describe('OpenSearchIndex', () => {
     });
 
     test('fails if the index doc type is unsupported', async () => {
-      client.indices.get.mockImplementation((params) => {
+      client.indices.get.mockImplementation((params: any) => {
         const index = params!.index as string;
         return opensearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
@@ -78,7 +78,7 @@ describe('OpenSearchIndex', () => {
     });
 
     test('fails if there are multiple root types', async () => {
-      client.indices.get.mockImplementation((params) => {
+      client.indices.get.mockImplementation((params: any) => {
         const index = params!.index as string;
         return opensearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
@@ -99,7 +99,7 @@ describe('OpenSearchIndex', () => {
     });
 
     test('decorates index info with exists and indexName', async () => {
-      client.indices.get.mockImplementation((params) => {
+      client.indices.get.mockImplementation((params: any) => {
         const index = params!.index as string;
         return opensearchClientMock.createSuccessTransportRequestPromise({
           [index]: {

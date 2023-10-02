@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { OpenSearchClient } from './types';
+import { OpenSearchClient, OpenSearchClientNext } from './types';
 
 /**
  * Serves the same purpose as the normal {@link IClusterClient | cluster client} but exposes
@@ -49,12 +49,25 @@ export interface IScopedClusterClient {
    * on behalf of the user that initiated the request to the OpenSearch Dashboards server.
    */
   readonly asCurrentUser: OpenSearchClient;
+  /**
+   * A {@link OpenSearchClient | client}, with support for long numerals, to be used to
+   * query the opensearch cluster on behalf of the internal OpenSearch Dashboards user.
+   */
+  readonly asInternalUserWithLongNumeralsSupport: OpenSearchClientNext;
+  /**
+   * A {@link OpenSearchClient | client}, with support for long numerals, to be used to
+   * query the opensearch cluster on behalf of the user that initiated the request to
+   * the OpenSearch Dashboards server.
+   */
+  readonly asCurrentUserWithLongNumeralsSupport: OpenSearchClientNext;
 }
 
 /** @internal **/
 export class ScopedClusterClient implements IScopedClusterClient {
   constructor(
     public readonly asInternalUser: OpenSearchClient,
-    public readonly asCurrentUser: OpenSearchClient
+    public readonly asCurrentUser: OpenSearchClient,
+    public readonly asInternalUserWithLongNumeralsSupport: OpenSearchClientNext,
+    public readonly asCurrentUserWithLongNumeralsSupport: OpenSearchClientNext
   ) {}
 }

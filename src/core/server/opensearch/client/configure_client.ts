@@ -30,25 +30,37 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { Client } from '@opensearch-project/opensearch';
+import { Client, ClientOptions } from '@opensearch-project/opensearch';
+import {
+  Client as ClientNext,
+  ClientOptions as ClientOptionsNext,
+} from '@opensearch-project/opensearch-next';
 import { RequestBody } from '@opensearch-project/opensearch/lib/Transport';
 
 import { Logger } from '../../logging';
 import { parseClientOptions, OpenSearchClientConfig } from './client_config';
 
-export const configureClient = (
+type ClientType<T> = T extends { withLongNumeralsSupport: true } ? ClientNext : Client;
+
+export const configureClient = <T>(
   config: OpenSearchClientConfig,
-  { logger, scoped = false }: { logger: Logger; scoped?: boolean }
-): Client => {
+  {
+    logger,
+    scoped = false,
+    withLongNumeralsSupport = false,
+  }: T extends { logger: Logger; scoped?: boolean; withLongNumeralsSupport?: boolean } ? T : never
+): ClientType<T> => {
   const clientOptions = parseClientOptions(config, scoped);
 
-  const client = new Client(clientOptions);
+  const client = withLongNumeralsSupport
+    ? new ClientNext({ ...clientOptions, enableLongNumeralSupport: true } as ClientOptionsNext)
+    : new Client(clientOptions as ClientOptions);
   addLogging(client, logger, config.logQueries);
 
-  return client;
+  return client as ClientType<T>;
 };
 
-const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
+const addLogging = (client: Client | ClientNext, logger: Logger, logQueries: boolean) => {
   client.on('response', (error, event) => {
     if (error) {
       const errorMessage =

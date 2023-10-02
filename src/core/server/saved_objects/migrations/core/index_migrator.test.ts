@@ -475,7 +475,6 @@ function withIndex(
       _shards: { successful: 1, total: 1 },
     } as opensearchtypes.CountResponse)
   );
-  // @ts-expect-error error is due to type {} is not compatible with type 'ScrollResponse<unknown>'
   // this setting is fine for test purpose
   client.scroll.mockImplementation(() => {
     if (scrollCallCounter <= docs.length) {

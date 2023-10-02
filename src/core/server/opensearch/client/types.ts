@@ -29,6 +29,7 @@
  */
 
 import type { OpenSearchDashboardsClient } from '@opensearch-project/opensearch/api/opensearch_dashboards';
+import type { OpenSearchDashboardsClient as OpenSearchDashboardsClientNext } from '@opensearch-project/opensearch-next/api/opensearch_dashboards';
 import type {
   ApiResponse,
   TransportRequestOptions,
@@ -43,6 +44,22 @@ import type {
  */
 export type OpenSearchClient = Omit<
   OpenSearchDashboardsClient,
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
+> & {
+  transport: {
+    request(
+      params: TransportRequestParams,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse>;
+  };
+};
+/**
+ * The "next" client used to query the opensearch cluster.
+ *
+ * @public
+ */
+export type OpenSearchClientNext = Omit<
+  OpenSearchDashboardsClientNext,
   'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
 > & {
   transport: {
