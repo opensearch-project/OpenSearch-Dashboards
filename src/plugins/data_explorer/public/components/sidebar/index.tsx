@@ -87,6 +87,7 @@ export const Sidebar: FC = ({ children }) => {
             setSelectedSources={handleSourceSelection}
             selectedSources={selectedSources}
             onFetchDataSetError={handleDataSetFetchError}
+            singleSelection={{ asPlainText: true }}
           />
           {/* <EuiComboBox
             placeholder="Select a datasource"
