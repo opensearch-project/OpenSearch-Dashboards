@@ -21,10 +21,15 @@ export interface TransformedPermission {
   permissions: string[];
 }
 
-const addToPrincipals = (principals?: Principals, users?: string[], groups?: string[]) => {
-  if (!principals) {
-    principals = {};
-  }
+const addToPrincipals = ({
+  principals = {},
+  users,
+  groups,
+}: {
+  principals: Principals;
+  users?: string[];
+  groups?: string[];
+}) => {
   if (!!users) {
     if (!principals.users) {
       principals.users = [];
@@ -40,7 +45,15 @@ const addToPrincipals = (principals?: Principals, users?: string[], groups?: str
   return principals;
 };
 
-const deleteFromPrincipals = (principals?: Principals, users?: string[], groups?: string[]) => {
+const deleteFromPrincipals = ({
+  principals,
+  users,
+  groups,
+}: {
+  principals?: Principals;
+  users?: string[];
+  groups?: string[];
+}) => {
   if (!principals) {
     return principals;
   }
@@ -82,7 +95,15 @@ export class ACL {
     this.permissions = initialPermissions || {};
   }
 
-  // parse the permissions object to check whether the specific principal has the specific permission types or not
+  /**
+   * A function that parses the permissions object to check whether the specific principal has the specific permission types or not
+   *
+   * @param {Array} permissionTypes permission types
+   * @param {Object} principals the users or groups
+   * @returns true if the principal has the specified permission types, false if the principal has no permission
+   *
+   * @public
+   */
   public hasPermission(permissionTypes: string[], principals: Principals) {
     if (!permissionTypes || permissionTypes.length === 0 || !this.permissions || !principals) {
       return false;
@@ -94,7 +115,15 @@ export class ACL {
     );
   }
 
-  // permissions object build function, add principal with specific permission to the object
+  /**
+   * A permissions object build function that adds principal with specific permission to the object
+   *
+   * @param {Array} permissionTypes the permission types
+   * @param {Object} principals the users or groups
+   * @returns the permissions object
+   *
+   * @public
+   */
   public addPermission(permissionTypes: string[], principals: Principals) {
     if (!permissionTypes || !principals) {
       return this;
@@ -104,17 +133,25 @@ export class ACL {
     }
 
     for (const permissionType of permissionTypes) {
-      this.permissions[permissionType] = addToPrincipals(
-        this.permissions[permissionType],
-        principals.users,
-        principals.groups
-      );
+      this.permissions[permissionType] = addToPrincipals({
+        principals: this.permissions[permissionType],
+        users: principals.users,
+        groups: principals.groups,
+      });
     }
 
     return this;
   }
 
-  // permissions object build function, remove specific permission of specific principal from the object
+  /**
+   * A permissions object build function that removes specific permission of specific principal from the object
+   *
+   * @param {Array} permissionTypes the permission types
+   * @param {Object} principals the users or groups
+   * @returns the permissions object
+   *
+   * @public
+   */
   public removePermission(permissionTypes: string[], principals: Principals) {
     if (!permissionTypes || !principals) {
       return this;
@@ -124,11 +161,11 @@ export class ACL {
     }
 
     for (const permissionType of permissionTypes) {
-      const result = deleteFromPrincipals(
-        this.permissions![permissionType],
-        principals.users,
-        principals.groups
-      );
+      const result = deleteFromPrincipals({
+        principals: this.permissions![permissionType],
+        users: principals.users,
+        groups: principals.groups,
+      });
       if (result) {
         this.permissions[permissionType] = result;
       }
@@ -138,9 +175,11 @@ export class ACL {
   }
 
   /**
-   * transform permissions format, change the format from permissionType->principals to principal->permissionTypes,
+   * A function that transforms permissions format, change the format from permissionType->principals to principal->permissionTypes,
    * which is used to clearyly dispaly user/group list and their granted permissions in the UI
-   * original permissions:   {
+   *
+   * for example:
+   * the original permissions object is:   {
    *     read: {
    *         users:['user1']
    *     },
@@ -149,10 +188,14 @@ export class ACL {
    *     }
    * }
    *
-   * transformed permissions: [
-   *     {type:'users',name:'user1',permissions:['read']},
-   *     {type:'groups',name:'group1',permissions:['write']},
+   * the transformed permissions object will be: [
+   *     {type:'users', name:'user1', permissions:['read']},
+   *     {type:'groups', name:'group1', permissions:['write']},
    * ]
+   *
+   * @returns the flat list of the permissions object
+   *
+   * @public
    */
   public toFlatList(): TransformedPermission[] {
     const result: TransformedPermission[] = [];
@@ -185,18 +228,35 @@ export class ACL {
     return result;
   }
 
+  /**
+   * A permissions object build function that resets the permissions object
+   *
+   * @public
+   */
   public resetPermissions() {
     // reset permissions
     this.permissions = {};
   }
 
-  // return the permissions object
+  /**
+   * A function that gets the premissions object
+   *
+   * @public
+   */
   public getPermissions() {
     return this.permissions;
   }
 
   /**
-   * generate query DSL by the specific conditions, used for fetching saved objects from the saved objects index
+   * A function that generates query DSL by the specific conditions, used for fetching saved objects from the saved objects index
+   *
+   * @param {Array} permissionTypes the permission types
+   * @param {Object} principals the users or groups
+   * @param {String | Array} savedObjectType saved object type, such as workspace, index-pattern etc.
+   * @returns the generated query DSL
+   *
+   * @public
+   * @static
    */
   public static generateGetPermittedSavedObjectsQueryDSL(
     permissionTypes: string[],
