@@ -63,11 +63,17 @@ If it's the only version of node installed, it will automatically be set to the 
 
 #### Install `yarn`
 
+OpenSearch Dashboards is set up using yarn, which can be installed through corepack. To install yarn, run:
+
 ```bash
+$ # Update corepack to the latest version
 $ npm i -g corepack
+
+$ # Install the correct version of yarn
+$ corepack install
 ```
 
-(See the [Yarn installation documentation](https://yarnpkg.com/getting-started/install) for more information.)
+(See the [corepack documentation](https://github.com/nodejs/corepack#-corepack) for more information.)
 
 ### Fork and clone OpenSearch Dashboards
 
