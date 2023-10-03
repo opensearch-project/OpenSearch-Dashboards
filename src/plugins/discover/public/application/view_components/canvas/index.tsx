@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
@@ -19,6 +19,7 @@ import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { filterColumns } from '../utils/filter_columns';
 import { DEFAULT_COLUMNS_SETTING } from '../../../../common';
+import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
 import './discover_canvas.scss';
 
 // eslint-disable-next-line import/no-default-export
@@ -42,7 +43,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     bucketInterval: {},
   });
 
-  const { status } = fetchState;
   const onQuerySubmit = useCallback(
     (payload, isUpdate) => {
       if (isUpdate === false) {
@@ -51,18 +51,30 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     },
     [refetch$]
   );
+  const [rows, setRows] = useState<OpenSearchSearchHit[] | undefined>(undefined);
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
-      if (
-        next.status !== fetchState.status ||
-        (next.hits && next.hits !== fetchState.hits) ||
-        (next.bucketInterval && next.bucketInterval !== fetchState.bucketInterval) ||
-        (next.chartData && next.chartData !== fetchState.chartData)
-      ) {
+      if (next.status === ResultStatus.LOADING) return;
+
+      let shouldUpdateState = false;
+
+      if (next.status !== fetchState.status) shouldUpdateState = true;
+      if (next.hits && next.hits !== fetchState.hits) shouldUpdateState = true;
+      if (next.bucketInterval && next.bucketInterval !== fetchState.bucketInterval)
+        shouldUpdateState = true;
+      if (next.chartData && next.chartData !== fetchState.chartData) shouldUpdateState = true;
+      if (next.rows && next.rows !== fetchState.rows) {
+        shouldUpdateState = true;
+        setRows(next.rows);
+      }
+
+      // Update the state if any condition is met.
+      if (shouldUpdateState) {
         setFetchState({ ...fetchState, ...next });
       }
     });
+
     return () => {
       subscription.unsubscribe();
     };
@@ -76,6 +88,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   }, [dispatch, filteredColumns, indexPattern]);
 
   const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
+
+  const MemoizedDiscoverTable = React.memo(DiscoverTable);
+  const MemoizedDiscoverChartContainer = React.memo(DiscoverChartContainer);
 
   return (
     <EuiPanel
@@ -91,21 +106,21 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
           onQuerySubmit,
         }}
       />
-      {status === ResultStatus.NO_RESULTS && (
+      {fetchState.status === ResultStatus.NO_RESULTS && (
         <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
       )}
-      {status === ResultStatus.UNINITIALIZED && (
+      {fetchState.status === ResultStatus.UNINITIALIZED && (
         <DiscoverUninitialized onRefresh={() => refetch$.next()} />
       )}
-      {status === ResultStatus.LOADING && <LoadingSpinner />}
-      {status === ResultStatus.READY && (
+      {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
+      {fetchState.status === ResultStatus.READY && (
         <>
           <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
             <EuiPanel>
-              <DiscoverChartContainer {...fetchState} />
+              <MemoizedDiscoverChartContainer {...fetchState} />
             </EuiPanel>
           </EuiPanel>
-          <DiscoverTable history={history} />
+          <MemoizedDiscoverTable rows={rows} />
         </>
       )}
     </EuiPanel>
