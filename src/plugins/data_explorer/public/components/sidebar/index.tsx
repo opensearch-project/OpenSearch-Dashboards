@@ -79,7 +79,7 @@ export const Sidebar: FC = ({ children }) => {
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
-        <EuiSplitPanel.Inner paddingSize="s" grow={false}>
+        <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
           <DataSourceSelectable
             dataSources={activeDataSources}
             dataSourceOptionList={dataSourceOptionList}
