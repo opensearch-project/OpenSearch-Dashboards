@@ -93,7 +93,7 @@ export const SurroundingDocsView = ({ id, indexPattern }: SurroundingDocsViewPar
         field,
         values,
         operation,
-        indexPattern.id
+        indexPattern.id || ''
       );
       return filterManager.addFilters(newFilters);
     },
@@ -115,23 +115,25 @@ export const SurroundingDocsView = ({ id, indexPattern }: SurroundingDocsViewPar
     [onAddFilter, rows, indexPattern, setContextAppState, contextQueryState, contextAppState]
   );
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
-    !isLoading && (
-      <Fragment>
-        <TopNavMenu
-          appName={'discover.context.surroundingDocs.topNavMenu'}
-          showSearchBar={true}
-          showQueryBar={false}
-          showDatePicker={false}
-          indexPatterns={[indexPattern]}
-          useDefaultBehaviors={true}
-        />
-        <EuiPage className="discover.context.appPage">
-          <EuiPageContent paddingSize="s" className="dscDocsContent">
-            {contextAppMemoized}
-          </EuiPageContent>
-        </EuiPage>
-      </Fragment>
-    )
+    <Fragment>
+      <TopNavMenu
+        appName={'discover.context.surroundingDocs.topNavMenu'}
+        showSearchBar={true}
+        showQueryBar={false}
+        showDatePicker={false}
+        indexPatterns={[indexPattern]}
+        useDefaultBehaviors={true}
+      />
+      <EuiPage className="discover.context.appPage">
+        <EuiPageContent paddingSize="s" className="dscDocsContent">
+          {contextAppMemoized}
+        </EuiPageContent>
+      </EuiPage>
+    </Fragment>
   );
 };
