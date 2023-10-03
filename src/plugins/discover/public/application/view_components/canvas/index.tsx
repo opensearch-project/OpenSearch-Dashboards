@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
@@ -42,6 +42,14 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   });
 
   const { status } = fetchState;
+  const onQuerySubmit = useCallback(
+    (payload, isUpdate) => {
+      if (isUpdate === false) {
+        refetch$.next();
+      }
+    },
+    [refetch$]
+  );
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
@@ -74,6 +82,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
         <TopNav
           opts={{
             setHeaderActionMenu,
+            onQuerySubmit,
           }}
         />
       </EuiFlexItem>
