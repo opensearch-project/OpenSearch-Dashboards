@@ -26,6 +26,8 @@ export const VisBuilderApp = () => {
     },
   } = useOpenSearchDashboards<VisBuilderServices>();
   const { pathname } = useLocation();
+  const beforeStateQ = osdUrlStateStorage.get('_q');
+  const beforeStateG = osdUrlStateStorage.get('_g');
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
@@ -36,6 +38,8 @@ export const VisBuilderApp = () => {
     // this effect should re-run when pathname is changed to preserve querystring part,
     // so the global state is always preserved
   }, [query, osdUrlStateStorage, pathname]);
+  const afterStateQ = osdUrlStateStorage.get('_q');
+  const afterStateG = osdUrlStateStorage.get('_g');
 
   // Render the application DOM.
   return (
