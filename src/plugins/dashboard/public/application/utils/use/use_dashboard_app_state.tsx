@@ -193,6 +193,17 @@ export const useDashboardAppAndGlobalState = ({
 
         subscriptions.add(stopSyncingFromTimeFilters);
 
+        const stopSyncingFromGlobalFilters = filterManager.getUpdates$().subscribe(() => {
+          refreshDashboardContainer({
+            dashboardServices: services,
+            dashboardContainer,
+            savedDashboard: dashboard!,
+            appStateData: stateContainer.getState(),
+          });
+        });
+
+        subscriptions.add(stopSyncingFromGlobalFilters);
+
         unsubscribeFromDashboardContainer = () => {
           stopSyncingDashboardContainerInputs();
           stopSyncingDashboardContainerOutputs();
