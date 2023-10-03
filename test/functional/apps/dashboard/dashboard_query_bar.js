@@ -49,8 +49,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
     });
 
-    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5116
-    it.skip('causes panels to reload when refresh is clicked', async () => {
+    it('causes panels to reload when refresh is clicked', async () => {
       await opensearchArchiver.unload('dashboard/current/data');
 
       await queryBar.clickQuerySubmitButton();
