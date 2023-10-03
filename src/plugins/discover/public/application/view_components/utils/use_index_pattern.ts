@@ -33,16 +33,6 @@ export const useIndexPattern = (services: DiscoverServices, store: StoreType) =>
     let isMounted = true;
 
     const fetchIndexPatternDetails = (id: string) => {
-      const indexPatternMissingWarning = i18n.translate(
-        'discover.valueIsNotConfiguredIndexPatternIDWarningTitle',
-        {
-          defaultMessage: '{id} is not a configured index pattern ID',
-          values: {
-            id: `"${id}"`,
-          },
-        }
-      );
-
       data.indexPatterns
         .get(id)
         .then((result) => {
@@ -52,6 +42,15 @@ export const useIndexPattern = (services: DiscoverServices, store: StoreType) =>
         })
         .catch(() => {
           if (isMounted) {
+            const indexPatternMissingWarning = i18n.translate(
+              'discover.valueIsNotConfiguredIndexPatternIDWarningTitle',
+              {
+                defaultMessage: '{id} is not a configured index pattern ID',
+                values: {
+                  id: `"${id}"`,
+                },
+              }
+            );
             toastNotifications.addDanger({
               title: indexPatternMissingWarning,
             });
