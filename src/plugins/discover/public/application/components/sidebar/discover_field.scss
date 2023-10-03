@@ -17,4 +17,8 @@
   &:focus &__actionButton {
     opacity: 1;
   }
+
+  @include ouiBreakpoint("xs", "s", "m") {
+    opacity: 1;
+  }
 }
