@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { ACL } from './acl';
+export { ACL, Permissions, Principals, PrincipalType, TransformedPermission } from './acl';
