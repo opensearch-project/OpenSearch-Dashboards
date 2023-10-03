@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -20,6 +20,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { filterColumns } from '../utils/filter_columns';
 import { DEFAULT_COLUMNS_SETTING } from '../../../../common';
 import './discover_canvas.scss';
+
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
   const { data$, refetch$, indexPattern } = useDiscoverContext();
@@ -42,6 +43,14 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   });
 
   const { status } = fetchState;
+  const onQuerySubmit = useCallback(
+    (payload, isUpdate) => {
+      if (isUpdate === false) {
+        refetch$.next();
+      }
+    },
+    [refetch$]
+  );
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
@@ -69,18 +78,21 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" className="dscCanvas">
-      <EuiFlexItem grow={false}>
-        <TopNav
-          opts={{
-            setHeaderActionMenu,
-          }}
-        />
-      </EuiFlexItem>
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      color="transparent"
+      paddingSize="none"
+      className="dscCanvas"
+    >
+      <TopNav
+        opts={{
+          setHeaderActionMenu,
+          onQuerySubmit,
+        }}
+      />
       {status === ResultStatus.NO_RESULTS && (
-        <EuiFlexItem>
-          <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
-        </EuiFlexItem>
+        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
       )}
       {status === ResultStatus.UNINITIALIZED && (
         <DiscoverUninitialized onRefresh={() => refetch$.next()} />
@@ -88,18 +100,14 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       {status === ResultStatus.LOADING && <LoadingSpinner />}
       {status === ResultStatus.READY && (
         <>
-          <EuiFlexItem grow={false}>
-            <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
-              <EuiPanel>
-                <DiscoverChartContainer {...fetchState} />
-              </EuiPanel>
+          <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
+            <EuiPanel>
+              <DiscoverChartContainer {...fetchState} />
             </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <DiscoverTable history={history} />
-          </EuiFlexItem>
+          </EuiPanel>
+          <DiscoverTable history={history} />
         </>
       )}
-    </EuiFlexGroup>
+    </EuiPanel>
   );
 }
