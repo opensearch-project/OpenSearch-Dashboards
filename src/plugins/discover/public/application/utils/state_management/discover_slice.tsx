@@ -11,6 +11,7 @@ import { RootState, DefaultViewState } from '../../../../../data_explorer/public
 import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../saved_searches/types';
+import { PLUGIN_ID } from '../../../../common';
 
 export interface DiscoverState {
   /**
@@ -79,6 +80,7 @@ export const getPreloadedState = async ({
       preloadedState.root = {
         metadata: {
           indexPattern: indexPatternId,
+          view: PLUGIN_ID,
         },
       };
 
