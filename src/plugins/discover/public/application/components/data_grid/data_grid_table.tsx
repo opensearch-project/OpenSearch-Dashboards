@@ -29,7 +29,6 @@ export interface DataGridTableProps {
   onSetColumns: (columns: string[]) => void;
   sort: SortOrder[];
   displayTimeColumn: boolean;
-  services: DiscoverServices;
   title?: string;
   description?: string;
   isToolbarVisible?: boolean;
