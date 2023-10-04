@@ -423,7 +423,7 @@
     "nyc": "^15.1.0",
     "pixelmatch": "^5.1.0",
     "pngjs": "^3.4.0",
-    "postcss": "^8.4.5",
+    "postcss": "^8.4.31",
     "prettier": "^2.1.1",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
