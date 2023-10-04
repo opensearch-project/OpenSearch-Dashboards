@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { DataExplorerServices, ViewProps } from '../../../../../data_explorer/public';
 import {
   OpenSearchDashboardsContextProvider,
@@ -11,7 +11,6 @@ import {
 } from '../../../../../opensearch_dashboards_react/public';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { useSearch, SearchContextValue } from '../utils/use_search';
-import { connectStorageToQueryState, opensearchFilters } from '../../../../../data/public';
 
 const SearchContext = React.createContext<SearchContextValue>({} as SearchContextValue);
 
@@ -23,16 +22,6 @@ export default function DiscoverContext({ children }: React.PropsWithChildren<Vi
     ...deServices,
     ...services,
   });
-
-  const { osdUrlStateStorage } = deServices;
-
-  // Connect the query service to the url state
-  useEffect(() => {
-    connectStorageToQueryState(services.data.query, osdUrlStateStorage, {
-      filters: opensearchFilters.FilterStateStore.APP_STATE,
-      query: true,
-    });
-  }, [osdUrlStateStorage, services.data.query, services.uiSettings]);
 
   return (
     <OpenSearchDashboardsContextProvider services={services}>
