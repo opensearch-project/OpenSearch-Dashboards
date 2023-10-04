@@ -37,10 +37,10 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Decouple] Allow plugin manifest config to define semver compatible OpenSearch plugin and verify if it is installed on the cluster([#4612](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4612))
 - [Advanced Settings] Consolidate settings into new "Appearance" category and add category IDs ([#4845](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4845))
 - Adds Data explorer framework and implements Discover using it ([#4806](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4806))
-- [Theme] Use themes' definitions to render the initial view ([#4936](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4936/))
-- [Theme] Make `next` theme the default ([#4854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4854/))
+- [Theme] Use themes' definitions to render the initial view ([#4936](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4936))
+- [Theme] Make `next` theme the default ([#4854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4854))
 - [Discover] Update embeddable for saved searches ([#5081](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5081))
-- [Workspace] Optional workspaces params in repository ([#5162](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5162/))
+- [Workspace] Optional workspaces params in repository ([#5162](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5162))
 
 ### 🐛 Bug Fixes
 
