@@ -4,30 +4,30 @@
  */
 
 import { DataSource } from '../datasource';
-import { IndexPattern } from '../../index_patterns';
+import { IndexPatternsService } from '../../index_patterns';
 import { DataSourceService } from '../datasource_services';
 
 class MockDataSource extends DataSource<any, any, any, any, any> {
-  private readonly indexPatterns;
+  private readonly indexPattern;
 
   constructor({
     name,
     type,
     metadata,
-    indexPatterns,
+    indexPattern,
   }: {
     name: string;
     type: string;
     metadata: any;
-    indexPatterns: IndexPattern;
+    indexPattern: IndexPatternsService;
   }) {
     super(name, type, metadata);
-    this.indexPatterns = indexPatterns;
+    this.indexPattern = indexPattern;
   }
 
   async getDataSet(dataSetParams?: any) {
-    await this.indexPatterns.ensureDefaultIndexPattern();
-    return await this.indexPatterns.getCache();
+    await this.indexPattern.ensureDefaultIndexPattern();
+    return await this.indexPattern.getCache();
   }
 
   async testConnection(): Promise<boolean> {
@@ -39,7 +39,7 @@ class MockDataSource extends DataSource<any, any, any, any, any> {
   }
 }
 
-const mockIndexPattern = {} as IndexPattern;
+const mockIndexPattern = {} as IndexPatternsService;
 
 const mockConfig1 = {
   name: 'test_datasource1',

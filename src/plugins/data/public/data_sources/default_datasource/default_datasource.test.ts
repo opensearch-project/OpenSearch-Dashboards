@@ -3,16 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IndexPatternsService } from '../../index_patterns';
 import { DefaultDslDataSource } from './default_datasource';
 
 describe('DefaultDslDataSource', () => {
-  let indexPatternsMock;
+  let indexPatternsMock: IndexPatternsService;
 
   beforeEach(() => {
-    indexPatternsMock = {
+    indexPatternsMock = ({
       ensureDefaultIndexPattern: jest.fn(),
       getCache: jest.fn(),
-    };
+    } as unknown) as IndexPatternsService;
   });
 
   it('should ensure default index pattern and get cache', async () => {

@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObject } from '../../../../core/types';
-import { IndexPatternSavedObjectAttrs } from '../../../data/common/index_patterns/index_patterns';
-import { IndexPatternsContract } from '../../../data/public';
-import { DataSource } from '../../../data/public';
+import { SavedObject } from '../../../../../core/types';
+import { IndexPatternsService } from '../../index_patterns';
+import { IndexPatternSavedObjectAttrs } from '../../index_patterns/index_patterns';
+import { DataSource } from '../datasource';
 
 interface DataSourceConfig {
   name: string;
   type: string;
   metadata: any;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: IndexPatternsService;
 }
 
 export class DefaultDslDataSource extends DataSource<

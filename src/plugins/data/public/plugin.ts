@@ -90,6 +90,7 @@ import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
 import { DataSourceService } from './data_sources/datasource_services';
 import { DataSourceFactory } from './data_sources/datasource';
+import { registerDefaultDatasource } from './data_sources/register_default_datasource';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -234,6 +235,8 @@ export class DataPublicPlugin
       },
     };
 
+    registerDefaultDatasource(dataServices);
+
     const SearchBar = createSearchBar({
       core,
       data: dataServices,
@@ -245,10 +248,6 @@ export class DataPublicPlugin
       ui: {
         IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
         SearchBar,
-      },
-      dataSources: {
-        dataSourceService,
-        dataSourceFactory,
       },
     };
   }

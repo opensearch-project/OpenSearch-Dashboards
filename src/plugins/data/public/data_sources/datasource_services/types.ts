@@ -45,3 +45,5 @@ export type DataSourceType = DataSource<
   IDataSourceQueryParams,
   IDataSourceQueryResult
 >;
+
+export type GenericDataSource = DataSource<any, any, any, any, any>;

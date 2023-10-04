@@ -9,13 +9,22 @@
  */
 
 import { DataSourceType } from '../datasource_services';
+import { DataSource } from '../datasource';
+
+type DataSourceClass<
+  MetaData = any,
+  SetParams = any,
+  DataSet = any,
+  QueryParams = any,
+  QueryResult = any
+> = new (config: any) => DataSource<MetaData, SetParams, DataSet, QueryParams, QueryResult>;
 
 export class DataSourceFactory {
   // Holds the singleton instance of the DataSourceFactory.
   private static factory: DataSourceFactory;
 
   // A dictionary holding the data source type as the key and its corresponding class constructor as the value.
-  private dataSourceClasses: { [type: string]: new (config: any) => DataSourceType } = {};
+  private dataSourceClasses: { [type: string]: DataSourceClass } = {};
 
   /**
    * Private constructor to ensure only one instance of DataSourceFactory is created.
@@ -39,10 +48,10 @@ export class DataSourceFactory {
    * If the type has already been registered, an error is thrown.
    *
    * @param {string} type - The identifier for the data source type.
-   * @param {new (config: any) => DataSourceType} dataSourceClass - The constructor of the data source class.
+   * @param {DataSourceClass} dataSourceClass - The constructor of the data source class.
    * @throws {Error} Throws an error if the data source type has already been registered.
    */
-  registerDataSourceType(type: string, dataSourceClass: new (config: any) => DataSourceType): void {
+  registerDataSourceType(type: string, dataSourceClass: DataSourceClass): void {
     if (this.dataSourceClasses[type]) {
       throw new Error('This data source type has already been registered');
     }
