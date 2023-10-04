@@ -13,6 +13,7 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDiscoverContext } from '../context';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
+import { opensearchFilters, connectStorageToQueryState } from '../../../../../data/public';
 
 export interface TopNavProps {
   opts: {
@@ -35,9 +36,15 @@ export const TopNav = ({ opts }: TopNavProps) => {
     },
     data,
     chrome,
+    osdUrlStateStorage,
   } = services;
 
   const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
+
+  connectStorageToQueryState(services.data.query, osdUrlStateStorage, {
+    filters: opensearchFilters.FilterStateStore.APP_STATE,
+    query: true,
+  });
 
   useEffect(() => {
     let isMounted = true;
