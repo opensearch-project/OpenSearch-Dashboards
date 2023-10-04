@@ -51,8 +51,8 @@ describe('buildPointSeriesData', () => {
     expect(result.ordered.interval.asHours()).toBe(1);
     expect(result.ordered.intervalOpenSearchUnit).toBe('h');
     expect(result.ordered.intervalOpenSearchValue).toBe(1);
-    expect(result.ordered.min.format()).toBe('2023-01-01T00:00:00+00:00');
-    expect(result.ordered.max.format()).toBe('2023-01-02T00:00:00+00:00');
+    expect(result.ordered.min.format()).toBe(moment('2023-01-01T00:00:00+00:00').format());
+    expect(result.ordered.max.format()).toBe(moment('2023-01-02T00:00:00+00:00').format());
     expect(result.yAxisLabel).toEqual('Y Axis');
     expect(result.values).toEqual([
       { x: 10, y: 100 },
