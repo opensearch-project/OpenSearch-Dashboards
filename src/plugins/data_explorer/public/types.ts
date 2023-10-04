@@ -32,12 +32,6 @@ export interface DataExplorerPluginStartDependencies {
   data: DataPublicPluginStart;
 }
 
-export interface DataSourceStart {
-  dataSourceService: DataSourceService;
-  dataSourceFactory: DataSourceFactory;
-  DataSourceSelector: React.ComponentType<DataSourceSelectableProps>;
-}
-
 export interface DataExplorerServices extends CoreStart {
   store?: Store;
   viewRegistry: ViewServiceStart;
