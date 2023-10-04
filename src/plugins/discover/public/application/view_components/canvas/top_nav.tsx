@@ -62,12 +62,9 @@ export const TopNav = ({ opts }: TopNavProps) => {
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
 
     if (savedSearch?.id) {
-      chrome.setBreadcrumbs([
-        ...getRootBreadcrumbs(getUrlForApp(PLUGIN_ID)),
-        { text: savedSearch.title },
-      ]);
+      chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedSearch.title }]);
     } else {
-      chrome.setBreadcrumbs([...getRootBreadcrumbs(getUrlForApp(PLUGIN_ID))]);
+      chrome.setBreadcrumbs([...getRootBreadcrumbs()]);
     }
   }, [chrome, getUrlForApp, savedSearch?.id, savedSearch?.title]);
 
