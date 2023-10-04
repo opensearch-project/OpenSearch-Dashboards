@@ -5,7 +5,7 @@
 
 import { DataSourceFactory } from './factory';
 import { DataSource } from './datasource';
-import { IndexPattern } from '../../index_patterns';
+import { IndexPattern, IndexPatternsService } from '../../index_patterns';
 
 class MockDataSource extends DataSource<any, any, any, any, any> {
   private readonly indexPatterns;
@@ -19,7 +19,7 @@ class MockDataSource extends DataSource<any, any, any, any, any> {
     name: string;
     type: string;
     metadata: any;
-    indexPatterns: IndexPattern;
+    indexPatterns: IndexPatternsService;
   }) {
     super(name, type, metadata);
     this.indexPatterns = indexPatterns;
@@ -30,12 +30,12 @@ class MockDataSource extends DataSource<any, any, any, any, any> {
     return await this.indexPatterns.getCache();
   }
 
-  async testConnection(): Promise<void> {
-    throw new Error('This operation is not supported for this class.');
+  async testConnection(): Promise<boolean> {
+    return true;
   }
 
   async runQuery(queryParams: any) {
-    return null;
+    return undefined;
   }
 }
 

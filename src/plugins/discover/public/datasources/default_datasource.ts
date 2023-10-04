@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObject } from '../../../saved_objects/public';
+import { SavedObject } from '../../../../core/types';
 import { IndexPatternSavedObjectAttrs } from '../../../data/common/index_patterns/index_patterns';
 import { IndexPatternsContract } from '../../../data/public';
 import { DataSource } from '../../../data/public';
@@ -34,11 +34,11 @@ export class DefaultDslDataSource extends DataSource<
     return await this.indexPatterns.getCache();
   }
 
-  async testConnection(): Promise<void> {
-    throw new Error('This operation is not supported for this class.');
+  async testConnection(): Promise<boolean> {
+    return true;
   }
 
   async runQuery(queryParams: any) {
-    return null;
+    return undefined;
   }
 }

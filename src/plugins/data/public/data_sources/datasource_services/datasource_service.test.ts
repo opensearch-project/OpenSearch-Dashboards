@@ -30,12 +30,12 @@ class MockDataSource extends DataSource<any, any, any, any, any> {
     return await this.indexPatterns.getCache();
   }
 
-  async testConnection(): Promise<void> {
-    throw new Error('This operation is not supported for this class.');
+  async testConnection(): Promise<boolean> {
+    return true;
   }
 
   async runQuery(queryParams: any) {
-    return null;
+    return undefined;
   }
 }
 

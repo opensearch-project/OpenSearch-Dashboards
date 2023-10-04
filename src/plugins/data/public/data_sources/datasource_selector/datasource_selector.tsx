@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import { EuiComboBox } from '@elastic/eui';
-import { DataSourceList, DataSourceOptionType } from './types';
+import { DataSourceOptionType } from './types';
 
 export const DataSourceSelector = ({
   dataSourceList,
@@ -13,7 +14,7 @@ export const DataSourceSelector = ({
   onDataSourceChange,
   singleSelection = true,
 }: {
-  dataSourceList: DataSourceList[];
+  dataSourceList: DataSourceOptionType[];
   selectedOptions: DataSourceOptionType[];
   onDataSourceChange: (selectedDataSourceOptions: DataSourceOptionType[]) => void;
   singleSelection?: boolean;
@@ -25,7 +26,9 @@ export const DataSourceSelector = ({
   return (
     <EuiComboBox
       data-test-subj="dataExplorerDSSelect"
-      placeholder="Select a datasource"
+      placeholder={i18n.translate('data.datasource.selectADatasource', {
+        defaultMessage: 'Select a datasource',
+      })}
       options={dataSourceList}
       selectedOptions={selectedOptions}
       onChange={onDataSourceSelectionChange}

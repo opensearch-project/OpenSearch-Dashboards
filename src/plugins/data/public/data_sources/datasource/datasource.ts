@@ -68,5 +68,5 @@ export abstract class DataSource<
    *
    * @returns {ConnectionStatus | Promise<void>} Status of the connection test.
    */
-  abstract testConnection(): ConnectionStatus | Promise<void>;
+  abstract testConnection(): ConnectionStatus | Promise<boolean>;
 }
