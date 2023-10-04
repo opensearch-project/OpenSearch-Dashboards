@@ -8,13 +8,7 @@ import { EmbeddableStart } from '../../embeddable/public';
 import { ExpressionsStart } from '../../expressions/public';
 import { ViewServiceStart, ViewServiceSetup } from './services/view_service';
 import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-  DataSourceFactory,
-  DataSourceService,
-  DataSourceSelectableProps,
-} from '../../data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { Store } from './utils/state_management';
 
 export type DataExplorerPluginSetup = ViewServiceSetup;

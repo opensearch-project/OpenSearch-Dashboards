@@ -10,14 +10,21 @@ import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './
 import { ISourceDataSet } from '../datasource/types';
 import { IndexPattern } from '../../index_patterns';
 
+type DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS' | 's3glue' | 'spark';
+
 // Mapping between datasource type and its display name.
-const DATASOURCE_TYPE_DISPLAY_NAME_MAP = {
+const DATASOURCE_TYPE_DISPLAY_NAME_MAP: Record<DataSourceTypeKey, string> = {
   DEFAULT_INDEX_PATTERNS: 'Index patterns',
   s3glue: 'Amazon S3',
   spark: 'Spark',
 };
 
 type DataSetType = string | IndexPattern;
+
+interface DataSetWithSource {
+  ds: DataSourceType;
+  data_sets: string[] | IndexPattern[];
+}
 
 export const DataSourceSelectable = ({
   dataSources, // list of all available datasource connections.
@@ -31,7 +38,7 @@ export const DataSourceSelectable = ({
   // This effect fetches datasets and prepares the datasource list for UI rendering.
   useEffect(() => {
     // Fetches datasets for a given datasource and returns it along with the source.
-    const fetchDataSetWithSource = async (ds: DataSourceType): Promise<ISourceDataSet> => {
+    const fetchDataSetWithSource = async (ds: DataSourceType): Promise<DataSetWithSource> => {
       const dataSet = await ds.getDataSet();
       return {
         ds,
@@ -42,8 +49,15 @@ export const DataSourceSelectable = ({
     // Map through all data sources and fetch their respective datasets.
     const fetchDataSets = () => dataSources.map((ds: DataSourceType) => fetchDataSetWithSource(ds));
 
-    const isIndexPatterns = (dataset: string | IndexPattern) =>
-      dataset.attributes?.title && dataset.id;
+    // const isIndexPatterns = (dataset: string | IndexPattern) =>
+    //   dataset.attributes?.title && dataset.id;
+
+    const isIndexPatterns = (dataset: string | IndexPattern): boolean => {
+      if (typeof dataset === 'object' && 'attributes' in dataset) {
+        return Boolean(dataset.attributes?.title && dataset.id);
+      }
+      return false;
+    };
 
     // Get the option format for the combo box from the dataSource and dataSet.
     const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetType) => {
