@@ -67,15 +67,14 @@ export default function ({ getService, getPageObjects }) {
         name: 'saved search',
         fields: ['bytes', 'agent'],
       });
-      // Current data grid loads 100 rows per page by default with inspect button and time range
-      await dashboardExpect.dataGridTableCellCount(400);
+      await dashboardExpect.docTableFieldCount(150);
 
       // Set to time range with no data
       await PageObjects.timePicker.setAbsoluteRange(
         'Jan 1, 2000 @ 00:00:00.000',
         'Jan 1, 2000 @ 01:00:00.000'
       );
-      await dashboardExpect.dataGridTableCellCount(0);
+      await dashboardExpect.docTableFieldCount(0);
     });
 
     it('Timepicker start, end, interval values are set by url', async () => {

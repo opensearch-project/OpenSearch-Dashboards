@@ -53,11 +53,16 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('dashboard state', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
       await browser.refresh();
     });
 
@@ -90,11 +95,8 @@ export default function ({ getService, getPageObjects }) {
       expect(colorChoiceRetained).to.be(true);
     });
 
-    // TODO: Revert the following changes on the following 3 saved search tests
-    // once issue https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5071 is resolved.
-    // The issue causes the previously saved object to not load automatically when navigating back to discover from the dashboard.
-    // Currently, we need to re-open the saved search in discover.
-    // The expected behavior is for the saved object to persist and load as it did in previous versions of discover.
+    // the following three tests are skipped because of save search save window bug:
+    // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4698
     it('Saved search with no changes will update when the saved object changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
@@ -114,12 +116,11 @@ export default function ({ getService, getPageObjects }) {
       expect(inViewMode).to.be(true);
 
       await PageObjects.header.clickDiscover();
-      // add load save search here since discover link won't take it to the save search link
+      // Add load save search here since discover link won't take it to the save search link for
+      // the legacy discover plugin
       await PageObjects.discover.loadSavedSearch('my search');
-      await PageObjects.timePicker.setHistoricalDataRange();
-
       await PageObjects.discover.clickFieldListItemAdd('agent');
-      await PageObjects.discover.saveSearch('my search', false);
+      await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.header.clickDashboard();
@@ -137,9 +138,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
       await PageObjects.header.clickDiscover();
-      // add load save search here since discover link won't take it to the save search link
+      // Add load save search here since discover link won't take it to the save search link for
+      // the legacy discover plugin
       await PageObjects.discover.loadSavedSearch('my search');
-      await PageObjects.timePicker.setHistoricalDataRange();
       await PageObjects.discover.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -156,10 +157,9 @@ export default function ({ getService, getPageObjects }) {
       const currentQuery = await queryBar.getQueryString();
       expect(currentQuery).to.equal('');
       const currentUrl = await browser.getCurrentUrl();
-
-      // due to previous re-open saved search, history is changed.
-      // query is in both _g and _a. We need to change query in _a.
-      const newUrl = currentUrl.replace(/query:%27%27/g, 'query:%27abc12345678910%27');
+      const newUrl = currentUrl.replace('query:%27%27', 'query:%27abc12345678910%27');
+      // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
+      // soft refresh.
       await browser.get(newUrl.toString(), false);
       await PageObjects.header.waitUntilLoadingHasFinished();
 

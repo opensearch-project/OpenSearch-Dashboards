@@ -49,6 +49,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
         [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
+        'discover:v2': false,
       });
       isOss = await deployment.isOss();
     });

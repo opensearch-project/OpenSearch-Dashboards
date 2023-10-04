@@ -43,6 +43,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await opensearchArchiver.load('visualize');
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
+        'discover:v2': false,
       });
       await PageObjects.common.navigateToApp('discover');
     });

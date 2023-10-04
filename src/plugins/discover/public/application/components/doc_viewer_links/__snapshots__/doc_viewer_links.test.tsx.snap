@@ -17,7 +17,7 @@ exports[`Render <DocViewerLink/> with 2 different links 1`] = `
     key="0"
   >
     <EuiLink
-      data-test-subj="docTableRowAction-0"
+      data-test-subj="docTableRowAction"
       href="aaa"
       style={
         Object {
@@ -34,7 +34,7 @@ exports[`Render <DocViewerLink/> with 2 different links 1`] = `
     key="1"
   >
     <EuiLink
-      data-test-subj="docTableRowAction-1"
+      data-test-subj="docTableRowAction"
       href="bbb"
       style={
         Object {
