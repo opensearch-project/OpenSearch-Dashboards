@@ -50,6 +50,7 @@ export abstract class DataSource<
    * patterns for OpenSearch data source
    *
    * @returns {SourceDataSet} Dataset associated with the data source.
+   * @experimental
    */
   abstract getDataSet(dataSetParams?: DataSetParams): SourceDataSet;
 
@@ -58,6 +59,7 @@ export abstract class DataSource<
    * Implementing classes need to provide the specific implementation.
    *
    * @returns {DataSourceQueryResult} Result from querying the data source.
+   * @experimental
    */
   abstract runQuery(queryParams: DataSourceQueryParams): DataSourceQueryResult;
 
@@ -67,6 +69,7 @@ export abstract class DataSource<
    * the connection status, typically indicating success or failure.
    *
    * @returns {ConnectionStatus | Promise<void>} Status of the connection test.
+   * @experimental
    */
   abstract testConnection(): ConnectionStatus | Promise<boolean>;
 }
