@@ -921,30 +921,6 @@ license.
 
 The following developer guide rules are specific for working with the React framework.
 
-#### Prefer reactDirective over react-component
-
-When using `ngReact` to embed your react components inside Angular HTML, prefer the
-`reactDirective` service over the `react-component` directive.
-You can read more about these two ngReact methods [here](https://github.com/ngReact/ngReact#features).
-
-Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more succinct syntax.
-
-**Good:**
-
-```html
-<hello-component
-  fname="person.fname"
-  lname="person.lname"
-  watch-depth="reference"
-></hello-component>
-```
-
-**Bad:**
-
-```html
-<react-component name="HelloComponent" props="person" watch-depth="reference" />
-```
-
 #### Name action functions and prop functions appropriately
 
 Name action functions in the form of a strong verb and passed properties in the form of on<Subject><Change>. E.g:
