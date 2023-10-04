@@ -177,6 +177,7 @@ export const DataGridTable = ({
         data-shared-item=""
         data-title={title}
         data-description={description}
+        data-test-subj="discoverTable"
       >
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
           <EuiPanel paddingSize="s" style={{ height: '100%' }}>
