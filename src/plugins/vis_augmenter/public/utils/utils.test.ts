@@ -372,12 +372,12 @@ describe('utils', () => {
       expect(loader.findAll).toHaveBeenCalledWith(
         '',
         100,
-        [],
+        undefined,
         {
           type: 'visualization',
           id: visId1 as string,
         },
-        []
+        undefined
       );
     });
     it('single plugin resource is propagated to findAll()', async () => {
@@ -391,7 +391,7 @@ describe('utils', () => {
       expect(loader.findAll).toHaveBeenCalledWith(
         'resource-1',
         100,
-        [],
+        undefined,
         {
           type: 'visualization',
           id: visId1 as string,
@@ -411,7 +411,7 @@ describe('utils', () => {
       expect(loader.findAll).toHaveBeenCalledWith(
         'resource-1|resource-2',
         100,
-        [],
+        undefined,
         {
           type: 'visualization',
           id: visId1 as string,
