@@ -35,16 +35,19 @@ const TEST_ANCHOR_FILTER_VALUE = 'IN';
 const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
 export default function ({ getService, getPageObjects }) {
-  const dataGrid = getService('dataGrid');
+  const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const browser = getService('browser');
-  const testSubjects = getService('testSubjects');
 
   const PageObjects = getPageObjects(['common', 'context']);
 
   describe('context filters', function contextSize() {
     beforeEach(async function () {
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
       await browser.refresh();
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
@@ -53,19 +56,18 @@ export default function ({ getService, getPageObjects }) {
 
     it('inclusive filter should be addable via expanded doc table rows', async function () {
       await retry.waitFor(`filter ${TEST_ANCHOR_FILTER_FIELD} in filterbar`, async () => {
-        // expand anchor row
-        await testSubjects.click('docTableExpandToggleColumn-5');
-
-        // add inclusive filter
-        await testSubjects.click(
-          `tableDocViewRow-${TEST_ANCHOR_FILTER_FIELD} > addInclusiveFilterButton`
-        );
+        await docTable.toggleRowExpanded({ isAnchorRow: true });
+        const anchorDetailsRow = await docTable.getAnchorDetailsRow();
+        await docTable.addInclusiveFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
 
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true);
       });
       await retry.waitFor(`filter matching docs in docTable`, async () => {
-        const fields = await dataGrid.getDataGridTableColumn('lastColumn');
-        return fields.every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
+        const fields = await docTable.getFields();
+        return fields
+          .map((row) => row[2])
+          .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
       });
     });
 
@@ -81,23 +83,21 @@ export default function ({ getService, getPageObjects }) {
       });
 
       await retry.waitFor('filters are disabled', async () => {
-        const fields = await dataGrid.getDataGridTableColumn('lastColumn');
-        const hasOnlyFilteredRows = fields.every(
-          (fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE
-        );
+        const fields = await docTable.getFields();
+        const hasOnlyFilteredRows = fields
+          .map((row) => row[2])
+          .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
         return hasOnlyFilteredRows === false;
       });
     });
 
     it('filter for presence should be addable via expanded doc table rows', async function () {
-      // expand anchor row
-      await testSubjects.click('docTableExpandToggleColumn-5');
+      await docTable.toggleRowExpanded({ isAnchorRow: true });
 
       await retry.waitFor('an exists filter in the filterbar', async () => {
-        // add inclusive filter
-        await testSubjects.click(
-          `tableDocViewRow-${TEST_ANCHOR_FILTER_FIELD} > addExistsFilterButton`
-        );
+        const anchorDetailsRow = await docTable.getAnchorDetailsRow();
+        await docTable.addExistsFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, 'exists', true);
       });
     });

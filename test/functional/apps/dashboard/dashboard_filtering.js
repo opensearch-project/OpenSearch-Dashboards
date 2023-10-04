@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('saved search is filtered', async () => {
-        await testSubjects.missingOrFail('euiDataGrid');
+        await dashboardExpect.savedSearchRowCount(0);
       });
 
       it('vega is filtered', async () => {
@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('saved search is filtered', async () => {
-        await testSubjects.missingOrFail('euiDataGrid');
+        await dashboardExpect.savedSearchRowCount(0);
       });
 
       it('vega is filtered', async () => {

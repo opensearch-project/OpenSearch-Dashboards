@@ -40,6 +40,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/console'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
+      require.resolve('./apps/discover'),
       require.resolve('./apps/getting_started'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
@@ -79,7 +80,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/status',
       },
       discover: {
-        pathname: '/app/data-explorer/discover',
+        pathname: '/app/discoverLegacy',
         hash: '/',
       },
       context: {

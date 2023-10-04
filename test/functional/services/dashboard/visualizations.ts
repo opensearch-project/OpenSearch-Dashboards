@@ -37,6 +37,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const browser = getService('browser');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const PageObjects = getPageObjects([
     'dashboard',
     'visualize',
@@ -72,6 +74,10 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
     }) {
       log.debug(`createSavedSearch(${name})`);
 
+      await opensearchDashboardsServer.uiSettings.replace({
+        'discover:v2': false,
+      });
+      await browser.refresh();
       await PageObjects.header.clickDiscover();
 
       await PageObjects.timePicker.setHistoricalDataRange();

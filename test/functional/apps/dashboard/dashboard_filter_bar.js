@@ -193,12 +193,7 @@ export default function ({ getService, getPageObjects }) {
       it('are added when a cell magnifying glass is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
-
-        // Expand a doc row
-        await testSubjects.click('docTableExpandToggleColumn-0');
-
-        // Add a field filter
-        await testSubjects.click('tableDocViewRow-@message > addInclusiveFilterButton');
+        await testSubjects.click('docTableCellFilter');
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);

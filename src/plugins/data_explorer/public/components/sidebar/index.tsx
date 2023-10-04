@@ -76,7 +76,6 @@ export const Sidebar: FC = ({ children }) => {
         <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
           <EuiComboBox
             placeholder="Select a datasource"
-            data-test-subj="dataExplorerDSSelect"
             singleSelection={{ asPlainText: true }}
             options={options}
             selectedOptions={selectedOption ? [selectedOption] : []}

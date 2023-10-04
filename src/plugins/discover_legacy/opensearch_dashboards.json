@@ -1,0 +1,27 @@
+{
+  "id": "discoverLegacy",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "charts",
+    "data",
+    "embeddable",
+    "inspector",
+    "opensearchDashboardsLegacy",
+    "urlForwarding",
+    "navigation",
+    "uiActions",
+    "visualizations"
+  ],
+  "optionalPlugins": [
+    "home",
+    "share"
+  ],
+  "requiredBundles": [
+    "opensearchDashboardsUtils",
+    "savedObjects",
+    "opensearchDashboardsReact",
+    "discover"
+  ]
+}

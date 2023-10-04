@@ -13,15 +13,14 @@ import {
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
 
 interface Props {
   columns: string[];
-  hit: OpenSearchSearchHit;
+  hit: any;
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
   onClose: () => void;
@@ -41,12 +40,10 @@ export function DataGridFlyout({
   // TODO: replace EuiLink with doc_view_links registry
   // TODO: Also move the flyout higher in the react tree to prevent redrawing the table component and slowing down page performance
   return (
-    <EuiFlyout onClose={onClose} size="m" data-test-subj="documentDetailFlyOut" ownFocus={false}>
+    <EuiFlyout onClose={onClose} size="m" data-test-subj="documentDetailFlyOut">
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
-            <FormattedMessage id="discover.docView.flyoutTitle" defaultMessage="Document Details" />
-          </h2>
+          <h2>Document Details</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
