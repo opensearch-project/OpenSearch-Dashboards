@@ -24,6 +24,7 @@ export const DataSourceSelector = ({
 
   return (
     <EuiComboBox
+      data-test-subj="dataExplorerDSSelect"
       placeholder="Select a datasource"
       options={dataSourceList}
       selectedOptions={selectedOptions}
