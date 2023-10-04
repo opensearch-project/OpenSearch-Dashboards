@@ -70,8 +70,8 @@ export const useSearch = (services: DiscoverServices) => {
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
-  const { data, filterManager, getSavedSearchById, core, toastNotifications, store } = services;
-  const indexPattern = useIndexPattern(services, store);
+  const indexPattern = useIndexPattern(services);
+  const { data, filterManager, getSavedSearchById, core, toastNotifications } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;

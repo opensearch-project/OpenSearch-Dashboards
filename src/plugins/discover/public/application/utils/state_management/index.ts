@@ -4,13 +4,7 @@
  */
 
 import { TypedUseSelectorHook } from 'react-redux';
-import {
-  RootState,
-  Store as StoreType,
-  setIndexPattern as updateIndexPattern,
-  useTypedDispatch,
-  useTypedSelector,
-} from '../../../../../data_explorer/public';
+import { RootState, useTypedDispatch, useTypedSelector } from '../../../../../data_explorer/public';
 import { DiscoverState } from './discover_slice';
 
 export * from './discover_slice';
@@ -21,4 +15,3 @@ export interface DiscoverRootState extends RootState {
 
 export const useSelector: TypedUseSelectorHook<DiscoverRootState> = useTypedSelector;
 export const useDispatch = useTypedDispatch;
-export { StoreType, updateIndexPattern };
