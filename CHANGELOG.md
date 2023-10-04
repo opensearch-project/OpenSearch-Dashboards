@@ -59,6 +59,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Data Explorer][Discover] Add onQuerySubmit to top nav and allow force update to embeddable ([#5160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5160))
 - [BUG][Discover] Fix misc navigation issues ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
 - [BUG][Discover] Fix mobile view ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
+- [BUG][Data Explorer][Discover] Automatically load solo added default index pattern ([#5171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5171))
+- [BUG][Data Explorer][Discover] Allow data grid to auto adjust size based on fetched data count ([#5191](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5191))
 
 ### 🚞 Infrastructure
 
