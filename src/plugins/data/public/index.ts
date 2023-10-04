@@ -517,7 +517,6 @@ export {
   IDataSourceRegisterationResult,
 } from './data_sources/datasource_services';
 export {
-  DataSourceSelector,
   DataSourceSelectable,
   DataSourceSelectableProps,
   DataSourceGroup,

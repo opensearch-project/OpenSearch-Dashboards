@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { DataSourceType } from '../datasource_services';
+import { EuiComboBoxOptionOption, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
+import { GenericDataSource } from '../datasource_services';
 
 export interface DataSourceGroup {
   label: string;
@@ -15,17 +15,17 @@ export interface DataSourceOption {
   label: string;
   value: string;
   type: string;
-  ds: DataSourceType;
+  ds: GenericDataSource;
 }
 
-export type DataSourceOptionType = EuiComboBoxOptionOption<unknown>;
+export type DataSourceOptionType = EuiComboBoxOptionOption<string>;
 
 export interface DataSourceSelectableProps {
-  dataSources: DataSourceType[];
+  dataSources: GenericDataSource[];
+  onDataSourceSelect: (dataSourceOption: DataSourceOption[]) => void;
+  singleSelection?: boolean | EuiComboBoxSingleSelectionShape;
+  onFetchDataSetError: (error: Error) => void;
   dataSourceOptionList: DataSourceGroup[];
   selectedSources: DataSourceOption[];
-  onDataSourceSelect: (dataSourceOption: DataSourceOption[]) => void;
   setDataSourceOptionList: (dataSourceList: DataSourceGroup[]) => void;
-  singleSelection?: boolean | { asPlainText: boolean };
-  onFetchDataSetError: (error: Error) => void;
 }

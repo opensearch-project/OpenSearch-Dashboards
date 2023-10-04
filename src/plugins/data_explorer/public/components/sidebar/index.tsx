@@ -91,7 +91,6 @@ export const Sidebar: FC = ({ children }) => {
             onDataSourceSelect={handleSourceSelection}
             selectedSources={selectedSources}
             onFetchDataSetError={handleDataSetFetchError}
-            singleSelection={{ asPlainText: true }}
           />
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">

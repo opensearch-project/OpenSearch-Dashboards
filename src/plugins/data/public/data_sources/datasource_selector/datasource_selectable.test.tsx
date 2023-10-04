@@ -6,15 +6,16 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { DataSourceSelectable } from './datasource_selectable';
-import { DataSourceType } from '../datasource_services';
+import { DataSourceType, GenericDataSource } from '../datasource_services';
+import { DataSourceGroup, DataSourceOption } from './types';
 
 describe('DataSourceSelectable', () => {
-  let dataSourcesMock;
-  let dataSourceOptionListMock;
-  let selectedSourcesMock;
-  let setSelectedSourcesMock;
-  let setDataSourceOptionListMock;
-  let onFetchDataSetErrorMock;
+  let dataSourcesMock: GenericDataSource[];
+  let dataSourceOptionListMock: DataSourceGroup[];
+  let selectedSourcesMock: DataSourceOption[];
+  let setSelectedSourcesMock: (sources: DataSourceOption[]) => void = jest.fn();
+  let setDataSourceOptionListMock: (sources: DataSourceGroup[]) => void = jest.fn();
+  let onFetchDataSetErrorMock: (error: Error) => void = jest.fn();
 
   beforeEach(() => {
     dataSourcesMock = [
@@ -38,7 +39,7 @@ describe('DataSourceSelectable', () => {
         dataSources={dataSourcesMock}
         dataSourceOptionList={dataSourceOptionListMock}
         selectedSources={selectedSourcesMock}
-        setSelectedSources={setSelectedSourcesMock}
+        onDataSourceSelect={setSelectedSourcesMock}
         setDataSourceOptionList={setDataSourceOptionListMock}
         onFetchDataSetError={onFetchDataSetErrorMock}
       />
@@ -52,7 +53,7 @@ describe('DataSourceSelectable', () => {
           dataSources={dataSourcesMock}
           dataSourceOptionList={dataSourceOptionListMock}
           selectedSources={selectedSourcesMock}
-          setSelectedSources={setSelectedSourcesMock}
+          onDataSourceSelect={setSelectedSourcesMock}
           setDataSourceOptionList={setDataSourceOptionListMock}
           onFetchDataSetError={onFetchDataSetErrorMock}
         />
@@ -63,7 +64,7 @@ describe('DataSourceSelectable', () => {
   });
 
   it('handles data set fetch errors', async () => {
-    dataSourcesMock[0].getDataSet.mockRejectedValue(new Error('Fetch error'));
+    (dataSourcesMock[0].getDataSet as jest.Mock).mockRejectedValue(new Error('Fetch error'));
 
     await act(async () => {
       render(
@@ -71,7 +72,7 @@ describe('DataSourceSelectable', () => {
           dataSources={dataSourcesMock}
           dataSourceOptionList={dataSourceOptionListMock}
           selectedSources={selectedSourcesMock}
-          setSelectedSources={setSelectedSourcesMock}
+          onDataSourceSelect={setSelectedSourcesMock}
           setDataSourceOptionList={setDataSourceOptionListMock}
           onFetchDataSetError={onFetchDataSetErrorMock}
         />

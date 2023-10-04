@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObject } from '../../../../core/types';
-import { IndexPatternSavedObjectAttrs } from '../../../data/common/index_patterns/index_patterns';
-import { IndexPatternsContract, DataSourceConfig, DataSource } from '../../../data/public';
+import { SavedObject } from '../../../../../core/public';
+import { IndexPatternSavedObjectAttrs } from '../../index_patterns/index_patterns';
+import { DataSource, DataSourceConfig, IndexPatternOption } from '../datasource';
 
 export class DefaultDslDataSource extends DataSource<
   any,
   any,
-  Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>> | null | undefined>,
+  Promise<IndexPatternOption[] | undefined>,
   any,
   any
 > {
@@ -23,7 +23,18 @@ export class DefaultDslDataSource extends DataSource<
 
   async getDataSet(dataSetParams?: any) {
     await this.indexPatterns.ensureDefaultIndexPattern();
-    return await this.indexPatterns.getCache();
+    const savedObjectLst = await this.indexPatterns.getCache();
+
+    if (!savedObjectLst) {
+      return undefined;
+    }
+
+    return savedObjectLst.map((savedObject: SavedObject<IndexPatternSavedObjectAttrs>) => {
+      return {
+        id: savedObject.id,
+        title: savedObject.attributes.title,
+      };
+    });
   }
 
   async testConnection(): Promise<boolean> {

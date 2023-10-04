@@ -9,4 +9,5 @@ export {
   IDataSourceRegisterationResult,
   DataSourceRegisterationError,
   DataSourceType,
+  GenericDataSource,
 } from './types';

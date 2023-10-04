@@ -3,8 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern, IndexPatternsContract } from '../../index_patterns';
+import { IndexPatternsService } from '../../index_patterns';
 import { DataSourceType } from '../datasource_services';
+
+export interface IndexPatternOption {
+  title: string;
+  id: string;
+}
 
 export interface IDataSourceMetaData {
   name: string;
@@ -16,7 +21,7 @@ export interface IDataSourceGroup {
 
 export interface ISourceDataSet {
   ds: DataSourceType;
-  data_sets: string[] | IndexPattern[];
+  data_sets: string[] | IndexPatternOption[];
 }
 
 // to-dos: add common interfaces for datasource
@@ -38,5 +43,5 @@ export interface DataSourceConfig {
   name: string;
   type: string;
   metadata: any;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: IndexPatternsService;
 }
