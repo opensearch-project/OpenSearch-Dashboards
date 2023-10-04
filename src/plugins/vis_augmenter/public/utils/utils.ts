@@ -72,19 +72,19 @@ export const getAugmentVisSavedObjs = async (
     );
   }
   try {
-    // If there is specified plugin resource IDs, add a search string and search field
-    // into findAll() fn call
+    // If there are any plugin resource IDs specified, add a search string and search field
+    // into findAll() call
     const pluginResourceIdsSpecified =
-      pluginResourceIds !== undefined && pluginResourceIds.length > 0;
+      Array.isArray(pluginResourceIds) && pluginResourceIds.length > 0;
     const resp = await loader?.findAll(
-      pluginResourceIdsSpecified ? pluginResourceIds.join('|') : '',
+      pluginResourceIdsSpecified ? pluginResourceIds!.join('|') : '',
       100,
-      [],
+      undefined,
       {
         type: 'visualization',
         id: visId as string,
       },
-      pluginResourceIdsSpecified ? ['pluginResource.id'] : []
+      pluginResourceIdsSpecified ? ['pluginResource.id'] : undefined
     );
     return (get(resp, 'hits', []) as any[]) as ISavedAugmentVis[];
   } catch (e) {
