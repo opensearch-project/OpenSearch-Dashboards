@@ -4,7 +4,6 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { isEmpty, forEach } from 'lodash';
 import {
   DataSource,
   IDataSetParams,
@@ -92,13 +91,12 @@ export class DataSourceService {
    * @returns A record of filtered data sources.
    */
   getDataSources(filters?: IDataSourceFilters): Record<string, DataSourceType> {
-    if (!filters || isEmpty(filters.names)) return this.dataSources;
-    const filteredDataSources: Record<string, DataSourceType> = {};
-    forEach(filters.names, (dsName) => {
+    if (!Array.isArray(filters?.names) || filters.names === 0) return this.dataSources;
+    return filters.names.reduce((filteredDataSources, dsName) => {
       if (dsName in this.dataSources) {
         filteredDataSources[dsName] = this.dataSources[dsName];
       }
-    });
-    return filteredDataSources;
+      return filteredDataSources;
+    }, {});
   }
 }

@@ -58,6 +58,10 @@ export const Sidebar: FC = ({ children }) => {
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
   const handleSourceSelection = (selectedDataSources: DataSourceOption[]) => {
+    if (selectedDataSources.length === 0) {
+      setSelectedSources(selectedDataSources);
+      return;
+    }
     // Temperary redirection solution for 2.11, where clicking non-index-pattern datasource
     // will redirect user to Observability event explorer
     if (selectedDataSources[0].ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
