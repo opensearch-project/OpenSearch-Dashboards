@@ -14,6 +14,7 @@ export interface DataSourceGroup {
 export interface DataSourceOption {
   label: string;
   value: string;
+  type: string;
   ds: DataSourceType;
 }
 
