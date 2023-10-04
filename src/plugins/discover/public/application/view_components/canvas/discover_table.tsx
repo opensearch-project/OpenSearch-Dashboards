@@ -16,7 +16,6 @@ import {
   useDispatch,
   useSelector,
 } from '../../utils/state_management';
-import { useSearch } from '../utils/use_search';
 import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../saved_searches/types';
@@ -24,7 +23,7 @@ import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 
 interface Props {
-  rows: OpenSearchSearchHit[];
+  rows?: OpenSearchSearchHit[];
 }
 
 export const DiscoverTable = ({ rows }: Props) => {
