@@ -11,5 +11,6 @@ export {
   IDataSourceQueryParams,
   IDataSourceQueryResult,
   ConnectionStatus,
+  DataSourceConfig,
 } from './types';
 export { DataSourceFactory } from './factory';

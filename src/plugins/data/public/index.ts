@@ -507,6 +507,7 @@ export {
   ISourceDataSet,
   ConnectionStatus,
   DataSourceFactory,
+  DataSourceConfig,
 } from './data_sources/datasource';
 export {
   DataSourceRegisterationError,
