@@ -2,3 +2,17 @@
   min-width: 260px;
   max-width: 300px;
 }
+
+.dscSidebarField__actionButton {
+  opacity: 0;
+  transition: opacity $ouiAnimSpeedExtraFast;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+
+  @include ouiBreakpoint("xs", "s", "m") {
+    opacity: 1;
+  }
+}
