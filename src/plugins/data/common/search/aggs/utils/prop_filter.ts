@@ -37,7 +37,7 @@ type FilterFunc<P extends keyof T, T> = (item: T[P]) => boolean;
  *   - fieldType filters a list of fields by their type property
  *   - aggFilter filters a list of aggs by their name property
  *
- * @returns the filter function which can be registered with angular
+ * @returns the filter function
  */
 export function propFilter<P extends string>(prop: P) {
   /**

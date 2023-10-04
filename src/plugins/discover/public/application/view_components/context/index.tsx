@@ -17,12 +17,14 @@ const SearchContext = React.createContext<SearchContextValue>({} as SearchContex
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverContext({ children }: React.PropsWithChildren<ViewProps>) {
+  const { services: deServices } = useOpenSearchDashboards<DataExplorerServices>();
   const services = getServices();
-  const searchParams = useSearch(services);
+  const searchParams = useSearch({
+    ...deServices,
+    ...services,
+  });
 
-  const {
-    services: { osdUrlStateStorage },
-  } = useOpenSearchDashboards<DataExplorerServices>();
+  const { osdUrlStateStorage } = deServices;
 
   // Connect the query service to the url state
   useEffect(() => {
