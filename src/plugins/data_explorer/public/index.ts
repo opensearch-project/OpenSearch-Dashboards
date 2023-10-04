@@ -14,10 +14,4 @@ export function plugin() {
 }
 export { DataExplorerPluginSetup, DataExplorerPluginStart, DataExplorerServices } from './types';
 export { ViewProps, ViewDefinition, DefaultViewState } from './services/view_service';
-export {
-  RootState,
-  Store,
-  useTypedSelector,
-  useTypedDispatch,
-  setIndexPattern,
-} from './utils/state_management';
+export { RootState, useTypedSelector, useTypedDispatch } from './utils/state_management';
