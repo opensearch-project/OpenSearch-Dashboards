@@ -59,8 +59,8 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGenerator,
 } from './url_generator';
-// import { SearchEmbeddableFactory } from './application/embeddable';
-import { NEW_DISCOVER_APP, PLUGIN_ID } from '../common';
+import { SearchEmbeddableFactory } from './embeddable';
+import { PLUGIN_ID } from '../common';
 import { DataExplorerPluginSetup } from '../../data_explorer/public';
 import { registerFeature } from './register_feature';
 import {
@@ -266,55 +266,45 @@ export class DiscoverPlugin
 
         // This is for instances where the user navigates to the app from the application nav menu
         const path = window.location.hash;
-        const v2Enabled = await core.uiSettings.get<boolean>(NEW_DISCOVER_APP);
-
-        if (!v2Enabled) {
-          navigateToApp('discoverLegacy', {
-            replace: true,
-            path,
-          });
+        const newPath = migrateUrlState(path);
+        if (newPath.startsWith('#/context') || newPath.startsWith('#/doc')) {
+          const { renderDocView } = await import('./application/components/doc_views');
+          const unmount = renderDocView(params.element);
+          return () => {
+            unmount();
+          };
         } else {
-          const newPath = migrateUrlState(path);
-          if (newPath.startsWith('#/context') || newPath.startsWith('#/doc')) {
-            const { renderDocView } = await import('./application/components/doc_views');
-            const unmount = renderDocView(params.element);
-            return () => {
-              unmount();
-            };
-          } else {
-            navigateToApp('data-explorer', {
-              replace: true,
-              path: `/${PLUGIN_ID}${newPath}`,
-            });
-          }
+          navigateToApp('data-explorer', {
+            replace: true,
+            path: `/${PLUGIN_ID}${newPath}`,
+          });
         }
 
         return () => {};
       },
     });
 
-    // TODO: These routes need to be handled for Discover 2.0 to support legacy saved URLS's
-    // plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
-    //   return `#${path}`;
-    // });
-    // plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
-    //   const urlParts = path.split('/');
-    //   // take care of urls containing legacy url, those split in the following way
-    //   // ["", "context", indexPatternId, _type, id + params]
-    //   if (urlParts[4]) {
-    //     // remove _type part
-    //     const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
-    //     return `#${newPath}`;
-    //   }
-    //   return `#${path}`;
-    // });
-    // plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
-    //   const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
-    //   if (!id) {
-    //     return `#${path.replace('/discover', '') || '/'}`;
-    //   }
-    //   return `#/view/${id}${tail || ''}`;
-    // });
+    plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
+      return `#${path}`;
+    });
+    plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
+      const urlParts = path.split('/');
+      // take care of urls containing legacy url, those split in the following way
+      // ["", "context", indexPatternId, _type, id + params]
+      if (urlParts[4]) {
+        // remove _type part
+        const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
+        return `#${newPath}`;
+      }
+      return `#${path}`;
+    });
+    plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
+      const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
+      if (!id) {
+        return `#${path.replace('/discover', '') || '/'}`;
+      }
+      return `#/view/${id}${tail || ''}`;
+    });
 
     if (plugins.home) {
       registerFeature(plugins.home);
@@ -348,7 +338,7 @@ export class DiscoverPlugin
       Context: lazy(() => import('./application/view_components/context')),
     });
 
-    // this.registerEmbeddable(core, plugins);
+    this.registerEmbeddable(core, plugins);
 
     return {
       docViews: {
@@ -394,9 +384,8 @@ export class DiscoverPlugin
     }
   }
 
-  // TODO: Use this registration when legacy discover is removed
   /**
-   * register embeddable with a slimmer embeddable version of inner angular
+   * register embeddable
    */
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     const getStartServices = async () => {
@@ -407,8 +396,7 @@ export class DiscoverPlugin
       };
     };
 
-    // TODO: Refactor to remove angular
-    // const factory = new SearchEmbeddableFactory(getStartServices, this.getEmbeddableInjector);
-    // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    const factory = new SearchEmbeddableFactory(getStartServices);
+    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }

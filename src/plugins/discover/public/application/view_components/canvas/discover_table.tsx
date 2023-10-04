@@ -17,7 +17,7 @@ import {
   useDispatch,
   useSelector,
 } from '../../utils/state_management';
-import { ResultStatus, SearchData } from '../utils/use_search';
+import { ResultStatus, SearchData, useSearch } from '../utils/use_search';
 import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../saved_searches/types';
@@ -71,6 +71,7 @@ export const DiscoverTable = ({ history }: Props) => {
   );
 
   const { rows } = fetchState || {};
+  const { savedSearch } = useSearch(services);
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
@@ -107,6 +108,8 @@ export const DiscoverTable = ({ history }: Props) => {
       rows={rows}
       displayTimeColumn={displayTimeColumn}
       services={services}
+      title={savedSearch?.id ? savedSearch.title : ''}
+      description={savedSearch?.id ? savedSearch.description : ''}
     />
   );
 };

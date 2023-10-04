@@ -28,15 +28,35 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'opensearch-dashboards/public';
-import { DiscoverPlugin } from './plugin';
+import {
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from 'src/plugins/embeddable/public';
+import { Filter, IIndexPattern, TimeRange, Query } from '../../../../data/public';
+import { SortOrder } from '../saved_searches/types';
+import { SavedSearch } from '../saved_searches';
 
-export { DiscoverSetup, DiscoverStart } from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DiscoverPlugin(initializerContext);
+export interface SearchInput extends EmbeddableInput {
+  timeRange: TimeRange;
+  query?: Query;
+  filters?: Filter[];
+  hidePanelTitles?: boolean;
+  columns?: string[];
+  sort?: SortOrder[];
 }
 
-export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
+export interface SearchOutput extends EmbeddableOutput {
+  editUrl: string;
+  indexPatterns?: IIndexPattern[];
+  editable: boolean;
+}
 
-export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './embeddable';
-export { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from './url_generator';
+export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
+  getSavedSearch(): SavedSearch;
+}
+
+export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
+  type: string;
+}
