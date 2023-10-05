@@ -21,7 +21,7 @@ export interface IDataSourceGroup {
 
 export interface ISourceDataSet {
   ds: DataSourceType;
-  data_sets: string[] | IndexPatternOption[];
+  data_sets: Array<string | IndexPatternOption>;
 }
 
 // to-dos: add common interfaces for datasource
