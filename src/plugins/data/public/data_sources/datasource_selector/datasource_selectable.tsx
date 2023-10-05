@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { ISourceDataSet, IndexPatternOption } from '../datasource';
 import { DataSourceType, GenericDataSource } from '../datasource_services';
 import { DataSourceGroup, DataSourceSelectableProps } from './types';
+import { useCallback } from 'react';
 
 type DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS' | 's3glue' | 'spark';
 
@@ -114,7 +115,10 @@ export const DataSourceSelectable = ({
       .catch((e) => onGetDataSetError(e));
   }, [dataSources, setDataSourceOptionList, onGetDataSetError]);
 
-  const handleSourceChange = (selectedOptions: any) => onDataSourceSelect(selectedOptions);
+  const handleSourceChange = useCallback(
+    (selectedOptions: any) => onDataSourceSelect(selectedOptions),
+    [onDataSourceSelect]
+  );
 
   return (
     <EuiComboBox

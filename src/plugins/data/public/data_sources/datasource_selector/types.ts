@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * @experimental These interfaces are experimental and might change in future releases.
+ */
+
 import { EuiComboBoxSingleSelectionShape } from '@elastic/eui';
 import { GenericDataSource } from '../datasource_services';
 

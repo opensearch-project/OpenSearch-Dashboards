@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * @experimental These interfaces, types and classes are experimental and might change
+ * in future releases.
+ */
+
 import {
   DataSource,
   DataSourceFactory,

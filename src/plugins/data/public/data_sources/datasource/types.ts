@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * @experimental These interfaces are experimental and might change in future releases.
+ */
+
 import { IndexPatternsService } from '../../index_patterns';
 import { DataSourceType } from '../datasource_services';
 
