@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC, useEffect, useState, useCallback } from 'react';
-import { EuiSplitPanel, EuiPageSideBar } from '@elastic/eui';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataExplorerServices } from '../../types';
-import { useTypedDispatch, useTypedSelector, setIndexPattern } from '../../utils/state_management';
+import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { DataSourceGroup, DataSourceSelectable, DataSourceType } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { DataExplorerServices } from '../../types';
+import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
@@ -73,9 +74,14 @@ export const Sidebar: FC = ({ children }) => {
     dispatch(setIndexPattern(selectedDataSources[0].value));
   };
 
-  const handleDataSetFetchError = useCallback(
+  const handleGetDataSetError = useCallback(
     () => (error: Error) => {
-      toasts.addError(error, { title: `Data set fetching error: ${error}` });
+      toasts.addError(error, {
+        title:
+          i18n.translate('dataExplorer.sidebar.failedToGetDataSetErrorDescription', {
+            defaultMessage: 'Failed to get data set: ',
+          }) + (error.message || error.name),
+      });
     },
     [toasts]
   );
@@ -90,7 +96,7 @@ export const Sidebar: FC = ({ children }) => {
             setDataSourceOptionList={setDataSourceOptionList}
             onDataSourceSelect={handleSourceSelection}
             selectedSources={selectedSources}
-            onFetchDataSetError={handleDataSetFetchError}
+            onGetDataSetError={handleGetDataSetError}
           />
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">

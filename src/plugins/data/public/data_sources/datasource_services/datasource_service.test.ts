@@ -100,8 +100,8 @@ describe('DataSourceService', () => {
     const ds1 = new MockDataSource(mockConfig1);
     const ds2 = new MockDataSource(mockConfig2);
     service.registerMultipleDataSources([ds1, ds2]);
-    const filters = { names: ['test_datasource1'] };
-    const retrievedDataSources = service.getDataSources(filters);
+    const filter = { names: ['test_datasource1'] };
+    const retrievedDataSources = service.getDataSources(filter);
     expect(retrievedDataSources).toHaveProperty('test_datasource1');
     expect(retrievedDataSources).not.toHaveProperty('test_datasource2');
   });

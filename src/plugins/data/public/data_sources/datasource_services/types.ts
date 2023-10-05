@@ -14,16 +14,16 @@ import {
 } from '../datasource';
 import { DataSourceService } from './datasource_service';
 
-export interface IDataSourceFilters {
+export interface IDataSourceFilter {
   names: string[];
 }
 
-export interface IDataSourceRegisterationResult {
+export interface IDataSourceRegistrationResult {
   success: boolean;
   info: string;
 }
 
-export class DataSourceRegisterationError extends Error {
+export class DataSourceRegistrationError extends Error {
   success: boolean;
   info: string;
   constructor(message: string) {

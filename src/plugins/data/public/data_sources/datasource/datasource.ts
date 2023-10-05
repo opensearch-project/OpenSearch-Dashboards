@@ -36,7 +36,7 @@ export abstract class DataSource<
     return this.type;
   }
 
-  getMetadata(): DataSourceMetaData {
+  getMetadata() {
     return this.metadata;
   }
 

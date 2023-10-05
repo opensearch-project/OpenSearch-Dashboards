@@ -41,7 +41,7 @@ describe('DataSourceSelectable', () => {
         selectedSources={selectedSourcesMock}
         onDataSourceSelect={setSelectedSourcesMock}
         setDataSourceOptionList={setDataSourceOptionListMock}
-        onFetchDataSetError={onFetchDataSetErrorMock}
+        onGetDataSetError={onFetchDataSetErrorMock}
       />
     );
   });
@@ -55,7 +55,7 @@ describe('DataSourceSelectable', () => {
           selectedSources={selectedSourcesMock}
           onDataSourceSelect={setSelectedSourcesMock}
           setDataSourceOptionList={setDataSourceOptionListMock}
-          onFetchDataSetError={onFetchDataSetErrorMock}
+          onGetDataSetError={onFetchDataSetErrorMock}
         />
       );
     });
@@ -74,7 +74,7 @@ describe('DataSourceSelectable', () => {
           selectedSources={selectedSourcesMock}
           onDataSourceSelect={setSelectedSourcesMock}
           setDataSourceOptionList={setDataSourceOptionListMock}
-          onFetchDataSetError={onFetchDataSetErrorMock}
+          onGetDataSetError={onFetchDataSetErrorMock}
         />
       );
     });

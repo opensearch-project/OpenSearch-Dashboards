@@ -21,13 +21,8 @@ const DATASOURCE_TYPE_DISPLAY_NAME_MAP: Record<DataSourceTypeKey, string> = {
 
 type DataSetType = ISourceDataSet['data_sets'][number];
 
-interface DataSetWithSource {
-  ds: GenericDataSource;
-  data_sets: DataSetType[];
-}
-
-// Fetches data sets for a given datasource and returns it along with the source.
-const fetchDataSetWithSource = async (ds: GenericDataSource): Promise<DataSetWithSource> => {
+// Get data sets for a given datasource and returns it along with the source.
+const getDataSetWithSource = async (ds: GenericDataSource): Promise<ISourceDataSet> => {
   const dataSet = await ds.getDataSet();
   return {
     ds,
@@ -35,9 +30,9 @@ const fetchDataSetWithSource = async (ds: GenericDataSource): Promise<DataSetWit
   };
 };
 
-// Map through all data sources and fetch their respective data sets.
-const fetchDataSets = (dataSources: GenericDataSource[]) =>
-  dataSources.map((ds) => fetchDataSetWithSource(ds));
+// Map through all data sources and get their respective data sets.
+const getDataSets = (dataSources: GenericDataSource[]) =>
+  dataSources.map((ds) => getDataSetWithSource(ds));
 
 const isIndexPatterns = (dataSet: DataSetType): dataSet is IndexPatternOption => {
   if (typeof dataSet === 'string') return false;
@@ -67,7 +62,7 @@ const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetType) => {
   };
 };
 
-// Convert fetched data sets into a structured format suitable for selector rendering.
+// Convert data sets into a structured format suitable for selector rendering.
 const getSourceList = (allDataSets: ISourceDataSet[]) => {
   const finalList = [] as DataSourceGroup[];
   allDataSets.forEach((curDataSet) => {
@@ -100,17 +95,17 @@ export const DataSourceSelectable = ({
   selectedSources, // current selected datasource in the form of [{ label: xxx, value: xxx }]
   onDataSourceSelect,
   setDataSourceOptionList,
-  onFetchDataSetError, //   onFetchDataSetError, Callback for handling data set fetch errors. Ensure it's memoized.
+  onGetDataSetError, //   onGetDataSetError, Callback for handling get data set errors. Ensure it's memoized.
   singleSelection = true,
 }: DataSourceSelectableProps) => {
-  // This effect fetches data sets and prepares the datasource list for UI rendering.
+  // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
-    Promise.all(fetchDataSets(dataSources))
+    Promise.all(getDataSets(dataSources))
       .then((results) => {
         setDataSourceOptionList(getSourceList(results));
       })
-      .catch((e) => onFetchDataSetError(e));
-  }, [dataSources, setDataSourceOptionList, onFetchDataSetError]);
+      .catch((e) => onGetDataSetError(e));
+  }, [dataSources, setDataSourceOptionList, onGetDataSetError]);
 
   const handleSourceChange = (selectedOptions: any) => onDataSourceSelect(selectedOptions);
 

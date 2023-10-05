@@ -5,20 +5,20 @@
 
 import { BehaviorSubject } from 'rxjs';
 import {
-  IDataSourceFilters,
-  IDataSourceRegisterationResult,
-  DataSourceRegisterationError,
+  DataSourceRegistrationError,
   GenericDataSource,
+  IDataSourceFilter,
+  IDataSourceRegistrationResult,
 } from './types';
 
 export class DataSourceService {
   private static dataSourceService: DataSourceService;
   // A record to store all registered data sources, using the data source name as the key.
   private dataSources: Record<string, GenericDataSource> = {};
-  private _dataSourcesSubject: BehaviorSubject<Record<string, GenericDataSource>>;
+  private dataSourcesSubject: BehaviorSubject<Record<string, GenericDataSource>>;
 
   private constructor() {
-    this._dataSourcesSubject = new BehaviorSubject(this.dataSources);
+    this.dataSourcesSubject = new BehaviorSubject(this.dataSources);
   }
 
   static getInstance(): DataSourceService {
@@ -36,7 +36,7 @@ export class DataSourceService {
    */
   async registerMultipleDataSources(
     datasources: GenericDataSource[]
-  ): Promise<IDataSourceRegisterationResult[]> {
+  ): Promise<IDataSourceRegistrationResult[]> {
     return Promise.all(datasources.map((ds) => this.registerDataSource(ds)));
   }
 
@@ -46,46 +46,41 @@ export class DataSourceService {
    *
    * @param ds - The data source to be registered.
    * @returns A registration result indicating success or failure.
-   * @throws {DataSourceRegisterationError} Throws an error if a data source with the same name already exists.
+   * @throws {DataSourceRegistrationError} Throws an error if a data source with the same name already exists.
    */
-  async registerDataSource(ds: GenericDataSource): Promise<IDataSourceRegisterationResult> {
+  async registerDataSource(ds: GenericDataSource): Promise<IDataSourceRegistrationResult> {
     const dsName = ds.getName();
     if (dsName in this.dataSources) {
-      throw new DataSourceRegisterationError(
+      throw new DataSourceRegistrationError(
         `Unable to register datasource ${dsName}, error: datasource name exists.`
       );
     } else {
-      this.dataSources = {
-        ...this.dataSources,
-        [dsName]: ds,
-      };
-      this._dataSourcesSubject.next(this.dataSources);
-      return { success: true, info: '' } as IDataSourceRegisterationResult;
+      this.dataSources[dsName] = ds;
+      this.dataSourcesSubject.next(this.dataSources);
+      return { success: true, info: '' } as IDataSourceRegistrationResult;
     }
   }
 
   public get dataSources$() {
-    return this._dataSourcesSubject.asObservable();
+    return this.dataSourcesSubject.asObservable();
   }
 
   /**
    * Retrieve the registered data sources based on provided filters.
    * If no filters are provided, all registered data sources are returned.
    *
-   * @param filters - An optional object with filter criteria (e.g., names of data sources).
+   * @param filter - An optional object with filter criteria (e.g., names of data sources).
    * @returns A record of filtered data sources.
    */
-  getDataSources(filters?: IDataSourceFilters): Record<string, GenericDataSource> {
-    if (!Array.isArray(filters?.names) || filters.names.length === 0) return this.dataSources;
+  getDataSources(filter?: IDataSourceFilter): Record<string, GenericDataSource> {
+    if (!filter || !Array.isArray(filter.names) || filter.names.length === 0)
+      return this.dataSources;
 
-    return filters.names.reduce<Record<string, GenericDataSource>>(
-      (filteredDataSources, dsName) => {
-        if (dsName in this.dataSources) {
-          filteredDataSources[dsName] = this.dataSources[dsName];
-        }
-        return filteredDataSources;
-      },
-      {} as Record<string, GenericDataSource>
-    );
+    return filter.names.reduce<Record<string, GenericDataSource>>((filteredDataSources, dsName) => {
+      if (dsName in this.dataSources) {
+        filteredDataSources[dsName] = this.dataSources[dsName];
+      }
+      return filteredDataSources;
+    }, {} as Record<string, GenericDataSource>);
   }
 }

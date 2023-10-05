@@ -510,11 +510,11 @@ export {
   DataSourceConfig,
 } from './data_sources/datasource';
 export {
-  DataSourceRegisterationError,
+  DataSourceRegistrationError,
   DataSourceService,
   DataSourceType,
-  IDataSourceFilters,
-  IDataSourceRegisterationResult,
+  IDataSourceFilter,
+  IDataSourceRegistrationResult,
 } from './data_sources/datasource_services';
 export {
   DataSourceSelectable,
