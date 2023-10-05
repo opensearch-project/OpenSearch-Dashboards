@@ -3,13 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { useEffect, useCallback } from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useEffect } from 'react';
 import { ISourceDataSet, IndexPatternOption } from '../datasource';
 import { DataSourceType, GenericDataSource } from '../datasource_services';
 import { DataSourceGroup, DataSourceSelectableProps } from './types';
-import { useCallback } from 'react';
 
 type DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS' | 's3glue' | 'spark';
 

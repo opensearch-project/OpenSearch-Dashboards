@@ -15,6 +15,9 @@
 
 import { ConnectionStatus } from './types';
 
+/**
+ * @experimental this class is experimental and might change in future releases.
+ */
 export abstract class DataSource<
   DataSourceMetaData,
   DataSetParams,

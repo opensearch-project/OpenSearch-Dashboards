@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { FC, useCallback, useEffect, useState } from 'react';
 import { DataSourceGroup, DataSourceSelectable, DataSourceType } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
