@@ -75,7 +75,7 @@ const getSourceList = (allDataSets: ISourceDataSet[]) => {
     const groupName = DATASOURCE_TYPE_DISPLAY_NAME_MAP[typeKey] || 'Default Group';
 
     const existingGroup = finalList.find((item) => item.label === groupName);
-    const mappedOptions = curDataSet.data_sets?.map((dataSet) =>
+    const mappedOptions = curDataSet.data_sets.map((dataSet) =>
       getSourceOptions(curDataSet.ds, dataSet)
     );
 
