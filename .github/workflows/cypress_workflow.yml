@@ -9,30 +9,30 @@ on:
   workflow_dispatch:
     inputs:
       test_repo:
-        description: 'Test repo'
+        description: 'Cypress test repo'
         default: 'opensearch-project/opensearch-dashboards-functional-test'
         required: true
         type: string
       test_branch:
-        description: 'Test branch (default: source branch)'
+        description: 'Cypress test branch (default: source branch)'
         required: false
         type: string
-      pr_number:
-        description: 'PR Number'
-        required: false
-        type: number
       specs:
         description: 'Tests to run (default: core)'
         default: 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,'
         required: false
         type: string
+      pr_number:
+        description: 'PR Number (optional)'
+        required: false
+        type: number
 
 env:
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
-  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch'
-  OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false'
+  START_CMD: '../scripts/use_node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --server.compression.enabled=true --opensearch.compression=true'
+  OPENSEARCH_SNAPSHOT_CMD: '../scripts/use_node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false'
   SPEC: ${{ inputs.specs != '' && inputs.specs || 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,' }} 
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true

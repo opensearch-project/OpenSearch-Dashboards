@@ -53,6 +53,7 @@ export type OpenSearchClientConfig = Pick<
   | 'username'
   | 'password'
   | 'disablePrototypePoisoningProtection'
+  | 'compression'
 > & {
   memoryCircuitBreaker?:
     | OpenSearchConfig['memoryCircuitBreaker']
@@ -118,6 +119,10 @@ export function parseClientOptions(config: OpenSearchClientConfig, scoped: boole
 
   if (config.disablePrototypePoisoningProtection != null) {
     clientOptions.disablePrototypePoisoningProtection = config.disablePrototypePoisoningProtection;
+  }
+
+  if (config.compression) {
+    clientOptions.compression = 'gzip';
   }
 
   return clientOptions;

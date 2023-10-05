@@ -143,6 +143,7 @@ export const configSchema = schema.object({
     schema.boolean({ defaultValue: false })
   ),
   disablePrototypePoisoningProtection: schema.maybe(schema.boolean({ defaultValue: false })),
+  compression: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 const deprecations: ConfigDeprecationProvider = ({ renameFromRoot, renameFromRootWithoutMap }) => [
@@ -325,6 +326,12 @@ export class OpenSearchConfig {
    */
   public readonly disablePrototypePoisoningProtection?: boolean;
 
+  /**
+   * Specifies whether the client should use compression to engine
+   * or not.
+   */
+  public readonly compression?: boolean;
+
   constructor(rawConfig: OpenSearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
@@ -346,6 +353,7 @@ export class OpenSearchConfig {
     this.password = rawConfig.password;
     this.customHeaders = rawConfig.customHeaders;
     this.disablePrototypePoisoningProtection = rawConfig.disablePrototypePoisoningProtection;
+    this.compression = rawConfig.compression;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
