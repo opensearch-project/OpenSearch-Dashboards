@@ -25,7 +25,7 @@ export class DefaultDslDataSource extends DataSource<
     await this.indexPatterns.ensureDefaultIndexPattern();
     const savedObjectLst = await this.indexPatterns.getCache();
 
-    if (!savedObjectLst) {
+    if (!Array.isArray(savedObjectLst)) {
       return undefined;
     }
 

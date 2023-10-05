@@ -44,10 +44,10 @@ export const Sidebar: FC = ({ children }) => {
 
   const getMatchedOption = (dataSourceList: DataSourceGroup[], ipId: string) => {
     for (const dsGroup of dataSourceList) {
-      return dsGroup.options.find((item) => {
-        return item.value === ipId;
-      });
+      const matchedOption = dsGroup.options.find((item) => item.value === ipId);
+      if (matchedOption !== undefined) return matchedOption;
     }
+    return undefined;
   };
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export const Sidebar: FC = ({ children }) => {
     }
     // Temporary redirection solution for 2.11, where clicking non-index-pattern datasource
     // will redirect user to Observability event explorer
-    if (selectedDataSources[0].ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
+    if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
       return application.navigateToUrl(
         `../observability-logs#/explorer?datasourceName=${selectedDataSources[0].label}&datasourceType=${selectedDataSources[0].type}`
       );

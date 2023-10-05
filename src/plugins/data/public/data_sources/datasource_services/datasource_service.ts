@@ -76,8 +76,7 @@ export class DataSourceService {
    * @returns A record of filtered data sources.
    */
   getDataSources(filters?: IDataSourceFilters): Record<string, GenericDataSource> {
-    if (!filters || !Array.isArray(filters?.names) || filters.names.length === 0)
-      return this.dataSources;
+    if (!Array.isArray(filters?.names) || filters.names.length === 0) return this.dataSources;
 
     return filters.names.reduce<Record<string, GenericDataSource>>(
       (filteredDataSources, dsName) => {
