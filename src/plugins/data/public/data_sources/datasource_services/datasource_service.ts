@@ -31,6 +31,7 @@ export class DataSourceService {
   /**
    * Register multiple data sources at once.
    *
+   * @experimental This API is experimental and might change in future releases.
    * @param datasources - An array of data sources to be registered.
    * @returns An array of registration results, one for each data source.
    */
@@ -44,6 +45,7 @@ export class DataSourceService {
    * Register a single data source.
    * Throws an error if a data source with the same name is already registered.
    *
+   * @experimental This API is experimental and might change in future releases.
    * @param ds - The data source to be registered.
    * @returns A registration result indicating success or failure.
    * @throws {DataSourceRegistrationError} Throws an error if a data source with the same name already exists.
@@ -68,7 +70,7 @@ export class DataSourceService {
   /**
    * Retrieve the registered data sources based on provided filters.
    * If no filters are provided, all registered data sources are returned.
-   *
+   * @experimental This API is experimental and might change in future releases.
    * @param filter - An optional object with filter criteria (e.g., names of data sources).
    * @returns A record of filtered data sources.
    */

@@ -93,6 +93,9 @@ const getSourceList = (allDataSets: ISourceDataSet[]) => {
   return finalList;
 };
 
+/**
+ * @experimental This component is experimental and might change in future releases.
+ */
 export const DataSourceSelectable = ({
   dataSources, // list of all available datasource connections.
   dataSourceOptionList, // combo box renderable option list derived from dataSources

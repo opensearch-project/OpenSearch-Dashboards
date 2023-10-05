@@ -49,8 +49,8 @@ export abstract class DataSource<
    * all available tables for flint datasources, and get all index
    * patterns for OpenSearch data source
    *
+   * @experimental This API is experimental and might change in future releases.
    * @returns {SourceDataSet} Dataset associated with the data source.
-   * @experimental
    */
   abstract getDataSet(dataSetParams?: DataSetParams): SourceDataSet;
 
@@ -58,8 +58,8 @@ export abstract class DataSource<
    * Abstract method to run a query against the data source.
    * Implementing classes need to provide the specific implementation.
    *
+   * @experimental This API is experimental and might change in future releases.
    * @returns {DataSourceQueryResult} Result from querying the data source.
-   * @experimental
    */
   abstract runQuery(queryParams: DataSourceQueryParams): DataSourceQueryResult;
 
@@ -68,6 +68,7 @@ export abstract class DataSource<
    * Implementing classes should provide the specific logic to determine
    * the connection status, typically indicating success or failure.
    *
+   * @experimental This API is experimental and might change in future releases.
    * @returns {ConnectionStatus | Promise<void>} Status of the connection test.
    * @experimental
    */
