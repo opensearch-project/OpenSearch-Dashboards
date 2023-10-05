@@ -28,18 +28,9 @@
  * under the License.
  */
 
-import angular from 'angular';
 import React from 'react';
 import { Plugin, CoreSetup } from 'opensearch-dashboards/public';
 import { DiscoverSetup } from '../../../../../src/plugins/discover/public';
-
-angular.module('myDocView', []).directive('myHit', () => ({
-  restrict: 'E',
-  scope: {
-    hit: '=hit',
-  },
-  template: '<h1 data-test-subj="angular-docview">{{hit._index}}</h1>',
-}));
 
 function MyHit(props: { index: string }) {
   return <h1 data-test-subj="react-docview">{props.index}</h1>;
@@ -47,17 +38,6 @@ function MyHit(props: { index: string }) {
 
 export class DocViewsPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup, { discover }: { discover: DiscoverSetup }) {
-    discover.docViews.addDocView({
-      directive: {
-        controller: function MyController($injector: any) {
-          $injector.loadNewModules(['myDocView']);
-        },
-        template: `<my-hit hit="hit"></my-hit>`,
-      },
-      order: 1,
-      title: 'Angular doc view',
-    });
-
     discover.docViews.addDocView({
       component: (props) => {
         return <MyHit index={props.hit._index as string} />;
