@@ -91,7 +91,11 @@ export const DataSourceSelectable = ({
 
         // check if add new datasource group or add to existing one
         if (existingGroup) {
-          existingGroup.options.push(...mappedOptions);
+          const existingOptionIds = new Set(existingGroup.options.map((opt) => opt.label));
+          const nonDuplicateOptions = mappedOptions.filter(
+            (opt) => !existingOptionIds.has(opt.label)
+          );
+          existingGroup.options.push(...nonDuplicateOptions);
         } else {
           finalList.push({
             label: groupName,
