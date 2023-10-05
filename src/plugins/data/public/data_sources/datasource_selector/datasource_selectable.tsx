@@ -76,8 +76,12 @@ const getSourceList = (allDataSets: ISourceDataSet[]) => {
 
     // check if add new datasource group or add to existing one
     if (existingGroup) {
+      // options deduplication
       const existingOptionIds = new Set(existingGroup.options.map((opt) => opt.label));
       const nonDuplicateOptions = mappedOptions.filter((opt) => !existingOptionIds.has(opt.label));
+
+      // 'existingGroup' directly references an item in the finalList
+      // pushing options to 'existingGroup' updates the corresponding item in finalList
       existingGroup.options.push(...nonDuplicateOptions);
     } else {
       finalList.push({
