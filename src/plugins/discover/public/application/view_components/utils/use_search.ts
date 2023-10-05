@@ -10,7 +10,7 @@ import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { RequestAdapter } from '../../../../../inspector/public';
-import { DiscoverServices } from '../../../build_services';
+import { DiscoverViewServices } from '../../../build_services';
 import { search } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
@@ -66,12 +66,12 @@ export type RefetchSubject = Subject<SearchRefetch>;
  * return () => subscription.unsubscribe();
  * }, [data$]);
  */
-export const useSearch = (services: DiscoverServices) => {
+export const useSearch = (services: DiscoverViewServices) => {
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
-  const indexPattern = useIndexPattern(services);
-  const { data, filterManager, getSavedSearchById, core, toastNotifications } = services;
+  const { data, filterManager, getSavedSearchById, core, toastNotifications, store } = services;
+  const indexPattern = useIndexPattern(services, store);
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
