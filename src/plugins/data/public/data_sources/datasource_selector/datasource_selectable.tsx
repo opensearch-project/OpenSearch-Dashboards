@@ -34,14 +34,14 @@ const getDataSetWithSource = async (ds: GenericDataSource): Promise<ISourceDataS
 const getDataSets = (dataSources: GenericDataSource[]) =>
   dataSources.map((ds) => getDataSetWithSource(ds));
 
-const isIndexPatterns = (dataSet: DataSetType): dataSet is IndexPatternOption => {
+export const isIndexPatterns = (dataSet: DataSetType): dataSet is IndexPatternOption => {
   if (typeof dataSet === 'string') return false;
 
   return !!(dataSet.title && dataSet.id);
 };
 
 // Get the option format for the combo box from the dataSource and dataSet.
-const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetType) => {
+export const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetType) => {
   const optionContent = {
     type: dataSource.getType(),
     name: dataSource.getName(),
