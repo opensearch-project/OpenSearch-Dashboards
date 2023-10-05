@@ -57,6 +57,7 @@ import { useEffectOnce } from 'react-use';
 import { getDataSources } from '../../data_source_management/public/components/utils';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
+import { addHelpMenuToAppChrome } from './utils/util';
 
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
@@ -254,7 +255,7 @@ function setBreadcrumbs(chrome: ChromeStart) {
 }
 
 export function renderApp(
-  { application, chrome, savedObjects, notifications }: CoreStart,
+  { application, chrome, docLinks, savedObjects, notifications }: CoreStart,
   element: HTMLElement,
   history: ScopedHistory,
   devTools: readonly DevToolApp[],
@@ -265,6 +266,7 @@ export function renderApp(
     return () => {};
   }
 
+  addHelpMenuToAppChrome(chrome, docLinks);
   setBadge(application, chrome);
   setBreadcrumbs(chrome);
   setTitle(chrome);
