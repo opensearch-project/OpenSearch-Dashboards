@@ -103,7 +103,7 @@ export const DataSourceSelectable = ({
   onDataSourceSelect,
   setDataSourceOptionList,
   onGetDataSetError, //   onGetDataSetError, Callback for handling get data set errors. Ensure it's memoized.
-  singleSelection = true,
+  singleSelection = { asPlainText: true },
 }: DataSourceSelectableProps) => {
   // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
