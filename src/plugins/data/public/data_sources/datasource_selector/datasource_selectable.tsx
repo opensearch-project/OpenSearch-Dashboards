@@ -128,6 +128,7 @@ export const DataSourceSelectable = ({
       selectedOptions={selectedSources as any}
       onChange={handleSourceChange}
       singleSelection={singleSelection}
+      isClearable={false}
       async
     />
   );
