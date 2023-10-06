@@ -52,6 +52,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const { header } = getPageObjects(['header']);
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const MenuToggle = getService('MenuToggle');
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const quickSelectTimeMenuToggle = new MenuToggle({
     name: 'QuickSelectTime Menu',
@@ -130,6 +131,32 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.exists('superDatePickerstartDatePopoverButton');
     }
 
+    // Helper function to set input value and verify
+    private async setInputValueWithRetry(testSubjectId: string, value: string) {
+      const MAX_ATTEMPTS = 3;
+
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        // try to set the value
+        await this.inputValue(testSubjectId, value);
+        await sleep(500);
+
+        // verify if the value was correctly set
+        const actualValue = await (await testSubjects.find(testSubjectId)).getAttribute('value');
+        if (actualValue === value) {
+          return;
+        }
+
+        // if it's the last attempt and value wasn't set correctly, throw an error
+        if (attempt === MAX_ATTEMPTS - 1) {
+          throw new Error(
+            `Failed to set ${testSubjectId} to ${value} after ${MAX_ATTEMPTS} attempts.`
+          );
+        }
+
+        await sleep(500); // wait before retrying
+      }
+    }
+
     /**
      * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
      * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
@@ -137,13 +164,16 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
     public async setAbsoluteRange(fromTime: string, toTime: string) {
       log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
       await this.showStartEndTimes();
+      // make sure to close this verify panel
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await sleep(500);
 
       // set to time
       await testSubjects.click('superDatePickerendDatePopoverButton');
       let panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.click('superDatePickerAbsoluteDateInput');
-      await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
+      await this.setInputValueWithRetry('superDatePickerAbsoluteDateInput', toTime);
       await browser.pressKeys(browser.keys.ESCAPE); // close popover because sometimes browser can't find start input
 
       // set from time
@@ -152,7 +182,8 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.click('superDatePickerAbsoluteDateInput');
-      await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
+      await this.setInputValueWithRetry('superDatePickerAbsoluteDateInput', fromTime);
+      await browser.pressKeys(browser.keys.ESCAPE);
 
       const superDatePickerApplyButtonExists = await testSubjects.exists(
         'superDatePickerApplyTimeButton'

@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('should show custom doc views', async () => {
-      await testSubjects.click('docTableExpandToggleColumn');
+      await testSubjects.click('docTableExpandToggleColumn-0');
       const reactTab = await find.byButtonText('React doc view');
       expect(await reactTab.isDisplayed()).to.be(true);
     });
