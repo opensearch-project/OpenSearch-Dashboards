@@ -48,11 +48,10 @@ export const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetTyp
     ds: dataSource,
   };
   if (isIndexPatterns(dataSet)) {
-    const ip = dataSet as IndexPatternOption;
     return {
       ...optionContent,
-      label: ip.title,
-      value: ip.id,
+      label: dataSet.title,
+      value: dataSet.id,
     };
   }
   return {
