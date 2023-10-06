@@ -496,3 +496,29 @@ export {
 
 // Export plugin after all other imports
 export { DataPublicPlugin as Plugin };
+
+// Export datasources
+export {
+  DataSource,
+  IDataSourceMetaData,
+  IDataSetParams,
+  IDataSourceQueryParams,
+  IDataSourceQueryResult,
+  ISourceDataSet,
+  ConnectionStatus,
+  DataSourceFactory,
+  DataSourceConfig,
+} from './data_sources/datasource';
+export {
+  DataSourceRegistrationError,
+  DataSourceService,
+  DataSourceType,
+  IDataSourceFilter,
+  IDataSourceRegistrationResult,
+} from './data_sources/datasource_services';
+export {
+  DataSourceSelectable,
+  DataSourceSelectableProps,
+  DataSourceGroup,
+  DataSourceOption,
+} from './data_sources/datasource_selector';
