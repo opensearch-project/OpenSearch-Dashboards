@@ -20,48 +20,49 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🔩 Tests
 
-## [2.11.0]
+## [2.11.0 - TBD]
 
 ### Deprecations
 
 ### 🛡 Security
 
+- [CVE-2022-25869] Remove AngularJS `1.8` ([#5086](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5086))
+
 ### 📈 Features/Enhancements
 
-- [Data Explorer][Discover 2.0] Restore single and surroundings doc view ([#4816](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4816))
-- [Data Explorer][Discover 2.0] Add missing change interval on TimeChart and improve fetch ([#4850](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4850))
-- [Data Explorer][Discover 2.0] Replace hide column and add move left/right ([#4838](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4838))
-- [Data Explorer][Discover 2.0] Append popout icon to oui link for doc viewer links ([#4855](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4855))
-- [Data Explorer][Discover 2.0] Allow Top Nav to update based on index pattern change ([#4889](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4889))
-- [Data Explorer] Add dismissible callout for discover ([#4857](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4857))
 - [Console] Add support for JSON with long numerals ([#4562](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4562))
+- [Data] Add `DataSource` service and `DataSourceSelector` for multiple datasource support ([#5167](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5167))
 
 ### 🐛 Bug Fixes
 
-- [Data Explorer] Fix breadcrumb for data explorer ([#4856](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4856))
-- [Data Explorer] Fix darkmode for histogram ([#4858](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4858))
-- [Data Explorer] Fixes save search glitch + misc ([#4870](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4870))
-- [Data Explorer][Discover 2.0] Fix issues when change index pattern ([#4875](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4875))
-- [Data Explorer] Fix display for index pattern without a default time field ([#4821](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4821))
-- Bump `agentkeepalive` to v4.5.0 to solve a problem preventing the use `https://ip` in `opensearch.hosts` ([#4949](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4949))
+- Bump `agentkeepalive` to `4.5.0` to solve a problem preventing the use `https://ip` in `opensearch.hosts` ([#4949](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4949))
+- [Data Explorer][Discover] Add `onQuerySubmit` to top nav and allow force update to embeddable ([#5160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5160))
+- [Data Explorer][Discover] Automatically load default index pattern ([#5171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5171))
+- [Data Explorer][Discover] Fix total hits issue for no time based data ([#5087](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5087))
+- [Data Explorer][Discover] Allow data grid to auto adjust size based on fetched data count ([#5191](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5191))
+- [Data Explorer][Discover] Allow filter and query persist when refresh page or paste url to a new tab ([#5206](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5206))
+- [Data Explorer][Discover] Fix misc navigation issues ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
+- [Data Explorer][Discover] Fix mobile view ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
+- [Table Visualization] Fix width of multiple tables when rendered in column view ([#4638](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4638))
+- [Table Visualization] Fix filter actions on data table vis cells ([#4837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4837))
+- [Vis Augmenter] Fix errors in conditions for activating `vizAugmenter` ([#5213](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5213))
+- [Vis Augmenter] Fix `visAugmenter` forming empty key-value pairs in its calls to the `SavedObject` API ([#5190](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5190))
 
 ### 🚞 Infrastructure
+
+- [CI] Add `NODE_OPTIONS` and disable disk allocation threshold ([#5172](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5172))
 
 ### 📝 Documentation
 
 ### 🛠 Maintenance
 
-- Remove examples and other unwanted artifacts from installed dependencies ([#4896](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4896))
+- [Version] Version increment from 2.10 to 2.11 ([#4975](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4975))
 
 ### 🔩 Tests
 
-- [CI] Fix BWC related CI failures by swapping dist url with snapshot url ([#4828](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4828))
-- [Dashboard De-Angular] Add unit tests for `dashboard_listing` and `dashboard_top_nav` ([#4640](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4640))
-- [Tests] Add BWC tests for 2.9 and 2.10 versions ([#4762](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4762))
-- [Stylelint] Add `no_restricted_values` linter rule ([#4413](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4413))
-- Units test for utils folder ([#4641](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4641))
-- Test (linkchecker): Exclude checking dead link ([#4720](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4720))
-- Update baseline images for functional tests ([#4879](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4879))
+- [Functional][Doc Views] Remove angular code from `plugin_functional` and update tests ([#5221](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5221))
+- [Unit][Data Explorer][Discover] Fix wrong test due to time conversion ([#5174](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5174))
+- [Unit][Data Explorer][Discover]Fix `buildPointSeriesData` unit test fails due to local timezone ([#4992](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4992))
 
 ## [2.10.0 - 2023-09-25]
 
