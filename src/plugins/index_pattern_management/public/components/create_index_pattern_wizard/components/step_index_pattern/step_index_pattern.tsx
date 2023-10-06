@@ -142,7 +142,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     this.state.query =
       initialQuery || context.services.uiSettings.get(UI_SETTINGS.INDEXPATTERN_PLACEHOLDER);
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
-    this.dataSrouceEnabled = context.services.dataSourceEnabled;
+    this.dataSourceEnabled = context.services.dataSourceEnabled;
     this.fetchIndices = debounce(this.fetchIndices.bind(this), 700) as any;
   }
 
