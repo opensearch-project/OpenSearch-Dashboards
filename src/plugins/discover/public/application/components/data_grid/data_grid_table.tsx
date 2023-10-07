@@ -29,7 +29,6 @@ export interface DataGridTableProps {
   onSetColumns: (columns: string[]) => void;
   sort: SortOrder[];
   displayTimeColumn: boolean;
-  services: DiscoverServices;
   title?: string;
   description?: string;
   isToolbarVisible?: boolean;
@@ -177,6 +176,7 @@ export const DataGridTable = ({
         data-shared-item=""
         data-title={title}
         data-description={description}
+        data-test-subj="discoverTable"
       >
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
           <EuiPanel paddingSize="s" style={{ height: '100%' }}>

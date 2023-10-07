@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { TimeRange, Query } from 'src/plugins/data/common';
 import { AppMountParameters } from '../../../../../../core/public';
 import { PLUGIN_ID } from '../../../../common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -12,10 +13,12 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDiscoverContext } from '../context';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
+import { opensearchFilters, connectStorageToQueryState } from '../../../../../data/public';
 
 export interface TopNavProps {
   opts: {
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   };
 }
 
@@ -33,9 +36,15 @@ export const TopNav = ({ opts }: TopNavProps) => {
     },
     data,
     chrome,
+    osdUrlStateStorage,
   } = services;
 
   const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
+
+  connectStorageToQueryState(services.data.query, osdUrlStateStorage, {
+    filters: opensearchFilters.FilterStateStore.APP_STATE,
+    query: true,
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -60,12 +69,9 @@ export const TopNav = ({ opts }: TopNavProps) => {
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
 
     if (savedSearch?.id) {
-      chrome.setBreadcrumbs([
-        ...getRootBreadcrumbs(getUrlForApp(PLUGIN_ID)),
-        { text: savedSearch.title },
-      ]);
+      chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedSearch.title }]);
     } else {
-      chrome.setBreadcrumbs([...getRootBreadcrumbs(getUrlForApp(PLUGIN_ID))]);
+      chrome.setBreadcrumbs([...getRootBreadcrumbs()]);
     }
   }, [chrome, getUrlForApp, savedSearch?.id, savedSearch?.title]);
 
@@ -83,6 +89,7 @@ export const TopNav = ({ opts }: TopNavProps) => {
       useDefaultBehaviors
       setMenuMountPoint={opts.setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
+      onQuerySubmit={opts.onQuerySubmit}
     />
   );
 };

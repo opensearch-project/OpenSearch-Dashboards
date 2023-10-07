@@ -309,7 +309,7 @@ export class SearchEmbeddable
 
   public reload() {
     if (this.searchProps) {
-      this.pushContainerStateParamsToProps(this.searchProps);
+      this.pushContainerStateParamsToProps(this.searchProps, true);
     }
   }
 
@@ -377,8 +377,9 @@ export class SearchEmbeddable
     ReactDOM.render(<SearchEmbeddableComponent {...props} />, node);
   }
 
-  private async pushContainerStateParamsToProps(searchProps: SearchProps) {
+  private async pushContainerStateParamsToProps(searchProps: SearchProps, force: boolean = false) {
     const isFetchRequired =
+      force ||
       !opensearchFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.input.timeRange) ||

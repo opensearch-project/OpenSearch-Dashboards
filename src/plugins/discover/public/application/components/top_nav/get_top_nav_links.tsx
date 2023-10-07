@@ -19,6 +19,7 @@ import {
 import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
+import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 
 export const getTopNavLinks = (
   services: DiscoverViewServices,
@@ -45,11 +46,9 @@ export const getTopNavLinks = (
       defaultMessage: 'New Search',
     }),
     run() {
-      setTimeout(() => {
-        history().push('/');
-        // TODO: figure out why a history push doesn't update the app state. The page reload is a hack around it
-        window.location.reload();
-      }, 0);
+      core.application.navigateToApp('discover', {
+        path: '#/',
+      });
     },
     testId: 'discoverNewButton',
   };
@@ -103,15 +102,7 @@ export const getTopNavLinks = (
               history().push(`/view/${encodeURIComponent(id)}`);
             } else {
               chrome.docTitle.change(savedSearch.lastSavedTitle);
-              chrome.setBreadcrumbs([
-                {
-                  text: i18n.translate('discover.discoverBreadcrumbTitle', {
-                    defaultMessage: 'Discover',
-                  }),
-                  href: '#/',
-                },
-                { text: savedSearch.title },
-              ]);
+              chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedSearch.title }]);
             }
 
             // set App state to clean
