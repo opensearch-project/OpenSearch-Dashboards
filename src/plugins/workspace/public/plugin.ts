@@ -6,13 +6,7 @@
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { debounce } from 'lodash';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  AppMountParameters,
-  AppNavLinkStatus,
-} from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { WORKSPACE_APP_ID, PATHS, WORKSPACE_ID_QUERYSTRING_NAME } from '../common/constants';
 import { HashURL } from './components/utils/hash_url';
 
@@ -28,12 +22,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       return this.getWorkpsaceIdFromURL() || '';
     }
 
-    const currentWorkspaceIdResp = await this.core?.workspaces.client.getCurrentWorkspaceId();
-    if (currentWorkspaceIdResp?.success && currentWorkspaceIdResp?.result) {
-      return currentWorkspaceIdResp.result;
-    }
-
-    return '';
+    return (await this.core?.workspaces.currentWorkspaceId$.getValue()) || '';
   }
   private getPatchedUrl = (
     url: string,
@@ -78,7 +67,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     );
   }
   private shouldPatchUrl(): boolean {
-    const currentWorkspaceId = this.core?.workspaces.client.currentWorkspaceId$.getValue();
+    const currentWorkspaceId = this.core?.workspaces.currentWorkspaceId$.getValue();
     const workspaceIdFromURL = this.getWorkpsaceIdFromURL();
     if (!currentWorkspaceId && !workspaceIdFromURL) {
       return false;
@@ -94,7 +83,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     const startService = await this.core?.getStartServices();
     if (startService) {
       combineLatest([
-        this.core?.workspaces.client.currentWorkspaceId$,
+        this.core?.workspaces.currentWorkspaceId$,
         startService[0].application.currentAppId$,
       ]).subscribe(async ([]) => {
         if (this.shouldPatchUrl()) {
@@ -106,24 +95,16 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   }
   public async setup(core: CoreSetup) {
     this.core = core;
-    this.core?.workspaces.setFormatUrlWithWorkspaceId((url, id, options) =>
-      this.getPatchedUrl(url, id, options)
-    );
     /**
      * Retrive workspace id from url
      */
     const workspaceId = this.getWorkpsaceIdFromURL();
 
     if (workspaceId) {
-      const result = await core.workspaces.client.enterWorkspace(workspaceId);
-      if (!result.success) {
-        core.fatalErrors.add(
-          result.error ||
-            i18n.translate('workspace.error.setup', {
-              defaultMessage: 'Workspace init failed',
-            })
-        );
-      }
+      /**
+       * Enter a workspace
+       */
+      this.core.workspaces.currentWorkspaceId$.next(workspaceId);
     }
 
     /**
@@ -142,36 +123,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       }, 500)
     );
 
-    core.application.register({
-      id: WORKSPACE_APP_ID,
-      title: i18n.translate('workspace.settings.title', {
-        defaultMessage: 'Workspace',
-      }),
-      // order: 6010,
-      navLinkStatus: AppNavLinkStatus.hidden,
-      // updater$: this.appUpdater,
-      async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
-        const services = {
-          ...coreStart,
-        };
-
-        return renderApp(params, services);
-      },
-    });
-
     return {};
-  }
-
-  private async _changeSavedObjectCurrentWorkspace() {
-    const startServices = await this.core?.getStartServices();
-    if (startServices) {
-      const coreStart = startServices[0];
-      coreStart.workspaces.client.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
-        coreStart.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
-      });
-    }
   }
 
   public start(core: CoreStart) {
@@ -180,7 +132,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
       baseUrl: core.http.basePath.get(),
       href: core.application.getUrlForApp(WORKSPACE_APP_ID, { path: PATHS.update }),
     });
-    this._changeSavedObjectCurrentWorkspace();
     return {};
   }
 }
