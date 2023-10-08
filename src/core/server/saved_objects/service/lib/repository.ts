@@ -243,6 +243,7 @@ export class SavedObjectsRepository {
       originId,
       initialNamespaces,
       version,
+      permissions,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -289,6 +290,7 @@ export class SavedObjectsRepository {
       migrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
+      ...(permissions && { permissions }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -976,7 +978,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt } = body._source;
+    const { originId, updated_at: updatedAt, permissions } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
@@ -991,6 +993,7 @@ export class SavedObjectsRepository {
       namespaces,
       ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
+      ...(permissions && { permissions }),
       version: encodeHitVersion(body),
       attributes: body._source[type],
       references: body._source.references || [],
@@ -1019,7 +1022,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, references, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { version, references, refresh = DEFAULT_REFRESH_SETTING, permissions } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: SavedObjectsRawDoc | undefined;
@@ -1033,6 +1036,7 @@ export class SavedObjectsRepository {
       [type]: attributes,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
+      ...(permissions && { permissions }),
     };
 
     const { body, statusCode } = await this.client.update<SavedObjectsRawDocSource>(
@@ -1754,7 +1758,7 @@ function getSavedObjectFromSource<T>(
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt } = doc._source;
+  const { originId, updated_at: updatedAt, permissions } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -1773,6 +1777,7 @@ function getSavedObjectFromSource<T>(
     attributes: doc._source[type],
     references: doc._source.references || [],
     migrationVersion: doc._source.migrationVersion,
+    permissions,
   };
 }
 

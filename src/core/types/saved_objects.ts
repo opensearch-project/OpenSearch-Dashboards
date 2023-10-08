@@ -27,6 +27,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Permissions } from '../server/saved_objects/permission_control/acl';
 
 /**
  * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}
@@ -113,6 +114,7 @@ export interface SavedObject<T = unknown> {
    * space.
    */
   originId?: string;
+  permissions?: Permissions;
 }
 
 export interface SavedObjectError {
