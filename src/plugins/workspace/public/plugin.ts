@@ -125,7 +125,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       }),
       order: 0,
       euiIconType: 'grid',
-      navLinkStatus: AppNavLinkStatus.default,
+      navLinkStatus: !!workspaceId ? AppNavLinkStatus.default : AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderOverviewApp } = await import('./application');
         return mountWorkspaceApp(params, renderOverviewApp);
@@ -139,7 +139,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         defaultMessage: 'Workspace Settings',
       }),
       euiIconType: 'managementApp',
-      navLinkStatus: AppNavLinkStatus.default,
+      navLinkStatus: !!workspaceId ? AppNavLinkStatus.default : AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderUpdateApp } = await import('./application');
         return mountWorkspaceApp(params, renderUpdateApp);
