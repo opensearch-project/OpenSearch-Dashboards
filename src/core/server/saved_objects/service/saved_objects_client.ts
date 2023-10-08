@@ -39,6 +39,7 @@ import {
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
+import { Permissions } from '../permission_control';
 
 /**
  *
