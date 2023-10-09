@@ -15,7 +15,7 @@ import {
 } from '../../../core/server';
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
-  permissions: Permissions;
+  permissions?: Permissions;
 }
 
 export interface WorkspaceFindOptions {

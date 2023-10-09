@@ -46,7 +46,9 @@ const workspaceAttributesSchema = schema.object({
   icon: schema.maybe(schema.string()),
   reserved: schema.maybe(schema.boolean()),
   defaultVISTheme: schema.maybe(schema.string()),
-  permissions: schema.oneOf([workspacePermission, schema.arrayOf(workspacePermission)]),
+  permissions: schema.maybe(
+    schema.oneOf([workspacePermission, schema.arrayOf(workspacePermission)])
+  ),
 });
 
 const convertToACL = (
@@ -126,7 +128,9 @@ export function registerRoutes({
             ...result.result,
             workspaces: result.result.workspaces.map((workspace) => ({
               ...workspace,
-              permissions: convertFromACL(workspace.permissions),
+              ...(workspace.permissions
+                ? { permissions: convertFromACL(workspace.permissions) }
+                : {}),
             })),
           },
         },
@@ -161,7 +165,9 @@ export function registerRoutes({
           ...result,
           result: {
             ...result.result,
-            permissions: convertFromACL(result.result.permissions),
+            ...(result.result.permissions
+              ? { permissions: convertFromACL(result.result.permissions) }
+              : {}),
           },
         },
       });
@@ -180,9 +186,13 @@ export function registerRoutes({
       const { attributes } = req.body;
       const rawRequest = ensureRawRequest(req);
       const authInfo = rawRequest?.auth?.credentials?.authInfo as { user_name?: string } | null;
-      const permissions = Array.isArray(attributes.permissions)
-        ? attributes.permissions
-        : [attributes.permissions];
+      const { permissions: permissionsInAttributes, ...others } = attributes;
+      let permissions: WorkspaceRoutePermissionItem[] = [];
+      if (permissionsInAttributes) {
+        permissions = Array.isArray(permissionsInAttributes)
+          ? permissionsInAttributes
+          : [permissionsInAttributes];
+      }
 
       if (!!authInfo?.user_name) {
         permissions.push({
@@ -204,8 +214,8 @@ export function registerRoutes({
           logger,
         },
         {
-          ...attributes,
-          permissions: convertToACL(permissions),
+          ...others,
+          ...(permissions.length ? { permissions: convertToACL(permissions) } : {}),
         }
       );
       return res.ok({ body: result });
@@ -226,6 +236,11 @@ export function registerRoutes({
     router.handleLegacyErrors(async (context, req, res) => {
       const { id } = req.params;
       const { attributes } = req.body;
+      const { permissions, ...others } = attributes;
+      let finalPermissions: WorkspaceRoutePermissionItem[] = [];
+      if (permissions) {
+        finalPermissions = Array.isArray(permissions) ? permissions : [permissions];
+      }
 
       const result = await client.update(
         {
@@ -235,8 +250,8 @@ export function registerRoutes({
         },
         id,
         {
-          ...attributes,
-          permissions: convertToACL(attributes.permissions),
+          ...others,
+          ...(finalPermissions.length ? { permissions: convertToACL(finalPermissions) } : {}),
         }
       );
       return res.ok({ body: result });
