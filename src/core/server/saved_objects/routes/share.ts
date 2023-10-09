@@ -6,7 +6,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { exportSavedObjectsToStream } from '../export';
-import { validateObjects } from './utils';
+import { filterInvalidObjects } from './utils';
 import { collectSavedObjects } from '../import/collect_saved_objects';
 import { WORKSPACE_TYPE } from '../../../utils';
 
@@ -39,12 +39,14 @@ export const registerShareRoute = (router: IRouter) => {
         .filter((type) => type.name !== WORKSPACE_TYPE)
         .map((t) => t.name);
 
-      if (objects) {
-        const validationError = validateObjects(objects, supportedTypes);
-        if (validationError) {
+      if (objects.length) {
+        const invalidObjects = filterInvalidObjects(objects, supportedTypes);
+        if (invalidObjects.length) {
           return res.badRequest({
             body: {
-              message: validationError,
+              message: `Trying to share object(s) with non-shareable types: ${invalidObjects
+                .map((obj) => `${obj.type}:${obj.id}`)
+                .join(', ')}`,
             },
           });
         }

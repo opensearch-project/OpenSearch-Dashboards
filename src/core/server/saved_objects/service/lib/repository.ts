@@ -723,14 +723,6 @@ export class SavedObjectsRepository {
       }
     }
 
-    const obj = await this.get(type, id, { namespace });
-    const existingWorkspace = obj.workspaces || [];
-    if (!force && existingWorkspace.length > 1) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'Unable to delete saved object that exists in multiple workspaces, use the `force` option to delete it anyway'
-      );
-    }
-
     const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
       {
         id: rawId,
@@ -812,7 +804,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Deletes all objects from the provided workspace.
+   * Deletes all objects from the provided workspace. It used when delete a workspace.
    *
    * @param {string} workspace
    * @param options SavedObjectsDeleteByWorkspaceOptions
@@ -822,7 +814,7 @@ export class SavedObjectsRepository {
     workspace: string,
     options: SavedObjectsDeleteByWorkspaceOptions = {}
   ): Promise<any> {
-    if (!workspace || workspace === '*') {
+    if (!workspace || typeof workspace !== 'string' || workspace === '*') {
       throw new TypeError(`workspace is required, and must be a string that is not equal to '*'`);
     }
 
@@ -1406,6 +1398,13 @@ export class SavedObjectsRepository {
     }
   }
 
+  /**
+   * Adds one or more workspaces to a given saved objects. This method and
+   * [`deleteFromWorkspaces`]{@link SavedObjectsRepository.deleteFromWorkspaces} are the only ways to change which workspace
+   * saved object is shared to.
+   * @param savedObjects saved objects that will shared to new workspaces
+   * @param workspaces new workspaces
+   */
   async addToWorkspaces(
     savedObjects: SavedObjectsShareObjects[],
     workspaces: string[],
@@ -1415,20 +1414,6 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'shared savedObjects must not be an empty array'
       );
-    }
-
-    // saved objects must exist in specified workspace
-    if (options.workspaces) {
-      const invalidObjects = savedObjects.filter((obj) => {
-        if (obj.workspaces && obj.workspaces.length > 0) {
-          return intersection(obj.workspaces, options.workspaces).length === 0;
-        }
-        return false;
-      });
-      if (invalidObjects && invalidObjects.length > 0) {
-        const [savedObj] = invalidObjects;
-        throw SavedObjectsErrorHelpers.createConflictError(savedObj.type, savedObj.id);
-      }
     }
 
     savedObjects.forEach(({ type, id }) => {
@@ -1445,6 +1430,26 @@ export class SavedObjectsRepository {
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const savedObjectsBulkResponse = await this.bulkGet(savedObjects);
+
+    const errorObjects = savedObjectsBulkResponse.saved_objects.filter((obj) => !!obj.error);
+    if (errorObjects && errorObjects.length) {
+      const errors = errorObjects.map((errorObject) => errorObject.error?.message).join(',');
+      throw SavedObjectsErrorHelpers.decorateBadRequestError(new Error(errors));
+    }
+
+    // saved objects must exist in specified workspace
+    if (options.workspaces) {
+      const invalidObjects = savedObjectsBulkResponse.saved_objects.filter((obj) => {
+        if (obj.workspaces && obj.workspaces.length > 0) {
+          return intersection(obj.workspaces, options.workspaces).length === 0;
+        }
+        return true;
+      });
+      if (invalidObjects && invalidObjects.length > 0) {
+        const [savedObj] = invalidObjects;
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(savedObj.type, savedObj.id);
+      }
+    }
 
     const docs = savedObjectsBulkResponse.saved_objects.map((obj) => {
       const { type, id } = obj;

@@ -324,6 +324,8 @@ export {
   SavedObjectsAddToWorkspacesOptions,
   SavedObjectsAddToWorkspacesResponse,
   SavedObjectsDeleteByWorkspaceOptions,
+  SavedObjectsDeleteFromWorkspacesOptions,
+  SavedObjectsDeleteFromWorkspacesResponse,
   Permissions,
   ACL,
   Principals,

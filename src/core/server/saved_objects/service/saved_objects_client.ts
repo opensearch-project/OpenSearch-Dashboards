@@ -172,7 +172,7 @@ export interface SavedObjectsCheckConflictsResponse {
   }>;
 }
 
-export type SavedObjectsShareObjects = Pick<SavedObject, 'type' | 'id' | 'workspaces'>;
+export type SavedObjectsShareObjects = Pick<SavedObject, 'type' | 'id'>;
 
 /**
  *
@@ -200,10 +200,10 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
   refresh?: MutatingOperationRefreshSetting;
 }
 
-export type SavedObjectsAddToWorkspacesOptions = Pick<
-  SavedObjectsUpdateOptions,
-  'refresh' | 'workspaces'
->;
+export interface SavedObjectsAddToWorkspacesOptions extends SavedObjectsBaseOptions {
+  /** The OpenSearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
 
 /**
  *
@@ -228,12 +228,12 @@ export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBas
   refresh?: MutatingOperationRefreshSetting;
 }
 
-export interface SavedObjectsDeleteFromWorkspacesOptions {
+export interface SavedObjectsDeleteFromWorkspacesOptions extends SavedObjectsBaseOptions {
   /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
-export interface SavedObjectsDeleteByWorkspaceOptions {
+export interface SavedObjectsDeleteByWorkspaceOptions extends SavedObjectsBaseOptions {
   /** The OpenSearch supports only boolean flag for this operation */
   refresh?: boolean;
 }
@@ -265,7 +265,7 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface SavedObjectsDeleteOptions extends Omit<SavedObjectsBaseOptions, 'workspaces'> {
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
   /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
   /** Force deletion of an object that exists in multiple namespaces */

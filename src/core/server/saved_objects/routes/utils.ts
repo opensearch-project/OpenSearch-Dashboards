@@ -73,3 +73,10 @@ export function validateObjects(
       .join(', ')}`;
   }
 }
+
+export function filterInvalidObjects(
+  objects: Array<{ id: string; type: string }>,
+  supportedTypes: string[]
+): Array<{ id: string; type: string }> {
+  return objects.filter((obj) => !supportedTypes.includes(obj.type));
+}

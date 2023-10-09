@@ -28,7 +28,12 @@
  * under the License.
  */
 
-import { createSavedObjectsStreamFromNdJson, validateTypes, validateObjects } from './utils';
+import {
+  createSavedObjectsStreamFromNdJson,
+  validateTypes,
+  validateObjects,
+  filterInvalidObjects,
+} from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '../../utils/streams';
 
@@ -163,5 +168,38 @@ describe('validateObjects', () => {
         allowedTypes
       )
     ).toBeUndefined();
+  });
+});
+
+describe('filterInvalidObjects', () => {
+  const allowedTypes = ['config', 'index-pattern', 'dashboard'];
+
+  it('returns invalid objects that types are not allowed', () => {
+    expect(
+      filterInvalidObjects(
+        [
+          { id: '1', type: 'config' },
+          { id: '1', type: 'not-allowed' },
+          { id: '42', type: 'not-allowed-either' },
+        ],
+        allowedTypes
+      )
+    ).toMatchObject([
+      { id: '1', type: 'not-allowed' },
+      { id: '42', type: 'not-allowed-either' },
+    ]);
+  });
+
+  it('returns empty array if all objects have allowed types', () => {
+    expect(
+      validateObjects(
+        [
+          { id: '1', type: 'config' },
+          { id: '2', type: 'config' },
+          { id: '1', type: 'index-pattern' },
+        ],
+        allowedTypes
+      )
+    ).toEqual(undefined);
   });
 });
