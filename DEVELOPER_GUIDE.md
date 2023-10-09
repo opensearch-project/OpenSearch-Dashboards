@@ -44,7 +44,10 @@ To develop on OpenSearch Dashboards, you'll need:
 
 - A [GitHub account](https://docs.github.com/en/get-started/onboarding/getting-started-with-your-github-account)
 - [`git`](https://git-scm.com/) for version control
-- [`Node.js`](https://nodejs.org/), [`npm`](https://www.npmjs.com/), and [`Yarn`](https://yarnpkg.com/) for building and running the project
+- [`Node.js`](https://nodejs.org/), [`npm`](https://www.npmjs.com/), and [`Yarn`](https://yarnpkg.com/) for building and running the project. Later on this document we explain how to install the following versions:
+  - node 18.16.0
+  - npm 9.5.1
+  - yarn 1.22.19
 - A code editor of your choice, configured for JavaScript/TypeScript. If you don't have a favorite editor, we suggest [Visual Studio Code](https://code.visualstudio.com/)
 
 If you already have these installed or have your own preferences for installing them, skip ahead to the [Fork and clone OpenSearch Dashboards](#fork-and-clone-opensearch-dashboards) section.
@@ -58,7 +61,7 @@ If you don't already have it installed (check with `git --version`) we recommend
 We recommend using [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm) to install and manage different node versions, which may differ between release branches.
 
 1. Install nvm (as specified by the [`nvm` README](https://github.com/nvm-sh/nvm#installing-and-updating)): `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash`
-2. Install the version of the Node.js runtime defined in [`.nvmrc`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.nvmrc): `nvm install`
+2. Install the version of the Node.js runtime defined in [`.nvmrc`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.nvmrc) using ` nvm install 18.6.0`
 
 If it's the only version of node installed, it will automatically be set to the `default` alias. Otherwise, use `nvm list` to see all installed `node` versions, and `nvm use` to select the node version required by OpenSearch Dashboards.
 
