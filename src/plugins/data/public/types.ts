@@ -41,6 +41,7 @@ import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { DataSourceStart } from './data_sources/datasource_services/types';
 
 export interface DataPublicPluginEnhancements {
   search: SearchEnhancements;
@@ -125,6 +126,11 @@ export interface DataPublicPluginStart {
    * {@link DataPublicPluginStartUi}
    */
   ui: DataPublicPluginStartUi;
+  /**
+   * multiple datasources
+   * {@link DataSourceStart}
+   */
+  dataSources: DataSourceStart;
 }
 
 export interface IDataPluginServices extends Partial<CoreStart> {
