@@ -454,6 +454,7 @@ export class SavedObjectsRepository {
             updated_at: time,
             references: object.references || [],
             originId: object.originId,
+            ...(object.permissions && { permissions: object.permissions }),
           }) as SavedObjectSanitizedDoc
         ),
       };
@@ -1074,6 +1075,7 @@ export class SavedObjectsRepository {
       version: encodeHitVersion(body),
       namespaces,
       ...(originId && { originId }),
+      ...(permissions && { permissions }),
       references,
       attributes,
     };
@@ -1274,7 +1276,7 @@ export class SavedObjectsRepository {
         };
       }
 
-      const { attributes, references, version, namespace: objectNamespace } = object;
+      const { attributes, references, version, namespace: objectNamespace, permissions } = object;
 
       if (objectNamespace === ALL_NAMESPACES_STRING) {
         return {
@@ -1295,6 +1297,7 @@ export class SavedObjectsRepository {
         [type]: attributes,
         updated_at: time,
         ...(Array.isArray(references) && { references }),
+        ...(permissions && { permissions }),
       };
 
       const requiresNamespacesCheck = this._registry.isMultiNamespace(object.type);
@@ -1447,7 +1450,7 @@ export class SavedObjectsRepository {
         )[0] as any;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { [type]: attributes, references, updated_at } = documentToSave;
+        const { [type]: attributes, references, updated_at, permissions } = documentToSave;
         if (error) {
           return {
             id,
@@ -1466,6 +1469,7 @@ export class SavedObjectsRepository {
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
           references,
+          ...(permissions && { permissions }),
         };
       }),
     };
@@ -1777,7 +1781,7 @@ function getSavedObjectFromSource<T>(
     attributes: doc._source[type],
     references: doc._source.references || [],
     migrationVersion: doc._source.migrationVersion,
-    permissions,
+    ...(permissions && { permissions }),
   };
 }
 
