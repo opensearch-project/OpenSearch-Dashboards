@@ -431,7 +431,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       }
 
       // saved_objects
-      const permitted = await this.permissionControl.batchValidate(
+      const validateResult = await this.permissionControl.batchValidate(
         wrapperOptions.request,
         objects.map((savedObj) => ({
           ...savedObj,
@@ -439,7 +439,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         [WorkspacePermissionMode.Write]
       );
 
-      if (!permitted) {
+      if (!validateResult.result) {
         throw generateSavedObjectsPermissionError();
       }
 
@@ -450,9 +450,13 @@ export class WorkspaceSavedObjectsClientWrapper {
       workspace: string,
       options: SavedObjectsDeleteByWorkspaceOptions = {}
     ) => {
-      await this.validateMultiWorkspacesPermissions([workspace], wrapperOptions.request, [
-        WorkspacePermissionMode.Write,
-      ]);
+      if (
+        !(await this.validateMultiWorkspacesPermissions([workspace], wrapperOptions.request, [
+          WorkspacePermissionMode.LibraryWrite,
+        ]))
+      ) {
+        throw generateWorkspacePermissionError();
+      }
 
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);
     };
