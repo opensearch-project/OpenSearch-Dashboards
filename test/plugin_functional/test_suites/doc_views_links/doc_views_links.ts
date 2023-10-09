@@ -38,7 +38,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   describe('custom doc views links', function () {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      // TODO: change back to setDefaultRange() once we resolve
+      // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5241
+      await PageObjects.timePicker.setDefaultRangeForDiscover();
       await testSubjects.click('docTableExpandToggleColumn-0');
     });
 
