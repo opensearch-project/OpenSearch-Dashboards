@@ -102,7 +102,7 @@ describe('url overflow detection', () => {
         </code>
          option in 
         <a
-          href="/test-123/app/management/opensearch-dashboards/settings"
+          href="/test-123/app/settings"
         >
           advanced settings
         </a>

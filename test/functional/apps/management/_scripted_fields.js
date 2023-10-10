@@ -75,13 +75,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function afterAll() {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should not allow saving of invalid scripts', async function () {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
@@ -99,7 +97,6 @@ export default function ({ getService, getPageObjects }) {
       const scriptedPainlessFieldName = 'ram_Pain_reg';
 
       it('should create and edit scripted field', async function () {
-        await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
@@ -133,7 +130,6 @@ export default function ({ getService, getPageObjects }) {
       const scriptedPainlessFieldName = 'ram_Pain1';
 
       it('should create scripted field', async function () {
-        await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
@@ -255,7 +251,6 @@ export default function ({ getService, getPageObjects }) {
       const scriptedPainlessFieldName2 = 'painString';
 
       it('should create scripted field', async function () {
-        await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
@@ -352,7 +347,6 @@ export default function ({ getService, getPageObjects }) {
       const scriptedPainlessFieldName2 = 'painBool';
 
       it('should create scripted field', async function () {
-        await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
@@ -452,7 +446,6 @@ export default function ({ getService, getPageObjects }) {
       const scriptedPainlessFieldName2 = 'painDate';
 
       it('should create scripted field', async function () {
-        await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());

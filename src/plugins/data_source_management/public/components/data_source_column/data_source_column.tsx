@@ -56,11 +56,7 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
         ?.map((dataSource) => {
           return {
             ...dataSource,
-            relativeUrl: basePath.prepend(
-              `/app/management/opensearch-dashboards/dataSources/${encodeURIComponent(
-                dataSource.id
-              )}`
-            ),
+            relativeUrl: basePath.prepend(`/app/dataSources/${encodeURIComponent(dataSource.id)}`),
           };
         })
         ?.reduce(

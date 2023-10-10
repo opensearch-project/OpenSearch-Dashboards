@@ -30,13 +30,13 @@
 
 import React, { useEffect } from 'react';
 import { get } from 'lodash';
-import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementNamespaceServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
@@ -51,6 +51,7 @@ const SavedObjectsTablePage = ({
   setBreadcrumbs,
   dataSourceEnabled,
   hideLocalCluster,
+  title,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -62,6 +63,7 @@ const SavedObjectsTablePage = ({
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
+  title: string;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
@@ -70,13 +72,11 @@ const SavedObjectsTablePage = ({
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
-          defaultMessage: 'Saved objects',
-        }),
-        href: '/',
+        text: title,
+        href: undefined,
       },
     ]);
-  }, [setBreadcrumbs]);
+  }, [setBreadcrumbs, title]);
 
   return (
     <SavedObjectsTable
@@ -108,6 +108,7 @@ const SavedObjectsTablePage = ({
       }}
       dataSourceEnabled={dataSourceEnabled}
       hideLocalCluster={hideLocalCluster}
+      title={title}
     />
   );
 };

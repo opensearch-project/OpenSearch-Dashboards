@@ -42,9 +42,7 @@ export const onRedirectNoIndexPattern = (
   overlays: CoreStart['overlays']
 ) => () => {
   const canManageIndexPatterns = capabilities.management.opensearchDashboards.indexPatterns;
-  const redirectTarget = canManageIndexPatterns
-    ? '/management/opensearch-dashboards/indexPatterns'
-    : '/home';
+  const redirectTarget = canManageIndexPatterns ? '/indexPatterns' : '/home';
   let timeoutId: NodeJS.Timeout | undefined;
 
   if (timeoutId) {
@@ -72,8 +70,8 @@ export const onRedirectNoIndexPattern = (
   if (redirectTarget === '/home') {
     navigateToApp('home');
   } else {
-    navigateToApp('management', {
-      path: `/opensearch-dashboards/indexPatterns?bannerMessage=${bannerMessage}`,
+    navigateToApp('indexPatterns', {
+      path: `?bannerMessage=${bannerMessage}`,
     });
   }
 

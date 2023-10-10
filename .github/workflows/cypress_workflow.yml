@@ -3,7 +3,7 @@ name: Run cypress tests
 # trigger on every PR for all branches
 on:
   pull_request:
-    branches: [ '**' ]
+    branches: ['**']
     paths-ignore:
       - '**/*.md'
   workflow_dispatch:
@@ -47,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-          group: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        group: [1, 2, 3, 4, 5, 6, 7, 8, 9]
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
@@ -184,7 +184,7 @@ jobs:
         with:
           issue-number: ${{ inputs.pr_number }}
           comment-author: 'github-actions[bot]'
-          body-includes: "${{ env.COMMENT_TAG }}"
+          body-includes: '${{ env.COMMENT_TAG }}'
 
       - name: Add comment on the PR
         uses: peter-evans/create-or-update-comment@v3
@@ -205,6 +205,6 @@ jobs:
             '${{ env.SPEC }}'
             ```
 
-            #### Link to results: 
+            #### Link to results:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           edit-mode: replace

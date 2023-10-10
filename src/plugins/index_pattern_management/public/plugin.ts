@@ -29,7 +29,13 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  AppMountParameters,
+} from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataSourcePluginSetup, DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
@@ -39,10 +45,9 @@ import {
   IndexPatternManagementServiceStart,
 } from './service';
 
-import { ManagementSetup } from '../../management/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 export interface IndexPatternManagementSetupDependencies {
-  management: ManagementSetup;
   urlForwarding: UrlForwardingSetup;
   dataSource?: DataSourcePluginSetup;
 }
@@ -78,15 +83,9 @@ export class IndexPatternManagementPlugin
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
     dependencies: IndexPatternManagementSetupDependencies
   ) {
-    const { urlForwarding, management, dataSource } = dependencies;
+    const { urlForwarding, dataSource } = dependencies;
 
-    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-
-    if (!opensearchDashboardsSection) {
-      throw new Error('`opensearchDashboards` management section not found.');
-    }
-
-    const newAppPath = `management/opensearch-dashboards/${IPM_APP_ID}`;
+    const newAppPath = IPM_APP_ID;
     const legacyPatternsPath = 'management/opensearch-dashboards/index_patterns';
 
     urlForwarding.forwardApp(
@@ -99,11 +98,13 @@ export class IndexPatternManagementPlugin
       return pathInApp && `/patterns${pathInApp}`;
     });
 
-    opensearchDashboardsSection.registerApp({
+    // register it under Library
+    core.application.register({
       id: IPM_APP_ID,
       title: sectionsHeader,
-      order: 0,
-      mount: async (params) => {
+      order: 8100,
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
 
         return mountManagementSection(

@@ -3,32 +3,41 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StartServicesAccessor } from 'src/core/public';
+import {
+  AppMountParameters,
+  ChromeBreadcrumb,
+  ScopedHistory,
+  StartServicesAccessor,
+} from 'src/core/public';
 
 import { I18nProvider } from '@osd/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ManagementAppMountParams } from '../../../management/public';
-
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
 import { DataSourceTableWithRouter } from '../components/data_source_table';
-import { DataSourceManagementContext } from '../types';
+import { DataSourceManagementContext, DataSourceManagementStartDependencies } from '../types';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
+import { PageWrapper } from '../components/page_wrapper';
+import { reactRouterNavigate } from '../../../opensearch_dashboards_react/public';
 
-export interface DataSourceManagementStartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export async function mountManagementSection(
+export async function mountDataSourcesManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
-  params: ManagementAppMountParams
+  params: AppMountParameters
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
   ] = await getStartServices();
+
+  const setBreadcrumbsScoped = (crumbs: ChromeBreadcrumb[] = []) => {
+    const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
+      ...item,
+      ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
+    });
+
+    chrome.setBreadcrumbs([...crumbs.map((item) => wrapBreadcrumb(item, params.history))]);
+  };
 
   const deps: DataSourceManagementContext = {
     chrome,
@@ -39,27 +48,29 @@ export async function mountManagementSection(
     overlays,
     http,
     docLinks,
-    setBreadcrumbs: params.setBreadcrumbs,
+    setBreadcrumbs: setBreadcrumbsScoped,
   };
 
   ReactDOM.render(
-    <OpenSearchDashboardsContextProvider services={deps}>
-      <I18nProvider>
-        <Router history={params.history}>
-          <Switch>
-            <Route path={['/create']}>
-              <CreateDataSourceWizardWithRouter />
-            </Route>
-            <Route path={['/:id']}>
-              <EditDataSourceWithRouter />
-            </Route>
-            <Route path={['/']}>
-              <DataSourceTableWithRouter />
-            </Route>
-          </Switch>
-        </Router>
-      </I18nProvider>
-    </OpenSearchDashboardsContextProvider>,
+    <PageWrapper>
+      <OpenSearchDashboardsContextProvider services={deps}>
+        <I18nProvider>
+          <Router history={params.history}>
+            <Switch>
+              <Route path={['/create']}>
+                <CreateDataSourceWizardWithRouter />
+              </Route>
+              <Route path={['/:id']}>
+                <EditDataSourceWithRouter />
+              </Route>
+              <Route path={['/']}>
+                <DataSourceTableWithRouter />
+              </Route>
+            </Switch>
+          </Router>
+        </I18nProvider>
+      </OpenSearchDashboardsContextProvider>
+    </PageWrapper>,
     params.element
   );
 
