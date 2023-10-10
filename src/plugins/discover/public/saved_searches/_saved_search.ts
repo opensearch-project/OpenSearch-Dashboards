@@ -80,7 +80,7 @@ export function createSavedSearchClass(services: SavedObjectOpenSearchDashboards
       });
       this.showInRecentlyAccessed = true;
       this.id = id;
-      this.getFullPath = () => `/app/discover#/view/${String(id)}`;
+      this.getFullPath = () => `/app/discover#/view/${String(this.id)}`;
     }
   }
 
