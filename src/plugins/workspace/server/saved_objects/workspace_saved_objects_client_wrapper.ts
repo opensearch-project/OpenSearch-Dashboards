@@ -149,8 +149,9 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
 
     let hasPermission = false;
-    // Check permission based on object's workspaces
-    if (savedObject.workspaces) {
+    // Check permission based on object's workspaces.
+    // If workspacePermissionModes is passed with an empty array, we need to skip this validation and continue to validate object ACL.
+    if (savedObject.workspaces && workspacePermissionModes.length > 0) {
       const workspacePermissionValidator = validateAllWorkspaces
         ? this.validateMultiWorkspacesPermissions
         : this.validateAtLeastOnePermittedWorkspaces;
@@ -243,16 +244,52 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      if (options?.workspaces && options.workspaces.length > 0) {
-        const permitted = await this.validateMultiWorkspacesPermissions(
-          options.workspaces,
+      const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
+
+      if (
+        hasTargetWorkspaces &&
+        !(await this.validateMultiWorkspacesPermissions(
+          options.workspaces ?? [],
           wrapperOptions.request,
           [WorkspacePermissionMode.LibraryWrite]
-        );
-        if (!permitted) {
-          throw generateSavedObjectsPermissionError();
+        ))
+      ) {
+        throw generateSavedObjectsPermissionError();
+      }
+
+      if (options.overwrite) {
+        for (const object of objects) {
+          const { type, id } = object;
+          if (id) {
+            let rawObject;
+            try {
+              rawObject = await wrapperOptions.client.get(type, id);
+            } catch (error) {
+              // If object is not found, we will skip the validation of this object.
+              if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+                continue;
+              } else {
+                throw error;
+              }
+            }
+            if (
+              !(await this.validateWorkspacesAndSavedObjectsPermissions(
+                rawObject,
+                wrapperOptions.request,
+                !hasTargetWorkspaces
+                  ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
+                    [WorkspacePermissionMode.LibraryWrite]
+                  : [],
+                [WorkspacePermissionMode.Write],
+                false
+              ))
+            ) {
+              throw generateWorkspacePermissionError();
+            }
+          }
         }
       }
+
       return await wrapperOptions.client.bulkCreate(objects, options);
     };
 
@@ -261,11 +298,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
+      const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
+
       if (
-        options?.workspaces &&
-        options.workspaces.length > 0 &&
+        hasTargetWorkspaces &&
         !(await this.validateMultiWorkspacesPermissions(
-          options.workspaces,
+          options.workspaces ?? [],
           wrapperOptions.request,
           [WorkspacePermissionMode.LibraryWrite]
         ))
@@ -279,7 +317,10 @@ export class WorkspaceSavedObjectsClientWrapper {
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           await wrapperOptions.client.get(type, options.id),
           wrapperOptions.request,
-          [WorkspacePermissionMode.LibraryWrite],
+          !hasTargetWorkspaces
+            ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
+              [WorkspacePermissionMode.LibraryWrite]
+            : [],
           [WorkspacePermissionMode.Write],
           false
         ))
