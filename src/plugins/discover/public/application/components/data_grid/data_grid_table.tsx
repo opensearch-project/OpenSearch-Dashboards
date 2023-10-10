@@ -29,9 +29,11 @@ export interface DataGridTableProps {
   onSetColumns: (columns: string[]) => void;
   sort: SortOrder[];
   displayTimeColumn: boolean;
-  services: DiscoverServices;
+  title?: string;
+  description?: string;
   isToolbarVisible?: boolean;
   isContextView?: boolean;
+  isLoading?: boolean;
 }
 
 export const DataGridTable = ({
@@ -45,8 +47,11 @@ export const DataGridTable = ({
   sort,
   rows,
   displayTimeColumn,
+  title = '',
+  description = '',
   isToolbarVisible = true,
   isContextView = false,
+  isLoading = false,
 }: DataGridTableProps) => {
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
@@ -166,7 +171,13 @@ export const DataGridTable = ({
         indexPattern,
       }}
     >
-      <>
+      <div
+        data-render-complete={!isLoading}
+        data-shared-item=""
+        data-title={title}
+        data-description={description}
+        data-test-subj="discoverTable"
+      >
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
           <EuiPanel paddingSize="s" style={{ height: '100%' }}>
             {table}
@@ -183,7 +194,7 @@ export const DataGridTable = ({
             onClose={() => setInspectedHit(undefined)}
           />
         )}
-      </>
+      </div>
     </DiscoverGridContextProvider>
   );
 };

@@ -40,7 +40,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
-import { FieldIcon, FieldButton } from '../../../../../opensearch_dashboards_react/public';
+import { FieldIcon } from '../../../../../opensearch_dashboards_react/public';
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { shortenDottedString } from '../../helpers';
@@ -163,6 +163,7 @@ export const DiscoverField = ({
           }}
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={addLabelAria}
+          className="dscSidebarField__actionButton"
         />
       </EuiToolTip>
     );
@@ -187,13 +188,14 @@ export const DiscoverField = ({
           }}
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={removeLabelAria}
+          className="dscSidebarField__actionButton"
         />
       </EuiToolTip>
     );
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} className="dscSidebarField">
       <EuiFlexItem grow={false}>
         <FieldIcon
           type={field.type}
@@ -219,6 +221,7 @@ export const DiscoverField = ({
                 onClick={() => setOpen((state) => !state)}
                 aria-label={infoLabelAria}
                 data-test-subj={`field-${field.name}-showDetails`}
+                className="dscSidebarField__actionButton"
               />
             }
             panelClassName="dscSidebarItem__fieldPopoverPanel"
