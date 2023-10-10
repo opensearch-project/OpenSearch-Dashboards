@@ -29,21 +29,15 @@
  */
 
 import { FatalErrorsSetup } from '../../../../../core/public';
-import {
-  AngularHttpError,
-  formatAngularHttpError,
-  isAngularHttpError,
-} from './format_angular_http_error';
 
+/**
+ * Adds an error to the list of fatal errors.
+ * @deprecated Use `core.fatalErrors.add` instead
+ */
 export function addFatalError(
   fatalErrors: FatalErrorsSetup,
-  error: AngularHttpError | Error | string,
+  error: Error | string,
   location?: string
 ) {
-  // add support for angular http errors to newPlatformFatalErrors
-  if (isAngularHttpError(error)) {
-    error = formatAngularHttpError(error);
-  }
-
   fatalErrors.add(error, location);
 }

@@ -10,7 +10,7 @@ import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { RequestAdapter } from '../../../../../inspector/public';
-import { DiscoverServices } from '../../../build_services';
+import { DiscoverViewServices } from '../../../build_services';
 import { search } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
@@ -66,11 +66,12 @@ export type RefetchSubject = Subject<SearchRefetch>;
  * return () => subscription.unsubscribe();
  * }, [data$]);
  */
-export const useSearch = (services: DiscoverServices) => {
+export const useSearch = (services: DiscoverViewServices) => {
+  const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
-  const indexPattern = useIndexPattern(services);
-  const { data, filterManager, getSavedSearchById, core, toastNotifications } = services;
+  const { data, filterManager, getSavedSearchById, core, toastNotifications, store } = services;
+  const indexPattern = useIndexPattern(services, store);
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
@@ -205,6 +206,8 @@ export const useSearch = (services: DiscoverServices) => {
       });
 
       data.search.showError(error as Error);
+    } finally {
+      initalSearchComplete.current = true;
     }
   }, [
     indexPattern,
@@ -240,18 +243,29 @@ export const useSearch = (services: DiscoverServices) => {
       })();
     });
 
-    // kick off initial fetch
-    refetch$.next();
+    // kick off initial refetch on page load
+    if (shouldSearchOnPageLoad() || initalSearchComplete.current === true) {
+      refetch$.next();
+    }
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [data$, data.query.queryString, filterManager, refetch$, timefilter, fetch, core.fatalErrors]);
+  }, [
+    data$,
+    data.query.queryString,
+    filterManager,
+    refetch$,
+    timefilter,
+    fetch,
+    core.fatalErrors,
+    shouldSearchOnPageLoad,
+  ]);
 
   // Get savedSearch if it exists
   useEffect(() => {
     (async () => {
-      const savedSearchInstance = await getSavedSearchById(savedSearchId || '');
+      const savedSearchInstance = await getSavedSearchById(savedSearchId);
       setSavedSearch(savedSearchInstance);
 
       // sync initial app filters from savedObject to filterManager

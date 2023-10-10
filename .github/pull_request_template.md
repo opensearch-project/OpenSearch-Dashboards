@@ -24,7 +24,6 @@
 - [ ] All tests pass
   - [ ] `yarn test:jest`
   - [ ] `yarn test:jest_integration`
-  - [ ] `yarn test:ftr`
 - [ ] New functionality includes testing.
 - [ ] New functionality has been documented.
 - [ ] Update [CHANGELOG.md](./../CHANGELOG.md)
