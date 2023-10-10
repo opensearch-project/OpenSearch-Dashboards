@@ -892,7 +892,6 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
@@ -1862,7 +1861,6 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
@@ -2832,7 +2830,6 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
@@ -3802,7 +3799,6 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
@@ -4772,7 +4768,6 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
@@ -5742,7 +5737,6 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "observers": Array [],
                 "thrownError": null,
               },
-              "renderWorkspaceMenu": [MockFunction],
               "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,

@@ -64,6 +64,7 @@ import {
   ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeStart,
+  ChromeSetup,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   NavType,
@@ -221,6 +222,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * @deprecated
    */
   context: ContextSetup;
+  chrome: ChromeSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -348,12 +350,7 @@ export {
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export {
-  WorkspacesStart,
-  WorkspacesSetup,
-  WorkspacesService,
-  WorkspaceObservables,
-} from './workspace';
+export { WorkspacesStart, WorkspacesSetup, WorkspacesService } from './workspace';
 
 export {
   WorkspacePermissionMode,

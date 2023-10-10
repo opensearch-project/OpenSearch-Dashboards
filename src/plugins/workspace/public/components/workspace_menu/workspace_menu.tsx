@@ -21,7 +21,7 @@ import {
   HttpSetup,
   MANAGEMENT_WORKSPACE_ID,
   WorkspaceAttribute,
-  WorkspaceObservables,
+  WorkspacesStart,
 } from '../../../../../core/public';
 import {
   WORKSPACE_CREATE_APP_ID,
@@ -33,7 +33,7 @@ import { formatUrlWithWorkspaceId } from '../../utils';
 interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   basePath: HttpSetup['basePath'];
-  observables: WorkspaceObservables;
+  workspaces: WorkspacesStart;
 }
 
 function getFilteredWorkspaceList(
@@ -50,10 +50,10 @@ function getFilteredWorkspaceList(
   ].slice(0, 5);
 }
 
-export const WorkspaceMenu = ({ basePath, getUrlForApp, observables }: Props) => {
+export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const currentWorkspace = useObservable(observables.currentWorkspace$, null);
-  const workspaceList = useObservable(observables.workspaceList$, []);
+  const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
+  const workspaceList = useObservable(workspaces.workspaceList$, []);
 
   const defaultHeaderName = i18n.translate(
     'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',

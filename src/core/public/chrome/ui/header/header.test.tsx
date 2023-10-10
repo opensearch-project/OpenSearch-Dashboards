@@ -33,7 +33,7 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { httpServiceMock } from '../../../http/http_service.mock';
-import { applicationServiceMock, chromeServiceMock, workspacesServiceMock } from '../../../mocks';
+import { applicationServiceMock, chromeServiceMock } from '../../../mocks';
 import { Header } from './header';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 
@@ -74,7 +74,6 @@ function mockProps() {
     getWorkspaceUrl: (id: string) => '',
     survey: '/',
     logos: chromeServiceMock.createStartContract().logos,
-    workspaces: workspacesServiceMock.createStartContract(),
   };
 }
 

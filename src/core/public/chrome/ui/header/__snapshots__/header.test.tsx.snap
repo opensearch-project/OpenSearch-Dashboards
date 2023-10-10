@@ -1891,94 +1891,6 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   survey="/"
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "renderWorkspaceMenu": [MockFunction],
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [
-          Subscriber {
-            "_parentOrParents": null,
-            "_subscriptions": Array [
-              SubjectSubscription {
-                "_parentOrParents": [Circular],
-                "_subscriptions": null,
-                "closed": false,
-                "subject": [Circular],
-                "subscriber": [Circular],
-              },
-            ],
-            "closed": false,
-            "destination": SafeSubscriber {
-              "_complete": undefined,
-              "_context": [Circular],
-              "_error": undefined,
-              "_next": [Function],
-              "_parentOrParents": null,
-              "_parentSubscriber": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "destination": Object {
-                "closed": true,
-                "complete": [Function],
-                "error": [Function],
-                "next": [Function],
-              },
-              "isStopped": false,
-              "syncErrorThrowable": false,
-              "syncErrorThrown": false,
-              "syncErrorValue": null,
-            },
-            "isStopped": false,
-            "syncErrorThrowable": true,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-        ],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -6208,94 +6120,6 @@ exports[`Header handles visibility and lock changes 1`] = `
           "thrownError": null,
         }
       }
-      workspaces={
-        Object {
-          "currentWorkspace$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": null,
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-          "currentWorkspaceId$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": "",
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-          "initialized$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": false,
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-          "renderWorkspaceMenu": [MockFunction],
-          "workspaceEnabled$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": false,
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [
-              Subscriber {
-                "_parentOrParents": null,
-                "_subscriptions": Array [
-                  SubjectSubscription {
-                    "_parentOrParents": [Circular],
-                    "_subscriptions": null,
-                    "closed": false,
-                    "subject": [Circular],
-                    "subscriber": [Circular],
-                  },
-                ],
-                "closed": false,
-                "destination": SafeSubscriber {
-                  "_complete": undefined,
-                  "_context": [Circular],
-                  "_error": undefined,
-                  "_next": [Function],
-                  "_parentOrParents": null,
-                  "_parentSubscriber": [Circular],
-                  "_subscriptions": null,
-                  "closed": false,
-                  "destination": Object {
-                    "closed": true,
-                    "complete": [Function],
-                    "error": [Function],
-                    "next": [Function],
-                  },
-                  "isStopped": false,
-                  "syncErrorThrowable": false,
-                  "syncErrorThrown": false,
-                  "syncErrorValue": null,
-                },
-                "isStopped": false,
-                "syncErrorThrowable": true,
-                "syncErrorThrown": false,
-                "syncErrorValue": null,
-              },
-            ],
-            "thrownError": null,
-          },
-          "workspaceList$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": Array [],
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        }
-      }
     >
       <EuiCollapsibleNav
         aria-label="Primary"
@@ -6335,146 +6159,55 @@ exports[`Header handles visibility and lock changes 1`] = `
               <div
                 className="euiFlexItem eui-yScroll"
               >
-                <CollapsibleNavHeader
-                  workspaces={
-                    Object {
-                      "currentWorkspace$": BehaviorSubject {
-                        "_isScalar": false,
-                        "_value": null,
-                        "closed": false,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
-                      "currentWorkspaceId$": BehaviorSubject {
-                        "_isScalar": false,
-                        "_value": "",
-                        "closed": false,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
-                      "initialized$": BehaviorSubject {
-                        "_isScalar": false,
-                        "_value": false,
-                        "closed": false,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
-                      "renderWorkspaceMenu": [MockFunction],
-                      "workspaceEnabled$": BehaviorSubject {
-                        "_isScalar": false,
-                        "_value": false,
-                        "closed": false,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [
-                          Subscriber {
-                            "_parentOrParents": null,
-                            "_subscriptions": Array [
-                              SubjectSubscription {
-                                "_parentOrParents": [Circular],
-                                "_subscriptions": null,
-                                "closed": false,
-                                "subject": [Circular],
-                                "subscriber": [Circular],
-                              },
-                            ],
-                            "closed": false,
-                            "destination": SafeSubscriber {
-                              "_complete": undefined,
-                              "_context": [Circular],
-                              "_error": undefined,
-                              "_next": [Function],
-                              "_parentOrParents": null,
-                              "_parentSubscriber": [Circular],
-                              "_subscriptions": null,
-                              "closed": false,
-                              "destination": Object {
-                                "closed": true,
-                                "complete": [Function],
-                                "error": [Function],
-                                "next": [Function],
-                              },
-                              "isStopped": false,
-                              "syncErrorThrowable": false,
-                              "syncErrorThrown": false,
-                              "syncErrorValue": null,
-                            },
-                            "isStopped": false,
-                            "syncErrorThrowable": true,
-                            "syncErrorThrown": false,
-                            "syncErrorValue": null,
-                          },
-                        ],
-                        "thrownError": null,
-                      },
-                      "workspaceList$": BehaviorSubject {
-                        "_isScalar": false,
-                        "_value": Array [],
-                        "closed": false,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
-                    }
-                  }
-                >
-                  <EuiCollapsibleNavGroup>
+                <EuiCollapsibleNavGroup>
+                  <div
+                    className="euiCollapsibleNavGroup"
+                    id="mockId"
+                  >
                     <div
-                      className="euiCollapsibleNavGroup"
-                      id="mockId"
+                      className="euiCollapsibleNavGroup__children"
                     >
-                      <div
-                        className="euiCollapsibleNavGroup__children"
-                      >
-                        <EuiFlexGroup>
-                          <div
-                            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                          >
-                            <EuiFlexItem>
-                              <div
-                                className="euiFlexItem"
+                      <EuiFlexGroup>
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiIcon
+                                size="l"
+                                type="logoOpenSearch"
                               >
-                                <EuiIcon
+                                <span
+                                  data-euiicon-type="logoOpenSearch"
                                   size="l"
-                                  type="logoOpenSearch"
+                                />
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiText>
+                                <div
+                                  className="euiText euiText--medium"
                                 >
-                                  <span
-                                    data-euiicon-type="logoOpenSearch"
-                                    size="l"
-                                  />
-                                </EuiIcon>
-                              </div>
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              <div
-                                className="euiFlexItem"
-                              >
-                                <EuiText>
-                                  <div
-                                    className="euiText euiText--medium"
-                                  >
-                                    <strong>
-                                       
-                                      OpenSearch Dashboards
-                                       
-                                    </strong>
-                                  </div>
-                                </EuiText>
-                              </div>
-                            </EuiFlexItem>
-                          </div>
-                        </EuiFlexGroup>
-                      </div>
+                                  <strong>
+                                     
+                                    OpenSearch Dashboards
+                                     
+                                  </strong>
+                                </div>
+                              </EuiText>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
                     </div>
-                  </EuiCollapsibleNavGroup>
-                </CollapsibleNavHeader>
+                  </div>
+                </EuiCollapsibleNavGroup>
                 <EuiCollapsibleNavGroup
                   data-test-opensearch-logo="clock"
                   data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -8567,94 +8300,6 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   survey="/"
-  workspaces={
-    Object {
-      "currentWorkspace$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": null,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "initialized$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "renderWorkspaceMenu": [MockFunction],
-      "workspaceEnabled$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [
-          Subscriber {
-            "_parentOrParents": null,
-            "_subscriptions": Array [
-              SubjectSubscription {
-                "_parentOrParents": [Circular],
-                "_subscriptions": null,
-                "closed": false,
-                "subject": [Circular],
-                "subscriber": [Circular],
-              },
-            ],
-            "closed": false,
-            "destination": SafeSubscriber {
-              "_complete": undefined,
-              "_context": [Circular],
-              "_error": undefined,
-              "_next": [Function],
-              "_parentOrParents": null,
-              "_parentSubscriber": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "destination": Object {
-                "closed": true,
-                "complete": [Function],
-                "error": [Function],
-                "next": [Function],
-              },
-              "isStopped": false,
-              "syncErrorThrowable": false,
-              "syncErrorThrown": false,
-              "syncErrorValue": null,
-            },
-            "isStopped": false,
-            "syncErrorThrowable": true,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-        ],
-        "thrownError": null,
-      },
-      "workspaceList$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": Array [],
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -11776,94 +11421,6 @@ exports[`Header renders condensed header 1`] = `
             },
           ],
           "thrownError": null,
-        }
-      }
-      workspaces={
-        Object {
-          "currentWorkspace$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": null,
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-          "currentWorkspaceId$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": "",
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-          "initialized$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": false,
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-          "renderWorkspaceMenu": [MockFunction],
-          "workspaceEnabled$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": false,
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [
-              Subscriber {
-                "_parentOrParents": null,
-                "_subscriptions": Array [
-                  SubjectSubscription {
-                    "_parentOrParents": [Circular],
-                    "_subscriptions": null,
-                    "closed": false,
-                    "subject": [Circular],
-                    "subscriber": [Circular],
-                  },
-                ],
-                "closed": false,
-                "destination": SafeSubscriber {
-                  "_complete": undefined,
-                  "_context": [Circular],
-                  "_error": undefined,
-                  "_next": [Function],
-                  "_parentOrParents": null,
-                  "_parentSubscriber": [Circular],
-                  "_subscriptions": null,
-                  "closed": false,
-                  "destination": Object {
-                    "closed": true,
-                    "complete": [Function],
-                    "error": [Function],
-                    "next": [Function],
-                  },
-                  "isStopped": false,
-                  "syncErrorThrowable": false,
-                  "syncErrorThrown": false,
-                  "syncErrorValue": null,
-                },
-                "isStopped": false,
-                "syncErrorThrowable": true,
-                "syncErrorThrown": false,
-                "syncErrorValue": null,
-              },
-            ],
-            "thrownError": null,
-          },
-          "workspaceList$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": Array [],
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
         }
       }
     >

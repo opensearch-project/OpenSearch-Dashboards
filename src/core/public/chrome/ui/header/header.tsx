@@ -44,7 +44,6 @@ import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { WorkspacesStart } from 'opensearch-dashboards/public';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -73,6 +72,7 @@ export interface HeaderProps {
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
@@ -94,7 +94,6 @@ export interface HeaderProps {
   branding: ChromeBranding;
   logos: Logos;
   survey: string | undefined;
-  workspaces: WorkspacesStart;
 }
 
 export function Header({
@@ -107,7 +106,7 @@ export function Header({
   branding,
   survey,
   logos,
-  workspaces,
+  collapsibleNavHeaderRender,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -249,6 +248,7 @@ export function Header({
 
         <CollapsibleNav
           appId$={application.currentAppId$}
+          collapsibleNavHeaderRender={collapsibleNavHeaderRender}
           id={navId}
           isLocked={isLocked}
           navLinks$={observables.navLinks$}
@@ -268,7 +268,6 @@ export function Header({
           }}
           customNavLink$={observables.customNavLink$}
           logos={logos}
-          workspaces={workspaces}
         />
       </header>
     </>

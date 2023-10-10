@@ -171,10 +171,12 @@ export class CoreSystem {
       });
       const application = this.application.setup({ context, http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
+      const chrome = this.chrome.setup();
 
       const core: InternalCoreSetup = {
         application,
         context,
+        chrome,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,
@@ -225,7 +227,7 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
       });
       const application = await this.application.start({ http, overlays });
-      const workspaces = this.workspaces.start({ application, http });
+      const workspaces = this.workspaces.start();
       const chrome = await this.chrome.start({
         application,
         docLinks,

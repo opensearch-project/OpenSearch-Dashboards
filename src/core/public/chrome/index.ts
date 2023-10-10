@@ -33,6 +33,7 @@ export {
   ChromeBreadcrumb,
   ChromeService,
   ChromeStart,
+  ChromeSetup,
   InternalChromeStart,
   ChromeHelpExtension,
 } from './chrome_service';

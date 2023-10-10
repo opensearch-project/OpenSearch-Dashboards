@@ -4,20 +4,17 @@
  */
 
 import React from 'react';
-
+import { ApplicationStart, HttpSetup, WorkspacesStart } from '../../../core/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
-import { ApplicationStart, HttpSetup, WorkspaceObservables } from '../../../core/public';
 
 export function renderWorkspaceMenu({
   basePath,
   getUrlForApp,
-  observables,
+  workspaces,
 }: {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   basePath: HttpSetup['basePath'];
-  observables: WorkspaceObservables;
+  workspaces: WorkspacesStart;
 }) {
-  return (
-    <WorkspaceMenu basePath={basePath} getUrlForApp={getUrlForApp} observables={observables} />
-  );
+  return <WorkspaceMenu basePath={basePath} getUrlForApp={getUrlForApp} workspaces={workspaces} />;
 }
