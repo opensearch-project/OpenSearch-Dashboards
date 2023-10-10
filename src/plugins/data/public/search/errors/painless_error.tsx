@@ -53,9 +53,7 @@ export class PainlessError extends OsdError {
 
   public getErrorMessage(application: ApplicationStart) {
     function onClick() {
-      application.navigateToApp('management', {
-        path: `/opensearch-dashboards/indexPatterns`,
-      });
+      application.navigateToApp('indexPatterns');
     }
 
     return (

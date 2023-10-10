@@ -32,10 +32,10 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@osd/i18n/react';
-import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../management/public';
+import { AppMountParameters, CoreSetup } from 'src/core/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { PageWrapper } from './page_wrapper';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { getAllowedTypes } from './../lib';
@@ -43,24 +43,25 @@ import { getAllowedTypes } from './../lib';
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
-  mountParams: ManagementAppMountParams;
+  appMountParams?: AppMountParameters;
+  title: string;
+  allowedObjectTypes?: string[];
 }
-
-let allowedObjectTypes: string[] | undefined;
-
-const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
-  defaultMessage: 'Saved Objects',
-});
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
 export const mountManagementSection = async ({
   core,
-  mountParams,
+  appMountParams,
   serviceRegistry,
+  title,
+  allowedObjectTypes,
 }: MountParams) => {
   const [coreStart, { data, uiActions }, pluginStart] = await core.getStartServices();
-  const { element, history, setBreadcrumbs } = mountParams;
+  const usedMountParams = appMountParams || ({} as ManagementAppMountParams);
+  const { element, history } = usedMountParams;
+  const { chrome } = coreStart;
+  const setBreadcrumbs = chrome.setBreadcrumbs;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
@@ -86,29 +87,34 @@ export const mountManagementSection = async ({
           <Route path={'/:service/:id'} exact={true}>
             <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
-                <SavedObjectsEditionPage
-                  coreStart={coreStart}
-                  uiActionsStart={uiActions}
-                  serviceRegistry={serviceRegistry}
-                  setBreadcrumbs={setBreadcrumbs}
-                  history={history}
-                />
+                <PageWrapper>
+                  <SavedObjectsEditionPage
+                    coreStart={coreStart}
+                    uiActionsStart={uiActions}
+                    serviceRegistry={serviceRegistry}
+                    setBreadcrumbs={setBreadcrumbs}
+                    history={history}
+                  />
+                </PageWrapper>
               </Suspense>
             </RedirectToHomeIfUnauthorized>
           </Route>
           <Route path={'/'} exact={false}>
             <RedirectToHomeIfUnauthorized>
               <Suspense fallback={<EuiLoadingSpinner />}>
-                <SavedObjectsTablePage
-                  coreStart={coreStart}
-                  dataStart={data}
-                  serviceRegistry={serviceRegistry}
-                  actionRegistry={pluginStart.actions}
-                  columnRegistry={pluginStart.columns}
-                  namespaceRegistry={pluginStart.namespaces}
-                  allowedTypes={allowedObjectTypes}
-                  setBreadcrumbs={setBreadcrumbs}
-                />
+                <PageWrapper>
+                  <SavedObjectsTablePage
+                    coreStart={coreStart}
+                    dataStart={data}
+                    serviceRegistry={serviceRegistry}
+                    actionRegistry={pluginStart.actions}
+                    columnRegistry={pluginStart.columns}
+                    namespaceRegistry={pluginStart.namespaces}
+                    allowedTypes={allowedObjectTypes}
+                    setBreadcrumbs={setBreadcrumbs}
+                    title={title}
+                  />
+                </PageWrapper>
               </Suspense>
             </RedirectToHomeIfUnauthorized>
           </Route>

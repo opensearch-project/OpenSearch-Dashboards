@@ -62,7 +62,7 @@ export const OverviewPageFooter: FC<Props> = ({ addBasePath, path }) => {
         <EuiButtonEmpty
           className="osdOverviewPageFooter__button"
           flush="both"
-          href={addBasePath('/app/management/opensearch-dashboards/settings#defaultRoute')}
+          href={addBasePath('/app/settings#defaultRoute')}
           iconType="home"
           size="xs"
         >

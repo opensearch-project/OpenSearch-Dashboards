@@ -9,7 +9,7 @@ const miscUtils = new MiscUtils(cy);
 
 describe('verify the advanced settings are saved', () => {
   beforeEach(() => {
-    miscUtils.visitPage('app/management/opensearch-dashboards/settings');
+    miscUtils.visitPage('app/settings');
   });
 
   it('the dark mode is on', () => {

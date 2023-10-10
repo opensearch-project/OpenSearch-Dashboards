@@ -29,10 +29,11 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
+import { AppMountParameters, CoreSetup, Plugin } from 'opensearch-dashboards/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 const component = new ComponentRegistry();
 
@@ -42,18 +43,21 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
-  public setup(core: CoreSetup, { management, home }: AdvancedSettingsPluginSetup) {
-    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-
-    opensearchDashboardsSection.registerApp({
+  public setup(core: CoreSetup, { home }: AdvancedSettingsPluginSetup) {
+    core.application.register({
       id: 'settings',
       title,
-      order: 3,
-      async mount(params) {
-        const { mountManagementSection } = await import(
+      order: 99,
+      category: DEFAULT_APP_CATEGORIES.management,
+      async mount(params: AppMountParameters) {
+        const { mountAdvancedSettingsManagementSection } = await import(
           './management_app/mount_management_section'
         );
-        return mountManagementSection(core.getStartServices, params, component.start);
+        return mountAdvancedSettingsManagementSection(
+          core.getStartServices,
+          params,
+          component.start
+        );
       },
     });
 
@@ -66,7 +70,7 @@ export class AdvancedSettingsPlugin
             'Customize your OpenSearch Dashboards experience — change the date format, turn on dark mode, and more.',
         }),
         icon: 'gear',
-        path: '/app/management/opensearch-dashboards/settings',
+        path: '/app/settings',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
       });

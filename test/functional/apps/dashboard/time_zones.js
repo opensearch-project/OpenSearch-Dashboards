@@ -51,7 +51,6 @@ export default function ({ getService, getPageObjects }) {
       await opensearchDashboardsServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', 'timezonetest_6_2_4.json')
@@ -75,7 +74,6 @@ export default function ({ getService, getPageObjects }) {
 
     it('Changing timezone changes dashboard timestamp and shows the same data', async () => {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickOpenSearchDashboardsSettings();
       await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'Etc/GMT+5');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
