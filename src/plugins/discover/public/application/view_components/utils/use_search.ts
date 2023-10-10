@@ -70,8 +70,8 @@ export const useSearch = (services: DiscoverViewServices) => {
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
-  const { data, filterManager, getSavedSearchById, core, toastNotifications, store } = services;
-  const indexPattern = useIndexPattern(services, store);
+  const { data, filterManager, getSavedSearchById, core, toastNotifications, chrome } = services;
+  const indexPattern = useIndexPattern(services);
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
@@ -284,6 +284,14 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       filterManager.setAppFilters(actualFilters);
       data.query.queryString.setQuery(query);
+
+      if (savedSearchInstance?.id) {
+        chrome.recentlyAccessed.add(
+          savedSearchInstance.getFullPath(),
+          savedSearchInstance.title,
+          savedSearchInstance.id
+        );
+      }
     })();
 
     return () => {};
