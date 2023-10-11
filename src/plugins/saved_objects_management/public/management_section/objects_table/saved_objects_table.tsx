@@ -189,7 +189,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isIncludeReferencesDeepChecked: true,
       currentWorkspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
-      workspaceEnabled: this.props.workspaces.workspaceEnabled$.getValue(),
+      workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
     };
   }
 
@@ -326,10 +326,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     this.workspacesSubscription = workspace.workspaceList$.subscribe((workspaceList) => {
       this.setState({ availableWorkspaces: workspaceList });
-    });
-
-    this.workspacesEnabledSubscription = workspace.workspaceEnabled$.subscribe((enabled) => {
-      this.setState({ workspaceEnabled: enabled });
     });
   };
 

@@ -241,6 +241,9 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "edit": false,
             "read": true,
           },
+          "workspaces": Object {
+            "enabled": false,
+          },
         },
         "currentAppId$": Observable {
           "_isScalar": false,

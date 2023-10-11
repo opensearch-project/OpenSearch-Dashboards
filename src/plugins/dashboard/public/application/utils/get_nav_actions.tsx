@@ -60,6 +60,7 @@ export const getNavActions = (
   currentContainer?: DashboardContainer
 ) => {
   const {
+    application,
     embeddable,
     data: { query: queryService },
     notifications,
@@ -77,7 +78,7 @@ export const getNavActions = (
   const navActions: {
     [key: string]: NavAction;
   } = {};
-  const workspaceEnabled = workspaces.workspaceEnabled$.value;
+  const workspaceEnabled = application.capabilities.workspaces.enabled;
 
   if (!stateContainer) {
     return navActions;

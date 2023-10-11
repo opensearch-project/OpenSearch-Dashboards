@@ -99,7 +99,7 @@ export const getTopNavConfig = (
     workspaces,
   }: VisualizeServices
 ) => {
-  const workspaceEnabled = workspaces.workspaceEnabled$.value;
+  const workspaceEnabled = application.capabilities.workspaces.enabled;
   const { vis, embeddableHandler } = visInstance;
   const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
 

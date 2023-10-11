@@ -82,6 +82,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       new SavedObjectsClient(repositoryFactory.createInternalRepository())
     );
 
+    core.capabilities.registerProvider(() => ({ workspaces: { enabled: true } }));
+
     return {
       client: this.client,
     };

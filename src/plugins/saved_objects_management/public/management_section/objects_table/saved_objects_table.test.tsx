@@ -135,6 +135,9 @@ describe('SavedObjectsTable', () => {
         edit: false,
         delete: false,
       },
+      workspaces: {
+        enabled: false,
+      },
     };
 
     http.post.mockResolvedValue([]);

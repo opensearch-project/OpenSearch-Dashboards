@@ -13,14 +13,12 @@ const currentWorkspaceId$ = new BehaviorSubject<string>('');
 const workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
 const currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
 const initialized$ = new BehaviorSubject<boolean>(false);
-const workspaceEnabled$ = new BehaviorSubject<boolean>(false);
 
 const createWorkspacesSetupContractMock = () => ({
   currentWorkspaceId$,
   workspaceList$,
   currentWorkspace$,
   initialized$,
-  workspaceEnabled$,
 });
 
 const createWorkspacesStartContractMock = () => ({
@@ -28,7 +26,6 @@ const createWorkspacesStartContractMock = () => ({
   workspaceList$,
   currentWorkspace$,
   initialized$,
-  workspaceEnabled$,
 });
 
 export type WorkspacesServiceContract = PublicMethodsOf<WorkspacesService>;

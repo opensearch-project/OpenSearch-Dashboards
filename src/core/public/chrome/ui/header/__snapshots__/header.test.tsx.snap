@@ -66,6 +66,7 @@ exports[`Header handles visibility and lock changes 1`] = `
         "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
+        "workspaces": Object {},
       },
       "currentActionMenu$": BehaviorSubject {
         "_isScalar": false,
@@ -6643,6 +6644,7 @@ exports[`Header renders condensed header 1`] = `
         "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
+        "workspaces": Object {},
       },
       "currentActionMenu$": BehaviorSubject {
         "_isScalar": false,

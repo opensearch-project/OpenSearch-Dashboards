@@ -43,7 +43,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           </ul>
           <EuiSpacer />
           <EuiText color="subdued">
-            To confirm your action, type <b style={{ color: '#000' }}>delete</b>.
+            To confirm your action, type <b>delete</b>.
           </EuiText>
           <EuiFieldText
             placeholder="delete"

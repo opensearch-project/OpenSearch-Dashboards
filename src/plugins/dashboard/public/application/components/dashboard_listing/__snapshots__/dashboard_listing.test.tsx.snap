@@ -104,6 +104,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -1018,15 +1019,6 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
@@ -1248,6 +1240,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -2162,15 +2155,6 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
@@ -2453,6 +2437,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -3367,15 +3352,6 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
@@ -3658,6 +3634,7 @@ exports[`dashboard listing renders table rows 1`] = `
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -4572,15 +4549,6 @@ exports[`dashboard listing renders table rows 1`] = `
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
@@ -4863,6 +4831,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -5777,15 +5746,6 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "thrownError": null,
               },
               "initialized$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": false,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "workspaceEnabled$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
                 "closed": false,
