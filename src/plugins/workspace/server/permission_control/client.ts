@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { OpenSearchDashboardsRequest } from '../../../../core/server';
+import { OpenSearchDashboardsRequest, Principals, SavedObject } from '../../../../core/server';
 import {
   ACL,
   TransformedPermission,
@@ -43,6 +43,54 @@ export class SavedObjectsPermissionControl {
   public async setup(getScopedClient: SavedObjectsServiceStart['getScopedClient']) {
     this._getScopedClient = getScopedClient;
   }
+
+  private logNotPermitted(
+    savedObjects: Array<Pick<SavedObject<unknown>, 'id' | 'type' | 'workspaces' | 'permissions'>>,
+    principals: Principals,
+    permissionModes: SavedObjectsPermissionModes
+  ) {
+    this.logger.debug(
+      `Authorization failed, principals: ${JSON.stringify(
+        principals
+      )} has no [${permissionModes}] permissions on the requested saved object: ${JSON.stringify(
+        savedObjects.map((savedObject) => ({
+          id: savedObject.id,
+          type: savedObject.type,
+          workspaces: savedObject.workspaces,
+          permissions: savedObject.permissions,
+        }))
+      )}`
+    );
+  }
+
+  public validateSavedObjectsACL(
+    savedObjects: Array<Pick<SavedObject<unknown>, 'id' | 'type' | 'workspaces' | 'permissions'>>,
+    principals: Principals,
+    permissionModes: SavedObjectsPermissionModes
+  ) {
+    const notPermittedSavedObjects: Array<Pick<
+      SavedObject<unknown>,
+      'id' | 'type' | 'workspaces' | 'permissions'
+    >> = [];
+    const hasAllPermission = savedObjects.every((savedObject) => {
+      // for object that doesn't contain ACL like config, return true
+      if (!savedObject.permissions) {
+        return true;
+      }
+
+      const aclInstance = new ACL(savedObject.permissions);
+      const hasPermission = aclInstance.hasPermission(permissionModes, principals);
+      if (!hasPermission) {
+        notPermittedSavedObjects.push(savedObject);
+      }
+      return hasPermission;
+    });
+    if (!hasAllPermission) {
+      this.logNotPermitted(notPermittedSavedObjects, principals, permissionModes);
+    }
+    return hasAllPermission;
+  }
+
   public async validate(
     request: OpenSearchDashboardsRequest,
     savedObject: SavedObjectsBulkGetObject,
@@ -81,39 +129,9 @@ export class SavedObjectsPermissionControl {
     }
 
     const principals = getPrincipalsFromRequest(request);
-    let savedObjectsBasicInfo: any[] = [];
-    const hasAllPermission = savedObjectsGet.every((item) => {
-      // for object that doesn't contain ACL like config, return true
-      if (!item.permissions) {
-        return true;
-      }
-      const aclInstance = new ACL(item.permissions);
-      const hasPermission = aclInstance.hasPermission(permissionModes, principals);
-      if (!hasPermission) {
-        savedObjectsBasicInfo = [
-          ...savedObjectsBasicInfo,
-          {
-            id: item.id,
-            type: item.type,
-            workspaces: item.workspaces,
-            permissions: item.permissions,
-          },
-        ];
-      }
-      return hasPermission;
-    });
-    if (!hasAllPermission) {
-      this.logger.debug(
-        `Authorization failed, principals: ${JSON.stringify(
-          principals
-        )} has no [${permissionModes}] permissions on the requested saved object: ${JSON.stringify(
-          savedObjectsBasicInfo
-        )}`
-      );
-    }
     return {
       success: true,
-      result: hasAllPermission,
+      result: this.validateSavedObjectsACL(savedObjectsGet, principals, permissionModes),
     };
   }
 
