@@ -261,9 +261,11 @@ exports[`SavedObjectsTable should render normally 1`] = `
         BasePath {
           "basePath": "",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "",
+          "workspaceBasePath": "",
         }
       }
       canDelete={false}

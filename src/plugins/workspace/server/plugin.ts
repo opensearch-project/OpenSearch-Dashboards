@@ -13,10 +13,27 @@ import {
 import { IWorkspaceClientImpl } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
+import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceClientImpl;
+
+  private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
+    /**
+     * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
+     */
+    setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
+      const workspaceId = getWorkspaceIdFromUrl(request.url.toString());
+
+      if (workspaceId) {
+        const requestUrl = new URL(request.url.toString());
+        requestUrl.pathname = cleanWorkspaceId(requestUrl.pathname);
+        return toolkit.rewriteUrl(requestUrl.toString());
+      }
+      return toolkit.next();
+    });
+  }
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
@@ -28,6 +45,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.client = new WorkspaceClient(core);
 
     await this.client.setup(core);
+
+    this.proxyWorkspaceTrafficToRealHandler(core);
 
     registerRoutes({
       http: core.http,

@@ -243,9 +243,11 @@ exports[`Header handles visibility and lock changes 1`] = `
     BasePath {
       "basePath": "/test",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
+      "workspaceBasePath": "",
     }
   }
   branding={Object {}}
@@ -5874,9 +5876,11 @@ exports[`Header handles visibility and lock changes 1`] = `
         BasePath {
           "basePath": "/test",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
+          "workspaceBasePath": "",
         }
       }
       closeNav={[Function]}
@@ -6935,9 +6939,11 @@ exports[`Header renders condensed header 1`] = `
     BasePath {
       "basePath": "/test",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
+      "workspaceBasePath": "",
     }
   }
   branding={
@@ -11347,9 +11353,11 @@ exports[`Header renders condensed header 1`] = `
         BasePath {
           "basePath": "/test",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
+          "workspaceBasePath": "",
         }
       }
       closeNav={[Function]}

@@ -29,37 +29,47 @@
  */
 
 import { modifyUrl } from '@osd/std';
+import type { PrependOptions } from './types';
 
 export class BasePath {
   constructor(
     private readonly basePath: string = '',
-    public readonly serverBasePath: string = basePath
+    public readonly serverBasePath: string = basePath,
+    private readonly workspaceBasePath: string = ''
   ) {}
 
   public get = () => {
+    return `${this.basePath}${this.workspaceBasePath}`;
+  };
+
+  public getBasePath = () => {
     return this.basePath;
   };
 
-  public prepend = (path: string): string => {
-    if (!this.basePath) return path;
+  public prepend = (path: string, prependOptions?: PrependOptions): string => {
+    const { withoutWorkspace } = prependOptions || {};
+    const basePath = withoutWorkspace ? this.basePath : this.get();
+    if (!basePath) return path;
     return modifyUrl(path, (parts) => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-        parts.pathname = `${this.basePath}${parts.pathname}`;
+        parts.pathname = `${basePath}${parts.pathname}`;
       }
     });
   };
 
-  public remove = (path: string): string => {
-    if (!this.basePath) {
+  public remove = (path: string, prependOptions?: PrependOptions): string => {
+    const { withoutWorkspace } = prependOptions || {};
+    const basePath = withoutWorkspace ? this.basePath : this.get();
+    if (!basePath) {
       return path;
     }
 
-    if (path === this.basePath) {
+    if (path === basePath) {
       return '/';
     }
 
-    if (path.startsWith(`${this.basePath}/`)) {
-      return path.slice(this.basePath.length);
+    if (path.startsWith(`${basePath}/`)) {
+      return path.slice(basePath.length);
     }
 
     return path;

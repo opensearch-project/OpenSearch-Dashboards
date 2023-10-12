@@ -1,0 +1,180 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<WorkspaceFatalError /> render error with callout 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+    style="min-height: 100vh;"
+  >
+    <main
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <div
+        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+        role="main"
+      >
+        <div
+          class="euiEmptyPrompt"
+        >
+          <span
+            color="danger"
+            data-euiicon-type="alert"
+          />
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
+          <h2
+            class="euiTitle euiTitle--medium"
+          >
+            <span>
+              Something went wrong
+            </span>
+          </h2>
+          <span
+            class="euiTextColor euiTextColor--subdued"
+          >
+            <div
+              class="euiSpacer euiSpacer--m"
+            />
+            <div
+              class="euiText euiText--medium"
+            >
+              <p>
+                <span>
+                  The workspace you want to go can not be found, try go back to home.
+                </span>
+              </p>
+            </div>
+          </span>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <button
+                class="euiButton euiButton--primary euiButton--fill"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    <span>
+                      Go back to home
+                    </span>
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiCallOut euiCallOut--danger"
+        >
+          <div
+            class="euiCallOutHeader"
+          >
+            <span
+              aria-hidden="true"
+              class="euiCallOutHeader__icon"
+              color="inherit"
+              data-euiicon-type="alert"
+            />
+            <span
+              class="euiCallOutHeader__title"
+            >
+              errorInCallout
+            </span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+`;
+
+exports[`<WorkspaceFatalError /> render normally 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+    style="min-height: 100vh;"
+  >
+    <main
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <div
+        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+        role="main"
+      >
+        <div
+          class="euiEmptyPrompt"
+        >
+          <span
+            color="danger"
+            data-euiicon-type="alert"
+          />
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
+          <h2
+            class="euiTitle euiTitle--medium"
+          >
+            <span>
+              Something went wrong
+            </span>
+          </h2>
+          <span
+            class="euiTextColor euiTextColor--subdued"
+          >
+            <div
+              class="euiSpacer euiSpacer--m"
+            />
+            <div
+              class="euiText euiText--medium"
+            >
+              <p>
+                <span>
+                  The workspace you want to go can not be found, try go back to home.
+                </span>
+              </p>
+            </div>
+          </span>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <button
+                class="euiButton euiButton--primary euiButton--fill"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    <span>
+                      Go back to home
+                    </span>
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+`;

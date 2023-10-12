@@ -110,4 +110,36 @@ describe('BasePath', () => {
       expect(new BasePath('/foo/bar', '/foo').serverBasePath).toEqual('/foo');
     });
   });
+
+  describe('workspaceBasePath', () => {
+    it('get path with workspace', () => {
+      expect(new BasePath('/foo/bar', '/foo/bar', '/workspace').get()).toEqual(
+        '/foo/bar/workspace'
+      );
+    });
+
+    it('getBasePath with workspace provided', () => {
+      expect(new BasePath('/foo/bar', '/foo/bar', '/workspace').getBasePath()).toEqual('/foo/bar');
+    });
+
+    it('prepend with workspace provided', () => {
+      expect(new BasePath('/foo/bar', '/foo/bar', '/workspace').prepend('/prepend')).toEqual(
+        '/foo/bar/workspace/prepend'
+      );
+    });
+
+    it('prepend with workspace provided but calls without workspace', () => {
+      expect(
+        new BasePath('/foo/bar', '/foo/bar', '/workspace').prepend('/prepend', {
+          withoutWorkspace: true,
+        })
+      ).toEqual('/foo/bar/prepend');
+    });
+
+    it('remove with workspace provided', () => {
+      expect(
+        new BasePath('/foo/bar', '/foo/bar', '/workspace').remove('/foo/bar/workspace/remove')
+      ).toEqual('/remove');
+    });
+  });
 });

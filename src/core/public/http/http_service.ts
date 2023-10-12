@@ -36,6 +36,8 @@ import { AnonymousPathsService } from './anonymous_paths_service';
 import { LoadingCountService } from './loading_count_service';
 import { Fetch } from './fetch';
 import { CoreService } from '../../types';
+import { getWorkspaceIdFromUrl } from '../utils';
+import { WORKSPACE_PATH_PREFIX } from '../../utils/constants';
 
 interface HttpDeps {
   injectedMetadata: InjectedMetadataSetup;
@@ -50,9 +52,15 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
 
   public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
     const opensearchDashboardsVersion = injectedMetadata.getOpenSearchDashboardsVersion();
+    let workspaceBasePath = '';
+    const workspaceId = getWorkspaceIdFromUrl(window.location.href);
+    if (workspaceId) {
+      workspaceBasePath = `${WORKSPACE_PATH_PREFIX}/${workspaceId}`;
+    }
     const basePath = new BasePath(
       injectedMetadata.getBasePath(),
-      injectedMetadata.getServerBasePath()
+      injectedMetadata.getServerBasePath(),
+      workspaceBasePath
     );
     const fetchService = new Fetch({ basePath, opensearchDashboardsVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
