@@ -857,4 +857,29 @@ describe('getSortedObjectsForExport()', () => {
       `Can't specify both "search" and "objects" properties when exporting`
     );
   });
+
+  test('rejects when both types and objecys are passed in', () => {
+    const exportOpts = {
+      exportSizeLimit: 1,
+      savedObjectsClient,
+      objects: [{ type: 'index-pattern', id: '1' }],
+      types: ['foo'],
+    };
+
+    expect(exportSavedObjectsToStream(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `Can't specify both "types" and "objects" properties when exporting`
+    );
+  });
+
+  test('rejects when bulkGet returns an error', () => {
+    const exportOpts = {
+      exportSizeLimit: 1,
+      savedObjectsClient,
+      objects: [{ type: 'index-pattern', id: '1' }],
+    };
+
+    expect(exportSavedObjectsToStream(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `Can't specify both "types" and "objects" properties when exporting`
+    );
+  });
 });

@@ -1259,6 +1259,12 @@ describe('SavedObjectsRepository', () => {
         migrationVersion: doc._source.migrationVersion,
       });
 
+      it(`returns early for undefined objects argument`, async () => {
+        const result = await savedObjectsRepository.bulkGet();
+        expect(result).toEqual({ saved_objects: [] });
+        expect(client.mget).not.toHaveBeenCalled();
+      });
+
       it(`returns early for empty objects argument`, async () => {
         const result = await bulkGet([]);
         expect(result).toEqual({ saved_objects: [] });

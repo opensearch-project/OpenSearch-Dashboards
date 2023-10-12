@@ -131,10 +131,6 @@ function getClauseForType(
  *  Gets the clause that will filter for the workspace.
  */
 function getClauseForWorkspace(workspace: string) {
-  if (!workspace) {
-    return {};
-  }
-
   return {
     bool: {
       must: [{ term: { workspaces: workspace } }],
@@ -245,9 +241,7 @@ export function getQueryParams({
       bool: {
         should: workspaces
           .filter((workspace) => workspace)
-          .map((workspace) => {
-            return getClauseForWorkspace(workspace);
-          }),
+          .map((workspace) => getClauseForWorkspace(workspace)),
         minimum_should_match: 1,
       },
     });
