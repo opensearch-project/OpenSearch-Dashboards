@@ -20,6 +20,8 @@ export function filterColumns(
   defaultColumns: string[]
 ) {
   const fieldsName = indexPattern?.fields.getAll().map((fld) => fld.name) || [];
-  const filteredColumns = columns.filter((column) => fieldsName.includes(column));
-  return filteredColumns.length > 0 ? filteredColumns : defaultColumns;
+  // combine columns and defaultColumns without duplicates
+  const combinedColumns = [...new Set([...columns, ...defaultColumns])];
+  const filteredColumns = combinedColumns.filter((column) => fieldsName.includes(column));
+  return filteredColumns.length > 0 ? filteredColumns : ['_source'];
 }

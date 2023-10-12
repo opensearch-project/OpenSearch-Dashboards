@@ -6,8 +6,8 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../../../data/public';
-import { useSelector, updateIndexPattern, StoreType } from '../../utils/state_management';
-import { DiscoverServices } from '../../../build_services';
+import { useSelector, updateIndexPattern } from '../../utils/state_management';
+import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
 
 /**
@@ -24,10 +24,10 @@ import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
  * @param store - The redux store in data_explorer to dispatch actions.
  * @returns - The fetched index pattern.
  */
-export const useIndexPattern = (services: DiscoverServices, store: StoreType) => {
+export const useIndexPattern = (services: DiscoverViewServices) => {
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  const { data, toastNotifications, uiSettings: config } = services;
+  const { data, toastNotifications, uiSettings: config, store } = services;
 
   useEffect(() => {
     let isMounted = true;
