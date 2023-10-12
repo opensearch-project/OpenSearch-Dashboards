@@ -102,6 +102,7 @@ interface StartDeps {
 type CollapsibleNavHeaderRender = (context: {
   basePath: HttpStart['basePath'];
   getUrlForApp: InternalApplicationStart['getUrlForApp'];
+  navigateToUrl: InternalApplicationStart['navigateToUrl'];
   workspaces: WorkspacesStart;
 }) => JSX.Element | null;
 
@@ -202,6 +203,7 @@ export class ChromeService {
             basePath: http.basePath,
             workspaces,
             getUrlForApp: application.getUrlForApp,
+            navigateToUrl: application.navigateToUrl,
           })
         : null;
 

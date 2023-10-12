@@ -11,10 +11,19 @@ export function renderWorkspaceMenu({
   basePath,
   getUrlForApp,
   workspaces,
+  navigateToUrl,
 }: {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   basePath: HttpSetup['basePath'];
   workspaces: WorkspacesStart;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
 }) {
-  return <WorkspaceMenu basePath={basePath} getUrlForApp={getUrlForApp} workspaces={workspaces} />;
+  return (
+    <WorkspaceMenu
+      basePath={basePath}
+      getUrlForApp={getUrlForApp}
+      workspaces={workspaces}
+      navigateToUrl={navigateToUrl}
+    />
+  );
 }

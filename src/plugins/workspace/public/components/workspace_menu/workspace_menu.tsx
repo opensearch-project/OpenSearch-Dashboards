@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 
 import {
   ApplicationStart,
@@ -32,6 +33,7 @@ import { formatUrlWithWorkspaceId } from '../../utils';
 
 interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   basePath: HttpSetup['basePath'];
   workspaces: WorkspacesStart;
 }
@@ -50,7 +52,7 @@ function getFilteredWorkspaceList(
   ].slice(0, 5);
 }
 
-export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => {
+export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces, navigateToUrl }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(workspaces.workspaceList$, []);
@@ -103,8 +105,8 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => 
   };
 
   const getWorkspaceListItems = () => {
-    const workspaceListItems = filteredWorkspaceList.map((workspace, index) =>
-      workspaceToItem(workspace, index)
+    const workspaceListItems: EuiContextMenuPanelItemDescriptor[] = filteredWorkspaceList.map(
+      (workspace, index) => workspaceToItem(workspace, index)
     );
     const length = workspaceListItems.length;
     workspaceListItems.push({
@@ -113,13 +115,18 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => 
         defaultMessage: 'Create workspace',
       }),
       key: length.toString(),
-      href: formatUrlWithWorkspaceId(
-        getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-          absolute: false,
-        }),
-        currentWorkspace?.id ?? '',
-        basePath
-      ),
+      onClick: () => {
+        navigateToUrl(
+          formatUrlWithWorkspaceId(
+            getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+              absolute: false,
+            }),
+            currentWorkspace?.id ?? '',
+            basePath
+          )
+        );
+        setPopover(false);
+      },
     });
     workspaceListItems.push({
       icon: <EuiIcon type="folderClosed" />,
@@ -127,13 +134,18 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces }: Props) => 
         defaultMessage: 'All workspaces',
       }),
       key: (length + 1).toString(),
-      href: formatUrlWithWorkspaceId(
-        getUrlForApp(WORKSPACE_LIST_APP_ID, {
-          absolute: false,
-        }),
-        currentWorkspace?.id ?? '',
-        basePath
-      ),
+      onClick: () => {
+        navigateToUrl(
+          formatUrlWithWorkspaceId(
+            getUrlForApp(WORKSPACE_LIST_APP_ID, {
+              absolute: false,
+            }),
+            currentWorkspace?.id ?? '',
+            basePath
+          )
+        );
+        setPopover(false);
+      },
     });
     return workspaceListItems;
   };
