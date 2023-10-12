@@ -108,6 +108,22 @@ afterAll(() => {
   (window as any).localStorage = originalLocalStorage;
 });
 
+describe('setup', () => {
+  it('register custom Nav Header render', async () => {
+    const customHeaderMock = React.createElement('TestCustomNavHeader');
+    const renderMock = jest.fn().mockReturnValue(customHeaderMock);
+    const chrome = new ChromeService({ browserSupportsCsp: true });
+
+    const chromeSetup = chrome.setup();
+    chromeSetup.registerCollapsibleNavHeader(renderMock);
+
+    const chromeStart = await chrome.start(defaultStartDeps());
+    const wrapper = shallow(React.createElement(() => chromeStart.getHeaderComponent()));
+    expect(wrapper.prop('collapsibleNavHeaderRender')).toBeDefined();
+    expect(wrapper.prop('collapsibleNavHeaderRender')()).toEqual(customHeaderMock);
+  });
+});
+
 describe('start', () => {
   it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
     const { startDeps } = await start({ options: { browserSupportsCsp: false } });
