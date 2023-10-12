@@ -3,7 +3,7 @@ name: Run cypress tests
 # trigger on every PR for all branches
 on:
   pull_request:
-    branches: ['**']
+    branches: [ '**' ]
     paths-ignore:
       - '**/*.md'
   workflow_dispatch:
@@ -33,7 +33,7 @@ env:
   FTR_PATH: 'ftr'
   START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch'
   OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false'
-  SPEC: ${{ inputs.specs != '' && inputs.specs || 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,' }}
+  SPEC: ${{ inputs.specs != '' && inputs.specs || 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,' }} 
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
@@ -137,7 +137,7 @@ jobs:
           name: ftr-cypress-screenshots
           path: ${{ env.FTR_PATH }}/cypress/screenshots
           retention-days: 1
-
+      
       - uses: actions/upload-artifact@v3
         if: always()
         with:
@@ -165,7 +165,7 @@ jobs:
         with:
           issue-number: ${{ inputs.pr_number }}
           comment-author: 'github-actions[bot]'
-          body-includes: '${{ env.COMMENT_TAG }}'
+          body-includes: "${{ env.COMMENT_TAG }}"
 
       - name: Add comment on the PR
         uses: peter-evans/create-or-update-comment@v3
