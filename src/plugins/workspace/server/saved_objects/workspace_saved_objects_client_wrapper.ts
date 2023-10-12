@@ -255,7 +255,14 @@ export class WorkspaceSavedObjectsClientWrapper {
         throw generateSavedObjectsPermissionError();
       }
 
-      if (options.overwrite) {
+      /**
+       *
+       * If target workspaces parameter exists, we don't need to do permission validation again.
+       * The bulk create method in repository doesn't allow extends workspaces with override.
+       * If target workspaces parameter doesn't exists, we need to check if has permission to object's workspaces or ACL.
+       *
+       */
+      if (!hasTargetWorkspaces && options.overwrite) {
         for (const object of objects) {
           const { type, id } = object;
           if (id) {
@@ -274,10 +281,7 @@ export class WorkspaceSavedObjectsClientWrapper {
               !(await this.validateWorkspacesAndSavedObjectsPermissions(
                 rawObject,
                 wrapperOptions.request,
-                !hasTargetWorkspaces
-                  ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
-                    [WorkspacePermissionMode.LibraryWrite]
-                  : [],
+                [WorkspacePermissionMode.LibraryWrite],
                 [WorkspacePermissionMode.Write],
                 false
               ))
@@ -301,7 +305,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       if (
         hasTargetWorkspaces &&
         !(await this.validateMultiWorkspacesPermissions(
-          options.workspaces ?? [],
+          options?.workspaces ?? [],
           wrapperOptions.request,
           [WorkspacePermissionMode.LibraryWrite]
         ))
@@ -309,16 +313,21 @@ export class WorkspaceSavedObjectsClientWrapper {
         throw generateWorkspacePermissionError();
       }
 
+      /**
+       *
+       * If target workspaces parameter exists, we don't need to do permission validation again.
+       * The create method in repository doesn't allow extends workspaces with override.
+       * If target workspaces parameter doesn't exists, we need to check if has permission to object's workspaces or ACL.
+       *
+       */
       if (
         options?.overwrite &&
         options.id &&
+        !hasTargetWorkspaces &&
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           await wrapperOptions.client.get(type, options.id),
           wrapperOptions.request,
-          !hasTargetWorkspaces
-            ? // If no workspaces are passed, we need to check the workspace permission of object when overwrite.
-              [WorkspacePermissionMode.LibraryWrite]
-            : [],
+          [WorkspacePermissionMode.LibraryWrite],
           [WorkspacePermissionMode.Write],
           false
         ))

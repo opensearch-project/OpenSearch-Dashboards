@@ -285,6 +285,20 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
       expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
     });
+
+    it('should able to create with override', async () => {
+      const createResult = await permittedSavedObjectedClient.create(
+        'dashboard',
+        {},
+        {
+          id: 'inner-workspace-dashboard-1',
+          overwrite: true,
+          workspaces: ['workspace-1'],
+        }
+      );
+
+      expect(createResult.error).toBeUndefined();
+    });
   });
 
   describe('bulkCreate', () => {
@@ -311,6 +325,47 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       );
       expect(result.saved_objects.length).toEqual(1);
       await permittedSavedObjectedClient.delete('dashboard', objectId);
+    });
+
+    it('should throw forbidden error when create with override', async () => {
+      let error;
+      try {
+        await notPermittedSavedObjectedClient.bulkCreate(
+          [
+            {
+              id: 'inner-workspace-dashboard-1',
+              type: 'dashboard',
+              attributes: {},
+            },
+          ],
+          {
+            overwrite: true,
+            workspaces: ['workspace-1'],
+          }
+        );
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+    });
+
+    it('should able to bulk create with override', async () => {
+      const createResult = await permittedSavedObjectedClient.bulkCreate(
+        [
+          {
+            id: 'inner-workspace-dashboard-1',
+            type: 'dashboard',
+            attributes: {},
+          },
+        ],
+        {
+          overwrite: true,
+          workspaces: ['workspace-1'],
+        }
+      );
+
+      expect(createResult.saved_objects).toHaveLength(1);
     });
   });
 
