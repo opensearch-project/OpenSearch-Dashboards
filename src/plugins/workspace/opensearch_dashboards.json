@@ -7,5 +7,5 @@
     "savedObjects"
   ],
   "optionalPlugins": [],
-  "requiredBundles": []
+  "requiredBundles": ["opensearchDashboardsReact"]
 }
