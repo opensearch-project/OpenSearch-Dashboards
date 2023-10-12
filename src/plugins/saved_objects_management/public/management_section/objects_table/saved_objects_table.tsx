@@ -121,7 +121,6 @@ export interface SavedObjectsTableProps {
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   dateFormat: string;
   title: string;
-  fullWidth: boolean;
 }
 
 export interface SavedObjectsTableState {

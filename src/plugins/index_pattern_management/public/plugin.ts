@@ -47,12 +47,11 @@ import {
   IndexPatternManagementServiceStart,
 } from './service';
 
-import { ManagementAppMountParams, ManagementSetup } from '../../management/public';
+import { ManagementAppMountParams } from '../../management/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { reactRouterNavigate } from '../../opensearch_dashboards_react/public';
 
 export interface IndexPatternManagementSetupDependencies {
-  management: ManagementSetup;
   urlForwarding: UrlForwardingSetup;
 }
 
@@ -85,14 +84,8 @@ export class IndexPatternManagementPlugin
 
   public setup(
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
-    { management, urlForwarding }: IndexPatternManagementSetupDependencies
+    { urlForwarding }: IndexPatternManagementSetupDependencies
   ) {
-    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-
-    if (!opensearchDashboardsSection) {
-      throw new Error('`opensearchDashboards` management section not found.');
-    }
-
     const newAppPath = IPM_APP_ID;
     const legacyPatternsPath = 'management/opensearch-dashboards/index_patterns';
 

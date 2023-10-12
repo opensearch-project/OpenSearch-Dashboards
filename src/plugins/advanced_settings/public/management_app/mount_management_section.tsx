@@ -34,12 +34,7 @@ import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import {
-  AppMountParameters,
-  ChromeBreadcrumb,
-  ScopedHistory,
-  StartServicesAccessor,
-} from 'src/core/public';
+import { AppMountParameters, ChromeBreadcrumb, StartServicesAccessor } from 'src/core/public';
 
 import { AdvancedSettings } from './advanced_settings';
 import { ComponentRegistry } from '../types';
@@ -51,7 +46,7 @@ import './index.scss';
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
   defaultMessage: 'Advanced settings',
 });
-const crumb = [{ text: title }];
+const crumb: ChromeBreadcrumb[] = [{ text: title }];
 
 const readOnlyBadge = {
   text: i18n.translate('advancedSettings.badge.readOnly.text', {
@@ -69,15 +64,12 @@ export async function mountAdvancedSettingsManagementSection(
   componentRegistry: ComponentRegistry['start']
 ) {
   const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
-  const setBreadcrumbsScoped = (crumbs: ChromeBreadcrumb[] = []) => {
-    const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
+  chrome.setBreadcrumbs([
+    ...crumb.map((item) => ({
       ...item,
-      ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
-    });
-
-    chrome.setBreadcrumbs([...crumbs.map((item) => wrapBreadcrumb(item, params.history))]);
-  };
-  setBreadcrumbsScoped(crumb);
+      ...(item.href ? reactRouterNavigate(params.history, item.href) : {}),
+    })),
+  ]);
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
 

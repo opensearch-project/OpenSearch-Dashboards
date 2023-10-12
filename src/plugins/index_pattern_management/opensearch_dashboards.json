@@ -4,6 +4,6 @@
   "server": true,
   "ui": true,
   "optionalPlugins": ["dataSource"],
-  "requiredPlugins": ["management", "data", "urlForwarding"],
+  "requiredPlugins": ["data", "urlForwarding"],
   "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils"]
 }

@@ -122,7 +122,6 @@ export class SavedObjectsManagementPlugin
         appMountParams,
         title,
         allowedObjectTypes,
-        fullWidth: false,
       });
     };
 
@@ -130,9 +129,7 @@ export class SavedObjectsManagementPlugin
      * Register saved objects overview & saved search & saved query here
      */
     core.application.register({
-      id: 'objects_all',
-      appRoute: '/app/objects',
-      exactRoute: true,
+      id: 'objects',
       title: MANAGE_LIBRARY_TITLE_WORDINGS,
       order: 10000,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
@@ -143,7 +140,6 @@ export class SavedObjectsManagementPlugin
 
     core.application.register({
       id: 'objects_searches',
-      appRoute: '/app/objects/search',
       title: SAVED_SEARCHES_WORDINGS,
       order: 8000,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
@@ -155,7 +151,6 @@ export class SavedObjectsManagementPlugin
 
     core.application.register({
       id: 'objects_query',
-      appRoute: '/app/objects/query',
       title: SAVED_QUERIES_WORDINGS,
       order: 8001,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
