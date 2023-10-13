@@ -28,6 +28,7 @@ import {
   EuiTextAlign,
   EuiTitle,
 } from '@elastic/eui';
+import { useUiSetting$ } from '../../opensearch_dashboards_react/public';
 
 export interface FormRowDeps {
   headerText: string;
@@ -110,9 +111,15 @@ export const HeaderUserMenu = () => {
       text: 'Use browser settings',
     },
   ];
+  const [darkMode, setDarkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const [themeVersion, setThemeVersion] = useUiSetting$<string>('theme:version');
   const [isPopoverOpen, setPopover] = useState(false);
-  const [theme, setTheme] = useState(themeOptions[1].value);
-  const [screenMode, setScreenMode] = useState(screenModeOptions[1].value);
+  const [theme, setTheme] = useState(themeOptions.find((t) => t.text === themeVersion)?.value);
+  const [screenMode, setScreenMode] = useState(
+    darkMode ? screenModeOptions[1].value : screenModeOptions[0].value
+  );
+
+  console.log(themeVersion);
 
   const onAvatarClick = () => {
     setPopover(!isPopoverOpen);
@@ -130,8 +137,12 @@ export const HeaderUserMenu = () => {
 
   const onAppearanceSubmit = (e: SyntheticEvent) => {
     console.log(e);
-    const mainStyleLink = document.querySelector('link[href*="osd-ui-shared-deps.v8.light"]');
-    mainStyleLink?.parentNode?.removeChild(mainStyleLink);
+    // const mainStyleLink = document.querySelector('link[href*="osd-ui-shared-deps.v8.light"]');
+    // mainStyleLink?.parentNode?.removeChild(mainStyleLink);
+
+    setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? '');
+    setDarkMode(screenMode === 'dark');
+    window.location.reload();
   };
 
   const onTenantSwitchRadioChange = (id: string) => {
@@ -285,7 +296,7 @@ export const HeaderUserMenu = () => {
             application, visit Advanced Settings or contact your administrator. Learn more
           </EuiCallOut>
           <EuiSpacer />
-          <EuiFormRow label="Theme version" helpText="Default: v7">
+          <EuiFormRow label="Theme version" helpText="Default: Next (preview)">
             <EuiSelect options={themeOptions} value={theme} onChange={onThemeChange} />
           </EuiFormRow>
           <EuiFormRow label="Screen mode" helpText="Default: Dark mode">

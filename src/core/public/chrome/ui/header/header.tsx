@@ -232,9 +232,9 @@ export function Header({
                 <HeaderNavControls navControls$={observables.navControlsRight$} />
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem border="left">
+              {/* <EuiHeaderSectionItem border="left">
                 <HeaderUserMenu />
-              </EuiHeaderSectionItem>
+              </EuiHeaderSectionItem> */}
 
               <EuiHeaderSectionItem border="left">
                 <HeaderHelpMenu
