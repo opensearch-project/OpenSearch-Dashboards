@@ -101,10 +101,10 @@ export const getWorkspaceIntegratedSavedObjects = (
   savedObjectList: SavedObject[],
   workspaceId?: string
 ) => {
-  savedObjectList = cloneDeep(savedObjectList);
+  const savedObjectListCopy = cloneDeep(savedObjectList);
 
-  savedObjectList.forEach((savedObject) => {
+  savedObjectListCopy.forEach((savedObject) => {
     overrideSavedObjectId(savedObject, withPrefix(workspaceId));
   });
-  return savedObjectList;
+  return savedObjectListCopy;
 };
