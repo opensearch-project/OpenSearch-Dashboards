@@ -33,6 +33,7 @@
  * https://github.com/angular/angular.js/blob/master/src/Angular.js#L1312
  *
  * @internal
+ * @deprecated This function will be removed in the next major version.
  */
 export function toAngularJSON(obj: any, pretty?: any): string {
   if (obj === undefined) return '';
