@@ -179,6 +179,7 @@ For windows:
 $ wsl -d docker-desktop
 $ sysctl -w vm.max_map_count=262144
 ```
+
 ### Next Steps
 
 Now that you have a development environment to play with, there are a number of different paths you may take next.
@@ -235,6 +236,7 @@ $ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plu
 Note - if you add the [`security` plugin](https://github.com/opensearch-project/security), you'll also need to [configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security).
 
 ### Plugin development
+
 The osd-plugin-generator tool makes it easier to create a plugin for OpenSearch Dashboards. It sets up the basic structure of the project and provides scripts to build it. Refer to [osd-plugin-generator](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator) for more details.
 
 #### Other snapshot configuration options
@@ -258,6 +260,8 @@ Options:
 $ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip
 ```
 
+> You can find nightly builds of opensearch and its plugins at https://aws.oss.sonatype.org/content/repositories/snapshots/org/opensearch/ and release builds at https://repo1.maven.org/maven2/org/opensearch/
+
 ### Alternative - Run OpenSearch from tarball
 
 If you would like to run OpenSearch from the tarball, you'll need to download the minimal distribution, install it, and then run the executable. (You'll also need Java installed and the `JAVA_HOME` environmental variable set - see [OpenSearch developer guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md#install-prerequisites) for details).
@@ -274,6 +278,13 @@ This method can also be used to develop against the [full distribution of OpenSe
 ### Configure OpenSearch Dashboards for security
 
 _This step is only mandatory if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+
+> Running `yarn opensearch snapshot -P <security_plugin_url>` will not work since the plugin needs some additional configuration to setup correctly. To configure it correctly, here are the steps:
+>
+> 1. Run `yarn opensearch snapshot -P <security_plugin_url>`. This will fail to run and complain about missing certificates. Ignore that since what we want is for the build artifacts
+> 2. Run `export initialAdminPassword=<inital admin password>` since its needed by the configuration script
+> 3. Run the config script in the plugin directory of opensearch. `bash .opensearch/<version>/plugins/opensearch-security/tools/install_demo_configuration.sh`
+> 4. Start opensearch `.opensearch/<version>/bin/opensearch`
 
 Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
 changes to the default [`opensearch_dashboards.yml`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/config/opensearch_dashboards.yml#L25-L72) in order to connect to OpenSearch.
