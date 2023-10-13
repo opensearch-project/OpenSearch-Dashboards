@@ -68,6 +68,7 @@ import {
   SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsDeleteByWorkspaceOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -787,6 +788,55 @@ export class SavedObjectsRepository {
           ...getSearchDsl(this._mappings, this._registry, {
             namespaces: namespace ? [namespace] : undefined,
             type: typesToUpdate,
+          }),
+        },
+      },
+      { ignore: [404] }
+    );
+
+    return body;
+  }
+
+  /**
+   * Deletes all objects from the provided workspace. It used when deleting a workspace.
+   *
+   * @param {string} workspace
+   * @param options SavedObjectsDeleteByWorkspaceOptions
+   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
+   */
+  async deleteByWorkspace(
+    workspace: string,
+    options: SavedObjectsDeleteByWorkspaceOptions = {}
+  ): Promise<any> {
+    if (!workspace || typeof workspace !== 'string' || workspace === '*') {
+      throw new TypeError(`workspace is required, and must be a string that is not equal to '*'`);
+    }
+
+    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
+
+    const { body } = await this.client.updateByQuery(
+      {
+        index: this.getIndicesForTypes(allTypes),
+        refresh: options.refresh,
+        body: {
+          script: {
+            source: `
+              if (!ctx._source.containsKey('workspaces')) {
+                ctx.op = "delete";
+              } else {
+                ctx._source['workspaces'].removeAll(Collections.singleton(params['workspace']));
+                if (ctx._source['workspaces'].empty) {
+                  ctx.op = "delete";
+                }
+              }
+            `,
+            lang: 'painless',
+            params: { workspace },
+          },
+          conflicts: 'proceed',
+          ...getSearchDsl(this._mappings, this._registry, {
+            workspaces: [workspace],
+            type: allTypes,
           }),
         },
       },

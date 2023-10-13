@@ -2637,6 +2637,85 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#deleteByWorkspace', () => {
+    const workspace = 'bar-workspace';
+    const mockUpdateResults = {
+      took: 15,
+      timed_out: false,
+      total: 3,
+      updated: 2,
+      deleted: 1,
+      batches: 1,
+      version_conflicts: 0,
+      noops: 0,
+      retries: { bulk: 0, search: 0 },
+      throttled_millis: 0,
+      requests_per_second: -1.0,
+      throttled_until_millis: 0,
+      failures: [],
+    };
+
+    const deleteByWorkspaceSuccess = async (workspace, options) => {
+      client.updateByQuery.mockResolvedValueOnce(
+        opensearchClientMock.createSuccessTransportRequestPromise(mockUpdateResults)
+      );
+      const result = await savedObjectsRepository.deleteByWorkspace(workspace, options);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
+      expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    describe('client calls', () => {
+      it(`should use the OpenSearch updateByQuery action`, async () => {
+        await deleteByWorkspaceSuccess(workspace);
+        expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should use all indices for all types`, async () => {
+        await deleteByWorkspaceSuccess(workspace);
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({ index: ['.opensearch_dashboards_test', 'custom'] }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws when workspace is not a string or is '*'`, async () => {
+        const test = async (workspace) => {
+          await expect(savedObjectsRepository.deleteByWorkspace(workspace)).rejects.toThrowError(
+            `workspace is required, and must be a string that is not equal to '*'`
+          );
+          expect(client.updateByQuery).not.toHaveBeenCalled();
+        };
+        await test(undefined);
+        await test(null);
+        await test(['foo-workspace']);
+        await test(123);
+        await test(true);
+        await test(ALL_NAMESPACES_STRING);
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns the query results on success`, async () => {
+        const result = await deleteByWorkspaceSuccess(workspace);
+        expect(result).toEqual(mockUpdateResults);
+      });
+    });
+
+    describe('search dsl', () => {
+      it(`constructs a query that have workspace as search critieria`, async () => {
+        await deleteByWorkspaceSuccess(workspace);
+        const allTypes = registry.getAllTypes().map((type) => type.name);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          workspaces: [workspace],
+          type: allTypes,
+        });
+      });
+    });
+  });
+
   describe('#find', () => {
     const generateSearchResults = (namespace) => {
       return {

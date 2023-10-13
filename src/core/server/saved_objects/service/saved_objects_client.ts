@@ -281,6 +281,15 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  *
  * @public
  */
+export interface SavedObjectsDeleteByWorkspaceOptions extends SavedObjectsBaseOptions {
+  /** The OpenSearch supports only boolean flag for this operation */
+  refresh?: boolean;
+}
+
+/**
+ *
+ * @public
+ */
 export class SavedObjectsClient {
   public static errors = SavedObjectsErrorHelpers;
   public errors = SavedObjectsErrorHelpers;
@@ -432,6 +441,18 @@ export class SavedObjectsClient {
   ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
+
+  /**
+   * delete saved objects by workspace id
+   * @param workspace
+   * @param options
+   */
+  deleteByWorkspace = async (
+    workspace: string,
+    options: SavedObjectsDeleteByWorkspaceOptions = {}
+  ): Promise<any> => {
+    return await this._repository.deleteByWorkspace(workspace, options);
+  };
 
   /**
    * Bulk Updates multiple SavedObject at once
