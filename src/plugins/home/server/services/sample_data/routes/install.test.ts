@@ -157,4 +157,67 @@ describe('sample data install route', () => {
       },
     });
   });
+
+  it('handler calls expected api with the given request with workspace', async () => {
+    const mockWorkspaceId = 'workspace';
+
+    const mockClient = jest.fn().mockResolvedValue(true);
+
+    const mockSOClientGetResponse = {
+      saved_objects: [
+        {
+          type: 'dashboard',
+          id: '12345',
+          namespaces: ['default'],
+          attributes: { title: 'dashboard' },
+        },
+      ],
+    };
+    const mockSOClient = {
+      bulkCreate: jest.fn().mockResolvedValue(mockSOClientGetResponse),
+      get: jest.fn().mockResolvedValue(mockSOClientGetResponse),
+    };
+
+    const mockContext = {
+      core: {
+        opensearch: {
+          legacy: {
+            client: { callAsCurrentUser: mockClient },
+          },
+        },
+        savedObjects: { client: mockSOClient },
+      },
+    };
+    const mockBody = { id: 'flights' };
+    const mockQuery = { workspace: mockWorkspaceId };
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+      params: mockBody,
+      query: mockQuery,
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    createInstallRoute(
+      mockCoreSetup.http.createRouter(),
+      sampleDatasets,
+      mockLogger,
+      mockUsageTracker
+    );
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.post.mock.calls[0][1];
+
+    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+
+    expect(mockClient.mock.calls[1][1].body.settings).toMatchObject({
+      index: { number_of_shards: 1 },
+    });
+
+    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok.mock.calls[0][0]).toMatchObject({
+      body: {
+        opensearchIndicesCreated: { opensearch_dashboards_sample_data_flights: 13059 },
+        opensearchDashboardsSavedObjectsLoaded: 20,
+      },
+    });
+  });
 });
