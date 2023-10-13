@@ -811,6 +811,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
    * @property {string} [options.preference]
+   * @property {Array<string>} [options.workspaces]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
