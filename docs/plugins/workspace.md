@@ -1,10 +1,9 @@
 # Workspace
-Workspace is a pivotal feature within OpenSearch-Dashboards, empowering users to craft distinct workspaces 
-by meticulously curating a selection of features and plugins tailored to specific use cases. This functionality
-not only facilitates clients in the systematic organization of visual assets, including saved_objects such as
-dashboards and visualizations, but also categorizes them logically within dedicated workspaces. This strategic
-approach enhances overall efficiency and manageability, making it an indispensable asset for OpenSearch-Dashboards
-users seeking precision and flexibility in their workflows.
+Workspace is a significant feature in OpenSearch-Dashboards, allowing users to create customized workspaces by
+selecting specific features and plugins that align with their particular use cases. This feature helps users
+organize visual assets, such as saved_objects like dashboards and visualizations, in a structured manner within
+dedicated workspaces. This approach aims to improve efficiency and manageability, making it a valuable tool for
+OpenSearch-Dashboards users who want a more precise and flexible workflow.
 
 ## Scopes
 In an OpenSearch cluster, when viewed from the perspective of OpenSearch Dashboards (OSD), data can be categorized
@@ -119,7 +118,7 @@ The coexistence of workspace-associated saved objects and those without workspac
 a balance between context-specific customization and system-wide consistency.
 
 ## Duplicate saved objects among workspaces
-While associating saved objects with multiple workspaces links a single object instance to multiple places, duplicating saved 
+While associating saved objects with multiple workspaces links a single object instance to multiple places, duplicating saved
 objects takes a different approach. When duplicating objects, it creates hard copies of the objects in the target workspace,
 regardless of their original workspaces.
 
@@ -168,7 +167,7 @@ and permissions tailored to their intended purposes. Currently, workspace plugin
 2. Personal Workspace
    - **Purpose**: The Personal Workspace is designed to provide individual users with a dedicated space for their personal work.
       However, it's important to note that a **Personal Workspace will only be created if user/role information can be retrieved**.
-   - **Features**: Users have the flexibility to configure their Personal Workspace according to their preferences and requirements. 
+   - **Features**: Users have the flexibility to configure their Personal Workspace according to their preferences and requirements.
    - **Permissions**: Access to the Personal Workspace is limited to the user who owns it, ensuring data privacy and personalization.
 3. Management Workspace
    - **Purpose**: The Management Workspace is dedicated to administrative tasks and configurations within OpenSearch Dashboards.
@@ -179,8 +178,5 @@ and permissions tailored to their intended purposes. Currently, workspace plugin
 
 ## Appendix
 1. The PR the introduce [object access control](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5083)
-2. The [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4633/files)of the design doc for saved object access control
-  
-
-
-
+2. The [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4633/files) of the design doc for saved object access control
+3. Future Vision for Dashboards: [Issue](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4298)
