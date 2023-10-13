@@ -35,8 +35,6 @@ import {
   CoreStart,
   Plugin,
   AppMountParameters,
-  ChromeBreadcrumb,
-  ScopedHistory,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataSourcePluginStart } from 'src/plugins/data_source/public';
@@ -47,9 +45,7 @@ import {
   IndexPatternManagementServiceStart,
 } from './service';
 
-import { ManagementAppMountParams } from '../../management/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { reactRouterNavigate } from '../../opensearch_dashboards_react/public';
 
 export interface IndexPatternManagementSetupDependencies {
   urlForwarding: UrlForwardingSetup;

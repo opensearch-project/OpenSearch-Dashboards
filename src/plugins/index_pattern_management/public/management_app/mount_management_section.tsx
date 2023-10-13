@@ -75,7 +75,7 @@ export async function mountManagementSection(
     { data, dataSource },
     indexPatternManagementStart,
   ] = await getStartServices();
-  const canSave = Boolean(application.capabilities.indexPatterns.save);
+  const canSave = Boolean(application.capabilities.indexPatterns?.save);
   const dataSourceEnabled = !!dataSource;
 
   if (!canSave) {
