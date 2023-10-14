@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui';
 import { Action } from '../../../../src/plugins/ui_actions/public';
 
 export const sampleAction = (

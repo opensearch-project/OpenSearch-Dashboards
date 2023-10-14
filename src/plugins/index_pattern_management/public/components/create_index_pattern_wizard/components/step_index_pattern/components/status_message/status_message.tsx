@@ -31,7 +31,7 @@
 import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { MatchedItem } from '../../../../types';

@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui';
 
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor

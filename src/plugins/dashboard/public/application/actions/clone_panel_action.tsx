@@ -32,7 +32,7 @@ import { i18n } from '@osd/i18n';
 import { CoreStart } from 'src/core/public';
 import uuid from 'uuid';
 import _ from 'lodash';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui';
 import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import { SavedObject } from '../../../../saved_objects/public';
 import {

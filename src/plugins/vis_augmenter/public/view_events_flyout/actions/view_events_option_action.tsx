@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui';
 import { get, isEmpty } from 'lodash';
 import { VisualizeEmbeddable } from '../../../../visualizations/public';
 import { EmbeddableContext } from '../../../../embeddable/public';

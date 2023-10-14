@@ -29,7 +29,7 @@
  */
 
 import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui';
 import { ActionType, ActionContextMapping, BaseContext } from '../types';
 import { Presentable } from '../util/presentable';
 import { Trigger } from '../triggers';

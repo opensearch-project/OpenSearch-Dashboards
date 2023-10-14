@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui';
 import { UiComponent } from 'src/plugins/opensearch_dashboards_utils/public';
 
 /**

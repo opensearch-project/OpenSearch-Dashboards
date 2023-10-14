@@ -135,13 +135,15 @@ export const HeaderUserMenu = () => {
     setScreenMode(e.target.value);
   };
 
-  const onAppearanceSubmit = (e: SyntheticEvent) => {
+  const onAppearanceSubmit = async (e: SyntheticEvent) => {
     console.log(e);
     // const mainStyleLink = document.querySelector('link[href*="osd-ui-shared-deps.v8.light"]');
     // mainStyleLink?.parentNode?.removeChild(mainStyleLink);
 
-    setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? '');
-    setDarkMode(screenMode === 'dark');
+    await await Promise.all([
+      setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? ''),
+      setDarkMode(screenMode === 'dark'),
+    ]);
     window.location.reload();
   };
 

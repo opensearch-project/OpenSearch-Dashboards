@@ -5,7 +5,7 @@
 
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { EuiIconType } from '@elastic/eui';
 import { Action, IncompatibleActionError } from '../../../ui_actions/public';
 import { getAugmentVisSavedObjs } from '../utils';
 import { getSavedAugmentVisLoader } from '../services';
