@@ -18,6 +18,7 @@ import { ResultStatus, SearchData } from '../utils/use_search';
 import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
+import { popularizeField } from '../../helpers/popularize_field';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverPanel(props: ViewProps) {
@@ -26,6 +27,8 @@ export default function DiscoverPanel(props: ViewProps) {
     data: {
       query: { filterManager },
     },
+    capabilities,
+    indexPatterns,
   } = services;
   const { data$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
@@ -67,6 +70,10 @@ export default function DiscoverPanel(props: ViewProps) {
       fieldCounts={fetchState.fieldCounts || {}}
       hits={fetchState.rows || []}
       onAddField={(fieldName, index) => {
+        if (indexPattern && capabilities.discover?.save) {
+          popularizeField(indexPattern, fieldName, indexPatterns);
+        }
+
         dispatch(
           addColumn({
             column: fieldName,
@@ -75,6 +82,10 @@ export default function DiscoverPanel(props: ViewProps) {
         );
       }}
       onRemoveField={(fieldName) => {
+        if (indexPattern && capabilities.discover?.save) {
+          popularizeField(indexPattern, fieldName, indexPatterns);
+        }
+
         dispatch(removeColumn(fieldName));
       }}
       onReorderFields={(source, destination) => {

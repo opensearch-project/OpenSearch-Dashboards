@@ -6,7 +6,6 @@
 import { TypedUseSelectorHook } from 'react-redux';
 import {
   RootState,
-  Store as StoreType,
   setIndexPattern as updateIndexPattern,
   useTypedDispatch,
   useTypedSelector,
@@ -21,4 +20,4 @@ export interface DiscoverRootState extends RootState {
 
 export const useSelector: TypedUseSelectorHook<DiscoverRootState> = useTypedSelector;
 export const useDispatch = useTypedDispatch;
-export { StoreType, updateIndexPattern };
+export { updateIndexPattern };
