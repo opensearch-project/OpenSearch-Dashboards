@@ -155,6 +155,7 @@ export class Config {
 
     const platforms: Platform[] = [];
     if (this.targetPlatforms.darwin) platforms.push(this.getPlatform('darwin', 'x64'));
+    if (this.targetPlatforms.darwinArm) platforms.push(this.getPlatform('darwin', 'arm64'));
     if (this.targetPlatforms.linux) platforms.push(this.getPlatform('linux', 'x64'));
     if (this.targetPlatforms.windows) platforms.push(this.getPlatform('win32', 'x64'));
     if (this.targetPlatforms.linuxArm) platforms.push(this.getPlatform('linux', 'arm64'));

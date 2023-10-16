@@ -52,6 +52,7 @@ const setup = async ({
   targetAllPlatforms = true,
   targetPlatforms = {
     darwin: false,
+    darwinArm: false,
     linux: false,
     linuxArm: false,
     windows: false,
@@ -60,6 +61,7 @@ const setup = async ({
   targetAllPlatforms?: boolean;
   targetPlatforms?: {
     darwin: boolean;
+    darwinArm: boolean;
     linux: boolean;
     linuxArm: boolean;
     windows: boolean;
@@ -117,6 +119,7 @@ describe('#hasSpecifiedPlatform', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: true,
+        darwinArm: false,
         linux: false,
         linuxArm: false,
         windows: false,
@@ -130,6 +133,7 @@ describe('#hasSpecifiedPlatform', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: false,
+        darwinArm: false,
         linux: false,
         linuxArm: true,
         windows: false,
@@ -143,6 +147,7 @@ describe('#hasSpecifiedPlatform', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: false,
+        darwinArm: false,
         linux: true,
         linuxArm: false,
         windows: false,
@@ -198,6 +203,7 @@ describe('#getTargetPlatforms()', () => {
     ).toMatchInlineSnapshot(`
       Array [
         "darwin-x64",
+        "darwin-arm64",
         "linux-arm64",
         "linux-x64",
         "win32-x64",
@@ -210,6 +216,7 @@ describe('#getTargetPlatforms()', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: true,
+        darwinArm: false,
         linux: false,
         linuxArm: false,
         windows: false,
@@ -233,6 +240,7 @@ describe('#getTargetPlatforms()', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: false,
+        darwinArm: false,
         linux: true,
         linuxArm: false,
         windows: false,
@@ -256,6 +264,7 @@ describe('#getTargetPlatforms()', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: false,
+        darwinArm: false,
         linux: false,
         linuxArm: true,
         windows: false,
@@ -279,6 +288,7 @@ describe('#getTargetPlatforms()', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: true,
+        darwinArm: false,
         linux: false,
         linuxArm: true,
         windows: false,
@@ -315,7 +325,7 @@ describe('#getNodePlatforms()', () => {
         .getTargetPlatforms()
         .map((p) => p.getNodeArch())
         .sort()
-    ).toEqual(['darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
+    ).toEqual(['darwin-x64', 'darwin-arm64', 'linux-arm64', 'linux-x64', 'win32-x64']);
   });
 
   it('returns this platform and linux, when targetAllPlatforms = false', async () => {
