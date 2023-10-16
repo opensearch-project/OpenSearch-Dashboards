@@ -113,6 +113,7 @@ interface WorkspaceFormProps {
   defaultValues?: WorkspaceFormData;
   opType?: string;
   permissionFirstRowDeletable?: boolean;
+  permissionEnabled?: boolean;
 }
 
 export const WorkspaceForm = ({
@@ -121,6 +122,7 @@ export const WorkspaceForm = ({
   defaultValues,
   opType,
   permissionFirstRowDeletable,
+  permissionEnabled,
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
   const workspaceNameReadOnly = defaultValues?.reserved;
@@ -500,17 +502,19 @@ export const WorkspaceForm = ({
         </EuiPanel>
       )}
       <EuiSpacer />
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h2>Members & permissions</h2>
-        </EuiTitle>
-        <WorkspacePermissionSettingPanel
-          errors={formErrors.permissions}
-          value={permissionSettings}
-          onChange={setPermissionSettings}
-          firstRowDeletable={permissionFirstRowDeletable}
-        />
-      </EuiPanel>
+      {permissionEnabled && (
+        <EuiPanel>
+          <EuiTitle size="s">
+            <h2>Members & permissions</h2>
+          </EuiTitle>
+          <WorkspacePermissionSettingPanel
+            errors={formErrors.permissions}
+            value={permissionSettings}
+            onChange={setPermissionSettings}
+            firstRowDeletable={permissionFirstRowDeletable}
+          />
+        </EuiPanel>
+      )}
       <EuiSpacer />
       <EuiText textAlign="right">
         {opType === WORKSPACE_OP_TYPE_CREATE && (

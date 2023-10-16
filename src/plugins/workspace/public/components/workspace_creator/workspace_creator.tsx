@@ -17,6 +17,7 @@ export const WorkspaceCreator = () => {
     services: { application, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
       let result;
@@ -76,6 +77,7 @@ export const WorkspaceCreator = () => {
               onSubmit={handleWorkspaceFormSubmit}
               opType={WORKSPACE_OP_TYPE_CREATE}
               permissionFirstRowDeletable
+              permissionEnabled={isPermissionEnabled}
             />
           )}
         </EuiPageContent>

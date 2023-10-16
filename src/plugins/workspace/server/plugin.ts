@@ -2,6 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -20,11 +22,12 @@ import {
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
 import { registerPermissionCheckRoutes } from './permission_control/routes';
-
+import { WorkspacePluginConfigType } from '../config';
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceDBImpl;
   private permissionControl?: SavedObjectsPermissionControlContract;
+  private readonly config$: Observable<WorkspacePluginConfigType>;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -44,31 +47,39 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   }
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'workspace');
+    this.logger = initializerContext.logger.get();
+    this.config$ = initializerContext.config.create<WorkspacePluginConfigType>();
   }
 
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
+    const config: WorkspacePluginConfigType = await this.config$.pipe(first()).toPromise();
+    const isPermissionControlEnabled =
+      config.permission.enabled === undefined ? true : config.permission.enabled;
 
     this.client = new WorkspaceClientWithSavedObject(core, this.logger);
 
     await this.client.setup(core);
-    this.permissionControl = new SavedObjectsPermissionControl(this.logger);
 
-    registerPermissionCheckRoutes({
-      http: core.http,
-      permissionControl: this.permissionControl,
-    });
+    this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
+    if (isPermissionControlEnabled) {
+      this.permissionControl = new SavedObjectsPermissionControl(this.logger);
 
-    const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-      this.permissionControl
-    );
+      registerPermissionCheckRoutes({
+        http: core.http,
+        permissionControl: this.permissionControl,
+      });
 
-    core.savedObjects.addClientWrapper(
-      0,
-      WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-      workspaceSavedObjectsClientWrapper.wrapperFactory
-    );
+      const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
+        this.permissionControl
+      );
+
+      core.savedObjects.addClientWrapper(
+        0,
+        WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+        workspaceSavedObjectsClientWrapper.wrapperFactory
+      );
+    }
 
     this.proxyWorkspaceTrafficToRealHandler(core);
 
@@ -82,7 +93,12 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       new SavedObjectsClient(repositoryFactory.createInternalRepository())
     );
 
-    core.capabilities.registerProvider(() => ({ workspaces: { enabled: true } }));
+    core.capabilities.registerProvider(() => ({
+      workspaces: {
+        enabled: true,
+        permissionEnabled: isPermissionControlEnabled,
+      },
+    }));
 
     return {
       client: this.client,
