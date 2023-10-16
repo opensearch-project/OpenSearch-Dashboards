@@ -39,6 +39,7 @@ import {
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
+import { Permissions } from '../permission_control/acl';
 
 /**
  *
@@ -68,6 +69,8 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Note: this can only be used for multi-namespace object types.
    */
   initialNamespaces?: string[];
+  /** permission control describe by ACL object */
+  permissions?: Permissions;
 }
 
 /**
@@ -98,7 +101,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references' | 'permissions'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -180,6 +183,8 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** permission control describe by ACL object */
+  permissions?: Permissions;
 }
 
 /**

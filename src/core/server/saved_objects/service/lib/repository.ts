@@ -245,6 +245,7 @@ export class SavedObjectsRepository {
       initialNamespaces,
       version,
       workspaces,
+      permissions,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -315,6 +316,7 @@ export class SavedObjectsRepository {
       updated_at: time,
       ...(Array.isArray(references) && { references }),
       ...(Array.isArray(savedObjectWorkspaces) && { workspaces: savedObjectWorkspaces }),
+      ...(permissions && { permissions }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -536,6 +538,7 @@ export class SavedObjectsRepository {
             references: object.references || [],
             originId: object.originId,
             workspaces: savedObjectWorkspaces,
+            ...(object.permissions && { permissions: object.permissions }),
           }) as SavedObjectSanitizedDoc
         ),
       };
@@ -1122,7 +1125,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt, workspaces } = body._source;
+    const { originId, updated_at: updatedAt, workspaces, permissions } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
@@ -1138,6 +1141,7 @@ export class SavedObjectsRepository {
       ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
       ...(workspaces && { workspaces }),
+      ...(permissions && { permissions }),
       version: encodeHitVersion(body),
       attributes: body._source[type],
       references: body._source.references || [],
@@ -1166,7 +1170,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, references, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { version, references, refresh = DEFAULT_REFRESH_SETTING, permissions } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: SavedObjectsRawDoc | undefined;
@@ -1180,6 +1184,7 @@ export class SavedObjectsRepository {
       [type]: attributes,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
+      ...(permissions && { permissions }),
     };
 
     const { body, statusCode } = await this.client.update<SavedObjectsRawDocSource>(
@@ -1218,6 +1223,7 @@ export class SavedObjectsRepository {
       namespaces,
       ...(originId && { originId }),
       ...(workspaces && { workspaces }),
+      ...(permissions && { permissions }),
       references,
       attributes,
     };
@@ -1418,7 +1424,7 @@ export class SavedObjectsRepository {
         };
       }
 
-      const { attributes, references, version, namespace: objectNamespace } = object;
+      const { attributes, references, version, namespace: objectNamespace, permissions } = object;
 
       if (objectNamespace === ALL_NAMESPACES_STRING) {
         return {
@@ -1439,6 +1445,7 @@ export class SavedObjectsRepository {
         [type]: attributes,
         updated_at: time,
         ...(Array.isArray(references) && { references }),
+        ...(permissions && { permissions }),
       };
 
       const requiresNamespacesCheck = this._registry.isMultiNamespace(object.type);
@@ -1591,7 +1598,7 @@ export class SavedObjectsRepository {
         )[0] as any;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { [type]: attributes, references, updated_at } = documentToSave;
+        const { [type]: attributes, references, updated_at, permissions } = documentToSave;
         if (error) {
           return {
             id,
@@ -1611,6 +1618,7 @@ export class SavedObjectsRepository {
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
           references,
+          ...(permissions && { permissions }),
         };
       }),
     };
@@ -1903,7 +1911,7 @@ function getSavedObjectFromSource<T>(
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt, workspaces } = doc._source;
+  const { originId, updated_at: updatedAt, workspaces, permissions } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -1923,6 +1931,7 @@ function getSavedObjectFromSource<T>(
     attributes: doc._source[type],
     references: doc._source.references || [],
     migrationVersion: doc._source.migrationVersion,
+    ...(permissions && { permissions }),
   };
 }
 

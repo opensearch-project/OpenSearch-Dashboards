@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { Permissions } from '../permission_control/acl';
 import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 
 /**
@@ -71,6 +72,7 @@ interface SavedObjectDoc<T = unknown> {
   updated_at?: string;
   originId?: string;
   workspaces?: string[];
+  permissions?: Permissions;
 }
 
 interface Referencable {
