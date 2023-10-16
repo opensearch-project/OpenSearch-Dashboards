@@ -12,7 +12,8 @@
     "navigation",
     "savedObjects",
     "visualizations",
-    "uiActions"
+    "uiActions",
+    "dataExplorer"
   ],
   "requiredBundles": [
     "charts",

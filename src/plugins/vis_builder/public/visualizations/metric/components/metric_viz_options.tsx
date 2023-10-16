@@ -16,14 +16,11 @@ import {
   RangeOption,
   SwitchOption,
 } from '../../../../../charts/public';
-import {
-  useTypedDispatch,
-  useTypedSelector,
-  setStyleState,
-} from '../../../application/utils/state_management';
+import { useTypedDispatch, setStyleState } from '../../../application/utils/state_management';
 import { MetricOptionsDefaults } from '../metric_viz_type';
 import { PersistedState } from '../../../../../visualizations/public';
-import { Option } from '../../../application/app';
+import { Option } from '../../../application/components/option';
+import { useVisBuilderContext } from '../../../application/view_components/context';
 
 const METRIC_COLOR_MODES = [
   {
@@ -47,7 +44,8 @@ const METRIC_COLOR_MODES = [
 ];
 
 function MetricVizOptions() {
-  const styleState = useTypedSelector((state) => state.style) as MetricOptionsDefaults;
+  const { rootState } = useVisBuilderContext();
+  const styleState = rootState.style as MetricOptionsDefaults;
   const dispatch = useTypedDispatch();
   const { metric } = styleState;
 

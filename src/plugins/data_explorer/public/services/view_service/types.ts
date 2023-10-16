@@ -7,6 +7,7 @@ import { Slice } from '@reduxjs/toolkit';
 import { LazyExoticComponent } from 'react';
 import { AppMountParameters } from '../../../../../core/public';
 import { RootState } from '../../utils/state_management';
+import { Store } from '../../utils/state_management';
 
 interface ViewListItem {
   id: string;
@@ -20,12 +21,19 @@ export interface DefaultViewState<T = unknown> {
 
 export type ViewProps = AppMountParameters;
 
+type SideEffect<T = any> = (store: Store, state: T, previousState?: T, services?: T) => void;
+
 export interface ViewDefinition<T = any> {
   readonly id: string;
   readonly title: string;
   readonly ui?: {
-    defaults: DefaultViewState | (() => DefaultViewState) | (() => Promise<DefaultViewState>);
-    slice: Slice<T>;
+    defaults:
+      | DefaultViewState
+      | (() => DefaultViewState)
+      | (() => Promise<DefaultViewState>)
+      | (() => Promise<Array<Promise<DefaultViewState<any>>>>);
+    slices: Array<Slice<T>>;
+    sideEffects?: Array<SideEffect<T>>;
   };
   readonly Canvas: LazyExoticComponent<(props: ViewProps) => React.ReactElement>;
   readonly Panel: LazyExoticComponent<(props: ViewProps) => React.ReactElement>;
