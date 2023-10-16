@@ -1,4 +1,4 @@
-## Version 2.10.0 Release Notes
+## Version 2.11.0 Release Notes
 
 ### 🛡 Security
 
