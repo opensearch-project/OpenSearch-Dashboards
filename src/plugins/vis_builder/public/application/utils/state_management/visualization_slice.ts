@@ -5,11 +5,11 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CreateAggConfigParams } from '../../../../../data/common';
-import { VisBuilderServices } from '../../../types';
 import { setActiveVisualization } from './shared_actions';
+import { DefaultViewState } from '../../../../../data_explorer/public';
+import { SliceProps } from './index';
 
 export interface VisualizationState {
-  indexPattern?: string;
   searchField: string;
   activeVisualization?: {
     name: string;
@@ -23,22 +23,27 @@ const initialState: VisualizationState = {
 };
 
 export const getPreloadedState = async ({
-  types,
-  data,
-}: VisBuilderServices): Promise<VisualizationState> => {
-  const preloadedState = { ...initialState };
-
+  services,
+  savedVisBuilderState,
+}: SliceProps): Promise<DefaultViewState<VisualizationState>> => {
+  const { types } = services;
   const defaultVisualization = types.all()[0];
-  const defaultIndexPattern = await data.indexPatterns.getDefault();
   const name = defaultVisualization.name;
-  if (name && defaultIndexPattern) {
-    preloadedState.activeVisualization = {
-      name,
-      aggConfigParams: [],
-    };
+  // Define the default activeVisualization
+  const defaultActiveVisualization = name
+    ? {
+        name,
+        aggConfigParams: [],
+      }
+    : undefined;
 
-    preloadedState.indexPattern = defaultIndexPattern.id;
-  }
+  // Use the saved state if available, otherwise use the default
+  const preloadedState: DefaultViewState<VisualizationState> = {
+    state: savedVisBuilderState?.visualization || {
+      ...initialState,
+      activeVisualization: defaultActiveVisualization,
+    },
+  };
 
   return preloadedState;
 };
@@ -47,11 +52,6 @@ export const slice = createSlice({
   name: 'visualization',
   initialState,
   reducers: {
-    setIndexPattern: (state, action: PayloadAction<string>) => {
-      state.indexPattern = action.payload;
-      state.activeVisualization!.aggConfigParams = [];
-      state.activeVisualization!.draftAgg = undefined;
-    },
     setSearchField: (state, action: PayloadAction<string>) => {
       state.searchField = action.payload;
     },
@@ -131,7 +131,6 @@ export const slice = createSlice({
 
 export const { reducer } = slice;
 export const {
-  setIndexPattern,
   setSearchField,
   editDraftAgg,
   saveDraftAgg,

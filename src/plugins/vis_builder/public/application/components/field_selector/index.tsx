@@ -9,13 +9,13 @@ import { EuiFlexItem, EuiAccordion, EuiNotificationBadge, EuiTitle } from '@elas
 import { IndexPattern, IndexPatternField, OSD_FIELD_TYPES } from '../../../../../data/public';
 
 import { COUNT_FIELD } from '../../utils/drag_drop';
-import { useTypedSelector } from '../../utils/state_management';
-import { useIndexPatterns, useSampleHits } from '../../utils/use';
+import { useVisBuilderContext } from '../../view_components/context';
+import { useSampleHits } from '../../utils/use/use_sample_hits';
 import { FieldSearch } from './field_search';
 import { Field, DraggableFieldButton } from './field';
 import { FieldDetails } from './types';
 import { getAvailableFields, getDetails } from './utils';
-import './field_selector.scss';
+import './index.scss';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];
@@ -24,18 +24,20 @@ interface IFieldCategories {
 }
 
 export const FieldSelector = () => {
-  const indexPattern = useIndexPatterns().selected;
-  const fieldSearchValue = useTypedSelector((state) => state.visualization.searchField);
+  const { indexPattern, rootState } = useVisBuilderContext();
+  const fieldSearchValue = rootState.visualization.searchField;
   // TODO: instead of a single fetch of sampled hits for all fields, we should just use the agg service to get top hits or terms per field: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/2780
   const hits = useSampleHits();
   const [filteredFields, setFilteredFields] = useState<IndexPatternField[]>([]);
 
   useEffect(() => {
     const indexFields = indexPattern?.fields.getAll() ?? [];
-    const filteredSubset = getAvailableFields(indexFields).filter((field) =>
+    const filteredSubset = getAvailableFields(indexFields).filter((field) => {
       // case-insensitive field search
-      field.displayName.toLowerCase().includes(fieldSearchValue.toLowerCase())
-    );
+      const displayName = field.displayName;
+
+      return displayName.toLowerCase().includes(fieldSearchValue.toLowerCase());
+    });
 
     setFilteredFields(filteredSubset);
     return;

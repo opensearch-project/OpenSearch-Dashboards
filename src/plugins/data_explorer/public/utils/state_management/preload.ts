@@ -22,19 +22,39 @@ export const getPreloadedState = async (
       return;
     }
 
-    const { defaults } = view.ui;
+    const { defaults, slices } = view.ui;
 
     try {
       // defaults can be a function or an object
       const preloadedState = typeof defaults === 'function' ? await defaults() : defaults;
-      rootState[view.id] = preloadedState.state;
-
-      // if the view wants to override the root state, we do that here
-      if (preloadedState.root) {
-        rootState = {
-          ...rootState,
-          ...preloadedState.root,
-        };
+      if (Array.isArray(preloadedState)) {
+        await Promise.all(
+          preloadedState.map(async (statePromise, index) => {
+            try {
+              const state = await statePromise;
+              const slice = slices[index];
+              const prefixedSliceName =
+                slice.name === view.id ? slice.name : `${view.id}-${slice.name}`;
+              rootState[prefixedSliceName] = state.state;
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.error(`Error initializing slice: ${e}`);
+            }
+          })
+        );
+      } else {
+        slices.forEach((slice) => {
+          const prefixedSliceName =
+            slice.name === view.id ? slice.name : `${view.id}-${slice.name}`;
+          rootState[prefixedSliceName] = preloadedState.state;
+        });
+        // if the view wants to override the root state, we do that here
+        if (preloadedState.root) {
+          rootState = {
+            ...rootState,
+            ...preloadedState.root,
+          };
+        }
       }
     } catch (e) {
       // eslint-disable-next-line no-console

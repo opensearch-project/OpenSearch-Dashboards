@@ -6,7 +6,7 @@
 import { coreMock } from '../../../../core/public/mocks';
 import { getStubIndexPattern } from '../../../data/public/test_utils';
 import { IndexPattern } from '../../../data/public';
-import { RootState } from '../application/utils/state_management';
+import { VisBuilderRootState } from '../application/utils/state_management';
 import { VisBuilderSavedObject } from '../types';
 import { getStateFromSavedObject, saveStateToSavedObject } from './transforms';
 import { VisBuilderSavedObjectAttributes } from '../../common';
@@ -17,18 +17,18 @@ describe('transforms', () => {
   describe('saveStateToSavedObject', () => {
     let TEST_INDEX_PATTERN_ID;
     let savedObject;
-    let rootState: RootState;
+    let rootState: VisBuilderRootState;
     let indexPattern: IndexPattern;
 
     beforeEach(() => {
       TEST_INDEX_PATTERN_ID = 'test-pattern';
       savedObject = {} as VisBuilderSavedObject;
       rootState = {
-        metadata: { editor: { state: 'loading', errors: {} } },
+        metadata: { indexPattern: TEST_INDEX_PATTERN_ID },
+        editor: { status: 'loading', errors: {}, savedVisBuilderId: '' },
         style: {},
         visualization: {
           searchField: '',
-          indexPattern: TEST_INDEX_PATTERN_ID,
           activeVisualization: {
             name: 'bar',
             aggConfigParams: [],
@@ -55,7 +55,7 @@ describe('transforms', () => {
     });
 
     test('should fail if the index pattern does not match the value on state', () => {
-      rootState.visualization.indexPattern = 'Some-other-pattern';
+      rootState.metadata.indexPattern = 'Some-other-pattern';
 
       expect(() =>
         saveStateToSavedObject(savedObject, rootState, indexPattern)
@@ -82,10 +82,12 @@ describe('transforms', () => {
 
       expect(state).toMatchInlineSnapshot(`
         Object {
+          "metadata": Object {
+            "indexPattern": "test-index",
+          },
           "style": Object {},
           "ui": Object {},
           "visualization": Object {
-            "indexPattern": "test-index",
             "searchField": "",
           },
         }

@@ -9,7 +9,8 @@ import { i18n } from '@osd/i18n';
 
 import { IndexPatternField } from '../../../../../data/public';
 
-import { useIndexPatterns, useOnAddFilter } from '../../utils/use';
+import { useOnAddFilter } from '../../utils/use';
+import { useVisBuilderContext } from '../../view_components/context';
 import { FieldBucket } from './field_bucket';
 import { Bucket, FieldDetails } from './types';
 
@@ -22,7 +23,7 @@ export function FieldDetailsView({ field, details }: FieldDetailsProps) {
   const { buckets, error, exists, total } = details;
 
   const onAddFilter = useOnAddFilter();
-  const indexPattern = useIndexPatterns().selected;
+  const { indexPattern } = useVisBuilderContext();
 
   const { metaFields = [] } = indexPattern ?? {};
   const isMetaField = metaFields.includes(field.name);

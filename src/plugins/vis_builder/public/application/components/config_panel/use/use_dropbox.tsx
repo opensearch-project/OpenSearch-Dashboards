@@ -19,6 +19,7 @@ import {
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { VisBuilderServices } from '../../../../types';
 import { useAggs } from '../../../utils/use';
+import { useVisBuilderContext } from '../../../view_components/context';
 
 const filterByName = propFilter('name');
 const filterByType = propFilter('type');
@@ -30,7 +31,8 @@ export interface UseDropboxProps extends Pick<DropboxProps, 'id' | 'label'> {
 export const useDropbox = (props: UseDropboxProps): DropboxProps => {
   const { id: dropboxId, label, schema } = props;
   const [validAggTypes, setValidAggTypes] = useState<string[]>([]);
-  const { aggConfigs, indexPattern, aggs, timeRange } = useAggs();
+  const { indexPattern } = useVisBuilderContext();
+  const { aggConfigs, aggs, timeRange } = useAggs();
   const dispatch = useTypedDispatch();
   const {
     services: {

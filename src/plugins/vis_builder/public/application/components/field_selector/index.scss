@@ -2,22 +2,25 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 @import "../../util";
 
 .vbFieldSelector {
   @include scrollNavParent(auto 1fr);
 
+  width: 100%;
   padding: $euiSizeS;
 
   &__fieldGroups {
     @include euiYScrollWithShadows;
 
     overflow-y: auto;
-    margin-right: -$euiSizeS;
+    margin-right: 0;
     padding-right: $euiSizeS;
-    margin-left: -$euiSizeS;
+    margin-left: 0;
     padding-left: $euiSizeS;
     margin-top: $euiSizeS;
+    width: 100%;
   }
 
   &__fieldGroup {

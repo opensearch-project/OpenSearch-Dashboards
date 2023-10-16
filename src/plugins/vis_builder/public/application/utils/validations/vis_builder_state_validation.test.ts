@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { RootState } from '../state_management';
+import { VisBuilderRootState } from '../state_management';
 import { validateVisBuilderState } from './vis_builder_state_validation';
 
 describe('visBuilder state validation', () => {
@@ -14,12 +14,11 @@ describe('visBuilder state validation', () => {
     type: 'metric',
   };
 
-  const validVisualizationState: RootState['visualization'] = {
+  const validVisualizationState: VisBuilderRootState['visualization'] = {
     activeVisualization: {
       name: 'metric',
       aggConfigParams: [],
     },
-    indexPattern: '',
     searchField: '',
   };
 
