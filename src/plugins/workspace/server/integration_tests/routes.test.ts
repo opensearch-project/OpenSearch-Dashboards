@@ -8,6 +8,7 @@ import { omit } from 'lodash';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
 import { WorkspaceRoutePermissionItem } from '../types';
 import { WorkspacePermissionMode } from '../../../../core/server';
+import { WORKSPACE_TYPE } from '../../../../core/server';
 
 const testWorkspace: WorkspaceAttribute & {
   permissions: WorkspaceRoutePermissionItem;
@@ -31,6 +32,7 @@ describe('workspace service', () => {
               enabled: false,
             },
           },
+          migrations: { skip: false },
         },
       },
     });
@@ -52,7 +54,11 @@ describe('workspace service', () => {
         .expect(200);
       await Promise.all(
         listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
-          osdTestServer.request.delete(root, `/api/workspaces/${item.id}`).expect(200)
+          // workspace delete API will not able to delete reserved workspace
+          // to clean up the test data, change it saved objects delete API
+          osdTestServer.request
+            .delete(root, `/api/saved_objects/${WORKSPACE_TYPE}/${item.id}`)
+            .expect(200)
         )
       );
     });
@@ -123,6 +129,16 @@ describe('workspace service', () => {
         .expect(200);
 
       await osdTestServer.request
+        .post(root, `/api/saved_objects/index-pattern/logstash-*`)
+        .send({
+          attributes: {
+            title: 'logstash-*',
+          },
+          workspaces: [result.body.result.id],
+        })
+        .expect(200);
+
+      await osdTestServer.request
         .delete(root, `/api/workspaces/${result.body.result.id}`)
         .expect(200);
 
@@ -132,6 +148,29 @@ describe('workspace service', () => {
       );
 
       expect(getResult.body.success).toEqual(false);
+
+      // saved objects been deleted
+      await osdTestServer.request
+        .get(root, `/api/saved_objects/index-pattern/logstash-*`)
+        .expect(404);
+    });
+    it('delete reserved workspace', async () => {
+      const reservedWorkspace: WorkspaceAttribute = { ...testWorkspace, reserved: true };
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omit(reservedWorkspace, 'id'),
+        })
+        .expect(200);
+
+      const deleteResult = await osdTestServer.request
+        .delete(root, `/api/workspaces/${result.body.result.id}`)
+        .expect(200);
+
+      expect(deleteResult.body.success).toEqual(false);
+      expect(deleteResult.body.error).toEqual(
+        `Reserved workspace ${result.body.result.id} is not allowed to delete.`
+      );
     });
     it('list', async () => {
       await osdTestServer.request
@@ -147,7 +186,7 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      expect(listResult.body.result.total).toEqual(3);
+      expect(listResult.body.result.total).toEqual(1);
     });
   });
 });
