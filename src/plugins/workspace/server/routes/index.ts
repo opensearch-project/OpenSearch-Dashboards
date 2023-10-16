@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { schema } from '@osd/config-schema';
 import { ensureRawRequest } from '../../../../core/server';
 

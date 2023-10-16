@@ -358,5 +358,3 @@ export {
   MANAGEMENT_WORKSPACE_ID,
   WORKSPACE_TYPE,
 } from '../utils';
-
-export { getWorkspaceIdFromUrl } from './utils';

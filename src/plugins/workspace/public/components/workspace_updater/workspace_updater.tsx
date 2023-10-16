@@ -24,7 +24,7 @@ import {
 } from '../workspace_creator/workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID, WORKSPACE_OP_TYPE_UPDATE } from '../../../common/constants';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
-import { formatUrlWithWorkspaceId } from '../../utils';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { WorkspacePermissionSetting } from '../';
 

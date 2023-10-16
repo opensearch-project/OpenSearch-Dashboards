@@ -45,3 +45,4 @@ export {
   WORKSPACE_TYPE,
   PERSONAL_WORKSPACE_ID_PREFIX,
 } from './constants';
+export { getWorkspaceIdFromUrl, formatUrlWithWorkspaceId, cleanWorkspaceId } from './workspace';

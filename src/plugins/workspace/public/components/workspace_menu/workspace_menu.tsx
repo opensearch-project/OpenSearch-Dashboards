@@ -29,7 +29,7 @@ import {
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_OVERVIEW_APP_ID,
 } from '../../../common/constants';
-import { formatUrlWithWorkspaceId } from '../../utils';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 
 interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];

@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import {
   HttpFetchError,
   HttpFetchOptions,
@@ -102,7 +103,7 @@ export class WorkspaceClient {
     }
   };
 
-  private getPath(path: Array<string | undefined>): string {
+  private getPath(...path: Array<string | undefined>): string {
     return [WORKSPACES_API_BASE_URL, join(...path)].filter((item) => item).join('/');
   }
 
@@ -179,7 +180,7 @@ export class WorkspaceClient {
       permissions: WorkspaceRoutePermissionItem[];
     }
   ): Promise<IResponse<WorkspaceAttribute>> {
-    const path = this.getPath([]);
+    const path = this.getPath();
 
     const result = await this.safeFetch<WorkspaceAttribute>(path, {
       method: 'POST',
@@ -202,7 +203,7 @@ export class WorkspaceClient {
    * @returns
    */
   public async delete(id: string): Promise<IResponse<null>> {
-    const result = await this.safeFetch<null>(this.getPath([id]), { method: 'DELETE' });
+    const result = await this.safeFetch<null>(this.getPath(id), { method: 'DELETE' });
 
     if (result.success) {
       await this.updateWorkspaceList();
@@ -216,15 +217,15 @@ export class WorkspaceClient {
    *
    * @param {object} [options={}]
    * @property {string} options.search
-   * @property {string} options.search_fields - see OpenSearch Simple Query String
+   * @property {string} options.searchFields - see OpenSearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
-   * @property {integer} [options.per_page=20]
+   * @property {integer} [options.perPage=20]
    * @property {array} options.fields
    * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
    */
-  public list = (
+  public list(
     options?: WorkspaceFindOptions
   ): Promise<
     IResponse<{
@@ -233,13 +234,13 @@ export class WorkspaceClient {
       per_page: number;
       page: number;
     }>
-  > => {
-    const path = this.getPath(['_list']);
+  > {
+    const path = this.getPath('_list');
     return this.safeFetch(path, {
       method: 'POST',
       body: JSON.stringify(options || {}),
     });
-  };
+  }
 
   /**
    * Fetches a single workspace
@@ -247,8 +248,8 @@ export class WorkspaceClient {
    * @param {string} id
    * @returns The workspace for the given id.
    */
-  public async get(id: string): Promise<IResponse<WorkspaceAttribute>> {
-    const path = this.getPath([id]);
+  public get(id: string): Promise<IResponse<WorkspaceAttribute>> {
+    const path = this.getPath(id);
     return this.safeFetch(path, {
       method: 'GET',
     });
@@ -269,7 +270,7 @@ export class WorkspaceClient {
       }
     >
   ): Promise<IResponse<boolean>> {
-    const path = this.getPath([id]);
+    const path = this.getPath(id);
     const body = {
       attributes,
     };

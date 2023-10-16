@@ -200,12 +200,6 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 exports[`SavedObjectsTable should render normally 1`] = `
 <EuiPageContent
   horizontalPosition="center"
-  style={
-    Object {
-      "marginTop": "40px",
-      "maxWidth": "75%",
-    }
-  }
 >
   <Header
     filteredCount={4}

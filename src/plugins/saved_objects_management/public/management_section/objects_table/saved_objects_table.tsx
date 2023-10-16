@@ -1075,10 +1075,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const hideImport = workspaceEnabled && !workspaceId;
 
     return (
-      <EuiPageContent
-        horizontalPosition="center"
-        style={this.props.fullWidth ? {} : { maxWidth: '75%', marginTop: '40px' }}
-      >
+      <EuiPageContent horizontalPosition="center">
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
