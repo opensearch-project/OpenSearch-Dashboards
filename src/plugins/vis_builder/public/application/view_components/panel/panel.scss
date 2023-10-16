@@ -2,11 +2,12 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 @import "../../util";
 
-.vbDataTab {
+.vbFieldSelector {
   @include scrollNavParent;
 
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 100%;
 }

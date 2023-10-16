@@ -6,20 +6,21 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import produce, { Draft } from 'immer';
-import { useTypedDispatch, useTypedSelector } from '../../../../application/utils/state_management';
+import { useTypedDispatch, setStyleState } from '../../../../application/utils/state_management';
 import { AreaOptionsDefaults } from '../area_vis_type';
-import { setState } from '../../../../application/utils/state_management/style_slice';
-import { Option } from '../../../../application/app';
+import { Option } from '../../../../application/components/option';
 import { BasicVisOptions } from '../../common/basic_vis_options';
+import { useVisBuilderContext } from '../../../../application/view_components/context';
 
 function AreaVisOptions() {
-  const styleState = useTypedSelector((state) => state.style) as AreaOptionsDefaults;
+  const { rootState } = useVisBuilderContext();
+  const styleState = rootState.style as AreaOptionsDefaults;
   const dispatch = useTypedDispatch();
 
   const setOption = useCallback(
     (callback: (draft: Draft<typeof styleState>) => void) => {
       const newState = produce(styleState, callback);
-      dispatch(setState<AreaOptionsDefaults>(newState));
+      dispatch(setStyleState<AreaOptionsDefaults>(newState));
     },
     [dispatch, styleState]
   );

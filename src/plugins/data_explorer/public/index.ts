@@ -15,6 +15,8 @@ export function plugin() {
 export { DataExplorerPluginSetup, DataExplorerPluginStart, DataExplorerServices } from './types';
 export { ViewProps, ViewDefinition, DefaultViewState } from './services/view_service';
 export {
+  AppDispatch,
+  MetadataState,
   RootState,
   Store,
   useTypedSelector,

@@ -86,8 +86,11 @@ export interface MetricRootState extends RenderState {
   style: MetricOptionsDefaults;
 }
 
-export const toExpression = async ({ style: styleState, visualization }: MetricRootState) => {
-  const { aggConfigs, expressionFns } = await getAggExpressionFunctions(visualization);
+export const toExpression = async (
+  { style: styleState, visualization }: MetricRootState,
+  indexId: string
+) => {
+  const { aggConfigs, expressionFns } = await getAggExpressionFunctions(visualization, indexId);
 
   // TODO: Update to use the getVisSchemas function from the Visualizations plugin
   // const schemas = getVisSchemas(vis, params);

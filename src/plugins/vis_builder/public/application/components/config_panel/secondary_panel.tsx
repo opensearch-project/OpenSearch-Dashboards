@@ -8,32 +8,31 @@ import { cloneDeep, get } from 'lodash';
 import { useDebounce } from 'react-use';
 import { i18n } from '@osd/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import { useTypedDispatch } from '../../utils/state_management';
 import { DefaultEditorAggParams } from '../../../../../vis_default_editor/public';
 import { Title } from './title';
-import { useIndexPatterns, useVisualizationType } from '../../utils/use';
+import { useVisualizationType } from '../../utils/use';
 import {
   OpenSearchDashboardsContextProvider,
   useOpenSearchDashboards,
 } from '../../../../../opensearch_dashboards_react/public';
-import { VisBuilderServices } from '../../../types';
+import { useVisBuilderContext } from '../../view_components/context';
+import { VisBuilderViewServices } from '../../../types';
 import { AggParam, IAggType, IFieldParamType } from '../../../../../data/public';
 import { saveDraftAgg, editDraftAgg } from '../../utils/state_management/visualization_slice';
-import { setError } from '../../utils/state_management/metadata_slice';
+import { setError } from '../../utils/state_management/editor_slice';
 import { Storage } from '../../../../../opensearch_dashboards_utils/public';
 
 const PANEL_KEY = 'SECONDARY_PANEL';
 
 export function SecondaryPanel() {
-  const { draftAgg, aggConfigParams } = useTypedSelector(
-    (state) => state.visualization.activeVisualization!
-  );
-  const isEditorValid = useTypedSelector((state) => !state.metadata.editor.errors[PANEL_KEY]);
+  const { indexPattern, rootState } = useVisBuilderContext();
+  const { draftAgg, aggConfigParams } = rootState.visualization.activeVisualization!;
+  const isEditorValid = rootState.editor.errors[PANEL_KEY];
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
   const vizType = useVisualizationType();
-  const indexPattern = useIndexPatterns().selected;
-  const { services } = useOpenSearchDashboards<VisBuilderServices>();
+  const { services } = useOpenSearchDashboards<VisBuilderViewServices>();
   const {
     data: {
       search: { aggs: aggService },

@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ScopedHistory } from '../../../../core/public';
-import { coreMock, scopedHistoryMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { embeddablePluginMock } from '../../../embeddable/public/mocks';
-import { expressionsPluginMock } from '../../../expressions/public/mocks';
-import { createOsdUrlStateStorage } from '../../../opensearch_dashboards_utils/public';
-import { DataExplorerServices } from '../types';
+import { ScopedHistory } from '../../../core/public';
+import { coreMock, scopedHistoryMock } from '../../../core/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
+import { embeddablePluginMock } from '../../embeddable/public/mocks';
+import { expressionsPluginMock } from '../../expressions/public/mocks';
+import { createOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
+import { DataExplorerServices } from './types';
 
-export const createDataExplorerServicesMock = () => {
+export const createDataExplorerStartServicesMock = () => {
   const coreStartMock = coreMock.createStart();
   const dataMock = dataPluginMock.createStartContract();
   const embeddableMock = embeddablePluginMock.createStartContract();
@@ -32,4 +32,17 @@ export const createDataExplorerServicesMock = () => {
   };
 
   return (dataExplorerServicesMock as unknown) as jest.Mocked<DataExplorerServices>;
+};
+
+export const createDataExplorerSetupServicesMock = () => {
+  const setupMock = {
+    registerView: jest.fn(),
+  };
+
+  return setupMock;
+};
+
+export const dataExplorerPluginMock = {
+  createDataExplorerStartServicesMock,
+  createDataExplorerSetupServicesMock,
 };

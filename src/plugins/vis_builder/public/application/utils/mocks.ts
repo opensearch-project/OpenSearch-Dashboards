@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ScopedHistory } from '../../../../../core/public';
-import { coreMock, scopedHistoryMock } from '../../../../../core/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../../expressions/public/mocks';
 import { navigationPluginMock } from '../../../../navigation/public/mocks';
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
-import { VisBuilderServices } from '../../types';
+import { VisBuilderViewServices } from '../../types';
 
 export const createVisBuilderServicesMock = () => {
   const coreStartMock = coreMock.createStart();
@@ -40,7 +39,6 @@ export const createVisBuilderServicesMock = () => {
     i18n: i18nContextMock,
     data: indexPatternMock,
     embeddable: embeddableMock,
-    scopedHistory: (scopedHistoryMock.create() as unknown) as ScopedHistory,
     osdUrlStateStorage: osdUrlStateStorageMock,
     types: {
       all: () => [
@@ -59,5 +57,5 @@ export const createVisBuilderServicesMock = () => {
     },
   };
 
-  return (visBuilderServicesMock as unknown) as jest.Mocked<VisBuilderServices>;
+  return (visBuilderServicesMock as unknown) as jest.Mocked<VisBuilderViewServices>;
 };

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const PLUGIN_ID = 'vis-builder';
+// treat PLUGIN_ID as a literal type 'vis-builder' rather than just string
+export const PLUGIN_ID = 'vis-builder' as const;
 export const PLUGIN_NAME = 'VisBuilder';
 export const VISUALIZE_ID = 'visualize';
 export const EDIT_PATH = '/edit';

@@ -2,14 +2,15 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 @import "variables";
 
 .vbLayout {
   padding: 0;
   display: grid;
   grid-template:
-    "topNav topNav" min-content
-    "leftNav workspaceNav" 1fr / #{$vbLeftNavWidth} 1fr;
+    "topNav" min-content
+    "workspaceNav" 1fr / 1fr;
   height: calc(100vh - #{$osdHeaderOffset});
 
   &__resizeContainer {
