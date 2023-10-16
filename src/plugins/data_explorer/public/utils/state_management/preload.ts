@@ -22,12 +22,15 @@ export const getPreloadedState = async (
       return;
     }
 
-    const { defaults } = view.ui;
+    const { defaults, slices } = view.ui;
 
     try {
       // defaults can be a function or an object
       const preloadedState = typeof defaults === 'function' ? await defaults() : defaults;
-      rootState[view.id] = preloadedState.state;
+      slices.forEach((slice) => {
+        const id = slice.name;
+        rootState[id] = preloadedState.state.id ? preloadedState.state.id : preloadedState.state;
+      });
 
       // if the view wants to override the root state, we do that here
       if (preloadedState.root) {

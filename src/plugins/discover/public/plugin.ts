@@ -329,7 +329,7 @@ export class DiscoverPlugin
           const services = getServices();
           return await getPreloadedState(services);
         },
-        slice: discoverSlice,
+        slices: [discoverSlice],
       },
       shouldShow: () => true,
       // ViewComponent

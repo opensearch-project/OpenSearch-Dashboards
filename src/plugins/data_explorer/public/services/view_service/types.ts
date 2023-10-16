@@ -25,7 +25,15 @@ export interface ViewDefinition<T = any> {
   readonly title: string;
   readonly ui?: {
     defaults: DefaultViewState | (() => DefaultViewState) | (() => Promise<DefaultViewState>);
-    slice: Slice<T>;
+    slices: Array<Slice<T>>;
+    sideEffects?: Array<
+      (
+        store: Store,
+        currentState: RootState,
+        previousState?: RootState,
+        services?: DataExplorerServices
+      ) => void
+    >;
   };
   readonly Canvas: LazyExoticComponent<(props: ViewProps) => React.ReactElement>;
   readonly Panel: LazyExoticComponent<(props: ViewProps) => React.ReactElement>;
