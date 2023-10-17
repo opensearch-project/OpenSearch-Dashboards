@@ -4,8 +4,12 @@
  */
 
 import { WorkspaceAttribute } from 'src/core/types';
-import { omit } from 'lodash';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
+
+const omitId = <T extends { id?: string }>(object: T): Omit<T, 'id'> => {
+  const { id, ...others } = object;
+  return others;
+};
 
 const testWorkspace: WorkspaceAttribute = {
   id: 'fake_id',
@@ -60,7 +64,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -71,7 +75,7 @@ describe('workspace service', () => {
       const result = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -85,7 +89,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -93,7 +97,7 @@ describe('workspace service', () => {
         .put(root, `/api/workspaces/${result.body.result.id}`)
         .send({
           attributes: {
-            ...omit(testWorkspace, 'id'),
+            ...omitId(testWorkspace),
             name: 'updated',
           },
         })
@@ -111,7 +115,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .expect(200);
 
@@ -130,7 +134,17 @@ describe('workspace service', () => {
       await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'another test workspace',
+          },
         })
         .expect(200);
 

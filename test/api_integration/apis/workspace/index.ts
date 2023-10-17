@@ -123,6 +123,17 @@ export default function ({ getService }: FtrProviderContext) {
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
 
+      await supertest
+        .post(`/api/workspaces`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'another test workspace',
+          },
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(200);
+
       const listResult = await supertest
         .post(`/api/workspaces/_list`)
         .send({
@@ -130,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
-      expect(listResult.body.result.total).equal(1);
+      expect(listResult.body.result.total).equal(2);
     });
-  }).tags('is:workspace');
+  });
 }
