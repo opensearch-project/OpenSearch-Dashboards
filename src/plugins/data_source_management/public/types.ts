@@ -61,19 +61,19 @@ export enum AuthType {
 export const credentialSourceOptions = [
   {
     value: AuthType.NoAuth,
-    text: i18n.translate('dataSourceManagement.credentialSourceOptions.NoAuthentication', {
+    inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.NoAuthentication', {
       defaultMessage: 'No authentication',
     }),
   },
   {
     value: AuthType.UsernamePasswordType,
-    text: i18n.translate('dataSourceManagement.credentialSourceOptions.UsernamePassword', {
+    inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.UsernamePassword', {
       defaultMessage: 'Username & Password',
     }),
   },
   {
     value: AuthType.SigV4,
-    text: i18n.translate('dataSourceManagement.credentialSourceOptions.AwsSigV4', {
+    inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.AwsSigV4', {
       defaultMessage: 'AWS SigV4',
     }),
   },
@@ -82,13 +82,13 @@ export const credentialSourceOptions = [
 export const sigV4ServiceOptions = [
   {
     value: SigV4ServiceName.OpenSearch,
-    text: i18n.translate('dataSourceManagement.SigV4ServiceOptions.OpenSearch', {
+    inputDisplay: i18n.translate('dataSourceManagement.SigV4ServiceOptions.OpenSearch', {
       defaultMessage: 'Amazon OpenSearch Service',
     }),
   },
   {
     value: SigV4ServiceName.OpenSearchServerless,
-    text: i18n.translate('dataSourceManagement.SigV4ServiceOptions.OpenSearchServerless', {
+    inputDisplay: i18n.translate('dataSourceManagement.SigV4ServiceOptions.OpenSearchServerless', {
       defaultMessage: 'Amazon OpenSearch Serverless',
     }),
   },
