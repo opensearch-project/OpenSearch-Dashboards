@@ -136,6 +136,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
               Object {
                 fields: Array [
                   id,
+                  workspaces,
                 ],
                 id: 1,
                 type: index-pattern,
@@ -230,6 +231,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
               Object {
                 fields: Array [
                   id,
+                  workspaces,
                 ],
                 id: 1,
                 type: index-pattern,
@@ -237,6 +239,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
               Object {
                 fields: Array [
                   id,
+                  workspaces,
                 ],
                 id: 3,
                 type: search,
@@ -419,6 +422,7 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
+                  workspaces,
                 ],
                 id: 3,
                 type: index-pattern,
@@ -426,6 +430,7 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
+                  workspaces,
                 ],
                 id: 5,
                 type: index-pattern,
@@ -433,6 +438,7 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
+                  workspaces,
                 ],
                 id: 6,
                 type: index-pattern,
@@ -440,6 +446,7 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
+                  workspaces,
                 ],
                 id: 7,
                 type: search,
@@ -447,6 +454,7 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
+                  workspaces,
                 ],
                 id: 8,
                 type: search,
@@ -600,5 +608,101 @@ describe('validateReferences()', () => {
     await expect(
       validateReferences(savedObjects, savedObjectsClient)
     ).rejects.toThrowErrorMatchingInlineSnapshot(`Bad Request`);
+  });
+
+  test('returns errors when references have conflict on workspaces', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          type: 'index-pattern',
+          id: '3',
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '3').output
+            .payload,
+          attributes: {},
+          references: [],
+          workspaces: ['foo'],
+        },
+        {
+          type: 'index-pattern',
+          id: '5',
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '5').output
+            .payload,
+          attributes: {},
+          references: [],
+          workspaces: ['bar'],
+        },
+      ],
+    });
+    const savedObjects = [
+      {
+        id: '5',
+        type: 'index-pattern',
+        attributes: {
+          title: 'My Visualization 2',
+        },
+        references: [
+          {
+            name: 'ref_0',
+            type: 'index-pattern',
+            id: '3',
+          },
+        ],
+      },
+    ];
+    const result = await validateReferences(
+      savedObjects,
+      savedObjectsClient,
+      undefined,
+      undefined,
+      ['bar']
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          error: Object {
+            references: Array [
+              Object {
+                id: 3,
+                type: index-pattern,
+              },
+            ],
+            type: missing_references,
+          },
+          id: 5,
+          meta: Object {
+            title: My Visualization 2,
+          },
+          title: My Visualization 2,
+          type: index-pattern,
+        },
+      ]
+    `);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                fields: Array [
+                  id,
+                  workspaces,
+                ],
+                id: 3,
+                type: index-pattern,
+              },
+            ],
+            Object {
+              namespace: undefined,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            type: return,
+            value: Promise {},
+          },
+        ],
+      }
+    `);
   });
 });

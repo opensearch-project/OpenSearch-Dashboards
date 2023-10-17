@@ -38,7 +38,7 @@ import { validateReferences } from './validate_references';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
 import { checkConflicts } from './check_conflicts';
-import { regenerateIds, regenerateIdsWithReference } from './regenerate_ids';
+import { regenerateIds } from './regenerate_ids';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -74,23 +74,17 @@ export async function importSavedObjectsFromStream({
   const validateReferencesResult = await validateReferences(
     collectSavedObjectsResult.collectedObjects,
     savedObjectsClient,
-    namespace
+    namespace,
+    undefined,
+    workspaces
   );
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
     importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
   } else {
-    if (workspaces) {
-      importIdMap = await regenerateIdsWithReference({
-        savedObjects: collectSavedObjectsResult.collectedObjects,
-        savedObjectsClient,
-        workspaces,
-        objectLimit,
-        importIdMap,
-      });
-    }
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
+    // Check for conflicts across all workspaces
     const checkConflictsParams = {
       objects: collectSavedObjectsResult.collectedObjects,
       savedObjectsClient,

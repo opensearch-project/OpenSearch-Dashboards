@@ -291,7 +291,7 @@ export class SavedObjectsRepository {
       }
       if (currentItem) {
         if (
-          SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+          SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
             workspaces,
             currentItem.workspaces
           ).length
@@ -493,7 +493,7 @@ export class SavedObjectsRepository {
           const transformedObject = this._serializer.rawToSavedObject(
             findObject as SavedObjectsRawDoc
           ) as SavedObject;
-          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
             options.workspaces,
             transformedObject.workspaces
           );
@@ -658,7 +658,7 @@ export class SavedObjectsRepository {
         let workspaceConflict = false;
         if (options.workspaces) {
           const transformedObject = this._serializer.rawToSavedObject(doc as SavedObjectsRawDoc);
-          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
+          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
             options.workspaces,
             transformedObject.workspaces
           );
