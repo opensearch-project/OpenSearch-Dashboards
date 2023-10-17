@@ -21,7 +21,7 @@ export const WorkspaceCreatorApp = () => {
     chrome?.setBreadcrumbs([
       {
         text: i18n.translate('workspace.workspaceCreateTitle', {
-          defaultMessage: 'Workspace Create',
+          defaultMessage: 'Create workspace',
         }),
       },
     ]);

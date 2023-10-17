@@ -22,7 +22,6 @@ import {
   WORKSPACE_UPDATE_APP_ID,
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_OVERVIEW_APP_ID,
-  WORKSPACE_NAV_CATEGORY,
   WORKSPACE_FATAL_ERROR_APP_ID,
 } from '../common/constants';
 import { SavedObjectsManagementPluginSetup } from '../../saved_objects_management/public';
@@ -148,11 +147,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     // list
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceList', {
-        defaultMessage: 'See More',
-      }),
-      euiIconType: 'folderClosed',
-      category: WORKSPACE_NAV_CATEGORY,
+      title: '',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');

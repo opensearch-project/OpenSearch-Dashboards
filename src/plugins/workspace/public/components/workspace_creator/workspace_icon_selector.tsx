@@ -5,9 +5,9 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect, EuiText } from '@elastic/eui';
 
-const icons = ['glasses', 'search', 'bell'];
+const icons = ['Glasses', 'Search', 'Bell', 'Package'];
 
 export const WorkspaceIconSelector = ({
   color,
@@ -18,19 +18,29 @@ export const WorkspaceIconSelector = ({
   value?: string;
   onChange: (value: string) => void;
 }) => {
-  return (
-    <EuiFlexGroup>
-      {icons.map((item) => (
-        <EuiFlexItem
-          key={item}
-          onClick={() => {
-            onChange(item);
-          }}
-          grow={false}
-        >
-          <EuiIcon size="l" type={item} color={value === item ? color : undefined} />
+  const options = icons.map((item) => ({
+    value: item,
+    inputDisplay: (
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        data-test-subj={`workspaceForm-workspaceDetails-iconSelector-${item}`}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={item.toLowerCase()} color={color} />
         </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText color={'subdued'}>{item}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  }));
+  return (
+    <EuiSuperSelect
+      data-test-subj="workspaceForm-workspaceDetails-iconSelector"
+      options={options}
+      valueOfSelected={value}
+      onChange={(icon) => onChange(icon)}
+    />
   );
 };

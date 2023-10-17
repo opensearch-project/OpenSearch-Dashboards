@@ -11,6 +11,7 @@ import {
   EuiPageContent,
   EuiButton,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useObservable } from 'react-use';
 import { i18n } from '@osd/i18n';
@@ -156,10 +157,10 @@ export const WorkspaceUpdater = () => {
 
   return (
     <EuiPage paddingSize="none">
-      <EuiPageBody panelled>
+      <EuiPageBody>
         <EuiPageHeader
           restrictWidth
-          pageTitle="Update Workspace"
+          pageTitle={`${currentWorkspace?.name ?? 'Workspace'} details`}
           rightSideItems={
             hideDeleteButton
               ? []
@@ -170,6 +171,7 @@ export const WorkspaceUpdater = () => {
                 ]
           }
         />
+        <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"

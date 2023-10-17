@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData } from './workspace_form';
@@ -61,8 +61,9 @@ export const WorkspaceCreator = () => {
 
   return (
     <EuiPage paddingSize="none">
-      <EuiPageBody panelled>
+      <EuiPageBody>
         <EuiPageHeader restrictWidth pageTitle="Create Workspace" />
+        <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
@@ -76,8 +77,8 @@ export const WorkspaceCreator = () => {
               application={application}
               onSubmit={handleWorkspaceFormSubmit}
               opType={WORKSPACE_OP_TYPE_CREATE}
-              permissionFirstRowDeletable
               permissionEnabled={isPermissionEnabled}
+              permissionFirstUserDeletable
             />
           )}
         </EuiPageContent>

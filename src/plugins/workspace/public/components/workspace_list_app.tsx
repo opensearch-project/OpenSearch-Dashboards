@@ -20,8 +20,8 @@ export const WorkspaceListApp = () => {
   useEffect(() => {
     chrome?.setBreadcrumbs([
       {
-        text: i18n.translate('workspace.workspaceCreateTitle', {
-          defaultMessage: 'Workspace Create',
+        text: i18n.translate('workspace.workspaceListTitle', {
+          defaultMessage: 'Workspace List',
         }),
       },
     ]);
