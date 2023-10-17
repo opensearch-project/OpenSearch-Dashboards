@@ -30,13 +30,13 @@ const addToPrincipals = ({
   users?: string[];
   groups?: string[];
 }) => {
-  if (!!users) {
+  if (users) {
     if (!principals.users) {
       principals.users = [];
     }
     principals.users = Array.from(new Set([...principals.users, ...users]));
   }
-  if (!!groups) {
+  if (groups) {
     if (!principals.groups) {
       principals.groups = [];
     }
@@ -57,10 +57,10 @@ const deleteFromPrincipals = ({
   if (!principals) {
     return principals;
   }
-  if (!!users && !!principals.users) {
+  if (users && principals.users) {
     principals.users = principals.users.filter((item) => !users.includes(item));
   }
-  if (!!groups && !!principals.groups) {
+  if (groups && principals.groups) {
     principals.groups = principals.groups.filter((item) => !groups.includes(item));
   }
   return principals;
@@ -321,7 +321,7 @@ export class ACL {
       bool: subBool,
     });
 
-    if (!!savedObjectType) {
+    if (savedObjectType) {
       bool.filter.push({
         terms: {
           type: Array.isArray(savedObjectType) ? savedObjectType : [savedObjectType],
