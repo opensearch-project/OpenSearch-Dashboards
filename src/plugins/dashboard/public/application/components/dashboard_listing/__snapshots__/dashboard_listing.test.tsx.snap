@@ -104,6 +104,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -794,6 +795,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -992,6 +994,44 @@ exports[`dashboard listing hideWriteControls 1`] = `
               },
               "allowTrackUserAgent": [MockFunction],
               "reportUiStats": [MockFunction],
+            },
+            "workspaces": Object {
+              "currentWorkspace$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "currentWorkspaceId$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "initialized$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceList$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": Array [],
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
             },
           }
         }
@@ -1196,6 +1236,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -1886,6 +1927,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -2084,6 +2126,44 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               },
               "allowTrackUserAgent": [MockFunction],
               "reportUiStats": [MockFunction],
+            },
+            "workspaces": Object {
+              "currentWorkspace$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "currentWorkspaceId$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "initialized$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceList$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": Array [],
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
             },
           }
         }
@@ -2349,6 +2429,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -3039,6 +3120,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -3237,6 +3319,44 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               },
               "allowTrackUserAgent": [MockFunction],
               "reportUiStats": [MockFunction],
+            },
+            "workspaces": Object {
+              "currentWorkspace$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "currentWorkspaceId$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "initialized$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceList$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": Array [],
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
             },
           }
         }
@@ -3502,6 +3622,7 @@ exports[`dashboard listing renders table rows 1`] = `
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -4192,6 +4313,7 @@ exports[`dashboard listing renders table rows 1`] = `
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -4390,6 +4512,44 @@ exports[`dashboard listing renders table rows 1`] = `
               },
               "allowTrackUserAgent": [MockFunction],
               "reportUiStats": [MockFunction],
+            },
+            "workspaces": Object {
+              "currentWorkspace$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "currentWorkspaceId$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "initialized$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceList$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": Array [],
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
             },
           }
         }
@@ -4655,6 +4815,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               },
               "currentAppId$": Observable {
                 "_isScalar": false,
@@ -5345,6 +5506,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -5543,6 +5705,44 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               },
               "allowTrackUserAgent": [MockFunction],
               "reportUiStats": [MockFunction],
+            },
+            "workspaces": Object {
+              "currentWorkspace$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "currentWorkspaceId$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "initialized$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceList$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": Array [],
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
             },
           }
         }

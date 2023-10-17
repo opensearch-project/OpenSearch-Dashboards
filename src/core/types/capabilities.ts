@@ -47,6 +47,9 @@ export interface Capabilities {
   /** Catalogue capabilities. Catalogue entries drive the visibility of the OpenSearch Dashboards homepage options. */
   catalogue: Record<string, boolean>;
 
+  /** Workspaces capabilities. */
+  workspaces: Record<string, boolean>;
+
   /** Custom capabilities, registered by plugins. undefined if the key does not exist */
   [key: string]: Record<string, boolean | Record<string, boolean>> | undefined;
 }
