@@ -30,7 +30,7 @@ describe('workspace service', () => {
     opensearchServer = await startOpenSearch();
     const startOSDResp = await startOpenSearchDashboards();
     root = startOSDResp.root;
-  }, 30000);
+  });
   afterAll(async () => {
     await root.shutdown();
     await opensearchServer.stop();
