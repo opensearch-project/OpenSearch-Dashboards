@@ -66,26 +66,29 @@ const deleteFromPrincipals = ({
   return principals;
 };
 
-const checkPermission = (currentPrincipals: Principals | undefined, principals: Principals) => {
+const checkPermission = (
+  allowedPrincipals: Principals | undefined,
+  requestedPrincipals: Principals
+) => {
   return (
-    (currentPrincipals?.users &&
-      principals?.users &&
-      checkPermissionForSinglePrincipalType(currentPrincipals.users, principals.users)) ||
-    (currentPrincipals?.groups &&
-      principals?.groups &&
-      checkPermissionForSinglePrincipalType(currentPrincipals.groups, principals.groups))
+    (allowedPrincipals?.users &&
+      requestedPrincipals?.users &&
+      checkPermissionForSinglePrincipalType(allowedPrincipals.users, requestedPrincipals.users)) ||
+    (allowedPrincipals?.groups &&
+      requestedPrincipals?.groups &&
+      checkPermissionForSinglePrincipalType(allowedPrincipals.groups, requestedPrincipals.groups))
   );
 };
 
 const checkPermissionForSinglePrincipalType = (
-  currentPrincipalArray: string[],
-  principalArray: string[]
+  allowedPrincipalArray: string[],
+  requestedPrincipalArray: string[]
 ) => {
   return (
-    currentPrincipalArray &&
-    principalArray &&
-    (currentPrincipalArray.includes('*') ||
-      principalArray.some((item) => currentPrincipalArray.includes(item)))
+    allowedPrincipalArray &&
+    requestedPrincipalArray &&
+    (allowedPrincipalArray.includes('*') ||
+      requestedPrincipalArray.some((item) => allowedPrincipalArray.includes(item)))
   );
 };
 
