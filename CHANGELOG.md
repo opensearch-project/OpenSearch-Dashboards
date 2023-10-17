@@ -8,6 +8,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
+- [CVE-2023-45133] Add package resolution for `@babel/traverse` to `7.23.2` to fix vulnerability ([#5309](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5309))
+
 ### 📈 Features/Enhancements
 
 ### 🐛 Bug Fixes
