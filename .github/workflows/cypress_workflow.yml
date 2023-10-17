@@ -9,33 +9,29 @@ on:
   workflow_dispatch:
     inputs:
       test_repo:
-        description: 'Test repo'
+        description: 'Cypress test repo'
         default: 'opensearch-project/opensearch-dashboards-functional-test'
         required: true
         type: string
       test_branch:
-        description: 'Test branch (default: source branch)'
+        description: 'Cypress test branch (default: source branch)'
+        required: false
+        type: string
+      specs:
+        description: 'Tests to run (default: osd:ciGroup)'
         required: false
         type: string
       pr_number:
-        description: 'PR Number'
+        description: 'PR Number (optional)'
         required: false
         type: number
-      specs:
-        description: 'Tests to run (default: core)'
-        default: 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,'
-        required: false
-        type: string
 
 env:
-  SOURCE_REPO: ${{ github.repository }}
-  SOURCE_BRANCH: "${{ github.base_ref }}"
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
-  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch'
+  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true'
   OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false'
-  SPEC: ${{ inputs.specs != '' && inputs.specs || 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,' }} 
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
@@ -48,6 +44,10 @@ env:
 jobs:
   cypress-tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+          group: [1, 2, 3, 4, 5, 6, 7, 8, 9]
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
@@ -56,7 +56,7 @@ jobs:
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
       TERM: xterm
-    name: Run cypress tests
+    name: Run cypress tests (osd:ciGroup${{ matrix.group }})
     steps:
       - name: Get source information from PR number
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
@@ -99,7 +99,7 @@ jobs:
         run: yarn osd bootstrap
 
       - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -107,6 +107,23 @@ jobs:
           path: ${{ env.FTR_PATH }}
           repository: ${{ env.TEST_REPO }}
           ref: '${{ env.TEST_BRANCH }}'
+
+      - name: Setup spec files by input
+        if: ${{ inputs.specs != '' }}
+        run: |
+          echo "SPEC=${{ inputs.specs }}" >> $GITHUB_ENV
+
+      - name: Setup spec files
+        if: ${{ inputs.specs == '' }}
+        working-directory: ${{ env.FTR_PATH }}
+        shell: bash
+        run: |
+          IFS="," read -a SPEC_ARRAY <<< $(yarn --silent osd:ciGroup${{ matrix.group }})
+          FORMATTED_SPEC=''
+          for i in "${SPEC_ARRAY[@]}"; do
+            FORMATTED_SPEC+="cypress/integration/core-opensearch-dashboards/opensearch-dashboards/${i},"
+          done
+          echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
 
       - name: Get Cypress version
         id: cypress_version
@@ -181,8 +198,6 @@ jobs:
 
             #### Inputs:
             ```
-            Source repo: '${{ env.SOURCE_REPO }}'
-            Source branch: '${{ env.SOURCE_BRANCH }}'
             Test repo: '${{ env.TEST_REPO }}'
             Test branch: '${{ env.TEST_BRANCH }}'
 

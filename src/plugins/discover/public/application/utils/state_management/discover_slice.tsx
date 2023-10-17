@@ -11,7 +11,7 @@ import { RootState, DefaultViewState } from '../../../../../data_explorer/public
 import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../saved_searches/types';
-import { PLUGIN_ID } from '../../../../common';
+import { DEFAULT_COLUMNS_SETTING, PLUGIN_ID } from '../../../../common';
 
 export interface DiscoverState {
   /**
@@ -57,6 +57,7 @@ const initialState: DiscoverState = {
 
 export const getPreloadedState = async ({
   getSavedSearchById,
+  uiSettings: config,
 }: DiscoverServices): Promise<DefaultViewState<DiscoverState>> => {
   const preloadedState: DefaultViewState<DiscoverState> = {
     state: {
@@ -86,6 +87,8 @@ export const getPreloadedState = async ({
 
       savedSearchInstance.destroy(); // this instance is no longer needed, will create another one later
     }
+  } else if (config.get(DEFAULT_COLUMNS_SETTING)) {
+    preloadedState.state.columns = config.get(DEFAULT_COLUMNS_SETTING);
   }
 
   return preloadedState;

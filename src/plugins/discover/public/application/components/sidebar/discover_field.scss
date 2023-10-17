@@ -3,16 +3,18 @@
   max-width: 300px;
 }
 
-.dscSidebarField__actionButton {
-  opacity: 0;
-  transition: opacity $ouiAnimSpeedExtraFast;
+.dscSidebarField {
+  &__actionButton {
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast;
 
-  &:hover,
-  &:focus {
-    opacity: 1;
+    @include ouiBreakpoint("xs", "s", "m") {
+      opacity: 1;
+    }
   }
 
-  @include ouiBreakpoint("xs", "s", "m") {
+  &:hover &__actionButton,
+  &:focus &__actionButton {
     opacity: 1;
   }
 }

@@ -33,7 +33,10 @@ import { ISearchSource } from '../../../data/public';
 
 export type SortOrder = [string, 'asc' | 'desc'];
 export interface SavedSearch
-  extends Pick<SavedObject, 'id' | 'title' | 'copyOnSave' | 'destroy' | 'lastSavedTitle' | 'save'> {
+  extends Pick<
+    SavedObject,
+    'id' | 'title' | 'copyOnSave' | 'destroy' | 'lastSavedTitle' | 'save' | 'getFullPath'
+  > {
   searchSource: ISearchSource; // This is optional in SavedObject, but required for SavedSearch
   description?: string;
   columns: string[];
