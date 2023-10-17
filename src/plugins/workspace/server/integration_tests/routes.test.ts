@@ -35,7 +35,7 @@ describe('workspace service', () => {
     await root.shutdown();
     await opensearchServer.stop();
   });
-  describe('Workspace CRUD apis', () => {
+  describe('Workspace CRUD APIs', () => {
     afterEach(async () => {
       const listResult = await osdTestServer.request
         .post(root, `/api/workspaces/_list`)
