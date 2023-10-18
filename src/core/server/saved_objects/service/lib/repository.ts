@@ -745,6 +745,7 @@ export class SavedObjectsRepository {
       typeToNamespacesMap,
       filter,
       preference,
+      workspaces,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -818,6 +819,7 @@ export class SavedObjectsRepository {
           typeToNamespacesMap,
           hasReference,
           kueryNode,
+          workspaces,
         }),
       },
     };

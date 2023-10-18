@@ -48,7 +48,8 @@ export async function getNonExistingReferenceAsKeys(
   savedObjects: SavedObject[],
   savedObjectsClient: SavedObjectsClientContract,
   namespace?: string,
-  retries?: SavedObjectsImportRetry[]
+  retries?: SavedObjectsImportRetry[],
+  workspaces?: string[]
 ) {
   const objectsToSkip = getObjectsToSkip(retries);
   const collector = new Map();
@@ -72,8 +73,16 @@ export async function getNonExistingReferenceAsKeys(
     return [];
   }
 
+  const fields = ['id'];
+  if (workspaces?.length) {
+    fields.push('workspaces');
+  }
+
   // Fetch references to see if they exist
-  const bulkGetOpts = Array.from(collector.values()).map((obj) => ({ ...obj, fields: ['id'] }));
+  const bulkGetOpts = Array.from(collector.values()).map((obj) => ({
+    ...obj,
+    fields,
+  }));
   const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts, { namespace });
 
   // Error handling
