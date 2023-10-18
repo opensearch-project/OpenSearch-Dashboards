@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
@@ -89,9 +89,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
 
   const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
 
-  const MemoizedDiscoverTable = React.memo(DiscoverTable);
-  const MemoizedDiscoverChartContainer = React.memo(DiscoverChartContainer);
-
   return (
     <EuiPanel
       hasBorder={false}
@@ -126,3 +123,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     </EuiPanel>
   );
 }
+
+const MemoizedDiscoverTable = React.memo(DiscoverTable);
+const MemoizedDiscoverChartContainer = React.memo(DiscoverChartContainer);
