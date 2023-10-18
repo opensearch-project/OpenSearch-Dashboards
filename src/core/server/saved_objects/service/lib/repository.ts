@@ -243,6 +243,7 @@ export class SavedObjectsRepository {
       originId,
       initialNamespaces,
       version,
+      workspaces,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -289,6 +290,7 @@ export class SavedObjectsRepository {
       migrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
+      ...(Array.isArray(workspaces) && { workspaces }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -438,6 +440,12 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      let savedObjectWorkspaces = options.workspaces;
+
+      if (expectedBulkGetResult.value.method !== 'create') {
+        savedObjectWorkspaces = object.workspaces;
+      }
+
       const expectedResult = {
         opensearchRequestIndex: bulkRequestIndexCounter++,
         requestedId: object.id,
@@ -452,6 +460,7 @@ export class SavedObjectsRepository {
             updated_at: time,
             references: object.references || [],
             originId: object.originId,
+            ...(savedObjectWorkspaces && { workspaces: savedObjectWorkspaces }),
           }) as SavedObjectSanitizedDoc
         ),
       };
