@@ -74,10 +74,15 @@ export async function getNonExistingReferenceAsKeys(
     return [];
   }
 
+  const fields = ['id'];
+  if (workspaces?.length) {
+    fields.push('workspaces');
+  }
+
   // Fetch references to see if they exist
   const bulkGetOpts = Array.from(collector.values()).map((obj) => ({
     ...obj,
-    fields: ['id', 'workspaces'],
+    fields,
   }));
   const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts, { namespace });
 
