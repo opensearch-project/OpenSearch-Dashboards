@@ -136,7 +136,6 @@ describe('getNonExistingReferenceAsKeys()', () => {
               Object {
                 fields: Array [
                   id,
-                  workspaces,
                 ],
                 id: 1,
                 type: index-pattern,
@@ -231,7 +230,6 @@ describe('getNonExistingReferenceAsKeys()', () => {
               Object {
                 fields: Array [
                   id,
-                  workspaces,
                 ],
                 id: 1,
                 type: index-pattern,
@@ -239,7 +237,6 @@ describe('getNonExistingReferenceAsKeys()', () => {
               Object {
                 fields: Array [
                   id,
-                  workspaces,
                 ],
                 id: 3,
                 type: search,
@@ -422,7 +419,6 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
-                  workspaces,
                 ],
                 id: 3,
                 type: index-pattern,
@@ -430,7 +426,6 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
-                  workspaces,
                 ],
                 id: 5,
                 type: index-pattern,
@@ -438,7 +433,6 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
-                  workspaces,
                 ],
                 id: 6,
                 type: index-pattern,
@@ -446,7 +440,6 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
-                  workspaces,
                 ],
                 id: 7,
                 type: search,
@@ -454,7 +447,6 @@ describe('validateReferences()', () => {
               Object {
                 fields: Array [
                   id,
-                  workspaces,
                 ],
                 id: 8,
                 type: search,
