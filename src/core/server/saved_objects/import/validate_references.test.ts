@@ -608,8 +608,6 @@ describe('validateReferences()', () => {
         {
           type: 'index-pattern',
           id: '3',
-          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '3').output
-            .payload,
           attributes: {},
           references: [],
           workspaces: ['foo'],
@@ -617,8 +615,6 @@ describe('validateReferences()', () => {
         {
           type: 'index-pattern',
           id: '5',
-          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '5').output
-            .payload,
           attributes: {},
           references: [],
           workspaces: ['bar'],
