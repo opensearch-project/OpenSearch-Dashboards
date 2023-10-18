@@ -5,8 +5,20 @@
 
 import dns from 'dns-sync';
 import IPCIDR from 'ip-cidr';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { config } from '../../../../core/server/http';
 
 export function isValidURL(endpoint: string, deniedIPs?: string[]) {
+  // Validate hostname e.g. https://abc.com<><><><img>
+  const httpSchema = config.schema;
+  const obj = {
+    host: endpoint,
+  };
+  try {
+    httpSchema.validate(obj);
+  } catch (err) {
+    return false;
+  }
   // Check the format of URL, URL has be in the format as
   // scheme://server/path/resource otherwise an TypeError
   // would be thrown.
