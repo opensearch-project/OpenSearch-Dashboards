@@ -5,13 +5,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@osd/utility-types';
-
 import { WorkspacesService } from './workspaces_service';
-import { WorkspaceAttribute } from '..';
+import { WorkspaceObject } from '..';
 
 const currentWorkspaceId$ = new BehaviorSubject<string>('');
-const workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
-const currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
+const workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([]);
+const currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
 const initialized$ = new BehaviorSubject<boolean>(false);
 
 const createWorkspacesSetupContractMock = () => ({

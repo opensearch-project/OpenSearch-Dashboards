@@ -32,18 +32,12 @@ import { NavLinksService } from './nav_links_service';
 import { take, map, takeLast } from 'rxjs/operators';
 import { App } from '../../application';
 import { BehaviorSubject } from 'rxjs';
+import { ChromeNavLink } from 'opensearch-dashboards/public';
 
 const availableApps = new Map([
   ['app1', { id: 'app1', order: 0, title: 'App 1', icon: 'app1' }],
-  [
-    'app2',
-    {
-      id: 'app2',
-      order: -10,
-      title: 'App 2',
-      euiIconType: 'canvasApp',
-    },
-  ],
+  ['app2', { id: 'app2', order: -10, title: 'App 2', euiIconType: 'canvasApp' }],
+  ['app3', { id: 'app3', order: 10, title: 'App 3', icon: 'app3' }],
   ['chromelessApp', { id: 'chromelessApp', order: 20, title: 'Chromless App', chromeless: true }],
 ]);
 
@@ -66,7 +60,110 @@ describe('NavLinksService', () => {
     start = service.start({ application: mockAppService, http: mockHttp });
   });
 
-  describe('#getNavLinks$()', () => {
+  describe('#getAllNavLinks$()', () => {
+    it('does not include `chromeless` applications', async () => {
+      expect(
+        await start
+          .getAllNavLinks$()
+          .pipe(
+            take(1),
+            map((links) => links.map((l) => l.id))
+          )
+          .toPromise()
+      ).not.toContain('chromelessApp');
+    });
+
+    it('sorts navLinks by `order` property', async () => {
+      expect(
+        await start
+          .getAllNavLinks$()
+          .pipe(
+            take(1),
+            map((links) => links.map((l) => l.id))
+          )
+          .toPromise()
+      ).toEqual(['app2', 'app1', 'app3']);
+    });
+
+    it('emits multiple values', async () => {
+      const navLinkIds$ = start.getAllNavLinks$().pipe(map((links) => links.map((l) => l.id)));
+      const emittedLinks: string[][] = [];
+      navLinkIds$.subscribe((r) => emittedLinks.push(r));
+      start.update('app1', { href: '/foo' });
+
+      service.stop();
+      expect(emittedLinks).toEqual([
+        ['app2', 'app1', 'app3'],
+        ['app2', 'app1', 'app3'],
+      ]);
+    });
+
+    it('completes when service is stopped', async () => {
+      const last$ = start.getAllNavLinks$().pipe(takeLast(1)).toPromise();
+      service.stop();
+      await expect(last$).resolves.toBeInstanceOf(Array);
+    });
+  });
+
+  describe('#getNavLinks$() when non null', () => {
+    // set filtered nav links, nav link with order smaller than 0 will be filtered
+    beforeEach(() => {
+      const filteredNavLinks = new Map<string, ChromeNavLink>();
+      start.getAllNavLinks$().subscribe((links) =>
+        links.forEach((link) => {
+          if (link.order !== undefined && link.order >= 0) {
+            filteredNavLinks.set(link.id, link);
+          }
+        })
+      );
+      start.setNavLinks(filteredNavLinks);
+    });
+
+    it('does not include `app2` applications', async () => {
+      expect(
+        await start
+          .getNavLinks$()
+          .pipe(
+            take(1),
+            map((links) => links.map((l) => l.id))
+          )
+          .toPromise()
+      ).not.toContain('app2');
+    });
+
+    it('sorts navLinks by `order` property', async () => {
+      expect(
+        await start
+          .getNavLinks$()
+          .pipe(
+            take(1),
+            map((links) => links.map((l) => l.id))
+          )
+          .toPromise()
+      ).toEqual(['app1', 'app3']);
+    });
+
+    it('emits multiple values', async () => {
+      const navLinkIds$ = start.getNavLinks$().pipe(map((links) => links.map((l) => l.id)));
+      const emittedLinks: string[][] = [];
+      navLinkIds$.subscribe((r) => emittedLinks.push(r));
+      start.update('app1', { href: '/foo' });
+
+      service.stop();
+      expect(emittedLinks).toEqual([
+        ['app1', 'app3'],
+        ['app1', 'app3'],
+      ]);
+    });
+
+    it('completes when service is stopped', async () => {
+      const last$ = start.getNavLinks$().pipe(takeLast(1)).toPromise();
+      service.stop();
+      await expect(last$).resolves.toBeInstanceOf(Array);
+    });
+  });
+
+  describe('#getNavLinks$() when null', () => {
     it('does not include `chromeless` applications', async () => {
       expect(
         await start
@@ -79,7 +176,7 @@ describe('NavLinksService', () => {
       ).not.toContain('chromelessApp');
     });
 
-    it('sorts navlinks by `order` property', async () => {
+    it('include `app2` applications', async () => {
       expect(
         await start
           .getNavLinks$()
@@ -88,7 +185,19 @@ describe('NavLinksService', () => {
             map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'app1']);
+      ).toContain('app2');
+    });
+
+    it('sorts navLinks by `order` property', async () => {
+      expect(
+        await start
+          .getNavLinks$()
+          .pipe(
+            take(1),
+            map((links) => links.map((l) => l.id))
+          )
+          .toPromise()
+      ).toEqual(['app2', 'app1', 'app3']);
     });
 
     it('emits multiple values', async () => {
@@ -99,8 +208,8 @@ describe('NavLinksService', () => {
 
       service.stop();
       expect(emittedLinks).toEqual([
-        ['app2', 'app1'],
-        ['app2', 'app1'],
+        ['app2', 'app1', 'app3'],
+        ['app2', 'app1', 'app3'],
       ]);
     });
 
@@ -123,7 +232,7 @@ describe('NavLinksService', () => {
 
   describe('#getAll()', () => {
     it('returns a sorted array of navlinks', () => {
-      expect(start.getAll().map((l) => l.id)).toEqual(['app2', 'app1']);
+      expect(start.getAll().map((l) => l.id)).toEqual(['app2', 'app1', 'app3']);
     });
   });
 
@@ -148,7 +257,7 @@ describe('NavLinksService', () => {
             map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'app1']);
+      ).toEqual(['app2', 'app1', 'app3']);
     });
 
     it('does nothing on chromeless applications', async () => {
@@ -161,7 +270,7 @@ describe('NavLinksService', () => {
             map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'app1']);
+      ).toEqual(['app2', 'app1', 'app3']);
     });
 
     it('removes all other links', async () => {

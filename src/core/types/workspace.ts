@@ -14,3 +14,7 @@ export interface WorkspaceAttribute {
   defaultVISTheme?: string;
   reserved?: boolean;
 }
+
+export interface WorkspaceObject extends WorkspaceAttribute {
+  readonly?: boolean;
+}

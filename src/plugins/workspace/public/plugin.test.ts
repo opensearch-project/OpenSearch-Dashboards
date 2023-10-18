@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { of } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
+import { ChromeNavLink } from 'opensearch-dashboards/public';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
@@ -111,5 +113,31 @@ describe('Workspace plugin', () => {
     currentAppIdSubscriber?.next(WORKSPACE_FATAL_ERROR_APP_ID);
     expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_OVERVIEW_APP_ID);
     windowSpy.mockRestore();
+  });
+
+  it('#start filter nav links according to workspace feature', () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const coreStart = coreMock.createStart();
+    const navLinksService = coreStart.chrome.navLinks;
+    const devToolsNavLink = {
+      id: 'dev_tools',
+      category: { id: 'management', label: 'Management' },
+    };
+    const discoverNavLink = {
+      id: 'discover',
+      category: { id: 'opensearchDashboards', label: 'Library' },
+    };
+    const workspace = {
+      id: 'test',
+      name: 'test',
+      features: ['dev_tools'],
+    };
+    const allNavLinks = of([devToolsNavLink, discoverNavLink] as ChromeNavLink[]);
+    const filteredNavLinksMap = new Map<string, ChromeNavLink>();
+    filteredNavLinksMap.set(devToolsNavLink.id, devToolsNavLink as ChromeNavLink);
+    navLinksService.getAllNavLinks$.mockReturnValue(allNavLinks);
+    coreStart.workspaces.currentWorkspace$.next(workspace);
+    workspacePlugin.start(coreStart);
+    expect(navLinksService.setNavLinks).toHaveBeenCalledWith(filteredNavLinksMap);
   });
 });

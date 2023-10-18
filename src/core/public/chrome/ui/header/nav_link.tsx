@@ -31,9 +31,8 @@
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
+import { AppCategory, ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { HttpStart } from '../../../http';
-import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
@@ -47,8 +46,9 @@ const aliasedApps: { [key: string]: string[] } = {
 export const isActiveNavLink = (appId: string | undefined, linkId: string): boolean =>
   !!(appId === linkId || aliasedApps[linkId]?.includes(appId || ''));
 
+export type CollapsibleNavLink = ChromeNavLink | RecentNavLink;
 interface Props {
-  link: ChromeNavLink;
+  link: CollapsibleNavLink;
   appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
@@ -68,9 +68,8 @@ export function createEuiListItem({
   onClick = () => {},
   navigateToApp,
   dataTestSubj,
-  externalLink = false,
 }: Props) {
-  const { href, id, title, disabled, euiIconType, icon, tooltip } = link;
+  const { href, id, title, disabled, euiIconType, icon, tooltip, externalLink } = link;
 
   return {
     label: tooltip ?? title,
@@ -101,14 +100,16 @@ export function createEuiListItem({
   };
 }
 
-export interface RecentNavLink {
-  href: string;
-  label: string;
-  title: string;
-  'aria-label': string;
-  iconType?: string;
-  onClick: React.MouseEventHandler;
-}
+export type RecentNavLink = Omit<ChromeNavLink, 'baseUrl'>;
+
+const recentlyVisitedCategory: AppCategory = {
+  id: 'recentlyVisited',
+  label: i18n.translate('core.ui.recentlyVisited.label', {
+    defaultMessage: 'Recently Visited',
+  }),
+  order: 0,
+  euiIconType: 'clock',
+};
 
 /**
  * Add saved object type info to recently links
@@ -120,11 +121,10 @@ export interface RecentNavLink {
  * @param navLinks
  * @param basePath
  */
-export function createRecentNavLink(
+export function createRecentChromeNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
-  basePath: HttpStart['basePath'],
-  navigateToUrl: InternalApplicationStart['navigateToUrl']
+  basePath: HttpStart['basePath']
 ): RecentNavLink {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));
@@ -143,16 +143,20 @@ export function createRecentNavLink(
 
   return {
     href,
-    label,
+    id: recentLink.id,
+    externalLink: true,
+    category: recentlyVisitedCategory,
     title: titleAndAriaLabel,
-    'aria-label': titleAndAriaLabel,
-    iconType: navLink?.euiIconType,
-    /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
-    onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-      if (event.button === 0 && !isModifiedOrPrevented(event)) {
-        event.preventDefault();
-        navigateToUrl(href);
-      }
-    },
   };
 }
+
+// As emptyRecentlyVisited is disabled, values for id, href and baseUrl does not affect
+export const emptyRecentlyVisited: RecentNavLink = {
+  id: '',
+  href: '',
+  disabled: true,
+  category: recentlyVisitedCategory,
+  title: i18n.translate('core.ui.EmptyRecentlyVisited', {
+    defaultMessage: 'No recently visited items',
+  }),
+};
