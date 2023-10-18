@@ -148,6 +148,12 @@ export class ChromeService {
   public setup() {
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
+        if (this.collapsibleNavHeaderRender) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
+          );
+        }
         this.collapsibleNavHeaderRender = render;
       },
     };
