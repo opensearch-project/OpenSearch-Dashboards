@@ -18,7 +18,7 @@
   text-align: center;
   background-color: $euiColorEmptyShade;
   border-radius: 100%;
-  padding: $euiSize / 2;
+  padding: calc($euiSize / 2);
 
   .euiIcon {
     vertical-align: baseline;
