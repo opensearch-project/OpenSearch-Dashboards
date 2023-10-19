@@ -140,7 +140,7 @@ interface WorkspaceFormProps {
   defaultValues?: WorkspaceFormData;
   opType?: string;
   permissionEnabled?: boolean;
-  permissionFirstUserDeletable?: boolean;
+  permissionLastAdminItemDeletable?: boolean;
 }
 
 export const WorkspaceForm = ({
@@ -149,7 +149,7 @@ export const WorkspaceForm = ({
   defaultValues,
   opType,
   permissionEnabled,
-  permissionFirstUserDeletable,
+  permissionLastAdminItemDeletable,
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
   const workspaceNameReadOnly = defaultValues?.reserved;
@@ -687,7 +687,7 @@ export const WorkspaceForm = ({
             errors={formErrors.permissions}
             onChange={setPermissionSettings}
             permissionSettings={permissionSettings}
-            firstUserDeletable={permissionFirstUserDeletable}
+            lastAdminItemDeletable={!!permissionLastAdminItemDeletable}
             data-test-subj={`workspaceForm-permissionSettingPanel`}
           />
         </EuiPanel>
