@@ -33,7 +33,6 @@ import { take } from 'rxjs/operators';
 import { ToastsApi } from './toasts_api';
 
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
-import { i18nServiceMock } from '../../i18n/i18n_service.mock';
 
 async function getCurrentToasts(toasts: ToastsApi) {
   return await toasts.get$().pipe(take(1)).toPromise();
