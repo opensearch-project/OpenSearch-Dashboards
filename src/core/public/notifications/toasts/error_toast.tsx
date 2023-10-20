@@ -29,19 +29,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-} from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
 import { OverlayStart } from 'opensearch-dashboards/public';
 import { I18nStart } from '../../i18n';
 
@@ -53,82 +40,13 @@ interface ErrorToastProps {
   i18nContext: () => I18nStart['Context'];
 }
 
-interface RequestError extends Error {
-  body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
-}
-
-const isRequestError = (e: Error | RequestError): e is RequestError => {
-  if ('body' in e) {
-    return e.body?.attributes?.error?.caused_by !== undefined;
-  }
-  return false;
-};
-
 /**
  * This should instead be replaced by the overlay service once it's available.
  * This does not use React portals so that if the parent toast times out, this modal
  * does not disappear. NOTE: this should use a global modal in the overlay service
  * in the future.
  */
-function showErrorDialog({
-  title,
-  error,
-  openModal,
-  i18nContext,
-}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18nContext'>) {
-  const I18nContext = i18nContext();
-  let text = '';
-
-  if (isRequestError(error)) {
-    text += `${error?.body?.attributes?.error?.caused_by.type}\n`;
-    text += `${error?.body?.attributes?.error?.caused_by.reason}\n\n`;
-  }
-
-  if (error.stack) {
-    text += error.stack;
-  }
-
-  const modal = openModal(
-    mount(
-      <React.Fragment>
-        <I18nContext>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
-            {text && (
-              <React.Fragment>
-                <EuiSpacer size="s" />
-                <EuiCodeBlock isCopyable={true} paddingSize="s">
-                  {text}
-                </EuiCodeBlock>
-              </React.Fragment>
-            )}
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButton onClick={() => modal.close()} fill>
-              <FormattedMessage
-                id="core.notifications.errorToast.closeModal"
-                defaultMessage="Close"
-              />
-            </EuiButton>
-          </EuiModalFooter>
-        </I18nContext>
-      </React.Fragment>
-    )
-  );
-}
 
 export function ErrorToast({ toastMessage }: ErrorToastProps) {
-  return (
-    <React.Fragment>
-      <p data-test-subj="errorToastMessage">{toastMessage}</p>
-    </React.Fragment>
-  );
+  return <p data-test-subj="errorToastMessage">{toastMessage}</p>;
 }
-
-const mount = (component: React.ReactElement) => (container: HTMLElement) => {
-  ReactDOM.render(component, container);
-  return () => ReactDOM.unmountComponentAtNode(container);
-};
