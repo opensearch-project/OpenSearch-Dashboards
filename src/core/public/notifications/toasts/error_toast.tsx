@@ -34,13 +34,6 @@ interface ErrorToastProps {
   toastMessage: string;
 }
 
-/**
- * This should instead be replaced by the overlay service once it's available.
- * This does not use React portals so that if the parent toast times out, this modal
- * does not disappear. NOTE: this should use a global modal in the overlay service
- * in the future.
- */
-
 export function ErrorToast({ toastMessage }: ErrorToastProps) {
   return <p data-test-subj="errorToastMessage">{toastMessage}</p>;
 }

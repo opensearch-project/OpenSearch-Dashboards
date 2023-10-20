@@ -237,7 +237,6 @@ describe('#addDanger()', () => {
 describe('#addError', () => {
   it('adds an error toast', async () => {
     const toasts = new ToastsApi(toastDeps());
-    toasts.start(startDeps());
     const toast = toasts.addError(new Error('unexpected error'), { title: 'Something went wrong' });
     expect(toast).toHaveProperty('color', 'danger');
     expect(toast).toHaveProperty('title', 'Something went wrong');
@@ -245,7 +244,6 @@ describe('#addError', () => {
 
   it('returns the created toast', async () => {
     const toasts = new ToastsApi(toastDeps());
-    toasts.start(startDeps());
     const toast = toasts.addError(new Error('unexpected error'), { title: 'Something went wrong' });
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
