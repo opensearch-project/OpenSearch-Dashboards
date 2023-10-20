@@ -1,11 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders matching snapshot 1`] = `
-<Fragment>
-  <p
-    data-test-subj="errorToastMessage"
-  >
-    This is the toast message
-  </p>
-</Fragment>
+<p
+  data-test-subj="errorToastMessage"
+>
+  This is the toast message
+</p>
 `;

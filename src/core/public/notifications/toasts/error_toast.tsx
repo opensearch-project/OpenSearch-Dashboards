@@ -29,15 +29,9 @@
  */
 
 import React from 'react';
-import { OverlayStart } from 'opensearch-dashboards/public';
-import { I18nStart } from '../../i18n';
 
 interface ErrorToastProps {
-  title: string;
-  error: Error;
   toastMessage: string;
-  openModal: OverlayStart['openModal'];
-  i18nContext: () => I18nStart['Context'];
 }
 
 /**

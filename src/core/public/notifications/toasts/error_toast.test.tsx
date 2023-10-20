@@ -45,26 +45,11 @@ let openModal: jest.Mock;
 beforeEach(() => (openModal = jest.fn()));
 
 function render(props: ErrorToastProps = {}) {
-  return (
-    <ErrorToast
-      openModal={openModal}
-      error={props.error || new Error('error message')}
-      title={props.title || 'An error occured'}
-      toastMessage={props.toastMessage || 'This is the toast message'}
-      i18nContext={() => ({ children }) => <React.Fragment>{children}</React.Fragment>}
-    />
-  );
+  return <ErrorToast toastMessage={props.toastMessage || 'This is the toast message'} />;
 }
 
 it('renders matching snapshot', () => {
   expect(shallow(render())).toMatchSnapshot();
-});
-
-it('should open a modal when clicking button', () => {
-  const wrapper = mountWithIntl(render());
-  expect(openModal).not.toHaveBeenCalled();
-  wrapper.find('button').simulate('click');
-  expect(openModal).toHaveBeenCalled();
 });
 
 afterAll(() => {
