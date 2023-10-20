@@ -62,10 +62,6 @@ function toastDeps() {
   };
 }
 
-function startDeps() {
-  return { overlays: {} as any, i18n: i18nServiceMock.createStartContract() };
-}
-
 describe('#get$()', () => {
   it('returns observable that emits NEW toast list when something added or removed', () => {
     const toasts = new ToastsApi(toastDeps());
