@@ -81,11 +81,7 @@ export class DQLSyntaxError extends Error {
       });
     }
 
-    const fullMessage = [message, expression, repeat('-', error.location.start.offset) + '^'].join(
-      '\n'
-    );
-
-    super(fullMessage);
+    super(message);
     this.name = 'DQLSyntaxError';
     this.shortMessage = message;
   }

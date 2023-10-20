@@ -120,28 +120,10 @@ function showErrorDialog({
   );
 }
 
-export function ErrorToast({
-  title,
-  error,
-  toastMessage,
-  openModal,
-  i18nContext,
-}: ErrorToastProps) {
+export function ErrorToast({ toastMessage }: ErrorToastProps) {
   return (
     <React.Fragment>
       <p data-test-subj="errorToastMessage">{toastMessage}</p>
-      <div className="eui-textRight">
-        <EuiButton
-          size="s"
-          color="danger"
-          onClick={() => showErrorDialog({ title, error, openModal, i18nContext })}
-        >
-          <FormattedMessage
-            id="core.toasts.errorToast.seeFullError"
-            defaultMessage="See the full error"
-          />
-        </EuiButton>
-      </div>
     </React.Fragment>
   );
 }
