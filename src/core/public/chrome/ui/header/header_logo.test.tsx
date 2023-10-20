@@ -97,6 +97,37 @@ describe('Header logo', () => {
       expect(props.navigateToApp).toHaveBeenCalledWith('home');
     });
 
+    
+    it('does not reload the page when reload is set to false', () => {
+      // Mock the window.location.reload function
+      window.location.reload = jest.fn();
+
+      const props = {
+        ...mockProps(),
+        reload: false, // Set reload to false
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
+      component.find('.logoContainer img').simulate('click');
+
+      expect(props.navigateToApp).not.toHaveBeenCalled();
+    });
+
+
+    it('does not reload the page when reload is set to false', () => {
+      // Mock the window.location.reload function
+      window.location.reload = jest.fn();
+
+      const props = {
+        ...mockProps(),
+        reload: true, // Set reload to true
+      };
+      const component = mountWithIntl(<HeaderLogo {...props} />);
+      component.find('.logoContainer img').simulate('click');
+
+      // Expect that window.location.reload is called exactly once
+      expect(window.location.reload).toHaveBeenCalledTimes(1);
+    });
+
     // ToDo: Add tests for onClick
     // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4692
     it.todo('performs all the complications');
