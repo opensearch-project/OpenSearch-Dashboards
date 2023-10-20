@@ -34,14 +34,8 @@ import React from 'react';
 import { ErrorToast } from './error_toast';
 
 interface ErrorToastProps {
-  error?: Error;
-  title?: string;
   toastMessage?: string;
 }
-
-let openModal: jest.Mock;
-
-beforeEach(() => (openModal = jest.fn()));
 
 function render(props: ErrorToastProps = {}) {
   return <ErrorToast toastMessage={props.toastMessage || 'This is the toast message'} />;
@@ -49,9 +43,4 @@ function render(props: ErrorToastProps = {}) {
 
 it('renders matching snapshot', () => {
   expect(shallow(render())).toMatchSnapshot();
-});
-
-afterAll(() => {
-  // Cleanup document.body to cleanup any modals which might be left over from tests.
-  document.body.innerHTML = '';
 });
