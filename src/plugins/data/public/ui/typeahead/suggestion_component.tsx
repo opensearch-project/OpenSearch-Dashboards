@@ -61,6 +61,10 @@ interface Props {
 }
 
 export function SuggestionComponent(props: Props) {
+  if (!props.suggestion.text.trim()) {
+    return null;
+  }
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
