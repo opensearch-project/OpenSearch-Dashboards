@@ -39,3 +39,4 @@ export * from './ui_settings';
 export * from './saved_objects';
 export * from './serializable';
 export * from './custom_branding';
+export * from './workspace';

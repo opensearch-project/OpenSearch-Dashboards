@@ -21,6 +21,7 @@ import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../saved_searches/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { popularizeField } from '../../helpers/popularize_field';
 
 interface Props {
   rows?: OpenSearchSearchHit[];
@@ -33,13 +34,27 @@ export const DiscoverTable = ({ rows }: Props) => {
     data: {
       query: { filterManager },
     },
+    capabilities,
+    indexPatterns,
   } = services;
 
   const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
   const { columns, sort } = useSelector((state) => state.discover);
   const dispatch = useDispatch();
-  const onAddColumn = (col: string) => dispatch(addColumn({ column: col }));
-  const onRemoveColumn = (col: string) => dispatch(removeColumn(col));
+  const onAddColumn = (col: string) => {
+    if (indexPattern && capabilities.discover?.save) {
+      popularizeField(indexPattern, col, indexPatterns);
+    }
+
+    dispatch(addColumn({ column: col }));
+  };
+  const onRemoveColumn = (col: string) => {
+    if (indexPattern && capabilities.discover?.save) {
+      popularizeField(indexPattern, col, indexPatterns);
+    }
+
+    dispatch(removeColumn(col));
+  };
   const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
     dispatch(setSort(s));

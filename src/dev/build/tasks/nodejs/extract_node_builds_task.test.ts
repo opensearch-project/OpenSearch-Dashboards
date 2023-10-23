@@ -124,6 +124,13 @@ it('runs expected fs operations', async () => {
           },
         ],
         Array [
+          <absolute path>/.node_binaries/<node version>/node-v<node version>-darwin-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/darwin-arm64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
           <absolute path>/.node_binaries/14.21.3/node-v14.21.3-linux-x64.tar.gz,
           <absolute path>/.node_binaries/14.21.3/linux-x64,
           Object {
@@ -140,6 +147,13 @@ it('runs expected fs operations', async () => {
         Array [
           <absolute path>/.node_binaries/14.21.3/node-v14.21.3-darwin-x64.tar.gz,
           <absolute path>/.node_binaries/14.21.3/darwin-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-darwin-arm64.tar.gz,
+          <absolute path>/.node_binaries/14.21.3/darwin-arm64,
           Object {
             "strip": 1,
           },
