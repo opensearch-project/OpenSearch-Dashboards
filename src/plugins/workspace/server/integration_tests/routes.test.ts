@@ -155,7 +155,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(reservedWorkspace, 'id'),
+          attributes: omitId(reservedWorkspace),
         })
         .expect(200);
 

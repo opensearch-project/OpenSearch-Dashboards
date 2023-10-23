@@ -6,3 +6,9 @@
 export const WORKSPACE_TYPE = 'workspace';
 
 export const WORKSPACE_PATH_PREFIX = '/w';
+
+export const PUBLIC_WORKSPACE_ID = 'public';
+
+export const MANAGEMENT_WORKSPACE_ID = 'management';
+
+export const PERSONAL_WORKSPACE_ID_PREFIX = 'personal';

@@ -10,6 +10,7 @@ import { ContextValue, ServicesContextProvider } from '../contexts';
 import { serviceContextMock } from '../contexts/services_context.mock';
 import { wrapWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { ReactWrapper, mount } from 'enzyme';
+import { waitFor } from '@testing-library/dom';
 
 const mockFile = new File(['{"text":"Sample JSON data"}'], 'sample.json', {
   type: 'application/json',
@@ -122,9 +123,11 @@ describe('ImportFlyout Component', () => {
     expect(component.find(overwriteOptionIdentifier).first().props().checked).toBe(false);
 
     // should update existing query
-    expect(mockUpdate).toBeCalledTimes(1);
-    expect(mockClose).toBeCalledTimes(1);
-    expect(mockRefresh).toBeCalledTimes(1);
+    await waitFor(() => {
+      expect(mockUpdate).toBeCalledTimes(1);
+      expect(mockClose).toBeCalledTimes(1);
+      expect(mockRefresh).toBeCalledTimes(1);
+    });
   });
 
   it('should handle errors during import', async () => {
