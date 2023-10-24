@@ -6,9 +6,9 @@ The new saved object service interface for custom repository is a project that a
 
 Currently, Dashboards stores its metadata configuration inside OpenSearch index (called .kibana). This approach is by design of Dashboards and biased towards product decision by upstream which works seamlessly and out of the box for customers but it introduces challenges while operating at scale and providing high availability for Dashboards. While choosing OpenSearch as a storage for Dashboards metadata, availability of Dashboards depends on OpenSearch cluster’s availability and other cluster parameters such as cluster health, state, versions which could make Dashboards unavailable.
 
-To mitigate above problem and unblock future extensibility of Dashboards, we are building Dashboards Meta storage adaptor to decouple Dashboards metadata storage from OpenSearch. This project will focus on introducing new interface in Saved Object Service using which developer can build their custom repository and save Dashboards metadata in storage of their choice.
+To mitigate the above problem and unblock future extensibility of Dashboards, we are building Dashboards Meta storage adaptor to decouple Dashboards metadata storage from OpenSearch. This project will focus on introducing new interface in Saved Object Service using which developer can build their custom repository and save Dashboards metadata in storage of their choice.
 
-The stakeholders of this new interface include the developers of the Dashboards and community contributors who wants to use other metadata store.
+The stakeholders of this a new interface include the developers of the Dashboards and community contributors who want to use other metadata store.
 
 ## Architecture Overview
 
