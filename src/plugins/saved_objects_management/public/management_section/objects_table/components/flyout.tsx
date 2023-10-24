@@ -97,6 +97,7 @@ export interface FlyoutProps {
   hideLocalCluster: boolean;
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
+  workspaces?: string[];
 }
 
 export interface FlyoutState {
@@ -189,13 +190,21 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    * Does the initial import of a file, resolveImportErrors then handles errors and retries
    */
   import = async () => {
-    const { http } = this.props;
+    const { http, workspaces } = this.props;
     const { file, importMode, selectedDataSourceId } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, importMode, selectedDataSourceId);
+      const response = await importFile(
+        http,
+        file!,
+        {
+          ...importMode,
+          workspaces,
+        },
+        selectedDataSourceId
+      );
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -251,6 +260,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       status: 'loading',
       loadingMessage: undefined,
     });
+    const { workspaces } = this.props;
 
     try {
       const updatedState = await resolveImportErrors({
@@ -258,6 +268,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         state: this.state,
         getConflictResolutions: this.getConflictResolutions,
         selectedDataSourceId: this.state.selectedDataSourceId,
+        workspaces,
       });
       this.setState(updatedState);
     } catch (e) {

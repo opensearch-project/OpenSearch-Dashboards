@@ -41,6 +41,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
           typesToInclude: schema.arrayOf(schema.string()),
           namespacesToInclude: schema.maybe(schema.arrayOf(schema.string())),
           searchString: schema.maybe(schema.string()),
+          workspaces: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
@@ -55,12 +56,18 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         perPage: 1000,
       };
 
+      const requestHasWorkspaces = Array.isArray(req.body.workspaces) && req.body.workspaces.length;
+
       const requestHasNamespaces =
         Array.isArray(req.body.namespacesToInclude) && req.body.namespacesToInclude.length;
 
       if (requestHasNamespaces) {
         counts.namespaces = {};
         findOptions.namespaces = req.body.namespacesToInclude;
+      }
+
+      if (requestHasWorkspaces) {
+        findOptions.workspaces = req.body.workspaces;
       }
 
       if (req.body.searchString) {

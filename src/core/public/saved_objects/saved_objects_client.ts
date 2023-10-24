@@ -61,6 +61,7 @@ export interface SavedObjectsCreateOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
+  workspaces?: string[];
 }
 
 /**
@@ -183,6 +184,11 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
 export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
+  /**
+   * if currentWorkspaceId is undefined, it means
+   * we should not carry out workspace info when doing any operation.
+   */
+  private currentWorkspaceId: string | undefined;
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
@@ -227,6 +233,11 @@ export class SavedObjectsClient {
     this.batchQueue = [];
   }
 
+  public setCurrentWorkspace(workspaceId: string): boolean {
+    this.currentWorkspaceId = workspaceId;
+    return true;
+  }
+
   /**
    * Persists an object
    *
@@ -249,6 +260,14 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
+    const currentWorkspaceId = this.currentWorkspaceId;
+    let finalWorkspaces;
+    if (options.hasOwnProperty('workspaces')) {
+      finalWorkspaces = options.workspaces;
+    } else if (typeof currentWorkspaceId === 'string') {
+      finalWorkspaces = [currentWorkspaceId];
+    }
+
     const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
       query,
@@ -256,6 +275,11 @@ export class SavedObjectsClient {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
+        ...(finalWorkspaces
+          ? {
+              workspaces: finalWorkspaces,
+            }
+          : {}),
       }),
     });
 
@@ -348,7 +372,25 @@ export class SavedObjectsClient {
       workspaces: 'workspaces',
     };
 
-    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
+    const currentWorkspaceId = this.currentWorkspaceId;
+    let finalWorkspaces;
+    if (options.hasOwnProperty('workspaces')) {
+      finalWorkspaces = options.workspaces;
+    } else if (typeof currentWorkspaceId === 'string') {
+      finalWorkspaces = Array.from(new Set([currentWorkspaceId]));
+    }
+
+    const renamedQuery = renameKeys<Omit<SavedObjectsFindOptions, 'ACLSearchParams'>, any>(
+      renameMap,
+      {
+        ...options,
+        ...(finalWorkspaces
+          ? {
+              workspaces: finalWorkspaces,
+            }
+          : {}),
+      }
+    );
     const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Partial<
       Record<string, any>
     >;

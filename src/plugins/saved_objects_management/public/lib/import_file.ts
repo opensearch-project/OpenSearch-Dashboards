@@ -40,12 +40,12 @@ interface ImportResponse {
 export async function importFile(
   http: HttpStart,
   file: File,
-  { createNewCopies, overwrite }: ImportMode,
+  { createNewCopies, overwrite, workspaces }: ImportMode,
   selectedDataSourceId?: string
 ) {
   const formData = new FormData();
   formData.append('file', file);
-  const query = createNewCopies ? { createNewCopies } : { overwrite };
+  const query = createNewCopies ? { createNewCopies, workspaces } : { overwrite, workspaces };
   if (selectedDataSourceId) {
     query.dataSourceId = selectedDataSourceId;
   }
