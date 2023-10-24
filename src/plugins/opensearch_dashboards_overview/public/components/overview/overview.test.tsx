@@ -249,8 +249,4 @@ describe('Overview', () => {
       expect(component).toMatchSnapshot();
     });
   });
-
-  // ToDo: Add tests for all the complications of Overview
-  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4693
-  // it.todo('renders each of the complications of Overview');
 });
