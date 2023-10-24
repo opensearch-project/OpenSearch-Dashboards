@@ -329,6 +329,26 @@ describe('SavedObjectsClient', () => {
       `);
     });
 
+    test('makes HTTP call with workspaces', () => {
+      savedObjectsClient.create('index-pattern', attributes, {
+        workspaces: ['foo'],
+      });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"workspaces\\":[\\"foo\\"]}",
+              "method": "POST",
+              "query": Object {
+                "overwrite": undefined,
+              },
+            },
+          ],
+        ]
+      `);
+    });
+
     test('rejects when HTTP call fails', async () => {
       http.fetch.mockRejectedValueOnce(new Error('Request failed'));
       await expect(
@@ -380,6 +400,29 @@ describe('SavedObjectsClient', () => {
               "method": "POST",
               "query": Object {
                 "overwrite": true,
+              },
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('makes HTTP call with workspaces', () => {
+      savedObjectsClient.bulkCreate([doc], {
+        workspaces: ['foo'],
+      });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_create",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
+              "method": "POST",
+              "query": Object {
+                "overwrite": undefined,
+                "workspaces": Array [
+                  "foo",
+                ],
               },
             },
           ],
@@ -505,6 +548,32 @@ describe('SavedObjectsClient', () => {
               "body": undefined,
               "method": "GET",
               "query": Object {},
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('makes HTTP call correctly with workspaces', () => {
+      const options = {
+        invalid: true,
+        workspaces: ['foo'],
+      };
+
+      // @ts-expect-error
+      savedObjectsClient.find(options);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_find",
+            Object {
+              "body": undefined,
+              "method": "GET",
+              "query": Object {
+                "workspaces": Array [
+                  "foo",
+                ],
+              },
             },
           ],
         ]

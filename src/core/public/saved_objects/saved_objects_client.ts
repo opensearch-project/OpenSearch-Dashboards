@@ -79,6 +79,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsC
 export interface SavedObjectsBulkCreateOptions {
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
+  workspaces?: string[];
 }
 
 /** @public */
@@ -295,11 +296,22 @@ export class SavedObjectsClient {
    * @returns The result of the create operation containing created saved objects.
    */
   public bulkCreate = (
-    objects: SavedObjectsBulkCreateObject[] = [],
+    objects: Array<Omit<SavedObjectsBulkCreateObject, 'workspaces'>> = [],
     options: SavedObjectsBulkCreateOptions = { overwrite: false }
   ) => {
     const path = this.getPath(['_bulk_create']);
-    const query = { overwrite: options.overwrite };
+    const query: HttpFetchOptions['query'] = { overwrite: options.overwrite };
+    const currentWorkspaceId = this.currentWorkspaceId;
+    let finalWorkspaces;
+    if (options.hasOwnProperty('workspaces')) {
+      finalWorkspaces = options.workspaces;
+    } else if (typeof currentWorkspaceId === 'string') {
+      finalWorkspaces = [currentWorkspaceId];
+    }
+
+    if (finalWorkspaces) {
+      query.workspaces = finalWorkspaces;
+    }
 
     const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.savedObjectsFetch(path, {
       method: 'POST',
