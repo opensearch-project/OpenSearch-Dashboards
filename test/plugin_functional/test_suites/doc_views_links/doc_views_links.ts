@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await waitFor(async () => (await browser.getAllWindowHandles()).length > originalTabCount);
 
       // switch to the originalTabCount in case previous tab is not closed in time
-      await browser.switchTab(originalTabCount);
+      //await browser.switchTab(originalTabCount);
 
       const currentUrl = await browser.getCurrentUrl();
       expect(currentUrl).to.eql('http://some-url/');
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await waitFor(async () => (await browser.getAllWindowHandles()).length > originalTabCount);
 
       // switch to the originalTabCount in case previous tab is not closed in time
-      await browser.switchTab(originalTabCount);
+      //await browser.switchTab(originalTabCount);
 
       const currentUrl = await browser.getCurrentUrl();
       expect(currentUrl).to.eql('http://some-url/');
