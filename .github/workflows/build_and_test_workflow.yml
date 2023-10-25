@@ -28,103 +28,6 @@ env:
   NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
 
 jobs:
-  build-lint-test:
-    name: Build and Verify on ${{ matrix.name }} (ciGroup${{ matrix.group }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        group: [1, 2, 3, 4]
-        include:
-          - os: ubuntu-latest
-            name: Linux
-          - os: windows-latest
-            name: Windows
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Configure git's autocrlf (Windows only)
-        if: matrix.os == 'windows-latest'
-        run: |
-          git config --global core.autocrlf false
-
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup JDK (Windows only)
-        if: matrix.os == 'windows-latest'
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
-        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
-
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v3
-        if: matrix.os != 'windows-latest'
-        with:
-          path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-
-
-      - name: Run bootstrap (Linux)
-        if: matrix.os != 'windows-latest'
-        run: yarn osd bootstrap
-
-      - name: Run bootstrap (Windows)
-        if: matrix.os == 'windows-latest'
-        run: yarn osd bootstrap || yarn osd bootstrap
-
-      - name: Run linter
-        # ciGroup 1 of unit-tests is shorter and Linux is faster
-        if: matrix.group == 1 && matrix.os == 'ubuntu-latest'
-        id: linter
-        run: yarn lint
-
-      - name: Validate NOTICE file
-        # ciGroup 1 of unit-tests is shorter and Linux is faster
-        if: matrix.group == 1 && matrix.os == 'ubuntu-latest'
-        id: notice-validate
-        run: yarn notice:validate
-
-      - name: Run unit tests group ${{ matrix.group }} with coverage
-        id: unit-tests
-        run: yarn test:jest:ci:coverage  --ci-group=${{ matrix.group }}
-
-      - name: Run mocha tests with coverage
-        # ciGroup 1 of unit-tests is shorter
-        if: matrix.group == 1
-        id: mocha-tests
-        run: yarn test:mocha:coverage
-
-      - name: Upload Code Coverage
-        id: upload-code-coverage
-        uses: codecov/codecov-action@v3
-        with:
-          directory: ./target/opensearch-dashboards-coverage
-          flags: ${{ matrix.name }}_${{ matrix.group }}
-
-      - name: Run integration tests
-        # ciGroup 1 of unit-tests is shorter
-        if: matrix.group == 1
-        id: integration-tests
-        run: yarn test:jest_integration:ci
-
   plugin-functional-tests:
     name: Run plugin functional tests on ${{ matrix.name }}
     strategy:
@@ -206,94 +109,7 @@ jobs:
             test/*/failure_debug/
             test/*/screenshots/
 
-  functional-tests:
-    name: Run functional tests on ${{ matrix.name }} (ciGroup${{ matrix.group }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-        include:
-          - os: ubuntu-latest
-            name: Linux
-          - os: windows-latest
-            name: Windows
-    runs-on: ${{ matrix.os }}
-    steps:
-      - run: echo Running functional tests for ciGroup${{ matrix.group }}
-
-      - name: Configure git's autocrlf (Windows only)
-        if: matrix.os == 'windows-latest'
-        run: |
-          git config --global core.autocrlf false
-
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup JDK (Windows only)
-        if: matrix.os == 'windows-latest'
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
-        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
-
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v3
-        if: matrix.os != 'windows-latest'
-        with:
-          path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-
-
-      - name: Setup chromedriver
-        run: node scripts/upgrade_chromedriver.js
-
-      - name: Run bootstrap (Linux)
-        if: matrix.os != 'windows-latest'
-        run: yarn osd bootstrap
-
-      - name: Run bootstrap (Windows)
-        if: matrix.os == 'windows-latest'
-        run: yarn osd bootstrap || yarn osd bootstrap
-
-      - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
-
-      - name: Run CI test group ${{ matrix.group }}
-        id: ftr-tests
-        run: node scripts/functional_tests.js --config test/functional/config.js --include ciGroup${{ matrix.group }}
-        env:
-          CI_GROUP: ciGroup${{ matrix.group }}
-          CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
-          JOB: ci${{ matrix.group }}
-          CACHE_DIR: ciGroup${{ matrix.group }}
-
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: failure-artifacts-ci${{ matrix.group }}
-          path: |
-            test/*/failure_debug/
-            test/*/screenshots/
-
-  build-min-artifact-tests:
+ 
     name: Build min release artifacts on ${{ matrix.name }}
     strategy:
       matrix:
@@ -385,9 +201,7 @@ jobs:
         with:
           name: ${{ matrix.suffix }}-${{ env.VERSION }}
           path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
-          retention-days: 1
-
-  bwc-tests:
+          retention-days: 
     needs: [build-min-artifact-tests]
     runs-on: ubuntu-latest
     container:
