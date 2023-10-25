@@ -111,7 +111,7 @@ describe('Header logo', () => {
       expect(props.navigateToApp).toHaveBeenCalledTimes(1);
     });
 
-    it('No Intervention Resulting in URL Loading-does not reload the page when reload is set to false', () => {
+    it('no intervention resulting in url loading-does not reload the page when reload is set to false', () => {
       const props = {
         ...mockProps(),
         navigateToApp: jest.fn(),
