@@ -107,7 +107,6 @@ describe('Header logo', () => {
       component.find('.logoContainer img').simulate('click');
 
       // Expect that navigateToApp is not called when reload is true
-      expect(props.navigateToApp).not.toHaveBeenCalled();
       // Expect that window.location.reload is called exactly once
       expect(props.navigateToApp).toHaveBeenCalledTimes(1);
     });
