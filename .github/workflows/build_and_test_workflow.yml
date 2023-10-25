@@ -99,7 +99,7 @@ jobs:
 
       - name: Run CI test group ${{ matrix.group }}
         id: plugin-ftr-tests
-        run: node scripts/functional_tests.js --config test/plugin_functional/config.js
+        run: node scripts/functional_tests.js --config test/plugin_functional/config.ts
 
       - uses: actions/upload-artifact@v3
         if: failure()
