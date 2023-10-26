@@ -54,14 +54,14 @@ export interface ChromeNavLinks {
   getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 
   /**
-   * Set an observable for a sorted list of filtered navlinks.
+   * Get an observable for a sorted list of all navlinks.
    */
-  getFilteredNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
+  getAllNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 
   /**
-   * Set filtered navlinks.
+   * Set navlinks.
    */
-  setFilteredNavLinks(filteredNavLinks: ReadonlyMap<string, ChromeNavLink>): void;
+  setNavLinks(navLinks: ReadonlyMap<string, ChromeNavLink>): void;
 
   /**
    * Get the state of a navlink at this point in time.
@@ -126,9 +126,6 @@ type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLi
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
-  private filteredNavLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink> | undefined>(
-    undefined
-  );
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const appLinks$ = application.applications$.pipe(
@@ -145,7 +142,10 @@ export class NavLinksService {
     // manual link modifications to be able to re-apply then after every
     // availableApps$ changes.
     const linkUpdaters$ = new BehaviorSubject<LinksUpdater[]>([]);
-    const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
+    const displayedNavLinks$ = new BehaviorSubject<ReadonlyMap<string, ChromeNavLink> | undefined>(
+      undefined
+    );
+    const allNavLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
     combineLatest([appLinks$, linkUpdaters$])
       .pipe(
@@ -154,42 +154,40 @@ export class NavLinksService {
         })
       )
       .subscribe((navLinks) => {
-        navLinks$.next(navLinks);
+        allNavLinks$.next(navLinks);
       });
 
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
 
     return {
       getNavLinks$: () => {
-        return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
-      },
-
-      setFilteredNavLinks: (filteredNavLinks: ReadonlyMap<string, ChromeNavLink>) => {
-        this.filteredNavLinks$.next(filteredNavLinks);
-      },
-
-      getFilteredNavLinks$: () => {
-        return combineLatest([navLinks$, this.filteredNavLinks$]).pipe(
-          map(([navLinks, filteredNavLinks]) =>
-            filteredNavLinks === undefined
-              ? sortNavLinks(navLinks)
-              : sortChromeNavLinks(filteredNavLinks)
+        return combineLatest([allNavLinks$, displayedNavLinks$]).pipe(
+          map(([allNavLinks, displayedNavLinks]) =>
+            displayedNavLinks === undefined ? sortLinks(allNavLinks) : sortLinks(displayedNavLinks)
           ),
           takeUntil(this.stop$)
         );
       },
 
+      setNavLinks: (navLinks: ReadonlyMap<string, ChromeNavLink>) => {
+        displayedNavLinks$.next(navLinks);
+      },
+
+      getAllNavLinks$: () => {
+        return allNavLinks$.pipe(map(sortLinks), takeUntil(this.stop$));
+      },
+
       get(id: string) {
-        const link = navLinks$.value.get(id);
+        const link = allNavLinks$.value.get(id);
         return link && link.properties;
       },
 
       getAll() {
-        return sortNavLinks(navLinks$.value);
+        return sortLinks(allNavLinks$.value);
       },
 
       has(id: string) {
-        return navLinks$.value.has(id);
+        return allNavLinks$.value.has(id);
       },
 
       showOnly(id: string) {
@@ -237,16 +235,9 @@ export class NavLinksService {
   }
 }
 
-function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
+function sortLinks(links: ReadonlyMap<string, NavLinkWrapper | ChromeNavLink>) {
   return sortBy(
-    [...navLinks.values()].map((link) => link.properties),
-    'order'
-  );
-}
-
-function sortChromeNavLinks(chromeNavLinks: ReadonlyMap<string, ChromeNavLink>) {
-  return sortBy(
-    [...chromeNavLinks.values()].map((link) => link as Readonly<ChromeNavLink>),
+    [...links.values()].map((link) => ('properties' in link ? link.properties : link)),
     'order'
   );
 }

@@ -79,13 +79,51 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
   getUrlForApp={[MockFunction]}
   homeHref="/"
-  id="collapsibe-nav"
+  id="collapsible-nav"
   isLocked={false}
   isNavOpen={true}
   logos={
@@ -382,7 +420,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     data-test-subj="collapsibleNav"
-    id="collapsibe-nav"
+    id="collapsible-nav"
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
@@ -395,7 +433,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       closeButtonPosition="outside"
       data-test-subj="collapsibleNav"
       hideCloseButton={false}
-      id="collapsibe-nav"
+      id="collapsible-nav"
       onClose={[Function]}
       outsideClickCloses={false}
       ownFocus={true}
@@ -416,61 +454,171 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
+        <EuiFlexItem
+          grow={false}
+          style={
+            Object {
+              "flexShrink": 0,
+            }
+          }
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+            style={
+              Object {
+                "flexShrink": 0,
+              }
+            }
+          >
+            <EuiCollapsibleNavGroup
+              background="light"
+              className="eui-yScroll"
+              style={
+                Object {
+                  "maxHeight": "40vh",
+                }
+              }
+            >
+              <div
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+                id="mockId"
+                style={
+                  Object {
+                    "maxHeight": "40vh",
+                  }
+                }
+              >
+                <div
+                  className="euiCollapsibleNavGroup__children"
+                >
+                  <EuiListGroup
+                    color="text"
+                    gutterSize="none"
+                    listItems={
+                      Array [
+                        Object {
+                          "data-test-subj": "collapsibleNavCustomNavLink",
+                          "href": "Custom link",
+                          "icon": undefined,
+                          "iconType": undefined,
+                          "isActive": false,
+                          "isDisabled": undefined,
+                          "label": "Custom link",
+                          "onClick": [Function],
+                        },
+                      ]
+                    }
+                    maxWidth="none"
+                    size="s"
+                  >
+                    <ul
+                      className="euiListGroup"
+                      style={
+                        Object {
+                          "maxWidth": "none",
+                        }
+                      }
+                    >
+                      <EuiListGroupItem
+                        color="text"
+                        data-test-subj="collapsibleNavCustomNavLink"
+                        href="Custom link"
+                        isActive={false}
+                        key="title-0"
+                        label="Custom link"
+                        onClick={[Function]}
+                        showToolTip={false}
+                        size="s"
+                        wrapText={false}
+                      >
+                        <li
+                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                        >
+                          <a
+                            className="euiListGroupItem__button"
+                            data-test-subj="collapsibleNavCustomNavLink"
+                            href="Custom link"
+                            onClick={[Function]}
+                            rel="noreferrer"
+                          >
+                            <span
+                              className="euiListGroupItem__label"
+                              title="Custom link"
+                            >
+                              Custom link
+                            </span>
+                          </a>
+                        </li>
+                      </EuiListGroupItem>
+                    </ul>
+                  </EuiListGroup>
+                </div>
+              </div>
+            </EuiCollapsibleNavGroup>
+          </div>
+        </EuiFlexItem>
+        <EuiHorizontalRule
+          margin="none"
+        >
+          <hr
+            className="euiHorizontalRule euiHorizontalRule--full"
+          />
+        </EuiHorizontalRule>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -1937,13 +2085,51 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
   getUrlForApp={[MockFunction]}
   homeHref="/"
-  id="collapsibe-nav"
+  id="collapsible-nav"
   isLocked={false}
   isNavOpen={false}
   logos={
@@ -2124,7 +2310,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     data-test-subj="collapsibleNav"
-    id="collapsibe-nav"
+    id="collapsible-nav"
     isDocked={false}
     isOpen={false}
     onClose={[Function]}
@@ -2204,13 +2390,51 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
   getUrlForApp={[MockFunction]}
   homeHref="/"
-  id="collapsibe-nav"
+  id="collapsible-nav"
   isLocked={false}
   isNavOpen={false}
   isOpen={true}
@@ -2392,7 +2616,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     data-test-subj="collapsibleNav"
-    id="collapsibe-nav"
+    id="collapsible-nav"
     isDocked={false}
     isOpen={false}
     onClose={[Function]}
@@ -2472,13 +2696,51 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
   getUrlForApp={[MockFunction]}
   homeHref="/"
-  id="collapsibe-nav"
+  id="collapsible-nav"
   isLocked={true}
   isNavOpen={false}
   isOpen={true}
@@ -2660,7 +2922,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     data-test-subj="collapsibleNav"
-    id="collapsibe-nav"
+    id="collapsible-nav"
     isDocked={true}
     isOpen={false}
     onClose={[Function]}
@@ -2673,7 +2935,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       closeButtonPosition="outside"
       data-test-subj="collapsibleNav"
       hideCloseButton={true}
-      id="collapsibe-nav"
+      id="collapsible-nav"
       onClose={[Function]}
       outsideClickCloses={false}
       ownFocus={true}
@@ -2689,61 +2951,61 @@ exports[`CollapsibleNav renders the default nav 3`] = `
         data-test-subj="collapsibleNav"
         role={null}
       >
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -3144,13 +3406,51 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
   getUrlForApp={[MockFunction]}
   homeHref="/"
-  id="collapsibe-nav"
+  id="collapsible-nav"
   isLocked={false}
   isNavOpen={true}
   logos={
@@ -3365,7 +3665,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
   <EuiCollapsibleNav
     aria-label="Primary"
     data-test-subj="collapsibleNav"
-    id="collapsibe-nav"
+    id="collapsible-nav"
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
@@ -3378,7 +3678,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
       closeButtonPosition="outside"
       data-test-subj="collapsibleNav"
       hideCloseButton={false}
-      id="collapsibe-nav"
+      id="collapsible-nav"
       onClose={[Function]}
       outsideClickCloses={false}
       ownFocus={true}
@@ -3399,61 +3699,61 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -4288,13 +4588,51 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
   getUrlForApp={[MockFunction]}
   homeHref="/"
-  id="collapsibe-nav"
+  id="collapsible-nav"
   isLocked={false}
   isNavOpen={true}
   logos={
@@ -4509,7 +4847,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
   <EuiCollapsibleNav
     aria-label="Primary"
     data-test-subj="collapsibleNav"
-    id="collapsibe-nav"
+    id="collapsible-nav"
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
@@ -4522,7 +4860,7 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
       closeButtonPosition="outside"
       data-test-subj="collapsibleNav"
       hideCloseButton={false}
-      id="collapsibe-nav"
+      id="collapsible-nav"
       onClose={[Function]}
       outsideClickCloses={false}
       ownFocus={true}
@@ -4543,61 +4881,61 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -5425,13 +5763,51 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
   getUrlForApp={[MockFunction]}
   homeHref="/"
-  id="collapsibe-nav"
+  id="collapsible-nav"
   isLocked={false}
   isNavOpen={true}
   logos={
@@ -5646,7 +6022,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
   <EuiCollapsibleNav
     aria-label="Primary"
     data-test-subj="collapsibleNav"
-    id="collapsibe-nav"
+    id="collapsible-nav"
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
@@ -5659,7 +6035,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
       closeButtonPosition="outside"
       data-test-subj="collapsibleNav"
       hideCloseButton={false}
-      id="collapsibe-nav"
+      id="collapsible-nav"
       onClose={[Function]}
       outsideClickCloses={false}
       ownFocus={true}
@@ -5680,61 +6056,61 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -6558,13 +6934,51 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
   getUrlForApp={[MockFunction]}
   homeHref="/"
-  id="collapsibe-nav"
+  id="collapsible-nav"
   isLocked={false}
   isNavOpen={true}
   logos={
@@ -6779,7 +7193,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
   <EuiCollapsibleNav
     aria-label="Primary"
     data-test-subj="collapsibleNav"
-    id="collapsibe-nav"
+    id="collapsible-nav"
     isDocked={false}
     isOpen={true}
     onClose={[Function]}
@@ -6792,7 +7206,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
       closeButtonPosition="outside"
       data-test-subj="collapsibleNav"
       hideCloseButton={false}
-      id="collapsibe-nav"
+      id="collapsible-nav"
       onClose={[Function]}
       outsideClickCloses={false}
       ownFocus={true}
@@ -6813,61 +7227,61 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
           onClick={[Function]}
           type="button"
         />
+        <EuiCollapsibleNavGroup>
+          <div
+            className="euiCollapsibleNavGroup"
+            id="mockId"
+          >
+            <div
+              className="euiCollapsibleNavGroup__children"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiIcon
+                        size="l"
+                        type="logoOpenSearch"
+                      >
+                        <span
+                          data-euiicon-type="logoOpenSearch"
+                          size="l"
+                        />
+                      </EuiIcon>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiText>
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <strong>
+                             
+                            OpenSearch Dashboards
+                             
+                          </strong>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        </EuiCollapsibleNavGroup>
         <EuiFlexItem
           className="eui-yScroll"
         >
           <div
             className="euiFlexItem eui-yScroll"
           >
-            <EuiCollapsibleNavGroup>
-              <div
-                className="euiCollapsibleNavGroup"
-                id="mockId"
-              >
-                <div
-                  className="euiCollapsibleNavGroup__children"
-                >
-                  <EuiFlexGroup>
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiIcon
-                            size="l"
-                            type="logoOpenSearch"
-                          >
-                            <span
-                              data-euiicon-type="logoOpenSearch"
-                              size="l"
-                            />
-                          </EuiIcon>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              <strong>
-                                 
-                                OpenSearch Dashboards
-                                 
-                              </strong>
-                            </div>
-                          </EuiText>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
-                </div>
-              </div>
-            </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
               data-test-opensearch-logo="clock"
               data-test-subj="collapsibleNavGroup-recentlyVisited"

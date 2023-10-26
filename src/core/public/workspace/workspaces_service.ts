@@ -5,10 +5,7 @@
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
-
-import { CoreService, WorkspaceAttribute } from '../../types';
-
-type WorkspaceObject = WorkspaceAttribute & { libraryReadonly?: boolean };
+import { CoreService, WorkspaceObject } from '../../types';
 
 interface WorkspaceObservables {
   /**
@@ -47,8 +44,8 @@ export type WorkspacesStart = WorkspaceObservables;
 
 export class WorkspacesService implements CoreService<WorkspacesSetup, WorkspacesStart> {
   private currentWorkspaceId$ = new BehaviorSubject<string>('');
-  private workspaceList$ = new BehaviorSubject<WorkspaceAttribute[]>([]);
-  private currentWorkspace$ = new BehaviorSubject<WorkspaceAttribute | null>(null);
+  private workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([]);
+  private currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   private initialized$ = new BehaviorSubject<boolean>(false);
 
   constructor() {

@@ -81,7 +81,7 @@ function mockProps(branding = {}) {
   return {
     appId$: new BehaviorSubject('test'),
     basePath: mockBasePath,
-    id: 'collapsibe-nav',
+    id: 'collapsible-nav',
     isLocked: false,
     isNavOpen: false,
     homeHref: '/',

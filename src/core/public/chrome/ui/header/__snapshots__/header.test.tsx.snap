@@ -316,7 +316,45 @@ exports[`Header handles visibility and lock changes 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -5859,7 +5897,45 @@ exports[`Header handles visibility and lock changes 1`] = `
           "closed": false,
           "hasError": false,
           "isStopped": false,
-          "observers": Array [],
+          "observers": Array [
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+          ],
           "thrownError": null,
         }
       }
@@ -6154,61 +6230,171 @@ exports[`Header handles visibility and lock changes 1`] = `
             data-test-subj="collapsibleNav"
             role={null}
           >
+            <EuiCollapsibleNavGroup>
+              <div
+                className="euiCollapsibleNavGroup"
+                id="mockId"
+              >
+                <div
+                  className="euiCollapsibleNavGroup__children"
+                >
+                  <EuiFlexGroup>
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <EuiIcon
+                            size="l"
+                            type="logoOpenSearch"
+                          >
+                            <span
+                              data-euiicon-type="logoOpenSearch"
+                              size="l"
+                            />
+                          </EuiIcon>
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
+                        >
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              <strong>
+                                 
+                                OpenSearch Dashboards
+                                 
+                              </strong>
+                            </div>
+                          </EuiText>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                </div>
+              </div>
+            </EuiCollapsibleNavGroup>
+            <EuiFlexItem
+              grow={false}
+              style={
+                Object {
+                  "flexShrink": 0,
+                }
+              }
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+                style={
+                  Object {
+                    "flexShrink": 0,
+                  }
+                }
+              >
+                <EuiCollapsibleNavGroup
+                  background="light"
+                  className="eui-yScroll"
+                  style={
+                    Object {
+                      "maxHeight": "40vh",
+                    }
+                  }
+                >
+                  <div
+                    className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+                    id="mockId"
+                    style={
+                      Object {
+                        "maxHeight": "40vh",
+                      }
+                    }
+                  >
+                    <div
+                      className="euiCollapsibleNavGroup__children"
+                    >
+                      <EuiListGroup
+                        color="text"
+                        gutterSize="none"
+                        listItems={
+                          Array [
+                            Object {
+                              "data-test-subj": "collapsibleNavCustomNavLink",
+                              "href": "",
+                              "icon": undefined,
+                              "iconType": undefined,
+                              "isActive": false,
+                              "isDisabled": undefined,
+                              "label": "Manage cloud deployment",
+                              "onClick": [Function],
+                            },
+                          ]
+                        }
+                        maxWidth="none"
+                        size="s"
+                      >
+                        <ul
+                          className="euiListGroup"
+                          style={
+                            Object {
+                              "maxWidth": "none",
+                            }
+                          }
+                        >
+                          <EuiListGroupItem
+                            color="text"
+                            data-test-subj="collapsibleNavCustomNavLink"
+                            href=""
+                            isActive={false}
+                            key="title-0"
+                            label="Manage cloud deployment"
+                            onClick={[Function]}
+                            showToolTip={false}
+                            size="s"
+                            wrapText={false}
+                          >
+                            <li
+                              className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                            >
+                              <button
+                                className="euiListGroupItem__button"
+                                data-test-subj="collapsibleNavCustomNavLink"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiListGroupItem__label"
+                                  title="Manage cloud deployment"
+                                >
+                                  Manage cloud deployment
+                                </span>
+                              </button>
+                            </li>
+                          </EuiListGroupItem>
+                        </ul>
+                      </EuiListGroup>
+                    </div>
+                  </div>
+                </EuiCollapsibleNavGroup>
+              </div>
+            </EuiFlexItem>
+            <EuiHorizontalRule
+              margin="none"
+            >
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full"
+              />
+            </EuiHorizontalRule>
             <EuiFlexItem
               className="eui-yScroll"
             >
               <div
                 className="euiFlexItem eui-yScroll"
               >
-                <EuiCollapsibleNavGroup>
-                  <div
-                    className="euiCollapsibleNavGroup"
-                    id="mockId"
-                  >
-                    <div
-                      className="euiCollapsibleNavGroup__children"
-                    >
-                      <EuiFlexGroup>
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                        >
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <EuiIcon
-                                size="l"
-                                type="logoOpenSearch"
-                              >
-                                <span
-                                  data-euiicon-type="logoOpenSearch"
-                                  size="l"
-                                />
-                              </EuiIcon>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  <strong>
-                                     
-                                    OpenSearch Dashboards
-                                     
-                                  </strong>
-                                </div>
-                              </EuiText>
-                            </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
-                    </div>
-                  </div>
-                </EuiCollapsibleNavGroup>
                 <EuiCollapsibleNavGroup
                   data-test-opensearch-logo="clock"
                   data-test-subj="collapsibleNavGroup-recentlyVisited"
@@ -6889,7 +7075,45 @@ exports[`Header renders condensed header 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -11213,7 +11437,45 @@ exports[`Header renders condensed header 1`] = `
           "closed": false,
           "hasError": false,
           "isStopped": false,
-          "observers": Array [],
+          "observers": Array [
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+          ],
           "thrownError": null,
         }
       }

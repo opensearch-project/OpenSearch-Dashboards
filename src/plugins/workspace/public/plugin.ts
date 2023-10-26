@@ -14,7 +14,7 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-  WorkspaceAttribute,
+  WorkspaceObject,
   DEFAULT_APP_CATEGORIES,
 } from '../../../core/public';
 import {
@@ -39,15 +39,15 @@ interface WorkspacePluginSetupDeps {
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
+
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
+
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     core.chrome.registerCollapsibleNavHeader(renderWorkspaceMenu);
-
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
-
     /**
      * Retrieve workspace id from url
      */
@@ -179,7 +179,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     }
   }
 
-  private filterByWorkspace(workspace: WorkspaceAttribute | null, allNavLinks: ChromeNavLink[]) {
+  private filterByWorkspace(workspace: WorkspaceObject | null, allNavLinks: ChromeNavLink[]) {
     if (!workspace) return allNavLinks;
     const features = workspace.features ?? ['*'];
     return allNavLinks.filter(featureMatchesConfig(features));
@@ -187,18 +187,18 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   private filterNavLinks(core: CoreStart) {
     const navLinksService = core.chrome.navLinks;
-    const chromeNavLinks$ = navLinksService.getNavLinks$();
+    const allNavLinks$ = navLinksService.getAllNavLinks$();
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
     combineLatest([
-      chromeNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
+      allNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
       currentWorkspace$,
-    ]).subscribe(([chromeNavLinks, currentWorkspace]) => {
-      const filteredNavLinks = new Map<string, ChromeNavLink>();
-      chromeNavLinks = this.filterByWorkspace(currentWorkspace, chromeNavLinks);
-      chromeNavLinks.forEach((chromeNavLink) => {
-        filteredNavLinks.set(chromeNavLink.id, chromeNavLink);
+    ]).subscribe(([allNavLinks, currentWorkspace]) => {
+      const filteredNavLinks = this.filterByWorkspace(currentWorkspace, allNavLinks);
+      const navLinks = new Map<string, ChromeNavLink>();
+      filteredNavLinks.forEach((chromeNavLink) => {
+        navLinks.set(chromeNavLink.id, chromeNavLink);
       });
-      navLinksService.setFilteredNavLinks(filteredNavLinks);
+      navLinksService.setNavLinks(navLinks);
     });
   }
 

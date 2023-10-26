@@ -277,7 +277,7 @@ export class ChromeService {
           homeHref={http.basePath.prepend('/app/home')}
           isVisible$={this.isVisible$}
           opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
-          navLinks$={navLinks.getFilteredNavLinks$()}
+          navLinks$={navLinks.getNavLinks$()}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           recentlyAccessed$={recentlyAccessed.get$()}
           navControlsLeft$={navControls.getLeft$()}
