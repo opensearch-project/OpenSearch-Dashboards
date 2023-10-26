@@ -176,9 +176,8 @@ export class WorkspaceClient {
    * @returns
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'> & {
-      permissions: WorkspaceRoutePermissionItem[];
-    }
+    attributes: Omit<WorkspaceAttribute, 'id'>,
+    permissions?: WorkspaceRoutePermissionItem[]
   ): Promise<IResponse<WorkspaceAttribute>> {
     const path = this.getPath();
 
@@ -186,6 +185,7 @@ export class WorkspaceClient {
       method: 'POST',
       body: JSON.stringify({
         attributes,
+        permissions,
       }),
     });
 
@@ -264,15 +264,13 @@ export class WorkspaceClient {
    */
   public async update(
     id: string,
-    attributes: Partial<
-      WorkspaceAttribute & {
-        permissions: WorkspaceRoutePermissionItem[];
-      }
-    >
+    attributes: Partial<WorkspaceAttribute>,
+    permissions?: WorkspaceRoutePermissionItem[]
   ): Promise<IResponse<boolean>> {
     const path = this.getPath(id);
     const body = {
       attributes,
+      permissions,
     };
 
     const result = await this.safeFetch(path, {

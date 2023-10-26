@@ -130,6 +130,20 @@ const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   return numberOfErrors;
 };
 
+const isUserOrGroupPermissionSettingDuplicated = (
+  permissionSettings: Array<Partial<WorkspacePermissionSetting>>,
+  permissionSettingToCheck: WorkspacePermissionSetting
+) =>
+  permissionSettings.some(
+    (permissionSetting) =>
+      (permissionSettingToCheck.type === WorkspacePermissionItemType.User &&
+        permissionSetting.type === WorkspacePermissionItemType.User &&
+        permissionSettingToCheck.userId === permissionSetting.userId) ||
+      (permissionSettingToCheck.type === WorkspacePermissionItemType.Group &&
+        permissionSetting.type === WorkspacePermissionItemType.Group &&
+        permissionSettingToCheck.group === permissionSetting.group)
+  );
+
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
 const defaultVISThemeOptions = [{ value: 'categorical', text: 'Categorical' }];
@@ -377,6 +391,14 @@ export const WorkspaceForm = ({
       for (let i = 0; i < formData.permissions.length; i++) {
         const permission = formData.permissions[i];
         if (isValidWorkspacePermissionSetting(permission)) {
+          if (
+            isUserOrGroupPermissionSettingDuplicated(formData.permissions.slice(0, i), permission)
+          ) {
+            permissionErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
+              defaultMessage: 'Duplicate permission setting',
+            });
+            continue;
+          }
           continue;
         }
         if (!permission.type) {

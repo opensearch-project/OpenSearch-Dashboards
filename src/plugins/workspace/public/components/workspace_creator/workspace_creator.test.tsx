@@ -169,7 +169,8 @@ describe('WorkspaceCreator', () => {
         color: '#000000',
         description: 'test workspace description',
         defaultVISTheme: 'categorical',
-      })
+      }),
+      expect.any(Array)
     );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
@@ -190,7 +191,8 @@ describe('WorkspaceCreator', () => {
       expect.objectContaining({
         name: 'test workspace name',
         features: expect.arrayContaining(['app1', 'app2', 'app3']),
-      })
+      }),
+      expect.any(Array)
     );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
@@ -216,10 +218,8 @@ describe('WorkspaceCreator', () => {
     expect(workspaceClientCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'test workspace name',
-        permissions: expect.arrayContaining([
-          expect.objectContaining({ type: 'user', userId: 'test user id' }),
-        ]),
-      })
+      }),
+      expect.arrayContaining([expect.objectContaining({ type: 'user', userId: 'test user id' })])
     );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();

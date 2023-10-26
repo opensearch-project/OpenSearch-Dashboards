@@ -30,6 +30,7 @@ import {
   IResponse,
   IRequestDetail,
   WorkspaceAttributeWithPermission,
+  WorkspacePermissionItem,
 } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId, getPrincipalsFromRequest } from './utils';
@@ -39,6 +40,91 @@ import {
   WORKSPACE_UPDATE_APP_ID,
 } from '../common/constants';
 
+const validatePermissionModesCombinations = [
+  [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read], // Read
+  [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Read], // Write
+  [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write], // Admin
+];
+
+const isValidPermissionModesCombination = (permissionModes: string[]) =>
+  validatePermissionModesCombinations.some(
+    (combination) =>
+      combination.length === permissionModes.length &&
+      combination.every((mode) => permissionModes.includes(mode))
+  );
+const validatePermissions = (permissions: WorkspacePermissionItem[]) => {
+  const existsUsersOrGroups: { [key: string]: boolean } = {};
+  for (const permission of permissions) {
+    const key = `${permission.type}${permission.type === 'user' ? `-${permission.userId}` : ''}${
+      permission.type === 'group' ? `-${permission.group}` : ''
+    }`;
+    if (existsUsersOrGroups[key]) {
+      throw new Error(DUPLICATE_PERMISSION_SETTING);
+    }
+    existsUsersOrGroups[key] = true;
+    if (!isValidPermissionModesCombination(permission.modes)) {
+      throw new Error(INVALID_PERMISSION_MODES_COMBINATION);
+    }
+  }
+};
+
+const convertToACL = (
+  workspacePermissions: WorkspacePermissionItem | WorkspacePermissionItem[]
+) => {
+  workspacePermissions = Array.isArray(workspacePermissions)
+    ? workspacePermissions
+    : [workspacePermissions];
+
+  const acl = new ACL();
+
+  workspacePermissions.forEach((permission) => {
+    switch (permission.type) {
+      case 'user':
+        acl.addPermission(permission.modes, { users: [permission.userId] });
+        return;
+      case 'group':
+        acl.addPermission(permission.modes, { groups: [permission.group] });
+        return;
+    }
+  });
+
+  return acl.getPermissions() || {};
+};
+
+const isValidWorkspacePermissionMode = (mode: string): mode is WorkspacePermissionMode =>
+  Object.values(WorkspacePermissionMode).some((modeValue) => modeValue === mode);
+
+const isWorkspacePermissionItem = (
+  test: WorkspacePermissionItem | null
+): test is WorkspacePermissionItem => test !== null;
+
+const convertFromACL = (permissions: Permissions) => {
+  const acl = new ACL(permissions);
+
+  return acl
+    .toFlatList()
+    .map(({ name, permissions: modes, type }) => {
+      const validModes = modes.filter(isValidWorkspacePermissionMode);
+      switch (type) {
+        case 'users':
+          return {
+            type: 'user',
+            modes: validModes,
+            userId: name,
+          } as const;
+        case 'groups':
+          return {
+            type: 'group',
+            modes: validModes,
+            group: name,
+          } as const;
+        default:
+          return null;
+      }
+    })
+    .filter(isWorkspacePermissionItem);
+};
+
 const WORKSPACE_ID_SIZE = 6;
 
 const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.error', {
@@ -47,6 +133,14 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
 
 const RESERVED_WORKSPACE_NAME_ERROR = i18n.translate('workspace.reserved.name.error', {
   defaultMessage: 'reserved workspace name cannot be changed',
+});
+
+const DUPLICATE_PERMISSION_SETTING = i18n.translate('workspace.invalid.permission.error', {
+  defaultMessage: 'Duplicate permission setting',
+});
+
+const INVALID_PERMISSION_MODES_COMBINATION = i18n.translate('workspace.invalid.permission.error', {
+  defaultMessage: 'Invalid workspace permission mode combination',
 });
 
 export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
@@ -78,7 +172,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   ): WorkspaceAttributeWithPermission {
     return {
       ...savedObject.attributes,
-      permissions: savedObject.permissions || {},
+      permissions: savedObject.permissions ? convertFromACL(savedObject.permissions) : undefined,
       id: savedObject.id,
     };
   }
@@ -207,12 +301,17 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
+
+      if (permissions) {
+        validatePermissions(permissions);
+      }
+
       const result = await client.create<Omit<WorkspaceAttribute, 'id'>>(
         WORKSPACE_TYPE,
         attributes,
         {
           id,
-          permissions,
+          permissions: permissions ? convertToACL(permissions) : undefined,
         }
       );
       return {
@@ -359,9 +458,13 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
         }
       }
 
+      if (permissions) {
+        validatePermissions(permissions);
+      }
+
       await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
         id,
-        permissions,
+        permissions: permissions ? convertToACL(permissions) : undefined,
         overwrite: true,
         version: workspaceInDB.version,
       });

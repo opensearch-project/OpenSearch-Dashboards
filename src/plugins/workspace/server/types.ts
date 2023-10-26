@@ -10,13 +10,12 @@ import {
   SavedObjectsFindResponse,
   CoreSetup,
   WorkspacePermissionMode,
-  Permissions,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
 } from '../../../core/server';
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
-  permissions?: Permissions;
+  permissions?: WorkspacePermissionItem[];
 }
 
 export interface WorkspaceFindOptions {
@@ -75,7 +74,7 @@ export type IResponse<T> =
       error?: string;
     };
 
-export type WorkspaceRoutePermissionItem = {
+export type WorkspacePermissionItem = {
   modes: Array<
     | WorkspacePermissionMode.LibraryRead
     | WorkspacePermissionMode.LibraryWrite

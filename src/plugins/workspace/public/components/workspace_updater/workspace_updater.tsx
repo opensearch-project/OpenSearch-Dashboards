@@ -72,7 +72,8 @@ export const WorkspaceUpdater = () => {
         return;
       }
       try {
-        result = await workspaceClient.update(currentWorkspace?.id, data);
+        const { permissions, ...attributes } = data;
+        result = await workspaceClient.update(currentWorkspace?.id, attributes, permissions);
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.update.failed', {

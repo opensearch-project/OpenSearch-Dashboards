@@ -22,7 +22,8 @@ export const WorkspaceCreator = () => {
     async (data: WorkspaceFormSubmitData) => {
       let result;
       try {
-        result = await workspaceClient.create(data);
+        const { permissions, ...attributes } = data;
+        result = await workspaceClient.create(attributes, permissions);
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.create.failed', {
