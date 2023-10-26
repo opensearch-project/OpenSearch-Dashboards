@@ -506,6 +506,25 @@ describe('#getQueryParams', () => {
           );
         });
       });
+
+      describe('`flags` parameter', () => {
+        it('does not include flags when `flags` is not specified', () => {
+          const result = getQueryParams({
+            registry,
+            search,
+          });
+          expectResult(result, expect.not.objectContaining({ flags: expect.anything() }));
+        });
+
+        it('includes flags when specified', () => {
+          const result = getQueryParams({
+            registry,
+            search,
+            flags: 'abc',
+          });
+          expectResult(result, expect.objectContaining({ flags: expect.stringMatching('abc') }));
+        });
+      });
     });
 
     describe('when using prefix search (query.bool.should)', () => {

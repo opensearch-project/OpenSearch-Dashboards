@@ -168,6 +168,7 @@ interface QueryParams {
   kueryNode?: KueryNode;
   workspaces?: string[];
   ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
+  flags?: string;
 }
 
 export function getClauseForReference(reference: HasReferenceQueryParams) {
@@ -226,6 +227,7 @@ export function getQueryParams({
   kueryNode,
   workspaces,
   ACLSearchParams,
+  flags,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -269,6 +271,7 @@ export function getQueryParams({
       searchFields,
       rootSearchFields,
       defaultSearchOperator,
+      flags,
     });
 
     if (useMatchPhrasePrefix) {
@@ -417,18 +420,21 @@ const getSimpleQueryStringClause = ({
   searchFields,
   rootSearchFields,
   defaultSearchOperator,
+  flags,
 }: {
   search: string;
   types: string[];
   searchFields?: string[];
   rootSearchFields?: string[];
   defaultSearchOperator?: string;
+  flags?: string;
 }) => {
   return {
     simple_query_string: {
       query: search,
       ...getSimpleQueryStringTypeFields(types, searchFields, rootSearchFields),
       ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
+      ...(flags ? { flags } : {}),
     },
   };
 };

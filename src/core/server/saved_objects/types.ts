@@ -92,6 +92,8 @@ export interface SavedObjectsFindOptions {
   search?: string;
   /** The fields to perform the parsed query against. See OpenSearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
+  /** The enabled operators for OpenSearch Simple Query String. See OpenSearch Simple Query String `flags` argument for more information */
+  flags?: string;
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.

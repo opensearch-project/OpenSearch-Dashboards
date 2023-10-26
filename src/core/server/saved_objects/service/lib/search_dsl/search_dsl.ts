@@ -55,6 +55,7 @@ interface GetSearchDslOptions {
   kueryNode?: KueryNode;
   workspaces?: string[];
   ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
+  flags?: string;
 }
 
 export function getSearchDsl(
@@ -76,6 +77,7 @@ export function getSearchDsl(
     kueryNode,
     workspaces,
     ACLSearchParams,
+    flags,
   } = options;
 
   if (!type) {
@@ -100,6 +102,7 @@ export function getSearchDsl(
       kueryNode,
       workspaces,
       ACLSearchParams,
+      flags,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };

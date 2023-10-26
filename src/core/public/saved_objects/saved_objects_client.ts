@@ -373,6 +373,7 @@ export class SavedObjectsClient {
       namespaces: 'namespaces',
       preference: 'preference',
       workspaces: 'workspaces',
+      flags: 'flags',
     };
 
     const currentWorkspaceId = this._getCurrentWorkspace();

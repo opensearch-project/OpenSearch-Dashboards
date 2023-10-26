@@ -296,6 +296,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
           type: WORKSPACE_TYPE,
           search: attributes.name,
           searchFields: ['name'],
+          flags: 'NONE', // disable all operators, treat workspace as literal string
         }
       );
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
@@ -452,6 +453,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
           search: attributes.name,
           searchFields: ['name'],
           fields: ['_id'],
+          flags: 'NONE', // disable all operators, treat workspace as literal string
         });
         if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
