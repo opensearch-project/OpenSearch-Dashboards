@@ -97,7 +97,7 @@ jobs:
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
 
-      - name: Run CI test group ${{ matrix.group }}
+      - name: Run functional plugin tests 
         id: plugin-ftr-tests
         run: node scripts/functional_tests.js --config test/plugin_functional/config.ts
 
