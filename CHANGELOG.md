@@ -83,6 +83,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CI] Add `NODE_OPTIONS` and disable disk allocation threshold ([#5172](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5172))
 - [CI] Supprt CI Groups for Cypress test jobs ([#5298](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5298))
 - [CI] Replace usage of deprecated `set-output` in workflows ([#5340](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5340))
+- [CI][Test] Add plugin functional tests on GitHub Actions ([#5383](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5383))
 
 ### 📝 Documentation
 
