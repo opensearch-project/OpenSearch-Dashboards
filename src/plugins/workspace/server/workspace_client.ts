@@ -36,13 +36,16 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   ): SavedObjectsClientContract | undefined {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
       excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+      includedHiddenTypes: [WORKSPACE_TYPE],
     });
   }
 
   private getSavedObjectClientsFromRequestDetail(
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract {
-    return requestDetail.context.core.savedObjects.client;
+    return this.savedObjects?.getScopedClient(requestDetail.request, {
+      includedHiddenTypes: [WORKSPACE_TYPE],
+    }) as SavedObjectsClientContract;
   }
   private getFlattenedResultWithSavedObject(
     savedObject: SavedObject<WorkspaceAttribute>
