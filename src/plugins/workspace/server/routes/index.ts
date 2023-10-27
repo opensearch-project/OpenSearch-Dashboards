@@ -189,7 +189,7 @@ export function registerRoutes({
         id,
         {
           ...attributes,
-          ...(finalPermissions.length ? { finalPermissions } : {}),
+          ...(finalPermissions.length ? { permissions: finalPermissions } : {}),
         }
       );
       return res.ok({ body: result });

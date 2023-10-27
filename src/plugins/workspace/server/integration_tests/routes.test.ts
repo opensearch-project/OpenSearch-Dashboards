@@ -6,13 +6,9 @@
 import { WorkspaceAttribute } from 'src/core/types';
 import { omit } from 'lodash';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
-import { WorkspaceRoutePermissionItem } from '../types';
-import { WorkspacePermissionMode } from '../../../../core/server';
 import { WORKSPACE_TYPE } from '../../../../core/server';
 
-const testWorkspace: WorkspaceAttribute & {
-  permissions: WorkspaceRoutePermissionItem;
-} = {
+const testWorkspace: WorkspaceAttribute = {
   id: 'fake_id',
   name: 'test_workspace',
   description: 'test_workspace_description',
@@ -119,6 +115,39 @@ describe('workspace service', () => {
 
       expect(getResult.body.success).toEqual(true);
       expect(getResult.body.result.name).toEqual('updated');
+    });
+    it('update with permission', async () => {
+      const permission = {
+        userId: 'foo',
+        type: 'user',
+        modes: ['read', 'library_read'],
+      };
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omit(testWorkspace, 'id'),
+        })
+        .expect(200);
+
+      await osdTestServer.request
+        .put(root, `/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            ...omit(testWorkspace, 'id'),
+            name: 'updated',
+          },
+          permissions: permission,
+        })
+        .expect(200);
+
+      const getResult = await osdTestServer.request.get(
+        root,
+        `/api/workspaces/${result.body.result.id}`
+      );
+
+      expect(getResult.body.success).toEqual(true);
+      expect(getResult.body.result.name).toEqual('updated');
+      expect(getResult.body.result.permissions[0]).toEqual(permission);
     });
     it('delete', async () => {
       const result: any = await osdTestServer.request
