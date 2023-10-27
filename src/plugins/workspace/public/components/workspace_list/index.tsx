@@ -3,45 +3,53 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
   EuiPageContent,
-  EuiBasicTable,
   EuiLink,
-  Direction,
-  CriteriaWithPagination,
+  EuiButton,
+  EuiInMemoryTable,
+  EuiTableSelectionType,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { useMemo, useCallback } from 'react';
 import { of } from 'rxjs';
+import { i18n } from '@osd/i18n';
 import { WorkspaceAttribute } from '../../../../../core/public';
 
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
-import { switchWorkspace } from '../utils/workspace';
+import { switchWorkspace, updateWorkspace } from '../utils/workspace';
+import { debounce } from '../utils/common';
+
+import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
+
+import { cleanWorkspaceId } from '../../../../../core/public';
+
+const WORKSPACE_LIST_PAGE_DESCRIPTIOIN = i18n.translate('workspace.list.description', {
+  defaultMessage:
+    'Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.',
+});
 
 export const WorkspaceList = () => {
   const {
     services: { workspaces, application, http },
   } = useOpenSearchDashboards();
 
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState<'name' | 'id'>('name');
-  const [sortDirection, setSortDirection] = useState<Direction>('asc');
-
+  const initialSortField = 'name';
+  const initialSortDirection = 'asc';
   const workspaceList = useObservable(workspaces?.workspaceList$ ?? of([]), []);
+  const [queryInput, setQueryInput] = useState<string>('');
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 5,
+    pageSizeOptions: [5, 10, 20],
+  });
 
-  const pageOfItems = useMemo(() => {
-    return workspaceList
-      .sort((a, b) => {
-        const compare = a[sortField].localeCompare(b[sortField]);
-        return sortDirection === 'asc' ? compare : -compare;
-      })
-      .slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [workspaceList, pageIndex, pageSize, sortField, sortDirection]);
+  // Will be uesed when updating table actions
+  const [, setSelection] = useState<WorkspaceAttribute[]>([]);
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
@@ -51,6 +59,29 @@ export const WorkspaceList = () => {
     },
     [application, http]
   );
+
+  const handleUpdateWorkspace = useCallback(
+    (id: string) => {
+      if (application && http) {
+        updateWorkspace({ application, http }, id);
+      }
+    },
+    [application, http]
+  );
+
+  const searchResult = useMemo(() => {
+    if (queryInput) {
+      const normalizedQuery = queryInput.toLowerCase();
+      const result = workspaceList.filter((item) => {
+        return (
+          item.id.toLowerCase().indexOf(normalizedQuery) > -1 ||
+          item.name.toLowerCase().indexOf(normalizedQuery) > -1
+        );
+      });
+      return result;
+    }
+    return workspaceList;
+  }, [workspaceList, queryInput]);
 
   const columns = [
     {
@@ -79,46 +110,95 @@ export const WorkspaceList = () => {
       isExpander: true,
       hasActions: true,
     },
+    {
+      name: 'Actions',
+      field: '',
+      actions: [
+        {
+          name: 'Edit',
+          icon: 'pencil',
+          type: 'icon',
+          description: 'edit workspace',
+          onClick: ({ id }: WorkspaceAttribute) => handleUpdateWorkspace(id),
+        },
+      ],
+    },
   ];
 
-  const onTableChange = ({ page, sort }: CriteriaWithPagination<WorkspaceAttribute>) => {
-    const { field, direction } = sort!;
-    const { index, size } = page;
+  const workspaceCreateUrl = useMemo(() => {
+    if (!application || !http) {
+      return '';
+    }
 
-    setPageIndex(index);
-    setPageSize(size);
-    setSortField(field as 'name' | 'id');
-    setSortDirection(direction);
+    return cleanWorkspaceId(
+      application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+        absolute: false,
+      })
+    );
+  }, [application, http]);
+
+  const debouncedSetQueryInput = useMemo(() => {
+    return debounce(setQueryInput, 300);
+  }, [setQueryInput]);
+
+  const handleSearchInput: EuiSearchBarProps['onChange'] = ({ query }) => {
+    debouncedSetQueryInput(query?.text ?? '');
+  };
+
+  const search: EuiSearchBarProps = {
+    onChange: handleSearchInput,
+    box: {
+      incremental: true,
+    },
+    toolsRight: [
+      <EuiButton href={workspaceCreateUrl} key="create_workspace">
+        Create workspace
+      </EuiButton>,
+    ],
+  };
+
+  const selectionValue: EuiTableSelectionType<WorkspaceAttribute> = {
+    selectable: () => true,
+    onSelectionChange: (selection) => {
+      setSelection(selection);
+    },
   };
 
   return (
     <EuiPage paddingSize="none">
       <EuiPageBody panelled>
-        <EuiPageHeader restrictWidth pageTitle="Workspace list" />
+        <EuiPageHeader
+          restrictWidth
+          pageTitle="Workspaces"
+          description={WORKSPACE_LIST_PAGE_DESCRIPTIOIN}
+        />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
           paddingSize="none"
-          color="subdued"
+          panelPaddingSize="l"
           hasShadow={false}
           style={{ width: '100%', maxWidth: 1000 }}
         >
-          <EuiBasicTable
-            items={pageOfItems}
+          <EuiInMemoryTable
+            items={searchResult}
             columns={columns}
-            pagination={{
-              pageIndex,
-              pageSize,
-              totalItemCount: workspaceList.length,
-              pageSizeOptions: [5, 10, 20],
-            }}
+            itemId="id"
+            onTableChange={({ page: { index, size } }) =>
+              setPagination((prev) => {
+                return { ...prev, pageIndex: index, pageSize: size };
+              })
+            }
+            pagination={pagination}
             sorting={{
               sort: {
-                field: sortField,
-                direction: sortDirection,
+                field: initialSortField,
+                direction: initialSortDirection,
               },
             }}
-            onChange={onTableChange}
+            isSelectable={true}
+            selection={selectionValue}
+            search={search}
           />
         </EuiPageContent>
       </EuiPageBody>

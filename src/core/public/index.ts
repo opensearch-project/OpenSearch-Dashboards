@@ -357,4 +357,5 @@ export {
   PUBLIC_WORKSPACE_ID,
   MANAGEMENT_WORKSPACE_ID,
   WORKSPACE_TYPE,
+  cleanWorkspaceId,
 } from '../utils';

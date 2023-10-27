@@ -30,6 +30,7 @@ import {
   WORKSPACE_OVERVIEW_APP_ID,
 } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
+import { cleanWorkspaceId } from '../../../../../core/public';
 
 interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
@@ -117,12 +118,10 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces, navigateToUr
       key: length.toString(),
       onClick: () => {
         navigateToUrl(
-          formatUrlWithWorkspaceId(
+          cleanWorkspaceId(
             getUrlForApp(WORKSPACE_CREATE_APP_ID, {
               absolute: false,
-            }),
-            currentWorkspace?.id ?? '',
-            basePath
+            })
           )
         );
         setPopover(false);
@@ -136,12 +135,10 @@ export const WorkspaceMenu = ({ basePath, getUrlForApp, workspaces, navigateToUr
       key: (length + 1).toString(),
       onClick: () => {
         navigateToUrl(
-          formatUrlWithWorkspaceId(
+          cleanWorkspaceId(
             getUrlForApp(WORKSPACE_LIST_APP_ID, {
               absolute: false,
-            }),
-            currentWorkspace?.id ?? '',
-            basePath
+            })
           )
         );
         setPopover(false);
