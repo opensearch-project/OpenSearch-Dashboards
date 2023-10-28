@@ -156,5 +156,67 @@ describe('workspace service', () => {
         .expect(200);
       expect(listResult.body.result.total).toEqual(2);
     });
+    it('unable to perform operations on workspace by calling saved objects APIs', async () => {
+      const result = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      /**
+       * Can not create workspace by saved objects API
+       */
+      await osdTestServer.request
+        .post(root, `/api/saved_objects/workspace`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'another test workspace',
+          },
+        })
+        .expect(400);
+
+      /**
+       * Can not get workspace by saved objects API
+       */
+      await osdTestServer.request
+        .get(root, `/api/saved_objects/workspace/${result.body.result.id}`)
+        .expect(404);
+
+      /**
+       * Can not update workspace by saved objects API
+       */
+      await osdTestServer.request
+        .put(root, `/api/saved_objects/workspace/${result.body.result.id}`)
+        .send({
+          attributes: {
+            name: 'another test workspace',
+          },
+        })
+        .expect(404);
+
+      /**
+       * Can not delete workspace by saved objects API
+       */
+      await osdTestServer.request
+        .delete(root, `/api/saved_objects/workspace/${result.body.result.id}`)
+        .expect(404);
+
+      /**
+       * Can not find workspace by saved objects API
+       */
+      const findResult = await osdTestServer.request
+        .get(root, `/api/saved_objects/_find?type=workspace`)
+        .expect(200);
+      const listResult = await osdTestServer.request
+        .post(root, `/api/workspaces/_list`)
+        .send({
+          page: 1,
+        })
+        .expect(200);
+      expect(findResult.body.total).toEqual(0);
+      expect(listResult.body.result.total).toEqual(1);
+    });
   });
 });
