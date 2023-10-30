@@ -336,54 +336,36 @@ describe('resolveImportErrors', () => {
       workspaces: ['foo'],
     });
     expect(httpMock.post.mock.calls).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            "/api/saved_objects/_resolve_import_errors",
-            Object {
-              "body": FormData {},
-              "headers": Object {
-                "Content-Type": undefined,
-              },
-              "query": Object {
-                "workspaces": Array [
-                  "foo",
-                ],
-              },
-            },
-          ],
-          Array [
-            "/api/saved_objects/_resolve_import_errors",
-            Object {
-              "body": FormData {},
-              "headers": Object {
-                "Content-Type": undefined,
-              },
-              "query": Object {
-                "workspaces": Array [
-                  "foo",
-                ],
-              },
-            },
-          ],
-        ],
-        "results": Array [
+      Array [
+        Array [
+          "/api/saved_objects/_resolve_import_errors",
           Object {
-            "type": "return",
-            "value": Promise {
-              Symbol(async_id_symbol): 8933,
-              Symbol(trigger_async_id_symbol): 8919,
+            "body": FormData {},
+            "headers": Object {
+              "Content-Type": undefined,
             },
-          },
-          Object {
-            "type": "return",
-            "value": Promise {
-              Symbol(async_id_symbol): 8941,
-              Symbol(trigger_async_id_symbol): 8938,
+            "query": Object {
+              "workspaces": Array [
+                "foo",
+              ],
             },
           },
         ],
-      }
+        Array [
+          "/api/saved_objects/_resolve_import_errors",
+          Object {
+            "body": FormData {},
+            "headers": Object {
+              "Content-Type": undefined,
+            },
+            "query": Object {
+              "workspaces": Array [
+                "foo",
+              ],
+            },
+          },
+        ],
+      ]
     `);
   });
 });
