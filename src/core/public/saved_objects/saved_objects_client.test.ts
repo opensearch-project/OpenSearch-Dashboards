@@ -581,3 +581,266 @@ describe('SavedObjectsClient', () => {
     });
   });
 });
+
+describe('SavedObjectsClientWithWorkspaceSet', () => {
+  const updatedAt = new Date().toISOString();
+  const doc = {
+    id: 'AVwSwFxtcMV38qjDZoQg',
+    type: 'config',
+    attributes: { title: 'Example title' },
+    version: 'foo',
+    updated_at: updatedAt,
+  };
+
+  const http = httpServiceMock.createStartContract();
+  let savedObjectsClient: SavedObjectsClient;
+
+  beforeEach(() => {
+    savedObjectsClient = new SavedObjectsClient(http);
+    savedObjectsClient.setCurrentWorkspace('foo');
+    http.fetch.mockClear();
+  });
+
+  describe('#create', () => {
+    const attributes = { foo: 'Foo', bar: 'Bar' };
+
+    beforeEach(() => {
+      http.fetch.mockResolvedValue({ id: 'serverId', type: 'server-type', attributes });
+    });
+
+    test('makes HTTP call with ID', () => {
+      savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern/myId",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"workspaces\\":[\\"foo\\"]}",
+              "method": "POST",
+              "query": Object {
+                "overwrite": undefined,
+              },
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('makes HTTP call without ID', () => {
+      savedObjectsClient.create('index-pattern', attributes);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"workspaces\\":[\\"foo\\"]}",
+              "method": "POST",
+              "query": Object {
+                "overwrite": undefined,
+              },
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('makes HTTP call with workspaces', () => {
+      savedObjectsClient.create('index-pattern', attributes, {
+        workspaces: ['foo'],
+      });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"workspaces\\":[\\"foo\\"]}",
+              "method": "POST",
+              "query": Object {
+                "overwrite": undefined,
+              },
+            },
+          ],
+        ]
+      `);
+    });
+  });
+
+  describe('#bulk_create', () => {
+    beforeEach(() => {
+      http.fetch.mockResolvedValue({ saved_objects: [doc] });
+    });
+
+    test('makes HTTP call', async () => {
+      await savedObjectsClient.bulkCreate([doc]);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_create",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
+              "method": "POST",
+              "query": Object {
+                "overwrite": false,
+                "workspaces": Array [
+                  "foo",
+                ],
+              },
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('makes HTTP call with overwrite query paramater', async () => {
+      await savedObjectsClient.bulkCreate([doc], { overwrite: true });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_create",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
+              "method": "POST",
+              "query": Object {
+                "overwrite": true,
+                "workspaces": Array [
+                  "foo",
+                ],
+              },
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('makes HTTP call with workspaces', () => {
+      savedObjectsClient.bulkCreate([doc], {
+        workspaces: ['bar'],
+      });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_create",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\",\\"updated_at\\":\\"${updatedAt}\\"}]",
+              "method": "POST",
+              "query": Object {
+                "overwrite": undefined,
+                "workspaces": Array [
+                  "bar",
+                ],
+              },
+            },
+          ],
+        ]
+      `);
+    });
+  });
+
+  describe('#bulk_update', () => {
+    const bulkUpdateDoc = {
+      id: 'AVwSwFxtcMV38qjDZoQg',
+      type: 'config',
+      attributes: { title: 'Example title' },
+      version: 'foo',
+    };
+    beforeEach(() => {
+      http.fetch.mockResolvedValue({ saved_objects: [bulkUpdateDoc] });
+    });
+
+    test('makes HTTP call', async () => {
+      await savedObjectsClient.bulkUpdate([bulkUpdateDoc]);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_update",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
+              "method": "PUT",
+              "query": undefined,
+            },
+          ],
+        ]
+      `);
+    });
+  });
+
+  describe('#find', () => {
+    const object = { id: 'logstash-*', type: 'index-pattern', title: 'Test' };
+
+    beforeEach(() => {
+      http.fetch.mockResolvedValue({ saved_objects: [object], page: 0, per_page: 1, total: 1 });
+    });
+
+    test('makes HTTP call correctly mapping options into snake case query parameters', () => {
+      const options = {
+        defaultSearchOperator: 'OR' as const,
+        fields: ['title'],
+        hasReference: { id: '1', type: 'reference' },
+        page: 10,
+        perPage: 100,
+        search: 'what is the meaning of life?|life',
+        searchFields: ['title^5', 'body'],
+        sortField: 'sort_field',
+        type: 'index-pattern',
+      };
+
+      savedObjectsClient.find(options);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_find",
+            Object {
+              "body": undefined,
+              "method": "GET",
+              "query": Object {
+                "default_search_operator": "OR",
+                "fields": Array [
+                  "title",
+                ],
+                "has_reference": "{\\"id\\":\\"1\\",\\"type\\":\\"reference\\"}",
+                "page": 10,
+                "per_page": 100,
+                "search": "what is the meaning of life?|life",
+                "search_fields": Array [
+                  "title^5",
+                  "body",
+                ],
+                "sort_field": "sort_field",
+                "type": "index-pattern",
+                "workspaces": Array [
+                  "foo",
+                ],
+              },
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('makes HTTP call correctly with workspaces', () => {
+      const options = {
+        invalid: true,
+        workspaces: ['bar'],
+      };
+
+      // @ts-expect-error
+      savedObjectsClient.find(options);
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/_find",
+            Object {
+              "body": undefined,
+              "method": "GET",
+              "query": Object {
+                "workspaces": Array [
+                  "bar",
+                ],
+              },
+            },
+          ],
+        ]
+      `);
+    });
+  });
+});

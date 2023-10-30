@@ -409,6 +409,70 @@ describe('SavedObjectsTable', () => {
         title: 'Your file is downloading in the background',
       });
     });
+
+    it('should make modules call with workspace', async () => {
+      getSavedObjectCountsMock.mockClear();
+      findObjectsMock.mockClear();
+      // @ts-expect-error
+      defaultProps.applications.capabilities.workspaces.enabled = true;
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' },
+      ] as SavedObjectWithMetadata[];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
+        _id: obj.id,
+        _type: obj.type,
+        _source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+      };
+
+      const workspacesStart = workspacesServiceMock.createStartContract();
+      workspacesStart.currentWorkspaceId$.next('foo');
+
+      const component = shallowRender({
+        savedObjectsClient: mockSavedObjectsClient,
+        workspaces: workspacesStart,
+      });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().onExport(true);
+      await component.instance().onExportAll();
+
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true, {
+        workspaces: ['foo'],
+      });
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+        http,
+        ['index-pattern', 'visualization', 'dashboard', 'search'],
+        undefined,
+        true,
+        {
+          workspaces: ['foo'],
+        }
+      );
+      expect(
+        getSavedObjectCountsMock.mock.calls.every((item) => item[1].workspaces[0] === 'foo')
+      ).toEqual(true);
+      expect(findObjectsMock.mock.calls.every((item) => item[1].workspaces[0] === 'foo')).toEqual(
+        true
+      );
+      // @ts-expect-error
+      defaultProps.applications.capabilities.workspaces.enabled = false;
+    });
   });
 
   describe('import', () => {
