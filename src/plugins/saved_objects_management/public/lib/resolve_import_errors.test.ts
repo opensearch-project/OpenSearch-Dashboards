@@ -335,7 +335,7 @@ describe('resolveImportErrors', () => {
       },
       workspaces: ['foo'],
     });
-    expect(httpMock.post).toMatchInlineSnapshot(`
+    expect(httpMock.post.mock.calls).toMatchInlineSnapshot(`
       [MockFunction] {
         "calls": Array [
           Array [
