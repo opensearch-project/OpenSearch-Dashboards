@@ -345,8 +345,8 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export { AppCategory, WorkspaceAttribute } from '../types';
+export { DEFAULT_APP_CATEGORIES, WORKSPACE_TYPE } from '../utils';
 
 export {
   SavedObject,
