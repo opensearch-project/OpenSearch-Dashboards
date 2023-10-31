@@ -208,6 +208,7 @@ export const useDashboardAppAndGlobalState = ({
           stopSyncingDashboardContainerInputs();
           stopSyncingDashboardContainerOutputs();
           subscriptions.unsubscribe();
+          dashboardContainer.destroy()
         };
       };
 

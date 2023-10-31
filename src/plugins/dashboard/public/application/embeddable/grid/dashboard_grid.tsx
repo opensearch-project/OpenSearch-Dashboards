@@ -212,14 +212,15 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   public buildLayoutFromPanels = (): GridData[] => {
-    return _.map(this.props.container.getInput().panels, (panel) => {
-    //return _.map(this.state.panels, (panel) => {
+    //return _.map(this.props.container.getInput().panels, (panel) => {
+    return _.map(this.state.panels, (panel) => {
       return panel.gridData;
     });
   };
 
   public onLayoutChange = (layout: PanelLayout[]) => {
-    const panels = this.props.container.getInput().panels
+    //const panels = this.props.container.getInput().panels
+    const panels = this.state.panels
     const updatedPanels: { [key: string]: DashboardPanelState } = layout.reduce(
       (updatedPanelsAcc, panelLayout) => {
         updatedPanelsAcc[panelLayout.i] = {
@@ -252,10 +253,10 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   public renderPanels() {
     //this.setState({ panels: this.props.container.getInput().panels})
     //const { panels } = this.props.container.getInput().panels
-    const { focusedPanelIndex, expandedPanelId } = this.state;
+    const { focusedPanelIndex, panels, expandedPanelId } = this.state;
     //console.log("HERE5", panels)
     console.log("HERE6", this.props.container.getInput().panels)
-    const panels = this.props.container.getInput().panels
+    //const panels = this.props.container.getInput().panels
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
     const panelsInOrder = Object.keys(panels).map(
@@ -270,6 +271,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
 
     return _.map(panelsInOrder, (panel) => {
+      console.log("panel", panel)
       const expandPanel =
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;

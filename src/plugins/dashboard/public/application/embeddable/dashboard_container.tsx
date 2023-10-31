@@ -61,6 +61,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import EventEmitter from 'events';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;

@@ -194,6 +194,7 @@ export class SearchEmbeddable
   }
 
   public destroy() {
+    console.log("destroy one search embeddable!")
     super.destroy();
     if (this.searchProps) {
       delete this.searchProps;

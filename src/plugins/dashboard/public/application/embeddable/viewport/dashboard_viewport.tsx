@@ -35,6 +35,7 @@ import { PanelState, EmbeddableStart } from '../../../../../embeddable/public';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../../opensearch_dashboards_react/public';
+import { EventEmitter } from 'stream';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
@@ -59,6 +60,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public readonly context!: DashboardReactContextValue;
   private subscription?: Subscription;
   private mounted: boolean = false;
+  public eventEmitter?: EventEmitter;
   constructor(props: DashboardViewportProps) {
     super(props);
     const {
