@@ -30,6 +30,7 @@
 
 import {
   EuiButtonEmpty,
+  EuiComboBox,
   EuiForm,
   EuiFormRow,
   EuiLink,
@@ -43,6 +44,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { useCallback } from 'react';
 
 interface Props {
   language: string;
@@ -67,6 +69,20 @@ export function QueryLanguageSwitcher(props: Props) {
     />
   );
 
+  const options = [
+    {
+      label: 'DQL'
+    },
+    {
+      label: 'Lucene',
+    },
+    {
+      label: 'PPL'
+    }
+  ]
+
+  const [selectedLanguage, setSelectedLanguage] = useState([options[0]])
+
   const button = (
     <EuiButtonEmpty
       size="xs"
@@ -78,66 +94,25 @@ export function QueryLanguageSwitcher(props: Props) {
     </EuiButtonEmpty>
   );
 
+  const handleLanguageChange = useCallback(
+    (selectedLanguage: any) => {
+      setSelectedLanguage(selectedLanguage)
+      console.log("selectedLanguage", selectedLanguage)
+      props.onSelectLanguage(selectedLanguage)
+    },
+    [setSelectedLanguage]
+  )
+
   return (
-    <EuiPopover
-      id="queryLanguageSwitcherPopover"
-      anchorClassName="euiFormControlLayout__append"
-      ownFocus
-      anchorPosition={props.anchorPosition || 'downRight'}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      repositionOnScroll
-    >
-      <EuiPopoverTitle>
-        <FormattedMessage
-          id="data.query.queryBar.syntaxOptionsTitle"
-          defaultMessage="Syntax options"
-        />
-      </EuiPopoverTitle>
-      <div style={{ width: '350px' }}>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="data.query.queryBar.syntaxOptionsDescription"
-              defaultMessage="The {docsLink} (DQL) offers a simplified query
-              syntax and support for scripted fields. If you turn off DQL,
-              OpenSearch Dashboards uses Lucene."
-              values={{
-                docsLink: (
-                  <EuiLink href={osdDQLDocs} target="_blank">
-                    {dqlFullName}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-
-        <EuiSpacer size="m" />
-
-        <EuiForm>
-          <EuiFormRow label={dqlFullName}>
-            <EuiSwitch
-              id="queryEnhancementOptIn"
-              name="popswitch"
-              label={
-                props.language === 'kuery' ? (
-                  <FormattedMessage id="data.query.queryBar.dqlOnLabel" defaultMessage="On" />
-                ) : (
-                  <FormattedMessage id="data.query.queryBar.dqlOffLabel" defaultMessage="Off" />
-                )
-              }
-              checked={props.language === 'kuery'}
-              onChange={() => {
-                const newLanguage = props.language === 'lucene' ? 'kuery' : 'lucene';
-                props.onSelectLanguage(newLanguage);
-              }}
-              data-test-subj="languageToggle"
-            />
-          </EuiFormRow>
-        </EuiForm>
-      </div>
-    </EuiPopover>
+    <EuiComboBox
+      data-test-subj="languageSelect"
+      options={options}
+      selectedOptions={selectedLanguage}
+      onChange={handleLanguageChange}
+      singleSelection={{asPlainText: true}}
+      isClearable={false}
+      async
+    />
   );
 }
+
