@@ -75,6 +75,8 @@ export const useEditorUpdates = ({
     if (!dashboardContainer || !dashboardDom) {
       return;
     }
+    // the panels info are correct here
+    console.log("HERERE CONTAINER2", dashboardContainer.getInput())
     dashboardContainer.render(dashboardDom);
     setIsEmbeddableRendered(true);
 

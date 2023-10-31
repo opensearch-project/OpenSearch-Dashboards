@@ -167,7 +167,8 @@ export abstract class Embeddable<
     this.renderComplete.setTitle(this.output.title || '');
 
     if (this.destroyed) {
-      throw new Error('Embeddable has been destroyed');
+      return;
+      //throw new Error('render: Embeddable has been destroyed');
     }
     return;
   }

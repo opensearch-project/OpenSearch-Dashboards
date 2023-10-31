@@ -96,6 +96,7 @@ export class DashboardContainerFactoryDefinition
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
+    console.log("create dashboard container")
     const services = await this.getStartServices();
     const stateTransfer = services.embeddable.getStateTransfer(this.getHistory());
     return new DashboardContainer(initialInput, services, stateTransfer, parent);

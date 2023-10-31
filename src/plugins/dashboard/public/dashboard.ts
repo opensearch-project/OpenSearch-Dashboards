@@ -63,6 +63,7 @@ export class Dashboard<TDashboardParams = DashboardParams> {
   setState(state: PartialDashboardState) {
     if (state.id) {
       this.id = state.id;
+      console.log("dashboard id", this.id)
     }
     if (state.timeRestore) {
       this.timeRestore = state.timeRestore;

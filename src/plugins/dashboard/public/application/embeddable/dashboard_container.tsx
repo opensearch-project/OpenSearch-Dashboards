@@ -235,6 +235,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
+    // panel info are correct here too
+    console.log("HERE3", this.getInput())
     ReactDOM.render(
       <I18nProvider>
         <OpenSearchDashboardsContextProvider services={this.options}>

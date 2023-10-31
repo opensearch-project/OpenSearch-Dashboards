@@ -143,6 +143,8 @@ interface PanelLayout extends Layout {
   i: string;
 }
 
+// the container prop contains the latest panels, however, the this.state.panels are not updates
+// since it is only get updated when creating dashboardGrid component
 class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   private subscription?: Subscription;
   private mounted: boolean = false;
@@ -152,7 +154,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
   constructor(props: DashboardGridProps) {
     super(props);
-
+    console.log("HEREEEEE!")
     this.state = {
       layout: [],
       isLayoutInvalid: false,
@@ -210,13 +212,14 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   public buildLayoutFromPanels = (): GridData[] => {
-    return _.map(this.state.panels, (panel) => {
+    return _.map(this.props.container.getInput().panels, (panel) => {
+    //return _.map(this.state.panels, (panel) => {
       return panel.gridData;
     });
   };
 
   public onLayoutChange = (layout: PanelLayout[]) => {
-    const panels = this.state.panels;
+    const panels = this.props.container.getInput().panels
     const updatedPanels: { [key: string]: DashboardPanelState } = layout.reduce(
       (updatedPanelsAcc, panelLayout) => {
         updatedPanelsAcc[panelLayout.i] = {
@@ -247,7 +250,12 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   };
 
   public renderPanels() {
-    const { focusedPanelIndex, panels, expandedPanelId } = this.state;
+    //this.setState({ panels: this.props.container.getInput().panels})
+    //const { panels } = this.props.container.getInput().panels
+    const { focusedPanelIndex, expandedPanelId } = this.state;
+    //console.log("HERE5", panels)
+    console.log("HERE6", this.props.container.getInput().panels)
+    const panels = this.props.container.getInput().panels
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
     const panelsInOrder = Object.keys(panels).map(

@@ -103,6 +103,8 @@ export const createDashboardContainer = async ({
           },
         };
       }
+      // It did create a new dashboard factory with the correct inputs
+      console.log("initial inputs", initialInput)
       const dashboardContainerEmbeddable = await dashboardFactory.create(initialInput);
 
       if (!dashboardContainerEmbeddable || isErrorEmbeddable(dashboardContainerEmbeddable)) {

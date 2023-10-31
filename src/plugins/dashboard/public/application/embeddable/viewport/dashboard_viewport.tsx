@@ -81,6 +81,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   }
 
   public componentDidMount() {
+    console.log("importnat mount!!!")
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
       const {
@@ -144,6 +145,12 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       description,
       useMargins,
     } = this.state;
+
+    //panel info are correct here
+    console.log("HERE4", container.getInput())
+
+    //panel info are wrong here
+    console.log("panels in viewport", panels)
     return (
       <div
         data-shared-items-count={Object.values(panels).length}

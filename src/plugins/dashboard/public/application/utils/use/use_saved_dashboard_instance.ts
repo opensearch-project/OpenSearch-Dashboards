@@ -158,8 +158,10 @@ export const useSavedDashboardInstance = ({
      * we need to reset the state by calling setSavedDashboardInstance({})
      * and then called getSavedDashboardInstance() again using the current dashboardIdFromUrl value.
      */
+
     if (!dashboardId.current) {
       dashboardId.current = dashboardIdFromUrl || 'new';
+      setSavedDashboardInstance({});
       getSavedDashboardInstance();
     } else if (
       dashboardIdFromUrl &&
