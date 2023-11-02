@@ -25,6 +25,7 @@ import {
 } from '../create_dashboard_container';
 import { DashboardContainer } from '../../embeddable';
 import { Dashboard } from '../../../dashboard';
+import { flushSync } from 'react-dom';
 
 /**
  * This effect is responsible for instantiating the dashboard app and global state container,
@@ -112,6 +113,10 @@ export const useDashboardAppAndGlobalState = ({
 
       const getDashboardContainer = async () => {
         const subscriptions = new Subscription();
+        if(currentContainer){
+          currentContainer.destroy();
+          setCurrentContainer(undefined);
+        }
         const dashboardContainer = await createDashboardContainer({
           services,
           savedDashboard: savedDashboardInstance,
@@ -208,6 +213,7 @@ export const useDashboardAppAndGlobalState = ({
           stopSyncingDashboardContainerInputs();
           stopSyncingDashboardContainerOutputs();
           subscriptions.unsubscribe();
+          dashboardContainer.destroy();
         };
       };
 

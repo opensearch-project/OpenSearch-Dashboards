@@ -183,7 +183,8 @@ export class SearchEmbeddable
    */
   public render(node: HTMLElement) {
     if (!this.searchProps) {
-      throw new Error('Search scope not defined');
+      return;
+      //throw new Error('Search scope not defined');
     }
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
@@ -352,7 +353,7 @@ export class SearchEmbeddable
       // Make the request
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
-      });
+      }); 
       this.updateOutput({ loading: false, error: undefined });
 
       // Log response to inspector

@@ -46,6 +46,7 @@ import { DashboardPanelState } from '../types';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DashboardContainerInput } from '../dashboard_container';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
+import { flushSync } from 'react-dom';
 
 let lastValidGridSize = 0;
 
@@ -164,7 +165,30 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     };
   }
 
+ // when returning false, the render() will not be triggered
+  public shouldComponentUpdate(newProps: DashboardGridProps){
+    console.log("shouldComponentUpdate")
+    // if(!_.isEqual(this.state.panels, this.props.container.getInput().panels)){
+    //   console.log("state before", this.state.panels)
+    //   this.setState({panels:  this.props.container.getInput().panels})
+    //   console.log("state after", this.state.panels)
+    // }
+    console.log("shouldComponentUpdate:panels in state", this.state.panels)
+    console.log("shouldComponentUpdate:panels in container", newProps.container.getInput().panels)
+    const result = Boolean(newProps.container.getInput().panels === this.state.panels)
+    console.log("result", result)
+     if(!result){
+       this.updatePanels()
+       this.forceUpdate()
+     }
+     else{
+      this.renderPanels()
+     }
+    return result;
+  }
+
   public componentDidMount() {
+    console.log("HEREERRR")
     this.mounted = true;
     let isLayoutInvalid = false;
     let layout;
@@ -206,7 +230,14 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     this.mounted = false;
     if (this.subscription) {
       this.subscription.unsubscribe();
+      flushSync(() => {})
     }
+  }
+
+  public updatePanels() {
+    this.setState({
+      panels: this.props.container.getInput().panels
+    })
   }
 
   public buildLayoutFromPanels = (): GridData[] => {
@@ -248,6 +279,9 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
 
   public renderPanels() {
     const { focusedPanelIndex, panels, expandedPanelId } = this.state;
+    console.log("render:panels in state", panels)
+    console.log("render:panels in container", this.props.container.getInput().panels)
+    
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
     const panelsInOrder = Object.keys(panels).map(
@@ -262,6 +296,9 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
 
     return _.map(panelsInOrder, (panel) => {
+      console.log("inside panelRender func all panels in order", panelsInOrder)
+      console.log("inside panelRender id", panel.explicitInput.id)
+      console.log("inside panelRender gridItems", this.gridItems)
       const expandPanel =
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
@@ -297,6 +334,12 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       return null;
     }
 
+    // if(!_.isEqual(this.state.panels, this.props.container.getInput().panels)){
+    //       console.log("state before", this.state.panels)
+    //       this.setState({panels:  this.props.container.getInput().panels})
+    //       console.log("state after", this.state.panels)
+    // }
+    
     const { viewMode } = this.state;
     const isViewMode = viewMode === ViewMode.VIEW;
     return (

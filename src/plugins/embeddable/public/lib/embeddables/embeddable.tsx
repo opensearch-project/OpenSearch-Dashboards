@@ -79,7 +79,7 @@ export abstract class Embeddable<
     this.input = {
       viewMode: ViewMode.EDIT,
       ...input,
-    };
+    }; 
     this.parent = parent;
 
     this.input$ = new Rx.BehaviorSubject<TEmbeddableInput>(this.input);
@@ -167,7 +167,8 @@ export abstract class Embeddable<
     this.renderComplete.setTitle(this.output.title || '');
 
     if (this.destroyed) {
-      throw new Error('Embeddable has been destroyed');
+      return;
+      //throw new Error('Embeddable has been destroyed');
     }
     return;
   }

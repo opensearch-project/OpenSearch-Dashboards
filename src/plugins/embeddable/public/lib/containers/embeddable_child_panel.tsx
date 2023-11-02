@@ -86,6 +86,9 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   }
 
   public render() {
+    if(this.embeddable && this.embeddable.parent?.id && (this.embeddable.parent?.id !== this.props.container.id)){
+      return null;
+    }
     const { PanelComponent } = this.props;
     const classes = classNames('embPanel', {
       'embPanel-isLoading': this.state.loading,
