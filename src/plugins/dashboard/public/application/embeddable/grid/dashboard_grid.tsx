@@ -164,6 +164,15 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     };
   }
 
+  public getDerivedStateFromProps() {
+    console.log("getDerivedStateFromProps")
+    if(this.state.panels!==this.props.container.getInput().panels){
+      console.log("here inside getDerivedStateFromProps if")
+      //this.setState(this.props.container.getInput().panels as any)
+      return {panels: this.props.container.getInput().panels as any}
+    }
+  }
+
   public componentDidMount() {
     this.mounted = true;
     let isLayoutInvalid = false;
@@ -293,6 +302,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   public render() {
+    console.log("render")
     if (this.state.isLayoutInvalid) {
       return null;
     }
