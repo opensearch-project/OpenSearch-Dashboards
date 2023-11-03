@@ -112,7 +112,7 @@ export function flattenHitWrapper(
   metaFields = {},
   cache = new WeakMap()
 ) {
-  return function cachedFlatten(hit: Record<string, any>, deep = false) {
+  return function cachedFlatten(hit: Record<string, any>, deep = true) {
     const decorateFlattened = decorateFlattenedWrapper(hit, metaFields);
     const cached = cache.get(hit);
     const flattened = cached || flattenHit(indexPattern, hit, deep);
