@@ -139,15 +139,6 @@ it('downloads node builds for each platform', async () => {
       ],
       Array [
         Object {
-          "destination": "darwin:downloadPath",
-          "log": <ToolingLog>,
-          "retries": 3,
-          "sha256": "darwin:sha256",
-          "url": "darwin:url",
-        },
-      ],
-      Array [
-        Object {
           "destination": "win32:downloadPath",
           "log": <ToolingLog>,
           "retries": 3,
@@ -180,15 +171,6 @@ it('downloads node builds for each platform', async () => {
           "retries": 3,
           "sha256": undefined,
           "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-darwin-x64.tar.gz",
-        },
-      ],
-      Array [
-        Object {
-          "destination": "/mocked/path/.node_binaries/14.21.3/node-v14.21.3-darwin-arm64.tar.gz",
-          "log": <ToolingLog>,
-          "retries": 3,
-          "sha256": undefined,
-          "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-darwin-arm64.tar.gz",
         },
       ],
       Array [
