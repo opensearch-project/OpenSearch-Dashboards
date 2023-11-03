@@ -227,10 +227,10 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.16.5",
-    "@babel/parser": "^7.16.6",
-    "@babel/register": "^7.16.5",
-    "@babel/types": "^7.16.0",
+    "@babel/core": "^7.22.9",
+    "@babel/parser": "^7.22.9",
+    "@babel/register": "^7.22.9",
+    "@babel/types": "^7.22.9",
     "@elastic/apm-rum": "^5.6.1",
     "@elastic/charts": "31.1.0",
     "@elastic/ems-client": "7.10.0",

@@ -9,16 +9,16 @@
     "osd:watch": "../../scripts/use_node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@babel/runtime": "^7.16.5",
+    "@babel/runtime": "^7.22.9",
     "@osd/i18n": "1.0.0",
     "lodash": "^4.17.21",
     "uuid": "3.3.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.16.0",
-    "@babel/core": "^7.16.5",
-    "@babel/plugin-transform-modules-commonjs": "^7.16.5",
-    "@babel/plugin-transform-runtime": "^7.16.5",
+    "@babel/cli": "^7.22.9",
+    "@babel/core": "^7.22.9",
+    "@babel/plugin-transform-modules-commonjs": "^7.22.9",
+    "@babel/plugin-transform-runtime": "^7.22.9",
     "@osd/babel-preset": "1.0.0",
     "@osd/dev-utils": "1.0.0",
     "babel-loader": "^8.2.3",
