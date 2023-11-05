@@ -90,7 +90,7 @@ export function createEuiListItem({
         navigateToApp(id);
       }
     },
-    isActive: appId === id,
+    isActive: isActiveNavLink(appId, id),
     isDisabled: disabled,
     'data-test-subj': dataTestSubj,
     ...(basePath && {
