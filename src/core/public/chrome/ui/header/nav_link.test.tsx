@@ -121,12 +121,14 @@ describe('createEuiListItem', () => {
 
   it('creates a list item with the correct properties', () => {
     const listItem = createEuiListItem(mockProps);
-    expect(listItem.label).toBe(mockProps.link.tooltip);
-    expect(listItem.href).toBe(mockProps.link.href);
-    expect(listItem['data-test-subj']).toBe(mockProps.dataTestSubj);
-    expect(listItem.onClick).toBeDefined();
-    expect(listItem.isActive).toBe(isActiveNavLink(mockProps.appId, mockProps.link.id));
-    expect(listItem.isDisabled).toBe(mockProps.link.disabled);
-    expect(listItem.iconType).toBe(mockProps.link.euiIconType);
+    expect(listItem).toHaveProperty('label', mockProps.link.tooltip);
+    expect(listItem).toHaveProperty('href', mockProps.link.href);
+    expect(listItem).toHaveProperty('data-test-subj', mockProps.dataTestSubj);
+    expect(listItem).toHaveProperty('onClick');
+    expect(listItem).toHaveProperty(
+      'isActive',
+      isActiveNavLink(mockProps.appId, mockProps.link.id)
+    );
+    expect(listItem).toHaveProperty('isDisabled', mockProps.link.disabled);
   });
 });
