@@ -35,9 +35,9 @@ export const Homepage: React.FC = () => {
       }}
     >
       <GetStartedSection />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       <DataSection />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       <BasicsSection />
     </EuiPageTemplate>
   );
