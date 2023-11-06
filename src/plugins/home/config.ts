@@ -33,6 +33,42 @@ import { schema, TypeOf } from '@osd/config-schema';
 export const configSchema = schema.object({
   disableWelcomeScreen: schema.boolean({ defaultValue: false }),
   disableNewThemeModal: schema.boolean({ defaultValue: false }),
+  prompts: schema.arrayOf(
+    schema.object({
+      prompt: schema.string(),
+      indexPattern: schema.string(),
+      datasourceName: schema.string(),
+      datasourceType: schema.string(),
+    }),
+    {
+      defaultValue: [
+        {
+          prompt: 'How many errors are there in my logs?',
+          datasourceName: 'Default cluster',
+          datasourceType: 'DEFAULT_INDEX_PATTERNS',
+          indexPattern: 'sso-logs',
+        },
+        {
+          prompt: 'Show me the number of flights each day?',
+          datasourceName: 'Default cluster',
+          datasourceType: 'DEFAULT_INDEX_PATTERNS',
+          indexPattern: 'opensearch_dashboards_sample_data_flights',
+        },
+        {
+          prompt: 'What are top visited urls on my website?',
+          datasourceName: 'Default cluster',
+          datasourceType: 'DEFAULT_INDEX_PATTERNS',
+          indexPattern: 'opensearch_dashboards_sample_data_logs',
+        },
+        {
+          prompt: 'Show me the number of orders grouped by gender',
+          datasourceName: 'Default cluster',
+          datasourceType: 'DEFAULT_INDEX_PATTERNS',
+          indexPattern: 'opensearch_datashboards_sample_data_ecommerce',
+        },
+      ],
+    }
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
