@@ -19,29 +19,40 @@ import {
 import { HeroSection } from './hero_section';
 
 export const GetStartedSection: React.FC = () => {
-  function renderOptions(options: string[]) {
+  function renderOptions(options1: string[], options2?: string[]) {
     return (
-      <EuiFlexGroup wrap direction="column" gutterSize="s">
-        {options.map((option, i) => (
-          <EuiFlexItem key={i} grow={false}>
-            <EuiPanel color="subdued">&quot;{option}&quot;</EuiPanel>
+      <EuiFlexGroup wrap direction="row" gutterSize="s">
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {options1.map((option, i) => (
+              <EuiFlexItem key={i} grow={false}>
+                <EuiPanel color="subdued">&quot;{option}&quot;</EuiPanel>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {options2 && (
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {options2.map((option, i) => (
+                <EuiFlexItem key={i} grow={false}>
+                  <EuiPanel color="subdued">&quot;{option}&quot;</EuiPanel>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
           </EuiFlexItem>
-        ))}
+        )}
       </EuiFlexGroup>
     );
   }
 
-  function renderCategory(size: 1 | 2, title: string, options: string[]) {
+  function renderCategory(size: 1 | 2, title: string, options1: string[], options2?: string[]) {
     return (
       <EuiFlexItem grow={size}>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h3>{title}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem>{renderOptions(options)}</EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="m">
+          <h3>{title}</h3>
+        </EuiTitle>
+        {renderOptions(options1, options2)}
       </EuiFlexItem>
     );
   }
@@ -55,16 +66,18 @@ export const GetStartedSection: React.FC = () => {
             i18n.translate('home.getStarted.observability', { defaultMessage: 'Observability' }),
             [
               i18n.translate('home.getStarted.monitor', {
-                defaultMessage: 'Help me monitor my applications infrastructure',
+                defaultMessage: 'Help me optimize the observability deployment for my new service',
               }),
               i18n.translate('home.getStarted.import', {
-                defaultMessage: 'Help me import my Prometheus Data',
+                defaultMessage: 'Help me investigate a service incident',
               }),
+            ],
+            [
               i18n.translate('home.getStarted.question', {
-                defaultMessage: 'Some question here',
+                defaultMessage: 'Help me understand why my service latency increased this week?',
               }),
               i18n.translate('home.getStarted.question2', {
-                defaultMessage: 'Some other question here',
+                defaultMessage: 'How are my service level indicators?',
               }),
             ]
           )}

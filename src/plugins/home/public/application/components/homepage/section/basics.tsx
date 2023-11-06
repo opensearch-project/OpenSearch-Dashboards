@@ -21,19 +21,19 @@ export const BasicsSection: React.FC = () => {
       label: i18n.translate('home.basics.gettingStarted.quickstart', {
         defaultMessage: 'OpenSearch Dashboards quickstart',
       }),
-      href: 'https://google.com',
+      href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
     },
     {
       label: i18n.translate('home.basics.gettingStarted.dataVis', {
         defaultMessage: 'Building data visualizations',
       }),
-      href: 'https://google.com',
+      href: 'https://opensearch.org/docs/latest/dashboards/visualize/viz-index/',
     },
     {
       label: i18n.translate('home.basics.gettingStarted.dashboards', {
         defaultMessage: 'Creating dashboards',
       }),
-      href: 'https://google.com',
+      href: 'https://opensearch.org/docs/latest/dashboards/dashboard/index/',
     },
   ];
 
@@ -42,19 +42,19 @@ export const BasicsSection: React.FC = () => {
       label: i18n.translate('home.basics.dataDiscovery.exploration', {
         defaultMessage: 'Get familiar with Discover',
       }),
-      href: 'https://google.com',
+      href: 'https://opensearch.org/docs/latest/dashboards/discover/index-discover/',
     },
     {
       label: i18n.translate('home.basics.dataDiscovery.sources', {
         defaultMessage: 'Run queries in the Dev Tools Console',
       }),
-      href: 'https://google.com',
+      href: 'https://opensearch.org/docs/latest/dashboards/dev-tools/run-queries/',
     },
     {
       label: i18n.translate('home.basics.dataDiscovery.vis', {
         defaultMessage: 'Working with indexes',
       }),
-      href: 'https://google.com',
+      href: 'https://opensearch.org/docs/latest/dashboards/im-dashboards/index/',
     },
   ];
 
@@ -63,19 +63,19 @@ export const BasicsSection: React.FC = () => {
       label: i18n.translate('home.basics.observability.logExplorer', {
         defaultMessage: 'Get familiar with Log Explorer',
       }),
-      href: 'https://google.com',
+      href: 'https://opensearch.org/docs/latest/observing-your-data/event-analytics/',
     },
     {
       label: i18n.translate('home.basics.observability.prometheus', {
         defaultMessage: 'Explore prometheus metrics',
       }),
-      href: 'https://google.com',
+      href: 'https://opensearch.org/docs/latest/observing-your-data/prometheusmetrics/',
     },
     {
       label: i18n.translate('home.basics.observability.traces', {
         defaultMessage: 'Dive into traces and spans',
       }),
-      href: 'https://google.com',
+      href: 'https://opensearch.org/docs/latest/observing-your-data/trace/ta-dashboards/',
     },
   ];
 
@@ -90,7 +90,7 @@ export const BasicsSection: React.FC = () => {
           })}
           layout="horizontal"
         >
-          <EuiListGroup listItems={gettingStartedLinks} />
+          <EuiListGroup className="home-basics-listGroup" listItems={gettingStartedLinks} />
         </EuiCard>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -102,7 +102,7 @@ export const BasicsSection: React.FC = () => {
           })}
           layout="horizontal"
         >
-          <EuiListGroup listItems={dataDiscoveryLinks} />
+          <EuiListGroup className="home-basics-listGroup" listItems={dataDiscoveryLinks} />
         </EuiCard>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -114,7 +114,7 @@ export const BasicsSection: React.FC = () => {
           })}
           layout="horizontal"
         >
-          <EuiListGroup listItems={observabilityLinks} />
+          <EuiListGroup className="home-basics-listGroup" listItems={observabilityLinks} />
         </EuiCard>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -129,7 +129,7 @@ export const BasicsSection: React.FC = () => {
       links={[
         {
           text: i18n.translate('home.basics.documentation', { defaultMessage: 'Documentation' }),
-          url: 'https://google.com',
+          url: 'https://opensearch.org/docs/latest/',
         },
       ]}
       categories={categories}
