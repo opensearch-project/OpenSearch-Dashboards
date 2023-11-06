@@ -104,7 +104,7 @@ export const GetStartedSection: React.FC = () => {
     return (
       <EuiPanel color="subdued">
         <EuiFlexGroup wrap direction="row" alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="home-getStarted-chatIcon">
             <EuiIcon type="chatRight" size="l" />
           </EuiFlexItem>
           <EuiFlexItem>
