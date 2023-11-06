@@ -35,6 +35,7 @@ import { Home } from './home';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
+import { Homepage } from './homepage';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
@@ -91,6 +92,9 @@ export function HomeApp({ directories, solutions }) {
           <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
           <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
+          </Route>
+          <Route exact path="/homepage">
+            <Homepage />
           </Route>
           <Route exact path="/">
             <Home
