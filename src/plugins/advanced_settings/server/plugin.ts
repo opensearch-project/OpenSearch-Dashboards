@@ -49,6 +49,14 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
 
     core.capabilities.registerProvider(capabilitiesProvider);
 
+    core.capabilities.registerSwitcher(async (request, capabilites) => {
+      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
+        advancedSettings: {
+          save: false,
+        },
+      });
+    });
+
     return {};
   }
 
