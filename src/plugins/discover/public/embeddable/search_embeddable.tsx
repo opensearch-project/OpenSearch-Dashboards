@@ -374,7 +374,9 @@ export class SearchEmbeddable
     const props = {
       searchProps,
     };
-    ReactDOM.render(<SearchEmbeddableComponent {...props} />, node);
+
+    const MemorizedSearchEmbeddableComponent = React.memo(SearchEmbeddableComponent);
+    ReactDOM.render(<MemorizedSearchEmbeddableComponent {...props} />, node);
   }
 
   private async pushContainerStateParamsToProps(searchProps: SearchProps, force: boolean = false) {
