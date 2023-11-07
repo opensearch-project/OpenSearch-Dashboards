@@ -47,6 +47,7 @@ import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
 import { StatusService } from './status/status_service';
+import { SecurityService } from './security/security_service';
 
 import { config as cspConfig } from './csp';
 import { config as opensearchConfig } from './opensearch';
@@ -86,6 +87,7 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly auditTrail: AuditTrailService;
   private readonly coreUsageData: CoreUsageDataService;
+  private readonly security: SecurityService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -118,6 +120,7 @@ export class Server {
     this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
+    this.security = new SecurityService(core);
   }
 
   public async setup() {
@@ -196,6 +199,8 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    const securitySetup = this.security.setup();
+
     this.coreUsageData.setup({ metrics: metricsSetup });
 
     const coreSetup: InternalCoreSetup = {
@@ -212,6 +217,7 @@ export class Server {
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
+      security: securitySetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -277,6 +283,8 @@ export class Server {
 
     await this.http.start();
 
+    await this.security.start();
+
     startTransaction?.end();
     return this.coreStart;
   }
@@ -295,6 +303,7 @@ export class Server {
     await this.status.stop();
     await this.logging.stop();
     await this.auditTrail.stop();
+    await this.security.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
