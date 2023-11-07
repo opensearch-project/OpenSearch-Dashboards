@@ -56,6 +56,7 @@ import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
+import { QueryLanguageSwitcher } from './language_switcher';
 
 const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
 
@@ -199,7 +200,16 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   function renderQueryInput() {
     if (!shouldRenderQueryInput()) return;
     return (
-      <EuiFlexItem>
+    <EuiFlexItem>
+    <EuiFlexGroup responsive={false} gutterSize="s">
+      <EuiFlexItem grow={2}>
+        <QueryLanguageSwitcher
+          language={props.query!.language}
+          anchorPosition={"downCenter"}
+          onSelectLanguage={() => {}}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={8}>
         <QueryStringInput
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
@@ -213,6 +223,8 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           dataTestSubj={props.dataTestSubj}
         />
       </EuiFlexItem>
+    </EuiFlexGroup>
+    </EuiFlexItem>
     );
   }
 
