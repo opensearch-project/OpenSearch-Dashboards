@@ -42,6 +42,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Theme] Use themes' definitions to render the initial view ([#4936](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4936))
 - [Theme] Make `next` theme the default ([#4854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4854))
 - [Discover] Update embeddable for saved searches ([#5081](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5081))
+- Add support for read-only mode through tenants ([#4498](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4498))
 - [Workspace] Add core workspace service module to enable the implementation of workspace features within OSD plugins ([#5092](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5092))
 - [Workspace] Setup workspace skeleton and implement basic CRUD API ([#5075](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5075))
 
@@ -64,6 +65,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Data Explorer][Discover] Add onQuerySubmit to top nav and allow force update to embeddable ([#5160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5160))
 - [Discover] Fix misc navigation issues ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
 - [Discover] Fix mobile view ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
+- [Discover] Fix inactive state on 'Discover' tab in side navigation menu([#5432](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5432))
 - Fix `visAugmenter` forming empty key-value pairs in its calls to the `SavedObject` API ([#5190](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5190))
 - Fix errors in conditions for activating `vizAugmenter` ([#5213](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5213))
 - [Data Explorer][Discover] Automatically load solo added default index pattern ([#5171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5171))
@@ -74,7 +76,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Fuctional Test] Make setDefaultAbsoluteRange more robust and update doc views tests ([#5242](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5242))
 - [BUG] Add platform "darwin-arm64" to unit test ([#5290](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5290))
 - [BUG][Dev Tool] Add dev tool documentation link to dev tool's help menu [#5166](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5166)
-- [BUF] Fix Inactive State on 'Discover' Tab in Side Navigation Menu([#5432](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5432))
+- Fix navigation issue across dashboards ([#5435](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5435))
 
 ### 🚞 Infrastructure
 
@@ -121,6 +123,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Console] Migrate `/lib/!autocomplete/` module to TypeScript ([#4150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4150))
 - [Dashboard] Restructure the `Dashboard` plugin folder to be more cohesive with the project ([#4575](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4575))
 - Refactor logo usage to centralize and optimize assets and improve tests ([#4702](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4702))
+- [Home] Remove unused tutorials ([#5212](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5212))
 
 ### 🔩 Tests
 
