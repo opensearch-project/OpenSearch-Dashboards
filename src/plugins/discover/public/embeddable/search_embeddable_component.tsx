@@ -52,10 +52,8 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
         data-test-subj="embeddedSavedSearchDocTable"
       >
         {discoverEmbeddableProps.totalHitCount !== 0 ? (
-          <EuiFlexItem style={{ minHeight: 0 }}>
-            <div className="osdDocTable__container">
-              <DataGridTableMemoized {...discoverEmbeddableProps} />
-            </div>
+          <EuiFlexItem style={{ minHeight: 0 }} className="osdDocTable__container">
+            <DataGridTableMemoized {...discoverEmbeddableProps} />
           </EuiFlexItem>
         ) : (
           <EuiFlexItem>
