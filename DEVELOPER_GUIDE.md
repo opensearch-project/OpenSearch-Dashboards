@@ -277,13 +277,13 @@ Then within another window. You can start:
 > 1. Run `yarn start:security:default`
 > 2. Navigate to OpenSearch Dashboards with default values.
 
+Or with non-default values:
+
 > 1. Run `export OPENSEARCH_USERNAME=admin`
 > 2. Run `export OPENSEARCH_PASSWORD=<inital admin password>`
 > 3. Optional: Run `export OPENSEARCH_SECURITY_READONLY_ROLE=<read only role>`
 > 4. Run `yarn start:security`
 > 5. Navigate to OpenSearch Dashboards and login with the above username and password.
-
-Or
 
 Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
 changes to the default [`opensearch_dashboards.yml`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/config/opensearch_dashboards.yml#L25-L72) in order to connect to OpenSearch.
