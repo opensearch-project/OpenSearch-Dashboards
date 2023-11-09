@@ -457,20 +457,20 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onSelectLanguage = (language: string) => {
-    // Send telemetry info every time the user opts in or out of kuery
-    // As a result it is important this function only ever gets called in the
-    // UI component's change handler.
-    this.services.http.post('/api/opensearch-dashboards/dql_opt_in_stats', {
-      body: JSON.stringify({ opt_in: language === 'kuery' }),
-    });
+  // private onSelectLanguage = (language: string) => {
+  //   // Send telemetry info every time the user opts in or out of kuery
+  //   // As a result it is important this function only ever gets called in the
+  //   // UI component's change handler.
+  //   this.services.http.post('/api/opensearch-dashboards/dql_opt_in_stats', {
+  //     body: JSON.stringify({ opt_in: language === 'kuery' }),
+  //   });
 
-    this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
+  //   this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
 
-    const newQuery = { query: '', language };
-    this.onChange(newQuery);
-    this.onSubmit(newQuery);
-  };
+  //   const newQuery = { query: '', language };
+  //   this.onChange(newQuery);
+  //   this.onSubmit(newQuery);
+  // };
 
   private onOutsideClick = () => {
     if (this.state.isSuggestionsVisible) {
@@ -618,7 +618,17 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
     return (
       <div className={className}>
-        <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
+<EuiFlexItem>
+          <EuiFlexGroup responsive={false} gutterSize="s">
+            <EuiFlexItem>
+              <QueryLanguageSwitcher
+                language={this.props.query.language}
+                anchorPosition={"downCenter"}
+                onSelectLanguage={() => {}}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>   
+              <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
             style={{ position: 'relative', width: '100%' }}
@@ -694,9 +704,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
               />
             </EuiPortal>
           </div>
-        </EuiOutsideClickDetector>
+              </EuiOutsideClickDetector>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+       
 
         {this.props.prepend}
+        </EuiFlexItem>
       </div>
     );
   }

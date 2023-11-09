@@ -91,9 +91,10 @@ export interface QueryBarTopRowProps {
 export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
+  const [query, setQuery] = useState({} as { query: string; language: string });
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
+  const { uiSettings, notifications, storage, appName, docLinks, http } = opensearchDashboards.services;
 
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
 
@@ -197,19 +198,24 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     return valueAsMoment.toISOString();
   }
 
+  const onLanguageChange = (language: string) => {
+    // Send telemetry info every time the user opts in or out of kuery
+    // As a result it is important this function only ever gets called in the
+    // UI component's change handler.
+    http.post('/api/opensearch-dashboards/dql_opt_in_stats', {
+      body: JSON.stringify({ opt_in: language === 'kuery' }),
+    });
+
+    storage.set('opensearchDashboards.userQueryLanguage', language);
+
+    const newQuery = { query: '', language };
+    setQuery(newQuery)
+  }
+
   function renderQueryInput() {
     if (!shouldRenderQueryInput()) return;
     return (
-    <EuiFlexItem>
-    <EuiFlexGroup responsive={false} gutterSize="s">
-      <EuiFlexItem grow={2}>
-        <QueryLanguageSwitcher
-          language={props.query!.language}
-          anchorPosition={"downCenter"}
-          onSelectLanguage={() => {}}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={8}>
+      <EuiFlexItem>
         <QueryStringInput
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
@@ -223,8 +229,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           dataTestSubj={props.dataTestSubj}
         />
       </EuiFlexItem>
-    </EuiFlexGroup>
-    </EuiFlexItem>
     );
   }
 
