@@ -109,6 +109,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add @curq as maintainer ([#4760](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4760))
 - Bump `oui` to `1.3.0` ([#4941](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4941))
 - Add @bandinib-amzn as maintainer ([#5113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5113))
+- Add @bandinib-amzn to CODEOWNERS file. ([#5456](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5456))
 
 ### 🪛 Refactoring
 
