@@ -13,6 +13,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2023-45133] Bump all babel dependencies from `7.16.x` to `7.22.9` to fix upstream vulnerability ([#5428](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5428))
 
 ### 📈 Features/Enhancements
+- Add platform "darwin-arm64" ([#5290](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5290)[#5455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5455))
 
 ### 🐛 Bug Fixes
 
