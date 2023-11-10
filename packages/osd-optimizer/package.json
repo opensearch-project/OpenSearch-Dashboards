@@ -10,8 +10,8 @@
     "osd:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@babel/cli": "^7.14.5",
-    "@babel/core": "^7.11.6",
+    "@babel/cli": "^7.22.9",
+    "@babel/core": "^7.22.9",
     "@osd/babel-preset": "1.0.0",
     "@osd/cross-platform": "1.0.0",
     "@osd/dev-utils": "1.0.0",

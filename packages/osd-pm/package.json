@@ -13,11 +13,10 @@
     "prettier": "prettier --write './src/**/*.ts'"
   },
   "devDependencies": {
-    "@babel/core": "^7.11.6",
-    "@babel/plugin-proposal-class-properties": "^7.10.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
-    "@babel/preset-env": "^7.11.0",
-    "@babel/preset-typescript": "^7.10.4",
+    "@babel/core": "^7.22.9",
+    "@babel/preset-env": "^7.22.9",
+    "@babel/preset-typescript": "^7.22.9",
+    "@osd/babel-preset": "1.0.0",
     "@types/cmd-shim": "^2.0.0",
     "@types/dedent": "^0.7.0",
     "@types/getopts": "^2.0.1",
