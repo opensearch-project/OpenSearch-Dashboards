@@ -8,6 +8,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Deprecations
 
 ### 🛡 Security
+- [CVE-2023-46234] Bump `eslint-import-resolver-webpack` from `0.11.1` to `0.13.8` and `browserify-sign` from `4.2.1` to `4.2.2` ([#5414](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5414/))
 
 ### 📈 Features/Enhancements
 
