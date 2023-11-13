@@ -258,6 +258,12 @@ Options:
 $ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip
 ```
 
+#### Read Only capabilities
+
+_This feature will only work if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+
+Please follow the design described in [the docs](https://github.com/opensearch-project/OpenSearch/blob/main/docs/capabilities/read_only_mode.md#design)
+
 ### Alternative - Run OpenSearch from tarball
 
 If you would like to run OpenSearch from the tarball, you'll need to download the minimal distribution, install it, and then run the executable. (You'll also need Java installed and the `JAVA_HOME` environmental variable set - see [OpenSearch developer guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md#install-prerequisites) for details).

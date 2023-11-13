@@ -227,10 +227,10 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.16.5",
-    "@babel/parser": "^7.16.6",
-    "@babel/register": "^7.16.5",
-    "@babel/types": "^7.16.0",
+    "@babel/core": "^7.22.9",
+    "@babel/parser": "^7.22.9",
+    "@babel/register": "^7.22.9",
+    "@babel/types": "^7.22.9",
     "@elastic/apm-rum": "^5.6.1",
     "@elastic/charts": "31.1.0",
     "@elastic/ems-client": "7.10.0",
@@ -350,7 +350,7 @@
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "0.22.0",
-    "chromedriver": "^107.0.3",
+    "chromedriver": "^119.0.1",
     "classnames": "2.3.1",
     "compare-versions": "3.5.1",
     "d3": "3.5.17",
