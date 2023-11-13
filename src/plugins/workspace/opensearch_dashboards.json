@@ -1,0 +1,11 @@
+{
+  "id": "workspace",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [
+    "savedObjects"
+  ],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}

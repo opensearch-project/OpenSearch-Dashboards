@@ -12,6 +12,7 @@ import {
   DataGridTableProps,
 } from '../application/components/data_grid/data_grid_table';
 import { VisualizationNoResults } from '../../../visualizations/public';
+import './search_embeddable.scss';
 
 interface SearchEmbeddableProps {
   searchProps: SearchProps;
@@ -51,7 +52,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
         data-test-subj="embeddedSavedSearchDocTable"
       >
         {discoverEmbeddableProps.totalHitCount !== 0 ? (
-          <EuiFlexItem>
+          <EuiFlexItem style={{ minHeight: 0 }} className="osdDocTable__container">
             <DataGridTableMemoized {...discoverEmbeddableProps} />
           </EuiFlexItem>
         ) : (

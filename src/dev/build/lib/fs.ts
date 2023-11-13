@@ -29,6 +29,7 @@
  */
 
 import fs from 'fs';
+import { rm } from 'fs/promises';
 import { createHash } from 'crypto';
 import { pipeline, Writable } from 'stream';
 import { resolve, dirname, isAbsolute, sep } from 'path';
@@ -138,8 +139,7 @@ export async function deleteEmptyFolders(
   );
   assertAbsolute(rootFolderPath.startsWith('!') ? rootFolderPath.slice(1) : rootFolderPath);
 
-  // Delete empty is used to gather all the empty folders and
-  // then we use del to actually delete them
+  // `deleteEmpty` is used to gather all the empty folders then `rm` is used to actually delete them
   const emptyFoldersList = await deleteEmpty(rootFolderPath, {
     // @ts-expect-error DT package has incorrect types https://github.com/jonschlinkert/delete-empty/blob/6ae34547663e6845c3c98b184c606fa90ef79c0a/index.js#L160
     dryRun: true,
@@ -148,12 +148,11 @@ export async function deleteEmptyFolders(
   const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
     return !foldersToKeep.some((folderToKeep) => folderToDelete.includes(folderToKeep));
   });
-  const deletedEmptyFolders = await del(foldersToDelete, {
-    concurrency: 4,
-  });
 
-  log.debug('Deleted %d empty folders', deletedEmptyFolders.length);
-  log.verbose('Deleted:', longInspect(deletedEmptyFolders));
+  await Promise.all(foldersToDelete.map((folder) => rm(folder, { force: true, recursive: true })));
+
+  log.debug('Deleted %d empty folders', foldersToDelete.length);
+  log.verbose('Deleted:', longInspect(foldersToDelete));
 }
 
 interface CopyOptions {
