@@ -146,7 +146,7 @@ export class DataSourceSavedObjectsClientWrapper {
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
     this.validateAttributes(attributes);
 
-    const { endpoint, auth } = attributes;
+    const { endpoint, auth } = attributes as DataSourceAttributes;
 
     switch (auth.type) {
       case AuthType.NoAuth:
@@ -180,7 +180,7 @@ export class DataSourceSavedObjectsClientWrapper {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions = {}
   ) {
-    const { auth, endpoint } = attributes;
+    const { auth, endpoint } = (attributes as unknown) as DataSourceAttributes;
 
     if (endpoint) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -243,7 +243,7 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private validateAttributes<T = unknown>(attributes: T) {
-    const { title, endpoint, auth } = attributes;
+    const { title, endpoint, auth } = attributes as DataSourceAttributes;
     if (!title?.trim?.().length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"title" attribute must be a non-empty string'
@@ -264,7 +264,7 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private validateAuth<T = unknown>(auth: T) {
-    const { type, credentials } = auth;
+    const { type, credentials } = auth as DataSourceAttributes['auth'];
 
     if (!type) {
       throw SavedObjectsErrorHelpers.createBadRequestError('"auth.type" attribute is required');
@@ -448,9 +448,7 @@ export class DataSourceSavedObjectsClientWrapper {
     auth: T,
     encryptionContext: EncryptionContext
   ) {
-    const {
-      credentials: { username, password },
-    } = auth;
+    const { username, password } = auth as UsernamePasswordTypedContent;
 
     return {
       ...auth,
@@ -462,9 +460,7 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private async encryptSigV4Credential<T = unknown>(auth: T, encryptionContext: EncryptionContext) {
-    const {
-      credentials: { accessKey, secretKey, region, service },
-    } = auth;
+    const { accessKey, secretKey, region, service } = auth as SigV4Content;
 
     return {
       ...auth,
