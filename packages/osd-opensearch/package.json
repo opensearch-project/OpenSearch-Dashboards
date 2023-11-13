@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@osd/babel-preset": "1.0.0",
-    "@babel/cli": "^7.16.0",
+    "@babel/cli": "^7.22.9",
     "del": "^6.1.1"
   }
 }

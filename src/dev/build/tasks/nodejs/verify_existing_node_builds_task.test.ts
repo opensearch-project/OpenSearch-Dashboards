@@ -121,6 +121,7 @@ it('checks shasums for each downloaded node build', async () => {
         Object {
           "type": "return",
           "value": Object {
+            "darwin:darwin-arm64:downloadName": "valid shasum",
             "darwin:darwin-x64:downloadName": "valid shasum",
             "linux:linux-arm64:downloadName": "valid shasum",
             "linux:linux-x64:downloadName": "valid shasum",
@@ -154,6 +155,14 @@ it('checks shasums for each downloaded node build', async () => {
           Platform {
             "architecture": "x64",
             "buildName": "darwin-x64",
+            "name": "darwin",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "arm64",
+            "buildName": "darwin-arm64",
             "name": "darwin",
           },
         ],
@@ -194,6 +203,14 @@ it('checks shasums for each downloaded node build', async () => {
         Object {
           "type": "return",
           "value": Object {
+            "downloadName": "darwin:darwin-arm64:downloadName",
+            "downloadPath": "darwin:darwin-arm64:downloadPath",
+            "version": "<node version>",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
             "downloadName": "win32:win32-x64:downloadName",
             "downloadPath": "win32:win32-x64:downloadPath",
             "version": "<node version>",
@@ -218,11 +235,19 @@ it('checks shasums for each downloaded node build', async () => {
           "sha256",
         ],
         Array [
+          "darwin:darwin-arm64:downloadPath",
+          "sha256",
+        ],
+        Array [
           "win32:win32-x64:downloadPath",
           "sha256",
         ],
       ],
       "results": Array [
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
         Object {
           "type": "return",
           "value": "valid shasum",
