@@ -175,6 +175,7 @@ export function QueryLanguageSwitcher(props: Props) {
                 checked={props.language === 'kuery'}	
                 onChange={() => {	
                   const newLanguage = props.language === 'lucene' ? 'kuery' : 'lucene';	
+                  //console.log("new language", newLanguage)
                   props.onSelectLanguage(newLanguage);	
                 }}	
                 data-test-subj="languageToggle"	

@@ -469,6 +469,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
+    console.log("new language", language)
+
     this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
 
     const newQuery = { query: '', language };
