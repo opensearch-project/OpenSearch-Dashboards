@@ -59,6 +59,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
+import { Observable } from 'rxjs';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -78,6 +79,7 @@ export interface QueryStringInputProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
+  currentApp$?: Observable<string|undefined>
 }
 
 interface Props extends QueryStringInputProps {
@@ -93,6 +95,7 @@ interface State {
   selectionEnd: number | null;
   indexPatterns: IIndexPattern[];
   queryBarRect: DOMRect | undefined;
+  currentApp: string | undefined;
 }
 
 const KEY_CODES = {
@@ -119,6 +122,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     selectionEnd: null,
     indexPatterns: [],
     queryBarRect: undefined,
+    currentApp: undefined
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -701,6 +705,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           language={this.props.query.language}
           anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
           onSelectLanguage={this.onSelectLanguage}
+          currentApp$={this.props.currentApp$}
         />
       </div>
     );

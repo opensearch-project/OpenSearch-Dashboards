@@ -45,14 +45,30 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { useCallback } from 'react';
+import { Observable } from 'rxjs';
+import { useObservable } from 'react-use';
 
 interface Props {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
+  currentApp$?: Observable<string|undefined>
 }
 
 export function QueryLanguageSwitcher(props: Props) {
+  const dataExplorerOptions = [
+    {
+      label: 'DQL'
+    },
+    {
+      label: 'Lucene',
+    },
+    {
+      label: 'PPL'
+    }
+  ]
+  const [selectedLanguage, setSelectedLanguage] = useState([dataExplorerOptions[0]])
+  
   const osdDQLDocs = useOpenSearchDashboards().services.docLinks?.links.opensearchDashboards.dql
     .base;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -69,19 +85,7 @@ export function QueryLanguageSwitcher(props: Props) {
     />
   );
 
-  const options = [
-    {
-      label: 'DQL'
-    },
-    {
-      label: 'Lucene',
-    },
-    {
-      label: 'PPL'
-    }
-  ]
-
-  const [selectedLanguage, setSelectedLanguage] = useState([options[0]])
+  
 
   const button = (
     <EuiButtonEmpty
@@ -103,16 +107,84 @@ export function QueryLanguageSwitcher(props: Props) {
     [setSelectedLanguage]
   )
 
-  return (
-    <EuiComboBox
-      data-test-subj="languageSelect"
-      options={options}
-      selectedOptions={selectedLanguage}
-      onChange={handleLanguageChange}
-      singleSelection={{asPlainText: true}}
-      isClearable={false}
-      async
-    />
+  if(props.currentApp$ && useObservable(props.currentApp$, '') === "data-explorer"){
+    return (
+      <EuiComboBox
+        data-test-subj="languageSelect"
+        options={dataExplorerOptions}
+        selectedOptions={selectedLanguage}
+        onChange={handleLanguageChange}
+        singleSelection={{asPlainText: true}}
+        isClearable={false}
+        async
+      />
   );
-}
+  }
+  else{
+    return (	  
+      <EuiPopover	    
+        id="queryLanguageSwitcherPopover"	      
+        anchorClassName="euiFormControlLayout__append"	     
+        ownFocus	      
+        anchorPosition={props.anchorPosition || 'downRight'}	    
+        button={button}	   
+        isOpen={isPopoverOpen}	  
+        closePopover={() => setIsPopoverOpen(false)}	
+        repositionOnScroll	
+      >	
+        <EuiPopoverTitle>	
+          <FormattedMessage	
+            id="data.query.queryBar.syntaxOptionsTitle"	
+            defaultMessage="Syntax options"	
+          />	
+        </EuiPopoverTitle>	
+        <div style={{ width: '350px' }}>	
+          <EuiText>	
+            <p>	
+              <FormattedMessage	
+                id="data.query.queryBar.syntaxOptionsDescription"	
+                defaultMessage="The {docsLink} (DQL) offers a simplified query	
+                syntax and support for scripted fields. If you turn off DQL,	
+                OpenSearch Dashboards uses Lucene."	
+                values={{	
+                  docsLink: (	
+                    <EuiLink href={osdDQLDocs} target="_blank">	
+                      {dqlFullName}	
+                    </EuiLink>	
+                  ),	
+                }}	
+              />	
+            </p>	
+          </EuiText>	
+  
+          <EuiSpacer size="m" />	
+  
+  
+          <EuiForm>	  
+            <EuiFormRow label={dqlFullName}>	    
+              <EuiSwitch	      
+                id="queryEnhancementOptIn"	     
+                name="popswitch"	      
+                label={	     
+                  props.language === 'kuery' ? (	     
+                    <FormattedMessage id="data.query.queryBar.dqlOnLabel" defaultMessage="On" />	     
+                  ) : (	     
+                    <FormattedMessage id="data.query.queryBar.dqlOffLabel" defaultMessage="Off" />	    
+                  )	
+                }	
+                checked={props.language === 'kuery'}	
+                onChange={() => {	
+                  const newLanguage = props.language === 'lucene' ? 'kuery' : 'lucene';	
+                  props.onSelectLanguage(newLanguage);	
+                }}	
+                data-test-subj="languageToggle"	
+              />	
+            </EuiFormRow>	
+          </EuiForm>	
+        </div>	
+      </EuiPopover>
+    )
+
+  }
+ }
 

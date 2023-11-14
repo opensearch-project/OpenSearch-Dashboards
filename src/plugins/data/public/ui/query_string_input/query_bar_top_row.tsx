@@ -92,8 +92,9 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
+  const { application, uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
 
+  const currentApp = application?.currentAppId$;
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
 
   const queryLanguage = props.query && props.query.language;
@@ -211,6 +212,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
+          currentApp$={currentApp}
         />
       </EuiFlexItem>
     );
