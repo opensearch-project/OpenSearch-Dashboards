@@ -70,10 +70,11 @@ const first = (stream, map) =>
   });
 
 exports.Cluster = class Cluster {
-  constructor({ log = defaultLog, ssl = false, security = false } = {}) {
+  constructor({ log = defaultLog, ssl = false, security = false, assistant = false } = {}) {
     this._log = log;
     this._ssl = ssl;
     this._security = security;
+    this._assistant = assistant;
     this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
 
@@ -222,6 +223,24 @@ exports.Cluster = class Cluster {
       await chmodAsync(pluginPath, '755');
       await execa(OPENSEARCH_SECURITY_INSTALL, ['-y', '-i', '-s'], { cwd: installPath });
     }
+  }
+
+  /**
+   * Setups cluster with assistant plugins
+   *
+   * @param {string} installPath
+   * @property {String} version - version of OpenSearch
+   */
+  async setupAssistant(installPath, version) {
+    const mlPluginUrl = generateEnginePluginUrl(version, 'opensearch-ml');
+    await this.installOpenSearchPlugins(installPath, mlPluginUrl);
+    this._log.info('Setting up ML-Commons');
+    const sqlPluginUrl = generateEnginePluginUrl(version, 'opensearch-sql');
+    await this.installOpenSearchPlugins(installPath, sqlPluginUrl);
+    this._log.info('Setting up SQL');
+    const observabilityPluginUrl = generateEnginePluginUrl(version, 'opensearch-observability');
+    await this.installOpenSearchPlugins(installPath, observabilityPluginUrl);
+    this._log.info('Setting up Observability');
   }
 
   /**

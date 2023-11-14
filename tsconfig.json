@@ -6,6 +6,7 @@
   "include": [
     "opensearch_dashboards.d.ts",
     "src/**/*",
+    "plugins/**/*",
     "typings/**/*",
     "test_utils/**/*"
   ],
