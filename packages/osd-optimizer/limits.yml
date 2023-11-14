@@ -1,89 +1,43 @@
 pageLoadAssetSize:
   advancedSettings: 27596
-  alerts: 106936
-  apm: 64385
   apmOss: 18996
-  beatsManagement: 188135
   bfetch: 41874
-  canvas: 1065624
   charts: 159211
-  cloud: 21076
   console: 46235
   core: 692646
-  crossClusterReplication: 65408
-  dashboard: 374267
-  dashboardEnhanced: 65646
-  dashboardMode: 22716
+  dashboard: 663829
   data: 1174083
-  dataEnhanced: 50420
+  dataExplorer: 148647
+  dataSource: 18645
+  dataSourceManagement: 29680
   devTools: 38781
-  discover: 105147
-  discoverEnhanced: 42730
+  discover: 171578
   embeddable: 242671
-  embeddableEnhanced: 41145
-  enterpriseSearch: 35741
-  opensearchUiShared: 326798
   expressions: 224120
-  features: 31211
-  fileUpload: 24717
-  globalSearch: 43548
-  globalSearchBar: 62888
-  globalSearchProviders: 25554
-  graph: 31504
-  grokdebugger: 26779
   home: 41661
-  indexLifecycleManagement: 107090
-  indexManagement: 662506
   indexPatternManagement: 154366
-  infra: 197873
-  ingestManager: 415829
-  ingestPipelines: 58003
   inputControlVis: 172819
   inspector: 148999
+  management: 46112
+  managementOverview: 23272
+  mapsLegacy: 116961
+  navigation: 37413
   opensearchDashboardsLegacy: 107855
   opensearchDashboardsOverview: 56426
   opensearchDashboardsReact: 162353
   opensearchDashboardsUtils: 198829
-  lens: 96624
-  licenseManagement: 41961
-  licensing: 39008
-  lists: 183665
-  logstash: 53548
-  management: 46112
-  maps: 183754
-  mapsLegacy: 116961
-  mapsLegacyLicensing: 20214
-  ml: 82187
-  monitoring: 268758
-  navigation: 37413
-  newsfeed: 42228
-  observability: 89709
-  painlessLab: 179892
+  opensearchUiShared: 326798
   regionMap: 66098
-  remoteClusters: 51327
-  reporting: 183418
-  rollup: 97204
   savedObjects: 108662
   savedObjectsManagement: 100503
-  searchprofiler: 67224
-  security: 189428
-  securitySolution: 638231
   share: 99205
-  snapshotRestore: 79176
-  spaces: 389643
-  telemetry: 91832
-  telemetryManagementSection: 52443
   tileMap: 65337
-  transform: 41151
-  triggersActionsUi: 170145
   uiActions: 95074
-  uiActionsEnhanced: 349799
-  upgradeAssistant: 80967
-  uptime: 40825
-  urlDrilldown: 34174
   urlForwarding: 32579
   usageCollection: 39762
-  visDefaultEditor: 50178
+  visAugmenter: 111211
+  visBuilder: 733061
+  visDefaultEditor: 344192
   visTypeMarkdown: 30896
   visTypeMetric: 42790
   visTypeTable: 95078
@@ -95,4 +49,3 @@ pageLoadAssetSize:
   visTypeXy: 20255
   visualizations: 295169
   visualize: 57433
-  watcher: 43742
