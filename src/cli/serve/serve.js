@@ -249,6 +249,7 @@ export default function (program) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--assistant', 'Run the dev server using assistant defaults')
       .option('--security', 'Run the dev server using security defaults')
       .option('--dist', 'Use production assets from osd/optimizer')
       .option(
