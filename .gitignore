@@ -68,3 +68,6 @@ snapshots.js
 
 # Yarn local mirror content
 .yarn-local-mirror
+
+# assistant plugin
+/scripts/assistant
