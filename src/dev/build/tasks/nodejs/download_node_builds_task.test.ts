@@ -36,6 +36,7 @@ import {
 
 import { Config, Platform } from '../../lib';
 import { DownloadNodeBuilds } from './download_node_builds_task';
+import { stripAnsiSnapshotSerializer } from '../../../../core/test_helpers/strip_ansi_snapshot_serializer';
 
 jest.mock('./node_shasums');
 jest.mock('./node_download_info');
@@ -43,6 +44,7 @@ jest.mock('../../lib/download');
 jest.mock('../../lib/get_build_number');
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
+expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
 const { getNodeDownloadInfo, getNodeVersionDownloadInfo } = jest.requireMock(
   './node_download_info'
@@ -67,6 +69,8 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
       linux: false,
       linuxArm: false,
       darwin: false,
+      darwinArm: false,
+      windows: false,
     },
   });
 
@@ -78,19 +82,23 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     };
   });
 
-  getNodeVersionDownloadInfo.mockImplementation((version, architecture, isWindows, repoRoot) => {
-    return {
-      url: `https://mirrors.nodejs.org/dist/v${version}/node-v${version}-${architecture}.tar.gz`,
-      downloadName: `node-v${version}-${architecture}.tar.gz`,
-      downloadPath: `/mocked/path/.node_binaries/${version}/node-v${version}-${architecture}.tar.gz`,
-      extractDir: `/mocked/path/.node_binaries/${version}/${architecture}`,
-      version,
-    };
-  });
+  getNodeVersionDownloadInfo.mockImplementation(
+    (version: string, architecture: string, isWindows: boolean, repoRoot: string) => {
+      return {
+        url: `https://mirrors.nodejs.org/dist/v${version}/node-v${version}-${architecture}.tar.gz`,
+        downloadName: `node-v${version}-${architecture}.tar.gz`,
+        downloadPath: `/mocked/path/.node_binaries/${version}/node-v${version}-${architecture}.tar.gz`,
+        extractDir: `/mocked/path/.node_binaries/${version}/${architecture}`,
+        version,
+      };
+    }
+  );
 
   getNodeShasums.mockReturnValue({
     'linux:downloadName': 'linux:sha256',
+    'linux-arm64:downloadName': 'linux-arm64:sha256',
     'darwin:downloadName': 'darwin:sha256',
+    'darwin-arm64:downloadName': 'darwin-arm64:sha256',
     'win32:downloadName': 'win32:sha256',
   });
 
@@ -126,6 +134,15 @@ it('downloads node builds for each platform', async () => {
           "retries": 3,
           "sha256": "linux:sha256",
           "url": "linux:url",
+        },
+      ],
+      Array [
+        Object {
+          "destination": "darwin:downloadPath",
+          "log": <ToolingLog>,
+          "retries": 3,
+          "sha256": "darwin:sha256",
+          "url": "darwin:url",
         },
       ],
       Array [
@@ -184,7 +201,10 @@ it('downloads node builds for each platform', async () => {
       ],
     ]
   `);
-  expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
+  /* ToDo [NODE14]: Replace when Node.js 14 support is removed
+   * expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
+   */
+  expect(testWriter.messages).toMatchSnapshot();
 });
 
 it('rejects if any download fails', async () => {
@@ -193,5 +213,8 @@ it('rejects if any download fails', async () => {
   await expect(DownloadNodeBuilds.run(config, log, [])).rejects.toMatchInlineSnapshot(
     `[Error: Download failed for reasons]`
   );
-  expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
+  /* ToDo [NODE14]: Replace when Node.js 14 support is removed
+   * expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
+   */
+  expect(testWriter.messages).toMatchSnapshot();
 });

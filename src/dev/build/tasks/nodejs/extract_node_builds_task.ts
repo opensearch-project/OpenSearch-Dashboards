@@ -38,7 +38,7 @@ import {
 export const ExtractNodeBuilds: GlobalTask = {
   global: true,
   description: 'Extracting node.js builds for all platforms',
-  async run(config) {
+  async run(config, log) {
     await Promise.all([
       ...config.getTargetPlatforms().map(async (platform) => {
         const { downloadPath, extractDir } = await getNodeDownloadInfo(config, platform);
@@ -50,6 +50,10 @@ export const ExtractNodeBuilds: GlobalTask = {
       }),
       // ToDo [NODE14]: Remove this Node.js 14 fallback download
       ...config.getTargetPlatforms().map(async (platform) => {
+        if (platform.getBuildName() === 'darwin-arm64') {
+          log.warning(`There are no fallback Node.js versions released for darwin-arm64.`);
+          return;
+        }
         const { downloadPath, extractDir } = await getNodeVersionDownloadInfo(
           NODE14_FALLBACK_VERSION,
           platform.getNodeArch(),
