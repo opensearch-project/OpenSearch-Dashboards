@@ -8,7 +8,7 @@
 // it is being scoped by a known outer selector
 .coreSystemRootDomElement {
   .ace-tm {
-    $aceBackground: tintOrShade($euiColorLightShade, 50%, 0);
+    $aceBackground: tintOrShade($euiColorLightShade, 50%, 0%);
 
     background-color: $euiColorLightestShade;
     color: $euiTextColor;

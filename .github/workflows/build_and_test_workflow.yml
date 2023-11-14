@@ -47,6 +47,14 @@ jobs:
         run: |
           git config --global core.autocrlf false
 
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: "C:"
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -146,6 +154,14 @@ jobs:
         run: |
           git config --global core.autocrlf false
 
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: "C:"
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -231,6 +247,14 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           git config --global core.autocrlf false
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: "C:"
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -323,6 +347,14 @@ jobs:
         run: |
           git config --global core.autocrlf false
         working-directory: .
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: "C:"
 
       - name: Checkout code
         uses: actions/checkout@v3
