@@ -65,7 +65,7 @@
     "start:docker": "scripts/use_node scripts/opensearch_dashboards --dev --opensearch.hosts=$OPENSEARCH_HOSTS --opensearch.ignoreVersionMismatch=true --server.host=$SERVER_HOST",
     "start:security": "scripts/use_node scripts/opensearch_dashboards --dev --security",
     "start:security:default": "export OPENSEARCH_USERNAME=kibanaserver && export OPENSEARCH_PASSWORD=kibanaserver && scripts/use_node scripts/opensearch_dashboards --dev --security",
-    "start:assistant": "test -f scripts/assistant/start.sh && scripts/assistant/start.sh",
+    "start:assistant": "test -f scripts/assistant/start.sh && scripts/assistant/start.sh || (echo 'Install scripts from `yarn setup` in OSD Assistant Plugin' && exit 1)",
     "debug": "scripts/use_node --nolazy --inspect scripts/opensearch_dashboards --dev",
     "debug-break": "scripts/use_node --nolazy --inspect-brk scripts/opensearch_dashboards --dev",
     "lint": "yarn run lint:es && yarn run lint:style",
