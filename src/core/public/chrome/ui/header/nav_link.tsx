@@ -39,14 +39,13 @@ import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
-// TODO: make this function more generic
-export const isActiveNavLink = (currentId: string | undefined, targetId: string): boolean => {
-  if (currentId === 'discover' || currentId === 'data-explorer') {
-    return ['discover', 'data-explorer'].includes(targetId);
-  } else {
-    return currentId === targetId;
-  }
+// TODO: replace hard-coded values with a registration function, so that apps can control active nav links similar to breadcrumbs
+const aliasedApps: { [key: string]: string[] } = {
+  discover: ['data-explorer'],
 };
+
+export const isActiveNavLink = (appId: string | undefined, linkId: string) =>
+  appId === linkId || aliasedApps[linkId]?.includes(appId || '');
 
 interface Props {
   link: ChromeNavLink;

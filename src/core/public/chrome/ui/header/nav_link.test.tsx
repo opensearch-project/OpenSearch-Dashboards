@@ -8,19 +8,19 @@ import { ChromeNavLink } from '../../..';
 import { httpServiceMock } from '../../../http/http_service.mock';
 
 describe('isActiveNavLink', () => {
-  it('should return true if the currentId is "discover" and targetId is "discover"', () => {
+  it('should return true if the appId is "discover" and linkId is "discover"', () => {
     expect(isActiveNavLink('discover', 'discover')).toBe(true);
   });
 
-  it('should return true if the currentId is "data-explorer" and targetId is "data-explorer"', () => {
+  it('should return true if the appId is "data-explorer" and linkId is "data-explorer"', () => {
     expect(isActiveNavLink('data-explorer', 'data-explorer')).toBe(true);
   });
 
-  it('should return true if the currentId is "discover" and targetId is "data-explorer"', () => {
-    expect(isActiveNavLink('discover', 'data-explorer')).toBe(true);
+  it('should return true if the appId is "data-explorer" and linkId is "discover"', () => {
+    expect(isActiveNavLink('data-explorer', 'discover')).toBe(true);
   });
 
-  it('should return false if the currentId and targetId do not match', () => {
+  it('should return false if the appId and linkId do not match', () => {
     expect(isActiveNavLink('dashboard', 'discover')).toBe(false);
   });
 });
