@@ -181,8 +181,38 @@ jobs:
           restore-keys: |
             yarn-
 
-      - name: Setup chromedriver
-        run: node scripts/upgrade_chromedriver.js
+      # Node 16 is only supported by ChromeDriver 116 and lower
+      - name: Download Chrome (Linux)
+        if: matrix.os != 'windows-latest'
+        id: download-chrome-linux
+        uses: abhi1693/setup-browser@v0.3.5
+        with:
+          browser: chrome
+          # https://chromiumdash.appspot.com/branches
+          version: 1160321
+
+      - name: Download Chrome (Windows)
+        if: matrix.os == 'windows-latest'
+        id: download-chrome-windows
+        uses: abhi1693/setup-browser@v0.3.5
+        with:
+          browser: chrome
+          # https://chromiumdash.appspot.com/branches
+          version: 1160375
+
+      - name: Setup Chrome (Linux)
+        if: matrix.os != 'windows-latest'
+        run: |
+          sudo rm -rf /usr/bin/google-chrome
+          sudo rm -rf /opt/google/chrome/chrome
+          sudo ln -s ${{steps.download-chrome-linux.outputs.path}}/${{steps.download-chrome-linux.outputs.binary}} /usr/bin/google-chrome
+
+      - name: Setup Chrome (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: cmd
+        run: |
+          rmdir "C:\Program Files\Google\Chrome\Application" /S /Q
+          mklink /J "C:\Program Files\Google\Chrome\Application" ${{steps.download-chrome-windows.outputs.path}}
 
       - name: Run bootstrap (Linux)
         if: matrix.os != 'windows-latest'
