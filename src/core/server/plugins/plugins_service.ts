@@ -38,7 +38,13 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, PluginConfigDescriptor, PluginName, InternalPluginInfo } from './types';
+import {
+  DiscoveredPlugin,
+  PluginConfigDescriptor,
+  PluginName,
+  InternalPluginInfo,
+  CompatibleEnginePluginVersions,
+} from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
@@ -97,6 +103,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly uiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
+  private readonly openSearchPluginInfo = new Map<PluginName, CompatibleEnginePluginVersions>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
@@ -128,6 +135,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         public: uiPlugins,
         browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
       },
+      requiredEnginePlugins: this.openSearchPluginInfo,
     };
   }
 
@@ -252,6 +260,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
               publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
             });
           }
+
+          this.openSearchPluginInfo.set(plugin.name, plugin.requiredEnginePlugins);
 
           pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
         })

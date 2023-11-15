@@ -47,6 +47,14 @@ jobs:
         run: |
           git config --global core.autocrlf false
 
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: "C:"
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -146,6 +154,14 @@ jobs:
         run: |
           git config --global core.autocrlf false
 
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: "C:"
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -232,6 +248,14 @@ jobs:
         run: |
           git config --global core.autocrlf false
 
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: "C:"
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -281,7 +305,7 @@ jobs:
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
 
-      - name: Run functional plugin tests 
+      - name: Run functional plugin tests
         id: plugin-ftr-tests
         run: node scripts/functional_tests.js --config test/plugin_functional/config.ts
 
@@ -308,6 +332,16 @@ jobs:
             ext: tar.gz
             suffix: linux-arm64
             script: build-platform --linux-arm --skip-os-packages
+          - os: macos-latest
+            name: macOS x64
+            ext: tar.gz
+            suffix: darwin-x64
+            script: build-platform --darwin --skip-os-packages
+          - os: macos-latest
+            name: macOS ARM64
+            ext: tar.gz
+            suffix: darwin-arm64
+            script: build-platform --darwin-arm --skip-os-packages
           - os: windows-latest
             name: Windows x64
             ext: zip
@@ -323,6 +357,14 @@ jobs:
         run: |
           git config --global core.autocrlf false
         working-directory: .
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: "C:"
 
       - name: Checkout code
         uses: actions/checkout@v3
