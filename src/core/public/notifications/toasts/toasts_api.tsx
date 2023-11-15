@@ -36,8 +36,6 @@ import { ErrorToast } from './error_toast';
 import { MountPoint } from '../../types';
 import { mountReactNode } from '../../utils';
 import { IUiSettingsClient } from '../../ui_settings';
-import { OverlayStart } from '../../overlays';
-import { I18nStart } from '../../i18n';
 
 /**
  * Allowed fields for {@link ToastInput}.
@@ -116,18 +114,11 @@ export class ToastsApi implements IToasts {
   private idCounter = 0;
   private uiSettings: IUiSettingsClient;
 
-  private overlays?: OverlayStart;
-  private i18n?: I18nStart;
-
   constructor(deps: { uiSettings: IUiSettingsClient }) {
     this.uiSettings = deps.uiSettings;
   }
 
   /** @internal */
-  public start({ overlays, i18n }: { overlays: OverlayStart; i18n: I18nStart }) {
-    this.overlays = overlays;
-    this.i18n = i18n;
-  }
 
   /** Observable of the toast messages to show to the user. */
   public get$() {
@@ -254,28 +245,8 @@ export class ToastsApi implements IToasts {
       color: 'danger',
       iconType: 'alert',
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
-      text: mountReactNode(
-        <ErrorToast
-          openModal={this.openModal.bind(this)}
-          error={error}
-          title={options.title}
-          toastMessage={message}
-          i18nContext={() => this.i18n!.Context}
-        />
-      ),
+      text: mountReactNode(<ErrorToast toastMessage={message} />),
       ...options,
     });
-  }
-
-  private openModal(
-    ...args: Parameters<OverlayStart['openModal']>
-  ): ReturnType<OverlayStart['openModal']> {
-    if (!this.overlays) {
-      // This case should never happen because no rendering should be occurring
-      // before the ToastService is started.
-      throw new Error(`Modal opened before ToastService was started.`);
-    }
-
-    return this.overlays.openModal(...args);
   }
 }
