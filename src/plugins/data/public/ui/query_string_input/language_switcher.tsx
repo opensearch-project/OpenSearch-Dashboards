@@ -61,7 +61,7 @@ export function QueryLanguageSwitcher(props: Props) {
       label: 'DQL'
     },
     {
-      label: 'Lucene',
+      label: 'lucene',
     },
     {
       label: 'PPL'
@@ -98,14 +98,11 @@ export function QueryLanguageSwitcher(props: Props) {
     </EuiButtonEmpty>
   );
 
-  const handleLanguageChange = useCallback(
-    (selectedLanguage: any) => {
-      setSelectedLanguage(selectedLanguage)
-      console.log("selectedLanguage", selectedLanguage)
-      props.onSelectLanguage(selectedLanguage)
-    },
-    [setSelectedLanguage]
-  )
+  const handleLanguageChange = (newLanguage:any) => {
+      const queryLanguage = newLanguage[0].label === 'DQL' ? 'kuery' : newLanguage[0].label;	
+      props.onSelectLanguage(queryLanguage)
+      setSelectedLanguage(newLanguage)
+    }
 
   if(props.currentApp$ && useObservable(props.currentApp$, '') === "data-explorer"){
     return (
@@ -175,7 +172,6 @@ export function QueryLanguageSwitcher(props: Props) {
                 checked={props.language === 'kuery'}	
                 onChange={() => {	
                   const newLanguage = props.language === 'lucene' ? 'kuery' : 'lucene';	
-                  //console.log("new language", newLanguage)
                   props.onSelectLanguage(newLanguage);	
                 }}	
                 data-test-subj="languageToggle"	
@@ -185,7 +181,6 @@ export function QueryLanguageSwitcher(props: Props) {
         </div>	
       </EuiPopover>
     )
-
   }
  }
 
