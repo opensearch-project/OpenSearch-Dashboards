@@ -50,7 +50,7 @@ export interface DataPublicPluginEnhancements {
 export interface DataSetupDependencies {
   expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
-  usageCollection?: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup
 }
 
 export interface DataStartDependencies {
