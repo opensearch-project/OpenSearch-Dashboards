@@ -1,0 +1,15 @@
+.home-hero-title {
+  color: $euiColorPrimary;
+}
+
+.home-hero-descriptionSection {
+  align-items: flex-start;
+}
+
+.home-hero-group > * {
+  flex-shrink: 0;
+}
+
+.home-getStarted-chatIcon {
+  padding-left: $euiSizeXS;
+}
