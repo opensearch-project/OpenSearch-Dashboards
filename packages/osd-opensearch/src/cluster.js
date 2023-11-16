@@ -241,6 +241,9 @@ exports.Cluster = class Cluster {
     const observabilityPluginUrl = generateEnginePluginUrl(version, 'opensearch-observability');
     await this.installOpenSearchPlugins(installPath, observabilityPluginUrl);
     this._log.info('Setting up Observability');
+    const alertingPluginUrl = generateEnginePluginUrl(version, 'opensearch-alerting');
+    await this.installOpenSearchPlugins(installPath, alertingPluginUrl);
+    this._log.info('Setting up Alerting');
   }
 
   /**
