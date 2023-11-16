@@ -89,8 +89,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛠 Maintenance
 
-### 🔩 Tests
-
 ## [2.11.0 - 2023-10-18](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.11.0)
 
 ### 🛡 Security
