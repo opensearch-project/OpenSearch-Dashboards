@@ -33,6 +33,67 @@ import { schema, TypeOf } from '@osd/config-schema';
 export const configSchema = schema.object({
   disableWelcomeScreen: schema.boolean({ defaultValue: false }),
   disableNewThemeModal: schema.boolean({ defaultValue: false }),
+  newHomepage: schema.boolean({ defaultValue: false }),
+  hero: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    title: schema.string({ defaultValue: 'Try the Query Assistant' }),
+    body: schema.string({
+      defaultValue:
+        'Automatically generate complex queries using simple conversational prompts. AI assisted summary helps you navigate and understand errors from your logs.{br}{br}You will be redirected to the observability playground where you will need to login. All the {terms} of the playground still apply.',
+    }),
+    img: schema.maybe(
+      schema.object({
+        src: schema.maybe(schema.string()),
+        link: schema.maybe(schema.string()),
+      })
+    ),
+    actionButton: schema.object({
+      text: schema.string({ defaultValue: 'Try in Log Explorer' }),
+      app: schema.string({ defaultValue: 'observability-logs' }),
+      path: schema.string({ defaultValue: '#/explorer' }),
+    }),
+    externalActionButton: schema.maybe(
+      schema.object({
+        text: schema.string(),
+        link: schema.string(),
+      })
+    ),
+    secondaryButton: schema.object({
+      text: schema.string({ defaultValue: 'Learn more' }),
+      link: schema.string({
+        defaultValue: 'https://opensearch.org/platform/observability/index.html',
+      }),
+    }),
+    prompts: schema.arrayOf(
+      schema.object({
+        text: schema.string(),
+        app: schema.string(),
+        path: schema.string(),
+      }),
+      {
+        defaultValue: [
+          {
+            text: 'How many errors are there in my logs?',
+            app: 'observability-logs',
+            path:
+              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=sso_logs-%2A.%2A&datasourceName=Default%20cluster&olly_q=How%20many%20errors%20are%20there%20in%20my%20logs%3F',
+          },
+          {
+            text: 'Show me the number of flights each day?',
+            app: 'observability-logs',
+            path:
+              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=opensearch_dashboards_sample_data_flights&datasourceName=Default%20cluster&olly_q=Show%20me%20the%20number%20of%20flights%20each%20day%3F',
+          },
+          {
+            text: 'What are top visited urls on my website?',
+            app: 'observability-logs',
+            path:
+              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=opensearch_dashboards_sample_data_logs&datasourceName=Default%20cluster&olly_q=What%20are%20top%20visited%20urls%20on%20my%20website%3F',
+          },
+        ],
+      }
+    ),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

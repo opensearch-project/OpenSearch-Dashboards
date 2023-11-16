@@ -39,6 +39,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     disableWelcomeScreen: true,
     disableNewThemeModal: true,
+    newHomepage: true,
+    hero: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [

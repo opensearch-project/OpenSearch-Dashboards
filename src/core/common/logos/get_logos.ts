@@ -24,6 +24,7 @@ export const CENTER_MARK_ON_DARK = 'ui/logos/opensearch_center_mark_on_dark.svg'
 export const ANIMATED_MARK_THEMED = 'ui/logos/opensearch_spinner.svg';
 export const ANIMATED_MARK_ON_LIGHT = 'ui/logos/opensearch_spinner_on_light.svg';
 export const ANIMATED_MARK_ON_DARK = 'ui/logos/opensearch_spinner_on_dark.svg';
+export const CHAT = 'ui/logos/opensearch_chat.svg';
 
 interface AssetOption {
   url?: string;
@@ -94,6 +95,8 @@ export const getLogos = (branding: Branding = {}, serverBasePath: string): Logos
   // OS animated marks
   const defaultLightColorSchemeAnimatedMark = `${serverBasePath}/${ANIMATED_MARK_ON_LIGHT}`;
   const defaultDarkColorSchemeAnimatedMark = `${serverBasePath}/${ANIMATED_MARK_ON_DARK}`;
+  // CHAT logos
+  const defaultChatLogo = `${serverBasePath}/${CHAT}`;
 
   const colorScheme: ColorScheme = darkMode ? ColorScheme.DARK : ColorScheme.LIGHT;
 
@@ -135,6 +138,11 @@ export const getLogos = (branding: Branding = {}, serverBasePath: string): Logos
       { url: customMarkUrl, type: ImageType.ALTERNATIVE, colorScheme: ColorScheme.LIGHT },
       { url: defaultDarkColorSchemeAnimatedMark, type: ImageType.DEFAULT, colorScheme: ColorScheme.DARK },
       { url: defaultLightColorSchemeAnimatedMark, type: ImageType.DEFAULT, colorScheme: ColorScheme.LIGHT },
+    ], darkMode),
+
+    Chat: getLogo([
+      { url: defaultChatLogo, type: ImageType.CUSTOM, colorScheme: ColorScheme.DARK },
+      { url: defaultChatLogo, type: ImageType.CUSTOM, colorScheme: ColorScheme.LIGHT },
     ], darkMode),
 
     colorScheme,

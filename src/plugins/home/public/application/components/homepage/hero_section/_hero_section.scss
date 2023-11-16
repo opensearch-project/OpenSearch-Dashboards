@@ -1,0 +1,35 @@
+.home-hero-title {
+  color: $euiColorPrimary;
+}
+
+.home-hero-descriptionSection {
+  align-items: flex-start;
+}
+
+.home-hero-group > * {
+  flex-shrink: 0;
+}
+
+.home-getStarted-chatIcon {
+  padding-left: $euiSizeXS;
+}
+
+.home-hero-illustrationContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.home-hero-illustrationButton {
+  z-index: 1040;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  &:hover:not([class*="isDisabled"]),
+  &:active:not([class*="isDisabled"]),
+  &:focus:not([class*="isDisabled"]) {
+    transform: translate(-50%, -50%);
+    animation: none !important;
+  }
+}
