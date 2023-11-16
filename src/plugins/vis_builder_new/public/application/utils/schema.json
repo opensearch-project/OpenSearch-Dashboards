@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "properties": {
+    "styleState": {
+      "type": "object"
+    },
+    "visualizationState": {
+      "type": "object",
+      "properties": {
+        "activeVisualization": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "aggConfigParams": {
+              "type": "array"
+            }
+          },
+          "required": [
+            "name",
+            "aggConfigParams"
+          ],
+          "additionalProperties": false
+        },
+        "indexPattern": {
+          "type": "string"
+        },
+        "searchField": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "searchField"
+      ],
+      "additionalProperties": false
+    },
+    "uiState": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "styleState",
+    "visualizationState"
+  ],
+  "additionalProperties": false
+}

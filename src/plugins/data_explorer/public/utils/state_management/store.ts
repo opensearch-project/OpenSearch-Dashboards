@@ -53,11 +53,18 @@ export const configurePreloadedStore = (preloadedState: PreloadedState<RootState
 export const getPreloadedStore = async (services: DataExplorerServices) => {
   // For each view preload the data and register the slice
   const views = services.viewRegistry.all();
+  const viewSideEffectsMap: Record<string, Function[]> = {};
+
   views.forEach((view) => {
     if (!view.ui) return;
 
-    const { slice } = view.ui;
-    registerSlice(slice);
+    const { slices, sideEffects } = view.ui;
+    registerSlices(slices);
+
+    // Save side effects if they exist
+    if (sideEffects) {
+      viewSideEffectsMap[view.id] = sideEffects;
+    }
   });
 
   const preloadedState = await loadReduxState(services);
@@ -72,7 +79,17 @@ export const getPreloadedStore = async (services: DataExplorerServices) => {
 
     if (isEqual(state, previousState)) return;
 
-    // Add Side effects here to apply after changes to the store are made. None for now.
+    // Execute view-specific side effects.
+    Object.entries(viewSideEffectsMap).forEach(([viewId, effects]) => {
+      effects.forEach((effect) => {
+        try {
+          effect(state, previousState, services);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error(`Error executing side effect for view ${viewId}:`, e);
+        }
+      });
+    });
 
     previousState = state;
   };
@@ -103,11 +120,13 @@ export const getPreloadedStore = async (services: DataExplorerServices) => {
   return { store, unsubscribe: onUnsubscribe };
 };
 
-export const registerSlice = (slice: Slice) => {
-  if (dynamicReducers[slice.name]) {
-    throw new Error(`Slice ${slice.name} already registered`);
-  }
-  dynamicReducers[slice.name] = slice.reducer;
+export const registerSlices = (slices: Slice[]) => {
+  slices.forEach((slice) => {
+    if (dynamicReducers[slice.name]) {
+      throw new Error(`Slice ${slice.name} already registered`);
+    }
+    dynamicReducers[slice.name] = slice.reducer;
+  });
 };
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
