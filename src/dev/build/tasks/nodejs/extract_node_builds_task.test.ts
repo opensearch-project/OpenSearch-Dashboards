@@ -58,6 +58,7 @@ async function setup() {
       linux: false,
       linuxArm: false,
       darwin: false,
+      darwinArm: false,
       windows: false,
     },
   });
@@ -147,13 +148,6 @@ it('runs expected fs operations', async () => {
         Array [
           <absolute path>/.node_binaries/14.21.3/node-v14.21.3-darwin-x64.tar.gz,
           <absolute path>/.node_binaries/14.21.3/darwin-x64,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-darwin-arm64.tar.gz,
-          <absolute path>/.node_binaries/14.21.3/darwin-arm64,
           Object {
             "strip": 1,
           },

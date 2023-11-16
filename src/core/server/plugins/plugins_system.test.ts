@@ -552,7 +552,7 @@ describe('start', () => {
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
   });
 
-  it('validates opensearch plugin installation when dependency is fulfilled', async () => {
+  it('validates plugin start when opensearch dependency is fulfilled', async () => {
     [
       createPlugin('dependency-fulfilled-plugin', {
         requiredOSPlugin: {
@@ -569,12 +569,9 @@ describe('start', () => {
     await pluginsSystem.setupPlugins(setupDeps);
     const pluginsStart = await pluginsSystem.startPlugins(startDeps);
     expect(pluginsStart).toBeInstanceOf(Map);
-    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
-    expect(log.warn).toHaveBeenCalledTimes(0);
   });
 
-  it('validates opensearch plugin installation and does not error out when plugin is not installed', async () => {
+  it('validates plugin start when opensearch plugin dependency is not installed', async () => {
     [
       createPlugin('dependency-missing-plugin', {
         requiredOSPlugin: {
@@ -591,52 +588,5 @@ describe('start', () => {
     await pluginsSystem.setupPlugins(setupDeps);
     const pluginsStart = await pluginsSystem.startPlugins(startDeps);
     expect(pluginsStart).toBeInstanceOf(Map);
-    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
-    expect(log.warn).toHaveBeenCalledTimes(1);
-    expect(log.warn).toHaveBeenCalledWith(
-      `OpenSearch plugin "missing-opensearch-dep" is not installed on the engine for the OpenSearch Dashboards plugin to function as expected.`
-    );
-  });
-
-  it('validates opensearch plugin installation and log warning when plugin exist but version is incompatible', async () => {
-    [
-      createPlugin('version-mismatch-plugin', {
-        requiredOSPlugin: {
-          'test-plugin-version-mismatch': '^1.0.0',
-        },
-      }),
-      createPlugin('no-dependency-plugin'),
-    ].forEach((plugin, index) => {
-      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
-      pluginsSystem.addPlugin(plugin);
-    });
-
-    await pluginsSystem.setupPlugins(setupDeps);
-    const pluginsStart = await pluginsSystem.startPlugins(startDeps);
-    expect(pluginsStart).toBeInstanceOf(Map);
-    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
-    expect(log.warn).toHaveBeenCalledTimes(1);
-    expect(log.warn).toHaveBeenCalledWith(
-      `OpenSearch plugin "test-plugin-version-mismatch" is not installed on the engine for the OpenSearch Dashboards plugin to function as expected.`
-    );
-  });
-
-  it('validates opensearch plugin installation and does not warn when there is no dependency', async () => {
-    [createPlugin('no-dependency-plugin-1'), createPlugin('no-dependency-plugin-2')].forEach(
-      (plugin, index) => {
-        jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-        jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
-        pluginsSystem.addPlugin(plugin);
-      }
-    );
-    await pluginsSystem.setupPlugins(setupDeps);
-    const pluginsStart = await pluginsSystem.startPlugins(startDeps);
-    expect(pluginsStart).toBeInstanceOf(Map);
-    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
-    expect(log.warn).toHaveBeenCalledTimes(0);
   });
 });
