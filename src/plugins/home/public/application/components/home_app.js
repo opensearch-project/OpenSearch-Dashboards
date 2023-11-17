@@ -35,7 +35,7 @@ import { Home } from './home';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
-import { OllyHomepage, PlaygroundHomepage } from './homepage';
+import { Homepage } from './homepage';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
@@ -57,9 +57,11 @@ export function HomeApp({ directories, solutions }) {
     addBasePath,
     environmentService,
     telemetry,
+    homeConfig,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
+  const isOlly = homeConfig.newHomepage;
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -93,13 +95,7 @@ export function HomeApp({ directories, solutions }) {
           <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
           </Route>
-          <Route exact path="/homepage">
-            <PlaygroundHomepage />
-          </Route>
-          <Route exact path="/olly-homepage">
-            <OllyHomepage />
-          </Route>
-          <Route exact path="/">
+          <Route exact path="/legacy">
             <Home
               addBasePath={addBasePath}
               directories={directories}
@@ -109,6 +105,9 @@ export function HomeApp({ directories, solutions }) {
               urlBasePath={getBasePath()}
               telemetry={telemetry}
             />
+          </Route>
+          <Route exact path="/">
+            <Homepage olly={isOlly} />
           </Route>
           <Route path="*" exact={true} component={RedirectToDefaultApp} />
         </Switch>
