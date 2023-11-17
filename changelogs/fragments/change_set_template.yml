@@ -1,7 +1,41 @@
 # Template
 
+# 💥 Breaking Changes
+breaking:
+  - This is a breaking change
+
+# 🚨 Deprecations
+deprecations:
+  - This is a deprecation change
+  
+# 🛡 Security
+security:
+  - This is a security change
+
+# 🐛 Bug Fixes
 bugfixes:
   - This is a sample fixed
 
+# 📈 Features/Enhancements
 feature:
   - Introduces a new feature
+
+# 🚞 Infrastructure
+infrastructure:
+  - This is an infrastructure change
+
+#  📝 Documentation
+documentation:
+  - This is a documentation change
+
+# 🛠 Maintenance
+maintenance:
+  - This is a maintenance change
+
+# 🪛 Refactoring
+refactoring:
+  - This is a refactoring change
+
+# 🔩 Tests
+tests:
+  - This is a test change
