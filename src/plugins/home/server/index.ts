@@ -39,6 +39,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     disableWelcomeScreen: true,
     disableNewThemeModal: true,
+    newHomepage: true,
     prompts: true,
   },
   schema: configSchema,
