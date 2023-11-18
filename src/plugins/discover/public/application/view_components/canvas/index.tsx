@@ -25,17 +25,6 @@ import './discover_canvas.scss';
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
   const { data$, refetch$, indexPattern } = useDiscoverContext();
-  const {
-    services: { uiSettings },
-  } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { columns } = useSelector((state) => state.discover);
-  const filteredColumns = filterColumns(
-    columns,
-    indexPattern,
-    uiSettings.get(DEFAULT_COLUMNS_SETTING)
-  );
-  const dispatch = useDispatch();
-  const prevIndexPattern = useRef(indexPattern);
 
   const [fetchState, setFetchState] = useState<SearchData>({
     status: data$.getValue().status,
@@ -79,13 +68,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       subscription.unsubscribe();
     };
   }, [data$, fetchState]);
-
-  useEffect(() => {
-    if (indexPattern !== prevIndexPattern.current) {
-      dispatch(setColumns({ columns: filteredColumns }));
-      prevIndexPattern.current = indexPattern;
-    }
-  }, [dispatch, filteredColumns, indexPattern]);
 
   const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
 

@@ -36,5 +36,18 @@ export function getIndexPatternFieldList(
   fieldCounts?: Record<string, number>
 ) {
   if (!indexPattern || !fieldCounts) return [];
-  return [...indexPattern.fields.getAll()];
+
+  const fieldNamesInDocs = Object.keys(fieldCounts);
+  const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
+  const unknownTypes: IndexPatternField[] = [];
+
+  difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
+    unknownTypes.push({
+      displayName: String(unknownFieldName),
+      name: String(unknownFieldName),
+      type: 'unknown',
+    } as IndexPatternField);
+  });
+
+  return [...indexPattern.fields.getAll(), ...unknownTypes];
 }
