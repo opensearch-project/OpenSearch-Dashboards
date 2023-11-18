@@ -43,7 +43,7 @@ import {
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { FIELDS_LIMIT_SETTING } from '../../../../common';
+import { FIELDS_LIMIT_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
 import { groupFields } from './lib/group_fields';
 import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
 import { getDetails } from './lib/get_details';
@@ -100,11 +100,16 @@ export function DiscoverSidebar({
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
+  const uiSettings = services.uiSettings;
 
   useEffect(() => {
-    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+    const newFields = getIndexPatternFieldList(
+      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+      selectedIndexPattern,
+      fieldCounts
+    );
     setFields(newFields);
-  }, [selectedIndexPattern, fieldCounts, hits, services]);
+  }, [selectedIndexPattern, fieldCounts, hits, services, uiSettings]);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
