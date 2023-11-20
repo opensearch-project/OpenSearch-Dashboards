@@ -4,13 +4,21 @@
  */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { VisBuilderServices } from '../../../types';
+import { DefaultViewState } from '../../../../../data_explorer/public';
 
 export type UIStateState<T = any> = T;
 
 const initialState = {} as UIStateState;
 
-export const getPreloadedState = async (services: VisBuilderServices): Promise<UIStateState> => {
-  return initialState;
+export const getPreloadedState = async (
+  services: VisBuilderServices
+): Promise<DefaultViewState<UIStateState>> => {
+  const preloadedState: DefaultViewState<UIStateState> = {
+    state: {
+      ...initialState,
+    },
+  };
+  return preloadedState;
 };
 
 export const uiStateSlice = createSlice({

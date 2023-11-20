@@ -1,0 +1,33 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.vbFieldButton {
+  @include euiBottomShadowSmall;
+
+  background-color: $euiColorEmptyShade;
+  border: $euiBorderThin;
+  margin-top: $euiSizeXS;
+
+  & > .osdFieldButton__button {
+    padding: 0;
+  }
+
+  & .osdFieldButton__name {
+    padding: $euiSizeS $euiSizeS $euiSizeS 0;
+  }
+
+  & > button {
+    align-items: stretch;
+  }
+
+  & .osdFieldIcon {
+    box-shadow: none;
+    height: 100%;
+  }
+}
+
+.vbItem__fieldPopoverPanel {
+  min-width: 260px;
+  max-width: 300px;
+}

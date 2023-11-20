@@ -5,6 +5,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { VisBuilderServices } from '../../../types';
+import { DefaultViewState } from '../../../../../data_explorer/public';
 
 /*
  * Initial state: default state when opening visBuilder plugin
@@ -14,20 +15,26 @@ import { VisBuilderServices } from '../../../types';
 type EditorStatus = 'loading' | 'loaded' | 'clean' | 'dirty';
 
 export interface EditorState {
-    errors: {
-      // Errors for each section in the editor
-      [key: string]: boolean;
-    };
-    status: EditorStatus;
+  errors: {
+    // Errors for each section in the editor
+    [key: string]: boolean;
+  };
+  status: EditorStatus;
 }
 
 const initialState: EditorState = {
-    errors: {},
-    status: 'loading',
+  errors: {},
+  status: 'loading',
 };
 
-export const getPreloadedState = async (services: VisBuilderServices): Promise<EditorState> => {
-  const preloadedState = { ...initialState };
+export const getPreloadedState = async (
+  services: VisBuilderServices
+): Promise<DefaultViewState<EditorState>> => {
+  const preloadedState: DefaultViewState<EditorState> = {
+    state: {
+      ...initialState,
+    },
+  };
   return preloadedState;
 };
 

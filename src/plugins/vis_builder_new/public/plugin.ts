@@ -38,9 +38,12 @@ import {
   styleSlice,
   uiStateSlice,
   visualizationSlice,
-  getPreloadedState,
   handlerEditorState,
   handlerParentAggs,
+  getEditorSlicePreloadedState,
+  getStyleSlicePreloadedState,
+  getUiStateSlicePreloadedState,
+  getVisualizationSlicePreloadedState,
 } from './application/utils/state_management';
 import {
   setExpressionLoader,
@@ -152,7 +155,12 @@ export class VisBuilderPlugin
             scopedHistory: this.currentHistory,
           };
 
-          return await getPreloadedState(services);
+          return [
+            getEditorSlicePreloadedState(services),
+            getStyleSlicePreloadedState(services),
+            getUiStateSlicePreloadedState(services),
+            getVisualizationSlicePreloadedState(services),
+          ];
         },
         slices: [editorSlice, styleSlice, uiStateSlice, visualizationSlice],
         sideEffects: [handlerEditorState, handlerParentAggs],

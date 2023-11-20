@@ -47,7 +47,6 @@ export interface VisBuilderServices extends CoreStart {
   data: DataPublicPluginStart;
   types: TypeServiceStart;
   expressions: ExpressionsStart;
-  // history: History;
   embeddable: EmbeddableStart;
   scopedHistory: ScopedHistory;
   dashboard: DashboardStart;

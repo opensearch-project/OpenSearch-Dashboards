@@ -4,16 +4,15 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { FieldSelector } from '../../components/field_selector';
 import { ViewProps } from '../../../../../data_explorer/public';
+import './index.scss';
 
 // eslint-disable-next-line import/no-default-export
 export default function VisBuilderPanel(props: ViewProps) {
   return (
-    <div
-      style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
-    >
-      <EuiLoadingSpinner size="l" />
+    <div className="vbDataTab">
+      <FieldSelector />
     </div>
   );
 }

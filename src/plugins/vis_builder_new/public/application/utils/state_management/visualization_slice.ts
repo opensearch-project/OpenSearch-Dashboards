@@ -7,9 +7,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CreateAggConfigParams } from '../../../../../data/common';
 import { VisBuilderServices } from '../../../types';
 import { setActiveVisualization } from './shared_actions';
+import { DefaultViewState } from '../../../../../data_explorer/public';
 
 export interface VisualizationState {
-  indexPattern?: string;
   searchField: string;
   activeVisualization?: {
     name: string;
@@ -25,19 +25,20 @@ const initialState: VisualizationState = {
 export const getPreloadedState = async ({
   types,
   data,
-}: VisBuilderServices): Promise<VisualizationState> => {
-  const preloadedState = { ...initialState };
+}: VisBuilderServices): Promise<DefaultViewState<VisualizationState>> => {
+  const preloadedState: DefaultViewState<VisualizationState> = {
+    state: {
+      ...initialState,
+    },
+  };
 
   const defaultVisualization = types.all()[0];
-  const defaultIndexPattern = await data.indexPatterns.getDefault();
   const name = defaultVisualization.name;
-  if (name && defaultIndexPattern) {
-    preloadedState.activeVisualization = {
+  if (name) {
+    preloadedState.state.activeVisualization = {
       name,
       aggConfigParams: [],
     };
-
-    preloadedState.indexPattern = defaultIndexPattern.id;
   }
 
   return preloadedState;
@@ -47,8 +48,7 @@ export const slice = createSlice({
   name: 'vbVisualization',
   initialState,
   reducers: {
-    setIndexPattern: (state, action: PayloadAction<string>) => {
-      state.indexPattern = action.payload;
+    setActiveVisualization: (state, action: PayloadAction<string>) => {
       state.activeVisualization!.aggConfigParams = [];
       state.activeVisualization!.draftAgg = undefined;
     },
@@ -131,7 +131,6 @@ export const slice = createSlice({
 
 export const { reducer } = slice;
 export const {
-  setIndexPattern,
   setSearchField,
   editDraftAgg,
   saveDraftAgg,
