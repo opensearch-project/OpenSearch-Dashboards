@@ -61,6 +61,9 @@ interface Props {
 }
 
 export function SuggestionComponent(props: Props) {
+  // Removing empty suggestions from the history is for maintaining a clean user experience.
+  // Empty suggestions, which typically result from inadvertent keystrokes or incomplete queries,
+  // do not provide value to the user.
   if (!props.suggestion.text.trim()) {
     return null;
   }
