@@ -65,6 +65,7 @@ import {
   SearchSourceDependencies,
   SearchSourceService,
   searchSourceRequiredUiSettings,
+  OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY,
 } from '../../common/search';
 import {
   getShardDelayBucketAgg,
@@ -130,6 +131,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.logger,
         usage,
         dataSource
+      )
+    );
+
+    this.registerSearchStrategy(
+      OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY,
+      opensearchSearchStrategyProvider(
+        this.initializerContext.config.legacy.globalConfig$,
+        this.logger,
+        usage,
+        dataSource,
+        true
       )
     );
 
@@ -242,7 +254,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => {
-    this.logger.debug(`Register strategy ${name}`);
     this.searchStrategies[name] = strategy;
   };
 
@@ -265,7 +276,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   >(
     name: string
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
-    this.logger.debug(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
     if (!strategy) {
       throw new Error(`Search strategy ${name} not found`);
