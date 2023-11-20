@@ -109,7 +109,8 @@ export function DiscoverSidebar({
       fieldCounts
     );
     setFields(newFields);
-  }, [selectedIndexPattern, fieldCounts, hits, services, uiSettings]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedIndexPattern, fieldCounts, hits, services, uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)]);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
