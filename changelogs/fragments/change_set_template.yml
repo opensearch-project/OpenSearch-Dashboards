@@ -1,41 +1,23 @@
-# Template
+# ########################################
+# Change set template
+# Filename: <pr_number>_category_<timestamp>.yml
+# ########################################
 
-# 💥 Breaking Changes
-breaking:
-  - This is a breaking change
+# category: <breaking>, <deprecate>, <feat>, <fix>, <infra>,
+#           <doc>, <chore>, <refactor> or <test>
+# merged: <timestamp YYYY-MM-DD format>
+# ---
 
-# 🚨 Deprecations
-deprecations:
-  - This is a deprecation change
-  
-# 🛡 Security
-security:
-  - This is a security change
+# - <Change_set_comments> ([#<PR_number>](<PR_link>))
 
-# 🐛 Bug Fixes
-bugfixes:
-  - This is a sample fixed
+# ########################################
+# Example
+# Filename: 5465_infra_2023_11_10.yml
+# ########################################
 
-# 📈 Features/Enhancements
-feature:
-  - Introduces a new feature
 
-# 🚞 Infrastructure
-infrastructure:
-  - This is an infrastructure change
+# category: infra
+# merged: 2023-11-10
+# ---
 
-#  📝 Documentation
-documentation:
-  - This is a documentation change
-
-# 🛠 Maintenance
-maintenance:
-  - This is a maintenance change
-
-# 🪛 Refactoring
-refactoring:
-  - This is a refactoring change
-
-# 🔩 Tests
-tests:
-  - This is a test change
+# - Bump `chromedriver` from `107.0.3` to `119.0.1` ([#5465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5465))
