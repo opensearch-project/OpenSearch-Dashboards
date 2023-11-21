@@ -1,0 +1,12 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.vbOption {
+  background-color: $euiColorEmptyShade;
+  padding: $euiSizeM;
+
+  & &__panel {
+    background-color: $euiColorLightestShade;
+  }
+}

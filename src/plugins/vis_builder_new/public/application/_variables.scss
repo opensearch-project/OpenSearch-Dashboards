@@ -1,0 +1,9 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+@import "@elastic/eui/src/global_styling/variables/header";
+@import "@elastic/eui/src/global_styling/variables/form";
+
+$osdHeaderOffset: $euiHeaderHeightCompensation;
+$vbLeftNavWidth: 462px;
