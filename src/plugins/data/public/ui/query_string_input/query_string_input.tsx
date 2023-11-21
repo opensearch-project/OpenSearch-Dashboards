@@ -464,7 +464,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
   private onSelectLanguage = (language: string) => {
     if(language === 'PPL'){
-      
+      this.services.application?.navigateToUrl('../observability-logs#/explorer')
+      return;
     }
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
