@@ -71,6 +71,7 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
       <EuiFlexItem key={prompt} grow={false}>
         <EuiPanel
           color="subdued"
+          paddingSize="s"
           onClick={() =>
             navigate('observability-logs', {
               path: `#/explorer?datasourceName=${encodeURIComponent(
@@ -97,7 +98,7 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
   function renderCategories() {
     return (
       <>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h3>
             <FormattedMessage id="home.getStarted.examples" defaultMessage="Suggested questions" />
           </h3>
@@ -109,16 +110,27 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
     );
   }
 
+  const links = [
+    {
+      text: i18n.translate('home.getStarted.learnMore', { defaultMessage: 'Learn more' }),
+      url: 'https://opensearch.org/platform/observability/index.html',
+    },
+  ];
+
+  if (olly) {
+    links.push({
+      text: i18n.translate('home.getStarted.stayConnected', { defaultMessage: 'Stay connected' }),
+      url: 'https://opensearch.org/slack.html',
+    });
+  }
+
   return (
     <HeroSection
       title={i18n.translate('home.getStarted.title', {
         defaultMessage: 'Try the Query Assistant',
       })}
       description={description}
-      link={{
-        text: i18n.translate('home.getStarted.learnMore', { defaultMessage: 'Learn more' }),
-        url: 'https://opensearch.org/platform/observability/index.html',
-      }}
+      links={links}
       actionButton={actionButton}
       content={
         olly ? (
