@@ -17,10 +17,10 @@ import {
 interface Props {
   title: string;
   description: React.ReactNode;
-  link: {
+  links: Array<{
     text: string;
     url: string;
-  };
+  }>;
   actionButton: React.ReactNode;
   content: React.ReactNode;
   illustration: React.ReactNode;
@@ -29,14 +29,14 @@ interface Props {
 export const HeroSection: React.FC<Props> = ({
   title,
   description,
-  link,
+  links,
   actionButton,
   content,
   illustration,
 }) => {
   return (
     <EuiPanel paddingSize="m">
-      <EuiFlexGroup direction="row" alignItems="center" className="home-hero-group">
+      <EuiFlexGroup direction="row" alignItems="flexStart" className="home-hero-group">
         <EuiFlexItem grow={10}>{illustration}</EuiFlexItem>
         <EuiFlexItem grow={9} className="home-hero-descriptionSection">
           <EuiTitle size="l" className="home-hero-title">
@@ -44,13 +44,16 @@ export const HeroSection: React.FC<Props> = ({
           </EuiTitle>
           <EuiText>{description}</EuiText>
           <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiLink key={link.url} href={link.url} external={true}>
-                {link.text}
-              </EuiLink>
-            </EuiFlexItem>
+          {actionButton}
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="row" responsive={false} gutterSize="l">
+            {links.map((link) => (
+              <EuiFlexItem grow={false} key={link.url}>
+                <EuiLink href={link.url} external={true}>
+                  {link.text}
+                </EuiLink>
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={10}>{content}</EuiFlexItem>
