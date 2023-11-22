@@ -20,6 +20,7 @@ import { HeroSection } from './hero_section';
 import illustration from '../../../../assets/illustration.svg';
 import { getServices } from '../../../opensearch_dashboards_services';
 import logo from '../../../../assets/logos/chat.svg';
+import image from '../../../../assets/screenshot.png';
 
 export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true }) => {
   const services = getServices();
@@ -139,7 +140,7 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
           <EuiImage src={illustration} alt="illustration" size="fullWidth" />
         )
       }
-      illustration={<EuiImage src="https://placehold.co/1920x1080" alt="Animated gif 16:9 ratio" />}
+      illustration={<EuiImage src={image} alt="Animated gif 16:9 ratio" />}
     />
   );
 };
