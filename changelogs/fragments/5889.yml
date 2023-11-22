@@ -1,0 +1,5 @@
+fix:
+  - fix 1 - Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing Elit
+  - fix 2 - Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing Elit
+deprecate:
+  - deprecate 1 - Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing Elit
