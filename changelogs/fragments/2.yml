@@ -6,3 +6,7 @@ feat:
 
 test:
 -  testing a new test ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+
+unknown:
+- skip
+-->
