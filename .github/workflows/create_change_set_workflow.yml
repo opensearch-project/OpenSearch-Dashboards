@@ -1,4 +1,4 @@
-name: Create Change Set Worflow
+name: Create Change Set
 
 on:
   pull_request:
