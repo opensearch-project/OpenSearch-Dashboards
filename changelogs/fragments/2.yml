@@ -1,11 +1,12 @@
 fix:
-  - Updates the graph ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+-  Updates the graph ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
 
 feat:
-  - Adds a new feature ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+-  Adds a new feature ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
 
 test:
-  - testing a new test ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+-  testing a new test ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
 
 unknown:
-  - skip
+- skip
+-->
