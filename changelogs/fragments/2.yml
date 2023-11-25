@@ -1,14 +1,2 @@
-fix:
--  Updates the graph ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
-
-feat:
--  Adds a new feature ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
-
-test:
--  test test test5 ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
-
-doc:
--  newish documentation ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
-
 unknown:
-##
+- unknown: Feat/chanelog project
