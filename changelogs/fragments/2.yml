@@ -4,5 +4,11 @@ fix:
 feat:
 -  Adds a new feature ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
 
+test:
+-  test test test3 ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+
 doc:
 -  new documentation ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+
+unknown:
+##
