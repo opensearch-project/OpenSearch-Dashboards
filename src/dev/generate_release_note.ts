@@ -4,28 +4,25 @@
  */
 
 import { resolve } from 'path';
-import { readFileSync, writeFileSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { load as loadYaml } from 'js-yaml';
 import { version as pkgVersion } from '../../package.json';
 
-// Path to the file
+// Define constant paths
 const filePath = resolve(__dirname, '..', '..', 'CHANGELOG.md');
+const fragmentDirPath = resolve(__dirname, '..', '..', 'changelogs', 'fragments');
+const releaseNotesDirPath = resolve(__dirname, '..', '..', 'release-notes');
 
+// Function to add content after the 'Unreleased' section in the changelog
 function addContentAfterUnreleased(path: string, newContent: string): void {
-  // Read the existing content of the file
   let fileContent = readFileSync(path, 'utf8');
-
-  // Define the target string to search for
   const targetString = '## [Unreleased]';
-
-  // Find the index of the target string
   const targetIndex = fileContent.indexOf(targetString);
+
   if (targetIndex !== -1) {
-    // Find the end of the line containing the target string
     const endOfLineIndex = fileContent.indexOf('\n', targetIndex);
 
     if (endOfLineIndex !== -1) {
-      // Insert the new content after the end of the target line
       fileContent =
         fileContent.slice(0, endOfLineIndex + 1) +
         '\n' +
@@ -42,25 +39,25 @@ function addContentAfterUnreleased(path: string, newContent: string): void {
     return;
   }
 
-  // Write the modified content back to the file
   writeFileSync(path, fileContent);
 }
 
+// Function to format the current date
 function getCurrentDateFormatted(): string {
   const now = new Date();
   const year = now.getFullYear();
-  const month = now.getMonth() + 1; // Months are 0-based
+  const month = now.getMonth() + 1;
   const day = now.getDate();
 
-  // Pad the month and day with leading zeros if necessary
-  const formattedMonth = month < 10 ? `0${month}` : `${month}`;
-  const formattedDay = day < 10 ? `0${day}` : `${day}`;
+  const formattedMonth = month.toString().padStart(2, '0');
+  const formattedDay = day.toString().padStart(2, '0');
 
   return `${year}-${formattedMonth}-${formattedDay}`;
 }
 
 const currentDate = getCurrentDateFormatted();
 
+// Define section mapping
 const SECTION_MAPPING = {
   breaking: '💥 Breaking Changes',
   deprecate: 'Deprecations',
@@ -74,25 +71,15 @@ const SECTION_MAPPING = {
   test: '🔩 Tests',
 };
 
-const SECTION_KEYS = Object.keys(SECTION_MAPPING);
 type SectionKey = keyof typeof SECTION_MAPPING;
 type Changelog = Record<SectionKey, string[]>;
 
-// const sections: Partial<Changelog> = {};
-const sections: Changelog = {
-  breaking: [],
-  deprecate: [],
-  security: [],
-  feat: [],
-  fix: [],
-  infra: [],
-  doc: [],
-  chore: [],
-  refactor: [],
-  test: [],
-};
+// Initialize sections
+const sections: Changelog = (Object.fromEntries(
+  Object.keys(SECTION_MAPPING).map((key) => [key, []])
+) as unknown) as Changelog;
 
-const fragmentDirPath = resolve(__dirname, '..', '..', 'changelogs', 'fragments');
+// Read fragment files and populate sections
 const fragmentPaths = readdirSync(fragmentDirPath).filter(
   (path) => path.endsWith('.yml') || path.endsWith('.yaml')
 );
@@ -102,47 +89,42 @@ for (const fragmentFilename of fragmentPaths) {
   const fragmentContents = readFileSync(fragmentPath, { encoding: 'utf-8' });
   const fragmentYaml = loadYaml(fragmentContents) as Changelog;
 
-  // const prNumber = fragmentFilename.split('.').slice(0, -1).join('.');
-
   for (const [sectionKey, entries] of Object.entries(fragmentYaml)) {
-    if (!SECTION_KEYS.includes(sectionKey)) {
-      // shouldnt be any unknown section coz they are handled during the changesets generation
+    if (!SECTION_MAPPING[sectionKey as SectionKey]) {
       // eslint-disable-next-line no-console
-      console.log(`Unknown section ${sectionKey} with skip. SKipping`);
+      console.warn(`Unknown section ${sectionKey}. Skipping.`);
       continue;
     }
 
-    const section = sections[sectionKey as SectionKey] || (sections[sectionKey as SectionKey] = []);
-    section.push(...entries);
+    sections[sectionKey as SectionKey].push(...entries);
   }
 }
 
-const changelogSections = [];
-
-for (const [sectionKey, entries] of Object.entries(sections)) {
+// Generate changelog sections
+const changelogSections = Object.entries(sections).map(([sectionKey, entries]) => {
   const sectionName = SECTION_MAPPING[sectionKey as SectionKey];
-  if (entries.length === 0) {
-    changelogSections.push(`### ${sectionName}`);
-    continue;
-  }
-  changelogSections.push(`### ${sectionName}
+  return entries.length === 0
+    ? `### ${sectionName}`
+    : `### ${sectionName}\n\n${entries.map((entry) => ` - ${entry}`).join('\n')}`;
+});
 
-${entries.map((entry) => ` - ${entry}`).join('\n')}`);
-}
-
+// Generate full changelog
 const changelog = `## [${pkgVersion}-${currentDate}](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/${pkgVersion})
 
 ${changelogSections.join('\n\n')}
 `;
-// generate the release note in the /release-notes folder
-const REALEASENOTE_FILENAME = `opensearch-dashboards.release-notes-${pkgVersion}.md`;
-const REALEASENOTE_HEADER = `# VERSION ${pkgVersion} Release Note`;
-const releasenote = `${REALEASENOTE_HEADER}
 
-${changelogSections.join('\n\n')}
-`;
-// console.log(`${changelogSections.join('\n\n')}`);
-// console.log(resolve(__dirname, '..', '..', 'release-notes', REALEASENOTE_FILENAME));
-writeFileSync(resolve(__dirname, '..', '..', 'release-notes', REALEASENOTE_FILENAME), releasenote);
-// writeFileSync(resolve(__dirname, '..', '..', 'CHANGELOG.md'), changelog + fileContent);
+// Generate release note
+const releaseNoteFilename = `opensearch-dashboards.release-notes-${pkgVersion}.md`;
+const releaseNoteHeader = `# VERSION ${pkgVersion} Release Note`;
+const releaseNote = `${releaseNoteHeader}\n\n${changelogSections.join('\n\n')}`;
+writeFileSync(resolve(releaseNotesDirPath, releaseNoteFilename), releaseNote);
+
+// Update changelog file
 addContentAfterUnreleased(filePath, changelog);
+
+// Delete fragment files
+for (const fragmentFilename of fragmentPaths) {
+  const fragmentPath = resolve(fragmentDirPath, fragmentFilename);
+  unlinkSync(fragmentPath);
+}
