@@ -40,7 +40,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     disableWelcomeScreen: true,
     disableNewThemeModal: true,
     newHomepage: true,
-    prompts: true,
+    hero: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
