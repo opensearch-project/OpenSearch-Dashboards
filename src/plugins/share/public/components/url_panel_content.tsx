@@ -86,6 +86,7 @@ interface State {
 export class UrlPanelContent extends Component<Props, State> {
   private mounted?: boolean;
   private shortUrlCache?: string;
+  shouldRenderShortUrl: boolean = true;
 
   constructor(props: Props) {
     super(props);
@@ -106,7 +107,16 @@ export class UrlPanelContent extends Component<Props, State> {
     this.mounted = false;
   }
 
-  public componentDidMount() {
+  public async componentDidMount() {
+    try {
+      await shortenUrl(this.getSnapshotUrl(), {
+        basePath: this.props.basePath,
+        post: this.props.post,
+      });
+    } catch (err) {
+      this.shouldRenderShortUrl = false;
+    }
+
     this.mounted = true;
     this.setUrl();
 
@@ -393,7 +403,8 @@ export class UrlPanelContent extends Component<Props, State> {
   private renderShortUrlSwitch = () => {
     if (
       this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT ||
-      !this.props.allowShortUrl
+      !this.props.allowShortUrl ||
+      !this.shouldRenderShortUrl
     ) {
       return;
     }
