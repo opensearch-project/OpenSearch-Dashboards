@@ -1,8 +1,5 @@
-fix:
-- Updates the graph ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
-
 feat:
 - Adds a new feature ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
 
-test:
-- test ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+refactor:
+- Modifies function ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
