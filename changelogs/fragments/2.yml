@@ -3,3 +3,6 @@ feat:
 
 refactor:
 - Modifies function ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+
+doc:
+- adds documentation ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
