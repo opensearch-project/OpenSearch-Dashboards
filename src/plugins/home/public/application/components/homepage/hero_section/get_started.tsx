@@ -20,13 +20,13 @@ import {
 import { HeroSection } from './hero_section';
 import illustration from '../../../../assets/illustration.svg';
 import { getServices } from '../../../opensearch_dashboards_services';
-import logo from '../../../../assets/logos/chat.svg';
 import screenshot from '../../../../assets/screenshot.png';
 
 export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true }) => {
   const services = getServices();
   const getUrl = services.application.getUrlForApp;
   const navigate = services.application.navigateToApp;
+  const logos = services.chrome.logos;
   const heroConfig = services.homeConfig.hero;
   const isHeroEnabled = heroConfig.enabled;
   const prompts = isHeroEnabled ? heroConfig.prompts : [];
@@ -87,7 +87,7 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
         >
           <EuiFlexGroup direction="row" responsive={false} alignItems="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={logo} size="l" />
+              <EuiIcon type={logos.Chat.url} size="l" />
             </EuiFlexItem>
             <EuiFlexItem>&quot;{text}&quot;</EuiFlexItem>
           </EuiFlexGroup>
