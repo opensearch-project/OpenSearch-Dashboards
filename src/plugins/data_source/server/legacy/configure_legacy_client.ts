@@ -165,10 +165,10 @@ const callAPI = async (
       return request.then(resolve, reject);
     });
   } catch (err) {
-    if (!options.wrap401Errors || err.statusCode !== 401) {
+    if (!options.wrap401Errors || (err as any).statusCode !== 401) {
       throw err;
     }
-    throw LegacyOpenSearchErrorHelpers.decorateNotAuthorizedError(err);
+    throw LegacyOpenSearchErrorHelpers.decorateNotAuthorizedError(err as Error);
   }
 };
 
@@ -194,14 +194,14 @@ const getBasicAuthClient = async (
 };
 
 const getAWSClient = (credential: SigV4Content, clientOptions: ConfigOptions): LegacyClient => {
-  const { accessKey, secretKey, region, service } = credential;
+  const { accessKey, secretKey, region } = credential;
   const client = new LegacyClient({
     connectionClass: HttpAmazonESConnector,
     awsConfig: new Config({
       region,
       credentials: new Credentials({ accessKeyId: accessKey, secretAccessKey: secretKey }),
     }),
-    service,
+
     ...clientOptions,
   });
   return client;

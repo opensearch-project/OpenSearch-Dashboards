@@ -163,7 +163,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
 
     /* Cancel Changes */
     test('should reset form on click cancel changes', async () => {
-      await new Promise((resolve) =>
+      await new Promise<void>((resolve) =>
         setTimeout(() => {
           updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
           expect(
@@ -173,7 +173,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
           resolve();
         }, 100)
       );
-      await new Promise((resolve) =>
+      await new Promise<void>((resolve) =>
         setTimeout(() => {
           /* Updated description*/
           updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');
@@ -196,7 +196,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
 
     /* Save Changes */
     test('should update the form with Username&Password on click save changes', async () => {
-      await new Promise((resolve) =>
+      await new Promise<void>((resolve) =>
         setTimeout(() => {
           updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
           expect(
@@ -206,7 +206,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
           resolve();
         }, 100)
       );
-      await new Promise((resolve) =>
+      await new Promise<void>((resolve) =>
         setTimeout(() => {
           /* Updated description*/
           updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');
@@ -291,7 +291,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
 
     /* Save Changes */
     test('should update the form with NoAuth on click save changes', async () => {
-      await new Promise((resolve) =>
+      await new Promise<void>((resolve) =>
         setTimeout(() => {
           updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
           expect(
@@ -301,7 +301,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
           resolve();
         }, 100)
       );
-      await new Promise((resolve) =>
+      await new Promise<void>((resolve) =>
         setTimeout(() => {
           /* Updated description*/
           updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');

@@ -64,7 +64,7 @@ export class CreateDataSourceForm extends React.Component<
   CreateDataSourceState
 > {
   static contextType = contextType;
-  public readonly context!: DataSourceManagementContextValue;
+  declare context: React.ContextType<typeof contextType>;
 
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
@@ -162,7 +162,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   validateUsername = () => {
-    const isValid = !!this.state.auth.credentials.username?.trim().length;
+    const isValid = !!this.state.auth.credentials.username?.toString().trim().length;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -206,7 +206,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   validateRegion = () => {
-    const isValid = !!this.state.auth.credentials.region?.trim().length;
+    const isValid = !!this.state.auth.credentials.region?.toString().trim().length;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -365,7 +365,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
-                value={this.state.auth.credentials.username || ''}
+                value={this.state.auth.credentials.username?.toString() || ''}
                 onChange={this.onChangeUsername}
                 onBlur={this.validateUsername}
                 data-test-subj="createDataSourceFormUsernameField"
@@ -387,7 +387,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 type={'dual'}
-                value={this.state.auth.credentials.password || ''}
+                value={this.state.auth.credentials.password?.toString() || ''}
                 onChange={this.onChangePassword}
                 onBlur={this.validatePassword}
                 spellCheck={false}
@@ -414,7 +414,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
-                value={this.state.auth.credentials.region || ''}
+                value={this.state.auth.credentials.region?.toString() || ''}
                 onChange={this.onChangeRegion}
                 onBlur={this.validateRegion}
                 data-test-subj="createDataSourceFormRegionField"
@@ -427,7 +427,7 @@ export class CreateDataSourceForm extends React.Component<
             >
               <EuiSelect
                 options={sigV4ServiceOptions}
-                value={this.state.auth.credentials.service}
+                value={this.state.auth.credentials.service?.toString()}
                 onChange={(e) => this.onChangeSigV4ServiceName(e)}
                 name="ServiceName"
                 data-test-subj="createDataSourceFormSigV4ServiceTypeSelect"
@@ -449,7 +449,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 type={'dual'}
-                value={this.state.auth.credentials.accessKey || ''}
+                value={this.state.auth.credentials.accessKey?.toString() || ''}
                 onChange={this.onChangeAccessKey}
                 onBlur={this.validateAccessKey}
                 spellCheck={false}
@@ -472,7 +472,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 type={'dual'}
-                value={this.state.auth.credentials.secretKey || ''}
+                value={this.state.auth.credentials.secretKey?.toString() || ''}
                 onChange={this.onChangeSecretKey}
                 onBlur={this.validateSecretKey}
                 spellCheck={false}

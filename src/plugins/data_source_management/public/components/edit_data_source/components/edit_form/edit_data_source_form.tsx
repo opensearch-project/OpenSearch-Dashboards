@@ -69,7 +69,7 @@ export interface EditDataSourceState {
 
 export class EditDataSourceForm extends React.Component<EditDataSourceProps, EditDataSourceState> {
   static contextType = contextType;
-  public readonly context!: DataSourceManagementContextValue;
+  declare context: React.ContextType<typeof contextType>;
   maskedPassword: string = '********';
 
   constructor(props: EditDataSourceProps, context: DataSourceManagementContextValue) {
@@ -118,16 +118,16 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       this.setState({
         title,
         description: description || '',
-        endpoint,
+        endpoint: endpoint || '', // Fix: Assign a default value of an empty string if endpoint is undefined
         auth: {
           type: auth.type,
           credentials: {
             username: authTypeCheckResults.isUserNamePassword ? auth.credentials?.username : '',
             password: authTypeCheckResults.isUserNamePassword ? this.maskedPassword : '',
             service: authTypeCheckResults.isSigV4
-              ? auth.credentials?.service || SigV4ServiceName.OpenSearch
-              : '',
-            region: authTypeCheckResults.isSigV4 ? auth.credentials!.region : '',
+              ? (auth.credentials?.service as SigV4ServiceName) || SigV4ServiceName.OpenSearch
+              : SigV4ServiceName.OpenSearch,
+            region: authTypeCheckResults.isSigV4 ? String(auth.credentials?.region) || '' : '',
             accessKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
             secretKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
           },
@@ -204,7 +204,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateUsername = () => {
-    const isValid = !!this.state.auth.credentials.username?.trim().length;
+    const isValid = !!this.state.auth.credentials.username?.toString().trim().length;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -263,7 +263,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateRegion = () => {
-    const isValid = !!this.state.auth.credentials.region?.trim().length;
+    const isValid = !!this.state.auth.credentials.region?.toString().trim().length;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -380,7 +380,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     this.setState({ isLoading: true });
     const isNewCredential = !!(this.state.auth.type !== this.props.existingDataSource.auth.type);
 
-    let credentials = this.state.auth.credentials;
+    let credentials = this.state.auth.credentials as
+      | UsernamePasswordTypedContent
+      | SigV4Content
+      | undefined;
 
     switch (this.state.auth.type) {
       case AuthType.UsernamePasswordType:
@@ -540,7 +543,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         {this.state.showUpdatePasswordModal ? (
           <UpdatePasswordModal
-            username={this.state.auth?.credentials?.username || ''}
+            username={this.state.auth?.credentials?.username?.toString() || ''}
             handleUpdatePassword={this.updatePassword}
             closeUpdatePasswordModal={this.closePasswordModal}
           />
@@ -566,8 +569,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         {this.state.showUpdateAwsCredentialModal ? (
           <UpdateAwsCredentialModal
-            region={this.state.auth.credentials!.region}
-            service={this.state.auth.credentials!.service}
+            region={this.state.auth.credentials!.region?.toString() || ''}
+            service={this.state.auth.credentials!.service as SigV4ServiceName}
             handleUpdateAwsCredential={this.updateAwsCredential}
             closeUpdateAwsCredentialModal={this.closeAwsCredentialModal}
           />
@@ -816,7 +819,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               }
             )}
             isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
-            value={this.state.auth.credentials?.region || ''}
+            value={this.state.auth.credentials?.region?.toString() || ''}
             onChange={this.onChangeRegion}
             onBlur={this.validateRegion}
             data-test-subj="editDataSourceFormRegionField"
@@ -829,7 +832,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         >
           <EuiSelect
             options={sigV4ServiceOptions}
-            value={this.state.auth.credentials?.service}
+            value={this.state.auth.credentials?.service?.toString()}
             onChange={(e) => this.onChangeSigV4ServiceName(e)}
             name="ServiceName"
             data-test-subj="editDataSourceFormSigV4ServiceTypeSelect"
@@ -853,8 +856,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             type={'dual'}
             value={
               this.props.existingDataSource.auth.type === AuthType.SigV4
-                ? this.maskedPassword
-                : this.state.auth.credentials?.accessKey
+                ? this.maskedPassword.toString()
+                : this.state.auth.credentials?.accessKey?.toString()
             }
             onChange={this.onChangeAccessKey}
             onBlur={this.validateAccessKey}
@@ -881,8 +884,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             type={'dual'}
             value={
               this.props.existingDataSource.auth.type === AuthType.SigV4
-                ? this.maskedPassword
-                : this.state.auth.credentials?.secretKey
+                ? this.maskedPassword.toString()
+                : this.state.auth.credentials?.secretKey?.toString()
             }
             onChange={this.onChangeSecretKey}
             onBlur={this.validateSecretKey}
@@ -918,7 +921,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 defaultMessage: 'Username to connect to data source',
               }
             )}
-            value={this.state.auth.credentials?.username || ''}
+            value={this.state.auth.credentials?.username?.toString() || ''}
             isInvalid={!!this.state.formErrorsByField.createCredential?.username?.length}
             onChange={this.onChangeUsername}
             onBlur={this.validateUsername}
@@ -944,8 +947,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 type={'dual'}
                 value={
                   this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType
-                    ? this.maskedPassword
-                    : this.state.auth.credentials?.password
+                    ? this.maskedPassword.toString()
+                    : this.state.auth.credentials?.password?.toString()
                 }
                 isInvalid={!!this.state.formErrorsByField.createCredential?.password?.length}
                 spellCheck={false}
