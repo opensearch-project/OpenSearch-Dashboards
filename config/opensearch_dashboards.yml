@@ -273,3 +273,11 @@
 
 # Set the value of this setting to true to enable plugin augmentation on Dashboard
 # vis_augmenter.pluginAugmentationEnabled: true
+
+# Example: For hero content
+# home.hero.title: 'The Assistant'
+# home.hero.body: 'Automatically make queries.{br}{br}All the {terms} applied.'
+# home.hero.externalActionButton: {
+#   text: 'Login to try',
+#   link: 'https://observability.playground.opensearch.org/'
+# }

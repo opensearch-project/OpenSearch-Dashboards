@@ -20,6 +20,7 @@ export interface Logos {
    */
   readonly CenterMark: LogoItem;
   readonly AnimatedMark: LogoItem;
+  readonly Chat: LogoItem;
   readonly colorScheme: ColorScheme;
 }
 
