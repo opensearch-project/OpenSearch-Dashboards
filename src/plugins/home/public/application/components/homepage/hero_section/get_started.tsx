@@ -141,6 +141,8 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
         heroConfig.img ? (
           <div className="home-hero-illustrationContainer">
             <EuiButtonIcon
+              target="_blank"
+              rel="noopener noreferrer"
               href={heroConfig.img.link}
               aria-labelledby="home-hero-illustrationPlay"
               className="home-hero-illustrationButton"
