@@ -15,31 +15,27 @@ import {
   EuiImage,
   EuiLink,
   EuiIcon,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { HeroSection } from './hero_section';
 import illustration from '../../../../assets/illustration.svg';
 import { getServices } from '../../../opensearch_dashboards_services';
-import logo from '../../../../assets/logos/chat.svg';
-import image from '../../../../assets/screenshot.png';
+import screenshot from '../../../../assets/screenshot.png';
 
 export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true }) => {
   const services = getServices();
   const getUrl = services.application.getUrlForApp;
   const navigate = services.application.navigateToApp;
-  const prompts = services.homeConfig.prompts;
+  const logos = services.chrome.logos;
+  const heroConfig = services.homeConfig.hero;
+  const isHeroEnabled = heroConfig.enabled;
+  const prompts = isHeroEnabled ? heroConfig.prompts : [];
   type Prompt = typeof prompts extends Array<infer T> ? T : never;
 
-  const OLLY_DESCRIPTION = (
-    <FormattedMessage
-      id="home.getStarted.ollyDescription"
-      defaultMessage="Automatically generate complex queries using simple natural language questions. AI assisted summaraies help you navigate and understand your log data."
-    />
-  );
-
-  const PLAYGROUND_DESCRIPTION = (
+  const description = (
     <FormattedMessage
       id="home.getStarted.playgroundDescription"
-      defaultMessage="Automatically generate complex queries using simple conversational prompts. AI assisted summary helps you navigate and understand errors from your logs.{br}{br}You will be redirected to the observability playground where you will need to login. All the {terms} of the playground still apply."
+      defaultMessage={heroConfig.body}
       values={{
         br: <br />,
         terms: (
@@ -51,45 +47,49 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
     />
   );
 
-  const description = olly ? OLLY_DESCRIPTION : PLAYGROUND_DESCRIPTION;
-
-  const OLLY_ACTION_BUTTON = (
-    <EuiButton fullWidth={false} fill href={getUrl('observability-logs', { path: '#/explorer' })}>
-      <FormattedMessage id="home.getStarted.launchTutorial" defaultMessage="Try in Log Explorer" />
+  const actionButton = !heroConfig.externalActionButton ? (
+    <EuiButton
+      fullWidth={false}
+      fill
+      href={getUrl(heroConfig.actionButton.app, { path: heroConfig.actionButton.path })}
+    >
+      <FormattedMessage
+        id="home.getStarted.launchTutorial"
+        defaultMessage={heroConfig.actionButton.text}
+      />
+    </EuiButton>
+  ) : (
+    <EuiButton fullWidth={false} fill href={heroConfig.externalActionButton.link}>
+      <FormattedMessage
+        id="home.getStarted.login"
+        defaultMessage={heroConfig.externalActionButton.text}
+      />
     </EuiButton>
   );
 
-  const PLAYGROUND_ACTION_BUTTON = (
-    <EuiButton fullWidth={false} fill href="https://observability.playground.opensearch.org/">
-      <FormattedMessage id="home.getStarted.login" defaultMessage="Login to try" />
-    </EuiButton>
+  const content = olly ? (
+    renderCategories()
+  ) : (
+    <EuiImage src={illustration} alt="illustration" size="fullWidth" />
   );
 
-  const actionButton = olly ? OLLY_ACTION_BUTTON : PLAYGROUND_ACTION_BUTTON;
-
-  function renderExample({ prompt, datasourceName, datasourceType, indexPattern }: Prompt) {
+  function renderExample({ text, app, path }: Prompt) {
     return (
-      <EuiFlexItem key={prompt} grow={false}>
+      <EuiFlexItem key={text} grow={false}>
         <EuiPanel
           color="subdued"
           paddingSize="s"
           onClick={() =>
-            navigate('observability-logs', {
-              path: `#/explorer?datasourceName=${encodeURIComponent(
-                datasourceName
-              )}&datasourceType=${encodeURIComponent(
-                datasourceType
-              )}&indexPattern=${encodeURIComponent(indexPattern)}&olly_q=${encodeURIComponent(
-                prompt
-              )}`,
+            navigate(app, {
+              path,
             })
           }
         >
           <EuiFlexGroup direction="row" responsive={false} alignItems="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={logo} size="l" />
+              <EuiIcon type={logos.Chat.url} size="l" />
             </EuiFlexItem>
-            <EuiFlexItem>&quot;{prompt}&quot;</EuiFlexItem>
+            <EuiFlexItem>&quot;{text}&quot;</EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
@@ -113,11 +113,14 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
 
   const links = [
     {
-      text: i18n.translate('home.getStarted.learnMore', { defaultMessage: 'Learn more' }),
-      url: 'https://opensearch.org/platform/observability/index.html',
+      text: i18n.translate('home.getStarted.learnMore', {
+        defaultMessage: heroConfig.secondaryButton.text,
+      }),
+      url: heroConfig.secondaryButton.link,
     },
   ];
 
+  // TODO: understand why we only want this for Olly
   if (olly) {
     links.push({
       text: i18n.translate('home.getStarted.stayConnected', { defaultMessage: 'Stay connected' }),
@@ -128,19 +131,30 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
   return (
     <HeroSection
       title={i18n.translate('home.getStarted.title', {
-        defaultMessage: 'Try the Query Assistant',
+        defaultMessage: heroConfig.title,
       })}
       description={description}
       links={links}
       actionButton={actionButton}
-      content={
-        olly ? (
-          renderCategories()
+      content={content}
+      illustration={
+        heroConfig.img ? (
+          <div className="home-hero-illustrationContainer">
+            <EuiButtonIcon
+              href={heroConfig.img.link}
+              aria-labelledby="home-hero-illustrationPlay"
+              className="home-hero-illustrationButton"
+              display="fill"
+              iconType="play"
+              iconSize="l"
+              size="m"
+            />
+            <EuiImage src={screenshot} alt="Animated gif 16:9 ratio" />
+          </div>
         ) : (
-          <EuiImage src={illustration} alt="illustration" size="fullWidth" />
+          <EuiImage src={screenshot} alt="Animated gif 16:9 ratio" />
         )
       }
-      illustration={<EuiImage src={image} alt="Animated gif 16:9 ratio" />}
     />
   );
 };
