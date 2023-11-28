@@ -29,8 +29,6 @@
  */
 
 import { withTimeout } from '@osd/std';
-import semver from 'semver';
-import { CatPluginsResponse } from '@opensearch-project/opensearch/api/types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
@@ -38,17 +36,20 @@ import { DiscoveredPlugin, PluginName } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { PluginDependencies } from '.';
+import { CrossCompatibilityService } from '../cross_compatibility';
 
 const Sec = 1000;
 /** @internal */
 export class PluginsSystem {
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
+  private readonly crossCompatibilityService: CrossCompatibilityService;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-system');
+    this.crossCompatibilityService = new CrossCompatibilityService(coreContext);
   }
 
   public addPlugin(plugin: PluginWrapper) {
@@ -167,54 +168,19 @@ export class PluginsSystem {
     return contracts;
   }
 
-  private async healthCheckOpenSearchPlugins(deps: PluginsServiceStartDeps) {
+  public async healthCheckOpenSearchPlugins(deps: PluginsServiceStartDeps) {
     // make _cat/plugins?format=json call to the OpenSearch instance
-    const opensearchInstalledPlugins = await this.getOpenSearchPlugins(deps);
+    const opensearchInstalledPlugins = await this.crossCompatibilityService.getOpenSearchPlugins(
+      deps.opensearch
+    );
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`For plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
-      const pluginOpenSearchDeps = Object.entries(plugin.requiredEnginePlugins);
-      for (const [enginePluginName, versionRange] of pluginOpenSearchDeps) {
-        // add check to see if the installing Dashboards plugin version is compatible with installed OpenSearch plugin
-        if (
-          !this.isVersionCompatibleOSPluginInstalled(
-            opensearchInstalledPlugins,
-            enginePluginName,
-            versionRange
-          )
-        ) {
-          this.log.warn(
-            `OpenSearch plugin "${enginePluginName}" is not installed on the engine for the OpenSearch Dashboards plugin to function as expected.`
-          );
-        }
-      }
-    }
-  }
-
-  private isVersionCompatibleOSPluginInstalled(
-    opensearchInstalledPlugins: CatPluginsResponse,
-    depPlugin: string,
-    versionRange: string
-  ) {
-    return opensearchInstalledPlugins.find(
-      (obj) =>
-        obj.component === depPlugin &&
-        semver.satisfies(semver.coerce(obj.version)!.version, versionRange)
-    );
-  }
-
-  private async getOpenSearchPlugins(deps: PluginsServiceStartDeps) {
-    // Makes cat.plugin api call to fetch list of OpenSearch plugins installed on the cluster
-    try {
-      const { body } = await deps.opensearch.client.asInternalUser.cat.plugins<any[]>({
-        format: 'JSON',
-      });
-      return body;
-    } catch (error) {
-      this.log.warn(
-        `Cat API call to OpenSearch to get list of plugins installed on the cluster has failed: ${error}`
+      this.crossCompatibilityService.checkPluginVersionCompatibility(
+        plugin.requiredEnginePlugins,
+        opensearchInstalledPlugins,
+        pluginName
       );
-      return [];
     }
   }
 
@@ -256,6 +222,7 @@ export class PluginsSystem {
               uiPluginNames.includes(p)
             ),
             requiredBundles: plugin.manifest.requiredBundles,
+            requiredEnginePlugins: plugin.manifest.requiredEnginePlugins,
           },
         ];
       })
