@@ -1,0 +1,19 @@
+name: Create Change Set
+
+on:
+  pull_request:
+    types: [synchronize, opened, edited]
+    paths-ignore:
+      - 'changelogs/fragments/**/*'
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Update Changelog
+        uses: BigSamu/OpenSearch_Change_Set_Create_Action@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN}}
+          changeset_path: changelogs/fragments
