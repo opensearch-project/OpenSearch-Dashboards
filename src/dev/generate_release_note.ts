@@ -29,9 +29,7 @@ function addContentAfterUnreleased(path: string, newContent: string): void {
         newContent +
         fileContent.slice(endOfLineIndex + 1);
     } else {
-      // eslint-disable-next-line no-console
-      console.warn('End of line for "Unreleased" section not found.');
-      return;
+      throw new Error('End of line for "Unreleased" section not found.');
     }
   } else {
     throw new Error("'## [Unreleased]' not found in the file.");
