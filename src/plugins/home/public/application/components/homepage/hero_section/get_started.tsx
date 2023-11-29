@@ -20,12 +20,12 @@ import {
 import { HeroSection } from './hero_section';
 import illustration from '../../../../assets/illustration.svg';
 import { getServices } from '../../../opensearch_dashboards_services';
-import screenshot from '../../../../assets/screenshot.png';
 
 export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true }) => {
   const services = getServices();
   const getUrl = services.application.getUrlForApp;
   const navigate = services.application.navigateToApp;
+  const addBasePath = services.http.basePath.prepend;
   const logos = services.chrome.logos;
   const heroConfig = services.homeConfig.hero;
   const isHeroEnabled = heroConfig.enabled;
@@ -66,6 +66,33 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
       />
     </EuiButton>
   );
+
+  const illustrationPanel = heroConfig.img ? (
+    <div className="home-hero-illustrationContainer">
+      <EuiButtonIcon
+        target="_blank"
+        rel="noopener noreferrer"
+        href={heroConfig.img.link}
+        aria-labelledby="home-hero-illustrationPlay"
+        className="home-hero-illustrationButton"
+        display="fill"
+        iconType="play"
+        iconSize="l"
+        size="m"
+      />
+      <EuiImage src={getIllustrationImage()} alt="getting started preview" />
+    </div>
+  ) : (
+    <EuiImage src={getIllustrationImage()} alt="getting started preview" />
+  );
+
+  function getIllustrationImage() {
+    if (heroConfig.img?.src) {
+      return heroConfig.img!.src;
+    }
+
+    return addBasePath('/plugins/home/assets/screenshot.png');
+  }
 
   const content = olly ? (
     renderCategories()
@@ -137,26 +164,7 @@ export const GetStartedSection: React.FC<{ olly?: boolean }> = ({ olly = true })
       links={links}
       actionButton={actionButton}
       content={content}
-      illustration={
-        heroConfig.img ? (
-          <div className="home-hero-illustrationContainer">
-            <EuiButtonIcon
-              target="_blank"
-              rel="noopener noreferrer"
-              href={heroConfig.img.link}
-              aria-labelledby="home-hero-illustrationPlay"
-              className="home-hero-illustrationButton"
-              display="fill"
-              iconType="play"
-              iconSize="l"
-              size="m"
-            />
-            <EuiImage src={screenshot} alt="Animated gif 16:9 ratio" />
-          </div>
-        ) : (
-          <EuiImage src={screenshot} alt="Animated gif 16:9 ratio" />
-        )
-      }
+      illustration={illustrationPanel}
     />
   );
 };
