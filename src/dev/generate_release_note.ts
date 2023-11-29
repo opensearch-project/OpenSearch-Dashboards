@@ -30,7 +30,7 @@ function addContentAfterUnreleased(path: string, newContent: string): void {
         fileContent.slice(endOfLineIndex + 1);
     } else {
       // eslint-disable-next-line no-console
-      console.warn('End of line for target string not found.');
+      console.warn('End of line for "Unreleased" section not found.');
       return;
     }
   } else {
