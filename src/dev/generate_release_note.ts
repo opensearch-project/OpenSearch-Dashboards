@@ -34,9 +34,7 @@ function addContentAfterUnreleased(path: string, newContent: string): void {
       return;
     }
   } else {
-    // eslint-disable-next-line no-console
-    console.warn("'## [Unreleased]' not found in the file.");
-    return;
+    throw new Error("'## [Unreleased]' not found in the file.");
   }
 
   writeFileSync(path, fileContent);
@@ -91,9 +89,7 @@ for (const fragmentFilename of fragmentPaths) {
 
   for (const [sectionKey, entries] of Object.entries(fragmentYaml)) {
     if (!SECTION_MAPPING[sectionKey as SectionKey]) {
-      // eslint-disable-next-line no-console
-      console.warn(`Unknown section ${sectionKey}. Skipping.`);
-      continue;
+      throw new Error(`Unknown section ${sectionKey}.`);
     }
 
     sections[sectionKey as SectionKey].push(...entries);
