@@ -262,6 +262,12 @@ $ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tm
 
 > You can find nightly builds of opensearch and its plugins at https://aws.oss.sonatype.org/content/repositories/snapshots/org/opensearch/ and release builds at https://repo1.maven.org/maven2/org/opensearch/
 
+#### Read Only capabilities
+
+_This feature will only work if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+
+Please follow the design described in [the docs](https://github.com/opensearch-project/OpenSearch/blob/main/docs/capabilities/read_only_mode.md#design)
+
 ### Alternative - Run OpenSearch from tarball
 
 If you would like to run OpenSearch from the tarball, you'll need to download the minimal distribution, install it, and then run the executable. (You'll also need Java installed and the `JAVA_HOME` environmental variable set - see [OpenSearch developer guide](https://github.com/opensearch-project/OpenSearch/blob/main/DEVELOPER_GUIDE.md#install-prerequisites) for details).
@@ -473,7 +479,7 @@ You can also use this service outside of React.
 
 When writing a new component, create a sibling SASS file of the same name and import directly into the **top** of the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
 
-All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & OpenSearch Dashboards invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v7light.scss).
+All SASS (.scss) files will automatically build with the [OUI](https://oui.opensearch.org/#/guidelines/sass) & OpenSearch Dashboards invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v7light.scss).
 
 While the styles for this component will only be loaded if the component exists on the page,
 the styles **will** be global and so it is recommended to use a three letter prefix on your
