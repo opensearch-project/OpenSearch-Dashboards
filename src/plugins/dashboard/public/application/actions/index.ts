@@ -58,3 +58,8 @@ export {
   LibraryNotificationAction,
   ACTION_LIBRARY_NOTIFICATION,
 } from './library_notification_action';
+export {
+  CreateDrilldownActionContext,
+  CreateDrilldownAction,
+  ACTION_CREATE_DRILLDOWN,
+} from './create_drilldown_action';
