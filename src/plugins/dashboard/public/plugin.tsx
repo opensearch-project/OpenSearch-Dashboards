@@ -88,11 +88,14 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import {
   ACTION_CLONE_PANEL,
+  ACTION_CREATE_DRILLDOWN,
   ACTION_EXPAND_PANEL,
   ACTION_REPLACE_PANEL,
   ClonePanelAction,
   ClonePanelActionContext,
   createDashboardContainerByValueRenderer,
+  CreateDrilldownActionContext,
+  CreateDrilldownAction,
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
@@ -198,6 +201,7 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
     [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
     [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
+    [ACTION_CREATE_DRILLDOWN]: CreateDrilldownActionContext;
   }
 }
 
@@ -540,6 +544,15 @@ export class DashboardPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
+
+    const createDrilldown = new CreateDrilldownAction(
+      core,
+      SavedObjectFinder,
+      notifications,
+      plugins.embeddable.getEmbeddableFactories
+    );
+    uiActions.registerAction(createDrilldown);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, createDrilldown.id);
 
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
