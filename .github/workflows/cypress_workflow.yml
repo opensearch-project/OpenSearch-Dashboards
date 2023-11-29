@@ -32,7 +32,7 @@ env:
   FTR_PATH: 'ftr'
   START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true'
   OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false'
-  CYPRESS_BROWSER: 'chromium'
+  CYPRESS_BROWSER: 'electron'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
