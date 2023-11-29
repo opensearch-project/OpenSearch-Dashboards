@@ -15,8 +15,12 @@ import {
   IconType,
 } from '@elastic/eui';
 import { Section } from './section';
+import { getServices } from '../../../opensearch_dashboards_services';
 
 export const BasicsSection: React.FC<{ initiallyOpen?: boolean }> = ({ initiallyOpen }) => {
+  const services = getServices();
+  const logos = services.chrome.logos;
+
   const gettingStartedLinks: EuiListGroupItemProps[] = [
     {
       label: i18n.translate('home.basics.gettingStarted.quickstart', {
@@ -101,7 +105,7 @@ export const BasicsSection: React.FC<{ initiallyOpen?: boolean }> = ({ initially
     <EuiFlexGroup wrap direction="row" alignItems="stretch">
       <EuiFlexItem>
         {renderCard(
-          'logoOpenSearch',
+          logos.Mark.url,
           i18n.translate('home.basics.gettingStarted.title', {
             defaultMessage: 'Getting started',
           }),

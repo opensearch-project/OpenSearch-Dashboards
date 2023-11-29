@@ -76,25 +76,19 @@ export const configSchema = schema.object({
             text: 'How many errors are there in my logs?',
             app: 'observability-logs',
             path:
-              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=sso-logs&datasourceName=Default%20cluster',
+              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=sso_logs-%2A.%2A&datasourceName=Default%20cluster&olly_q=How%20many%20errors%20are%20there%20in%20my%20logs%3F',
           },
           {
             text: 'Show me the number of flights each day?',
             app: 'observability-logs',
             path:
-              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=opensearch_dashboards_sample_data_flights&datasourceName=Default%20cluster',
+              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=opensearch_dashboards_sample_data_flights&datasourceName=Default%20cluster&olly_q=Show%20me%20the%20number%20of%20flights%20each%20day%3F',
           },
           {
             text: 'What are top visited urls on my website?',
             app: 'observability-logs',
             path:
-              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=opensearch_dashboards_sample_data_logs&datasourceName=Default%20cluster',
-          },
-          {
-            text: 'Show me the number of orders grouped by gender',
-            app: 'observability-logs',
-            path:
-              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=opensearch_dashboards_sample_data_ecommerce&datasourceName=Default%20cluster',
+              '#/explorer?datasourceType=DEFAULT_INDEX_PATTERNS&indexPattern=opensearch_dashboards_sample_data_logs&datasourceName=Default%20cluster&olly_q=What%20are%20top%20visited%20urls%20on%20my%20website%3F',
           },
         ],
       }
