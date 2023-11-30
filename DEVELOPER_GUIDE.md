@@ -244,10 +244,11 @@ Options:
       -E                Additional key=value settings to pass to OpenSearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on OpenSearch
+      --security        Installs and sets up OpenSearch Security plugin on the cluster
       --P               OpenSearch plugin artifact URL to install it on the cluster.
 
 ```bash
-$ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip
+$ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip --security
 ```
 
 ### Alternative - Run OpenSearch from tarball
@@ -266,6 +267,18 @@ This method can also be used to develop against the [full distribution of OpenSe
 ### Configure OpenSearch Dashboards for security
 
 _This step is only mandatory if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+
+> 1. Run `export initialAdminPassword=<initial admin password>` since it's needed by the configuration script
+> 2. Run `yarn opensearch snapshot --security`
+> 3. Wait a few seconds while the plugin is installed, configured, and OpenSearch starts up.
+
+Then within another window. You can start:
+
+> 1. Run `export OPENSEARCH_USERNAME=admin`
+> 2. Run `export OPENSEARCH_PASSWORD=<initial admin password>`
+> 3. Optional: Run `export OPENSEARCH_SECURITY_READONLY_ROLE=<read only role>`
+> 4. Run `yarn start:security`
+> 5. Navigate to OpenSearch Dashboards and login with the above username and password.
 
 Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
 changes to the default [`opensearch_dashboards.yml`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/config/opensearch_dashboards.yml#L25-L72) in order to connect to OpenSearch.
