@@ -125,6 +125,60 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       set('opensearch.hosts', opensearchHosts);
       set('opensearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
+
+    if (opts.security) {
+      const customOpenSearchHosts = opts.opensearch
+        ? opts.opensearch.split(',')
+        : [].concat(get('opensearch.hosts') || []);
+
+      const opensearchHosts = (
+        (customOpenSearchHosts.length > 0 && customOpenSearchHosts) || ['https://localhost:9200']
+      ).map((hostUrl) => {
+        const parsedUrl = new URL('', hostUrl);
+        return `https://localhost:${parsedUrl.port}`;
+      });
+
+      if (!get('opensearch.hosts')) {
+        set('opensearch.hosts', opensearchHosts);
+      }
+
+      if (!get('opensearch.ssl.verificationMode')) {
+        set('opensearch.ssl.verificationMode', 'none');
+      }
+
+      if (get('opensearch.username') === 'opensearch_dashboards_system') {
+        set('opensearch.username', process.env.OPENSEARCH_USERNAME);
+      }
+
+      if (get('opensearch.password') === 'changeme') {
+        set('opensearch.password', process.env.OPENSEARCH_PASSWORD);
+      }
+
+      if (!get('opensearch.requestHeadersWhitelist')) {
+        set('opensearch.requestHeadersWhitelist', ['authorization', 'securitytenant']);
+      }
+
+      if (!get('opensearch_security.multitenancy.enabled')) {
+        set('opensearch_security.multitenancy.enabled', true);
+      }
+
+      if (!get('opensearch_security.multitenancy.tenants.preferred')) {
+        set('opensearch_security.multitenancy.tenants.preferred', ['Private', 'Global']);
+      }
+
+      if (
+        !get('opensearch_security.readonly_mode.roles') &&
+        process.env.OPENSEARCH_SECURITY_READONLY_ROLE
+      ) {
+        set('opensearch_security.readonly_mode.roles', [
+          process.env.OPENSEARCH_SECURITY_READONLY_ROLE,
+        ]);
+      }
+
+      if (!get('opensearch_security.cookie.secure')) {
+        set('opensearch_security.cookie.secure', false);
+      }
+    }
   }
 
   if (opts.opensearch) set('opensearch.hosts', opts.opensearch.split(','));
@@ -195,6 +249,7 @@ export default function (program) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--security', 'Run the dev server using security defaults')
       .option('--dist', 'Use production assets from osd/optimizer')
       .option(
         '--no-base-path',
