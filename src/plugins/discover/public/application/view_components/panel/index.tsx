@@ -45,17 +45,17 @@ export default function DiscoverPanel(props: ViewProps) {
     const timeFieldname = indexPattern?.timeFieldName;
 
     if (columns !== prevColumns.current) {
+      let updatedColumns = buildColumns(columns);
       if (
         timeFieldname &&
         !prevColumns.current.includes(timeFieldname) &&
         columns.includes(timeFieldname)
       ) {
         // Remove timeFieldname from columns if previously chosen columns does not include time field
-        let updatedColumns = columns.filter((column) => column !== timeFieldname);
-        updatedColumns = buildColumns(updatedColumns);
-        dispatch(setColumns({ columns: updatedColumns }));
+        updatedColumns = columns.filter((column) => column !== timeFieldname);
       }
       // Update the ref with the new columns
+      dispatch(setColumns({ columns: updatedColumns }));
       prevColumns.current = columns;
     }
   }, [columns, dispatch, indexPattern?.timeFieldName]);
