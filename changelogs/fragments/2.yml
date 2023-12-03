@@ -1,2 +1,5 @@
 feat:
 - Adds a new feature ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+
+fix:
+- Fixes a bug ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
