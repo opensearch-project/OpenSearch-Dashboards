@@ -366,7 +366,7 @@ export class RenderingService {
    */
   public isUrlValid = async (url: string, configName?: string): Promise<boolean> => {
     if (url === '/') {
-      return false;
+      return true;
     }
     if (url.match(/\.(png|svg|gif|PNG|SVG|GIF)$/) === null) {
       this.logger.get('branding').error(`${configName} config is invalid. Using default branding.`);
