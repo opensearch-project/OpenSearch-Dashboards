@@ -76,9 +76,15 @@ interface IndexAliases {
 
 type IndicesOrAliases = string | string[] | null;
 
+interface SettingKeyToPathMap {
+  fields: '_mapping';
+  indices: '_aliases';
+  templates: '_template';
+}
+
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
-const POLL_INTERVAL = 60000;
+export const POLL_INTERVAL = 60000;
 let pollTimeoutId: NodeJS.Timeout | null;
 
 let perIndexTypes: { [index: string]: { [type: string]: Field[] } } = {};
@@ -316,11 +322,11 @@ export function clear() {
 
 function retrieveSettings(
   http: HttpSetup,
-  settingsKey: string,
+  settingsKey: keyof SettingKeyToPathMap,
   settingsToRetrieve: any,
   dataSourceId: string
 ): Promise<HttpResponse<any>> | Promise<void> | Promise<{}> {
-  const settingKeyToPathMap: { [settingsKey: string]: string } = {
+  const settingKeyToPathMap: SettingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
     templates: '_template',
@@ -330,13 +336,8 @@ function retrieveSettings(
   if (settingsToRetrieve[settingsKey] === true) {
     return opensearch.send(http, 'GET', settingKeyToPathMap[settingsKey], null, dataSourceId);
   } else {
-    if (settingsToRetrieve[settingsKey] === false) {
-      // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return Promise.resolve({});
-    } else {
-      // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return Promise.resolve();
-    }
+    // If the user doesn't want autocomplete suggestions, then clear any that exist
+    return Promise.resolve();
   }
 }
 
@@ -418,12 +419,11 @@ export function retrieveAutoCompleteInfo(
   dataSourceId: string
 ) {
   clearSubscriptions();
-
   Promise.allSettled([
     retrieveMappings(http, settingsToRetrieve, dataSourceId),
     retrieveAliases(http, settingsToRetrieve, dataSourceId),
     retrieveTemplates(http, settingsToRetrieve, dataSourceId),
-  ]).then(() => {
+  ]).then((res) => {
     // Schedule next request.
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send

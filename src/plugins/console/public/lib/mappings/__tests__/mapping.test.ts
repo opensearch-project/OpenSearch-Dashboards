@@ -30,7 +30,10 @@
 
 import { Field } from '../mappings';
 import '../../../application/models/sense_editor/sense_editor.test.mocks';
+import * as opensearch from '../../opensearch/opensearch';
 import * as mappings from '../mappings';
+import { createMockHttpResponse } from '../../opensearch/http_response.mock';
+import { serviceContextMock } from '../../../application/contexts/services_context.mock';
 
 describe('Mappings', () => {
   beforeEach(() => {
@@ -289,5 +292,83 @@ describe('Mappings', () => {
     });
 
     expect(mappings.getTypes()).toEqual(['properties']);
+  });
+});
+const tick = () => new Promise((res) => setImmediate(res));
+
+export const advanceTimersByTime = async (time: number) =>
+  jest.advanceTimersByTime(time) && (await tick());
+
+export const runOnlyPendingTimers = async () => jest.runOnlyPendingTimers() && (await tick());
+
+export const runAllTimers = async () => jest.runAllTimers() && (await tick());
+
+describe('Auto Complete Info', () => {
+  let response = {};
+
+  beforeEach(() => {
+    mappings.clear();
+    response = {
+      body: {
+        'sample-ecommerce': {
+          mappings: {
+            properties: {
+              timestamp: {
+                type: 'date',
+              },
+            },
+          },
+        },
+      },
+    };
+    jest.resetAllMocks();
+    jest.useFakeTimers(); // Enable automatic mocking of timers
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.useRealTimers();
+  });
+
+  test('Retrieve AutoComplete Info for Mappings, Aliases and Templates', async () => {
+    jest.useFakeTimers(); // Ensure fake timers are used
+
+    const mockHttpResponse = createMockHttpResponse(
+      200,
+      'ok',
+      [['Content-Type', 'application/json, utf-8']],
+      response
+    );
+
+    const dataSourceId = 'mock-data-source-id';
+    const sendSpy = jest.spyOn(opensearch, 'send').mockResolvedValue(mockHttpResponse);
+
+    const {
+      services: { http, settings: settingsService },
+    } = serviceContextMock.create();
+
+    mappings.retrieveAutoCompleteInfo(
+      http,
+      settingsService,
+      {
+        fields: true,
+        indices: true,
+        templates: true,
+      },
+      dataSourceId
+    );
+
+    // Fast-forward until all timers have been executed
+    jest.runAllTimers();
+
+    // Resolve the promise chain
+    await Promise.resolve();
+
+    expect(sendSpy).toHaveBeenCalledTimes(3);
+
+    // Ensure send is called with different arguments
+    expect(sendSpy).toHaveBeenCalledWith(http, 'GET', '_mapping', null, dataSourceId);
+    expect(sendSpy).toHaveBeenCalledWith(http, 'GET', '_aliases', null, dataSourceId);
+    expect(sendSpy).toHaveBeenCalledWith(http, 'GET', '_template', null, dataSourceId);
   });
 });
