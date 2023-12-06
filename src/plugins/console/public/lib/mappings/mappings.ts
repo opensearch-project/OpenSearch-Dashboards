@@ -385,7 +385,7 @@ const retrieveMappings = async (http: HttpSetup, settingsToRetrieve: any, dataSo
 };
 
 const retrieveAliases = async (http: HttpSetup, settingsToRetrieve: any, dataSourceId: string) => {
-  const response = await retrieveSettings(http, 'fields', settingsToRetrieve, dataSourceId);
+  const response = await retrieveSettings(http, 'indices', settingsToRetrieve, dataSourceId);
 
   if (isHttpResponse(response) && response.body) {
     const aliases = response.body as IndexAliases;
@@ -398,7 +398,7 @@ const retrieveTemplates = async (
   settingsToRetrieve: any,
   dataSourceId: string
 ) => {
-  const response = await retrieveSettings(http, 'fields', settingsToRetrieve, dataSourceId);
+  const response = await retrieveSettings(http, 'templates', settingsToRetrieve, dataSourceId);
 
   if (isHttpResponse(response) && response.body) {
     const resTemplates = response.body;
