@@ -34,7 +34,6 @@ import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
 import { IIndexPattern } from '../../index_patterns';
 import { handleNestedFilter } from './handle_nested_filter';
-import { customFilterMatchesIndex } from './custom_filter_matches_index';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -77,10 +76,7 @@ export const buildQueryFromFilters = (
     return filters
       .filter(filterNegate(negate))
       .filter(
-        (filter) =>
-          !ignoreFilterIfFieldNotInIndex ||
-          filterMatchesIndex(filter, indexPattern) ||
-          customFilterMatchesIndex(filter, indexPattern)
+        (filter) => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
       )
       .map((filter) => {
         return migrateFilter(filter, indexPattern);
