@@ -171,7 +171,7 @@ export class RenderingService {
     };
   }
 
-  public async stop() {}
+  public async stop() { }
 
   /**
    * Setups HTTP Agent if SSL is enabled to pass SSL config
@@ -366,11 +366,14 @@ export class RenderingService {
    */
   public isUrlValid = async (url: string, configName?: string): Promise<boolean> => {
     if (url === '/') {
-      return true;
+      return false;
     }
     if (url.match(/\.(png|svg|gif|PNG|SVG|GIF)$/) === null) {
       this.logger.get('branding').error(`${configName} config is invalid. Using default branding.`);
       return false;
+    }
+    if (url.startsWith('/')) {
+      return true;
     }
     return await Axios.get(url, {
       httpsAgent: this.httpsAgent,
