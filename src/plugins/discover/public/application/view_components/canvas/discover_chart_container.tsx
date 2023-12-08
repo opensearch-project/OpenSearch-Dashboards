@@ -5,6 +5,7 @@
 
 import './discover_chart_container.scss';
 import React, { useMemo } from 'react';
+import { PalantirProvider } from '../../../../../../../plugins/dashboards-assistant/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useDiscoverContext } from '../context';
@@ -14,7 +15,7 @@ import { DiscoverChart } from '../../components/chart/chart';
 export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { uiSettings, data, core } = services;
-  const { indexPattern, savedSearch } = useDiscoverContext();
+  const { indexPattern, savedSearch, getPalantir } = useDiscoverContext();
 
   const isTimeBased = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
     indexPattern,
@@ -22,7 +23,7 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
 
   if (!hits) return null;
 
-  return (
+  const discoverChartComponent = (
     <DiscoverChart
       bucketInterval={bucketInterval}
       chartData={chartData}
@@ -36,5 +37,11 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
       showResetButton={!!savedSearch && !!savedSearch.id}
       isTimeBased={isTimeBased}
     />
+  );
+
+  return getPalantir ? (
+    <PalantirProvider value={() => getPalantir}>{discoverChartComponent}</PalantirProvider>
+  ) : (
+    <>{discoverChartComponent}</>
   );
 };

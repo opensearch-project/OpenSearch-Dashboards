@@ -11,6 +11,7 @@ import dateMath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { PalantirComponent } from '../../../../../../../plugins/dashboards-assistant/public';
 import { DataPublicPluginStart, search } from '../../../../../data/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_header';
@@ -43,7 +44,7 @@ export const DiscoverChart = ({
   services,
   showResetButton = false,
 }: DiscoverChartProps) => {
-  const { refetch$ } = useDiscoverContext();
+  const { refetch$, getPalantir } = useDiscoverContext();
   const { from, to } = data.query.timefilter.timefilter.getTime();
   const timeRange = {
     from: dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
@@ -66,14 +67,25 @@ export const DiscoverChart = ({
     [data]
   );
 
+  const hitsCounterComponent = (
+    <HitsCounter
+      key="totalHits"
+      hits={hits > 0 ? hits : 0}
+      showResetButton={showResetButton}
+      onResetQuery={resetQuery}
+    />
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false} className="dscChart__hitsCounter">
-        <HitsCounter
-          hits={hits > 0 ? hits : 0}
-          showResetButton={showResetButton}
-          onResetQuery={resetQuery}
-        />
+        {getPalantir ? (
+          <PalantirComponent data-test-subj="PalantirComponent">
+            {hitsCounterComponent}
+          </PalantirComponent>
+        ) : (
+          <>{hitsCounterComponent}</>
+        )}
       </EuiFlexItem>
       {isTimeBased && (
         <EuiFlexItem className="dscChart__TimechartHeader">

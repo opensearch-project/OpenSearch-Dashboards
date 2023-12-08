@@ -51,6 +51,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { VisualizationsStart } from 'src/plugins/visualizations/public';
 import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
 
+import { Palantir } from '../../../../plugins/dashboards-assistant/public';
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './opensearch_dashboards_services';
@@ -82,6 +83,7 @@ export interface DiscoverServices {
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
+  getPalantir?: (id: string) => Palantir;
 }
 
 export function buildServices(
@@ -123,6 +125,7 @@ export function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
+    getPalantir: plugins.assistantDashboards!.getPalantir,
   };
 }
 
