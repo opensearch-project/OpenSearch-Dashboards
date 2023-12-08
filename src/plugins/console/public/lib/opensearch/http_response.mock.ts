@@ -11,7 +11,6 @@ export const createMockResponse = (
   headers: Array<[string, string]>
 ): Response => {
   return {
-    // headers: {} as Headers,
     headers: new Headers(headers),
     ok: true,
     redirected: false,

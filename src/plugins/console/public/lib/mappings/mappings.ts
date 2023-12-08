@@ -76,11 +76,11 @@ interface IndexAliases {
 
 type IndicesOrAliases = string | string[] | null;
 
-interface SettingKeyToPathMap {
-  fields: '_mapping';
-  indices: '_aliases';
-  templates: '_template';
-}
+const SETTING_KEY_TO_PATH_MAP = {
+  fields: '_mapping',
+  indices: '_aliases',
+  templates: '_template',
+};
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
@@ -322,19 +322,13 @@ export function clear() {
 
 function retrieveSettings(
   http: HttpSetup,
-  settingsKey: keyof SettingKeyToPathMap,
+  settingsKey: keyof typeof SETTING_KEY_TO_PATH_MAP,
   settingsToRetrieve: any,
   dataSourceId: string
-): Promise<HttpResponse<any>> | Promise<void> | Promise<{}> {
-  const settingKeyToPathMap: SettingKeyToPathMap = {
-    fields: '_mapping',
-    indices: '_aliases',
-    templates: '_template',
-  };
-
+): Promise<HttpResponse<any>> | Promise<void> {
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
-    return opensearch.send(http, 'GET', settingKeyToPathMap[settingsKey], null, dataSourceId);
+    return opensearch.send(http, 'GET', SETTING_KEY_TO_PATH_MAP[settingsKey], null, dataSourceId);
   } else {
     // If the user doesn't want autocomplete suggestions, then clear any that exist
     return Promise.resolve();
@@ -423,7 +417,7 @@ export function retrieveAutoCompleteInfo(
     retrieveMappings(http, settingsToRetrieve, dataSourceId),
     retrieveAliases(http, settingsToRetrieve, dataSourceId),
     retrieveTemplates(http, settingsToRetrieve, dataSourceId),
-  ]).then((res) => {
+  ]).then(() => {
     // Schedule next request.
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
