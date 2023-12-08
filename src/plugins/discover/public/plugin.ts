@@ -30,6 +30,10 @@ import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/publi
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { lazy } from 'react';
+import {
+  AssistantPublicPluginSetup,
+  AssistantPublicPluginStart,
+} from './../../../../plugins/dashboards-assistant/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { url } from '../../opensearch_dashboards_utils/public';
@@ -125,6 +129,7 @@ export interface DiscoverSetupPlugins {
   opensearchDashboardsLegacy: OpenSearchDashboardsLegacySetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
+  assistantDashboards?: AssistantPublicPluginSetup;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
   dataExplorer: DataExplorerPluginSetup;
@@ -144,6 +149,7 @@ export interface DiscoverStartPlugins {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
+  assistantDashboards?: AssistantPublicPluginStart;
 }
 
 /**
@@ -172,6 +178,20 @@ export class DiscoverPlugin
           useHash: core.uiSettings.get('state:storeInSessionStorage'),
         })
       );
+    }
+
+    if (plugins.assistantDashboards) {
+      plugins.assistantDashboards.registerPalantir([
+        {
+          key: 'totalHits',
+          description: '# of documents returned from the node.',
+          suggestion: 'Where are the rest of my total hits?',
+        },
+        {
+          key: 'timestampField',
+          suggestion: 'How to format my timestamp field?',
+        },
+      ]);
     }
 
     this.docViewsRegistry = new DocViewsRegistry();

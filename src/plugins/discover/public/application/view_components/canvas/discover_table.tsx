@@ -38,7 +38,7 @@ export const DiscoverTable = ({ rows }: Props) => {
     indexPatterns,
   } = services;
 
-  const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
+  const { refetch$, indexPattern, savedSearch, getPalantir } = useDiscoverContext();
   const { columns, sort } = useSelector((state) => state.discover);
   const dispatch = useDispatch();
   const onAddColumn = (col: string) => {
@@ -104,6 +104,7 @@ export const DiscoverTable = ({ rows }: Props) => {
       displayTimeColumn={displayTimeColumn}
       title={savedSearch?.id ? savedSearch.title : ''}
       description={savedSearch?.id ? savedSearch.description : ''}
+      palantir={getPalantir}
     />
   );
 };

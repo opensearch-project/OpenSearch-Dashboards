@@ -15,6 +15,10 @@ import {
 } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import {
+  PalantirComponent,
+  Palantir,
+} from '../../../../../../../plugins/dashboards-assistant/public';
 
 function fetchSourceTypeDataCell(
   idxPattern: IndexPattern,
@@ -45,7 +49,8 @@ function fetchSourceTypeDataCell(
 
 export const fetchTableDataCell = (
   idxPattern: IndexPattern,
-  dataRows: OpenSearchSearchHit[] | undefined
+  dataRows: OpenSearchSearchHit[] | undefined,
+  palantir?: (key: string) => Palantir
 ) => ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
   const singleRow = dataRows ? (dataRows[rowIndex] as Record<string, unknown>) : undefined;
   const flattenedRows = dataRows ? dataRows.map((hit) => idxPattern.flattenHit(hit)) : [];
@@ -75,9 +80,16 @@ export const fetchTableDataCell = (
     return <span>-</span>;
   } else {
     const sanitizedCellValue = dompurify.sanitize(idxPattern.formatField(singleRow, columnId));
-    return (
+    const spanComponent = (
       // eslint-disable-next-line react/no-danger
       <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
     );
+
+    const aiSpanComponent = (
+      <PalantirComponent key="timestampField" input={palantir?.('timestampField')}>
+        {spanComponent}
+      </PalantirComponent>
+    );
+    return palantir && columnId === 'timestamp' ? aiSpanComponent : spanComponent;
   }
 };

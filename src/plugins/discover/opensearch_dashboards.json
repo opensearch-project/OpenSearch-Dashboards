@@ -15,9 +15,10 @@
     "uiActions",
     "visualizations"
   ],
-  "optionalPlugins": ["home", "share"],
+  "optionalPlugins": ["home", "share", "assistantDashboards"],
   "requiredBundles": [
     "home",
+    "assistantDashboards",
     "opensearchDashboardsUtils",
     "savedObjects",
     "opensearchDashboardsReact"

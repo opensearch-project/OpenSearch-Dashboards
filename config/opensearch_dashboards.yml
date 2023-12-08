@@ -281,3 +281,5 @@
 #   text: 'Login to try',
 #   link: 'https://observability.playground.opensearch.org/'
 # }
+
+# assistant.enabled: false

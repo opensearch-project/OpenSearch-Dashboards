@@ -16,6 +16,7 @@ import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_
 import { usePagination } from '../utils/use_pagination';
 import { SortOrder } from '../../../saved_searches/types';
 import { buildColumns } from '../../utils/columns';
+import { Palantir } from './../../../../../../../plugins/dashboards-assistant/public';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -33,6 +34,7 @@ export interface DataGridTableProps {
   isToolbarVisible?: boolean;
   isContextView?: boolean;
   isLoading?: boolean;
+  palantir?: (id: string) => Palantir;
 }
 
 export const DataGridTable = ({
@@ -51,6 +53,7 @@ export const DataGridTable = ({
   isToolbarVisible = true,
   isContextView = false,
   isLoading = false,
+  palantir,
 }: DataGridTableProps) => {
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
@@ -84,7 +87,8 @@ export const DataGridTable = ({
     [onSort]
   );
 
-  const renderCellValue = useMemo(() => fetchTableDataCell(indexPattern, rows), [
+  const renderCellValue = useMemo(() => fetchTableDataCell(indexPattern, rows, palantir), [
+    palantir,
     indexPattern,
     rows,
   ]);
