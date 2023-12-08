@@ -32,6 +32,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG] Add platform "darwin-arm64" to unit test ([#5290](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5290))
 - [BUG][Dev Tool] Add dev tool documentation link to dev tool's help menu [#5166](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5166)
 - Fix missing border for header navigation control on right ([#5450](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5450))
+- [BUG] Fix filtering issue in data source selector ([5484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5484))
+- [BUG][Data] Support for custom filters with heterogeneous data fields ([5577](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5577))
 
 ### 🚞 Infrastructure
 
@@ -40,6 +42,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add an achievement badger to the PR ([#3721](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3721))
 - [CI] Enable inputs for manually triggered Cypress test jobs ([#5134](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5134))
 - [CI] Replace usage of deprecated `set-output` in workflows ([#5340](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5340))
+- [Chore] Add `--security` for `opensearch snapshot` and `opensearch_dashboards` to configure local setup with the security plugin ([#5451](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5451))
 
 ### 📝 Documentation
 

@@ -129,7 +129,6 @@ export const DataSourceSelectable = ({
       onChange={handleSourceChange}
       singleSelection={singleSelection}
       isClearable={false}
-      async
     />
   );
 };
