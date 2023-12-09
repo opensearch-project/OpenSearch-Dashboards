@@ -1,4 +1,4 @@
-# Revised Changelog and Release Notes Process
+# Changelog and Release Notes
 
 For information regarding the revised changelog and release notes process, please consult the README in the GitHub Actions repository that this process utilizes. To view this README, follow the link below:
 
