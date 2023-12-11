@@ -6,20 +6,48 @@ on:
     branches: [ '**' ]
     paths-ignore:
       - '**/*.md'
+  workflow_dispatch:
+    inputs:
+      test_repo:
+        description: 'Cypress test repo'
+        default: 'opensearch-project/opensearch-dashboards-functional-test'
+        required: true
+        type: string
+      test_branch:
+        description: 'Cypress test branch (default: source branch)'
+        required: false
+        type: string
+      specs:
+        description: 'Tests to run (default: osd:ciGroup)'
+        required: false
+        type: string
+      pr_number:
+        description: 'PR Number (optional)'
+        required: false
+        type: number
 
 env:
+  TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
+  TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
-  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch'
-  OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot'
-  SPEC: 'cypress/integration/core-opensearch-dashboards/opensearch-dashboards/**/*.js,'
+  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true'
+  OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false'
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
+  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
+  COMMENT_TAG: '[MANUAL CYPRESS TEST RUN RESULTS]'
+  COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
+  COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'
 
 jobs:
   cypress-tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+          group: [1, 2, 3, 4, 5, 6, 7, 8, 9]
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
@@ -28,10 +56,33 @@ jobs:
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
       TERM: xterm
-    name: Run cypress tests
+    name: Run cypress tests (osd:ciGroup${{ matrix.group }})
     steps:
+      - name: Get source information from PR number
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
+        id: get_pr_info
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: result } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ inputs.pr_number }}
+            });
+            core.setOutput('head_name', result.head.repo.full_name);
+            core.setOutput('head_ref', result.head.ref);
+
+      - name: Set source repo from PR number
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
+        run: |
+          echo "SOURCE_REPO=${{ steps.get_pr_info.outputs.head_name }}" >> $GITHUB_ENV
+          echo "SOURCE_BRANCH=${{ steps.get_pr_info.outputs.head_ref }}" >> $GITHUB_ENV
+
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          repository: ${{ env.SOURCE_REPO }}
+          ref: '${{ env.SOURCE_BRANCH }}'
 
       - name: Setup Node
         uses: actions/setup-node@v2
@@ -48,19 +99,36 @@ jobs:
         run: yarn osd bootstrap
 
       - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
       - name: Checkout
         uses: actions/checkout@v2
         with:
           path: ${{ env.FTR_PATH }}
-          repository: opensearch-project/opensearch-dashboards-functional-test
-          ref: '${{ github.base_ref }}'
+          repository: ${{ env.TEST_REPO }}
+          ref: '${{ env.TEST_BRANCH }}'
+
+      - name: Setup spec files by input
+        if: ${{ inputs.specs != '' }}
+        run: |
+          echo "SPEC=${{ inputs.specs }}" >> $GITHUB_ENV
+
+      - name: Setup spec files
+        if: ${{ inputs.specs == '' }}
+        working-directory: ${{ env.FTR_PATH }}
+        shell: bash
+        run: |
+          IFS="," read -a SPEC_ARRAY <<< $(yarn --silent osd:ciGroup${{ matrix.group }})
+          FORMATTED_SPEC=''
+          for i in "${SPEC_ARRAY[@]}"; do
+            FORMATTED_SPEC+="cypress/integration/core-opensearch-dashboards/opensearch-dashboards/${i},"
+          done
+          echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
 
       - name: Get Cypress version
         id: cypress_version
         run: |
-          echo "::set-output name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')"
+          echo "name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
 
       - name: Cache Cypress
         id: cache-cypress
@@ -102,3 +170,41 @@ jobs:
           name: ftr-cypress-results
           path: ${{ env.FTR_PATH }}/cypress/results
           retention-days: 1
+
+  add-comment:
+    needs: [cypress-tests]
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find Comment
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          issue-number: ${{ inputs.pr_number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: "${{ env.COMMENT_TAG }}"
+
+      - name: Add comment on the PR
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ inputs.pr_number }}
+          body: |
+            ### ${{ env.COMMENT_TAG }}
+
+            #### ${{ needs.cypress-tests.result == 'success' && env.COMMENT_SUCCESS_MSG || env.COMMENT_FAILURE_MSG }}
+
+            #### Inputs:
+            ```
+            Test repo: '${{ env.TEST_REPO }}'
+            Test branch: '${{ env.TEST_BRANCH }}'
+
+            Test spec:
+            '${{ env.SPEC }}'
+            ```
+
+            #### Link to results: 
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          edit-mode: replace

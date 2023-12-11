@@ -123,6 +123,7 @@ const defaultCapabilities: Capabilities = {
   navLinks: {},
   management: {},
   catalogue: {},
+  workspaces: {},
 };
 
 /** @internal */

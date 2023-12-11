@@ -34,7 +34,7 @@ const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
-const { OPENSEARCH_BIN, OPENSEARCH_PLUGIN } = require('./paths');
+const { OPENSEARCH_BIN, OPENSEARCH_PLUGIN, OPENSEARCH_SECURITY_INSTALL } = require('./paths');
 const { log: defaultLog, parseOpenSearchLog, extractConfigFiles, decompress } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -42,6 +42,19 @@ const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
 const { CA_CERT_PATH, OPENSEARCH_P12_PATH, OPENSEARCH_P12_PASSWORD } = require('@osd/dev-utils');
 const readFile = util.promisify(fs.readFile);
+const chmodAsync = util.promisify(fs.chmod);
+
+const LATEST_ENGINE_PLUGIN_BASE_URL =
+  'https://ci.opensearch.org/ci/dbc/distribution-build-opensearch';
+
+function generateEnginePluginUrl(version, plugin) {
+  const legacyVersion = `${version}.0`;
+  const [platform, type] =
+    process.platform === 'win32' ? ['windows', 'zip'] : [process.platform, 'tar'];
+  const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
+
+  return `${LATEST_ENGINE_PLUGIN_BASE_URL}/${version}/latest/${platform}/${arch}/${type}/builds/opensearch/plugins/${plugin}-${legacyVersion}.zip`;
+}
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -57,9 +70,10 @@ const first = (stream, map) =>
   });
 
 exports.Cluster = class Cluster {
-  constructor({ log = defaultLog, ssl = false } = {}) {
+  constructor({ log = defaultLog, ssl = false, security = false } = {}) {
     this._log = log;
     this._ssl = ssl;
+    this._security = security;
     this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
 
@@ -190,6 +204,23 @@ exports.Cluster = class Cluster {
       }
       this._log.info(`Plugin installation complete`);
       this._log.indent(-4);
+    }
+  }
+
+  /**
+   * Setups cluster with security demo configuration
+   *
+   * @param {string} installPath
+   * @property {String} version - version of OpenSearch
+   */
+  async setupSecurity(installPath, version) {
+    const pluginUrl = generateEnginePluginUrl(version, 'opensearch-security');
+    await this.installOpenSearchPlugins(installPath, pluginUrl);
+    this._log.info('Setting up security');
+    const pluginPath = path.resolve(installPath, OPENSEARCH_SECURITY_INSTALL);
+    if (pluginPath) {
+      await chmodAsync(pluginPath, '755');
+      await execa(OPENSEARCH_SECURITY_INSTALL, ['-y', '-i', '-s'], { cwd: installPath });
     }
   }
 

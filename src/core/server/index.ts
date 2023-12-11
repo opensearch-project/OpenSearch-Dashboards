@@ -76,6 +76,8 @@ import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
+import { SecurityServiceSetup } from './security/types';
+import { CrossCompatibilityServiceStart } from './cross_compatibility/types';
 
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
@@ -345,8 +347,8 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export { AppCategory, WorkspaceAttribute } from '../types';
+export { DEFAULT_APP_CATEGORIES, WORKSPACE_TYPE } from '../utils';
 
 export {
   SavedObject,
@@ -437,6 +439,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
+  /** {@link SecurityServiceSetup} */
+  security: SecurityServiceSetup;
   /** {@link StatusServiceSetup} */
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
@@ -482,6 +486,8 @@ export interface CoreStart {
   auditTrail: AuditTrailStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
+  /** {@link CrossCompatibilityServiceStart} */
+  crossCompatibility: CrossCompatibilityServiceStart;
 }
 
 export {
@@ -493,6 +499,7 @@ export {
   PluginsServiceStart,
   PluginOpaqueId,
   AuditTrailStart,
+  CrossCompatibilityServiceStart,
 };
 
 /**

@@ -62,6 +62,17 @@ We recommend using [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm) t
 
 If it's the only version of node installed, it will automatically be set to the `default` alias. Otherwise, use `nvm list` to see all installed `node` versions, and `nvm use` to select the node version required by OpenSearch Dashboards.
 
+### Fork and clone OpenSearch Dashboards
+
+All local development should be done in a [forked repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
+Fork OpenSearch Dashboards by clicking the "Fork" button at the top of the [GitHub repository](https://github.com/opensearch-project/OpenSearch-Dashboards).
+
+Clone your forked version of OpenSearch Dashboards to your local machine (replace `opensearch-project` in the command below with your GitHub username):
+
+```bash
+$ git clone git@github.com:opensearch-project/OpenSearch-Dashboards.git
+```
+
 #### Install `yarn`
 
 OpenSearch Dashboards is set up using yarn, which can be installed through corepack. To install yarn, run:
@@ -75,17 +86,6 @@ $ corepack install
 ```
 
 (See the [corepack documentation](https://github.com/nodejs/corepack#-corepack) for more information.)
-
-### Fork and clone OpenSearch Dashboards
-
-All local development should be done in a [forked repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
-Fork OpenSearch Dashboards by clicking the "Fork" button at the top of the [GitHub repository](https://github.com/opensearch-project/OpenSearch-Dashboards).
-
-Clone your forked version of OpenSearch Dashboards to your local machine (replace `opensearch-project` in the command below with your GitHub username):
-
-```bash
-$ git clone git@github.com:opensearch-project/OpenSearch-Dashboards.git
-```
 
 ### Bootstrap OpenSearch Dashboards
 
@@ -252,11 +252,18 @@ Options:
       -E                Additional key=value settings to pass to OpenSearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on OpenSearch
+      --security        Installs and sets up OpenSearch Security plugin on the cluster
       --P               OpenSearch plugin artifact URL to install it on the cluster.
 
 ```bash
-$ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip
+$ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip --security
 ```
+
+#### Read Only capabilities
+
+_This feature will only work if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+
+Please follow the design described in [the docs](https://github.com/opensearch-project/OpenSearch/blob/main/docs/capabilities/read_only_mode.md#design)
 
 ### Alternative - Run OpenSearch from tarball
 
@@ -274,6 +281,18 @@ This method can also be used to develop against the [full distribution of OpenSe
 ### Configure OpenSearch Dashboards for security
 
 _This step is only mandatory if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+
+> 1. Run `export initialAdminPassword=<initial admin password>` since it's needed by the configuration script
+> 2. Run `yarn opensearch snapshot --security`
+> 3. Wait a few seconds while the plugin is installed, configured, and OpenSearch starts up.
+
+Then within another window. You can start:
+
+> 1. Run `export OPENSEARCH_USERNAME=admin`
+> 2. Run `export OPENSEARCH_PASSWORD=<initial admin password>`
+> 3. Optional: Run `export OPENSEARCH_SECURITY_READONLY_ROLE=<read only role>`
+> 4. Run `yarn start:security`
+> 5. Navigate to OpenSearch Dashboards and login with the above username and password.
 
 Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
 changes to the default [`opensearch_dashboards.yml`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/config/opensearch_dashboards.yml#L25-L72) in order to connect to OpenSearch.
@@ -462,7 +481,7 @@ You can also use this service outside of React.
 
 When writing a new component, create a sibling SASS file of the same name and import directly into the **top** of the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
 
-All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & OpenSearch Dashboards invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v7light.scss).
+All SASS (.scss) files will automatically build with the [OUI](https://oui.opensearch.org/#/guidelines/sass) & OpenSearch Dashboards invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v7light.scss).
 
 While the styles for this component will only be loaded if the component exists on the page,
 the styles **will** be global and so it is recommended to use a three letter prefix on your
@@ -928,30 +947,6 @@ license.
 ### React
 
 The following developer guide rules are specific for working with the React framework.
-
-#### Prefer reactDirective over react-component
-
-When using `ngReact` to embed your react components inside Angular HTML, prefer the
-`reactDirective` service over the `react-component` directive.
-You can read more about these two ngReact methods [here](https://github.com/ngReact/ngReact#features).
-
-Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more succinct syntax.
-
-**Good:**
-
-```html
-<hello-component
-  fname="person.fname"
-  lname="person.lname"
-  watch-depth="reference"
-></hello-component>
-```
-
-**Bad:**
-
-```html
-<react-component name="HelloComponent" props="person" watch-depth="reference" />
-```
 
 #### Name action functions and prop functions appropriately
 
