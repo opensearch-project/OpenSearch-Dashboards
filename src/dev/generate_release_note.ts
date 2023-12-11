@@ -6,12 +6,18 @@
 import { resolve } from 'path';
 import { readFileSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { load as loadYaml } from 'js-yaml';
+import { readdir } from 'fs/promises';
 import { version as pkgVersion } from '../../package.json';
-
-// Define constant paths
-const filePath = resolve(__dirname, '..', '..', 'CHANGELOG.md');
-const fragmentDirPath = resolve(__dirname, '..', '..', 'changelogs', 'fragments');
-const releaseNotesDirPath = resolve(__dirname, '..', '..', 'release-notes');
+import {
+  validateFragment,
+  getCurrentDateFormatted,
+  Changelog,
+  SECTION_MAPPING,
+  fragmentDirPath,
+  SectionKey,
+  releaseNotesDirPath,
+  filePath,
+} from './generate_release_note_helper';
 
 // Function to add content after the 'Unreleased' section in the changelog
 function addContentAfterUnreleased(path: string, newContent: string): void {
@@ -38,37 +44,7 @@ function addContentAfterUnreleased(path: string, newContent: string): void {
   writeFileSync(path, fileContent);
 }
 
-// Function to format the current date
-function getCurrentDateFormatted(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-
-  const formattedMonth = month.toString().padStart(2, '0');
-  const formattedDay = day.toString().padStart(2, '0');
-
-  return `${year}-${formattedMonth}-${formattedDay}`;
-}
-
 const currentDate = getCurrentDateFormatted();
-
-// Define section mapping
-const SECTION_MAPPING = {
-  breaking: '💥 Breaking Changes',
-  deprecate: 'Deprecations',
-  security: '🛡 Security',
-  feat: '📈 Features/Enhancements',
-  fix: '🐛 Bug Fixes',
-  infra: '🚞 Infrastructure',
-  doc: '📝 Documentation',
-  chore: '🛠 Maintenance',
-  refactor: '🪛 Refactoring',
-  test: '🔩 Tests',
-};
-
-type SectionKey = keyof typeof SECTION_MAPPING;
-type Changelog = Record<SectionKey, string[]>;
 
 // Initialize sections
 const sections: Changelog = (Object.fromEntries(
@@ -76,49 +52,58 @@ const sections: Changelog = (Object.fromEntries(
 ) as unknown) as Changelog;
 
 // Read fragment files and populate sections
-const fragmentPaths = readdirSync(fragmentDirPath).filter(
-  (path) => path.endsWith('.yml') || path.endsWith('.yaml')
-);
-
-for (const fragmentFilename of fragmentPaths) {
-  const fragmentPath = resolve(fragmentDirPath, fragmentFilename);
-  const fragmentContents = readFileSync(fragmentPath, { encoding: 'utf-8' });
-  const fragmentYaml = loadYaml(fragmentContents) as Changelog;
-
-  for (const [sectionKey, entries] of Object.entries(fragmentYaml)) {
-    if (!SECTION_MAPPING[sectionKey as SectionKey]) {
-      throw new Error(`Unknown section ${sectionKey}.`);
+async function readFragments() {
+  const fragmentPaths = await readdir(fragmentDirPath, { withFileTypes: true });
+  for (const fragmentFilename of fragmentPaths) {
+    // skip non yml or yaml files
+    if (!fragmentFilename.name.endsWith('.yml') && !fragmentFilename.name.endsWith('.yaml')) {
+      // eslint-disable-next-line no-console
+      console.warn(`Skipping non yml or yaml file ${fragmentFilename.name}`);
+      continue;
     }
 
-    sections[sectionKey as SectionKey].push(...entries);
+    const fragmentPath = resolve(fragmentDirPath, fragmentFilename.name);
+    const fragmentContents = readFileSync(fragmentPath, { encoding: 'utf-8' });
+
+    validateFragment(fragmentContents);
+
+    const fragmentYaml = loadYaml(fragmentContents) as Changelog;
+
+    for (const [sectionKey, entries] of Object.entries(fragmentYaml)) {
+      sections[sectionKey as SectionKey].push(...entries);
+    }
+  }
+
+  // Delete fragment files
+  for (const fragmentFilename of fragmentPaths) {
+    const fragmentPath = resolve(fragmentDirPath, fragmentFilename.name);
+    unlinkSync(fragmentPath);
   }
 }
 
-// Generate changelog sections
-const changelogSections = Object.entries(sections).map(([sectionKey, entries]) => {
-  const sectionName = SECTION_MAPPING[sectionKey as SectionKey];
-  return entries.length === 0
-    ? `### ${sectionName}`
-    : `### ${sectionName}\n\n${entries.map((entry) => ` - ${entry}`).join('\n')}`;
-});
+(async () => {
+  await readFragments();
 
-// Generate full changelog
-const changelog = `## [${pkgVersion}-${currentDate}](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/${pkgVersion})
+  // Generate changelog sections
+  const changelogSections = Object.entries(sections).map(([sectionKey, entries]) => {
+    const sectionName = SECTION_MAPPING[sectionKey as SectionKey];
+    return entries.length === 0
+      ? `### ${sectionName}`
+      : `### ${sectionName}\n\n${entries.map((entry) => ` - ${entry}`).join('\n')}`;
+  });
 
-${changelogSections.join('\n\n')}
-`;
+  // Generate full changelog
+  const changelog = `## [${pkgVersion}-${currentDate}](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/${pkgVersion})
 
-// Generate release note
-const releaseNoteFilename = `opensearch-dashboards.release-notes-${pkgVersion}.md`;
-const releaseNoteHeader = `# VERSION ${pkgVersion} Release Note`;
-const releaseNote = `${releaseNoteHeader}\n\n${changelogSections.join('\n\n')}`;
-writeFileSync(resolve(releaseNotesDirPath, releaseNoteFilename), releaseNote);
+  ${changelogSections.join('\n\n')}
+  `;
 
-// Update changelog file
-addContentAfterUnreleased(filePath, changelog);
+  // Generate release note
+  const releaseNoteFilename = `opensearch-dashboards.release-notes-${pkgVersion}.md`;
+  const releaseNoteHeader = `# VERSION ${pkgVersion} Release Note`;
+  const releaseNote = `${releaseNoteHeader}\n\n${changelogSections.join('\n\n')}`;
+  writeFileSync(resolve(releaseNotesDirPath, releaseNoteFilename), releaseNote);
 
-// Delete fragment files
-for (const fragmentFilename of fragmentPaths) {
-  const fragmentPath = resolve(fragmentDirPath, fragmentFilename);
-  unlinkSync(fragmentPath);
-}
+  // Update changelog file
+  addContentAfterUnreleased(filePath, changelog);
+})();
