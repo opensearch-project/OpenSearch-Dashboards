@@ -42,6 +42,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Replace `node-sass` with `sass-embedded` ([#5338](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5338))
 - [Version] Bump version to 2.12.0 ([#5294](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5294))
+- Add @SuZhou-Joe as a maintainer. ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
 
 ### 🪛 Refactoring
 
