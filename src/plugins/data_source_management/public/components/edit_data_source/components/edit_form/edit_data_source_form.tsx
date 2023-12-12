@@ -860,7 +860,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             type={'dual'}
             value={
               this.props.existingDataSource.auth.type === AuthType.SigV4
-                ? this.maskedPassword.toString()
+                ? this.maskedPassword
                 : this.state.auth.credentials?.accessKey?.toString()
             }
             onChange={this.onChangeAccessKey}
@@ -951,7 +951,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 type={'dual'}
                 value={
                   this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType
-                    ? this.maskedPassword.toString()
+                    ? this.maskedPassword
                     : this.state.auth.credentials?.password?.toString()
                 }
                 isInvalid={!!this.state.formErrorsByField.createCredential?.password?.length}
