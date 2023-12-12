@@ -20,6 +20,7 @@ import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
+import { syncQueryStateWithUrl } from '../../../../../data/public';
 
 export const getTopNavLinks = (
   services: DiscoverViewServices,
@@ -35,6 +36,8 @@ export const getTopNavLinks = (
     toastNotifications,
     chrome,
     store,
+    data: { query },
+    osdUrlStateStorage,
   } = services;
 
   const newSearch = {
@@ -107,6 +110,9 @@ export const getTopNavLinks = (
 
             // set App state to clean
             store!.dispatch({ type: setSavedSearchId.type, payload: id });
+
+            // starts syncing `_g` portion of url with query services
+            syncQueryStateWithUrl(query, osdUrlStateStorage);
 
             return { id };
           }

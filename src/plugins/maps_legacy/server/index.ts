@@ -52,7 +52,7 @@ export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('map.includeElasticMapsService', 'map.includeOpenSearchMapsService'),
-    renameFromRoot('map.proxyOpenSearchMapsServiceInMaps', 'map.proxyElasticMapsServiceInMaps'),
+    renameFromRoot('map.proxyElasticMapsServiceInMaps', 'map.proxyOpenSearchMapsServiceInMaps'),
     renameFromRoot(
       'map.regionmap.includeElasticMapsService',
       'map.regionmap.includeOpenSearchMapsService'

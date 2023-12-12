@@ -32,6 +32,7 @@ import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
+import { RecursiveReadonly } from '@osd/utility-types';
 
 import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
@@ -73,7 +74,7 @@ interface StartDeps {
 // Mount functions with two arguments are assumed to expect deprecated `context` object.
 const isAppMountDeprecated = (mount: (...args: any[]) => any): mount is AppMountDeprecated =>
   mount.length === 2;
-function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
+function filterAvailable<T>(m: Map<string, T>, capabilities: RecursiveReadonly<Capabilities>) {
   return new Map(
     [...m].filter(
       ([id]) => capabilities.navLinks[id] === undefined || capabilities.navLinks[id] === true
