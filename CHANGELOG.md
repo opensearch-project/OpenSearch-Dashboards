@@ -57,6 +57,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Bump `js-yaml` from `3.14.0` to `4.1.0` ([#3770](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3770))
 - Replace `node-sass` with `sass-embedded` ([#5338](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5338))
 - Bump `chromedriver` from `107.0.3` to `119.0.1` ([#5465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5465))
+- Add @SuZhou-Joe as a maintainer. ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
 
 ### 🪛 Refactoring
 
