@@ -204,7 +204,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateUsername = () => {
-    const isValid = !!this.state.auth.credentials.username?.toString().trim().length;
+    const isValid =
+      typeof this.state.auth.credentials.username === 'string' &&
+      !!this.state.auth.credentials.username.trim().length;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -263,7 +265,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateRegion = () => {
-    const isValid = !!this.state.auth.credentials.region?.toString().trim().length;
+    const isValid =
+      typeof this.state.auth.credentials.region === 'string' &&
+      !!this.state.auth.credentials.region.trim().length;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -884,7 +888,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             type={'dual'}
             value={
               this.props.existingDataSource.auth.type === AuthType.SigV4
-                ? this.maskedPassword.toString()
+                ? this.maskedPassword
                 : this.state.auth.credentials?.secretKey?.toString()
             }
             onChange={this.onChangeSecretKey}

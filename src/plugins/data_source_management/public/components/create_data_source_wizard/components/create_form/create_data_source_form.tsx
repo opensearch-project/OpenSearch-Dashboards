@@ -162,7 +162,9 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   validateUsername = () => {
-    const isValid = !!this.state.auth.credentials.username?.toString().trim().length;
+    const isValid =
+      typeof this.state.auth.credentials.username === 'string' &&
+      !!this.state.auth.credentials.username.trim().length;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -206,7 +208,9 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   validateRegion = () => {
-    const isValid = !!this.state.auth.credentials.region?.toString().trim().length;
+    const isValid =
+      typeof this.state.auth.credentials.region === 'string' &&
+      !!this.state.auth.credentials.region.trim().length;
     this.setState({
       formErrorsByField: {
         ...this.state.formErrorsByField,
@@ -365,7 +369,11 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
-                value={this.state.auth.credentials.username?.toString() || ''}
+                value={
+                  typeof this.state.auth.credentials.username === 'string'
+                    ? this.state.auth.credentials.username
+                    : ''
+                }
                 onChange={this.onChangeUsername}
                 onBlur={this.validateUsername}
                 data-test-subj="createDataSourceFormUsernameField"

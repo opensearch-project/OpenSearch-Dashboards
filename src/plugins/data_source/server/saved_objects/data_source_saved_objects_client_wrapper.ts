@@ -243,14 +243,14 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private validateAttributes<T = unknown>(attributes: T) {
-    const { title, endpoint, auth } = attributes as DataSourceAttributes;
+    const { title, endpoint, auth } = attributes as Partial<DataSourceAttributes>;
     if (!title?.trim?.().length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"title" attribute must be a non-empty string'
       );
     }
 
-    if (!isValidURL(endpoint, this.endpointBlockedIps)) {
+    if (!isValidURL(endpoint ?? '', this.endpointBlockedIps)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"endpoint" attribute is not valid or allowed'
       );
@@ -264,7 +264,7 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private validateAuth<T = unknown>(auth: T) {
-    const { type, credentials } = auth as DataSourceAttributes['auth'];
+    const { type, credentials } = auth as Partial<DataSourceAttributes['auth']>;
 
     if (!type) {
       throw SavedObjectsErrorHelpers.createBadRequestError('"auth.type" attribute is required');
