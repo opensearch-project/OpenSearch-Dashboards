@@ -3,3 +3,6 @@ feat:
 
 doc:
 - Adds documentation ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
+
+test:
+- Test ([#2](https://github.com/BigSamu/OpenSearch-Dashboards/pull/2))
