@@ -10,76 +10,31 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
-- [CVE-2022-25869] Remove AngularJS 1.8 ([#5086](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5086))
-- [CVE-2022-37599] Bump loader-utils from `2.0.3` to `2.0.4` ([#3031](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3031)). Backwards-compatible fixes included in v2.6.0 and v1.3.7 releases.
-- [CVE-2022-37603] Bump loader-utils from `2.0.3` to `2.0.4` ([#3031](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3031)). Backwards-compatible fixes included in v2.6.0 and v1.3.7 releases.
 - [WS-2021-0638] Bump mocha from `7.2.0` to `10.1.0` ([#2711](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2711))
-- [CVE-2023-26115] Bump `word-wrap` from `1.2.3` to `1.2.4` ([#4589](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4589))
-- Bump `node-sass` to a version that uses a newer `libsass` ([#4649](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4649))
-- [CVE-2019-11358] Bump version of tinygradient from 0.4.3 to 1.1.5 ([#4742](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4742))
-- [CVE-2021-3520] Bump `lmdb` from `2.8.0` to `2.8.5` ([#4804](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4804))
-- Remove examples and other unwanted artifacts from installed dependencies ([#4896](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4896))
 - Add support for TLS v1.3 ([#5133](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5133))
-- [CVE-2023-45133] Add package resolution for `@babel/traverse` to `7.23.2` to fix vulnerability ([#5309](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5309))
 - [CVE-2023-45133] Bump all babel dependencies from `7.16.x` to `7.22.9` to fix upstream vulnerability ([#5428](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5428))
-- [CVE-2023-46234] Bump `eslint-import-resolver-webpack` from `0.11.1` to `0.13.8` and `browserify-sign` from `4.2.1` to `4.2.2` ([#5414](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5414/))
+- [CVE-2023-45857] Bump `axios` from `0.27.2` to `1.6.1` ([#5470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5470))
 
 ### 📈 Features/Enhancements
 
-- Enable theme-switching via Advanced Settings to preview the Next theme ([#4475](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4475))
-- Optimize `augment-vis` saved obj searching by adding arg to saved obj client ([#4595](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4595))
-- Add resource ID filtering in fetch `augment-vis` obj queries ([#4608](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4608))
-- Reduce the amount of comments in compiled CSS ([#4648](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4648))
-- [Saved Object Service] Customize saved objects service status ([#4696](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4696))
-- Remove minimum constraint on opensearch hosts to allow empty host ([#4701](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4701))
-- [Discover] Update styles to compatible with OUI `next` theme ([#4644](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4644))
-- [Home] Add modal to introduce the `next` theme ([#4715](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4715))
-- [Home] Add new theme sample dashboard screenshots ([#4906](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4906))
-- Remove visualization editor sidebar background ([#4719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4719))
-- [Vis Colors] Remove customized colors from sample visualizations and dashboards ([#4741](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4741))
-- [Vis Colors] Update color mapper to prioritize unique colors per visualization rather than across entire dashboard ([#4890](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4890))
-- [Decouple] Allow plugin manifest config to define semver compatible OpenSearch plugin and verify if it is installed on the cluster([#4612](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4612))
-- [Advanced Settings] Consolidate settings into new "Appearance" category and add category IDs ([#4845](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4845))
-- Adds Data explorer framework and implements Discover using it ([#4806](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4806))
-- [Theme] Use themes' definitions to render the initial view ([#4936](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4936))
-- [Theme] Make `next` theme the default ([#4854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4854))
-- [Discover] Update embeddable for saved searches ([#5081](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5081))
 - Add support for read-only mode through tenants ([#4498](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4498))
 - [Workspace] Add core workspace service module to enable the implementation of workspace features within OSD plugins ([#5092](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5092))
 - [Workspace] Setup workspace skeleton and implement basic CRUD API ([#5075](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5075))
+- [Decouple] Add new cross compatibility check core service which export functionality for plugins to verify if their OpenSearch plugin counterpart is installed on the cluster or has incompatible version to configure the plugin behavior([#4710](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4710))
+- [Discover] Display inner properties in the left navigation bar [#5429](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5429)
 
 ### 🐛 Bug Fixes
 
 - [Chore] Update deprecated url methods (url.parse(), url.format()) ([#2910](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2910))
 - Cleanup unused url ([#3847](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3847))
-- Fix Node.js download link ([#4556](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4556))
 - [TSVB, Dashboards] Fix inconsistent dark mode code editor themes ([#4609](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4609))
-- [Table Visualization] Fix width of multiple tables when rendered in column view ([#4638](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4638))
-- [Legacy Maps] Fix dark mode style overrides ([#4658](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4658))
-- Fix management overview page duplicate rendering ([#4636](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4636))
-- Bump `agentkeepalive` to v4.5.0 to solve a problem preventing the use `https://ip` in `opensearch.hosts` ([#4949](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4949))
-- [Table Vis] Fix filter actions on data table vis cells ([#4837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4837))
-- Fix broken app when management is turned off ([#4891](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4891))
-- Correct the generated path for downloading plugins by their names on Windows ([#4953](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4953))
 - Fix `maps.proxyOpenSearchMapsServiceInMaps` config definition so it can be set ([#5170](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5170))
-- Fix `buildPointSeriesData` unit test fails due to local timezone ([#4992](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4992))
-- [Data Explorer][Discover] Fix total hits issue for no time based data ([#5087](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5087))
-- [Data Explorer][Discover] Add onQuerySubmit to top nav and allow force update to embeddable ([#5160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5160))
-- [Discover] Fix misc navigation issues ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
-- [Discover] Fix mobile view ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
-- Fix `visAugmenter` forming empty key-value pairs in its calls to the `SavedObject` API ([#5190](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5190))
-- Fix errors in conditions for activating `vizAugmenter` ([#5213](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5213))
-- [Data Explorer][Discover] Automatically load solo added default index pattern ([#5171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5171))
-- [Data Explorer][Discover] Allow data grid to auto adjust size based on fetched data count ([#5191](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5191))
-- [BUG] Fix wrong test due to time conversion ([#5174](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5174))
-- [BUG][Data Explorer][Discover] Allow filter and query persist when refresh page or paste url to a new tab ([#5206](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5206))
-- [Data Explorer] Remove the `X` icon in data source selection field ([#5238](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5238))
-- [BUG][Fuctional Test] Make setDefaultAbsoluteRange more robust and update doc views tests ([#5242](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5242))
 - [BUG] Add platform "darwin-arm64" to unit test ([#5290](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5290))
 - [BUG][Dev Tool] Add dev tool documentation link to dev tool's help menu [#5166](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5166)
+- Fix missing border for header navigation control on right ([#5450](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5450))
+- [BUG] Fix filtering issue in data source selector ([5484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5484))
+- [BUG][Data] Support for custom filters with heterogeneous data fields ([5577](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5577))
 - [BUG][Data] Fix empty suggestion history when querying in search bar [#5349](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5349)
-- Fix navigation issue across dashboards ([#5435](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5435))
-- [Discover] Fix table panel auto-sizing ([#5441](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5441))
 
 ### 🚞 Infrastructure
 
@@ -87,53 +42,219 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Upgrade yarn version to be compatible with @opensearch-project/opensearch ([#3443](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3443))
 - Add an achievement badger to the PR ([#3721](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3721))
 - [CI] Enable inputs for manually triggered Cypress test jobs ([#5134](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5134))
-- [CI] Add `NODE_OPTIONS` and disable disk allocation threshold ([#5172](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5172))
-- [CI] Supprt CI Groups for Cypress test jobs ([#5298](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5298))
 - [CI] Replace usage of deprecated `set-output` in workflows ([#5340](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5340))
-- [CI][Test] Add plugin functional tests on GitHub Actions ([#5383](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5383))
+- [Chore] Add `--security` for `opensearch snapshot` and `opensearch_dashboards` to configure local setup with the security plugin ([#5451](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5451))
 
 ### 📝 Documentation
 
 - [Doc] Add COMMUNICATIONS.md with info about Slack, forum, office hours ([#3837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3837))
 - Add plugin development section in DEVELOPER_GUIDE.md ([#3989](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3989))
-- [Vis Augmenter] Add documentation to `vis_augmenter` plugin ([#4527](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4527))
 - Remove ftr test step from PR template ([#5217](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5217))
 - [Doc] Update EUI doc site links to point to OUI doc site ([#5293](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5293))
 
 ### 🛠 Maintenance
 
-- Remove angular html extractor ([#4680](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4680))
 - Removes `minimatch` manual resolution ([#3019](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3019))
 - Upgrade `vega-lite` dependency from `4.17.0` to `^5.6.0` ([#3076](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3076)). Backwards-compatible version included in v2.5.0 release.
 - Bump `js-yaml` from `3.14.0` to `4.1.0` ([#3770](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3770))
-- [@osd/pm] Automate multi-target bootstrap and build ([#4650](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4650))
-- Update webpack environment targets ([#4649](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4649))
-- Add @curq as maintainer ([#4760](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4760))
-- Bump `oui` to `1.3.0` ([#4941](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4941))
-- Add @bandinib-amzn as maintainer ([#5113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5113))
-- Add @bandinib-amzn to CODEOWNERS file. ([#5456](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5456))
+- Replace `node-sass` with `sass-embedded` ([#5338](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5338))
 - Bump `chromedriver` from `107.0.3` to `119.0.1` ([#5465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5465))
+- Bump `typescript` resolution from `4.0.2` to `4.6.4` ([#5470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5470))
+- Add @SuZhou-Joe as a maintainer. ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
 
 ### 🪛 Refactoring
 
 - [Console] Remove unused ul element and its custom styling ([#3993](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3993))
-- Fix EUI/OUI type errors ([#3798](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3798))
 - Remove unused Sass in `tile_map` plugin ([#4110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4110))
-- [Maps Legacy] Removed KUI usage in `maps_legacy` plugin([#3998](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3998))
-- [Markdown] Replace custom CSS styles and HTML markup with OUI components ([#4390](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4390))
-- [Vis Colors] [VisLib] Update legend colors to use OUI color palette ([#4365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4365))
-- [Vis colors] Update legacy mapped colors in charts plugin to use `ouiPaletteColorBlind()`, Update default color in legacy visualizations to use `ouiPaletteColorBlind()[0]` ([#4398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4398))
-- [Saved Objects Management] Add new or remove extra tags and styles ([#4069](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4069))
-- [Console] Migrate `/lib/autocomplete/` module to TypeScript ([#4148](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4148))
-- [Console] Migrate `/lib/!autocomplete/` module to TypeScript ([#4150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4150))
-- [Dashboard] Restructure the `Dashboard` plugin folder to be more cohesive with the project ([#4575](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4575))
-- Refactor logo usage to centralize and optimize assets and improve tests ([#4702](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4702))
 - [Home] Remove unused tutorials ([#5212](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5212))
 
 ### 🔩 Tests
 
-- [Tests] Add BWC tests for 2.9 and 2.10 ([#4762](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4762))
-- [Tests-refactor] Remove angular code from plugin_functional and update tests ([#5221](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5221))
+## [2.11.1 - 2023-11-21](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.11.1)
+
+### 🛡 Security
+
+- [CVE-2023-45133] Add package resolution for `@babel/traverse` to `7.23.2` to fix vulnerability ([#5309](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5309))
+- [CVE-2023-46234] Bump `eslint-import-resolver-webpack` from `0.11.1` to `0.13.8` and `browserify-sign` from `4.2.1` to `4.2.2` ([#5414](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5414/))
+
+### 📈 Features/Enhancements
+
+### 🐛 Bug Fixes
+
+- Fix navigation issue across dashboards ([#5435](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5435))
+- [Discover] Fix table panel auto-sizing ([#5441](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5441))
+
+### 🚞 Infrastructure
+
+- [CI][Test] Add plugin functional tests on GitHub Actions ([#5383](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5383))
+
+### 📝 Documentation
+
+- Add Release Notes and update CHANGELOG.md for 2.11.1 ([#5486](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5486))
+
+### 🔩 Tests
+
+### 🛠 Maintenance
+
+## [2.11.0 - 2023-10-18](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.11.0)
+
+### 🛡 Security
+
+- [CVE-2022-25869] Remove AngularJS `1.8` ([#5086](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5086))
+
+### 📈 Features/Enhancements
+
+- [Console] Add support for JSON with long numerals ([#4562](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4562))
+- [Data] Add `DataSource` service and `DataSourceSelector` for multiple datasource support ([#5167](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5167))
+- [Discover] Update embeddable for saved searches ([#5081](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5081))
+
+### 🐛 Bug Fixes
+
+- Bump `agentkeepalive` to `4.5.0` to solve a problem preventing the use `https://ip` in `opensearch.hosts` ([#4949](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4949))
+- [Data Explorer][Discover] Add `onQuerySubmit` to top nav and allow force update to embeddable ([#5160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5160))
+- [Data Explorer][Discover] Automatically load default index pattern ([#5171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5171))
+- [Data Explorer][Discover] Fix total hits issue for no time based data ([#5087](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5087))
+- [Data Explorer][Discover] Allow data grid to auto adjust size based on fetched data count ([#5191](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5191))
+- [Data Explorer][Discover] Allow filter and query persist when refresh page or paste url to a new tab ([#5206](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5206))
+- [Data Explorer][Discover] Fix misc navigation issues ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
+- [Data Explorer][Discover] Fix mobile view ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
+- [Table Visualization] Fix width of multiple tables when rendered in column view ([#4638](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4638))
+- [Table Visualization] Fix filter actions on data table vis cells ([#4837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4837))
+- [Vis Augmenter] Fix errors in conditions for activating `vizAugmenter` ([#5213](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5213))
+- [Vis Augmenter] Fix `visAugmenter` forming empty key-value pairs in its calls to the `SavedObject` API ([#5190](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5190))
+- [Data Explorer] Remove the `X` icon in data source selection field ([#5238](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5238))
+- [BUG][Fuctional Test] Make setDefaultAbsoluteRange more robust and update doc views tests ([#5242](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5242))
+
+### 🚞 Infrastructure
+
+- [CI] Add `NODE_OPTIONS` and disable disk allocation threshold ([#5172](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5172))
+- [CI] Supprt CI Groups for Cypress test jobs ([#5298](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5298))
+
+### 🛠 Maintenance
+
+- [Version] Version increment from 2.10 to 2.11 ([#4975](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4975))
+- Remove angular html extractor ([#4680](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4680))
+- Add @bandinib-amzn as maintainer ([#5113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5113))
+- Add @bandinib-amzn to CODEOWNERS file. ([#5456](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5456))
+
+### 🔩 Tests
+
+- [Functional][Doc Views] Remove angular code from `plugin_functional` and update tests ([#5221](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5221))
+- [Unit][Data Explorer][Discover] Fix wrong test due to time conversion ([#5174](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5174))
+- [Unit][Data Explorer][Discover]Fix `buildPointSeriesData` unit test fails due to local timezone ([#4992](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4992))
+
+## [2.10.0 - 2023-09-25](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.10.0)
+
+### 🛡 Security
+
+- Bump word-wrap from 1.2.3 to 1.2.4 ([#4589](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4589))
+- Bump version of tinygradient from 0.4.3 to 1.1.5 ([#4742](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4742))
+- Bump lmdb from 2.8.0 to 2.8.5 ([#4804](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4804))
+- Alias and bump mocha ([#4874](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4874))
+- Remove examples and other unwanted artifacts from installed dependencies ([#4896](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4896))
+
+### 📈 Features/Enhancements
+
+- [Vis colors] Update legacy mapped colors in charts plugin to use ouiPaletteColorBlind() ([#4398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4398))
+- [Saved Objects Management] Add new or remove extra tags and styles ([#4069](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4069))
+- Chore (home): Update visual consistency dashboard TSVB colors ([#4501](http://github.com/opensearch-project/OpenSearch-Dashboards/pull/4501))
+- Feature (home): Update visual consistency sample dashboard with more vis ([#4581](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4581))
+- Add resource ID filtering in fetch augment-vis obj queries ([#4608](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4608))
+- Enable theme-switching via Advanced Settings to preview the Next theme ([#4475](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4475))
+- Feat (home): Add remaining vis type examples ([#4619](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4619))
+- Feat (Discover): Update styles to be compatible with next theme ([#4644](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4644))
+- Update webpack environment targets ([#4649](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4649))
+- [Table Visualization] Replace div containers with OuiFlex components ([#4272](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4272))
+- Reduce the amount of comments in compiled CSS ([#4648](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4648))
+- Feat (home): Remove color customizations from sample dashboards ([#4741](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4741))
+- Remove visualization editor background ([#4719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4719))
+- Add saved objects service status api ([#4696](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4696))
+- Allow plugin manifest config to define semver compatible OpenSearch plugin and verify if it is installed on the cluster ([#4612](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4612))
+- Eliminate duplicate dashboard breadcrumb text ID ([#4805](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4805))
+- [@osd/pm] Automate multi-target bootstrap and build ([#4650](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4650))
+- [Home] Add modal to introduce the `next` theme ([#4715](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4715))
+- [Home] Add new theme sample dashboard screenshots ([#4906](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4906))
+- Change color fn used to calculate icon colors for search typeahead suggestions ([#4884](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4884))
+- [Next Theme] Make next theme the default ([#4854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4854))
+- [Vis Colors] Update color mapper to prioritize unique colors per vis ([#4890](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4890))
+- [Advanced Settings] Consolidate settings into new "Appearance" category and add category IDs ([#4845](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4845))
+- Adds Data explorer framework and implements Discover using it ([#4806](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4806))
+- Use themes' definitions to render the initial view. This impacts the loading screen font and colors ([#4936](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4936))
+
+### 🐛 Bug Fixes
+
+- [VisLib] Replace legend color palette with OUI color palette ([#4365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4365))
+- Fix (styles): Make ace code editor themes consistent ([#4609](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4609))
+- [i18n] fix generation scripts ([#4252](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4252))
+- Fix (Legacy Maps): Add necessary specificity for dark mode style overrides ([#4658](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4658))
+- Fix --font-text CSS var usage and add more leaflet font overrides ([#4674](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4674))
+- Fix snapshots that didn't get updated between PRs ([#4863](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4863))
+- [BUG] Fix management overview page duplicate rendering ([#4636](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4636))
+- Fixes broken app when management is turned off ([#4891](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4891))
+- [CCI] Fix EUI/OUI type errors ([#3798](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3798))
+- Correct the generated path for downloading plugins by their names on Windows ([#4953](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4953))
+
+### 📝 Documentation
+
+- Add missing 1.3.x patch release notes to 2.x branch ([#4771](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4771))
+- [Vis Augmenter] Add documentation to `vis_augmenter` plugin ([#4527](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4527))
+
+### 🛠 Maintenance
+
+- Version increment from 2.9 to 2.10 ([#4545](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4545))
+- Bump OpenSearch-Dashboards 2.10.0 to use nodejs 18.16.0 version ([#4948](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4948))
+- Bump `oui` to `1.3.0` ([#4941](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4941))
+- Add @curq as maintainer ([#4760](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4760))
+
+### 🪛 Refactoring
+
+- [Markdown] Replace custom css styles and native html with OUI ([#4390](http://github.com/opensearch-project/OpenSearch-Dashboards/pull/4390))
+- Removed KUI usage in `maps_legacy` plugin ([#3998](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3998))
+- [Console] Converted all `/lib/autocomplete/**/*.js` files to typescript ([#4148](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4148))
+- [Console] Convert all non-autocomplete lib files to typescript ([#4150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4150))
+- Refactor/remove breadcrumb styling main ([#4621](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4621))
+- Bump `node-sass` to a version that uses a newer `libsass` ([#4651](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4651))
+- [Dashboards] restructure folder to be more cohesive with the project ([#4575](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4575))
+- Remove minimum constraint on opensearch hosts ([#4701](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4701))
+- [CCI] Remove unused tags in the navigation plugin ([#3964](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3964))
+- Refactor logo usage ([#4702](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4702))
+- [Markdown] Replace custom CSS styles and HTML markup with OUI components ([#4390](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4390))
+- Fix EUI/OUI type errors ([#3798](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3798))
+
+### 🔩 Tests
+
+- [CI] Fix BWC related CI failures by swapping dist url with snapshot url ([#4828](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4828))
+- [Dashboard De-Angular] Add unit tests for `dashboard_listing` and `dashboard_top_nav` ([#4640](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4640))
+- [Tests] Add BWC tests for 2.9 and 2.10 versions ([#4762](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4762))
+- [Stylelint] Add `no_restricted_values` linter rule ([#4413](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4413))
+- Units test for utils folder ([#4641](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4641))
+- Test (linkchecker): Exclude checking dead link ([#4720](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4720))
+- Update baseline images for functional tests ([#4879](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4879))
+
+## [1.3.13 - 2023-09-21](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/1.3.13)
+
+### 🛡 Security
+
+- [CVE-2019-11358] Bump version of `tinygradient` from `0.4.3` to `1.1.5` ([#4571](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4751))
+- [CVE-2023-26136] Bump `word-wrap` from `1.2.3` to `1.2.4` ([#5002](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5002))
+- [CVE-2022-21670] Bump `markdown-it` from `10.0.0` to `12.3.2` ([#5016](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5016))
+- [CVE-2022-33987] Partially fix security issues for `got` by bumping `@elastic/makelogs` from `6.0.0` to `6.1.1` and updating yarn.lock ([#5006](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5006))
+- Bump `yo` from `2.0.6` to `3.1.1` ([#5005]( https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5005))
+- [CVE-2023-0842] Bump `xml2js` from `0.4.22` to `0.6.2` ([#5024](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5024))
+
+### 📈 Features/Enhancements
+
+### 🐛 Bug Fixes
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+### 🛠 Maintenance
+
+- [Version] Increment version to 1.3.13 ([#4721](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4721))
+- [Chore] Add company.net to exclusion list in linkchecker ([#4704](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4704))
+- [Chore] Exclude checking dead link in linkchecker ([#4868](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4868))
 
 ## [1.3.12 - 2023-08-10](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/1.3.12)
 
@@ -193,6 +314,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Vis Augmenter] Update base vis height in view events flyout ([#4535](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4535))
 - [Dashboard De-Angular] Add more unit tests for utils folder ([#4641](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4641))
 - [Dashboard De-Angular] Add unit tests for dashboard_listing and dashboard_top_nav ([#4640](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4640))
+- Optimize `augment-vis` saved obj searching by adding arg to saved obj client ([#4595](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4595))
 
 ### 🐛 Bug Fixes
 
@@ -203,6 +325,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Update main menu to display 'Dashboards' for consistency ([#4453](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4453))
 - [Multiple DataSource] Retain the original sample data API ([#4526](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4526))
 - Remove `lmdb-store` to fix backport issue ([#4266](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4266))
+- Fix Node.js download link ([#4556](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4556))
 
 ### 🚞 Infrastructure
 

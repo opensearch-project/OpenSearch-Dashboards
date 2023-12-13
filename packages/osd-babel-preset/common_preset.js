@@ -29,8 +29,8 @@
  */
 
 const plugins = [
-  '@babel/plugin-transform-class-properties',
-  '@babel/plugin-transform-private-methods',
+  require.resolve('@babel/plugin-transform-class-properties'),
+  require.resolve('@babel/plugin-transform-private-methods'),
   require.resolve('babel-plugin-add-module-exports'),
 
   // Optional Chaining proposal is stage 4 (https://github.com/tc39/proposal-optional-chaining)

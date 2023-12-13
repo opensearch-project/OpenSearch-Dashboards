@@ -233,6 +233,7 @@ export class LegacyService implements CoreService {
           throw new Error('core.start.coreUsageData.getCoreUsageData is unsupported in legacy');
         },
       },
+      crossCompatibility: startDeps.core.crossCompatibility,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
