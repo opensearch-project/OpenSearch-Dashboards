@@ -1,4 +1,0 @@
-feat:
-- Designed new procedure for automating the process for updates of changelogs and release notes ([#5519](https://github.com/BigSamu/OpenSearch-Dashboards/pull/5519))
-- Created Github workflow automating creation of changeset files (i.e. fragments) with changelog entries related to update([#5519](https://github.com/BigSamu/OpenSearch-Dashboards/pull/5519))
-- Created script automating the update of CHANGELOG.md file and release notes files ([#5519](https://github.com/BigSamu/OpenSearch-Dashboards/pull/5519))
