@@ -37,7 +37,7 @@ export const SECTION_MAPPING = {
 export type SectionKey = keyof typeof SECTION_MAPPING;
 export type Changelog = Record<SectionKey, string[]>;
 
-const MAX_ENTRY_LENGTH = 50;
+const MAX_ENTRY_LENGTH = 100;
 
 // validate format of fragment files
 export function validateFragment(content: string) {
