@@ -34,7 +34,7 @@ import { CoreService } from '../../types';
 import { MomentService } from './moment';
 import { StylesService } from './styles';
 
-interface Deps {
+export interface Deps {
   uiSettings: IUiSettingsClient;
 }
 

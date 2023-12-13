@@ -48,7 +48,7 @@ import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
 
-interface SetupDeps {
+export interface SetupDeps {
   opensearch: Pick<InternalOpenSearchServiceSetup, 'status$'>;
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
