@@ -44,8 +44,8 @@ const aliasedApps: { [key: string]: string[] } = {
   discover: ['data-explorer'],
 };
 
-export const isActiveNavLink = (appId: string | undefined, linkId: string) =>
-  appId === linkId || aliasedApps[linkId]?.includes(appId || '');
+export const isActiveNavLink = (appId: string | undefined, linkId: string): boolean =>
+  !!(appId === linkId || aliasedApps[linkId]?.includes(appId || ''));
 
 interface Props {
   link: ChromeNavLink;
