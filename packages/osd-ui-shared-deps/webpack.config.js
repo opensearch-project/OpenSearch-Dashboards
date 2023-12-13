@@ -131,6 +131,17 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           },
         ],
       },
+      {
+        test: /worker_proxy_service\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+          },
+        },
+      },
     ],
   },
 
