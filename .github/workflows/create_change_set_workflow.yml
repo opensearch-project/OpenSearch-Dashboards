@@ -9,6 +9,7 @@ on:
 jobs:
   update-changelog:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
