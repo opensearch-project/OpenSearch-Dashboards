@@ -37,7 +37,7 @@ Existing applications can migrate their data exploration views to Data Explorer.
 1. Registering the application as a view.
 2. Using Data Explorer's state management and data source.
 3. Modifying routes to utilize Data Explorer's routes.
-4. Adapting the UI to match Data Explorer's panel and workspace components.
+4. Adapting the UI to match Data Explorer's panel and canvas components.
 
 #### Routing:
 
