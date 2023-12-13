@@ -4,7 +4,7 @@
  */
 
 import { resolve } from 'path';
-import { readFileSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
+import { readFileSync, writeFileSync, unlinkSync, Dirent } from 'fs';
 import { load as loadYaml } from 'js-yaml';
 import { readdir } from 'fs/promises';
 import { version as pkgVersion } from '../../package.json';
@@ -44,15 +44,21 @@ function addContentAfterUnreleased(path: string, newContent: string): void {
   writeFileSync(path, fileContent);
 }
 
-const currentDate = getCurrentDateFormatted();
-
-// Initialize sections
-const sections: Changelog = (Object.fromEntries(
-  Object.keys(SECTION_MAPPING).map((key) => [key, []])
-) as unknown) as Changelog;
+function deleteFragments(fragmentPaths: Dirent[]): void {
+  // Delete fragment files
+  for (const fragmentFilename of fragmentPaths) {
+    const fragmentPath = resolve(fragmentDirPath, fragmentFilename.name);
+    unlinkSync(fragmentPath);
+  }
+}
 
 // Read fragment files and populate sections
 async function readFragments() {
+  // Initialize sections
+  const sections: Changelog = (Object.fromEntries(
+    Object.keys(SECTION_MAPPING).map((key) => [key, []])
+  ) as unknown) as Changelog;
+
   const fragmentPaths = await readdir(fragmentDirPath, { withFileTypes: true });
   for (const fragmentFilename of fragmentPaths) {
     // skip non yml or yaml files
@@ -73,16 +79,12 @@ async function readFragments() {
       sections[sectionKey as SectionKey].push(...entries);
     }
   }
-
-  // Delete fragment files
-  for (const fragmentFilename of fragmentPaths) {
-    const fragmentPath = resolve(fragmentDirPath, fragmentFilename.name);
-    unlinkSync(fragmentPath);
-  }
+  return { sections, fragmentPaths };
 }
 
 (async () => {
-  await readFragments();
+  const { sections, fragmentPaths } = await readFragments();
+  deleteFragments(fragmentPaths);
 
   // Generate changelog sections
   const changelogSections = Object.entries(sections).map(([sectionKey, entries]) => {
@@ -93,6 +95,7 @@ async function readFragments() {
   });
 
   // Generate full changelog
+  const currentDate = getCurrentDateFormatted();
   const changelog = `## [${pkgVersion}-${currentDate}](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/${pkgVersion})
 
   ${changelogSections.join('\n\n')}
