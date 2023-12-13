@@ -7,6 +7,7 @@ import { resolve } from 'path';
 
 export const filePath = resolve(__dirname, '..', '..', 'CHANGELOG.md');
 export const fragmentDirPath = resolve(__dirname, '..', '..', 'changelogs', 'fragments');
+export const fragmentTempDirPath = resolve(__dirname, '..', '..', 'changelogs', 'temp_fragments');
 export const releaseNotesDirPath = resolve(__dirname, '..', '..', 'release-notes');
 
 export function getCurrentDateFormatted(): string {
