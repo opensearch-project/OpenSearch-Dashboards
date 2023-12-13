@@ -56,7 +56,7 @@ import {
 import { RequestHandlerContext } from '../../server';
 import { registerCoreHandlers } from './lifecycle_handlers';
 
-interface SetupDeps {
+export interface SetupDeps {
   context: ContextSetup;
 }
 
