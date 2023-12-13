@@ -58,7 +58,8 @@ export function validateFragment(content: string) {
       if (entry === '') {
         continue;
       }
-      if (!entryRegex.test(entry)) {
+      // if (!entryRegex.test(entry)) {
+      if (!entryRegex.test(entry.trim())) {
         throw new Error(`Invalid entry ${entry} in section ${sectionKey}.`);
       }
     }

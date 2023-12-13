@@ -84,7 +84,6 @@ async function readFragments() {
 
 (async () => {
   const { sections, fragmentPaths } = await readFragments();
-  deleteFragments(fragmentPaths);
 
   // Generate changelog sections
   const changelogSections = Object.entries(sections).map(([sectionKey, entries]) => {
@@ -109,4 +108,6 @@ async function readFragments() {
 
   // Update changelog file
   addContentAfterUnreleased(filePath, changelog);
+
+  deleteFragments(fragmentPaths);
 })();
