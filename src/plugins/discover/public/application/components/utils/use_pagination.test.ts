@@ -6,10 +6,17 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { usePagination } from './use_pagination';
 
+import { uiSettingsServiceMock } from '../../../../../../core/public/mocks';
+
 describe('usePagination', () => {
+  // TODO: create mock for DiscoverServices
+  const services: any = {
+    uiSettings: uiSettingsServiceMock.createSetupContract(),
+  };
+
   it('should initialize correctly with visParams and nRow', () => {
     const nRow = 30;
-    const { result } = renderHook(() => usePagination(nRow));
+    const { result } = renderHook(() => usePagination({ rowCount: nRow, services }));
 
     expect(result.current).toEqual({
       pageIndex: 0,
@@ -22,7 +29,7 @@ describe('usePagination', () => {
 
   it('should update pageSize correctly when calling onChangeItemsPerPage', () => {
     const nRow = 30;
-    const { result } = renderHook(() => usePagination(nRow));
+    const { result } = renderHook(() => usePagination({ rowCount: nRow, services }));
 
     act(() => {
       result.current?.onChangeItemsPerPage(20);
@@ -39,7 +46,7 @@ describe('usePagination', () => {
 
   it('should update pageIndex correctly when calling onChangePage', () => {
     const nRow = 30;
-    const { result } = renderHook(() => usePagination(nRow));
+    const { result } = renderHook(() => usePagination({ rowCount: nRow, services }));
 
     act(() => {
       result.current?.onChangePage(1);
@@ -56,7 +63,7 @@ describe('usePagination', () => {
 
   it('should correct pageIndex if it exceeds maximum page index after nRow or perPage change', () => {
     const nRow = 300;
-    const { result } = renderHook(() => usePagination(nRow));
+    const { result } = renderHook(() => usePagination({ rowCount: nRow, services }));
 
     act(() => {
       result.current?.onChangePage(4);
