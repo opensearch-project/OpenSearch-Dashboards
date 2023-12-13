@@ -79,6 +79,7 @@ describe('CapabilitiesService', () => {
                 "catalogue": Object {},
                 "management": Object {},
                 "navLinks": Object {},
+                "workspaces": Object {},
               }
           `);
     });
@@ -101,6 +102,7 @@ describe('CapabilitiesService', () => {
           },
           "management": Object {},
           "navLinks": Object {},
+          "workspaces": Object {},
         }
       `);
     });

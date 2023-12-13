@@ -29,30 +29,23 @@
  */
 
 const plugins = [
+  require.resolve('@babel/plugin-transform-class-properties'),
+  require.resolve('@babel/plugin-transform-private-methods'),
   require.resolve('babel-plugin-add-module-exports'),
-
-  // The class properties proposal was merged with the private fields proposal
-  // into the "class fields" proposal which is stage 3.
-  // See https://github.com/babel/proposals/issues/12 for progress
-  require.resolve('@babel/plugin-proposal-class-properties'),
 
   // Optional Chaining proposal is stage 4 (https://github.com/tc39/proposal-optional-chaining)
   // Need this since we are using TypeScript 3.7+
-  require.resolve('@babel/plugin-proposal-optional-chaining'),
+  require.resolve('@babel/plugin-transform-optional-chaining'),
   // Nullish coalescing proposal is stage 4 (https://github.com/tc39/proposal-nullish-coalescing)
   // Need this since we are using TypeScript 3.7+
-  require.resolve('@babel/plugin-proposal-nullish-coalescing-operator'),
+  require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
 
   // Proposal is merged into ECMA-262 (https://github.com/tc39/proposal-export-ns-from)
   // Need this since we are using TypeScript 3.8+
-  require.resolve('@babel/plugin-proposal-export-namespace-from'),
-
-  // Proposal is merged into ECMA-262 (https://github.com/tc39/proposal-export-ns-from)
-  // Need this since we are using TypeScript 3.9+
-  require.resolve('@babel/plugin-proposal-private-methods'),
+  require.resolve('@babel/plugin-transform-export-namespace-from'),
 
   // Proposal is on stage 4 (https://github.com/tc39/proposal-logical-assignment)
-  require.resolve('@babel/plugin-proposal-logical-assignment-operators'),
+  require.resolve('@babel/plugin-transform-logical-assignment-operators'),
 ];
 
 module.exports = {

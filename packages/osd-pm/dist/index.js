@@ -131,17 +131,11 @@ Object.defineProperty(exports, "run", {
     return _cli.run;
   }
 });
-
 var _cli = __webpack_require__(1);
-
 var _production = __webpack_require__(563);
-
 var _projects = __webpack_require__(147);
-
 var _project = __webpack_require__(165);
-
 var _workspaces = __webpack_require__(329);
-
 var _config = __webpack_require__(330);
 
 /***/ }),
@@ -155,23 +149,14 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.run = run;
-
 var _dedent = _interopRequireDefault(__webpack_require__(2));
-
 var _getopts = _interopRequireDefault(__webpack_require__(3));
-
 var _path = __webpack_require__(4);
-
 var _tooling_log = __webpack_require__(5);
-
 var _commands = __webpack_require__(128);
-
 var _run = __webpack_require__(558);
-
 var _log = __webpack_require__(145);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -201,6 +186,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
+
 function help() {
   _log.log.info((0, _dedent.default)`
       usage: osd <command> [<args>]
@@ -224,21 +210,18 @@ function help() {
         --silent                Disable log output
     ` + '\n');
 }
-
 async function run(argv) {
   _log.log.setLogLevel((0, _tooling_log.pickLevelFromFlags)((0, _getopts.default)(argv, {
     boolean: ['verbose', 'debug', 'quiet', 'silent']
-  }))); // We can simplify this setup (and remove this extra handling) once Yarn
+  })));
+
+  // We can simplify this setup (and remove this extra handling) once Yarn
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
-
-
   if (argv.includes('--')) {
     _log.log.error(`Using "--" is not allowed, as it doesn't work with 'yarn osd'.`);
-
     process.exit(1);
   }
-
   const options = (0, _getopts.default)(argv, {
     alias: {
       e: 'exclude',
@@ -251,14 +234,13 @@ async function run(argv) {
     boolean: ['prefer-offline', 'frozen-lockfile', 'cache']
   });
   const args = options._;
-
   if (options.help || args.length === 0) {
     help();
     return;
-  } // This `rootPath` is relative to `./dist/` as that's the location of the
+  }
+
+  // This `rootPath` is relative to `./dist/` as that's the location of the
   // built version of this tool.
-
-
   const rootPath = (0, _path.resolve)(__dirname, '../../../');
   const commandName = args[0];
   const extraArgs = args.slice(1);
@@ -268,13 +250,10 @@ async function run(argv) {
     rootPath
   };
   const command = _commands.commands[commandName];
-
   if (command === undefined) {
     _log.log.error(`[${commandName}] is not a valid command, see 'osd --help'`);
-
     process.exit(1);
   }
-
   await (0, _run.runCommand)(command, commandOptions);
 }
 
@@ -555,6 +534,7 @@ module.exports = require("path");
 
 "use strict";
 
+
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -565,7 +545,6 @@ module.exports = require("path");
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -588,27 +567,21 @@ exports.ToolingLogCollectingWriter = exports.parseLogLevel = exports.pickLevelFr
  * specific language governing permissions and limitations
  * under the License.
  */
-
 var tooling_log_1 = __webpack_require__(6);
-
 Object.defineProperty(exports, "ToolingLog", {
   enumerable: true,
   get: function () {
     return tooling_log_1.ToolingLog;
   }
 });
-
 var tooling_log_text_writer_1 = __webpack_require__(111);
-
 Object.defineProperty(exports, "ToolingLogTextWriter", {
   enumerable: true,
   get: function () {
     return tooling_log_text_writer_1.ToolingLogTextWriter;
   }
 });
-
 var log_levels_1 = __webpack_require__(126);
-
 Object.defineProperty(exports, "pickLevelFromFlags", {
   enumerable: true,
   get: function () {
@@ -621,9 +594,7 @@ Object.defineProperty(exports, "parseLogLevel", {
     return log_levels_1.parseLogLevel;
   }
 });
-
 var tooling_log_collecting_writer_1 = __webpack_require__(127);
-
 Object.defineProperty(exports, "ToolingLogCollectingWriter", {
   enumerable: true,
   get: function () {
@@ -637,6 +608,7 @@ Object.defineProperty(exports, "ToolingLogCollectingWriter", {
 
 "use strict";
 
+
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -647,12 +619,10 @@ Object.defineProperty(exports, "ToolingLogCollectingWriter", {
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.ToolingLog = void 0;
-
 const tslib_1 = __webpack_require__(7);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -672,64 +642,48 @@ const tslib_1 = __webpack_require__(7);
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 const Rx = tslib_1.__importStar(__webpack_require__(8));
-
 const tooling_log_text_writer_1 = __webpack_require__(111);
-
 class ToolingLog {
   constructor(writerConfig) {
     this.identWidth = 0;
     this.writers = writerConfig ? [new tooling_log_text_writer_1.ToolingLogTextWriter(writerConfig)] : [];
     this.written$ = new Rx.Subject();
   }
-
   indent(delta = 0) {
     this.identWidth = Math.max(this.identWidth + delta, 0);
     return this.identWidth;
   }
-
   verbose(...args) {
     this.sendToWriters('verbose', args);
   }
-
   debug(...args) {
     this.sendToWriters('debug', args);
   }
-
   info(...args) {
     this.sendToWriters('info', args);
   }
-
   success(...args) {
     this.sendToWriters('success', args);
   }
-
   warning(...args) {
     this.sendToWriters('warning', args);
   }
-
   error(error) {
     this.sendToWriters('error', [error]);
   }
-
   write(...args) {
     this.sendToWriters('write', args);
   }
-
   getWriters() {
     return this.writers.slice(0);
   }
-
   setWriters(writers) {
     this.writers = [...writers];
   }
-
   getWritten$() {
     return this.written$.asObservable();
   }
-
   sendToWriters(type, args) {
     const msg = {
       type,
@@ -737,20 +691,16 @@ class ToolingLog {
       args
     };
     let written = false;
-
     for (const writer of this.writers) {
       if (writer.write(msg)) {
         written = true;
       }
     }
-
     if (written) {
       this.written$.next(msg);
     }
   }
-
 }
-
 exports.ToolingLog = ToolingLog;
 
 /***/ }),
@@ -6816,6 +6766,7 @@ var ZipBufferIterator = /*@__PURE__*/ (function (_super) {
 
 "use strict";
 
+
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -6826,12 +6777,10 @@ var ZipBufferIterator = /*@__PURE__*/ (function (_super) {
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.ToolingLogTextWriter = void 0;
-
 const tslib_1 = __webpack_require__(7);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -6851,14 +6800,9 @@ const tslib_1 = __webpack_require__(7);
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 const util_1 = __webpack_require__(112);
-
 const chalk_1 = tslib_1.__importDefault(__webpack_require__(113));
-
 const log_levels_1 = __webpack_require__(126);
-
 const {
   magentaBright,
   yellow,
@@ -6876,72 +6820,56 @@ const MSG_PREFIXES = {
   warning: ` ${yellow('warn')} `,
   error: `${red('ERROR')} `
 };
-
 const has = (obj, key) => obj.hasOwnProperty(key);
-
 function shouldWriteType(level, type) {
   if (type === 'write') {
     return level.name !== 'silent';
   }
-
   return Boolean(level.flags[type === 'success' ? 'info' : type]);
 }
-
 function stringifyError(error) {
   if (typeof error !== 'string' && !(error instanceof Error)) {
     error = new Error(`"${error}" thrown`);
   }
-
   if (typeof error === 'string') {
     return error;
   }
-
   return error.stack || error.message || error;
 }
-
 class ToolingLogTextWriter {
   constructor(config) {
-    this.level = log_levels_1.parseLogLevel(config.level);
+    this.level = (0, log_levels_1.parseLogLevel)(config.level);
     this.writeTo = config.writeTo;
-
     if (!this.writeTo || typeof this.writeTo.write !== 'function') {
       throw new Error('ToolingLogTextWriter requires the `writeTo` option be set to a stream (like process.stdout)');
     }
   }
-
   write(msg) {
     if (!shouldWriteType(this.level, msg.type)) {
       return false;
     }
-
     const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
     ToolingLogTextWriter.write(this.writeTo, prefix, msg);
     return true;
   }
-
   static write(writeTo, prefix, msg) {
-    const txt = msg.type === 'error' ? stringifyError(msg.args[0]) : util_1.format(msg.args[0], ...msg.args.slice(1));
+    const txt = msg.type === 'error' ? stringifyError(msg.args[0]) : (0, util_1.format)(msg.args[0], ...msg.args.slice(1));
     (prefix + txt).split('\n').forEach((line, i) => {
       let lineIndent = '';
-
       if (msg.indent > 0) {
         // if we are indenting write some spaces followed by a symbol
         lineIndent += ' '.repeat(msg.indent - 1);
         lineIndent += line.startsWith('-') ? '└' : '│';
       }
-
       if (line && prefix && i > 0) {
         // apply additional indentation to lines after
         // the first if this message gets a prefix
         lineIndent += PREFIX_INDENT;
       }
-
       writeTo.write(`${lineIndent}${line}\n`);
     });
   }
-
 }
-
 exports.ToolingLogTextWriter = ToolingLogTextWriter;
 
 /***/ }),
@@ -8941,6 +8869,7 @@ module.exports = (chalk, temporary) => {
 
 "use strict";
 
+
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -8951,13 +8880,11 @@ module.exports = (chalk, temporary) => {
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.parseLogLevel = exports.pickLevelFromFlags = void 0;
 const LEVELS = ['silent', 'error', 'warning', 'info', 'debug', 'verbose'];
-
 function pickLevelFromFlags(flags, options = {}) {
   if (flags.verbose) return 'verbose';
   if (flags.debug) return 'debug';
@@ -8965,17 +8892,13 @@ function pickLevelFromFlags(flags, options = {}) {
   if (flags.silent) return 'silent';
   return options.default || 'info';
 }
-
 exports.pickLevelFromFlags = pickLevelFromFlags;
-
 function parseLogLevel(name) {
   const i = LEVELS.indexOf(name);
-
   if (i === -1) {
     const msg = `Invalid log level "${name}" ` + `(expected one of ${LEVELS.join(',')})`;
     throw new Error(msg);
   }
-
   const flags = {};
   LEVELS.forEach((level, levelI) => {
     flags[level] = levelI <= i;
@@ -8985,7 +8908,6 @@ function parseLogLevel(name) {
     flags: flags
   };
 }
-
 exports.parseLogLevel = parseLogLevel;
 
 /***/ }),
@@ -8993,6 +8915,7 @@ exports.parseLogLevel = parseLogLevel;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
 
 /*
  * SPDX-License-Identifier: Apache-2.0
@@ -9004,7 +8927,6 @@ exports.parseLogLevel = parseLogLevel;
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -9027,9 +8949,7 @@ exports.ToolingLogCollectingWriter = void 0;
  * specific language governing permissions and limitations
  * under the License.
  */
-
 const tooling_log_text_writer_1 = __webpack_require__(111);
-
 class ToolingLogCollectingWriter extends tooling_log_text_writer_1.ToolingLogTextWriter {
   constructor(level = 'verbose') {
     super({
@@ -9043,9 +8963,7 @@ class ToolingLogCollectingWriter extends tooling_log_text_writer_1.ToolingLogTex
     });
     this.messages = [];
   }
-
 }
-
 exports.ToolingLogCollectingWriter = ToolingLogCollectingWriter;
 
 /***/ }),
@@ -9059,15 +8977,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.commands = void 0;
-
 var _bootstrap = __webpack_require__(129);
-
 var _clean = __webpack_require__(344);
-
 var _run = __webpack_require__(457);
-
 var _watch = __webpack_require__(458);
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -9097,13 +9010,13 @@ var _watch = __webpack_require__(458);
  * specific language governing permissions and limitations
  * under the License.
  */
-const commands = {
+
+const commands = exports.commands = {
   bootstrap: _bootstrap.BootstrapCommand,
   clean: _clean.CleanCommand,
   run: _run.RunCommand,
   watch: _watch.WatchCommand
 };
-exports.commands = commands;
 
 /***/ }),
 /* 129 */
@@ -9116,23 +9029,14 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.BootstrapCommand = void 0;
-
 var _link_project_executables = __webpack_require__(130);
-
 var _log = __webpack_require__(145);
-
 var _parallelize = __webpack_require__(146);
-
 var _projects = __webpack_require__(147);
-
 var _project_checksums = __webpack_require__(331);
-
 var _bootstrap_cache_file = __webpack_require__(341);
-
 var _yarn_lock = __webpack_require__(333);
-
 var _validate_dependencies = __webpack_require__(342);
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -9162,10 +9066,10 @@ var _validate_dependencies = __webpack_require__(342);
  * specific language governing permissions and limitations
  * under the License.
  */
-const BootstrapCommand = {
+
+const BootstrapCommand = exports.BootstrapCommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
-
   async run(projects, projectGraph, {
     options,
     osd
@@ -9175,15 +9079,12 @@ const BootstrapCommand = {
     });
     const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
     const extraArgs = [...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []), ...(options['prefer-offline'] === true ? ['--prefer-offline'] : [])];
-
     for (const batch of batchedProjectsByWorkspace) {
       for (const project of batch) {
         if (project.isWorkspaceProject) {
           _log.log.verbose(`Skipping workspace project: ${project.name}`);
-
           continue;
         }
-
         if (project.hasDependencies()) {
           await project.installDependencies({
             extraArgs
@@ -9191,10 +9092,10 @@ const BootstrapCommand = {
         }
       }
     }
-
     const yarnLock = await (0, _yarn_lock.readYarnLock)(osd);
     await (0, _validate_dependencies.validateDependencies)(osd, yarnLock);
     await (0, _link_project_executables.linkProjectExecutables)(projects, projectGraph);
+
     /**
      * At the end of the bootstrapping process we call all `osd:bootstrap` scripts
      * in the list of projects. We do this because some projects need to be
@@ -9205,61 +9106,47 @@ const BootstrapCommand = {
     const checksums = await (0, _project_checksums.getAllChecksums)(osd, _log.log, yarnLock);
     const caches = new Map();
     let cachedProjectCount = 0;
-
     for (const project of projects.values()) {
       if (project.hasScript('osd:bootstrap') || project.hasBuildTargets()) {
         const file = new _bootstrap_cache_file.BootstrapCacheFile(osd, project, checksums);
         const valid = options.cache && file.isValid();
-
         if (valid) {
           _log.log.debug(`[${project.name}] cache up to date`);
-
           cachedProjectCount += 1;
         }
-
         caches.set(project, {
           file,
           valid
         });
       }
     }
-
     if (cachedProjectCount > 0) {
       _log.log.success(`${cachedProjectCount} bootstrap builds are cached`);
     }
-
     await (0, _parallelize.parallelizeBatches)(batchedProjects, async project => {
       const cache = caches.get(project);
-
       if (cache && !cache.valid) {
         // Explicitly defined targets override any bootstrap scripts
         if (project.hasBuildTargets()) {
           if (project.hasScript('osd:bootstrap')) {
             _log.log.debug(`[${project.name}] ignoring [osd:bootstrap] script since build targets are provided`);
           }
-
           _log.log.info(`[${project.name}] running [osd:bootstrap] build targets`);
-
           cache.file.delete();
           await project.buildForTargets({
             sourceMaps: true
           });
         } else {
           _log.log.info(`[${project.name}] running [osd:bootstrap] script`);
-
           cache.file.delete();
           await project.runScriptStreaming('osd:bootstrap');
         }
-
         cache.file.write();
-
         _log.log.success(`[${project.name}] bootstrap complete`);
       }
     });
   }
-
 };
-exports.BootstrapCommand = BootstrapCommand;
 
 /***/ }),
 /* 130 */
@@ -9272,13 +9159,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.linkProjectExecutables = linkProjectExecutables;
-
 var _path = __webpack_require__(4);
-
 var _fs = __webpack_require__(131);
-
 var _log = __webpack_require__(145);
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -9319,28 +9202,24 @@ var _log = __webpack_require__(145);
  */
 async function linkProjectExecutables(projectsByName, projectGraph) {
   _log.log.debug(`Linking package executables`);
-
   for (const [projectName, projectDeps] of projectGraph) {
     const project = projectsByName.get(projectName);
     const binsDir = (0, _path.resolve)(project.nodeModulesLocation, '.bin');
-
     for (const projectDep of projectDeps) {
       const executables = projectDep.getExecutables();
-
       for (const name of Object.keys(executables)) {
-        const srcPath = executables[name]; // existing logic from lerna -- ensure that the bin we are going to
-        // point to exists or ignore it
+        const srcPath = executables[name];
 
+        // existing logic from lerna -- ensure that the bin we are going to
+        // point to exists or ignore it
         if (!(await (0, _fs.isFile)(srcPath))) {
           continue;
         }
+        const dest = (0, _path.resolve)(binsDir, name);
 
-        const dest = (0, _path.resolve)(binsDir, name); // Get relative project path with normalized path separators.
-
+        // Get relative project path with normalized path separators.
         const projectRelativePath = (0, _path.relative)(project.path, srcPath).split(_path.sep).join('/');
-
         _log.log.debug(`[${project.name}] ${name} -> ${projectRelativePath}`);
-
         await (0, _fs.mkdirp)((0, _path.dirname)(dest));
         await (0, _fs.createSymlink)(srcPath, dest, 'exec');
         await (0, _fs.chmod)(dest, '755');
@@ -9389,19 +9268,12 @@ Object.defineProperty(exports, "writeFile", {
     return _promises.writeFile;
   }
 });
-
 var _cmdShim = _interopRequireDefault(__webpack_require__(132));
-
 var _promises = __webpack_require__(143);
-
 var _ncp = __webpack_require__(144);
-
 var _path = __webpack_require__(4);
-
 var _util = __webpack_require__(112);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -9431,16 +9303,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
-const cmdShim = (0, _util.promisify)(_cmdShim.default);
 
+const cmdShim = (0, _util.promisify)(_cmdShim.default);
 const mkdirp = async path => await (0, _promises.mkdir)(path, {
   recursive: true
 });
-
 exports.mkdirp = mkdirp;
-const copyDirectory = (0, _util.promisify)(_ncp.ncp);
-exports.copyDirectory = copyDirectory;
-
+const copyDirectory = exports.copyDirectory = (0, _util.promisify)(_ncp.ncp);
 async function statTest(path, block) {
   try {
     return block(await (0, _promises.lstat)(path));
@@ -9448,37 +9317,34 @@ async function statTest(path, block) {
     if (e.code === 'ENOENT') {
       return false;
     }
-
     throw e;
   }
 }
+
 /**
  * Test if a path points to a symlink.
  * @param path
  */
-
-
 async function isSymlink(path) {
   return await statTest(path, stats => stats.isSymbolicLink());
 }
+
 /**
  * Test if a path points to a directory.
  * @param path
  */
-
-
 async function isDirectory(path) {
   return await statTest(path, stats => stats.isDirectory());
 }
+
 /**
  * Test if a path points to a regular file.
  * @param path
  */
-
-
 async function isFile(path) {
   return await statTest(path, stats => stats.isFile());
 }
+
 /**
  * Create a symlink at dest that points to src. Adapted from
  * https://github.com/lerna/lerna/blob/2f1b87d9e2295f587e4ac74269f714271d8ed428/src/FileSystemUtilities.js#L103.
@@ -9489,8 +9355,6 @@ async function isFile(path) {
  *  windows will use the `cmd-shim` module since symlinks can't be used
  *  for executable files on windows.
  */
-
-
 async function createSymlink(src, dest, type) {
   if (process.platform === 'win32') {
     if (type === 'exec') {
@@ -9504,7 +9368,6 @@ async function createSymlink(src, dest, type) {
     await forceCreate(relativeSource, dest, posixType);
   }
 }
-
 async function forceCreate(src, dest, type) {
   try {
     // If something exists at `dest` we need to remove it first.
@@ -9514,7 +9377,6 @@ async function forceCreate(src, dest, type) {
       throw error;
     }
   }
-
   await (0, _promises.symlink)(src, dest, type);
 }
 
@@ -11221,20 +11083,42 @@ Object.defineProperty(exports, "LogLevel", {
   }
 });
 exports.log = void 0;
-
 var _tooling_log = __webpack_require__(5);
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); } /*
+                                                                                                                                                                                                                                                                                                                                                                                           * SPDX-License-Identifier: Apache-2.0
+                                                                                                                                                                                                                                                                                                                                                                                           *
+                                                                                                                                                                                                                                                                                                                                                                                           * The OpenSearch Contributors require contributions made to
+                                                                                                                                                                                                                                                                                                                                                                                           * this file be licensed under the Apache-2.0 license or a
+                                                                                                                                                                                                                                                                                                                                                                                           * compatible open source license.
+                                                                                                                                                                                                                                                                                                                                                                                           *
+                                                                                                                                                                                                                                                                                                                                                                                           * Any modifications Copyright OpenSearch Contributors. See
+                                                                                                                                                                                                                                                                                                                                                                                           * GitHub history for details.
+                                                                                                                                                                                                                                                                                                                                                                                           */ /*
+                                                                                                                                                                                                                                                                                                                                                                                               * Licensed to Elasticsearch B.V. under one or more contributor
+                                                                                                                                                                                                                                                                                                                                                                                               * license agreements. See the NOTICE file distributed with
+                                                                                                                                                                                                                                                                                                                                                                                               * this work for additional information regarding copyright
+                                                                                                                                                                                                                                                                                                                                                                                               * ownership. Elasticsearch B.V. licenses this file to you under
+                                                                                                                                                                                                                                                                                                                                                                                               * the Apache License, Version 2.0 (the "License"); you may
+                                                                                                                                                                                                                                                                                                                                                                                               * not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                               * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                               *
+                                                                                                                                                                                                                                                                                                                                                                                               *    http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                               *
+                                                                                                                                                                                                                                                                                                                                                                                               * Unless required by applicable law or agreed to in writing,
+                                                                                                                                                                                                                                                                                                                                                                                               * software distributed under the License is distributed on an
+                                                                                                                                                                                                                                                                                                                                                                                               * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+                                                                                                                                                                                                                                                                                                                                                                                               * KIND, either express or implied.  See the License for the
+                                                                                                                                                                                                                                                                                                                                                                                               * specific language governing permissions and limitations
+                                                                                                                                                                                                                                                                                                                                                                                               * under the License.
+                                                                                                                                                                                                                                                                                                                                                                                               */
 class Log extends _tooling_log.ToolingLog {
   constructor() {
     super();
-
     _defineProperty(this, "logLevel", void 0);
-
     this.setLogLevel('info');
   }
-
   setLogLevel(level) {
     this.logLevel = (0, _tooling_log.parseLogLevel)(level);
     this.setWriters([new _tooling_log.ToolingLogTextWriter({
@@ -11242,16 +11126,12 @@ class Log extends _tooling_log.ToolingLog {
       writeTo: process.stdout
     })]);
   }
-
   wouldLogLevel(level) {
     return this.logLevel.flags[level];
   }
-
 }
-
 exports.Log = Log;
-const log = new Log();
-exports.log = log;
+const log = exports.log = new Log();
 
 /***/ }),
 /* 146 */
@@ -11265,7 +11145,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.parallelize = parallelize;
 exports.parallelizeBatches = parallelizeBatches;
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -11295,6 +11174,7 @@ exports.parallelizeBatches = parallelizeBatches;
  * specific language governing permissions and limitations
  * under the License.
  */
+
 async function parallelizeBatches(batches, fn) {
   for (const batch of batches) {
     // We need to make sure the entire batch has completed before we can move on
@@ -11302,23 +11182,18 @@ async function parallelizeBatches(batches, fn) {
     await parallelize(batch, fn);
   }
 }
-
 async function parallelize(items, fn, concurrency = 4) {
   if (items.length === 0) {
     return;
   }
-
   return new Promise((resolve, reject) => {
     let activePromises = 0;
     const values = items.slice(0);
-
     async function scheduleItem(item) {
       activePromises++;
-
       try {
         await fn(item);
         activePromises--;
-
         if (values.length > 0) {
           // We have more work to do, so we schedule the next promise
           scheduleItem(values.shift());
@@ -11331,7 +11206,6 @@ async function parallelize(items, fn, concurrency = 4) {
         reject(error);
       }
     }
-
     values.splice(0, concurrency).map(scheduleItem);
   });
 }
@@ -11350,21 +11224,13 @@ exports.buildProjectGraph = buildProjectGraph;
 exports.getProjects = getProjects;
 exports.includeTransitiveProjects = includeTransitiveProjects;
 exports.topologicallyBatchProjects = topologicallyBatchProjects;
-
 var _glob = _interopRequireDefault(__webpack_require__(148));
-
 var _path = _interopRequireDefault(__webpack_require__(4));
-
 var _util = __webpack_require__(112);
-
 var _errors = __webpack_require__(164);
-
 var _project = __webpack_require__(165);
-
 var _workspaces = __webpack_require__(329);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -11394,7 +11260,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
+
 const glob = (0, _util.promisify)(_glob.default);
+
 /** a Map of project names to Project instances */
 
 async function getProjects(rootPath, projectsPathsPatterns, {
@@ -11403,44 +11271,33 @@ async function getProjects(rootPath, projectsPathsPatterns, {
 } = {}) {
   const projects = new Map();
   const workspaceProjectsPaths = await (0, _workspaces.workspacePackagePaths)(rootPath);
-
   for (const pattern of projectsPathsPatterns) {
     const pathsToProcess = await packagesFromGlobPattern({
       pattern,
       rootPath
     });
-
     for (const filePath of pathsToProcess) {
       const projectConfigPath = normalize(filePath);
-
       const projectDir = _path.default.dirname(projectConfigPath);
-
       const project = await _project.Project.fromPath(projectDir);
-
       if (workspaceProjectsPaths.indexOf(filePath) >= 0) {
         project.isWorkspaceProject = true;
       }
-
       const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name);
-
       if (excludeProject) {
         continue;
       }
-
       if (projects.has(project.name)) {
         throw new _errors.CliError(`There are multiple projects with the same name [${project.name}]`, {
           name: project.name,
           paths: [project.path, projects.get(project.name).path]
         });
       }
-
       projects.set(project.name, project);
     }
   }
-
   return projects;
 }
-
 function packagesFromGlobPattern({
   pattern,
   rootPath
@@ -11456,22 +11313,19 @@ function packagesFromGlobPattern({
     noglobstar: true
   };
   return glob(_path.default.join(pattern, 'package.json'), globOptions);
-} // https://github.com/isaacs/node-glob/blob/master/common.js#L104
+}
+
+// https://github.com/isaacs/node-glob/blob/master/common.js#L104
 // glob always returns "\\" as "/" in windows, so everyone
 // gets normalized because we can't have nice things.
-
-
 function normalize(dir) {
   return _path.default.normalize(dir);
 }
-
 function buildProjectGraph(projects) {
   const projectGraph = new Map();
-
   for (const project of projects.values()) {
     const projectDeps = [];
     const dependencies = project.allDependencies;
-
     for (const depName of Object.keys(dependencies)) {
       if (projects.has(depName)) {
         const dep = projects.get(depName);
@@ -11480,83 +11334,69 @@ function buildProjectGraph(projects) {
         projectDeps.push(dep);
       }
     }
-
     projectGraph.set(project.name, projectDeps);
   }
-
   return projectGraph;
 }
-
 function topologicallyBatchProjects(projectsToBatch, projectGraph, {
   batchByWorkspace = false
 } = {}) {
   // We're going to be chopping stuff out of this list, so copy it.
   const projectsLeftToBatch = new Set(projectsToBatch.keys());
   const batches = [];
-
   if (batchByWorkspace) {
     const workspaceRootProject = Array.from(projectsToBatch.values()).find(p => p.isWorkspaceRoot);
-
     if (!workspaceRootProject) {
       throw new _errors.CliError(`There was no yarn workspace root found.`);
-    } // Push in the workspace root first.
+    }
 
-
+    // Push in the workspace root first.
     batches.push([workspaceRootProject]);
-    projectsLeftToBatch.delete(workspaceRootProject.name); // In the next batch, push in all workspace projects.
+    projectsLeftToBatch.delete(workspaceRootProject.name);
 
+    // In the next batch, push in all workspace projects.
     const workspaceBatch = [];
-
     for (const projectName of projectsLeftToBatch) {
       const project = projectsToBatch.get(projectName);
-
       if (project.isWorkspaceProject) {
         workspaceBatch.push(project);
         projectsLeftToBatch.delete(projectName);
       }
     }
-
     batches.push(workspaceBatch);
   }
-
   while (projectsLeftToBatch.size > 0) {
     // Get all projects that have no remaining dependencies within the repo
     // that haven't yet been picked.
     const batch = [];
-
     for (const projectName of projectsLeftToBatch) {
       const projectDeps = projectGraph.get(projectName);
       const needsDependenciesBatched = projectDeps.some(dep => projectsLeftToBatch.has(dep.name));
-
       if (!needsDependenciesBatched) {
         batch.push(projectsToBatch.get(projectName));
       }
-    } // If we weren't able to find a project with no remaining dependencies,
+    }
+
+    // If we weren't able to find a project with no remaining dependencies,
     // then we've encountered a cycle in the dependency graph.
-
-
     const hasCycles = batch.length === 0;
-
     if (hasCycles) {
       const cycleProjectNames = [...projectsLeftToBatch];
       const message = 'Encountered a cycle in the dependency graph. Projects in cycle are:\n' + cycleProjectNames.join(', ');
       throw new _errors.CliError(message);
     }
-
     batches.push(batch);
     batch.forEach(project => projectsLeftToBatch.delete(project.name));
   }
-
   return batches;
 }
-
 function includeTransitiveProjects(subsetOfProjects, allProjects, {
   onlyProductionDependencies = false
 } = {}) {
-  const projectsWithDependents = new Map(); // the current list of packages we are expanding using breadth-first-search
+  const projectsWithDependents = new Map();
 
+  // the current list of packages we are expanding using breadth-first-search
   const toProcess = [...subsetOfProjects];
-
   while (toProcess.length > 0) {
     const project = toProcess.shift();
     const dependencies = onlyProductionDependencies ? project.productionDependencies : project.allDependencies;
@@ -11567,7 +11407,6 @@ function includeTransitiveProjects(subsetOfProjects, allProjects, {
     });
     projectsWithDependents.set(project.name, project);
   }
-
   return projectsWithDependents;
 }
 
@@ -14963,7 +14802,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.CliError = void 0;
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -14993,14 +14831,13 @@ exports.CliError = void 0;
  * specific language governing permissions and limitations
  * under the License.
  */
+
 class CliError extends Error {
   constructor(message, meta = {}) {
     super(message);
     this.meta = meta;
   }
-
 }
-
 exports.CliError = CliError;
 
 /***/ }),
@@ -15014,64 +14851,78 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Project = void 0;
-
 var _fs = _interopRequireDefault(__webpack_require__(134));
-
 var _path = _interopRequireDefault(__webpack_require__(4));
-
 var _util = __webpack_require__(112);
-
 var _errors = __webpack_require__(164);
-
 var _log = __webpack_require__(145);
-
 var _package_json = __webpack_require__(166);
-
 var _scripts = __webpack_require__(282);
-
 var _targeted_build = __webpack_require__(328);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); } /*
+                                                                                                                                                                                                                                                                                                                                                                                           * SPDX-License-Identifier: Apache-2.0
+                                                                                                                                                                                                                                                                                                                                                                                           *
+                                                                                                                                                                                                                                                                                                                                                                                           * The OpenSearch Contributors require contributions made to
+                                                                                                                                                                                                                                                                                                                                                                                           * this file be licensed under the Apache-2.0 license or a
+                                                                                                                                                                                                                                                                                                                                                                                           * compatible open source license.
+                                                                                                                                                                                                                                                                                                                                                                                           *
+                                                                                                                                                                                                                                                                                                                                                                                           * Any modifications Copyright OpenSearch Contributors. See
+                                                                                                                                                                                                                                                                                                                                                                                           * GitHub history for details.
+                                                                                                                                                                                                                                                                                                                                                                                           */ /*
+                                                                                                                                                                                                                                                                                                                                                                                               * Licensed to Elasticsearch B.V. under one or more contributor
+                                                                                                                                                                                                                                                                                                                                                                                               * license agreements. See the NOTICE file distributed with
+                                                                                                                                                                                                                                                                                                                                                                                               * this work for additional information regarding copyright
+                                                                                                                                                                                                                                                                                                                                                                                               * ownership. Elasticsearch B.V. licenses this file to you under
+                                                                                                                                                                                                                                                                                                                                                                                               * the Apache License, Version 2.0 (the "License"); you may
+                                                                                                                                                                                                                                                                                                                                                                                               * not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                               * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                               *
+                                                                                                                                                                                                                                                                                                                                                                                               *    http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                               *
+                                                                                                                                                                                                                                                                                                                                                                                               * Unless required by applicable law or agreed to in writing,
+                                                                                                                                                                                                                                                                                                                                                                                               * software distributed under the License is distributed on an
+                                                                                                                                                                                                                                                                                                                                                                                               * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+                                                                                                                                                                                                                                                                                                                                                                                               * KIND, either express or implied.  See the License for the
+                                                                                                                                                                                                                                                                                                                                                                                               * specific language governing permissions and limitations
+                                                                                                                                                                                                                                                                                                                                                                                               * under the License.
+                                                                                                                                                                                                                                                                                                                                                                                               */
 class Project {
   static async fromPath(path) {
     const pkgJson = await (0, _package_json.readPackageJson)(path);
     return new Project(pkgJson, path);
   }
-  /** parsed package.json */
 
+  /** parsed package.json */
 
   constructor(packageJson, projectPath) {
     _defineProperty(this, "json", void 0);
-
+    /** absolute path to the package.json file in the project */
     _defineProperty(this, "packageJsonLocation", void 0);
-
+    /** absolute path to the node_modules in the project (might not actually exist) */
     _defineProperty(this, "nodeModulesLocation", void 0);
-
+    /** absolute path to the target directory in the project (might not actually exist) */
     _defineProperty(this, "targetLocation", void 0);
-
+    /** absolute path to the directory containing the project */
     _defineProperty(this, "path", void 0);
-
+    /** the version of the project */
     _defineProperty(this, "version", void 0);
-
+    /** merged set of dependencies of the project, [name => version range] */
     _defineProperty(this, "allDependencies", void 0);
-
+    /** regular dependencies of the project, [name => version range] */
     _defineProperty(this, "productionDependencies", void 0);
-
+    /** development dependencies of the project, [name => version range] */
     _defineProperty(this, "devDependencies", void 0);
-
+    /** scripts defined in the package.json file for the project [name => body] */
     _defineProperty(this, "scripts", void 0);
-
+    /** custom definitions for the project, @osd/pm: { key: value } */
     _defineProperty(this, "customDefinitions", void 0);
-
+    /** build targets from the custom definitions, @osd/pm: { node: true, web: true } */
     _defineProperty(this, "buildTargets", void 0);
-
     _defineProperty(this, "isWorkspaceRoot", false);
-
     _defineProperty(this, "isWorkspaceProject", false);
-
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
     this.packageJsonLocation = _path.default.resolve(this.path, 'package.json');
@@ -15080,41 +14931,36 @@ class Project {
     this.version = this.json.version;
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
-    this.allDependencies = { ...this.devDependencies,
+    this.allDependencies = {
+      ...this.devDependencies,
       ...this.productionDependencies
     };
     this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
     this.scripts = this.json.scripts || {};
     this.customDefinitions = this.json['@osd/pm'] || {};
     this.buildTargets = [];
-
     for (const target of _targeted_build.BuildTargets) {
       if (this.customDefinitions[target]) this.buildTargets.push(target);
     }
   }
-
   get name() {
     return this.json.name;
   }
-
   ensureValidProjectDependency(project, dependentProjectIsInWorkspace) {
     const versionInPackageJson = this.allDependencies[project.name];
     let expectedVersionInPackageJson;
-
     if (dependentProjectIsInWorkspace) {
       expectedVersionInPackageJson = project.json.version;
     } else {
       const relativePathToProject = normalizePath(_path.default.relative(this.path, project.path));
       expectedVersionInPackageJson = `link:${relativePathToProject}`;
-    } // No issues!
+    }
 
-
+    // No issues!
     if (versionInPackageJson === expectedVersionInPackageJson) {
       return;
     }
-
     let problemMsg;
-
     if ((0, _package_json.isLinkDependency)(versionInPackageJson) && dependentProjectIsInWorkspace) {
       problemMsg = `but should be using a workspace`;
     } else if ((0, _package_json.isLinkDependency)(versionInPackageJson)) {
@@ -15122,79 +14968,62 @@ class Project {
     } else {
       problemMsg = `but it's not using the local package`;
     }
-
     throw new _errors.CliError(`[${this.name}] depends on [${project.name}] ${problemMsg}. Update its package.json to the expected value below.`, {
       actual: `"${project.name}": "${versionInPackageJson}"`,
       expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
       package: `${this.name} (${this.packageJsonLocation})`
     });
   }
-
   getBuildConfig() {
     return this.json.opensearchDashboards && this.json.opensearchDashboards.build || {};
   }
+
   /**
    * Returns the directory that should be copied into the OpenSearch Dashboards build artifact.
    * This config can be specified to only include the project's build artifacts
    * instead of everything located in the project directory.
    */
-
-
   getIntermediateBuildDirectory() {
     return _path.default.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
   }
-
   getCleanConfig() {
     return this.json.opensearchDashboards && this.json.opensearchDashboards.clean || {};
   }
-
   isFlaggedAsDevOnly() {
     return !!(this.json.opensearchDashboards && this.json.opensearchDashboards.devOnly);
   }
-
   hasScript(name) {
     return name in this.scripts;
   }
-
   hasBuildTargets() {
     return this.buildTargets.length > 0;
   }
-
   getExecutables() {
     const raw = this.json.bin;
-
     if (!raw) {
       return {};
     }
-
     if (typeof raw === 'string') {
       return {
         [this.name]: _path.default.resolve(this.path, raw)
       };
     }
-
     if (typeof raw === 'object') {
       const binsConfig = {};
-
       for (const binName of Object.keys(raw)) {
         binsConfig[binName] = _path.default.resolve(this.path, raw[binName]);
       }
-
       return binsConfig;
     }
-
     throw new _errors.CliError(`[${this.name}] has an invalid "bin" field in its package.json, ` + `expected an object or a string`, {
       binConfig: (0, _util.inspect)(raw),
       package: `${this.name} (${this.packageJsonLocation})`
     });
   }
-
   async runScript(scriptName, args = []) {
     _log.log.info(`Running script [${scriptName}] in [${this.name}]:`);
-
     return (0, _scripts.runScriptInPackage)(scriptName, args, this);
   }
-
   runScriptStreaming(scriptName, options = {}) {
     return (0, _scripts.runScriptInPackageStreaming)({
       script: scriptName,
@@ -15203,82 +15032,65 @@ class Project {
       debug: options.debug
     });
   }
-
   buildForTargets(options = {}) {
     if (!this.hasBuildTargets()) {
       _log.log.warning(`There are no build targets defined for [${this.name}]`);
-
       return false;
     }
-
     return (0, _targeted_build.buildTargetedPackage)({
       pkg: this,
       sourceMaps: options.sourceMaps
     });
   }
-
   hasDependencies() {
     return Object.keys(this.allDependencies).length > 0;
   }
-
   async installDependencies({
     extraArgs
   }) {
     _log.log.info(`[${this.name}] running yarn`);
-
     _log.log.write('');
-
     await (0, _scripts.installInDir)(this.path, extraArgs);
-
     _log.log.write('');
-
     await this.removeExtraneousNodeModules();
   }
+
   /**
    * Yarn workspaces symlinks workspace projects to the root node_modules, even
    * when there is no depenency on the project. This results in unnecicary, and
    * often duplicated code in the build archives.
    */
-
-
   async removeExtraneousNodeModules() {
     // this is only relevant for the root workspace
     if (!this.isWorkspaceRoot) {
       return;
     }
-
     const workspacesInfo = await (0, _scripts.yarnWorkspacesInfo)(this.path);
-    const unusedWorkspaces = new Set(Object.keys(workspacesInfo)); // check for any cross-project dependency
+    const unusedWorkspaces = new Set(Object.keys(workspacesInfo));
 
+    // check for any cross-project dependency
     for (const name of Object.keys(workspacesInfo)) {
       const workspace = workspacesInfo[name];
       workspace.workspaceDependencies.forEach(w => unusedWorkspaces.delete(w));
     }
-
     unusedWorkspaces.forEach(name => {
       const {
         dependencies,
         devDependencies
       } = this.json;
-
       const nodeModulesPath = _path.default.resolve(this.nodeModulesLocation, name);
-
       const isDependency = dependencies && dependencies.hasOwnProperty(name);
       const isDevDependency = devDependencies && devDependencies.hasOwnProperty(name);
-
       if (!isDependency && !isDevDependency && _fs.default.existsSync(nodeModulesPath)) {
         _log.log.debug(`No dependency on ${name}, removing link in node_modules`);
-
         _fs.default.unlinkSync(nodeModulesPath);
       }
     });
   }
+}
 
-} // We normalize all path separators to `/` in generated files
-
-
+// We normalize all path separators to `/` in generated files
 exports.Project = Project;
-
 function normalizePath(path) {
   return path.replace(/[\\\/]+/g, '/');
 }
@@ -15296,13 +15108,9 @@ Object.defineProperty(exports, "__esModule", {
 exports.isLinkDependency = void 0;
 exports.readPackageJson = readPackageJson;
 exports.writePackageJson = writePackageJson;
-
 var _readPkg = _interopRequireDefault(__webpack_require__(167));
-
 var _writePkg = _interopRequireDefault(__webpack_require__(270));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -15332,19 +15140,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
+
 function readPackageJson(cwd) {
   return (0, _readPkg.default)({
     cwd,
     normalize: false
   });
 }
-
 function writePackageJson(path, json) {
   return (0, _writePkg.default)(path, json);
 }
-
 const isLinkDependency = depVersion => depVersion.startsWith('link:');
-
 exports.isLinkDependency = isLinkDependency;
 
 /***/ }),
@@ -25449,9 +25255,7 @@ exports.installInDir = installInDir;
 exports.runScriptInPackage = runScriptInPackage;
 exports.runScriptInPackageStreaming = runScriptInPackageStreaming;
 exports.yarnWorkspacesInfo = yarnWorkspacesInfo;
-
 var _child_process = __webpack_require__(283);
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25481,35 +25285,34 @@ var _child_process = __webpack_require__(283);
  * specific language governing permissions and limitations
  * under the License.
  */
-const YARN_EXEC = process.env.npm_execpath || 'yarn';
 
+const YARN_EXEC = process.env.npm_execpath || 'yarn';
 /**
  * Install all dependencies in the given directory
  */
 async function installInDir(directory, extraArgs = []) {
-  const options = ['install', '--non-interactive', ...extraArgs]; // We pass the mutex flag to ensure only one instance of yarn runs at any
-  // given time (e.g. to avoid conflicts).
+  const options = ['install', '--non-interactive', ...extraArgs];
 
+  // We pass the mutex flag to ensure only one instance of yarn runs at any
+  // given time (e.g. to avoid conflicts).
   await (0, _child_process.spawn)(YARN_EXEC, options, {
     cwd: directory
   });
 }
+
 /**
  * Run script in the given directory
  */
-
-
 async function runScriptInPackage(script, args, pkg) {
   const execOpts = {
     cwd: pkg.path
   };
   await (0, _child_process.spawn)(YARN_EXEC, ['run', script, ...args], execOpts);
 }
+
 /**
  * Run script in the given directory
  */
-
-
 function runScriptInPackageStreaming({
   script,
   args,
@@ -25524,7 +25327,6 @@ function runScriptInPackageStreaming({
     debug
   });
 }
-
 async function yarnWorkspacesInfo(directory) {
   const {
     stdout
@@ -25532,7 +25334,6 @@ async function yarnWorkspacesInfo(directory) {
     cwd: directory,
     stdio: 'pipe'
   });
-
   try {
     return JSON.parse(JSON.parse(stdout).data);
   } catch (error) {
@@ -25552,19 +25353,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.spawn = spawn;
 exports.spawnStreaming = spawnStreaming;
-
 var _stream = __webpack_require__(138);
-
 var _chalk = _interopRequireDefault(__webpack_require__(113));
-
 var _execa = _interopRequireDefault(__webpack_require__(284));
-
 var _strongLogTransformer = _interopRequireDefault(__webpack_require__(320));
-
 var _log = __webpack_require__(145);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25594,14 +25388,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
-const colorWheel = [_chalk.default.cyan, _chalk.default.magenta, _chalk.default.blue, _chalk.default.yellow, _chalk.default.green];
 
+const colorWheel = [_chalk.default.cyan, _chalk.default.magenta, _chalk.default.blue, _chalk.default.yellow, _chalk.default.green];
 const getColor = () => {
   const color = colorWheel.shift();
   colorWheel.push(color);
   return color;
 };
-
 function spawn(command, args, opts) {
   return (0, _execa.default)(command, args, {
     stdio: 'inherit',
@@ -25609,24 +25402,19 @@ function spawn(command, args, opts) {
     ...opts
   });
 }
-
 function streamToLog(debug = true) {
   return new _stream.Writable({
     objectMode: true,
-
     write(line, _, cb) {
       if (line.endsWith('\n')) {
         _log.log[debug ? 'debug' : 'write'](line.slice(0, -1));
       } else {
         _log.log[debug ? 'debug' : 'write'](line);
       }
-
       cb();
     }
-
   });
 }
-
 function spawnStreaming(command, args, opts, {
   prefix,
   debug
@@ -28834,51 +28622,41 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.BuildTargets = void 0;
 exports.buildTargetedPackage = buildTargetedPackage;
-
 var _promises = __webpack_require__(143);
-
 var _path = __webpack_require__(4);
-
 var _child_process = __webpack_require__(283);
-
 var _log = __webpack_require__(145);
-
 /*
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 const BuildTargetPresets = {
   web: '@osd/babel-preset/webpack_preset',
   node: '@osd/babel-preset/node_preset'
 };
-const BuildTargets = Object.keys(BuildTargetPresets);
+const BuildTargets = exports.BuildTargets = Object.keys(BuildTargetPresets);
+
 /**
  * Run script in the given directory
  */
-
-exports.BuildTargets = BuildTargets;
-
 async function buildTargetedPackage({
   pkg,
   sourceMaps
 }) {
   _log.log.debug(`[${pkg.name}] deleting old output`);
-
   await (0, _promises.rm)(pkg.targetLocation, {
     force: true,
     recursive: true
   });
-
   _log.log.debug(`[${pkg.name}] generating type definitions`);
-
   await (0, _child_process.spawn)('tsc', [...(sourceMaps ? ['--declarationMap', 'true'] : [])], {
     cwd: pkg.path
-  }); // Generate [A], [A and B], or [A, B, and C] labels
+  });
 
+  // Generate [A], [A and B], or [A, B, and C] labels
   const targetsDisplayLabel = pkg.buildTargets.join(', ').replace(/, ([^,]+)$/, pkg.buildTargets.length > 2 ? ', and $1' : ' and $1');
-
   _log.log.debug(`[${pkg.name}] transpiling for ${targetsDisplayLabel}`);
-
   await Promise.all([...pkg.buildTargets.map(target => (0, _child_process.spawn)('babel', ['src', '--no-babelrc', '--presets', BuildTargetPresets[target], '--out-dir', (0, _path.resolve)(pkg.targetLocation, target), '--extensions', '.ts,.js,.tsx', '--ignore', '**/*.test.ts,**/*.test.tsx', '--quiet', ...(sourceMaps ? ['--source-maps', 'inline'] : [])], {
     env: {
       BABEL_ENV: target
@@ -28899,23 +28677,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.copyWorkspacePackages = copyWorkspacePackages;
 exports.workspacePackagePaths = workspacePackagePaths;
-
 var _glob = _interopRequireDefault(__webpack_require__(148));
-
 var _path = _interopRequireDefault(__webpack_require__(4));
-
 var _util = __webpack_require__(112);
-
 var _config = __webpack_require__(330);
-
 var _fs = __webpack_require__(131);
-
 var _package_json = __webpack_require__(166);
-
 var _projects = __webpack_require__(147);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -28945,57 +28714,49 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
-const glob = (0, _util.promisify)(_glob.default);
 
+const glob = (0, _util.promisify)(_glob.default);
 async function workspacePackagePaths(rootPath) {
   const rootPkgJson = await (0, _package_json.readPackageJson)(rootPath);
-
   if (!rootPkgJson.workspaces) {
     return [];
   }
-
   const workspacesPathsPatterns = rootPkgJson.workspaces.packages;
   let workspaceProjectsPaths = [];
-
   for (const pattern of workspacesPathsPatterns) {
     workspaceProjectsPaths = workspaceProjectsPaths.concat(await packagesFromGlobPattern({
       pattern,
       rootPath
     }));
-  } // Filter out exclude glob patterns
+  }
 
-
+  // Filter out exclude glob patterns
   for (const pattern of workspacesPathsPatterns) {
     if (pattern.startsWith('!')) {
       const pathToRemove = _path.default.join(rootPath, pattern.slice(1), 'package.json');
-
       workspaceProjectsPaths = workspaceProjectsPaths.filter(p => p !== pathToRemove);
     }
   }
-
   return workspaceProjectsPaths;
 }
-
 async function copyWorkspacePackages(rootPath) {
   const projectPaths = (0, _config.getProjectPaths)({
     rootPath
   });
   const projects = await (0, _projects.getProjects)(rootPath, projectPaths);
-
   for (const project of projects.values()) {
     const dest = _path.default.resolve(rootPath, 'node_modules', project.name);
-
     if ((await (0, _fs.isSymlink)(dest)) === false) {
       continue;
-    } // Remove the symlink
+    }
 
+    // Remove the symlink
+    await (0, _fs.unlink)(dest);
 
-    await (0, _fs.unlink)(dest); // Copy in the package
-
+    // Copy in the package
     await (0, _fs.copyDirectory)(project.path, dest);
   }
 }
-
 function packagesFromGlobPattern({
   pattern,
   rootPath
@@ -29024,9 +28785,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getProjectPaths = getProjectPaths;
-
 var _path = __webpack_require__(4);
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -29065,7 +28824,9 @@ function getProjectPaths({
   ossOnly,
   skipOpenSearchDashboardsPlugins
 }) {
-  const projectPaths = [rootPath, (0, _path.resolve)(rootPath, 'packages/*')]; // This is needed in order to install the dependencies for the declared
+  const projectPaths = [rootPath, (0, _path.resolve)(rootPath, 'packages/*')];
+
+  // This is needed in order to install the dependencies for the declared
   // plugin functional used in the selenium functional tests.
   // As we are now using the webpack dll for the client vendors dependencies
   // when we run the plugin functional tests against the distributable
@@ -29074,11 +28835,9 @@ function getProjectPaths({
   // into the webpack dll reference plugin.
   // In anyway, have a plugin declaring their own dependencies is the
   // correct and the expect behavior.
-
   projectPaths.push((0, _path.resolve)(rootPath, 'test/plugin_functional/plugins/*'));
   projectPaths.push((0, _path.resolve)(rootPath, 'test/interpreter_functional/plugins/*'));
   projectPaths.push((0, _path.resolve)(rootPath, 'examples/*'));
-
   if (!skipOpenSearchDashboardsPlugins) {
     projectPaths.push((0, _path.resolve)(rootPath, '../opensearch-dashboards-extra/*'));
     projectPaths.push((0, _path.resolve)(rootPath, '../opensearch-dashboards-extra/*/packages/*'));
@@ -29087,7 +28846,6 @@ function getProjectPaths({
     projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*/packages/*'));
     projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*/plugins/*'));
   }
-
   return projectPaths;
 }
 
@@ -29102,17 +28860,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getAllChecksums = getAllChecksums;
-
 var _promises = __webpack_require__(143);
-
 var _crypto = _interopRequireDefault(__webpack_require__(332));
-
 var _execa = _interopRequireDefault(__webpack_require__(284));
-
 var _yarn_lock = __webpack_require__(333);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -29142,10 +28894,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
+
+/** map of [repo relative path to changed file, type of change] */
+
 const projectBySpecificitySorter = (a, b) => b.path.length - a.path.length;
+
 /** Get the changed files for a set of projects */
-
-
 async function getChangesForProjects(projects, osd, log) {
   log.verbose('getting changed files');
   const {
@@ -29155,12 +28909,10 @@ async function getChangesForProjects(projects, osd, log) {
   });
   const output = stdout.trim();
   const unassignedChanges = new Map();
-
   if (output) {
     for (const line of output.split('\n')) {
       const [tag, ...pathParts] = line.trim().split(' ');
       const path = pathParts.join(' ');
-
       switch (tag) {
         case 'M':
         case 'C':
@@ -29170,17 +28922,13 @@ async function getChangesForProjects(projects, osd, log) {
           if (unassignedChanges.get(path) !== 'deleted') {
             unassignedChanges.set(path, 'modified');
           }
-
           break;
-
         case 'R':
           unassignedChanges.set(path, 'deleted');
           break;
-
         case '?':
           unassignedChanges.set(path, 'untracked');
           break;
-
         case 'H':
         case 'S':
         case 'K':
@@ -29191,44 +28939,35 @@ async function getChangesForProjects(projects, osd, log) {
       }
     }
   }
-
   const sortedRelevantProjects = Array.from(projects.values()).sort(projectBySpecificitySorter);
   const changesByProject = new Map();
-
   for (const project of sortedRelevantProjects) {
     if (osd.isOutsideRepo(project)) {
       changesByProject.set(project, undefined);
       continue;
     }
-
     const ownChanges = new Map();
     const prefix = osd.getRelative(project.path);
-
     for (const [path, type] of unassignedChanges) {
       if (path.startsWith(prefix)) {
         ownChanges.set(path, type);
         unassignedChanges.delete(path);
       }
     }
-
     log.verbose(`[${project.name}] found ${ownChanges.size} changes`);
     changesByProject.set(project, ownChanges);
   }
-
   if (unassignedChanges.size) {
     throw new Error(`unable to assign all change paths to a project: ${JSON.stringify(Array.from(unassignedChanges.entries()))}`);
   }
-
   return changesByProject;
 }
+
 /** Get the latest commit sha for a project */
-
-
 async function getLatestSha(project, osd) {
   if (osd.isOutsideRepo(project)) {
     return;
   }
-
   const {
     stdout
   } = await (0, _execa.default)('git', ['log', '-n', '1', '--pretty=format:%H', '--', project.path], {
@@ -29236,28 +28975,23 @@ async function getLatestSha(project, osd) {
   });
   return stdout.trim() || undefined;
 }
+
 /**
  * Get the checksum for a specific project in the workspace
  */
-
-
 async function getChecksum(project, changes, yarnLock, osd, log) {
   const sha = await getLatestSha(project, osd);
-
   if (sha) {
     log.verbose(`[${project.name}] local sha:`, sha);
   }
-
   if (!changes || Array.from(changes.values()).includes('invalid')) {
     log.warning(`[${project.name}] unable to determine local changes, caching disabled`);
     return;
   }
-
   const changesSummary = await Promise.all(Array.from(changes).sort((a, b) => a[0].localeCompare(b[0])).map(async ([path, type]) => {
     if (type === 'deleted') {
       return `${path}:deleted`;
     }
-
     const stats = await (0, _promises.stat)(osd.getAbsolute(path));
     log.verbose(`[${project.name}] modified time ${stats.mtimeMs} for ${path}`);
     return `${path}:${stats.mtimeMs}`;
@@ -29270,11 +29004,9 @@ async function getChecksum(project, changes, yarnLock, osd, log) {
     includeDependentProject: false,
     productionDepsOnly: false
   });
-
   if (!depMap) {
     return;
   }
-
   const deps = Array.from(depMap.values()).map(({
     name,
     version
@@ -29285,29 +29017,25 @@ async function getChecksum(project, changes, yarnLock, osd, log) {
     changes: changesSummary,
     deps
   }, null, 2);
-
   if (process.env.BOOTSTRAP_CACHE_DEBUG_CHECKSUM) {
     return checksum;
   }
-
   const hash = _crypto.default.createHash('sha1');
-
   hash.update(checksum);
   return hash.digest('hex');
 }
+
 /**
  * Calculate checksums for all projects in the workspace based on
  *  - last git commit to project directory
  *  - un-committed changes
  *  - resolved dependencies from yarn.lock referenced by project package.json
  */
-
-
 async function getAllChecksums(osd, log, yarnLock) {
   const projects = osd.getAllProjects();
   const changesByProject = await getChangesForProjects(projects, osd, log);
-  /** map of [project.name, cacheKey] */
 
+  /** map of [project.name, cacheKey] */
   const cacheKeys = new Map();
   await Promise.all(Array.from(projects.values()).map(async project => {
     cacheKeys.set(project.name, await getChecksum(project, changesByProject.get(project), yarnLock, osd, log));
@@ -29333,15 +29061,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.readYarnLock = readYarnLock;
 exports.resolveDepsForProject = resolveDepsForProject;
-
 var _lockfile = __webpack_require__(334);
-
 var _crossPlatform = __webpack_require__(335);
-
 var _path = __webpack_require__(4);
-
 var _fs = __webpack_require__(131);
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -29371,58 +29094,53 @@ var _fs = __webpack_require__(131);
  * specific language governing permissions and limitations
  * under the License.
  */
+
 // @ts-expect-error published types are worthless
+
 async function readYarnLock(osd) {
   try {
     const contents = await (0, _fs.readFile)(osd.getAbsolute('yarn.lock'), 'utf8');
     const yarnLock = (0, _lockfile.parse)(contents);
-
     if (yarnLock.type === 'success') {
       return fixFileLinks(yarnLock.object, osd.getAbsolute());
     }
-
     throw new Error('unable to read yarn.lock file, please run `yarn osd bootstrap`');
   } catch (error) {
     if (error.code !== 'ENOENT') {
       throw error;
     }
   }
-
   return {};
 }
+
 /**
  * Converts relative `file:` paths to absolute paths
  * Yarn parsing method converts all file URIs to relative paths and this
  * breaks the single-version requirement as dependencies to the same path
  * would differ in their URIs across OSD and packages.
  */
-
-
 function fixFileLinks(yarnLock, projectRoot) {
   const fileLinkDelimiter = '@file:';
   const linkedKeys = Object.keys(yarnLock).filter(key => key.includes(fileLinkDelimiter));
   if (linkedKeys.length === 0) return yarnLock;
-  const updatedYarnLock = { ...yarnLock
+  const updatedYarnLock = {
+    ...yarnLock
   };
-
   for (const key of linkedKeys) {
     const [keyName, keyPath, ...rest] = key.split(fileLinkDelimiter);
-
     if (!(0, _path.isAbsolute)(keyPath)) {
       const updatedKeyName = [keyName, (0, _crossPlatform.standardize)((0, _path.resolve)(projectRoot, keyPath)), ...rest].join(fileLinkDelimiter);
       updatedYarnLock[updatedKeyName] = updatedYarnLock[key];
     }
   }
-
   return updatedYarnLock;
 }
+
 /**
  * Get a list of the absolute dependencies of this project, as resolved
  * in the yarn.lock file, does not include other projects in the workspace
  * or their dependencies
  */
-
-
 function resolveDepsForProject({
   project: rootProject,
   yarnLock,
@@ -29436,54 +29154,42 @@ function resolveDepsForProject({
   const seenProjects = new Set();
   const projectQueue = [rootProject];
   const depQueue = [];
-
   while (projectQueue.length) {
     const project = projectQueue.shift();
-
     if (seenProjects.has(project)) {
       continue;
     }
-
     seenProjects.add(project);
     const projectDeps = Object.entries(productionDepsOnly ? project.productionDependencies : project.allDependencies);
-
     for (const [name, versionRange] of projectDeps) {
       depQueue.push([name, versionRange]);
     }
-
     while (depQueue.length) {
       const [name, versionRange] = depQueue.shift();
       const req = `${name}@${versionRange}`;
-
       if (resolved.has(req)) {
         continue;
       }
-
       if (includeDependentProject && osd.hasProject(name)) {
         projectQueue.push(osd.getProject(name));
       }
-
       if (!osd.hasProject(name)) {
         const pkg = yarnLock[req];
-
         if (!pkg) {
           log.warning('yarn.lock file is out of date, please run `yarn osd bootstrap` to re-enable caching');
           return;
         }
-
         resolved.set(req, {
           name,
           version: pkg.version
         });
         const allDepsEntries = [...Object.entries(pkg.dependencies || {}), ...Object.entries(pkg.optionalDependencies || {})];
-
         for (const [childName, childVersionRange] of allDepsEntries) {
           depQueue.push([childName, childVersionRange]);
         }
       }
     }
   }
-
   return resolved;
 }
 
@@ -39771,21 +39477,17 @@ module.exports = process && support(supportLevel);
 
 "use strict";
 
+
 /*
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
 const tslib_1 = __webpack_require__(7);
-
 tslib_1.__exportStar(__webpack_require__(336), exports);
-
 tslib_1.__exportStar(__webpack_require__(337), exports);
-
 tslib_1.__exportStar(__webpack_require__(338), exports);
 
 /***/ }),
@@ -39794,22 +39496,18 @@ tslib_1.__exportStar(__webpack_require__(338), exports);
 
 "use strict";
 
+
 /*
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.realshortpathSync = exports.realShortPathSync = exports.realpathSync = exports.realPathSync = exports.resolveToShortNameSync = exports.resolveToShortPathSync = exports.resolveToFullNameSync = exports.resolveToFullPathSync = exports.shortNameSupportedSync = exports.shortNamesSupportedSync = exports.standardize = exports.NAMESPACE_PREFIX = void 0;
-
 const child_process_1 = __webpack_require__(285);
-
 const path_1 = __webpack_require__(4);
-
 const fs_1 = __webpack_require__(134);
-
 exports.NAMESPACE_PREFIX = process.platform === 'win32' ? '\\\\?\\' : '';
 /**
  * Get a standardized reference to a path
@@ -39818,38 +39516,33 @@ exports.NAMESPACE_PREFIX = process.platform === 'win32' ? '\\\\?\\' : '';
  * @param {boolean} [escapedBackslashes=true] - on Windows, double-backslash the reference
  * @param {boolean} [returnUNC=false] - produce an extended reference
  */
-
-exports.standardize = (path, usePosix = true, escapedBackslashes = true, returnUNC = false) => {
+const standardize = (path, usePosix = true, escapedBackslashes = true, returnUNC = false) => {
   var _process;
-
   // Force os-dependant separators
-  const normal = path_1.normalize(path); // Filter out in-browser executions as well as non-windows ones
-
+  const normal = (0, path_1.normalize)(path);
+  // Filter out in-browser executions as well as non-windows ones
   if (((_process = process) === null || _process === void 0 ? void 0 : _process.platform) !== 'win32') return normal;
   if (usePosix) return normal.replace(/\\/g, '/');else if (escapedBackslashes) return normal.replace(/\\/g, '\\\\');else if (returnUNC) return '\\\\?\\' + normal;
   return normal;
 };
+exports.standardize = standardize;
 /**
  * Windows-only function that uses PowerShell to calculate the full path
  * @param {string} path
  * @private
  */
-
-
 const getFullPathSync = path => {
   if (process.platform !== 'win32') return path;
-
   try {
-    var _child_process_1$exec, _child_process_1$exec2;
-
-    const fullName = (_child_process_1$exec = child_process_1.execSync(`powershell "(Get-Item -LiteralPath '${path}').FullName"`, {
+    var _ref, _ref$trim;
+    const fullName = (_ref = (0, child_process_1.execSync)(`powershell "(Get-Item -LiteralPath '${path}').FullName"`, {
       encoding: 'utf8'
-    })) === null || _child_process_1$exec === void 0 ? void 0 : (_child_process_1$exec2 = _child_process_1$exec.trim) === null || _child_process_1$exec2 === void 0 ? void 0 : _child_process_1$exec2.call(_child_process_1$exec); // Make sure we got something back
-
+    })) === null || _ref === void 0 || (_ref$trim = _ref.trim) === null || _ref$trim === void 0 ? void 0 : _ref$trim.call(_ref);
+    // Make sure we got something back
     if ((fullName === null || fullName === void 0 ? void 0 : fullName.length) > 2) return fullName;
-  } catch (ex) {// Do nothing
+  } catch (ex) {
+    // Do nothing
   }
-
   return path;
 };
 /**
@@ -39857,95 +39550,80 @@ const getFullPathSync = path => {
  * @param {string} path
  * @private
  */
-
-
 const getShortPathSync = path => {
   if (process.platform !== 'win32') return path;
-
   try {
-    var _child_process_1$exec3, _child_process_1$exec4;
-
-    const shortPath = (_child_process_1$exec3 = child_process_1.execSync(`powershell "$FSO = New-Object -ComObject Scripting.FileSystemObject; $O = (Get-Item -LiteralPath '${path}'); if ($O.PSIsContainer) { $FSO.GetFolder($O.FullName).ShortPath } else { $FSO.GetFile($O.FullName).ShortPath }"`, {
+    var _ref2, _ref2$trim;
+    const shortPath = (_ref2 = (0, child_process_1.execSync)(`powershell "$FSO = New-Object -ComObject Scripting.FileSystemObject; $O = (Get-Item -LiteralPath '${path}'); if ($O.PSIsContainer) { $FSO.GetFolder($O.FullName).ShortPath } else { $FSO.GetFile($O.FullName).ShortPath }"`, {
       encoding: 'utf8'
-    })) === null || _child_process_1$exec3 === void 0 ? void 0 : (_child_process_1$exec4 = _child_process_1$exec3.trim) === null || _child_process_1$exec4 === void 0 ? void 0 : _child_process_1$exec4.call(_child_process_1$exec3); // Make sure we got something back
-
+    })) === null || _ref2 === void 0 || (_ref2$trim = _ref2.trim) === null || _ref2$trim === void 0 ? void 0 : _ref2$trim.call(_ref2);
+    // Make sure we got something back
     if ((shortPath === null || shortPath === void 0 ? void 0 : shortPath.length) > 2) return shortPath;
-  } catch (ex) {// Do nothing
+  } catch (ex) {
+    // Do nothing
   }
-
   return path;
 };
 /**
  * Checks if Windows 8.3 short names are supported on the volume of the given path
  * @param {string} [path='.'] - the path to examine
  */
-
-
-exports.shortNamesSupportedSync = (path = '.') => {
+const shortNamesSupportedSync = (path = '.') => {
   if (process.platform !== 'win32') return false;
   const testFileName = '.___osd-cross-platform-test.file';
-  const file = path_1.resolve(path, testFileName); // Create a test file if it doesn't exist
-
-  if (!fs_1.existsSync(file)) fs_1.closeSync(fs_1.openSync(file, 'w')); // If the returned value's basename is not the same as the requested file name, it must be a short name
-
-  const foundShortName = path_1.basename(getShortPathSync(file)) !== testFileName; // Cleanup
-
-  fs_1.unlinkSync(file);
+  const file = (0, path_1.resolve)(path, testFileName);
+  // Create a test file if it doesn't exist
+  if (!(0, fs_1.existsSync)(file)) (0, fs_1.closeSync)((0, fs_1.openSync)(file, 'w'));
+  // If the returned value's basename is not the same as the requested file name, it must be a short name
+  const foundShortName = (0, path_1.basename)(getShortPathSync(file)) !== testFileName;
+  // Cleanup
+  (0, fs_1.unlinkSync)(file);
   return foundShortName;
 };
+exports.shortNamesSupportedSync = shortNamesSupportedSync;
 /**
  * @borrows shortNamesSupportedSync
  */
-
-
 exports.shortNameSupportedSync = exports.shortNamesSupportedSync;
 /**
  * Get the full pathname
  * @param {string} path - the path to resolve
  */
-
-exports.resolveToFullPathSync = path => getFullPathSync(path_1.resolve(path));
+const resolveToFullPathSync = path => getFullPathSync((0, path_1.resolve)(path));
+exports.resolveToFullPathSync = resolveToFullPathSync;
 /**
  * @borrows resolveToFullPathSync
  */
-
-
 exports.resolveToFullNameSync = exports.resolveToFullPathSync;
 /**
  * Get the short pathname
  * @param {string} path - the path to resolve
  */
-
-exports.resolveToShortPathSync = path => getShortPathSync(path_1.resolve(path));
+const resolveToShortPathSync = path => getShortPathSync((0, path_1.resolve)(path));
+exports.resolveToShortPathSync = resolveToShortPathSync;
 /**
  * @borrows resolveToShortPathSync
  */
-
-
 exports.resolveToShortNameSync = exports.resolveToShortPathSync;
 /**
  * Get the canonical pathname
  * @param {string} path - the path to resolve
  */
-
-exports.realPathSync = path => getFullPathSync(fs_1.realpathSync(path, 'utf8'));
+const realPathSync = path => getFullPathSync((0, fs_1.realpathSync)(path, 'utf8'));
+exports.realPathSync = realPathSync;
 /**
  * @borrows realPathSync
  */
-
-
 exports.realpathSync = exports.realPathSync;
 /**
  * Get the canonical pathname
  * @param {string} path - the path to resolve
  */
-
-exports.realShortPathSync = path => getShortPathSync(fs_1.realpathSync(path, 'utf8'));
+const realShortPathSync = path => getShortPathSync((0, fs_1.realpathSync)(path, 'utf8'));
+exports.realShortPathSync = realShortPathSync;
 /**
  * @borrows realShortPathSync
  */
-
-
 exports.realshortpathSync = exports.realShortPathSync;
 
 /***/ }),
@@ -39954,38 +39632,35 @@ exports.realshortpathSync = exports.realShortPathSync;
 
 "use strict";
 
+
 /*
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.PROCESS_POSIX_WORKING_DIR = exports.PROCESS_WORKING_DIR = void 0;
-
 const path_1 = __webpack_require__(336);
 /**
  * The full pathname of the working directory of the process
  * @constant
  * @type {string}
  */
-
-
-exports.PROCESS_WORKING_DIR = path_1.resolveToFullPathSync(process.cwd());
+exports.PROCESS_WORKING_DIR = (0, path_1.resolveToFullPathSync)(process.cwd());
 /**
  * The full pathname of the working directory of the process, in POSIX format
  * @constant
  * @type {string}
  */
-
-exports.PROCESS_POSIX_WORKING_DIR = path_1.standardize(exports.PROCESS_WORKING_DIR);
+exports.PROCESS_POSIX_WORKING_DIR = (0, path_1.standardize)(exports.PROCESS_WORKING_DIR);
 
 /***/ }),
 /* 338 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
 
 /*
  * SPDX-License-Identifier: Apache-2.0
@@ -39997,12 +39672,10 @@ exports.PROCESS_POSIX_WORKING_DIR = path_1.standardize(exports.PROCESS_WORKING_D
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.relativeToRepoRoot = exports.getRepoRoot = exports.getMatchingRoot = exports.UPSTREAM_BRANCH = exports.REPO_ROOT_8_3 = exports.REPO_ROOT = void 0;
-
 const tslib_1 = __webpack_require__(7);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -40022,86 +39695,71 @@ const tslib_1 = __webpack_require__(7);
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 const path_1 = __webpack_require__(4);
-
 const load_json_file_1 = tslib_1.__importDefault(__webpack_require__(339));
-
 const path_2 = __webpack_require__(336);
-
 const readOpenSearchDashboardsPkgJson = dir => {
   try {
-    const path = path_1.resolve(dir, 'package.json');
+    const path = (0, path_1.resolve)(dir, 'package.json');
     const json = load_json_file_1.default.sync(path);
-
     if ((json === null || json === void 0 ? void 0 : json.name) === 'opensearch-dashboards') {
       return json;
     }
   } catch (error) {
-    if (error && error.code === 'ENOENT') {
+    if ((error === null || error === void 0 ? void 0 : error.code) === 'ENOENT') {
       return;
     }
-
     throw error;
   }
 };
-
 const findOpenSearchDashboardsPackageJson = () => {
   // search for the opensearch-dashboards directory, since this file is moved around it might
   // not be where we think but should always be a relatively close parent
   // of this directory
-  const startDir = path_2.realPathSync(__dirname);
+  const startDir = (0, path_2.realPathSync)(__dirname);
   const {
     root: rootDir
-  } = path_1.parse(startDir);
+  } = (0, path_1.parse)(startDir);
   let cursor = startDir;
-
   while (true) {
     const opensearchDashboardsPkgJson = readOpenSearchDashboardsPkgJson(cursor);
-
     if (opensearchDashboardsPkgJson) {
       return {
         opensearchDashboardsDir: cursor,
         opensearchDashboardsPkgJson: opensearchDashboardsPkgJson
       };
     }
-
-    const parent = path_1.dirname(cursor);
-
+    const parent = (0, path_1.dirname)(cursor);
     if (parent === rootDir) {
       throw new Error(`unable to find opensearch-dashboards directory from ${startDir}`);
     }
-
     cursor = parent;
   }
 };
-
 const {
   opensearchDashboardsDir,
   opensearchDashboardsPkgJson
 } = findOpenSearchDashboardsPackageJson();
-exports.REPO_ROOT = path_2.resolveToFullPathSync(opensearchDashboardsDir);
-exports.REPO_ROOT_8_3 = path_2.resolveToShortPathSync(opensearchDashboardsDir);
+exports.REPO_ROOT = (0, path_2.resolveToFullPathSync)(opensearchDashboardsDir);
+exports.REPO_ROOT_8_3 = (0, path_2.resolveToShortPathSync)(opensearchDashboardsDir);
 exports.UPSTREAM_BRANCH = opensearchDashboardsPkgJson.branch;
-
-exports.getMatchingRoot = (path, rootPaths) => {
-  const rootPathsArray = Array.isArray(rootPaths) ? rootPaths : [rootPaths]; // We can only find the appropriate root if an absolute path was given
-
-  if (path && path_1.isAbsolute(path)) {
+const getMatchingRoot = (path, rootPaths) => {
+  const rootPathsArray = Array.isArray(rootPaths) ? rootPaths : [rootPaths];
+  // We can only find the appropriate root if an absolute path was given
+  if (path && (0, path_1.isAbsolute)(path)) {
     // Return the matching root if one is found or return `undefined`
     return rootPathsArray.find(root => path.startsWith(root));
   }
-
   return undefined;
 };
-
-exports.getRepoRoot = path => exports.getMatchingRoot(path, [exports.REPO_ROOT, exports.REPO_ROOT_8_3]);
-
-exports.relativeToRepoRoot = path => {
-  const repoRoot = exports.getRepoRoot(path);
-  return repoRoot ? path_1.relative(repoRoot, path) : null;
+exports.getMatchingRoot = getMatchingRoot;
+const getRepoRoot = path => (0, exports.getMatchingRoot)(path, [exports.REPO_ROOT, exports.REPO_ROOT_8_3]);
+exports.getRepoRoot = getRepoRoot;
+const relativeToRepoRoot = path => {
+  const repoRoot = (0, exports.getRepoRoot)(path);
+  return repoRoot ? (0, path_1.relative)(repoRoot, path) : null;
 };
+exports.relativeToRepoRoot = relativeToRepoRoot;
 
 /***/ }),
 /* 339 */
@@ -40162,56 +39820,73 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.BootstrapCacheFile = void 0;
-
 var _fs = _interopRequireDefault(__webpack_require__(134));
-
 var _path = _interopRequireDefault(__webpack_require__(4));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); } /*
+                                                                                                                                                                                                                                                                                                                                                                                           * SPDX-License-Identifier: Apache-2.0
+                                                                                                                                                                                                                                                                                                                                                                                           *
+                                                                                                                                                                                                                                                                                                                                                                                           * The OpenSearch Contributors require contributions made to
+                                                                                                                                                                                                                                                                                                                                                                                           * this file be licensed under the Apache-2.0 license or a
+                                                                                                                                                                                                                                                                                                                                                                                           * compatible open source license.
+                                                                                                                                                                                                                                                                                                                                                                                           *
+                                                                                                                                                                                                                                                                                                                                                                                           * Any modifications Copyright OpenSearch Contributors. See
+                                                                                                                                                                                                                                                                                                                                                                                           * GitHub history for details.
+                                                                                                                                                                                                                                                                                                                                                                                           */ /*
+                                                                                                                                                                                                                                                                                                                                                                                               * Licensed to Elasticsearch B.V. under one or more contributor
+                                                                                                                                                                                                                                                                                                                                                                                               * license agreements. See the NOTICE file distributed with
+                                                                                                                                                                                                                                                                                                                                                                                               * this work for additional information regarding copyright
+                                                                                                                                                                                                                                                                                                                                                                                               * ownership. Elasticsearch B.V. licenses this file to you under
+                                                                                                                                                                                                                                                                                                                                                                                               * the Apache License, Version 2.0 (the "License"); you may
+                                                                                                                                                                                                                                                                                                                                                                                               * not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                               * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                               *
+                                                                                                                                                                                                                                                                                                                                                                                               *    http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                               *
+                                                                                                                                                                                                                                                                                                                                                                                               * Unless required by applicable law or agreed to in writing,
+                                                                                                                                                                                                                                                                                                                                                                                               * software distributed under the License is distributed on an
+                                                                                                                                                                                                                                                                                                                                                                                               * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+                                                                                                                                                                                                                                                                                                                                                                                               * KIND, either express or implied.  See the License for the
+                                                                                                                                                                                                                                                                                                                                                                                               * specific language governing permissions and limitations
+                                                                                                                                                                                                                                                                                                                                                                                               * under the License.
+                                                                                                                                                                                                                                                                                                                                                                                               */
 class BootstrapCacheFile {
   constructor(osd, project, checksums) {
     _defineProperty(this, "path", void 0);
-
     _defineProperty(this, "expectedValue", void 0);
-
     this.path = _path.default.resolve(project.targetLocation, '.bootstrap-cache');
-
     if (!checksums) {
       return;
     }
-
-    const projectAndDepCacheKeys = Array.from(osd.getProjectAndDeps(project.name).values()) // sort deps by name so that the key is stable
-    .sort((a, b) => a.name.localeCompare(b.name)) // get the cacheKey for each project, return undefined if the cache key couldn't be determined
+    const projectAndDepCacheKeys = Array.from(osd.getProjectAndDeps(project.name).values())
+    // sort deps by name so that the key is stable
+    .sort((a, b) => a.name.localeCompare(b.name))
+    // get the cacheKey for each project, return undefined if the cache key couldn't be determined
     .map(p => {
       const cacheKey = checksums.get(p.name);
-
       if (cacheKey) {
         return `${p.name}:${cacheKey}`;
       }
-    }); // if any of the relevant cache keys are undefined then the projectCacheKey must be too
+    });
 
+    // if any of the relevant cache keys are undefined then the projectCacheKey must be too
     this.expectedValue = projectAndDepCacheKeys.some(k => !k) ? undefined : [`# this is only human readable for debugging, please don't try to parse this`, ...projectAndDepCacheKeys].join('\n');
   }
-
   isValid() {
     if (!this.expectedValue) {
       return false;
     }
-
     try {
       return _fs.default.readFileSync(this.path, 'utf8') === this.expectedValue;
     } catch (error) {
       if (error.code === 'ENOENT') {
         return false;
       }
-
       throw error;
     }
   }
-
   delete() {
     try {
       _fs.default.unlinkSync(this.path);
@@ -40221,21 +39896,16 @@ class BootstrapCacheFile {
       }
     }
   }
-
   write() {
     if (!this.expectedValue) {
       return;
     }
-
     _fs.default.mkdirSync(_path.default.dirname(this.path), {
       recursive: true
     });
-
     _fs.default.writeFileSync(this.path, this.expectedValue);
   }
-
 }
-
 exports.BootstrapCacheFile = BootstrapCacheFile;
 
 /***/ }),
@@ -40249,21 +39919,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.validateDependencies = validateDependencies;
-
 var _lockfile = __webpack_require__(334);
-
 var _dedent = _interopRequireDefault(__webpack_require__(2));
-
 var _chalk = _interopRequireDefault(__webpack_require__(113));
-
 var _fs = __webpack_require__(131);
-
 var _log = __webpack_require__(145);
-
 var _projects_tree = __webpack_require__(343);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -40293,30 +39955,29 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
+
 // @ts-expect-error published types are useless
+
 async function validateDependencies(osd, yarnLock) {
   // look through all of the packages in the yarn.lock file to see if
   // we have accidentally installed multiple lodash v4 versions
   const lodash4Versions = new Set();
   const lodash4Reqs = new Set();
-
   for (const [req, dep] of Object.entries(yarnLock)) {
     if (req.startsWith('lodash@') && dep.version.startsWith('4.')) {
       lodash4Reqs.add(req);
       lodash4Versions.add(dep.version);
     }
-  } // if we find more than one lodash v4 version installed then delete
+  }
+
+  // if we find more than one lodash v4 version installed then delete
   // lodash v4 requests from the yarn.lock file and prompt the user to
   // retry bootstrap so that a single v4 version will be installed
-
-
   if (lodash4Versions.size > 1) {
     for (const req of lodash4Reqs) {
       delete yarnLock[req];
     }
-
     await (0, _fs.writeFile)(osd.getAbsolute('yarn.lock'), (0, _lockfile.stringify)(yarnLock), 'utf8');
-
     _log.log.error((0, _dedent.default)`
 
       Multiple version of lodash v4 were detected, so they have been removed
@@ -40330,23 +39991,21 @@ async function validateDependencies(osd, yarnLock) {
       If you have questions about this please reach out to the operations team.
 
     `);
-
     process.exit(1);
-  } // look through all the dependencies of production packages and production
+  }
+
+  // look through all the dependencies of production packages and production
   // dependencies of those packages to determine if we're shipping any versions
   // of lodash v3 in the distributable
-
-
   const prodDependencies = osd.resolveAllProductionDependencies(yarnLock, _log.log);
   const lodash3Versions = new Set();
-
   for (const dep of prodDependencies.values()) {
     if (dep.name === 'lodash' && dep.version.startsWith('3.')) {
       lodash3Versions.add(dep.version);
     }
-  } // if any lodash v3 packages were found we abort and tell the user to fix things
+  }
 
-
+  // if any lodash v3 packages were found we abort and tell the user to fix things
   if (lodash3Versions.size) {
     _log.log.error((0, _dedent.default)`
 
@@ -40361,18 +40020,15 @@ async function validateDependencies(osd, yarnLock) {
       If you have questions about this please reack out to the operations team.
 
     `);
-
     process.exit(1);
-  } // TODO: remove this once we move into a single package.json
+  }
+
+  // TODO: remove this once we move into a single package.json
   // look through all the package.json files to find packages which have mismatched version ranges
-
-
   const depRanges = new Map();
-
   for (const project of osd.getAllProjects().values()) {
     for (const [dep, range] of Object.entries(project.allDependencies)) {
       const existingDep = depRanges.get(dep);
-
       if (!existingDep) {
         depRanges.set(dep, [{
           range,
@@ -40380,9 +40036,7 @@ async function validateDependencies(osd, yarnLock) {
         }]);
         continue;
       }
-
       const existingRange = existingDep.find(existing => existing.range === range);
-
       if (!existingRange) {
         existingDep.push({
           range,
@@ -40390,16 +40044,13 @@ async function validateDependencies(osd, yarnLock) {
         });
         continue;
       }
-
       existingRange.projects.push(project);
     }
   }
-
   const duplicateRanges = Array.from(depRanges.entries()).filter(([, ranges]) => ranges.length > 1).reduce((acc, [dep, ranges]) => [...acc, dep, ...ranges.map(({
     range,
     projects
   }) => `  ${range} => ${projects.map(p => p.name).join(', ')}`)], []).join('\n        ');
-
   if (duplicateRanges) {
     _log.log.error((0, _dedent.default)`
 
@@ -40414,14 +40065,12 @@ async function validateDependencies(osd, yarnLock) {
 
         ${duplicateRanges}
     `);
-
     process.exit(1);
-  } // look for packages that have the the `opensearchDashboards.devOnly` flag in their package.json
+  }
+
+  // look for packages that have the the `opensearchDashboards.devOnly` flag in their package.json
   // and make sure they aren't included in the production dependencies of OpenSearch Dashboards
-
-
   const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(osd, 'opensearch-dashboards');
-
   if (devOnlyProjectsInProduction) {
     _log.log.error((0, _dedent.default)`
       Some of the packages in the production dependency chain for OpenSearch Dashboards are
@@ -40432,22 +40081,17 @@ async function validateDependencies(osd, yarnLock) {
 
         ${(0, _projects_tree.treeToString)(devOnlyProjectsInProduction).split('\n').join('\n        ')}
     `);
-
     process.exit(1);
   }
-
   _log.log.success('yarn.lock analysis completed without any issues');
 }
-
 function getDevOnlyProductionDepsTree(osd, projectName) {
   const project = osd.getProject(projectName);
   const childProjectNames = [...Object.keys(project.productionDependencies).filter(name => osd.hasProject(name))];
   const children = childProjectNames.map(n => getDevOnlyProductionDepsTree(osd, n)).filter(t => !!t);
-
   if (!children.length && !project.isFlaggedAsDevOnly()) {
     return;
   }
-
   const tree = {
     name: project.isFlaggedAsDevOnly() ? _chalk.default.red.bold(projectName) : projectName,
     children
@@ -40467,15 +40111,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.renderProjectsTree = renderProjectsTree;
 exports.treeToString = treeToString;
-
 var _chalk = _interopRequireDefault(__webpack_require__(113));
-
 var _path = _interopRequireDefault(__webpack_require__(4));
-
 var _crossPlatform = __webpack_require__(335);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -40505,22 +40144,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
-const projectKey = Symbol('__project');
 
+const projectKey = Symbol('__project');
 function renderProjectsTree(rootPath, projects) {
   const projectsTree = buildProjectsTree(rootPath, projects);
   return treeToString(createTreeStructure(projectsTree));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 function treeToString(tree) {
   return [tree.name].concat(childrenToStrings(tree.children, '')).join('\n');
 }
-
 function childrenToStrings(tree, treePrefix) {
   if (tree === undefined) {
     return [];
   }
-
   let strings = [];
   tree.forEach((node, index) => {
     const isLastNode = tree.length - 1 === index;
@@ -40532,22 +40173,20 @@ function childrenToStrings(tree, treePrefix) {
   });
   return strings;
 }
-
 function createTreeStructure(tree) {
   let name;
   const children = [];
-
   for (const [dir, project] of tree.entries()) {
     // This is a leaf node (aka a project)
     if (typeof project === 'string') {
       name = _chalk.default.green(project);
       continue;
-    } // If there's only one project and the key indicates it's a leaf node, we
+    }
+
+    // If there's only one project and the key indicates it's a leaf node, we
     // know that we're at a package folder that contains a package.json, so we
     // "inline it" so we don't get unnecessary levels, i.e. we'll just see
     // `foo` instead of `foo -> foo`.
-
-
     if (project.size === 1 && project.has(projectKey)) {
       const projectName = project.get(projectKey);
       children.push({
@@ -40556,10 +40195,10 @@ function createTreeStructure(tree) {
       });
       continue;
     }
+    const subtree = createTreeStructure(project);
 
-    const subtree = createTreeStructure(project); // If the name is specified, we know there's a package at the "root" of the
+    // If the name is specified, we know there's a package at the "root" of the
     // subtree itself.
-
     if (subtree.name !== undefined) {
       const projectName = subtree.name;
       children.push({
@@ -40567,65 +40206,53 @@ function createTreeStructure(tree) {
         name: dirOrProjectName(dir, projectName)
       });
       continue;
-    } // Special-case whenever we have one child, so we don't get unnecessary
+    }
+
+    // Special-case whenever we have one child, so we don't get unnecessary
     // folders in the output. E.g. instead of `foo -> bar -> baz` we get
     // `foo/bar/baz` instead.
-
-
     if (subtree.children && subtree.children.length === 1) {
       const child = subtree.children[0];
-
       const newName = _chalk.default.dim((0, _crossPlatform.standardize)(_path.default.join(dir.toString(), child.name), true));
-
       children.push({
         children: child.children,
         name: newName
       });
       continue;
     }
-
     children.push({
       children: subtree.children,
       name: _chalk.default.dim(dir.toString())
     });
   }
-
   return {
     name,
     children
   };
 }
-
 function dirOrProjectName(dir, projectName) {
   return dir === projectName ? _chalk.default.green(dir) : (0, _chalk.default)`{dim ${dir.toString()} ({reset.green ${projectName}})}`;
 }
-
 function buildProjectsTree(rootPath, projects) {
   const tree = new Map();
-
   for (const project of projects.values()) {
     if (rootPath === project.path) {
       tree.set(projectKey, project.name);
     } else {
       const relativeProjectPath = _path.default.relative(rootPath, project.path);
-
       addProjectToTree(tree, relativeProjectPath.split(_path.default.sep), project);
     }
   }
-
   return tree;
 }
-
 function addProjectToTree(tree, pathParts, project) {
   if (pathParts.length === 0) {
     tree.set(projectKey, project.name);
   } else {
     const [currentDir, ...rest] = pathParts;
-
     if (!tree.has(currentDir)) {
       tree.set(currentDir, new Map());
     }
-
     const subtree = tree.get(currentDir);
     addProjectToTree(subtree, rest, project);
   }
@@ -40642,19 +40269,12 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.CleanCommand = void 0;
-
 var _del = _interopRequireDefault(__webpack_require__(345));
-
 var _ora = _interopRequireDefault(__webpack_require__(434));
-
 var _path = __webpack_require__(4);
-
 var _fs = __webpack_require__(131);
-
 var _log = __webpack_require__(145);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -40684,13 +40304,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
-const CleanCommand = {
+
+const CleanCommand = exports.CleanCommand = {
   description: 'Remove the node_modules and target directories from all projects.',
   name: 'clean',
-
   async run(projects) {
     const toDelete = [];
-
     for (const project of projects.values()) {
       if (await (0, _fs.isDirectory)(project.nodeModulesLocation)) {
         toDelete.push({
@@ -40698,18 +40317,15 @@ const CleanCommand = {
           pattern: (0, _path.relative)(project.path, project.nodeModulesLocation)
         });
       }
-
       if (await (0, _fs.isDirectory)(project.targetLocation)) {
         toDelete.push({
           cwd: project.path,
           pattern: (0, _path.relative)(project.path, project.targetLocation)
         });
       }
-
       const {
         extraPatterns
       } = project.getCleanConfig();
-
       if (extraPatterns) {
         toDelete.push({
           cwd: project.path,
@@ -40717,7 +40333,6 @@ const CleanCommand = {
         });
       }
     }
-
     if (toDelete.length === 0) {
       _log.log.success('Nothing to delete');
     } else {
@@ -40731,7 +40346,6 @@ const CleanCommand = {
        * patterns and does not impact the cwd check.
        */
       const originalCwd = process.cwd();
-
       try {
         for (const {
           pattern,
@@ -40739,11 +40353,9 @@ const CleanCommand = {
         } of toDelete) {
           process.chdir(cwd);
           const promise = (0, _del.default)(pattern);
-
           if (_log.log.wouldLogLevel('info')) {
             _ora.default.promise(promise, (0, _path.relative)(originalCwd, (0, _path.join)(cwd, String(pattern))));
           }
-
           await promise;
         }
       } finally {
@@ -40751,9 +40363,7 @@ const CleanCommand = {
       }
     }
   }
-
 };
-exports.CleanCommand = CleanCommand;
 
 /***/ }),
 /* 345 */
@@ -51850,15 +51460,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.RunCommand = void 0;
-
 var _errors = __webpack_require__(164);
-
 var _log = __webpack_require__(145);
-
 var _parallelize = __webpack_require__(146);
-
 var _projects = __webpack_require__(147);
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -51888,36 +51493,30 @@ var _projects = __webpack_require__(147);
  * specific language governing permissions and limitations
  * under the License.
  */
-const RunCommand = {
+
+const RunCommand = exports.RunCommand = {
   description: 'Run script defined in package.json in each package that contains that script.',
   name: 'run',
-
   async run(projects, projectGraph, {
     extraArgs
   }) {
     const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
-
     if (extraArgs.length === 0) {
       throw new _errors.CliError('No script specified');
     }
-
     const scriptName = extraArgs[0];
     const scriptArgs = extraArgs.slice(1);
     await (0, _parallelize.parallelizeBatches)(batchedProjects, async project => {
       if (project.hasScript(scriptName)) {
         _log.log.info(`[${project.name}] running "${scriptName}" script`);
-
         await project.runScriptStreaming(scriptName, {
           args: scriptArgs
         });
-
         _log.log.success(`[${project.name}] complete`);
       }
     });
   }
-
 };
-exports.RunCommand = RunCommand;
 
 /***/ }),
 /* 458 */
@@ -51930,17 +51529,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.WatchCommand = void 0;
-
 var _errors = __webpack_require__(164);
-
 var _log = __webpack_require__(145);
-
 var _parallelize = __webpack_require__(146);
-
 var _projects = __webpack_require__(147);
-
 var _watch = __webpack_require__(459);
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -51975,11 +51568,12 @@ var _watch = __webpack_require__(459);
  * Name of the script in the package/project package.json file to run during `osd watch`.
  */
 const watchScriptName = 'osd:watch';
+
 /**
  * Name of the OpenSearch Dashboards project.
  */
-
 const opensearchDashboardsProjectName = 'opensearch-dashboards';
+
 /**
  * Command that traverses through list of available projects/packages that have `osd:watch` script in their
  * package.json files, groups them into topology aware batches and then processes theses batches one by one
@@ -51990,49 +51584,38 @@ const opensearchDashboardsProjectName = 'opensearch-dashboards';
  * the `osd:watch` script and eventually for the entire batch. Currently we support completion "markers" for
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
  */
-
-const WatchCommand = {
+const WatchCommand = exports.WatchCommand = {
   description: 'Runs `osd:watch` script for every project.',
   name: 'watch',
-
   async run(projects, projectGraph) {
     const projectsToWatch = new Map();
-
     for (const project of projects.values()) {
       // We can't watch project that doesn't have `osd:watch` script.
       if (project.hasScript(watchScriptName)) {
         projectsToWatch.set(project.name, project);
       }
     }
-
     if (projectsToWatch.size === 0) {
       throw new _errors.CliError(`There are no projects to watch found. Make sure that projects define 'osd:watch' script in 'package.json'.`);
     }
-
     const projectNames = Array.from(projectsToWatch.keys());
+    _log.log.info(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`);
 
-    _log.log.info(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`); // OpenSearch Dashboards should always be run the last, so we don't rely on automatic
+    // OpenSearch Dashboards should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
-
-
     const shouldWatchOpenSearchDashboardsProject = projectsToWatch.delete(opensearchDashboardsProjectName);
     const batchedProjects = (0, _projects.topologicallyBatchProjects)(projectsToWatch, projectGraph);
-
     if (shouldWatchOpenSearchDashboardsProject) {
       batchedProjects.push([projects.get(opensearchDashboardsProjectName)]);
     }
-
     await (0, _parallelize.parallelizeBatches)(batchedProjects, async pkg => {
       const completionHint = await (0, _watch.waitUntilWatchIsReady)(pkg.runScriptStreaming(watchScriptName, {
         debug: false
       }).stdout);
-
       _log.log.success(`[${pkg.name}] Initial build completed (${completionHint}).`);
     });
   }
-
 };
-exports.WatchCommand = WatchCommand;
 
 /***/ }),
 /* 459 */
@@ -52045,15 +51628,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.waitUntilWatchIsReady = waitUntilWatchIsReady;
-
 var Rx = _interopRequireWildcard(__webpack_require__(8));
-
 var _operators = __webpack_require__(460);
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -52088,12 +51666,13 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  * Number of milliseconds we wait before we fall back to the default watch handler.
  */
 const defaultHandlerDelay = 3000;
+
 /**
  * If default watch handler is used, then it's the number of milliseconds we wait for
  * any build output before we consider watch task ready.
  */
-
 const defaultHandlerReadinessTimeout = 2000;
+
 /**
  * Describes configurable watch options.
  */
@@ -52107,16 +51686,11 @@ function getWatchHandlers(buildOutput$, {
   const defaultHandler = Rx.of(undefined).pipe((0, _operators.delay)(handlerReadinessTimeout), (0, _operators.map)(() => buildOutput$.pipe((0, _operators.timeout)(handlerDelay), (0, _operators.catchError)(() => Rx.of('timeout')))));
   return [typescriptHandler, webpackHandler, defaultHandler];
 }
-
 function waitUntilWatchIsReady(stream, opts = {}) {
   const buildOutput$ = new Rx.Subject();
-
   const onDataListener = data => buildOutput$.next(data.toString('utf-8'));
-
   const onEndListener = () => buildOutput$.complete();
-
   const onErrorListener = e => buildOutput$.error(e);
-
   stream.once('end', onEndListener);
   stream.once('error', onErrorListener);
   stream.on('data', onDataListener);
@@ -58173,17 +57747,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.runCommand = runCommand;
-
 var _errors = __webpack_require__(164);
-
 var _log = __webpack_require__(145);
-
 var _projects = __webpack_require__(147);
-
 var _projects_tree = __webpack_require__(343);
-
 var _opensearch_dashboards = __webpack_require__(559);
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -58213,10 +57781,10 @@ var _opensearch_dashboards = __webpack_require__(559);
  * specific language governing permissions and limitations
  * under the License.
  */
+
 async function runCommand(command, config) {
   try {
     _log.log.debug(`Running [${command.name}] command from [${config.rootPath}]`);
-
     const osd = await _opensearch_dashboards.OpenSearchDashboards.loadFrom(config.rootPath);
     const projects = osd.getFilteredProjects({
       skipOpenSearchDashboardsPlugins: Boolean(config.options['skip-opensearch-dashboards-plugins']),
@@ -58224,52 +57792,38 @@ async function runCommand(command, config) {
       exclude: toArray(config.options.exclude),
       include: toArray(config.options.include)
     });
-
     if (projects.size === 0) {
       _log.log.error(`There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.`);
-
       return process.exit(1);
     }
-
     const projectGraph = (0, _projects.buildProjectGraph)(projects);
-
     _log.log.debug(`Found ${projects.size.toString()} projects`);
-
     _log.log.debug((0, _projects_tree.renderProjectsTree)(config.rootPath, projects));
-
-    await command.run(projects, projectGraph, { ...config,
+    await command.run(projects, projectGraph, {
+      ...config,
       osd
     });
   } catch (error) {
     _log.log.error(`[${command.name}] failed:`);
-
     if (error instanceof _errors.CliError) {
       _log.log.error(error.message);
-
       const metaOutput = Object.entries(error.meta).map(([key, value]) => `${key}: ${value}`).join('\n');
-
       if (metaOutput) {
         _log.log.info('Additional debugging info:\n');
-
         _log.log.indent(2);
-
         _log.log.info(metaOutput);
-
         _log.log.indent(-2);
       }
     } else {
       _log.log.error(error);
     }
-
     process.exit(1);
   }
 }
-
 function toArray(value) {
   if (value == null) {
     return [];
   }
-
   return Array.isArray(value) ? value : [value];
 }
 
@@ -58284,23 +57838,42 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.OpenSearchDashboards = void 0;
-
 var _path = _interopRequireDefault(__webpack_require__(4));
-
 var _multimatch = _interopRequireDefault(__webpack_require__(560));
-
 var _isPathInside = _interopRequireDefault(__webpack_require__(428));
-
 var _yarn_lock = __webpack_require__(333);
-
 var _projects = __webpack_require__(147);
-
 var _config = __webpack_require__(330);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); } /*
+                                                                                                                                                                                                                                                                                                                                                                                           * SPDX-License-Identifier: Apache-2.0
+                                                                                                                                                                                                                                                                                                                                                                                           *
+                                                                                                                                                                                                                                                                                                                                                                                           * The OpenSearch Contributors require contributions made to
+                                                                                                                                                                                                                                                                                                                                                                                           * this file be licensed under the Apache-2.0 license or a
+                                                                                                                                                                                                                                                                                                                                                                                           * compatible open source license.
+                                                                                                                                                                                                                                                                                                                                                                                           *
+                                                                                                                                                                                                                                                                                                                                                                                           * Any modifications Copyright OpenSearch Contributors. See
+                                                                                                                                                                                                                                                                                                                                                                                           * GitHub history for details.
+                                                                                                                                                                                                                                                                                                                                                                                           */ /*
+                                                                                                                                                                                                                                                                                                                                                                                               * Licensed to Elasticsearch B.V. under one or more contributor
+                                                                                                                                                                                                                                                                                                                                                                                               * license agreements. See the NOTICE file distributed with
+                                                                                                                                                                                                                                                                                                                                                                                               * this work for additional information regarding copyright
+                                                                                                                                                                                                                                                                                                                                                                                               * ownership. Elasticsearch B.V. licenses this file to you under
+                                                                                                                                                                                                                                                                                                                                                                                               * the Apache License, Version 2.0 (the "License"); you may
+                                                                                                                                                                                                                                                                                                                                                                                               * not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                               * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                               *
+                                                                                                                                                                                                                                                                                                                                                                                               *    http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                               *
+                                                                                                                                                                                                                                                                                                                                                                                               * Unless required by applicable law or agreed to in writing,
+                                                                                                                                                                                                                                                                                                                                                                                               * software distributed under the License is distributed on an
+                                                                                                                                                                                                                                                                                                                                                                                               * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+                                                                                                                                                                                                                                                                                                                                                                                               * KIND, either express or implied.  See the License for the
+                                                                                                                                                                                                                                                                                                                                                                                               * specific language governing permissions and limitations
+                                                                                                                                                                                                                                                                                                                                                                                               * under the License.
+                                                                                                                                                                                                                                                                                                                                                                                               */
 /**
  * Helper class for dealing with a set of projects as children of
  * the OpenSearch Dashboards project. The osd/pm is currently implemented to be
@@ -58318,96 +57891,77 @@ class OpenSearchDashboards {
       rootPath
     })));
   }
-
   constructor(allWorkspaceProjects) {
     this.allWorkspaceProjects = allWorkspaceProjects;
-
     _defineProperty(this, "opensearchDashboardsProject", void 0);
-
     const opensearchDashboardsProject = allWorkspaceProjects.get('opensearch-dashboards');
-
     if (!opensearchDashboardsProject) {
       throw new TypeError('Unable to create OpenSearch Dashboards object without all projects, including the OpenSearch Dashboards project.');
     }
-
     this.opensearchDashboardsProject = opensearchDashboardsProject;
   }
+
   /** make an absolute path by resolving subPath relative to the opensearch-dashboards repo */
-
-
   getAbsolute(...subPath) {
     return _path.default.resolve(this.opensearchDashboardsProject.path, ...subPath);
   }
+
   /** convert an absolute path to a relative path, relative to the opensearch-dashboards repo */
-
-
   getRelative(absolute) {
     return _path.default.relative(this.opensearchDashboardsProject.path, absolute);
   }
+
   /** get a copy of the map of all projects in the opensearch-dashboards workspace */
-
-
   getAllProjects() {
     return new Map(this.allWorkspaceProjects);
   }
+
   /** determine if a project with the given name exists */
-
-
   hasProject(name) {
     return this.allWorkspaceProjects.has(name);
   }
+
   /** get a specific project, throws if the name is not known (use hasProject() first) */
-
-
   getProject(name) {
     const project = this.allWorkspaceProjects.get(name);
-
     if (!project) {
       throw new Error(`No package with name "${name}" in the workspace`);
     }
-
     return project;
   }
+
   /** get a project and all of the projects it depends on in a ProjectMap */
-
-
   getProjectAndDeps(name) {
     const project = this.getProject(name);
     return (0, _projects.includeTransitiveProjects)([project], this.allWorkspaceProjects);
   }
+
   /** filter the projects to just those matching certain paths/include/exclude tags */
-
-
   getFilteredProjects(options) {
     const allProjects = this.getAllProjects();
     const filteredProjects = new Map();
     const pkgJsonPaths = Array.from(allProjects.values()).map(p => p.packageJsonLocation);
-    const filteredPkgJsonGlobs = (0, _config.getProjectPaths)({ ...options,
+    const filteredPkgJsonGlobs = (0, _config.getProjectPaths)({
+      ...options,
       rootPath: this.opensearchDashboardsProject.path
     }).map(g => _path.default.resolve(g, 'package.json'));
     const matchingPkgJsonPaths = (0, _multimatch.default)(pkgJsonPaths, filteredPkgJsonGlobs);
-
     for (const project of allProjects.values()) {
       const pathMatches = matchingPkgJsonPaths.includes(project.packageJsonLocation);
       const notExcluded = !options.exclude.includes(project.name);
       const isIncluded = !options.include.length || options.include.includes(project.name);
-
       if (pathMatches && notExcluded && isIncluded) {
         filteredProjects.set(project.name, project);
       }
     }
-
     return filteredProjects;
   }
-
   isPartOfRepo(project) {
     return project.path === this.opensearchDashboardsProject.path || (0, _isPathInside.default)(project.path, this.opensearchDashboardsProject.path);
   }
-
   isOutsideRepo(project) {
     return !this.isPartOfRepo(project);
   }
-
   resolveAllProductionDependencies(yarnLock, log) {
     const opensearchDashboardsDeps = (0, _yarn_lock.resolveDepsForProject)({
       project: this.opensearchDashboardsProject,
@@ -58419,9 +57973,7 @@ class OpenSearchDashboards {
     });
     return new Map([...opensearchDashboardsDeps.entries()]);
   }
-
 }
-
 exports.OpenSearchDashboards = OpenSearchDashboards;
 
 /***/ }),
@@ -58517,7 +58069,6 @@ Object.defineProperty(exports, "buildProductionProjects", {
     return _build_production_projects.buildProductionProjects;
   }
 });
-
 var _build_production_projects = __webpack_require__(564);
 
 /***/ }),
@@ -58531,25 +58082,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.buildProductionProjects = buildProductionProjects;
-
 var _cpy = _interopRequireDefault(__webpack_require__(565));
-
 var _del = _interopRequireDefault(__webpack_require__(345));
-
 var _path = __webpack_require__(4);
-
 var _config = __webpack_require__(330);
-
 var _fs = __webpack_require__(131);
-
 var _log = __webpack_require__(145);
-
 var _package_json = __webpack_require__(166);
-
 var _projects = __webpack_require__(147);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -58579,6 +58120,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
+
 async function buildProductionProjects({
   opensearchDashboardsRoot,
   buildRoot
@@ -58587,9 +58129,7 @@ async function buildProductionProjects({
   const projectGraph = (0, _projects.buildProjectGraph)(projects);
   const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
   const projectNames = [...projects.values()].map(project => project.name);
-
   _log.log.info(`Preparing production build for [${projectNames.join(', ')}]`);
-
   for (const batch of batchedProjects) {
     for (const project of batch) {
       await deleteTarget(project);
@@ -58598,6 +58138,7 @@ async function buildProductionProjects({
     }
   }
 }
+
 /**
  * Returns the subset of projects that should be built into the production
  * bundle. As we copy these into OpenSearch Dashboards 's `node_modules` during the build step,
@@ -58605,8 +58146,6 @@ async function buildProductionProjects({
  * we only include OpenSearch Dashboards 's transitive _production_ dependencies. If onlyOSS
  * is supplied, we omit projects with build.oss in their package.json set to false.
  */
-
-
 async function getProductionProjects(rootPath) {
   const projectPaths = (0, _config.getProjectPaths)({
     rootPath
@@ -58615,8 +58154,9 @@ async function getProductionProjects(rootPath) {
   const projectsSubset = [projects.get('opensearch-dashboards')];
   const productionProjects = (0, _projects.includeTransitiveProjects)(projectsSubset, projects, {
     onlyProductionDependencies: true
-  }); // We remove OpenSearch Dashboards , as we're already building OpenSearch Dashboards
+  });
 
+  // We remove OpenSearch Dashboards , as we're already building OpenSearch Dashboards
   productionProjects.delete('opensearch-dashboards');
   productionProjects.forEach(project => {
     if (project.getBuildConfig().oss === false) {
@@ -58625,17 +58165,14 @@ async function getProductionProjects(rootPath) {
   });
   return productionProjects;
 }
-
 async function deleteTarget(project) {
   const targetDir = project.targetLocation;
-
   if (await (0, _fs.isDirectory)(targetDir)) {
     await (0, _del.default)(targetDir, {
       force: true
     });
   }
 }
-
 async function buildProject(project) {
   // Explicitly defined targets override any bootstrap scripts
   if (project.hasBuildTargets()) {
@@ -58644,6 +58181,7 @@ async function buildProject(project) {
     await project.runScript('build');
   }
 }
+
 /**
  * Copy all the project's files from its "intermediate build directory" and
  * into the build. The intermediate directory can either be the root of the
@@ -58655,8 +58193,6 @@ async function buildProject(project) {
  * manage dependencies is that it will "dedupe" them, so we don't include
  * unnecessary copies of dependencies.
  */
-
-
 async function copyToBuild(project, opensearchDashboardsRoot, buildRoot) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = (0, _path.relative)(opensearchDashboardsRoot, project.path);
@@ -58666,14 +58202,15 @@ async function copyToBuild(project, opensearchDashboardsRoot, buildRoot) {
     dot: true,
     nodir: true,
     parents: true
-  }); // If a project is using an intermediate build directory, we special-case our
+  });
+
+  // If a project is using an intermediate build directory, we special-case our
   // handling of `package.json`, as the project build process might have copied
   // (a potentially modified) `package.json` into the intermediate build
   // directory already. If so, we want to use that `package.json` as the basis
   // for creating the production-ready `package.json`. If it's not present in
   // the intermediate build, we fall back to using the project's already defined
   // `package.json`.
-
   const packageJson = (await (0, _fs.isFile)((0, _path.join)(buildProjectPath, 'package.json'))) ? await (0, _package_json.readPackageJson)(buildProjectPath) : project.json;
   await (0, _package_json.writePackageJson)(buildProjectPath, packageJson);
 }

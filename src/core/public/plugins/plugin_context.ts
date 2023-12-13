@@ -121,6 +121,7 @@ export function createPluginSetupContext<
       getBranding: deps.injectedMetadata.getBranding,
     },
     getStartServices: () => plugin.startDependencies,
+    workspaces: deps.workspaces,
   };
 }
 
@@ -168,5 +169,6 @@ export function createPluginStartContext<
       getBranding: deps.injectedMetadata.getBranding,
     },
     fatalErrors: deps.fatalErrors,
+    workspaces: deps.workspaces,
   };
 }

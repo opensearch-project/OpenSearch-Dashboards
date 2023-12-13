@@ -37,6 +37,7 @@ const createStartContractMock = (): jest.Mocked<CapabilitiesStart> => ({
     catalogue: {},
     management: {},
     navLinks: {},
+    workspaces: {},
   }),
 });
 

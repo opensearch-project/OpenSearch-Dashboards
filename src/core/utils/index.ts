@@ -37,3 +37,4 @@ export {
   IContextProvider,
 } from './context';
 export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
+export { WORKSPACE_TYPE } from './constants';

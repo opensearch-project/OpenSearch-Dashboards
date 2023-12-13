@@ -72,6 +72,7 @@ describe('CapabilitiesService', () => {
           "navLinks": Object {
             "myLink": true,
           },
+          "workspaces": Object {},
         }
       `);
     });
@@ -107,6 +108,7 @@ describe('CapabilitiesService', () => {
             "B": true,
             "C": true,
           },
+          "workspaces": Object {},
         }
       `);
     });
@@ -134,6 +136,7 @@ describe('CapabilitiesService', () => {
           },
           "management": Object {},
           "navLinks": Object {},
+          "workspaces": Object {},
         }
       `);
     });
@@ -192,6 +195,7 @@ describe('CapabilitiesService', () => {
             "b": true,
             "c": false,
           },
+          "workspaces": Object {},
         }
       `);
     });
