@@ -73,7 +73,6 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
                     id="visTypeMarkdown.params.helpLinkLabel"
                     defaultMessage="Help"
                   />{' '}
-                  <EuiIcon type="popout" size="s" />
                 </EuiLink>
               </EuiText>
             </EuiFlexItem>
