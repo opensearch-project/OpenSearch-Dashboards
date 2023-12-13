@@ -171,7 +171,7 @@ export class RenderingService {
     };
   }
 
-  public async stop() { }
+  public async stop() {}
 
   /**
    * Setups HTTP Agent if SSL is enabled to pass SSL config
