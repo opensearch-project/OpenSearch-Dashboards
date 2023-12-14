@@ -117,7 +117,9 @@ export class HapiResponseAdapter {
   private toRedirect(
     opensearchDashboardsResponse: OpenSearchDashboardsResponse<HttpResponsePayload>
   ) {
-    const { headers } = opensearchDashboardsResponse.options;
+    const {
+      headers,
+    }: { headers?: Record<string, string | string[]> } = opensearchDashboardsResponse.options;
     if (!headers || typeof headers.location !== 'string') {
       throw new Error("expected 'location' header to be set");
     }

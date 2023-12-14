@@ -50,6 +50,7 @@
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
+    "useUnknownInCatchVariables": false,
     // adding global typings
     "types": [
       "node",

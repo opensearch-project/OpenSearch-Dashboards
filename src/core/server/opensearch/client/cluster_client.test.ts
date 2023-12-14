@@ -530,7 +530,7 @@ describe('ClusterClient', () => {
       let closeScopedClientWithLongNumeralsSupport: () => void;
 
       internalClient.close.mockReturnValue(
-        new Promise((resolve) => {
+        new Promise<void>((resolve) => {
           closeInternalClient = resolve;
         }).then(() => {
           expect(clusterClientClosed).toBe(false);
@@ -538,7 +538,7 @@ describe('ClusterClient', () => {
         })
       );
       scopedClient.close.mockReturnValue(
-        new Promise((resolve) => {
+        new Promise<void>((resolve) => {
           closeScopedClient = resolve;
         }).then(() => {
           expect(clusterClientClosed).toBe(false);
@@ -546,7 +546,7 @@ describe('ClusterClient', () => {
         })
       );
       internalClientWithLongNumeralsSupport.close.mockReturnValue(
-        new Promise((resolve) => {
+        new Promise<void>((resolve) => {
           closeInternalClientWithLongNumeralsSupport = resolve;
         }).then(() => {
           expect(clusterClientClosed).toBe(false);
@@ -554,7 +554,7 @@ describe('ClusterClient', () => {
         })
       );
       scopedClientWithLongNumeralsSupport.close.mockReturnValue(
-        new Promise((resolve) => {
+        new Promise<void>((resolve) => {
           closeScopedClientWithLongNumeralsSupport = resolve;
         }).then(() => {
           expect(clusterClientClosed).toBe(false);

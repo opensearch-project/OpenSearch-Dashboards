@@ -173,7 +173,7 @@ const makeProps = () => ({
 
 describe('Overview', () => {
   describe('renders', () => {
-    it('with solutions and features', () => {
+    it('with news, solutions, and features', () => {
       const props = {
         ...makeProps(),
       };
@@ -181,7 +181,7 @@ describe('Overview', () => {
       expect(component).toMatchSnapshot();
     });
 
-    it('without solutions and with features', () => {
+    it('with news, without solutions, and with features', () => {
       const props = {
         ...makeProps(),
         solutions: [],
@@ -189,7 +189,8 @@ describe('Overview', () => {
       const component = shallowWithIntl(<Overview {...props} />);
       expect(component).toMatchSnapshot();
     });
-    it('with solutions and without features', () => {
+
+    it('with news, with solutions, and without features', () => {
       const props = {
         ...makeProps(),
         features: [],
@@ -197,9 +198,55 @@ describe('Overview', () => {
       const component = shallowWithIntl(<Overview {...props} />);
       expect(component).toMatchSnapshot();
     });
-  });
 
-  // ToDo: Add tests for all the complications of Overview
-  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4693
-  it.todo('renders each of the complications of Overview');
+    it('without news, with solutions and features', () => {
+      const props = {
+        ...makeProps(),
+        newsFetchResult: null,
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('with news without solutions and without features', () => {
+      const props = {
+        ...makeProps(),
+        features: [],
+        solutions: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('without news and solutions, with features', () => {
+      const props = {
+        ...makeProps(),
+        newsFetchResult: null,
+        solutions: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('without news and features, with solutions', () => {
+      const props = {
+        ...makeProps(),
+        newsFetchResult: null,
+        features: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('without news, solutions, and features', () => {
+      const props = {
+        ...makeProps(),
+        newsFetchResult: null,
+        features: [],
+        solutions: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+  });
 });
