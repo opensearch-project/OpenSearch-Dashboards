@@ -17,4 +17,5 @@ jobs:
         uses: BigSamu/OpenSearch_Change_Set_Create_Action@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          changeset_token: ${{ secrets.CHANGESET_TOKEN }}
           changeset_path: changelogs/fragments
