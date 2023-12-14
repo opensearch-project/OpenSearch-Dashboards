@@ -31,11 +31,11 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fix `maps.proxyOpenSearchMapsServiceInMaps` config definition so it can be set ([#5170](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5170))
 - [Discover] Fix inactive state on 'Discover' tab in side navigation menu ([#5432](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5432))
 - [BUG] Add platform "darwin-arm64" to unit test ([#5290](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5290))
-- [BUG][Dev Tool] Add dev tool documentation link to dev tool's help menu [#5166](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5166)
+- [BUG][dev tool] Add dev tool documentation link to dev tool's help menu [#5166](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5166)
 - Fix missing border for header navigation control on right ([#5450](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5450))
 - [BUG] Fix filtering issue in data source selector ([5484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5484))
-- [BUG][Data] Support for custom filters with heterogeneous data fields ([5577](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5577))
-- [BUG][Data] Fix empty suggestion history when querying in search bar [#5349](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5349)
+- [BUG][data] Support for custom filters with heterogeneous data fields ([5577](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5577))
+- [BUG][data] Fix empty suggestion history when querying in search bar [#5349](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5349)
 
 ### 🚞 Infrastructure
 
@@ -89,7 +89,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🚞 Infrastructure
 
-- [CI][Test] Add plugin functional tests on GitHub Actions ([#5383](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5383))
+- [CI][test] Add plugin functional tests on GitHub Actions ([#5383](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5383))
 
 ### 📝 Documentation
 
@@ -114,19 +114,19 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🐛 Bug Fixes
 
 - Bump `agentkeepalive` to `4.5.0` to solve a problem preventing the use `https://ip` in `opensearch.hosts` ([#4949](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4949))
-- [Data Explorer][Discover] Add `onQuerySubmit` to top nav and allow force update to embeddable ([#5160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5160))
-- [Data Explorer][Discover] Automatically load default index pattern ([#5171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5171))
-- [Data Explorer][Discover] Fix total hits issue for no time based data ([#5087](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5087))
-- [Data Explorer][Discover] Allow data grid to auto adjust size based on fetched data count ([#5191](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5191))
-- [Data Explorer][Discover] Allow filter and query persist when refresh page or paste url to a new tab ([#5206](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5206))
-- [Data Explorer][Discover] Fix misc navigation issues ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
-- [Data Explorer][Discover] Fix mobile view ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
+- [Data Explorer][discover] Add `onQuerySubmit` to top nav and allow force update to embeddable ([#5160](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5160))
+- [Data Explorer][discover] Automatically load default index pattern ([#5171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5171))
+- [Data Explorer][discover] Fix total hits issue for no time based data ([#5087](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5087))
+- [Data Explorer][discover] Allow data grid to auto adjust size based on fetched data count ([#5191](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5191))
+- [Data Explorer][discover] Allow filter and query persist when refresh page or paste url to a new tab ([#5206](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5206))
+- [Data Explorer][discover] Fix misc navigation issues ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
+- [Data Explorer][discover] Fix mobile view ([#5168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5168))
 - [Table Visualization] Fix width of multiple tables when rendered in column view ([#4638](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4638))
 - [Table Visualization] Fix filter actions on data table vis cells ([#4837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4837))
 - [Vis Augmenter] Fix errors in conditions for activating `vizAugmenter` ([#5213](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5213))
 - [Vis Augmenter] Fix `visAugmenter` forming empty key-value pairs in its calls to the `SavedObject` API ([#5190](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5190))
 - [Data Explorer] Remove the `X` icon in data source selection field ([#5238](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5238))
-- [BUG][Fuctional Test] Make setDefaultAbsoluteRange more robust and update doc views tests ([#5242](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5242))
+- [BUG][fuctional test] Make setDefaultAbsoluteRange more robust and update doc views tests ([#5242](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5242))
 
 ### 🚞 Infrastructure
 
@@ -142,9 +142,9 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🔩 Tests
 
-- [Functional][Doc Views] Remove angular code from `plugin_functional` and update tests ([#5221](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5221))
-- [Unit][Data Explorer][Discover] Fix wrong test due to time conversion ([#5174](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5174))
-- [Unit][Data Explorer][Discover]Fix `buildPointSeriesData` unit test fails due to local timezone ([#4992](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4992))
+- [Functional][doc views] Remove angular code from `plugin_functional` and update tests ([#5221](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5221))
+- [Unit][data explorer][Discover] Fix wrong test due to time conversion ([#5174](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5174))
+- [Unit][data explorer][Discover]Fix `buildPointSeriesData` unit test fails due to local timezone ([#4992](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4992))
 
 ## [2.10.0 - 2023-09-25](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.10.0)
 
@@ -242,7 +242,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2023-26136] Bump `word-wrap` from `1.2.3` to `1.2.4` ([#5002](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5002))
 - [CVE-2022-21670] Bump `markdown-it` from `10.0.0` to `12.3.2` ([#5016](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5016))
 - [CVE-2022-33987] Partially fix security issues for `got` by bumping `@elastic/makelogs` from `6.0.0` to `6.1.1` and updating yarn.lock ([#5006](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5006))
-- Bump `yo` from `2.0.6` to `3.1.1` ([#5005]( https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5005))
+- Bump `yo` from `2.0.6` to `3.1.1` ([#5005](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5005))
 - [CVE-2023-0842] Bump `xml2js` from `0.4.22` to `0.6.2` ([#5024](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5024))
 
 ### 📈 Features/Enhancements
