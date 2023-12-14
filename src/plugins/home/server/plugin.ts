@@ -39,7 +39,7 @@ import {
 } from './services';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
-import { sampleDataTelemetry } from './saved_objects';
+import { sampleDataTelemetry, homepageSavedObjectType } from './saved_objects';
 import { registerRoutes } from './routes';
 
 interface HomeServerPluginSetupDependencies {
@@ -54,6 +54,7 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     core.capabilities.registerProvider(capabilitiesProvider);
     core.savedObjects.registerType(sampleDataTelemetry);
+    core.savedObjects.registerType(homepageSavedObjectType);
 
     const router = core.http.createRouter();
     registerRoutes(router);

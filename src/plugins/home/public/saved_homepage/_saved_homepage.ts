@@ -9,6 +9,12 @@ import {
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
 
+export interface SavedHomepage extends SavedObject {
+  // TODO: add types for heros and sections
+  heros: unknown[];
+  sections: unknown[];
+}
+
 export function createSavedHomepageClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);
 

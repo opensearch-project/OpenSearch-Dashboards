@@ -6,7 +6,7 @@
 import { CoreStart } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectLoader } from '../../../../saved_objects/public';
-import { createSavedHomepageLoader } from '../../saved_homepage';
+import { createSavedHomepageLoader, SavedHomepage } from '../../saved_homepage';
 
 export interface HeroSection {
   id: string;
@@ -64,6 +64,23 @@ export class SectionTypeService {
     }
 
     return this.savedHomepageLoader;
+  }
+
+  public async getHomepage() {
+    if (!this.savedHomepageLoader) {
+      throw new Error('SectionTypeService has not been started yet.');
+    }
+
+    // TODO: this will ignore multiple homepages if there are more than one. Maybe we want some other logic here?
+    const { hits } = await this.savedHomepageLoader.find();
+    const id = Object.values(hits)[0]?.id as string | undefined;
+    const homepage: SavedHomepage = await this.savedHomepageLoader.get(id);
+
+    if (!id) {
+      await homepage.save({});
+    }
+
+    return homepage;
   }
 
   public getHeroSections() {
