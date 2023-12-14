@@ -41,6 +41,7 @@ export class SectionTypeService {
         if (this.sections[section.id]) {
           throw new Error(`Section with id '${section.id}' already exists.`);
         }
+
         this.sections[section.id] = section;
       },
     };
