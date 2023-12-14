@@ -32,6 +32,7 @@ import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import PropTypes from 'prop-types';
 import { Home } from './home';
+import { Homepage } from './homepage';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
@@ -92,7 +93,7 @@ export function HomeApp({ directories, solutions }) {
           <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
           </Route>
-          <Route exact path="/">
+          <Route exact path="/legacy">
             <Home
               addBasePath={addBasePath}
               directories={directories}
@@ -102,6 +103,9 @@ export function HomeApp({ directories, solutions }) {
               urlBasePath={getBasePath()}
               telemetry={telemetry}
             />
+          </Route>
+          <Route exact path="/">
+            <Homepage />
           </Route>
           <Route path="*" exact={true} component={RedirectToDefaultApp} />
         </Switch>

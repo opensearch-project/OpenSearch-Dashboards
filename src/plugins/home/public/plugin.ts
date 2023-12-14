@@ -47,6 +47,8 @@ import {
   FeatureCatalogueRegistrySetup,
   TutorialService,
   TutorialServiceSetup,
+  SectionTypeService,
+  SectionTypeServiceSetup,
 } from './services';
 import { ConfigSchema } from '../config';
 import { setServices } from './application/opensearch_dashboards_services';
@@ -81,6 +83,7 @@ export class HomePublicPlugin
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
+  private readonly sectionTypeService = new SectionTypeService();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -122,6 +125,7 @@ export class HomePublicPlugin
           featureCatalogue: this.featuresCatalogueRegistry,
           injectedMetadata: coreStart.injectedMetadata,
           dataSource,
+          sectionTypes: this.sectionTypeService,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
@@ -149,18 +153,26 @@ export class HomePublicPlugin
       order: 500,
     });
 
+    const sectionTypes = { ...this.sectionTypeService.setup() };
+
+    // TODO: register base section types
+
     return {
       featureCatalogue,
       environment: { ...this.environmentService.setup() },
       tutorials: { ...this.tutorialService.setup() },
+      sectionTypes,
     };
   }
 
-  public start(
-    { application: { capabilities, currentAppId$ }, http }: CoreStart,
-    { urlForwarding }: HomePluginStartDependencies
-  ) {
+  public start(core: CoreStart, { data, urlForwarding }: HomePluginStartDependencies) {
+    const {
+      application: { capabilities, currentAppId$ },
+      http,
+    } = core;
+
     this.featuresCatalogueRegistry.start({ capabilities });
+    this.sectionTypeService.start({ core, data });
 
     // If the home app is the initial location when loading OpenSearch Dashboards...
     if (
@@ -204,6 +216,7 @@ export interface HomePublicPluginSetup {
    */
 
   environment: EnvironmentSetup;
+  sectionTypes: SectionTypeServiceSetup;
 }
 export interface HomePublicPluginStart {
   featureCatalogue: FeatureCatalogueRegistry;
