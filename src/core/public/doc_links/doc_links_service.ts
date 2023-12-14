@@ -32,7 +32,7 @@ import { deepFreeze } from '@osd/std';
 import { parse } from 'semver';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
-interface StartDeps {
+export interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;
 }
 
