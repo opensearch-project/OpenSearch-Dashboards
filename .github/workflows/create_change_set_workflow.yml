@@ -1,7 +1,7 @@
 name: Create Change Set
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, edited]
     paths-ignore:
       - 'changelogs/fragments/**/*'
