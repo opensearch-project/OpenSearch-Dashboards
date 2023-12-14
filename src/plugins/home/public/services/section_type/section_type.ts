@@ -82,11 +82,11 @@ export class SectionTypeService {
     return homepage;
   }
 
-  public getHeroSections() {
+  public getHeroSectionTypes() {
     return Object.values(this.heroSections);
   }
 
-  public getSections() {
+  public getSectionTypes() {
     return Object.values(this.sections);
   }
 }
