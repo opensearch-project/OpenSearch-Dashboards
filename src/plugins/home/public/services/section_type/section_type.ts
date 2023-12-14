@@ -57,15 +57,6 @@ export class SectionTypeService {
     });
   }
 
-  // TODO: convert this into some getters for homepages
-  public getSavedHomepageLoader() {
-    if (!this.savedHomepageLoader) {
-      throw new Error('SectionTypeService has not been started yet.');
-    }
-
-    return this.savedHomepageLoader;
-  }
-
   /**
    * Gets the current homepage in any scenario. If no homepage exists, one will be created.
    * The actual homepage that is returned is opaque to the caller, meaning this may be an
