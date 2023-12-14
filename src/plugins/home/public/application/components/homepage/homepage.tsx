@@ -8,6 +8,7 @@ import { getServices } from '../../opensearch_dashboards_services';
 
 export const Homepage = () => {
   const { sectionTypes } = getServices();
+  // eslint-disable-next-line no-console
   console.log(sectionTypes);
 
   return <span>Hello world</span>;

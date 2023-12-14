@@ -28,10 +28,10 @@ export const homepageSavedObjectType: SavedObjectsType = {
       kibanaSavedObjectMeta: {
         properties: { searchSourceJSON: { type: 'text', index: false } },
       },
-      showGetStartedSection: {
-        type: 'boolean',
+      heros: {
+        type: 'object',
       },
-      test: {
+      sections: {
         type: 'object',
       },
     },
