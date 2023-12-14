@@ -66,6 +66,14 @@ export class SectionTypeService {
     return this.savedHomepageLoader;
   }
 
+  /**
+   * Gets the current homepage in any scenario. If no homepage exists, one will be created.
+   * The actual homepage that is returned is opaque to the caller, meaning this may be an
+   * application-wide homepage, a workspace-specific homepage, or a user-specific homepage.
+   *
+   * Currently, if there are multiple candidates for the homepage, the first one will be returned.
+   * This may change in the future.
+   */
   public async getHomepage() {
     if (!this.savedHomepageLoader) {
       throw new Error('SectionTypeService has not been started yet.');
