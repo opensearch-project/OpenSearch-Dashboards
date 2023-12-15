@@ -21,16 +21,21 @@ export const Homepage = () => {
     sectionTypes.getHomepage().then(setHomepage).catch(setError);
   }, [sectionTypes]);
 
-  // eslint-disable-next-line no-console
-  console.log(homepage, isLoading, error);
-
   if (isLoading) {
     return <span>Loading...</span>;
   }
 
+  if (error) {
+    // TODO: what is the correct way to handle errors here?
+    // eslint-disable-next-line no-console
+    console.error(error);
+
+    return <span>Error loading homepage</span>;
+  }
+
   function renderSections() {
-    return homepage!.sections.map((section, i) => (
-      <Section key={i} title={section.title} render={section.render} />
+    return homepage!.sections.map(({ render, title, description, links }, i) => (
+      <Section key={i} title={title} description={description} links={links} render={render} />
     ));
   }
 
@@ -39,7 +44,6 @@ export const Homepage = () => {
   return (
     <div>
       {hero && <HeroSection render={hero.render} />}
-      <h2>sections:</h2>
       {renderSections()}
     </div>
   );

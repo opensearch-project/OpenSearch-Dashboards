@@ -20,6 +20,8 @@ export interface HeroSection {
 export interface Section {
   id: string;
   title: string;
+  description?: string;
+  links?: Array<{ label: string; url: string }>;
   render: RenderFn;
 }
 

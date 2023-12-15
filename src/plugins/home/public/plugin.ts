@@ -159,7 +159,13 @@ export class HomePublicPlugin
 
     // TODO: register base section types
     sectionTypes.registerHeroSection({ id: 'hello:world', render: renderFn });
-    sectionTypes.registerSection({ id: 'hello:world', title: 'Hello world!', render: renderFn });
+    sectionTypes.registerSection({
+      id: 'hello:world',
+      title: 'Hello world!',
+      description: 'This is a description',
+      links: [{ label: 'Link', url: 'https://google.com' }],
+      render: renderFn,
+    });
 
     return {
       featureCatalogue,
