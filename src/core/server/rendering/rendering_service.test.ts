@@ -195,6 +195,11 @@ describe('RenderingService', () => {
       const result = await service.isUrlValid('/', 'config');
       expect(result).toEqual(false);
     });
+
+    it('checks relative URL returns true', async () => {
+      const result = await service.isUrlValid('/demo/opensearch_mark_default.png', 'config');
+      expect(result).toEqual(true);
+    });
   });
 
   describe('isTitleValid()', () => {
