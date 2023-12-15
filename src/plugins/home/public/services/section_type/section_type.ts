@@ -8,12 +8,21 @@ import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectLoader } from '../../../../saved_objects/public';
 import { createSavedHomepageLoader, SavedHomepage } from '../../saved_homepage';
 
+export type RenderFn = (element: HTMLElement) => () => void;
+
 export interface HeroSection {
   id: string;
+  render: RenderFn;
 }
 
 export interface Section {
   id: string;
+  render: RenderFn;
+}
+
+export interface Homepage {
+  heroes: HeroSection[];
+  sections: Section[];
 }
 
 export class SectionTypeService {
@@ -65,7 +74,7 @@ export class SectionTypeService {
    * Currently, if there are multiple candidates for the homepage, the first one will be returned.
    * This may change in the future.
    */
-  public async getHomepage() {
+  public async getHomepage(): Promise<Homepage> {
     if (!this.savedHomepageLoader) {
       throw new Error('SectionTypeService has not been started yet.');
     }
@@ -79,7 +88,14 @@ export class SectionTypeService {
       await homepage.save({});
     }
 
-    return homepage;
+    // TODO: is there a better/maybe more performant way to do this?
+    const heroes = Array.isArray(homepage.heros) ? homepage.heros : [homepage.heros];
+    const sections = Array.isArray(homepage.sections) ? homepage.sections : [homepage.sections];
+
+    return {
+      heroes: heroes.map((hero) => this.heroSections[hero.id]),
+      sections: sections.map((section) => this.sections[section.id]),
+    };
   }
 
   public getHeroSectionTypes() {

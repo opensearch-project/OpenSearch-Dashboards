@@ -30,6 +30,9 @@ export const homepageSavedObjectType: SavedObjectsType = {
       },
       heros: {
         type: 'object',
+        properties: {
+          id: { type: 'keyword' },
+        },
       },
       sections: {
         type: 'object',

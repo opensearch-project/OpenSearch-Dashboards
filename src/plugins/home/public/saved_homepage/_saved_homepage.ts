@@ -9,10 +9,18 @@ import {
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
 
+export interface SerializedHeroSection {
+  id: string;
+}
+
+export interface SerializedSection {
+  id: string;
+}
+
 export interface SavedHomepage extends SavedObject {
-  // TODO: add types for heros and sections
-  heros: unknown[];
-  sections: unknown[];
+  // NOTE: this type allows both an object and an array of objects. As of now, we only support a single hero, but in the future we'll allow for a carousel of heroes.
+  heros: SerializedHeroSection[] | SerializedHeroSection;
+  sections: SerializedSection[] | SerializedSection;
 }
 
 export function createSavedHomepageClass(services: SavedObjectOpenSearchDashboardsServices) {
@@ -35,7 +43,7 @@ export function createSavedHomepageClass(services: SavedObjectOpenSearchDashboar
         mapping: SavedHomepage.mapping,
         id: (opts.id as string) || '',
         defaults: {
-          heros: [],
+          heros: { id: 'hello:world' },
           sections: [],
         },
       });

@@ -60,6 +60,8 @@ import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
 
+import { renderFn } from './testing';
+
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   telemetry?: TelemetryPluginStart;
@@ -156,6 +158,7 @@ export class HomePublicPlugin
     const sectionTypes = { ...this.sectionTypeService.setup() };
 
     // TODO: register base section types
+    sectionTypes.registerHeroSection({ id: 'hello:world', render: renderFn });
 
     return {
       featureCatalogue,
