@@ -44,7 +44,7 @@ export function createSavedHomepageClass(services: SavedObjectOpenSearchDashboar
         id: (opts.id as string) || '',
         defaults: {
           heros: { id: 'hello:world' },
-          sections: [],
+          sections: [{ id: 'hello:world' }, { id: 'hello:world' }],
         },
       });
     }

@@ -36,6 +36,9 @@ export const homepageSavedObjectType: SavedObjectsType = {
       },
       sections: {
         type: 'object',
+        properties: {
+          id: { type: 'keyword' },
+        },
       },
     },
   },

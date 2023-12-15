@@ -6,7 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { Homepage as HomepageType } from '../../../services/section_type/section_type';
 import { getServices } from '../../opensearch_dashboards_services';
-import { LazyRender } from './lazy_render';
+import { HeroSection } from './hero_section';
+import { Section } from './section';
 
 export const Homepage = () => {
   const { sectionTypes } = getServices();
@@ -27,30 +28,19 @@ export const Homepage = () => {
     return <span>Loading...</span>;
   }
 
-  function renderHero() {
-    if (Array.isArray(homepage!.heroes)) {
-      return (
-        <div>
-          {homepage!.heroes.map((hero, i) => (
-            <LazyRender key={i} render={hero.render} />
-          ))}
-        </div>
-      );
-    }
-
-    return <span>{JSON.stringify(homepage!.heroes)}</span>;
+  function renderSections() {
+    return homepage!.sections.map((section, i) => (
+      <Section key={i} title={section.title} render={section.render} />
+    ));
   }
+
+  const hero = homepage!.heroes[0];
 
   return (
     <div>
-      <h2>heros:</h2>
-      {renderHero()}
+      {hero && <HeroSection render={hero.render} />}
       <h2>sections:</h2>
-      <ul>
-        {homepage!.sections.map((section, i) => (
-          <li key={i}>{JSON.stringify(section)}</li>
-        ))}
-      </ul>
+      {renderSections()}
     </div>
   );
 };

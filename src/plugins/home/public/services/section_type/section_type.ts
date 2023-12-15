@@ -19,6 +19,7 @@ export interface HeroSection {
 
 export interface Section {
   id: string;
+  title: string;
   render: RenderFn;
 }
 
