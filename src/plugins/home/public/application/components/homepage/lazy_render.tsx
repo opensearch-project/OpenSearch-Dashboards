@@ -20,7 +20,7 @@ export const LazyRender: FC<Props> = ({ render }) => {
     }
 
     return render(ref.current);
-  }, [ref, render]);
+  }, [render]);
 
   // display: contents is used so that this component doesn't affect the rendering of the child render function
   return <div style={{ display: 'contents' }} ref={ref} />;

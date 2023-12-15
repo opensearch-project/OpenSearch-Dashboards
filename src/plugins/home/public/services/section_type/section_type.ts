@@ -8,6 +8,8 @@ import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectLoader } from '../../../../saved_objects/public';
 import { createSavedHomepageLoader, SavedHomepage } from '../../saved_homepage';
 
+// TODO: this should support error handling explicitly
+// TODO: this should support async rendering through a promise
 export type RenderFn = (element: HTMLElement) => () => void;
 
 export interface HeroSection {
