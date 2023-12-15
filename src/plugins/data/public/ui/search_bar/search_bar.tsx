@@ -47,6 +47,7 @@ import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
+import { services } from '../../../../../../test/api_integration/services/index';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
@@ -92,6 +93,7 @@ export interface SearchBarOwnProps {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
+  useNewQuerySelector?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -418,6 +420,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           }
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          useNewQuerySelector={this.props.useNewQuerySelector}
         />
       );
     }

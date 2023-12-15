@@ -47,6 +47,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
+import { Observable } from 'rxjs';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
@@ -59,7 +60,6 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
-import { Observable } from 'rxjs';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -79,7 +79,8 @@ export interface QueryStringInputProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
-  currentApp$?: Observable<string|undefined>
+  currentApp$?: Observable<string | undefined>;
+  useNewQuerySelector?: boolean;
 }
 
 interface Props extends QueryStringInputProps {
@@ -122,7 +123,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     selectionEnd: null,
     indexPatterns: [],
     queryBarRect: undefined,
-    currentApp: undefined
+    currentApp: undefined,
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -233,8 +234,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
       if (this.persistedLog) {
         this.persistedLog.add(query.query);
       }
-
-      console.log("on submit query language", query.language)
       this.props.onSubmit({ query: fromUser(query.query), language: query.language });
     }
   };
@@ -463,8 +462,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private onSelectLanguage = (language: string) => {
-    if(language === 'PPL'){
-      this.services.application?.navigateToUrl('../observability-logs#/explorer')
+    if (language === 'PPL') {
+      this.services.application?.navigateToUrl('../observability-logs#/explorer');
       return;
     }
     // Send telemetry info every time the user opts in or out of kuery
@@ -711,6 +710,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
           onSelectLanguage={this.onSelectLanguage}
           currentApp$={this.props.currentApp$}
+          useNewQuerySelector={this.props.useNewQuerySelector}
         />
       </div>
     );

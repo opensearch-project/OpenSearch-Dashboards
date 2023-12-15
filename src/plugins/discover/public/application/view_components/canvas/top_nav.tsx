@@ -37,6 +37,7 @@ export const TopNav = ({ opts }: TopNavProps) => {
     data,
     chrome,
     osdUrlStateStorage,
+    useNewQuerySelector,
   } = services;
 
   const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
@@ -90,6 +91,7 @@ export const TopNav = ({ opts }: TopNavProps) => {
       setMenuMountPoint={opts.setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
       onQuerySubmit={opts.onQuerySubmit}
+      useNewQuerySelector={useNewQuerySelector}
     />
   );
 };

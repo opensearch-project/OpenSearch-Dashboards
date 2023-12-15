@@ -82,6 +82,7 @@ export interface DiscoverServices {
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
+  useNewQuerySelector: boolean;
 }
 
 export function buildServices(
@@ -123,6 +124,7 @@ export function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
+    useNewQuerySelector: !!plugins.observabilityDashboards,
   };
 }
 

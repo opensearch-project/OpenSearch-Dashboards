@@ -83,6 +83,7 @@ export interface QueryBarTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  useNewQuerySelector?: boolean;
 }
 
 // Needed for React.lazy
@@ -92,7 +93,14 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { application, uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
+  const {
+    application,
+    uiSettings,
+    notifications,
+    storage,
+    appName,
+    docLinks,
+  } = opensearchDashboards.services;
 
   const currentApp = application?.currentAppId$;
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
@@ -213,6 +221,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
           currentApp$={currentApp}
+          useNewQuerySelector={props.useNewQuerySelector}
         />
       </EuiFlexItem>
     );

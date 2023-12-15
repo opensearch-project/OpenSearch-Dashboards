@@ -117,8 +117,6 @@ export const DataSourceSelectable = ({
     (selectedOptions: any) => onDataSourceSelect(selectedOptions),
     [onDataSourceSelect]
   );
-  console.log("dataSourceOptionList", dataSourceOptionList)
-  console.log("selectedSource", selectedSources)
 
   return (
     <EuiComboBox

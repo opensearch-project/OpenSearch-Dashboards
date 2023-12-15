@@ -188,6 +188,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           showAutoRefreshOnly={props.showAutoRefreshOnly}
           showDatePicker={props.showDatePicker}
           showFilterBar={props.showFilterBar}
+          useNewQuerySelector={props.useNewQuerySelector}
           showQueryBar={props.showQueryBar}
           showQueryInput={props.showQueryInput}
           showSaveQuery={props.showSaveQuery}
