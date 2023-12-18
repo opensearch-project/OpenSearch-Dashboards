@@ -175,16 +175,16 @@ function DevToolsWrapper({
           <div className="devAppDataSourcePicker">
             <EuiComboBox
               aria-label={i18n.translate('devTools.devToolWrapper.DataSourceComboBoxAriaLabel', {
-                defaultMessage: 'Select a Data Source',
+                defaultMessage: 'Select a data source',
               })}
               placeholder={i18n.translate('devTools.devToolWrapper.DataSourceComboBoxPlaceholder', {
-                defaultMessage: 'Select a Data Source',
+                defaultMessage: 'Select a data source',
               })}
               singleSelection={{ asPlainText: true }}
               options={dataSources}
               selectedOptions={selectedOptions}
               onChange={onChange}
-              prepend="DataSource"
+              prepend="Data source"
               compressed
               isDisabled={!dataSourceEnabled}
             />

@@ -198,7 +198,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     this.setLocally(key, newVal);
 
     try {
-      const { settings } = await this.api.batchSet(key, newVal);
+      const { settings } = (await this.api.batchSet(key, newVal)) || {};
       this.cache = defaultsDeep({}, defaults, settings);
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
