@@ -18,7 +18,7 @@
   }
 
   &__resizeButton {
-    transform: translateX(-$euiSizeM / 2);
+    transform: translateX(calc(-1 * $euiSizeM / 2));
   }
 }
 
