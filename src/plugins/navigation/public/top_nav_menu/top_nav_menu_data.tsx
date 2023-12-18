@@ -29,7 +29,7 @@
  */
 
 import { EuiButtonProps } from '@elastic/eui';
-import { EuiIconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 

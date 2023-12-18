@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiIconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Action, IncompatibleActionError } from '../../../ui_actions';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';

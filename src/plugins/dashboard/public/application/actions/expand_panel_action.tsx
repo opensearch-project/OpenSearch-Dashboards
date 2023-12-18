@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiIconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@osd/i18n';
 import { IEmbeddable } from '../../../../embeddable/public';
 import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';

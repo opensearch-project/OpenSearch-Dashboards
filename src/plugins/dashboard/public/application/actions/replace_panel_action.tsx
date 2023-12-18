@@ -30,7 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'src/core/public';
-import { EuiIconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { IEmbeddable, ViewMode, EmbeddableStart } from '../../../../embeddable/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';

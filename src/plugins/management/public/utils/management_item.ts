@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiIconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { CreateManagementItemArgs } from '../types';
 
 export class ManagementItem {

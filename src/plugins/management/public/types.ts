@@ -29,7 +29,7 @@
  */
 
 import { ScopedHistory, Capabilities } from 'opensearch-dashboards/public';
-import { EuiIconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
 

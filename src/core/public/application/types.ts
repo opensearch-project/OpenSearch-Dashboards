@@ -32,7 +32,7 @@ import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@osd/utility-types';
 
-import { EuiIconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { MountPoint } from '../types';
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';

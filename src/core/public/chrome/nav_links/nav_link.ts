@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiIconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { pick } from '@osd/std';
 import { AppCategory } from '../../';
 
