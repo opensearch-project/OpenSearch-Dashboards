@@ -16,6 +16,11 @@ export const homepageSavedObjectType: SavedObjectsType = {
     getTitle() {
       return 'Home';
     },
+    getEditUrl(obj) {
+      return `/management/opensearch-dashboards/objects/savedHomepage/${encodeURIComponent(
+        obj.id
+      )}`;
+    },
     getInAppUrl() {
       return {
         path: `/app/${PLUGIN_ID}`,

@@ -110,6 +110,14 @@ export class SectionTypeService {
   public getSectionTypes() {
     return Object.values(this.sections);
   }
+
+  public getSavedHomepageLoader() {
+    if (!this.savedHomepageLoader) {
+      throw new Error('SectionTypeService has not been started yet.');
+    }
+
+    return this.savedHomepageLoader;
+  }
 }
 
 export type SectionTypeServiceSetup = ReturnType<SectionTypeService['setup']>;

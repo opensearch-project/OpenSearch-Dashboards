@@ -58,7 +58,12 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
             <EuiFlexItem grow={1}>
               {description}
               {hasDescriptionSpacer && <EuiSpacer />}
-              {hasLinks && links.map(({ label, url }, i) => <EuiLink href={url}>{label}</EuiLink>)}
+              {hasLinks &&
+                links.map(({ label, url }, i) => (
+                  <EuiLink key={i} href={url}>
+                    {label}
+                  </EuiLink>
+                ))}
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={3}>

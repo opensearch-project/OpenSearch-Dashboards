@@ -199,7 +199,10 @@ export class HomePublicPlugin
       });
     }
 
-    return { featureCatalogue: this.featuresCatalogueRegistry };
+    return {
+      featureCatalogue: this.featuresCatalogueRegistry,
+      getSavedHomepageLoader: () => this.sectionTypeService.getSavedHomepageLoader(),
+    };
   }
 }
 
@@ -230,4 +233,5 @@ export interface HomePublicPluginSetup {
 }
 export interface HomePublicPluginStart {
   featureCatalogue: FeatureCatalogueRegistry;
+  getSavedHomepageLoader: SectionTypeService['getSavedHomepageLoader'];
 }
