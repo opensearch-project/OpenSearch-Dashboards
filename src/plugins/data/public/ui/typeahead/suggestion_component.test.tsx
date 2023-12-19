@@ -45,6 +45,14 @@ const mockSuggestion: QuerySuggestion = {
   type: QuerySuggestionTypes.Value,
 };
 
+const mockEmptySuggestion: QuerySuggestion = {
+  description: '',
+  end: 0,
+  start: 0,
+  text: '',
+  type: QuerySuggestionTypes.Value,
+};
+
 describe('SuggestionComponent', () => {
   it('Should display the suggestion and use the provided ariaId', () => {
     const component = shallow(
@@ -134,5 +142,38 @@ describe('SuggestionComponent', () => {
 
     component.simulate('mouseenter');
     expect(mockHandler).toHaveBeenCalledTimes(1);
+  });
+
+  it('Should return null for empty suggestion text', () => {
+    const component = shallow(
+      <SuggestionComponent
+        onClick={noop}
+        onMouseEnter={noop}
+        selected={false}
+        suggestion={mockEmptySuggestion}
+        innerRef={noop}
+        ariaId={'suggestion-empty'}
+        shouldDisplayDescription={true}
+      />
+    );
+
+    expect(component.isEmptyRender()).toBeTruthy();
+  });
+
+  it('Should return null for suggestion text with only whitespace', () => {
+    const whitespaceSuggestion = { ...mockEmptySuggestion, text: '  ' };
+    const component = shallow(
+      <SuggestionComponent
+        onClick={noop}
+        onMouseEnter={noop}
+        selected={false}
+        suggestion={whitespaceSuggestion}
+        innerRef={noop}
+        ariaId={'suggestion-whitespace'}
+        shouldDisplayDescription={true}
+      />
+    );
+
+    expect(component.isEmptyRender()).toBeTruthy();
   });
 });
