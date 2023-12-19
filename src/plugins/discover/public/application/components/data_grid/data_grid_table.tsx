@@ -59,7 +59,7 @@ export const DataGridTable = ({
 
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
-  const pageSizeLimit = services.uiSettings.get(SAMPLE_SIZE_SETTING);
+  const pageSizeLimit = services.uiSettings?.get(SAMPLE_SIZE_SETTING);
   const pagination = usePagination({ rowCount, pageSizeLimit });
 
   let adjustedColumns = buildColumns(columns);
