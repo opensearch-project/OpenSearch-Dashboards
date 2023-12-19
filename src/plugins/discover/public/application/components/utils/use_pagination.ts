@@ -4,25 +4,20 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { DiscoverServices } from '../../../build_services';
-import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { generatePageSizeOptions } from './page_size_options';
 export interface Props {
-  services: DiscoverServices;
+  pageSizeLimit: number;
   rowCount: number;
 }
 
-export const usePagination = ({ rowCount, services }: Props) => {
-  const { uiSettings } = services;
-
+export const usePagination = ({ rowCount, pageSizeLimit }: Props) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 100 });
   const pageCount = useMemo(() => Math.ceil(rowCount / pagination.pageSize), [
     rowCount,
     pagination,
   ]);
-  const sampleSize = uiSettings.get(SAMPLE_SIZE_SETTING);
 
-  const pageSizeOptions = generatePageSizeOptions(sampleSize);
+  const pageSizeOptions = generatePageSizeOptions(pageSizeLimit);
 
   const onChangeItemsPerPage = useCallback(
     (pageSize: number) => setPagination((p) => ({ ...p, pageSize })),
