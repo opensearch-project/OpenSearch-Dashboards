@@ -86,11 +86,11 @@ export class SectionTypeService {
 
     // TODO: this will ignore multiple homepages if there are more than one. Maybe we want some other logic here?
     const { hits } = await this.savedHomepageLoader.find();
-    const id = Object.values(hits)[0]?.id as string | undefined;
+    const id = hits[0]?.id as string | undefined;
     const homepage: SavedHomepage = await this.savedHomepageLoader.get(id);
 
     if (!id) {
-      await homepage.save({});
+      await homepage.save({ confirmOverwrite: true, isTitleDuplicateConfirmed: true });
     }
 
     // TODO: is there a better/maybe more performant way to do this?

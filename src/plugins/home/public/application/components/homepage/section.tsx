@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 import {
   EuiPanel,
   EuiButtonIcon,
@@ -34,6 +34,29 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
 
   const toggleExpanded = () => setExpanded((expanded) => !expanded);
 
+  const memoizedContent = useMemo(
+    () => (
+      <EuiFlexGroup direction="row">
+        {hasDescriptionSection && (
+          <EuiFlexItem grow={1}>
+            {description}
+            {hasDescriptionSpacer && <EuiSpacer />}
+            {hasLinks &&
+              links.map(({ label, url }, i) => (
+                <EuiLink key={i} href={url}>
+                  {label}
+                </EuiLink>
+              ))}
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={3}>
+          <LazyRender render={render} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [description, hasDescriptionSection, hasDescriptionSpacer, hasLinks, links, render]
+  );
+
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" color="transparent">
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
@@ -52,25 +75,7 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isExpanded && (
-        <EuiFlexGroup direction="row">
-          {hasDescriptionSection && (
-            <EuiFlexItem grow={1}>
-              {description}
-              {hasDescriptionSpacer && <EuiSpacer />}
-              {hasLinks &&
-                links.map(({ label, url }, i) => (
-                  <EuiLink key={i} href={url}>
-                    {label}
-                  </EuiLink>
-                ))}
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={3}>
-            <LazyRender render={render} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      {isExpanded && memoizedContent}
     </EuiPanel>
   );
 };
