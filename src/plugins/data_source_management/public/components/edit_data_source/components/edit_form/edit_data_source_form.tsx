@@ -573,8 +573,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         {this.state.showUpdateAwsCredentialModal ? (
           <UpdateAwsCredentialModal
-            region={this.state.auth.credentials!.region?.toString() || ''}
-            service={this.state.auth.credentials!.service as SigV4ServiceName}
+            region={this.state.auth.credentials.region?.toString() || ''}
+            service={this.state.auth.credentials.service as SigV4ServiceName}
             handleUpdateAwsCredential={this.updateAwsCredential}
             closeUpdateAwsCredentialModal={this.closeAwsCredentialModal}
           />
