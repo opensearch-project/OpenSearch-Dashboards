@@ -69,7 +69,7 @@ export interface EditDataSourceState {
 
 export class EditDataSourceForm extends React.Component<EditDataSourceProps, EditDataSourceState> {
   static contextType = contextType;
-  declare context: React.ContextType<typeof contextType>;
+  public readonly context!: DataSourceManagementContextValue;
   maskedPassword: string = '********';
 
   constructor(props: EditDataSourceProps, context: DataSourceManagementContextValue) {
