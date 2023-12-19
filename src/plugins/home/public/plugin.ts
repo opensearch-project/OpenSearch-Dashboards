@@ -59,7 +59,8 @@ import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/pub
 import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
-import { workWithDataRender } from './application/components/homepage/sections/work_with_data';
+import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
+import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
 
 import { renderFn } from './testing';
 
@@ -168,17 +169,8 @@ export class HomePublicPlugin
       render: renderFn,
     });
 
-    sectionTypes.registerSection({
-      id: 'home:workWithData',
-      title: i18n.translate('home.sections.workWithData.title', {
-        defaultMessage: 'Work with data',
-      }),
-      description: i18n.translate('home.sections.workWithData.description', {
-        defaultMessage:
-          'Get started by ingesting data to access robust and visual data exploration capabilities. Not ready to ingest data yet? Use our sample data to explore and get familiar with OpenSearch capabilities.',
-      }),
-      render: workWithDataRender,
-    });
+    sectionTypes.registerSection(workWithDataSection);
+    sectionTypes.registerSection(learnBasicsSection);
 
     return {
       featureCatalogue,

@@ -13,6 +13,7 @@ import {
   EuiButtonProps,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { Section } from '../../../../services/section_type/section_type';
 import { renderFn } from './utils';
 import { getServices } from '../../../opensearch_dashboards_services';
 import ecommerceLight from '../../../../assets/sample_data_resources/ecommerce/dashboard_new.png';
@@ -46,7 +47,7 @@ const Card: FC<{
   </EuiFlexItem>
 );
 
-export const workWithDataRender = renderFn(() => {
+const render = renderFn(() => {
   const services = getServices();
   const getUrl = services.application.getUrlForApp;
   const darkMode = services.injectedMetadata.getBranding().darkMode;
@@ -109,3 +110,15 @@ export const workWithDataRender = renderFn(() => {
     </EuiFlexGroup>
   );
 });
+
+export const workWithDataSection: Section = {
+  id: 'home:workWithData',
+  title: i18n.translate('home.sections.workWithData.title', {
+    defaultMessage: 'Work with data',
+  }),
+  description: i18n.translate('home.sections.workWithData.description', {
+    defaultMessage:
+      'Get started by ingesting data to access robust and visual data exploration capabilities. Not ready to ingest data yet? Use our sample data to explore and get familiar with OpenSearch capabilities.',
+  }),
+  render,
+};
