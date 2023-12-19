@@ -4,6 +4,7 @@
  */
 
 import { CoreStart } from 'opensearch-dashboards/public';
+import { EuiLinkAnchorProps } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectLoader } from '../../../../saved_objects/public';
 import { createSavedHomepageLoader, SavedHomepage } from '../../saved_homepage';
@@ -21,7 +22,7 @@ export interface Section {
   id: string;
   title: string;
   description?: string;
-  links?: Array<{ label: string; url: string }>;
+  links?: Array<{ label: string; url: string; props?: Omit<EuiLinkAnchorProps, 'href'> }>;
   render: RenderFn;
 }
 

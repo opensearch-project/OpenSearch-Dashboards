@@ -5,5 +5,5 @@
   "ui": true,
   "requiredPlugins": ["data", "urlForwarding", "savedObjects"],
   "optionalPlugins": ["usageCollection", "telemetry", "dataSource"],
-  "requiredBundles": ["opensearchDashboardsReact", "dataSourceManagement", "savedObjects"]
+  "requiredBundles": ["opensearchDashboardsReact", "dataSourceManagement"]
 }

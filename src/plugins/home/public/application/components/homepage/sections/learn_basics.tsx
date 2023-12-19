@@ -147,6 +147,9 @@ export const learnBasicsSection: Section = {
         defaultMessage: 'Documentation',
       }),
       url: 'https://opensearch.org/docs/latest/',
+      props: {
+        external: true,
+      },
     },
   ],
   render,

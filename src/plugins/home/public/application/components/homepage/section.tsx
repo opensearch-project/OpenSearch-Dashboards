@@ -43,8 +43,8 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
             <EuiText>{description}</EuiText>
             {hasDescriptionSpacer && <EuiSpacer />}
             {hasLinks &&
-              links.map(({ label, url }, i) => (
-                <EuiLink key={i} href={url}>
+              links.map(({ label, url, props }, i) => (
+                <EuiLink key={i} {...props} href={url}>
                   {label}
                 </EuiLink>
               ))}
