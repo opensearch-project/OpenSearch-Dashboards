@@ -76,6 +76,10 @@ export class SectionTypeService {
    * The actual homepage that is returned is opaque to the caller, meaning this may be an
    * application-wide homepage, a workspace-specific homepage, or a user-specific homepage.
    *
+   * An edge case to be aware of is if a user creates a homepage with sections from plugins,
+   * then uninstalls those plugins, and navigates to the homepage. In this case, those sections
+   * are ignored so that if the user installs the plugins again, they will see the sections again.
+   *
    * Currently, if there are multiple candidates for the homepage, the first one will be returned.
    * This may change in the future.
    */
@@ -97,9 +101,11 @@ export class SectionTypeService {
     const heroes = Array.isArray(homepage.heros) ? homepage.heros : [homepage.heros];
     const sections = Array.isArray(homepage.sections) ? homepage.sections : [homepage.sections];
 
+    // Sections and heroes _could_ be undefined if the user creates a homepage with plugins then
+    // starts Dashboards without those plugins. In this case, we just ignore those sections.
     return {
-      heroes: heroes.map((hero) => this.heroSections[hero.id]),
-      sections: sections.map((section) => this.sections[section.id]),
+      heroes: heroes.map((hero) => this.heroSections[hero.id]).filter(Boolean),
+      sections: sections.map((section) => this.sections[section.id]).filter(Boolean),
     };
   }
 

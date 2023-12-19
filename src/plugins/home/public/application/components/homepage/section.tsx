@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLink,
+  EuiText,
 } from '@elastic/eui';
 import { RenderFn, Section as SectionType } from '../../../services/section_type/section_type';
 import { LazyRender } from './lazy_render';
@@ -39,7 +40,7 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
       <EuiFlexGroup direction="row">
         {hasDescriptionSection && (
           <EuiFlexItem grow={1}>
-            {description}
+            <EuiText>{description}</EuiText>
             {hasDescriptionSpacer && <EuiSpacer />}
             {hasLinks &&
               links.map(({ label, url }, i) => (
@@ -58,7 +59,7 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
   );
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" color="transparent">
+    <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon

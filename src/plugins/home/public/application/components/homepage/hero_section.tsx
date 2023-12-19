@@ -14,7 +14,7 @@ interface Props {
 
 export const HeroSection: FC<Props> = ({ render }) => {
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
+    <EuiPanel>
       <LazyRender render={render} />
     </EuiPanel>
   );
