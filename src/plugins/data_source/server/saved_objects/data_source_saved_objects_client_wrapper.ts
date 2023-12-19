@@ -448,7 +448,9 @@ export class DataSourceSavedObjectsClientWrapper {
     auth: T,
     encryptionContext: EncryptionContext
   ) {
-    const { username, password } = auth as UsernamePasswordTypedContent;
+    const {
+      credentials: { username, password },
+    } = auth as { credentials: UsernamePasswordTypedContent };
 
     return {
       ...auth,
@@ -460,7 +462,9 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private async encryptSigV4Credential<T = unknown>(auth: T, encryptionContext: EncryptionContext) {
-    const { accessKey, secretKey, region, service } = auth as SigV4Content;
+    const {
+      credentials: { accessKey, secretKey, region, service },
+    } = auth as { credentials: SigV4Content };
 
     return {
       ...auth,
