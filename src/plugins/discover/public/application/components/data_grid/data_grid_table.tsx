@@ -18,6 +18,7 @@ import { SortOrder } from '../../../saved_searches/types';
 import { buildColumns } from '../../utils/columns';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverServices } from '../../../build_services';
+import { SAMPLE_SIZE_SETTING } from '../../../../common';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -58,7 +59,8 @@ export const DataGridTable = ({
 
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
-  const pagination = usePagination({ rowCount, services });
+  const pageSizeLimit = services.uiSettings.get(SAMPLE_SIZE_SETTING);
+  const pagination = usePagination({ rowCount, pageSizeLimit });
 
   let adjustedColumns = buildColumns(columns);
   // handle case where the user removes selected filed and leaves only time column
