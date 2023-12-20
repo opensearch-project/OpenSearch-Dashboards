@@ -138,6 +138,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 📝 Documentation
 
+- added js documentation and a readme file to files in utils folder ([#5540])(https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5540/)
+
 ### 🛠 Maintenance
 
 - Adding @ZilongX and @Flyingliuhub as maintainers. ([#4137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4137))
