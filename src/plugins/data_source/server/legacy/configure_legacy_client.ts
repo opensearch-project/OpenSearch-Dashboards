@@ -168,7 +168,7 @@ const callAPI = async (
     if (!options.wrap401Errors || err.statusCode !== 401) {
       throw err;
     }
-    throw LegacyOpenSearchErrorHelpers.decorateNotAuthorizedError(err as Error);
+    throw LegacyOpenSearchErrorHelpers.decorateNotAuthorizedError(err);
   }
 };
 

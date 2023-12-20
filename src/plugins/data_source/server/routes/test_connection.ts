@@ -78,7 +78,7 @@ export const registerTestConnectionRoute = (
             success: true,
           },
         });
-      } catch (err: Error | any) {
+      } catch (err) {
         return response.customError({
           statusCode: err.statusCode || 500,
           body: {
