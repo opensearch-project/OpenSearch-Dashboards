@@ -111,6 +111,7 @@ export function createPluginSetupContext<
       registerMountContext: (contextName, provider) =>
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
+    chrome: deps.chrome,
     context: deps.context,
     fatalErrors: deps.fatalErrors,
     http: deps.http,

@@ -371,6 +371,9 @@ export class RenderingService {
       this.logger.get('branding').error(`${configName} config is invalid. Using default branding.`);
       return false;
     }
+    if (url.startsWith('/')) {
+      return true;
+    }
     return await Axios.get(url, {
       httpsAgent: this.httpsAgent,
       adapter: 'http',
