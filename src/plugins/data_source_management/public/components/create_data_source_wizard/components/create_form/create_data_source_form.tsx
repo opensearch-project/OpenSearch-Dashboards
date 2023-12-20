@@ -64,7 +64,7 @@ export class CreateDataSourceForm extends React.Component<
   CreateDataSourceState
 > {
   static contextType = contextType;
-  declare context: React.ContextType<typeof contextType>;
+  public readonly context!: DataSourceManagementContextValue;
 
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
