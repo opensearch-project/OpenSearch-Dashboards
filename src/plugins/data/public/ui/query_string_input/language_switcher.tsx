@@ -31,6 +31,7 @@
 import {
   EuiButtonEmpty,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiForm,
   EuiFormRow,
   EuiLink,
@@ -57,7 +58,6 @@ export function QueryLanguageSwitcher(props: Props) {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { application } = opensearchDashboards.services;
   const currentApp$ = application?.currentAppId$;
-
   let useNewQuerySelector;
   application?.applications$.subscribe((applications) => {
     applications.forEach((applicationEntry) => {
@@ -108,12 +108,14 @@ export function QueryLanguageSwitcher(props: Props) {
     </EuiButtonEmpty>
   );
 
-  const handleLanguageChange = (newLanguage: any) => {
+  const handleLanguageChange = (newLanguage: EuiComboBoxOptionOption[]) => {
     const queryLanguage = newLanguage[0].label === 'DQL' ? 'kuery' : newLanguage[0].label;
     props.onSelectLanguage(queryLanguage);
     setSelectedLanguage(newLanguage);
   };
 
+  // The following is a temporary solution for adding PPL navigation, and should be replaced once final solution is determined.
+  // Follow-up issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5628
   if (useObservable(currentApp$!, '') === 'data-explorer' && useNewQuerySelector) {
     return (
       <EuiComboBox
