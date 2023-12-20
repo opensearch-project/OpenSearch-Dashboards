@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ViewProps } from '../../../../../data_explorer/public';
 import {
   addColumn,
   removeColumn,
   reorderColumn,
+  setColumns,
   useDispatch,
   useSelector,
 } from '../../utils/state_management';
@@ -19,6 +20,7 @@ import { IndexPatternField, opensearchFilters } from '../../../../../data/public
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { popularizeField } from '../../helpers/popularize_field';
+import { buildColumns } from '../../utils/columns';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverPanel(props: ViewProps) {
@@ -36,7 +38,27 @@ export default function DiscoverPanel(props: ViewProps) {
   const { columns } = useSelector((state) => ({
     columns: state.discover.columns,
   }));
+
+  const prevColumns = useRef(columns);
   const dispatch = useDispatch();
+  useEffect(() => {
+    const timeFieldname = indexPattern?.timeFieldName;
+
+    if (columns !== prevColumns.current) {
+      let updatedColumns = buildColumns(columns);
+      if (
+        timeFieldname &&
+        !prevColumns.current.includes(timeFieldname) &&
+        columns.includes(timeFieldname)
+      ) {
+        // Remove timeFieldname from columns if previously chosen columns does not include time field
+        updatedColumns = columns.filter((column) => column !== timeFieldname);
+      }
+      // Update the ref with the new columns
+      dispatch(setColumns({ columns: updatedColumns }));
+      prevColumns.current = columns;
+    }
+  }, [columns, dispatch, indexPattern?.timeFieldName]);
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
