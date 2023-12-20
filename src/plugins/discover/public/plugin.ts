@@ -30,7 +30,6 @@ import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/publi
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { lazy } from 'react';
-import { ObservabilityStart } from 'plugins/dashboards-observability/public/types';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { url } from '../../opensearch_dashboards_utils/public';
@@ -145,7 +144,6 @@ export interface DiscoverStartPlugins {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
-  observabilityDashboards?: ObservabilityStart;
 }
 
 /**

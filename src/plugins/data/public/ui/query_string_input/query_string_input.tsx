@@ -47,7 +47,6 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
-import { Observable } from 'rxjs';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
@@ -79,8 +78,6 @@ export interface QueryStringInputProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
-  currentApp$?: Observable<string | undefined>;
-  useNewQuerySelector?: boolean;
 }
 
 interface Props extends QueryStringInputProps {
@@ -709,8 +706,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
           language={this.props.query.language}
           anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
           onSelectLanguage={this.onSelectLanguage}
-          currentApp$={this.props.currentApp$}
-          useNewQuerySelector={this.props.useNewQuerySelector}
         />
       </div>
     );

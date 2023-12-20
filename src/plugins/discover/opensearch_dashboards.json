@@ -15,7 +15,7 @@
     "uiActions",
     "visualizations"
   ],
-  "optionalPlugins": ["home", "share", "observabilityDashboards"],
+  "optionalPlugins": ["home", "share"],
   "requiredBundles": [
     "home",
     "opensearchDashboardsUtils",

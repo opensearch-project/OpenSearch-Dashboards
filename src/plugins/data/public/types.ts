@@ -42,7 +42,7 @@ import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
-import { ObservabilitySetup } from '../../../../plugins/dashboards-observability/public/types';
+
 export interface DataPublicPluginEnhancements {
   search: SearchEnhancements;
 }

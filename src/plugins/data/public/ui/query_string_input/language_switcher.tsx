@@ -43,19 +43,31 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
-import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { IDataPluginServices } from '../../types';
 
 interface Props {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
-  currentApp$?: Observable<string | undefined>;
-  useNewQuerySelector?: boolean;
 }
 
 export function QueryLanguageSwitcher(props: Props) {
+  const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
+  const { application } = opensearchDashboards.services;
+  const currentApp$ = application?.currentAppId$;
+
+  let useNewQuerySelector;
+  application?.applications$.subscribe((applications) => {
+    applications.forEach((applicationEntry) => {
+      if (applicationEntry.id === 'observability-dashboards') {
+        useNewQuerySelector = true;
+        return;
+      }
+    });
+  });
+
   const dataExplorerOptions = [
     {
       label: 'DQL',
@@ -102,7 +114,7 @@ export function QueryLanguageSwitcher(props: Props) {
     setSelectedLanguage(newLanguage);
   };
 
-  if (useObservable(props.currentApp$!, '') === 'data-explorer' && props.useNewQuerySelector) {
+  if (useObservable(currentApp$!, '') === 'data-explorer' && useNewQuerySelector) {
     return (
       <EuiComboBox
         className="languageSwitcher"
