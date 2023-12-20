@@ -126,7 +126,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             password: authTypeCheckResults.isUserNamePassword ? this.maskedPassword : '',
             service: authTypeCheckResults.isSigV4
               ? (auth.credentials?.service as SigV4ServiceName) || SigV4ServiceName.OpenSearch
-              : (('' as unknown) as undefined),
+              : undefined,
             region: authTypeCheckResults.isSigV4 ? String(auth.credentials?.region || '') : '',
             accessKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
             secretKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
