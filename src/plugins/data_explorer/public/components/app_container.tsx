@@ -29,17 +29,14 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
           <EuiResizableContainer style={{ marginTop: '0px', padding: '0px' }}>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
-                <EuiResizablePanel
-                  minSize="10%"
-                  mode="collapsible"
-                >
+                <EuiResizablePanel initialSize={140} minSize="10%" mode="collapsible">
                   <Sidebar>
                     <Panel {...params} />
                   </Sidebar>
                 </EuiResizablePanel>
                 <EuiResizableButton />
 
-                <EuiResizablePanel minSize="65%" mode="main">
+                <EuiResizablePanel initialSize={1140} minSize="65%" mode="main">
                   <EuiPageBody className="deLayout__canvas">
                     <Canvas {...params} />
                   </EuiPageBody>
