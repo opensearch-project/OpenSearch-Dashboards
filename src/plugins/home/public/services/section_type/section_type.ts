@@ -95,7 +95,7 @@ export class SectionTypeService {
     const homepage: SavedHomepage = await this.savedHomepageLoader.get(id);
 
     if (!id) {
-      await homepage.save({ confirmOverwrite: true, isTitleDuplicateConfirmed: true });
+      await homepage.save({});
     }
 
     // TODO: is there a better/maybe more performant way to do this?

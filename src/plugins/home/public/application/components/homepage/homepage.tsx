@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EuiPageTemplate, EuiButtonEmpty } from '@elastic/eui';
 import { Homepage as HomepageType } from '../../../services/section_type/section_type';
 import { getServices } from '../../opensearch_dashboards_services';
@@ -36,15 +37,16 @@ export const Homepage = () => {
     return <span>Error loading homepage</span>;
   }
 
+  // TODO: this ends up being reversed on the page, so we reverse the array here. There is a performance cost to this, so todo manually reverse it
   const sideItems: React.ReactNode[] = [
     <EuiButtonEmpty iconType="indexOpen" href={getUrl('home', { path: '#/tutorial_directory' })}>
-      Add data
+      <FormattedMessage id="home.addData" defaultMessage="Add data" />
     </EuiButtonEmpty>,
     <EuiButtonEmpty iconType="gear" href={getUrl('management')}>
-      Manage
+      <FormattedMessage id="home.manage" defaultMessage="Manage" />
     </EuiButtonEmpty>,
     <EuiButtonEmpty iconType="wrench" href={getUrl('dev_tools', { path: '#/console' })}>
-      Dev tools
+      <FormattedMessage id="home.devTools" defaultMessage="Dev tools" />
     </EuiButtonEmpty>,
   ].reverse();
 

@@ -14,7 +14,9 @@ export const homepageSavedObjectType: SavedObjectsType = {
     icon: 'home',
     importableAndExportable: true,
     getTitle() {
-      return 'Home';
+      // TODO: currently, this is hardcoded to the application-level homepage. Update this logic to support
+      // workspace and user level homepages.
+      return 'Home [application]';
     },
     getEditUrl(obj) {
       return `/management/opensearch-dashboards/objects/savedHomepage/${encodeURIComponent(
