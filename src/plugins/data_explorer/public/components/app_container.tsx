@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiResizableContainer } from '@elastic/eui';
 import { Suspense } from 'react';
 import { AppMountParameters } from '../../../../core/public';
 import { Sidebar } from './sidebar';
@@ -26,12 +26,27 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
       {/* TODO: improve fallback state */}
       <Suspense fallback={<div>Loading...</div>}>
         <Context {...params}>
-          <Sidebar>
-            <Panel {...params} />
-          </Sidebar>
-          <EuiPageBody className="deLayout__canvas">
-            <Canvas {...params} />
-          </EuiPageBody>
+          <EuiResizableContainer style={{ marginTop: '0px', padding: '0px' }}>
+            {(EuiResizablePanel, EuiResizableButton) => (
+              <>
+                <EuiResizablePanel
+                  minSize="10%"
+                  mode="collapsible"
+                >
+                  <Sidebar>
+                    <Panel {...params} />
+                  </Sidebar>
+                </EuiResizablePanel>
+                <EuiResizableButton />
+
+                <EuiResizablePanel minSize="65%" mode="main">
+                  <EuiPageBody className="deLayout__canvas">
+                    <Canvas {...params} />
+                  </EuiPageBody>
+                </EuiResizablePanel>
+              </>
+            )}
+          </EuiResizableContainer>
         </Context>
       </Suspense>
     </EuiPage>

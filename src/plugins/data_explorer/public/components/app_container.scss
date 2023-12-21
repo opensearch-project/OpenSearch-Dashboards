@@ -1,8 +1,10 @@
 $osdHeaderOffset: $euiHeaderHeightCompensation;
 
 .deSidebar {
-  max-width: 462px;
-  min-width: 400px;
+  max-width: 620px;
+  min-width: 180px;
+  top: 0;
+  height: 100%;
 
   @include ouiBreakpoint("xs", "s", "m") {
     max-width: initial;
