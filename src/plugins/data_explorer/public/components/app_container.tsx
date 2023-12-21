@@ -26,7 +26,7 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
       {/* TODO: improve fallback state */}
       <Suspense fallback={<div>Loading...</div>}>
         <Context {...params}>
-          <EuiResizableContainer style={{ marginTop: '0px', padding: '0px' }}>
+          <EuiResizableContainer>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel initialSize={140} minSize="10%" mode="collapsible">
