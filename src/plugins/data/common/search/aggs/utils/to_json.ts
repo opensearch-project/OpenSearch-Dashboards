@@ -35,7 +35,7 @@
  * @internal
  * @deprecated This function will be removed in the next major version.
  */
-export function toAngularJSON(obj: any, pretty?: any): string {
+export function toJSON(obj: any, pretty?: any): string {
   if (obj === undefined) return '';
   if (typeof pretty === 'number') {
     pretty = pretty ? 2 : null;
