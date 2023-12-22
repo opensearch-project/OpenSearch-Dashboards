@@ -51,22 +51,38 @@ function print_txt() {
 # $3 is the url to curl
 # $4 contains arguments that need to be passed to the curl command
 function check_status() {
-  # Calculate end time as 180s from now
-  check_status_end_time=$(expr 180 + "$(date '+%s')")
+  timeout_duration=180 
 
-  rm -rf $1
+  check_status_end_time=$((SECONDS + timeout_duration))
 
-  while [ ! -f $1 ] || ! grep -q "$2" $1; do
-    if [ -f $1 ]; then rm $1; fi
-    curl $3 $4 > $1 || true
+  rm -rf "$1"
 
-    # Stop checking after $check_status_end_time
-    if [ $check_status_end_time -lt $(date '+%s') ]; then
+  while [ ! -f "$1" ] || ! grep -q "$2" "$1"; do
+    if [ -f "$1" ]; then
+      rm "$1"
+    fi
+
+    curl "$3" "$4" > "$1" || true
+
+    if [ $SECONDS -ge $check_status_end_time ]; then
       echo "Error: Status check has timed out"
       exit 1
     fi
   done
-  rm $1
+
+  rm "$1"
+
+  if [ ! -f "$1" ]; then
+    echo "Error: Status check failed. The file '$1' is missing."
+    exit 1
+  fi
+
+  if ! grep -q "$2" "$1"; then
+    echo "Error: Status check failed. The error message '$2' is not found in '$1'."
+    exit 1
+  fi
+
+  echo "Status check successful"
 }
 
 # this function copies the tested data for the required version to the opensearch data folder
