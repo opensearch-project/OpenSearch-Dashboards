@@ -1,0 +1,7 @@
+{
+  "prefix": "cspConfigurationProvider",
+  "paths": {
+    "cspConfigurationProvider": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
