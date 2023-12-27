@@ -1,23 +1,20 @@
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   Logger,
-  OnPreResponseHandler,
   OpenSearchClient,
+  Plugin,
+  PluginInitializerContext,
 } from '../../../core/server';
 
+import { createCspRulesPreResponseHandler } from './csp_handlers';
+import { OpenSearchCspClient } from './provider';
+import { defineRoutes } from './routes';
 import {
   CspClient,
   CspConfigurationProviderPluginSetup,
   CspConfigurationProviderPluginStart,
 } from './types';
-import { defineRoutes } from './routes';
-import { OpenSearchCspClient } from './provider';
-
-const OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME = '.opensearch_dashboards_config';
-const OPENSEARCH_DASHBOARDS_CONFIG_DOCUMENT_NAME = 'csp.rules';
 
 export class CspConfigurationProviderPlugin
   implements Plugin<CspConfigurationProviderPluginSetup, CspConfigurationProviderPluginStart> {
@@ -47,7 +44,9 @@ export class CspConfigurationProviderPlugin
     // Register server side APIs
     defineRoutes(router);
 
-    core.http.registerOnPreResponse(this.createCspRulesPreResponseHandler(core));
+    core.http.registerOnPreResponse(
+      createCspRulesPreResponseHandler(core, this.getCspClient.bind(this))
+    );
 
     return {
       setCspClient: this.setCspClient.bind(this),
@@ -60,41 +59,4 @@ export class CspConfigurationProviderPlugin
   }
 
   public stop() {}
-
-  private createCspRulesPreResponseHandler(core: CoreSetup): OnPreResponseHandler {
-    return async (request, response, toolkit) => {
-      const shouldCheckDest = ['document', 'frame', 'iframe', 'embed', 'object'];
-
-      const currentDest = request.headers['sec-fetch-dest'];
-
-      if (!shouldCheckDest.includes(currentDest)) {
-        return toolkit.next({});
-      }
-
-      const [coreStart] = await core.getStartServices();
-
-      const myClient = this.getCspClient(coreStart.opensearch.client.asInternalUser);
-
-      const existsData = await myClient.exists(OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME);
-
-      let header;
-      const defaultHeader = core.http.csp.header;
-
-      if (!existsData) {
-        header = defaultHeader;
-      } else {
-        const data = await myClient.get(
-          OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME,
-          OPENSEARCH_DASHBOARDS_CONFIG_DOCUMENT_NAME
-        );
-        header = data || defaultHeader;
-      }
-
-      const additionalHeaders = {
-        ['content-security-policy']: header,
-      };
-
-      return toolkit.next({ headers: additionalHeaders });
-    };
-  }
 }
