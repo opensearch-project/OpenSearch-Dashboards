@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { OpenSearchClient } from '../../../../src/core/server';
 
 import { CspClient } from './types';

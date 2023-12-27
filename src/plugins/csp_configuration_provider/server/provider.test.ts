@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { SearchResponse } from '@opensearch-project/opensearch/api/types';
 import {
   OpenSearchClientMock,
