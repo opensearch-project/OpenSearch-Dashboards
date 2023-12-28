@@ -59,8 +59,16 @@ const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
   intercept: jest.fn(),
   csp: {
+    rules: [
+      `script-src 'unsafe-eval' 'self'`,
+      `worker-src blob: 'self'`,
+      `style-src 'unsafe-inline' 'self'`,
+      `frame-ancestors 'self'`,
+    ],
     header:
       "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
+    warnLegacyBrowsers: true,
+    strict: false,
   },
 });
 
