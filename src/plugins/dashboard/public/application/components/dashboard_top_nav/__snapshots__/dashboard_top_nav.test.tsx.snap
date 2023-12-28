@@ -753,17 +753,6 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -956,7 +945,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1036,7 +1025,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1104,7 +1093,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1171,7 +1160,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1279,7 +1268,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1353,7 +1342,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1424,7 +1413,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1493,7 +1482,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1569,7 +1558,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1638,7 +1627,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1857,7 +1846,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1937,7 +1926,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2005,7 +1994,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2072,7 +2061,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2180,7 +2169,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2254,7 +2243,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2325,7 +2314,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2394,7 +2383,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2470,7 +2459,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2539,7 +2528,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -3545,17 +3534,6 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -3748,7 +3726,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -3828,7 +3806,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -3896,7 +3874,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -3963,7 +3941,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4071,7 +4049,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4145,7 +4123,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4216,7 +4194,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4285,7 +4263,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4361,7 +4339,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4430,7 +4408,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4649,7 +4627,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4729,7 +4707,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4797,7 +4775,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4864,7 +4842,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4972,7 +4950,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5046,7 +5024,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5117,7 +5095,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5186,7 +5164,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5262,7 +5240,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5331,7 +5309,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -6337,17 +6315,6 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -6540,7 +6507,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -6620,7 +6587,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -6688,7 +6655,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -6755,7 +6722,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -6863,7 +6830,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -6937,7 +6904,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7008,7 +6975,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7077,7 +7044,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7153,7 +7120,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7222,7 +7189,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7441,7 +7408,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7521,7 +7488,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7589,7 +7556,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7656,7 +7623,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7764,7 +7731,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7838,7 +7805,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7909,7 +7876,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7978,7 +7945,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8054,7 +8021,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8123,7 +8090,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9129,17 +9096,6 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -9332,7 +9288,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9412,7 +9368,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9480,7 +9436,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9547,7 +9503,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9655,7 +9611,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9729,7 +9685,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9800,7 +9756,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9869,7 +9825,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9945,7 +9901,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10014,7 +9970,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10233,7 +10189,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10313,7 +10269,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10381,7 +10337,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10448,7 +10404,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10556,7 +10512,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10630,7 +10586,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10701,7 +10657,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10770,7 +10726,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10846,7 +10802,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10915,7 +10871,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11921,17 +11877,6 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -12124,7 +12069,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12204,7 +12149,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12272,7 +12217,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12339,7 +12284,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12447,7 +12392,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12521,7 +12466,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12592,7 +12537,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12661,7 +12606,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12737,7 +12682,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12806,7 +12751,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13025,7 +12970,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13105,7 +13050,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13173,7 +13118,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13240,7 +13185,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13348,7 +13293,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13422,7 +13367,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13493,7 +13438,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13562,7 +13507,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13638,7 +13583,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13707,7 +13652,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14713,17 +14658,6 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -14916,7 +14850,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14996,7 +14930,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15064,7 +14998,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15131,7 +15065,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15239,7 +15173,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15313,7 +15247,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15384,7 +15318,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15453,7 +15387,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15529,7 +15463,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15598,7 +15532,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15817,7 +15751,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15897,7 +15831,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -15965,7 +15899,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -16032,7 +15966,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -16140,7 +16074,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -16214,7 +16148,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -16285,7 +16219,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -16354,7 +16288,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -16430,7 +16364,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -16499,7 +16433,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,

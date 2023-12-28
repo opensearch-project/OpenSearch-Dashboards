@@ -861,17 +861,6 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -1059,7 +1048,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1139,7 +1128,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1207,7 +1196,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1274,7 +1263,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1382,7 +1371,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1456,7 +1445,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1527,7 +1516,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1596,7 +1585,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1672,7 +1661,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1741,7 +1730,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -1960,7 +1949,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2040,7 +2029,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2108,7 +2097,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2175,7 +2164,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2283,7 +2272,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2357,7 +2346,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2428,7 +2417,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2497,7 +2486,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2573,7 +2562,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -2642,7 +2631,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -3828,17 +3817,6 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -4026,7 +4004,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4106,7 +4084,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4174,7 +4152,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4241,7 +4219,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4349,7 +4327,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4423,7 +4401,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4494,7 +4472,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4563,7 +4541,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4639,7 +4617,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4708,7 +4686,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -4927,7 +4905,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5007,7 +4985,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5075,7 +5053,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5142,7 +5120,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5250,7 +5228,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5324,7 +5302,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5395,7 +5373,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5464,7 +5442,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5540,7 +5518,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -5609,7 +5587,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -6856,17 +6834,6 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -7054,7 +7021,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7134,7 +7101,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7202,7 +7169,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7269,7 +7236,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7377,7 +7344,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7451,7 +7418,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7522,7 +7489,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7591,7 +7558,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7667,7 +7634,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7736,7 +7703,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -7955,7 +7922,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8035,7 +8002,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8103,7 +8070,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8170,7 +8137,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8278,7 +8245,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8352,7 +8319,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8423,7 +8390,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8492,7 +8459,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8568,7 +8535,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -8637,7 +8604,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -9884,17 +9851,6 @@ exports[`dashboard listing renders table rows 1`] = `
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -10082,7 +10038,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10162,7 +10118,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10230,7 +10186,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10297,7 +10253,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10405,7 +10361,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10479,7 +10435,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10550,7 +10506,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10619,7 +10575,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10695,7 +10651,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10764,7 +10720,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -10983,7 +10939,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11063,7 +11019,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11131,7 +11087,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11198,7 +11154,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11306,7 +11262,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11380,7 +11336,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11451,7 +11407,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11520,7 +11476,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11596,7 +11552,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -11665,7 +11621,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -12912,17 +12868,6 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "remove": [Function],
                 "serverBasePath": "",
               },
-              "csp": Object {
-                "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-                "rules": Array [
-                  "script-src 'unsafe-eval' 'self'",
-                  "worker-src blob: 'self'",
-                  "style-src 'unsafe-inline' 'self'",
-                  "frame-ancestors 'self'",
-                ],
-                "strict": false,
-                "warnLegacyBrowsers": true,
-              },
               "delete": [MockFunction],
               "fetch": [MockFunction],
               "get": [MockFunction],
@@ -13110,7 +13055,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13190,7 +13135,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13258,7 +13203,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13325,7 +13270,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13433,7 +13378,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13507,7 +13452,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13578,7 +13523,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13647,7 +13592,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13723,7 +13668,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -13792,7 +13737,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14011,7 +13956,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14091,7 +14036,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14159,7 +14104,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14226,7 +14171,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14334,7 +14279,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14408,7 +14353,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14479,7 +14424,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14548,7 +14493,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14624,7 +14569,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,
@@ -14693,7 +14638,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       "emit": [Function],
                       "generateRequestId": [Function],
                       "headers": Object {
-                        "user-agent": "opensearch-js/2.3.1 (linux 5.4.0-1037-aws-x64; Node.js v18.16.0)",
+                        "user-agent": "opensearch-js/2.3.1 (linux 6.2.0-1018-azure-x64; Node.js v18.16.0)",
                       },
                       "maxRetries": 3,
                       "memoryCircuitBreaker": undefined,

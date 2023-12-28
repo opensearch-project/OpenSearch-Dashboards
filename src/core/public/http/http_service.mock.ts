@@ -33,11 +33,9 @@ import { HttpService } from './http_service';
 import { HttpSetup } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { BasePath } from './base_path';
-import { ICspConfig } from 'opensearch-dashboards/server';
 
 export type HttpSetupMock = jest.Mocked<HttpSetup> & {
   basePath: BasePath;
-  csp: ICspConfig;
   anonymousPaths: jest.Mocked<HttpSetup['anonymousPaths']>;
 };
 
@@ -58,18 +56,6 @@ const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   addLoadingCountSource: jest.fn(),
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
   intercept: jest.fn(),
-  csp: {
-    rules: [
-      `script-src 'unsafe-eval' 'self'`,
-      `worker-src blob: 'self'`,
-      `style-src 'unsafe-inline' 'self'`,
-      `frame-ancestors 'self'`,
-    ],
-    header:
-      "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
-    warnLegacyBrowsers: true,
-    strict: false,
-  },
 });
 
 const createMock = ({ basePath = '' } = {}) => {
