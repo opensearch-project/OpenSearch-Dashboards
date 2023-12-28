@@ -173,6 +173,17 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "remove": [Function],
             "serverBasePath": "",
           },
+          "csp": Object {
+            "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'",
+            "rules": Array [
+              "script-src 'unsafe-eval' 'self'",
+              "worker-src blob: 'self'",
+              "style-src 'unsafe-inline' 'self'",
+              "frame-ancestors 'self'",
+            ],
+            "strict": false,
+            "warnLegacyBrowsers": true,
+          },
           "delete": [MockFunction],
           "fetch": [MockFunction],
           "get": [MockFunction],
