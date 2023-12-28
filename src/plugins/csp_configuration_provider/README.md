@@ -2,7 +2,7 @@
 
 A OpenSearch Dashboards plugin
 
-This plugin introduces the support of self service dynamic configuration of Content Security Policy (CSP) rules without requiring a server restart. It registers a pre-response handler to `HttpServiceSetup` which can get Content Security Policy (CSP) rules from a new index `.opensearch_dashboards_config` and then rewrite to CSP header. OSD users could update the content of the index with new CSP rules and will take effect immediately.
+This plugin introduces the support of self service dynamic configuration of Content Security Policy (CSP) rules without requiring a server restart. It registers a pre-response handler to `HttpServiceSetup` which can get CSP rules from a new index `.opensearch_dashboards_config` and then rewrite to CSP header. OSD users could update the content of the index with new CSP rules and will take effect immediately.
 
 It also provides an interface `CspClient` for future extensions of external CSP providers. By default, an implementation based on OpenSearch as database is used.
 
