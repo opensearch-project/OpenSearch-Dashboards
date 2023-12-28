@@ -26,23 +26,23 @@ export function createCspRulesPreResponseHandler(
 
     const myClient = getCspClient(coreStart.opensearch.client.asInternalUser);
 
-    const existsData = await myClient.exists(OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME);
+    const existsValue = await myClient.exists(OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME);
 
-    let header;
-    const defaultHeader = core.http.csp.header;
+    if (!existsValue) {
+      return toolkit.next({});
+    }
 
-    if (!existsData) {
-      header = defaultHeader;
-    } else {
-      const data = await myClient.get(
-        OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME,
-        OPENSEARCH_DASHBOARDS_CONFIG_DOCUMENT_NAME
-      );
-      header = data || defaultHeader;
+    const cspRules = await myClient.get(
+      OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME,
+      OPENSEARCH_DASHBOARDS_CONFIG_DOCUMENT_NAME
+    );
+
+    if (!cspRules) {
+      return toolkit.next({});
     }
 
     const additionalHeaders = {
-      ['content-security-policy']: header,
+      'content-security-policy': cspRules,
     };
 
     return toolkit.next({ headers: additionalHeaders });

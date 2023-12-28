@@ -48,6 +48,7 @@ import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.m
 import { contextServiceMock } from './context/context_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 import { workspacesServiceMock } from './workspace/workspaces_service.mock';
+import { opensearchServiceMock } from '../server/mocks';
 
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
@@ -110,6 +111,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
     },
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
     workspaces: workspacesServiceMock.createStartContract(),
+    opensearch: opensearchServiceMock.createStart(),
   };
 
   return mock;
