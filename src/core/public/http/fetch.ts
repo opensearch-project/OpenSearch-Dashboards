@@ -212,6 +212,8 @@ export class Fetch {
   }
 
   private shorthand(method: string): HttpHandler {
+    // ToDo: find why 'TResponseBody' of HttpHandler is not assignable to type 'HttpResponse<any>'
+    // @ts-expect-error
     return (pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
       const optionsWithPath = validateFetchArguments(pathOrOptions, options);
       return this.fetch({ ...optionsWithPath, method });

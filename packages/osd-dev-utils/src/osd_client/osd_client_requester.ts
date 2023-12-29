@@ -36,7 +36,7 @@ import { ToolingLog } from '../tooling_log';
 
 const isConcliftOnGetError = (error: any) => {
   return (
-    isAxiosResponseError(error) && error.config.method === 'GET' && error.response.status === 409
+    isAxiosResponseError(error) && error.config?.method === 'GET' && error.response.status === 409
   );
 };
 
