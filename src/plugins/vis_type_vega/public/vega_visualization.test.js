@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import $ from 'jquery';
-
 import 'leaflet/dist/leaflet.js';
 import 'leaflet-vega';
 import { createVegaVisualization } from './vega_visualization';
@@ -83,8 +81,12 @@ describe('VegaVisualizations', () => {
     mockedHeightValue = height;
     domNode = document.createElement('div');
 
-    mockWidth = jest.spyOn($.prototype, 'width').mockImplementation(() => mockedWidthValue);
-    mockHeight = jest.spyOn($.prototype, 'height').mockImplementation(() => mockedHeightValue);
+    mockWidth = jest
+      .spyOn(domNode, 'clientWidth', 'get')
+      .mockImplementation(() => mockedWidthValue);
+    mockHeight = jest
+      .spyOn(domNode, 'clientHeight', 'get')
+      .mockImplementation(() => mockedHeightValue);
   };
 
   const mockGetServiceSettings = async () => {

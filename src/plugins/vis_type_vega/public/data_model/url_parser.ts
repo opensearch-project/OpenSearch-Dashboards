@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import $ from 'jquery';
 import { i18n } from '@osd/i18n';
 import { UrlObject } from './types';
 
@@ -74,6 +73,8 @@ export class UrlParser {
       );
     } else {
       url += (url.includes('?') ? '&' : '?') + $.param(query);
+      // replace jquery with built-in javascript
+      url += (url.includes('?') ? '&' : '?') + new URLSearchParams(query).toString();
     }
 
     obj.url = url;

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { vega, vegaLite, vegaExpressionInterpreter } from '../lib/vega';
@@ -72,7 +71,7 @@ export function bypassExternalUrlCheck(url) {
 
 export class VegaBaseView {
   constructor(opts) {
-    this._$parentEl = $(opts.parentEl);
+    this._parentEl = document.querySelector(opts.parentEl);
     this._parser = opts.vegaParser;
     this._serviceSettings = opts.serviceSettings;
     this._filterManager = opts.filterManager;
@@ -82,7 +81,7 @@ export class VegaBaseView {
     this._view = null;
     this._vegaViewConfig = null;
     this._vegaViewOptions = null;
-    this._$messages = null;
+    this._messages = null;
     this._destroyHandlers = [];
     this._initialized = false;
     this._enableExternalUrls = getEnableExternalUrls();
@@ -93,7 +92,7 @@ export class VegaBaseView {
     this._initialized = true;
 
     try {
-      this._$parentEl.empty().addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
+      this._parentEl.empty().addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
       for (const warn of this._parser.warnings) {
@@ -105,26 +104,27 @@ export class VegaBaseView {
         return;
       }
 
-      this._$container = $('<div class="vgaVis__view">')
-        // Force a height here because css is not loaded in mocha test
-        .css('height', '100%')
-        .appendTo(this._$parentEl);
-      this._$controls = $(
-        `<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`
-      ).appendTo(this._$parentEl);
+      this._container = document.createElement('div');
+      this._container.className = 'vgaVis__view';
+      // Force a height here because css is not loaded in mocha test
+      this._container.style.height = '100%';
+      this._parentEl.appendChild(this.container);
+      this._controls = document.createElement('div');
+      this._controls.className = `vgaVis__controls vgaVis__controls--${this._parser.controlsDir}`;
+      this._parentEl.appendChild(this._controls);
 
       this._addDestroyHandler(() => {
-        if (this._$container) {
-          this._$container.remove();
-          this._$container = null;
+        if (this._container) {
+          this._container.remove();
+          this._container = null;
         }
-        if (this._$controls) {
-          this._$controls.remove();
-          this._$controls = null;
+        if (this._controls) {
+          this._controls.remove();
+          this._controls = null;
         }
-        if (this._$messages) {
-          this._$messages.remove();
-          this._$messages = null;
+        if (this._messages) {
+          this._messages.remove();
+          this._messages = null;
         }
         if (this._view) {
           this._view.finalize();
@@ -230,14 +230,18 @@ export class VegaBaseView {
   }
 
   _addMessage(type, text) {
-    if (!this._$messages) {
-      this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
+    if (!this._messages) {
+      this._messages = document.createElement('ul');
+      this._messages.className = 'vgaVis__messages';
+      this._parentEl.appendChild(this._messages);
     }
-    this._$messages.append(
-      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
-        $(`<pre class="vgaVis__messageCode">`).text(text)
-      )
-    );
+    const li = document.createElement('li');
+    li.className = `vgaVis__message vgaVis__message--${type}`;
+    const pre = document.createElement('pre');
+    pre.className = 'vgaVis__messageCode';
+    pre.textContent = text;
+    li.appendChild(pre);
+    this._messages.appendChild(li);
   }
 
   resize() {
@@ -247,12 +251,9 @@ export class VegaBaseView {
   }
 
   updateVegaSize(view) {
-    // For some reason the object is slightly scrollable without the extra padding.
-    // This might be due to https://github.com/jquery/jquery/issues/3808
-    // Which is being fixed as part of jQuery 3.3.0
     const heightExtraPadding = 6;
-    const width = Math.max(0, this._$container.width());
-    const height = Math.max(0, this._$container.height()) - heightExtraPadding;
+    const width = Math.max(0, this._container.width());
+    const height = Math.max(0, this._container.height()) - heightExtraPadding;
 
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);
@@ -274,7 +275,7 @@ export class VegaBaseView {
     // based on the event mark size, such that there is sufficient but minimal space
     // needed to render the event marks.
     const eventVisHeight = 100;
-    const height = Math.max(0, this._$container.height()) - eventVisHeight;
+    const height = Math.max(0, this._container.height()) - eventVisHeight;
     if (view._signals.concat_0_height !== undefined) {
       view._signals.concat_0_height.value = height;
     }
@@ -296,7 +297,7 @@ export class VegaBaseView {
       if (this._parser.tooltips) {
         // position and padding can be specified with
         // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
-        const tthandler = new TooltipHandler(this._$container[0], view, this._parser.tooltips);
+        const tthandler = new TooltipHandler(this._container[0], view, this._parser.tooltips);
 
         // Vega bug workaround - need to destroy tooltip by hand
         this._addDestroyHandler(() => tthandler.hideTooltip());
