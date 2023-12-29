@@ -2,7 +2,7 @@
 
 A OpenSearch Dashboards plugin
 
-This plugin introduces the support of self service dynamic configuration of Content Security Policy (CSP) rules without requiring a server restart. It registers a pre-response handler to `HttpServiceSetup` which can get CSP rules from a new index `.opensearch_dashboards_config` and then rewrite to CSP header. OSD users could update the content of the index with new CSP rules and will take effect immediately.
+This plugin introduces the support of self service dynamic configuration of Content Security Policy (CSP) rules without requiring a server restart. It registers a pre-response handler to `HttpServiceSetup` which can get CSP rules from a new index `.opensearch_dashboards_config` and then rewrite to CSP header. OSD users could update the content of the index with new CSP rules and the change will take effect immediately.
 
 It also provides an interface `CspClient` for future extensions of external CSP providers. By default, an implementation based on OpenSearch as database is used.
 
@@ -30,11 +30,11 @@ PUT .opensearch_dashboards_config/_doc/csp.rules
 ```
 
 ## External CSP Clients
-While a default OpenSearch based client is implemented, OSD users can use external CSP clients by using an OSD plugin (outside OSD).
+While a default OpenSearch based client is implemented, OSD users can use external CSP clients through an OSD plugin (outside OSD).
 
 Let's call this plugin `MyCspClientPlugin`.
 
-First, this plugin will need to implement a class `MyCspClient` based on interface `CspClient` defined in the `types.ts`.
+First, this plugin will need to implement a class `MyCspClient` based on interface `CspClient` defined in the `types.ts` under directory `src/plugins/csp_configuration_provider/server/types.ts`.
 
 Second, this plugin needs to declare `cspConfigurationProvider` as its dependency by adding it to `requiredPlugins` in its own `opensearch_dashboards.json`.
 
