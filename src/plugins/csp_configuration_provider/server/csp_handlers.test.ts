@@ -3,13 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { coreMock } from '../../../core/public/mocks';
 import { RouteMethod } from '../../../core/server';
 import {
   OpenSearchDashboardsRequest,
   OpenSearchDashboardsRouteOptions,
 } from '../../../core/server/http/router/request';
-import { httpServerMock } from '../../../core/server/mocks';
+import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { createCspRulesPreResponseHandler } from './csp_handlers';
 
 const forgeRequest = ({
