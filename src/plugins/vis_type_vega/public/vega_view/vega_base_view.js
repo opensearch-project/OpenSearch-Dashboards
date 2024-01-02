@@ -92,7 +92,9 @@ export class VegaBaseView {
     this._initialized = true;
 
     try {
-      this._parentEl.empty().addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
+      this._parentEl.innerHTML = '';
+      this._parentEl.classList.add('vgaVis');
+      this._parentEl.style.flexDirection = this._parser.containerDir;
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
       for (const warn of this._parser.warnings) {
