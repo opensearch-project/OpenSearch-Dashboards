@@ -72,8 +72,6 @@ export class UrlParser {
         })
       );
     } else {
-      url += (url.includes('?') ? '&' : '?') + $.param(query);
-      // replace jquery with built-in javascript
       url += (url.includes('?') ? '&' : '?') + new URLSearchParams(query).toString();
     }
 
