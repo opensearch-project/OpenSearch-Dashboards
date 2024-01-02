@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// TODO: Is any of this still needed or used?
 import { deepFreeze } from '@osd/std';
 
 export enum ThemeColorSchemes {

@@ -75,6 +75,7 @@ export interface UiSettingsParams<T = unknown> {
   optionLabels?: Record<string, string>;
   /** a flag indicating whether new value applying requires page reloading */
   requiresPageReload?: boolean;
+  preferBrowserSetting?: boolean;
   /** a flag indicating that value cannot be changed */
   readonly?: boolean;
   /** defines a type of UI element {@link UiSettingsType} */

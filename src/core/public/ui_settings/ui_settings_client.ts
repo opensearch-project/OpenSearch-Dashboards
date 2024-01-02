@@ -89,7 +89,9 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     }
 
     const type = this.cache[key].type;
-    const userValue = this.cache[key].userValue;
+    const userValue = this.cache[key].preferBrowserSetting
+      ? window.localStorage.getItem(`uiSettings:${key}`)
+      : this.cache[key].userValue;
     const defaultValue = defaultOverride !== undefined ? defaultOverride : this.cache[key].value;
     const value = userValue == null ? defaultValue : userValue;
 

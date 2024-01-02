@@ -94,18 +94,21 @@ export class RenderingService {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
+        // TODO: make sure this is used as default in templates
         // Cannot use `uiSettings.get()` since a user might not be authenticated
         const darkMode =
           (settings.user?.['theme:darkMode']?.userValue ??
             uiSettings.getOverrideOrDefault('theme:darkMode')) ||
           false;
 
+        // TODO: make sure this is used as default in templates
         // At the very least, the schema should define a default theme; the '' will be unreachable
         const themeVersion =
           (settings.user?.['theme:version']?.userValue ??
             uiSettings.getOverrideOrDefault('theme:version')) ||
           '';
 
+        // TODO: should this be moved to better account for dark mode?
         const brandingAssignment = await this.assignBrandingConfig(
           darkMode,
           opensearchDashboardsConfig as OpenSearchDashboardsConfigType
@@ -115,6 +118,7 @@ export class RenderingService {
           strictCsp: http.csp.strict,
           uiPublicUrl,
           bootstrapScriptUrl: `${basePath}/bootstrap.js`,
+          startupScriptUrl: `${basePath}/startup.js`,
           i18n: i18n.translate,
           locale: i18n.getLocale(),
           darkMode,
