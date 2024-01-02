@@ -39,7 +39,9 @@ export class CspConfigurationProviderPlugin
       return this.cspClient;
     }
 
-    return new OpenSearchCspClient(inputOpenSearchClient);
+    const openSearchCspClient = new OpenSearchCspClient(inputOpenSearchClient);
+    this.setCspClient(openSearchCspClient);
+    return this.cspClient;
   }
 
   public setup(core: CoreSetup) {
