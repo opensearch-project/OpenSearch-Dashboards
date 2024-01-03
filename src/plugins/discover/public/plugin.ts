@@ -184,11 +184,13 @@ export class DiscoverPlugin
       plugins.assistantDashboards.registerPalantir([
         {
           key: 'totalHits',
-          description: '# of documents returned from the node.',
+          type: 'summaryWithSuggestions',
+          summary: '# of documents returned from the node.',
           suggestion: 'Where are the rest of my total hits?',
         },
         {
           key: 'timestampField',
+          type: 'suggestions',
           suggestion: 'How to format my timestamp field?',
         },
       ]);
