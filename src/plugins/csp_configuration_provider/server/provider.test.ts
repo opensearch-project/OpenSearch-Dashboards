@@ -107,6 +107,32 @@ describe('Provider', () => {
       );
     });
 
+    it('returns empty when value field is missing in opensearch response', async () => {
+      const cspRules = "frame-ancestors 'self'";
+
+      opensearchClient.search.mockImplementation(() => {
+        return opensearchClientMock.createSuccessTransportRequestPromise({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  value_typo: cspRules,
+                },
+              },
+            ],
+          },
+        } as SearchResponse<any>);
+      });
+
+      const client = new OpenSearchCspClient(opensearchClient);
+      const getValue = await client.get(INDEX_NAME, INDEX_DOCUMENT_NAME);
+
+      expect(getValue).toBe('');
+      expect(opensearchClient.search).toBeCalledWith(
+        getSearchInput(INDEX_NAME, INDEX_DOCUMENT_NAME)
+      );
+    });
+
     it('returns empty string when opensearch errors happen', async () => {
       opensearchClient.search.mockImplementation(() => {
         return opensearchClientMock.createErrorTransportRequestPromise(new Error(ERROR_MESSAGE));

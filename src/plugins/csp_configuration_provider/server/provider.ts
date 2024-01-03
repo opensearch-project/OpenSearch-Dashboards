@@ -52,7 +52,7 @@ export class OpenSearchCspClient implements CspClient {
         body: query,
       });
 
-      value = data?.body?.hits?.hits[0]?._source?.value;
+      value = data?.body?.hits?.hits[0]?._source?.value || '';
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(
