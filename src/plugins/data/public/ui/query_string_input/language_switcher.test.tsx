@@ -41,6 +41,7 @@ describe('LanguageSwitcher', () => {
     const services = {
       uiSettings: startMock.uiSettings,
       docLinks: startMock.docLinks,
+      application: startMock.application,
     };
 
     return (
