@@ -78,8 +78,10 @@ export function QueryLanguageSwitcher(props: Props) {
     {
       label: 'PPL',
     },
+    {
+      label: 'SQL',
+    },
   ];
-  const [selectedLanguage, setSelectedLanguage] = useState([dataExplorerOptions[0]]);
 
   const osdDQLDocs = useOpenSearchDashboards().services.docLinks?.links.opensearchDashboards.dql
     .base;
@@ -109,20 +111,26 @@ export function QueryLanguageSwitcher(props: Props) {
   );
 
   const handleLanguageChange = (newLanguage: EuiComboBoxOptionOption[]) => {
+    if (['PPL', 'SQL'].includes(newLanguage[0].label)) {
+      application?.navigateToUrl('../observability-logs#/explorer');
+      return;
+    }
     const queryLanguage = newLanguage[0].label === 'DQL' ? 'kuery' : newLanguage[0].label;
     props.onSelectLanguage(queryLanguage);
-    setSelectedLanguage(newLanguage);
   };
 
   // The following is a temporary solution for adding PPL navigation, and should be replaced once final solution is determined.
   // Follow-up issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5628
   if (useObservable(currentApp$!, '') === 'data-explorer' && useNewQuerySelector) {
+    const selectedLanguage = {
+      label: props.language === 'kuery' ? 'DQL' : props.language,
+    };
     return (
       <EuiComboBox
         className="languageSwitcher"
         data-test-subj="languageSelect"
         options={dataExplorerOptions}
-        selectedOptions={selectedLanguage}
+        selectedOptions={[selectedLanguage]}
         onChange={handleLanguageChange}
         singleSelection={{ asPlainText: true }}
         isClearable={false}

@@ -93,7 +93,6 @@ interface State {
   selectionEnd: number | null;
   indexPatterns: IIndexPattern[];
   queryBarRect: DOMRect | undefined;
-  currentApp: string | undefined;
 }
 
 const KEY_CODES = {
@@ -120,7 +119,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
     selectionEnd: null,
     indexPatterns: [],
     queryBarRect: undefined,
-    currentApp: undefined,
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -459,10 +457,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private onSelectLanguage = (language: string) => {
-    if (language === 'PPL') {
-      this.services.application?.navigateToUrl('../observability-logs#/explorer');
-      return;
-    }
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
