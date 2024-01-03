@@ -28,7 +28,8 @@ import {
   EuiTextAlign,
   EuiTitle,
 } from '@elastic/eui';
-import { useUiSetting$ } from '../../opensearch_dashboards_react/public';
+import { CoreStart } from 'opensearch-dashboards/public';
+import { useOpenSearchDashboards, useUiSetting$ } from '../../opensearch_dashboards_react/public';
 
 export interface FormRowDeps {
   headerText: string;
@@ -87,6 +88,11 @@ export function FormRow(props: FormRowWithChildComponentDeps) {
 }
 
 export const HeaderUserMenu = () => {
+  const {
+    services: {
+      http: { basePath },
+    },
+  } = useOpenSearchDashboards<CoreStart>();
   const themeOptions = [
     {
       value: 'v7',
@@ -119,8 +125,6 @@ export const HeaderUserMenu = () => {
     darkMode ? screenModeOptions[1].value : screenModeOptions[0].value
   );
 
-  console.log(themeVersion);
-
   const onAvatarClick = () => {
     setPopover(!isPopoverOpen);
   };
@@ -137,8 +141,6 @@ export const HeaderUserMenu = () => {
 
   const onAppearanceSubmit = async (e: SyntheticEvent) => {
     console.log(e);
-    // const mainStyleLink = document.querySelector('link[href*="osd-ui-shared-deps.v8.light"]');
-    // mainStyleLink?.parentNode?.removeChild(mainStyleLink);
 
     await await Promise.all([
       setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? ''),
@@ -174,6 +176,7 @@ export const HeaderUserMenu = () => {
   const closePopover = () => {
     setPopover(false);
   };
+
   const avatar = (
     <EuiButtonEmpty>
       <EuiAvatar name="Anonymous" onClick={onAvatarClick} />
@@ -234,7 +237,7 @@ export const HeaderUserMenu = () => {
       items: [
         {
           name: 'Appearance',
-          icon: 'color',
+          icon: 'color', // controlsHorizontal, controlsVertical, eye, glasses, invert, moon, wrench
           panel: 2,
         },
         {
@@ -292,10 +295,22 @@ export const HeaderUserMenu = () => {
       initialFocusedItemIndex: 0,
       title: 'Appearance',
       content: (
-        <div style={{ padding: 16 }}>
+        <div style={{ maxWidth: 300 }}>
           <EuiCallOut color="warning">
-            These settings apply to only this user account. Tochange settings for the entire
-            application, visit Advanced Settings or contact your administrator. Learn more
+            These settings apply to only this user account. To change settings for the entire
+            application,{' '}
+            <EuiLink
+              href={basePath.prepend('/app/management/opensearch-dashboards/settings#appearance')}
+            >
+              visit Advanced Settings
+            </EuiLink>{' '}
+            or contact your administrator.{' '}
+            <EuiLink
+              target="_blank"
+              href="https://opensearch.org/docs/latest/dashboards/quickstart/"
+            >
+              Learn more
+            </EuiLink>
           </EuiCallOut>
           <EuiSpacer />
           <EuiFormRow label="Theme version" helpText="Default: Next (preview)">
@@ -311,7 +326,12 @@ export const HeaderUserMenu = () => {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow hasEmptyLabelSpace>
-                <EuiLink href="#">Theme feedback</EuiLink>
+                <EuiLink
+                  target="_blank"
+                  href="https://forum.opensearch.org/t/feedback-on-dark-mode-experience/15725"
+                >
+                  Theme feedback
+                </EuiLink>
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -456,11 +476,10 @@ export const HeaderUserMenu = () => {
 
   return (
     <EuiPopover
-      id="contextMenuExample"
+      id="headerUserContextMenu"
       button={avatar}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
       anchorPosition="downLeft"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />

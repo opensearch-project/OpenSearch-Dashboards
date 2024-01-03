@@ -1,5 +1,7 @@
 // TODO: fix boolean/string coerce issues
-var rawDarkMode = window.localStorage.getItem('uiSettings:theme:darkMode') || {{configDarkMode}};
+var browserDarkMode = window.localStorage.getItem('uiSettings:theme:darkMode');
+
+var rawDarkMode = browserDarkMode !== 'true' && browserDarkMode !== 'false' ? {{configDarkMode}} : browserDarkMode === 'true';
 
 var rawThemeVersion = window.localStorage.getItem('uiSettings:theme:version') || '{{configThemeVersion}}'
 
@@ -21,7 +23,10 @@ var themedStylesDom = document.createElement('style');
 
 themedStylesDom.innerHTML = `
   :root {
-    color-scheme: ${darkMode ? 'dark' : 'light'};
+    color-scheme: ${darkMode};
+  }
+  .${darkMode}Only {
+    display: unset;
   }
   .osdWelcomeView {
     background-color: ${themeDefinition.euiHeaderBackgroundColor};

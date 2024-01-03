@@ -155,22 +155,8 @@ export const Styles: FunctionComponent = () => {
             max-width: 100%;
           }
 
-          @media (prefers-color-scheme: dark) {
-            .darkOnly {
-              display: default;
-            }
-            .lightOnly {
-              display: none;
-            }
-          }
-
-          @media (prefers-color-scheme: light) {
-            .darkOnly {
-              display: none;
-            }
-            .lightOnly {
-              display: default;
-            }
+          .darkOnly, .lightOnly {
+            display: none;
           }
 
           @keyframes osdProgress {

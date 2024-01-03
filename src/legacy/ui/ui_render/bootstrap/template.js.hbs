@@ -12,7 +12,9 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   }
 
   // TODO: Should this be retrieved from window.__osdThemeTag__ instead?
-  var rawDarkMode = window.localStorage.getItem('uiSettings:theme:darkMode') || {{configDarkMode}};
+  var browserDarkMode = window.localStorage.getItem('uiSettings:theme:darkMode');
+
+  var rawDarkMode = browserDarkMode !== 'true' && browserDarkMode !== 'false' ? {{configDarkMode}} : browserDarkMode === 'true';
 
   // TODO: Should this be retrieved from window.__osdThemeTag__ instead?
   var rawThemeVersion = window.localStorage.getItem('uiSettings:theme:version') || '{{configThemeVersion}}'

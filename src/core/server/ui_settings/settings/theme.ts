@@ -46,6 +46,7 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       preferBrowserSetting: true,
       category: ['appearance'],
       schema: schema.boolean(),
+      type: 'boolean',
     },
     'theme:version': {
       name: i18n.translate('core.ui_settings.params.themeVersionTitle', {

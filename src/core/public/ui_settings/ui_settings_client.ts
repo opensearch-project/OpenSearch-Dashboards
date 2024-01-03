@@ -95,6 +95,11 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     const defaultValue = defaultOverride !== undefined ? defaultOverride : this.cache[key].value;
     const value = userValue == null ? defaultValue : userValue;
 
+    // TODO: is there a more elegant way to handle?
+    if (typeof value === 'string' && type === 'boolean') {
+      return JSON.parse(value);
+    }
+
     if (type === 'json') {
       return JSON.parse(value);
     }
@@ -188,6 +193,15 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
     const declared = this.isDeclared(key);
     const defaults = this.defaults;
+
+    if (this.cache[key].preferBrowserSetting) {
+      try {
+        window.localStorage.setItem(`uiSettings:${key}`, newVal);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
 
     const oldVal = declared ? this.cache[key].userValue : undefined;
 

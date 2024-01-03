@@ -33,7 +33,7 @@ import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
-import { setupTopNavButton } from './account-app';
+import { setupTopNavThemeButton, setupTopNavUserButton } from './account-app';
 
 const component = new ComponentRegistry();
 
@@ -79,7 +79,8 @@ export class AdvancedSettingsPlugin
   }
 
   public start(core: CoreStart) {
-    setupTopNavButton(core);
+    setupTopNavUserButton(core);
+    setupTopNavThemeButton(core);
 
     return {
       component: component.start,
