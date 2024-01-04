@@ -39,6 +39,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Data] Support for custom filters with heterogeneous data fields ([5577](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5577))
 - [BUG][Data] Fix empty suggestion history when querying in search bar [#5349](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5349)
 - [BUG][Discover] Fix what is displayed in `selected fields` when removing columns from canvas [#5537](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5537)
+- [BUG][Discover] Fix advanced setting `discover:modifyColumnsOnSwitch` ([#5508](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5508))
 - [Discover] Fix missing index pattern field from breaking Discover [#5626](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5626)
 
 ### 🚞 Infrastructure
@@ -66,7 +67,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Bump `chromedriver` from `107.0.3` to `119.0.1` ([#5465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5465))
 - Bump `typescript` resolution from `4.0.2` to `4.6.4` ([#5470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5470))
 - Bump `OUI` to `1.4.0` ([#5637](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5637))
-- Add @SuZhou-Joe as a maintainer. ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
+- Add @SuZhou-Joe as a maintainer ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
+- Move @seanneumann to emeritus maintainer ([#5634](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5634))
 
 ### 🪛 Refactoring
 
