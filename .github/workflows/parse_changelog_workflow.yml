@@ -1,0 +1,17 @@
+name: Parse Changelog
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Parse changelog entries and submit request for changset creation
+        uses: BigSamu/OpenSearch_Parse_Changelog_Action@main
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          changeset_path: changelogs/fragments
