@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useMount } from 'react-use';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiPageTemplate, EuiButtonEmpty } from '@elastic/eui';
@@ -13,7 +14,7 @@ import { HeroSection } from './hero_section';
 import { Section } from './section';
 
 export const Homepage = () => {
-  const { sectionTypes, application } = getServices();
+  const { sectionTypes, application, chrome } = getServices();
   const getUrl = application.getUrlForApp;
 
   // TODO: ideally, this should be some sort of observable so changes can be made without having to explicitly hit a save button
@@ -24,6 +25,14 @@ export const Homepage = () => {
   useEffect(() => {
     sectionTypes.getHomepage().then(setHomepage).catch(setError);
   }, [sectionTypes]);
+
+  useMount(() => {
+    chrome.setBreadcrumbs([
+      {
+        text: i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
+      },
+    ]);
+  });
 
   if (isLoading) {
     return <span>Loading...</span>;
