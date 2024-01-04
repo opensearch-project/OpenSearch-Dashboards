@@ -25,7 +25,6 @@ const Card: FC<{
 }> = ({ iconType, title, listItems }) => (
   <EuiFlexItem grow={1}>
     <EuiCard
-      display="plain"
       icon={<EuiIcon type={iconType} size="xl" />}
       title={
         <>

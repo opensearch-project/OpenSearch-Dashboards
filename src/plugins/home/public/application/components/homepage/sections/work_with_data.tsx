@@ -33,7 +33,6 @@ const Card: FC<{
 }> = ({ imgSrc, imgAlt, title, description, footerButtonProps, footerUrl, footerText }) => (
   <EuiFlexItem grow={1}>
     <EuiCard
-      display="plain"
       image={<EuiImage src={imgSrc} alt={imgAlt} />}
       title={title}
       description={description}
