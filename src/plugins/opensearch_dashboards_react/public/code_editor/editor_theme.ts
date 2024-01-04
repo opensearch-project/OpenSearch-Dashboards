@@ -122,6 +122,7 @@ export function createTheme(
   };
 }
 
+// TODO: Can this be refactored to use packages/osd-ui-shared-deps/theme.ts ?
 const DARK_THEME = createTheme(darkTheme, '#343551');
 const LIGHT_THEME = createTheme(lightTheme, '#E3E4ED');
 
