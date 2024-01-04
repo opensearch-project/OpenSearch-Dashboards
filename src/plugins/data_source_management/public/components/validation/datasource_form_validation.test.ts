@@ -7,7 +7,11 @@ import { AuthType } from '../../types';
 import { CreateDataSourceState } from '../create_data_source_wizard/components/create_form/create_data_source_form';
 import { EditDataSourceState } from '../edit_data_source/components/edit_form/edit_data_source_form';
 import { defaultValidation, performDataSourceFormValidation } from './datasource_form_validation';
-import { mockDataSourceAttributesWithAuth } from '../../mocks';
+import {
+  mockDataSourceAttributesWithAuth,
+  mockDataSourceAttributesWithValidEndpoint,
+  mockDataSourceAttributesWithInvalidEndpoint,
+} from '../../mocks';
 
 describe('DataSourceManagement: Form Validation', () => {
   describe('validate create/edit datasource', () => {
@@ -46,6 +50,16 @@ describe('DataSourceManagement: Form Validation', () => {
     test('should fail validation when password is empty', () => {
       form.auth.credentials.username = 'test';
       form.auth.credentials.password = '';
+      const result = performDataSourceFormValidation(form, [], '');
+      expect(result).toBe(false);
+    });
+    test('should fail validation when endpoint path is not empty', () => {
+      form.endpoint = mockDataSourceAttributesWithInvalidEndpoint.endpoint;
+      const result = performDataSourceFormValidation(form, [], '');
+      expect(result).toBe(false);
+    });
+    test('should NOT fail validation when endpoint path is empty', () => {
+      form.endpoint = mockDataSourceAttributesWithValidEndpoint.endpoint;
       const result = performDataSourceFormValidation(form, [], '');
       expect(result).toBe(false);
     });
