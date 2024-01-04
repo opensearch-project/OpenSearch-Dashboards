@@ -23,6 +23,7 @@ export const Homepage = () => {
   const isLoading = !homepage && !error;
 
   useEffect(() => {
+    // TODO: maybe this could have some sort of retry mechanism?
     sectionTypes.getHomepage().then(setHomepage).catch(setError);
   }, [sectionTypes]);
 
