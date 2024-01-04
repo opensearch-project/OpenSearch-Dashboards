@@ -60,12 +60,6 @@ export const Homepage = () => {
     </EuiButtonEmpty>,
   ].reverse();
 
-  function renderSections() {
-    return homepage!.sections.map(({ render, title, description, links }, i) => (
-      <Section key={i} title={title} description={description} links={links} render={render} />
-    ));
-  }
-
   const hero = homepage!.heroes[0];
 
   return (
@@ -87,7 +81,9 @@ export const Homepage = () => {
       }}
     >
       {hero && <HeroSection render={hero.render} />}
-      {renderSections()}
+      {homepage!.sections.map(({ render, title, description, links }, i) => (
+        <Section key={i} title={title} description={description} links={links} render={render} />
+      ))}
     </EuiPageTemplate>
   );
 };
