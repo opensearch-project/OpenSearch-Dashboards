@@ -43,8 +43,6 @@ export const Template: FunctionComponent<Props> = ({
   metadata: {
     uiPublicUrl,
     locale,
-    // darkMode,
-    // themeVersion,
     injectedMetadata,
     i18n,
     startupScriptUrl,
