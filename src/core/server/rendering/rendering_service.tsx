@@ -110,7 +110,6 @@ export class RenderingService {
 
         // TODO: should this be moved to better account for dark mode?
         const brandingAssignment = await this.assignBrandingConfig(
-          darkMode,
           opensearchDashboardsConfig as OpenSearchDashboardsConfigType
         );
 
@@ -210,11 +209,9 @@ export class RenderingService {
    * @returns {BrandingAssignment} valid URLs or undefined assigned for each branding configs
    */
   private assignBrandingConfig = async (
-    darkMode: boolean,
     opensearchDashboardsConfig: Readonly<OpenSearchDashboardsConfigType>
   ): Promise<BrandingAssignment> => {
     const brandingValidation: BrandingValidation = await this.checkBrandingValid(
-      darkMode,
       opensearchDashboardsConfig
     );
     const branding = opensearchDashboardsConfig.branding;
@@ -310,30 +307,26 @@ export class RenderingService {
    * @returns {BrandingValidation} indicate valid/invalid URL for each branding config
    */
   private checkBrandingValid = async (
-    darkMode: boolean,
     opensearchDashboardsConfig: Readonly<OpenSearchDashboardsConfigType>
   ): Promise<BrandingValidation> => {
     const branding = opensearchDashboardsConfig.branding;
     const isLogoDefaultValid = await this.isUrlValid(branding.logo.defaultUrl, 'logo default');
 
-    const isLogoDarkmodeValid = darkMode
-      ? await this.isUrlValid(branding.logo.darkModeUrl, 'logo darkMode')
-      : false;
+    const isLogoDarkmodeValid = await this.isUrlValid(branding.logo.darkModeUrl, 'logo darkMode');
 
     const isMarkDefaultValid = await this.isUrlValid(branding.mark.defaultUrl, 'mark default');
 
-    const isMarkDarkmodeValid = darkMode
-      ? await this.isUrlValid(branding.mark.darkModeUrl, 'mark darkMode')
-      : false;
+    const isMarkDarkmodeValid = await this.isUrlValid(branding.mark.darkModeUrl, 'mark darkMode');
 
     const isLoadingLogoDefaultValid = await this.isUrlValid(
       branding.loadingLogo.defaultUrl,
       'loadingLogo default'
     );
 
-    const isLoadingLogoDarkmodeValid = darkMode
-      ? await this.isUrlValid(branding.loadingLogo.darkModeUrl, 'loadingLogo darkMode')
-      : false;
+    const isLoadingLogoDarkmodeValid = await this.isUrlValid(
+      branding.loadingLogo.darkModeUrl,
+      'loadingLogo darkMode'
+    );
 
     const isFaviconValid = await this.isUrlValid(branding.faviconUrl, 'favicon');
 
