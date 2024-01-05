@@ -1,13 +1,13 @@
 name: Parse Changelog
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, edited]
 
-permissions: write-all
-  # contents: read
-  # issues: write
-  # pull-requests: write
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   update-changelog:
