@@ -27,6 +27,7 @@ export const HeaderUserThemeMenu = () => {
   const {
     services: {
       http: { basePath },
+      uiSettings,
     },
   } = useOpenSearchDashboards<CoreStart>();
   // TODO: move to central location?
@@ -62,6 +63,10 @@ export const HeaderUserThemeMenu = () => {
   const [screenMode, setScreenMode] = useState(
     darkMode ? screenModeOptions[1].value : screenModeOptions[0].value
   );
+  const allSettings = uiSettings.getAll();
+  const defaultTheme = allSettings['theme:version'].value;
+  const defaultScreenMode = allSettings['theme:darkMode'].value;
+  console.log(allSettings['theme:darkMode']);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -112,7 +117,6 @@ export const HeaderUserThemeMenu = () => {
   );
 
   // TODO: make i18n, check all translation ids
-  // TODO: get configured defaults
   // TODO: fix focus behavior
   const appearanceContent = (
     <div style={{ maxWidth: 300 }}>
@@ -130,10 +134,18 @@ export const HeaderUserThemeMenu = () => {
         </EuiLink>
       </EuiCallOut>
       <EuiSpacer />
-      <EuiFormRow label="Theme version" helpText="Default: Next (preview)">
+      <EuiFormRow label="Theme version" helpText={`Default: ${defaultTheme}`}>
         <EuiSelect options={themeOptions} value={theme} onChange={onThemeChange} />
       </EuiFormRow>
-      <EuiFormRow label="Screen mode" helpText="Default: Dark mode">
+      <EuiFormRow
+        label="Screen mode"
+        helpText={`Default: ${
+          screenModeOptions.find((t) => {
+            const defaultValue = defaultScreenMode ? 'dark' : 'light';
+            return defaultValue === t.value;
+          })?.text
+        }`}
+      >
         <EuiSelect options={screenModeOptions} value={screenMode} onChange={onScreenModeChange} />
       </EuiFormRow>
       <EuiFlexGroup>

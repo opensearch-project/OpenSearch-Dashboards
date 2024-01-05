@@ -91,6 +91,7 @@ export const HeaderUserMenu = () => {
   const {
     services: {
       http: { basePath },
+      uiSettings,
     },
   } = useOpenSearchDashboards<CoreStart>();
   const themeOptions = [
@@ -124,6 +125,10 @@ export const HeaderUserMenu = () => {
   const [screenMode, setScreenMode] = useState(
     darkMode ? screenModeOptions[1].value : screenModeOptions[0].value
   );
+  const allSettings = uiSettings.getAll();
+  const defaultTheme = allSettings['theme:version'].value;
+  const defaultScreenMode = allSettings['theme:darkMode'].value;
+  console.log(allSettings['theme:darkMode']);
 
   const onAvatarClick = () => {
     setPopover(!isPopoverOpen);
@@ -313,10 +318,18 @@ export const HeaderUserMenu = () => {
             </EuiLink>
           </EuiCallOut>
           <EuiSpacer />
-          <EuiFormRow label="Theme version" helpText="Default: Next (preview)">
+          <EuiFormRow label="Theme version" helpText={`Default: ${defaultTheme}`}>
             <EuiSelect options={themeOptions} value={theme} onChange={onThemeChange} />
           </EuiFormRow>
-          <EuiFormRow label="Screen mode" helpText="Default: Dark mode">
+          <EuiFormRow
+            label="Screen mode"
+            helpText={`Default: ${
+              screenModeOptions.find((t) => {
+                const defaultValue = defaultScreenMode ? 'dark' : 'light';
+                return defaultValue === t.value;
+              })?.text
+            }`}
+          >
             <EuiSelect
               options={screenModeOptions}
               value={screenMode}

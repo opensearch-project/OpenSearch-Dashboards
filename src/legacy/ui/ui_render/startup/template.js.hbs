@@ -1,9 +1,20 @@
-// TODO: fix boolean/string coerce issues
-var browserDarkMode = window.localStorage.getItem('uiSettings:theme:darkMode');
+var uiSettingsJSON = window.localStorage.getItem('uiSettings') || '{}';
 
-var rawDarkMode = browserDarkMode !== 'true' && browserDarkMode !== 'false' ? {{configDarkMode}} : browserDarkMode === 'true';
+var uiSettings = {};
+try {
+  uiSettings = JSON.parse(uiSettingsJSON) || {};
+} catch (error) {
+  console.log(error);
+}
 
-var rawThemeVersion = window.localStorage.getItem('uiSettings:theme:version') || '{{configThemeVersion}}'
+var browserDarkMode = uiSettings['theme:darkMode'] || {};
+var browserThemeVersion = uiSettings['theme:version'] || {};
+
+var rawDarkMode = typeof browserDarkMode.userValue !== 'boolean' ? {{configDarkMode}} : browserDarkMode.userValue
+
+debugger;
+
+var rawThemeVersion = browserThemeVersion.userValue || '{{configThemeVersion}}'
 
 // TODO: should this reflect config defaults instead?
 var darkMode = rawDarkMode ? 'dark' : 'light';
