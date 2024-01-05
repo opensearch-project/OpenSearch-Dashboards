@@ -66,25 +66,20 @@ export const HeaderUserThemeMenu = () => {
   const allSettings = uiSettings.getAll();
   const defaultTheme = allSettings['theme:version'].value;
   const defaultScreenMode = allSettings['theme:darkMode'].value;
-  console.log(allSettings['theme:darkMode']);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
 
   const onThemeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    console.log(`change theme to ${e.target.value}`);
     setTheme(e.target.value);
   };
 
   const onScreenModeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    console.log(`change screen mode to ${e.target.value}`);
     setScreenMode(e.target.value);
   };
 
   const onAppearanceSubmit = async (e: SyntheticEvent) => {
-    console.log(e);
-
     // TODO: only set changed
     await await Promise.all([
       setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? ''),

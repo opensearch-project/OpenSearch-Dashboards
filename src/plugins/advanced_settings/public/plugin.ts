@@ -79,7 +79,6 @@ export class AdvancedSettingsPlugin
   }
 
   public start(core: CoreStart) {
-    setupTopNavUserButton(core);
     setupTopNavThemeButton(core);
 
     return {
