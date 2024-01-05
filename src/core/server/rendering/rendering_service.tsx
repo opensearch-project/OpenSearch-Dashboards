@@ -106,8 +106,6 @@ export class RenderingService {
           startupScriptUrl: `${basePath}/startup.js`,
           i18n: i18n.translate,
           locale: i18n.getLocale(),
-          darkMode,
-          themeVersion,
           injectedMetadata: {
             version: env.packageInfo.version,
             buildNumber: env.packageInfo.buildNum,
@@ -132,7 +130,6 @@ export class RenderingService {
               uiSettings: settings,
             },
             branding: {
-              darkMode,
               assetFolderUrl: `${uiPublicUrl}/default_branding`,
               logo: {
                 defaultUrl: brandingAssignment.logoDefault,

@@ -14,7 +14,7 @@ var rawDarkMode = typeof browserDarkMode.userValue !== 'boolean' ? {{configDarkM
 
 var rawThemeVersion = browserThemeVersion.userValue || '{{configThemeVersion}}'
 
-// TODO: should this reflect config defaults instead?
+// TODO: source of truth for mapping should be elsewhere
 var darkMode = rawDarkMode ? 'dark' : 'light';
 var themeVersion = rawThemeVersion === 'v7' ? 'v7' : 'v8';
 
@@ -27,6 +27,13 @@ var themeSources = {{THEME_SOURCES}};
 var themeDefinition = themeSources[themeVersion][darkMode];
 
 var stylesheetTarget = document.querySelector('head meta[name="add-styles-here"]');
+
+var themeColorDom = document.createElement('meta');
+
+themeColorDom.name = 'theme-color';
+themeColorDom.content = themeDefinition.euiHeaderBackgroundColor;
+
+document.head.insertBefore(themeColorDom, stylesheetTarget);
 
 var themedStylesDom = document.createElement('style');
 

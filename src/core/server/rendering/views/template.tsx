@@ -115,7 +115,6 @@ export const Template: FunctionComponent<Props> = ({
         <link rel="manifest" href={favicon ? `` : `${uiPublicUrl}/favicons/manifest.json`} />
 
         {/* Ignoring all of the above, Safari picks this one */}
-        {/* TODO: update color from theme in startup */}
         <link
           rel="mask-icon"
           color="#003553"
@@ -128,8 +127,6 @@ export const Template: FunctionComponent<Props> = ({
           content={favicon ? `` : `${uiPublicUrl}/favicons/browserconfig.xml`}
         />
 
-        {/* TODO: set color from theme  in startup */}
-        <meta name="theme-color" content="#ffffff" />
         <Styles />
 
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
