@@ -38,7 +38,6 @@ import * as v8dark from '@elastic/eui/dist/eui_theme_next_dark.json';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 import { OpenSearchDashboardsRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
-import { AppStartup } from './startup';
 import { getApmConfig } from '../apm';
 
 /**
@@ -231,15 +230,18 @@ export function uiRenderMixin(osdServer, server, config) {
         v8: 'Source Code Pro',
       });
 
-      const startup = new AppStartup({
-        templateData: {
-          configDarkMode,
-          configThemeVersion,
-          THEME_SOURCES,
-          fontText,
-          fontCode,
+      const startup = new AppBootstrap(
+        {
+          templateData: {
+            configDarkMode,
+            configThemeVersion,
+            THEME_SOURCES,
+            fontText,
+            fontCode,
+          },
         },
-      });
+        'startup'
+      );
 
       const body = await startup.getJsFile();
       const etag = await startup.getJsFileHash();
