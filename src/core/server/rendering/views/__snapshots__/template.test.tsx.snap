@@ -50,10 +50,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -201,10 +197,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -351,10 +343,6 @@ Array [
   <meta
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
-  />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
   />,
   null,
   <meta
@@ -509,10 +497,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -666,10 +650,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -817,10 +797,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -967,10 +943,6 @@ Array [
   <meta
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
-  />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
   />,
   null,
   <meta
@@ -1125,10 +1097,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -1276,10 +1244,6 @@ Array [
     content=""
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -1426,10 +1390,6 @@ Array [
   <meta
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
-  />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
   />,
   null,
   <meta
