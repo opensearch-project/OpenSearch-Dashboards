@@ -33,7 +33,7 @@ import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
-import { setupTopNavThemeButton, setupTopNavUserButton } from './account-app';
+import { setupTopNavThemeButton } from './register_nav_control';
 
 const component = new ComponentRegistry();
 
