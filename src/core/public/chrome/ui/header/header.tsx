@@ -233,10 +233,6 @@ export function Header({
                 <HeaderNavControls side="right" navControls$={observables.navControlsRight$} />
               </EuiHeaderSectionItem>
 
-              {/* <EuiHeaderSectionItem border="left">
-                <HeaderUserMenu />
-              </EuiHeaderSectionItem> */}
-
               <EuiHeaderSectionItem border="left">
                 <HeaderHelpMenu
                   helpExtension$={observables.helpExtension$}
