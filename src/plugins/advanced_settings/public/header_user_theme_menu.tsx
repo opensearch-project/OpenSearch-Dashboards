@@ -55,13 +55,19 @@ export const HeaderUserThemeMenu = () => {
       text: 'Use browser settings',
     },
   ];
+  const prefersAutomatic =
+    (window.localStorage.getItem('useBrowserColorScheme') && window.matchMedia) || false;
   const [darkMode, setDarkMode] = useUiSetting$<boolean>('theme:darkMode');
   const [themeVersion, setThemeVersion] = useUiSetting$<string>('theme:version');
   const [isPopoverOpen, setPopover] = useState(false);
   // TODO: improve naming?
   const [theme, setTheme] = useState(themeOptions.find((t) => t.text === themeVersion)?.value);
   const [screenMode, setScreenMode] = useState(
-    darkMode ? screenModeOptions[1].value : screenModeOptions[0].value
+    prefersAutomatic
+      ? screenModeOptions[2].value
+      : darkMode
+      ? screenModeOptions[1].value
+      : screenModeOptions[0].value
   );
   const allSettings = uiSettings.getAll();
   const defaultTheme = allSettings['theme:version'].value;
@@ -80,11 +86,23 @@ export const HeaderUserThemeMenu = () => {
   };
 
   const onAppearanceSubmit = async (e: SyntheticEvent) => {
+    const actions = [setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? '')];
+
+    if (screenMode === 'automatic') {
+      const browserMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      window.localStorage.setItem('useBrowserColorScheme', 'true');
+
+      if (browserMode !== darkMode) {
+        actions.push(setDarkMode(browserMode));
+      }
+    } else if ((screenMode === 'dark') !== darkMode) {
+      actions.push(setDarkMode(screenMode === 'dark'));
+      window.localStorage.removeItem('useBrowserColorScheme');
+    } else {
+      window.localStorage.removeItem('useBrowserColorScheme');
+    }
     // TODO: only set changed
-    await await Promise.all([
-      setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? ''),
-      setDarkMode(screenMode === 'dark'),
-    ]);
+    await await Promise.all([actions]);
     window.location.reload();
   };
 
