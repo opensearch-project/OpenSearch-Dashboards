@@ -59,9 +59,11 @@ describe('DataSourceManagement: Form Validation', () => {
       expect(result).toBe(false);
     });
     test('should NOT fail validation when endpoint path is empty', () => {
+      form.auth.type = AuthType.NoAuth;
+      form.title = 'test';
       form.endpoint = mockDataSourceAttributesWithValidEndpoint.endpoint;
       const result = performDataSourceFormValidation(form, [], '');
-      expect(result).toBe(false);
+      expect(result).toBe(true);
     });
     test('should NOT fail validation on empty username/password when  No Auth is selected', () => {
       form.auth.type = AuthType.NoAuth;
