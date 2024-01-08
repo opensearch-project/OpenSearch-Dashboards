@@ -50,11 +50,8 @@ describe('Datasource Management: Edit Datasource Form', () => {
   };
 
   const setAuthTypeValue = (testSubjId: string, value: string) => {
-    component.find(testSubjId).last().simulate('change', {
-      target: {
-        value,
-      },
-    });
+    component.find(testSubjId).last().simulate('click');
+    component.find({ id: value }).last().simulate('click');
   };
 
   describe('Case 1: With Username & Password', () => {
