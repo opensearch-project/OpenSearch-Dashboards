@@ -6,11 +6,11 @@
 import { CoreSetup, OnPreResponseHandler, OpenSearchClient } from '../../../core/server';
 import { CspClient } from './types';
 
-const OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME = '.opensearch_dashboards_config';
 const OPENSEARCH_DASHBOARDS_CONFIG_DOCUMENT_NAME = 'csp.rules';
 
 export function createCspRulesPreResponseHandler(
   core: CoreSetup,
+  dynamicConfigIndex: string,
   getCspClient: (inputOpenSearchClient: OpenSearchClient) => CspClient
 ): OnPreResponseHandler {
   return async (request, response, toolkit) => {
@@ -26,14 +26,14 @@ export function createCspRulesPreResponseHandler(
 
     const myClient = getCspClient(coreStart.opensearch.client.asInternalUser);
 
-    const existsValue = await myClient.exists(OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME);
+    const existsValue = await myClient.exists(dynamicConfigIndex);
 
     if (!existsValue) {
       return toolkit.next({});
     }
 
     const cspRules = await myClient.get(
-      OPENSEARCH_DASHBOARDS_CONFIG_INDEX_NAME,
+      dynamicConfigIndex,
       OPENSEARCH_DASHBOARDS_CONFIG_DOCUMENT_NAME
     );
 

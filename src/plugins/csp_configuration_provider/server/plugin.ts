@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -10,6 +12,7 @@ import {
   OpenSearchClient,
   Plugin,
   PluginInitializerContext,
+  SharedGlobalConfig,
 } from '../../../core/server';
 
 import { createCspRulesPreResponseHandler } from './csp_handlers';
@@ -24,10 +27,12 @@ import {
 export class CspConfigurationProviderPlugin
   implements Plugin<CspConfigurationProviderPluginSetup, CspConfigurationProviderPluginStart> {
   private readonly logger: Logger;
+  private readonly config$: Observable<SharedGlobalConfig>;
   private cspClient: CspClient | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config$ = initializerContext.config.legacy.globalConfig$;
   }
 
   private setCspClient(inputCspClient: CspClient) {
@@ -44,15 +49,21 @@ export class CspConfigurationProviderPlugin
     return this.cspClient;
   }
 
-  public setup(core: CoreSetup) {
+  public async setup(core: CoreSetup) {
     this.logger.debug('CspConfigurationProvider: Setup');
     const router = core.http.createRouter();
 
     // Register server side APIs
     defineRoutes(router);
 
+    const config = await this.config$.pipe(first()).toPromise();
+
     core.http.registerOnPreResponse(
-      createCspRulesPreResponseHandler(core, this.getCspClient.bind(this))
+      createCspRulesPreResponseHandler(
+        core,
+        config.opensearchDashboards.dynamic_config_index,
+        this.getCspClient.bind(this)
+      )
     );
 
     return {

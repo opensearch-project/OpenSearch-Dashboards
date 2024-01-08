@@ -30,6 +30,8 @@ const forgeRequest = ({
   });
 };
 
+const DEFAULT_DYNAMIC_CONFIG_INDEX = '.opensearch_dashboards_config';
+
 describe('CSP handlers', () => {
   let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
 
@@ -49,7 +51,11 @@ describe('CSP handlers', () => {
 
     const getCspClient = jest.fn().mockReturnValue(cspClient);
 
-    const handler = createCspRulesPreResponseHandler(coreSetup, getCspClient);
+    const handler = createCspRulesPreResponseHandler(
+      coreSetup,
+      DEFAULT_DYNAMIC_CONFIG_INDEX,
+      getCspClient
+    );
     const request = forgeRequest({ method: 'get', headers: { 'sec-fetch-dest': 'document' } });
 
     toolkit.next.mockReturnValue('next' as any);
@@ -81,7 +87,11 @@ describe('CSP handlers', () => {
 
     const getCspClient = jest.fn().mockReturnValue(cspClient);
 
-    const handler = createCspRulesPreResponseHandler(coreSetup, getCspClient);
+    const handler = createCspRulesPreResponseHandler(
+      coreSetup,
+      DEFAULT_DYNAMIC_CONFIG_INDEX,
+      getCspClient
+    );
     const request = forgeRequest({ method: 'get', headers: { 'sec-fetch-dest': 'document' } });
 
     toolkit.next.mockReturnValue('next' as any);
@@ -107,7 +117,11 @@ describe('CSP handlers', () => {
 
     const getCspClient = jest.fn().mockReturnValue(cspClient);
 
-    const handler = createCspRulesPreResponseHandler(coreSetup, getCspClient);
+    const handler = createCspRulesPreResponseHandler(
+      coreSetup,
+      DEFAULT_DYNAMIC_CONFIG_INDEX,
+      getCspClient
+    );
     const request = forgeRequest({ method: 'get', headers: { 'sec-fetch-dest': 'document' } });
 
     toolkit.next.mockReturnValue('next' as any);
@@ -133,7 +147,11 @@ describe('CSP handlers', () => {
 
     const getCspClient = jest.fn().mockReturnValue(cspClient);
 
-    const handler = createCspRulesPreResponseHandler(coreSetup, getCspClient);
+    const handler = createCspRulesPreResponseHandler(
+      coreSetup,
+      DEFAULT_DYNAMIC_CONFIG_INDEX,
+      getCspClient
+    );
 
     const cssSecFetchDest = 'css';
     const request = forgeRequest({ method: 'get', headers: { 'sec-fetch-dest': cssSecFetchDest } });
@@ -161,7 +179,11 @@ describe('CSP handlers', () => {
 
     const getCspClient = jest.fn().mockReturnValue(cspClient);
 
-    const handler = createCspRulesPreResponseHandler(coreSetup, getCspClient);
+    const handler = createCspRulesPreResponseHandler(
+      coreSetup,
+      DEFAULT_DYNAMIC_CONFIG_INDEX,
+      getCspClient
+    );
 
     const request = forgeRequest({ method: 'get', headers: {} });
 
