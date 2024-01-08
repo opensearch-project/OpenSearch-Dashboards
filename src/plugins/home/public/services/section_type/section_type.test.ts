@@ -21,6 +21,20 @@ describe('SectionTypeService', () => {
       }).not.toThrow();
     });
 
+    test('throws if registering hero section with same id', () => {
+      const setup = new SectionTypeService().setup();
+      expect(() => {
+        setup.registerHeroSection({
+          id: 'foo',
+          render: () => () => {},
+        });
+        setup.registerHeroSection({
+          id: 'foo',
+          render: () => () => {},
+        });
+      }).toThrowErrorMatchingInlineSnapshot(`"Hero section with id 'foo' already exists."`);
+    });
+
     test('supports registering sections', () => {
       const setup = new SectionTypeService().setup();
       expect(() => {
@@ -35,6 +49,22 @@ describe('SectionTypeService', () => {
           render: () => () => {},
         });
       }).not.toThrow();
+    });
+
+    test('throws if registering section with same id', () => {
+      const setup = new SectionTypeService().setup();
+      expect(() => {
+        setup.registerSection({
+          id: 'foo',
+          title: 'Foo',
+          render: () => () => {},
+        });
+        setup.registerSection({
+          id: 'foo',
+          title: 'Foo',
+          render: () => () => {},
+        });
+      }).toThrowErrorMatchingInlineSnapshot(`"Section with id 'foo' already exists."`);
     });
   });
 });
