@@ -48,11 +48,11 @@ import { InternalOpenSearchServiceSetup, InternalOpenSearchServiceStart } from '
 import { pollOpenSearchNodesVersion } from './version_check/ensure_opensearch_version';
 import { calculateStatus$ } from './status';
 
-interface SetupDeps {
+export interface SetupDeps {
   http: InternalHttpServiceSetup;
 }
 
-interface StartDeps {
+export interface StartDeps {
   auditTrail: AuditTrailStart;
 }
 
