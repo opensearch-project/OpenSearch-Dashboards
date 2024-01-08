@@ -34,7 +34,7 @@ import { shallow } from 'enzyme';
 import { Home } from './home';
 import { NewThemeModal } from './new_theme_modal';
 
-import { FeatureCatalogueCategory } from '../../services/feature_catalogue';
+import { FeatureCatalogueCategory } from '../../services';
 
 const mockHomeConfig = jest.fn();
 const mockUiSettings = jest.fn();
@@ -59,6 +59,7 @@ jest.mock('../opensearch_dashboards_services', () => ({
 jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   OverviewPageHeader: jest.fn().mockReturnValue(<></>),
+  withOpenSearchDashboards: jest.fn((component) => component),
 }));
 
 describe('home', () => {
