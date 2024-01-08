@@ -34,7 +34,7 @@ import { shallow } from 'enzyme';
 import { Home } from './home';
 import { NewThemeModal } from './new_theme_modal';
 
-import { FeatureCatalogueCategory } from '../../services';
+import { FeatureCatalogueCategory } from '../../services/feature_catalogue';
 
 const mockHomeConfig = jest.fn();
 const mockUiSettings = jest.fn();

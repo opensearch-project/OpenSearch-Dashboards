@@ -38,7 +38,7 @@ import {
   OverviewPageHeader,
 } from '../../../../../../src/plugins/opensearch_dashboards_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
-import { FeatureCatalogueCategory } from '../../services';
+import { FeatureCatalogueCategory } from '../../services/feature_catalogue';
 import { getServices } from '../opensearch_dashboards_services';
 import { AddData } from './add_data';
 import { ManageData } from './manage_data';
