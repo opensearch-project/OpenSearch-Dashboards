@@ -62,8 +62,6 @@ import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
 
-import { renderFn } from './testing';
-
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   telemetry?: TelemetryPluginStart;
@@ -158,16 +156,6 @@ export class HomePublicPlugin
     });
 
     const sectionTypes = { ...this.sectionTypeService.setup() };
-
-    // TODO: register base section types
-    sectionTypes.registerHeroSection({ id: 'hello:world', render: renderFn });
-    sectionTypes.registerSection({
-      id: 'hello:world',
-      title: 'Hello world!',
-      description: 'This is a description',
-      links: [{ label: 'Link', url: 'https://google.com' }],
-      render: renderFn,
-    });
 
     sectionTypes.registerSection(workWithDataSection);
     sectionTypes.registerSection(learnBasicsSection);

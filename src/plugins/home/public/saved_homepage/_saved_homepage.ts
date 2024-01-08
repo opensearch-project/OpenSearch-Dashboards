@@ -43,7 +43,7 @@ export function createSavedHomepageClass(services: SavedObjectOpenSearchDashboar
         mapping: SavedHomepage.mapping,
         id: (opts.id as string) || '',
         defaults: {
-          heros: [{ id: 'hello:world' }],
+          heros: [],
           sections: [{ id: 'home:workWithData' }, { id: 'home:learnBasics' }],
         },
       });
