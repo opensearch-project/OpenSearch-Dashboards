@@ -76,12 +76,14 @@ describe('SectionTypeService', () => {
 
     test('returns registered hero sections', () => {
       const sectionTypeService = new SectionTypeService();
+      const setup = sectionTypeService.setup();
 
-      sectionTypeService.setup().registerHeroSection({
+      setup.registerHeroSection({
         id: 'foo',
         render: () => () => {},
       });
-      sectionTypeService.setup().registerHeroSection({
+
+      setup.registerHeroSection({
         id: 'bar',
         render: () => () => {},
       });
@@ -101,13 +103,15 @@ describe('SectionTypeService', () => {
 
     test('returns registered sections', () => {
       const sectionTypeService = new SectionTypeService();
+      const setup = sectionTypeService.setup();
 
-      sectionTypeService.setup().registerSection({
+      setup.registerSection({
         id: 'foo',
         title: 'Foo',
         render: () => () => {},
       });
-      sectionTypeService.setup().registerSection({
+
+      setup.registerSection({
         id: 'bar',
         title: 'Bar',
         render: () => () => {},
