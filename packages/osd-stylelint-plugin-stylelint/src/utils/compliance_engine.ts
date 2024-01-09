@@ -18,6 +18,12 @@ export interface ComplianceRule {
   message: string;
 }
 
+/**
+ * Retrieves a specific rule from the provided rules based on the node information.
+ * @param rules - The ValueBasedConfig containing rules.
+ * @param nodeInfo - The information about the node (selector and prop).
+ * @returns The specific rule if found, otherwise undefined.
+ */
 const getRule = (rules: ValueBasedConfig, nodeInfo: { selector: string; prop: string }) => {
   const rule = rules[nodeInfo.prop];
   if (!rule) {
@@ -40,10 +46,22 @@ const getRule = (rules: ValueBasedConfig, nodeInfo: { selector: string; prop: st
   return rule[ruleKey];
 };
 
+/**
+ * Checks if the specified node is tracked based on the provided rules.
+ * @param rules - The ValueBasedConfig containing rules.
+ * @param nodeInfo - The information about the node (selector and prop).
+ * @returns True if the node is tracked, otherwise false.
+ */
 const isTracked = (rules: ValueBasedConfig, nodeInfo: { selector: string; prop: string }) => {
   return getRule(rules, nodeInfo) !== undefined;
 };
 
+/**
+ * Retrieves the compliance rule for the specified node and value.
+ * @param rules - The ValueBasedConfig containing rules.
+ * @param nodeInfo - The information about the node (selector, prop, and value).
+ * @returns The ComplianceRule object if a rule is found, otherwise undefined.
+ */
 const getComplianceRule = (
   rules: ValueBasedConfig,
   nodeInfo: { selector: string; prop: string; value: string }
