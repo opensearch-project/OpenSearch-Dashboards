@@ -89,6 +89,7 @@
     "**/async": "^3.2.3",
     "**/d3-color": "^3.1.0",
     "**/elasticsearch/agentkeepalive": "^4.5.0",
+    "**/follow-redirects": "^1.15.4",
     "**/glob-parent": "^6.0.0",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/json-schema": "^0.4.0",
