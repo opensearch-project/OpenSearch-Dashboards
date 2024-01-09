@@ -17,7 +17,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
-  EuiSelect,
+  EuiSuperSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -166,8 +166,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
-  onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const authType = e.target.value as AuthType;
+  onChangeAuthType = (authType: AuthType) => {
     this.setState(
       {
         auth: {
@@ -241,13 +240,13 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
-  onChangeSigV4ServiceName = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  onChangeSigV4ServiceName = (service: SigV4ServiceName) => {
     this.setState({
       auth: {
         ...this.state.auth,
         credentials: {
           ...this.state.auth.credentials,
-          service: e.target.value as SigV4ServiceName,
+          service,
         } as SigV4Content,
       },
     });
@@ -772,9 +771,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             defaultMessage: 'Credential',
           })}
         >
-          <EuiSelect
+          <EuiSuperSelect
             options={credentialSourceOptions}
-            value={this.state.auth.type}
+            valueOfSelected={this.state.auth.type}
             onChange={this.onChangeAuthType}
             name="Credential"
             data-test-subj="editDataSourceSelectAuthType"
@@ -827,10 +826,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             defaultMessage: 'Service Name',
           })}
         >
-          <EuiSelect
+          <EuiSuperSelect
             options={sigV4ServiceOptions}
-            value={this.state.auth.credentials?.service}
-            onChange={(e) => this.onChangeSigV4ServiceName(e)}
+            valueOfSelected={this.state.auth.credentials?.service}
+            onChange={(value) => this.onChangeSigV4ServiceName(value)}
             name="ServiceName"
             data-test-subj="editDataSourceFormSigV4ServiceTypeSelect"
           />
