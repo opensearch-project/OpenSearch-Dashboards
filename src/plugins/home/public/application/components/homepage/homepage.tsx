@@ -7,11 +7,12 @@ import React, { useState, useEffect } from 'react';
 import { useMount } from 'react-use';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiPageTemplate, EuiButtonEmpty } from '@elastic/eui';
+import { EuiPageTemplate, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { Homepage as HomepageType } from '../../../services/section_type/section_type';
 import { getServices } from '../../opensearch_dashboards_services';
 import { HeroSection } from './hero_section';
 import { Section } from './section';
+import { Footer } from './footer';
 
 export const Homepage = () => {
   const { sectionTypes, application, chrome } = getServices();
@@ -84,6 +85,8 @@ export const Homepage = () => {
       {homepage!.sections.map(({ render, title, description, links }, i) => (
         <Section key={i} title={title} description={description} links={links} render={render} />
       ))}
+      <EuiHorizontalRule />
+      <Footer />
     </EuiPageTemplate>
   );
 };
