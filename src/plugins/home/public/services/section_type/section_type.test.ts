@@ -4,6 +4,8 @@
  */
 
 import { SectionTypeService } from './section_type';
+import { coreMock } from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../../../data/public/mocks';
 
 describe('SectionTypeService', () => {
   describe('setup', () => {
@@ -65,6 +67,34 @@ describe('SectionTypeService', () => {
           render: () => () => {},
         });
       }).toThrowErrorMatchingInlineSnapshot(`"Section with id 'foo' already exists."`);
+    });
+  });
+
+  describe('getHomepage', () => {
+    test('throws if start not called', async () => {
+      const sectionTypeService = new SectionTypeService();
+      await expect(sectionTypeService.getHomepage()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"SectionTypeService has not been started yet."`
+      );
+    });
+
+    test('returns empty homepage if no sections registered', async () => {
+      const core = coreMock.createStart();
+      const data = dataPluginMock.createStartContract();
+
+      // mock saved object client find in the core contract
+      core.savedObjects.client.find = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve({ savedObjects: [], totoal: 0 }));
+
+      // mock saved object client create in the core contract
+      core.savedObjects.client.create = jest.fn().mockResolvedValue(Promise.resolve({ id: '1' }));
+
+      const sectionTypeService = new SectionTypeService();
+      sectionTypeService.start({ core, data });
+
+      const homepage = sectionTypeService.getHomepage();
+      await expect(homepage).resolves.toEqual({ heroes: [], sections: [] });
     });
   });
 
