@@ -82,12 +82,10 @@ describe('SectionTypeService', () => {
       const core = coreMock.createStart();
       const data = dataPluginMock.createStartContract();
 
-      // mock saved object client find in the core contract
       core.savedObjects.client.find = jest
         .fn()
         .mockResolvedValue(Promise.resolve({ savedObjects: [], totoal: 0 }));
 
-      // mock saved object client create in the core contract
       core.savedObjects.client.create = jest.fn().mockResolvedValue(Promise.resolve({ id: '1' }));
 
       const sectionTypeService = new SectionTypeService();
