@@ -11,7 +11,7 @@
   "dependencies": {
     "@elastic/charts": "31.1.0",
     "@elastic/eui": "npm:@opensearch-project/oui@1.4.0",
-    "@elastic/numeral": "^2.5.0",
+    "@elastic/numeral": "npm:@amoo-miki/numeral@2.6.0",
     "@opensearch/datemath": "5.0.3",
     "@osd/i18n": "1.0.0",
     "@osd/monaco": "1.0.0",
@@ -52,3 +52,4 @@
     "webpack": "npm:@amoo-miki/webpack@4.46.0-rc.2"
   }
 }
+
