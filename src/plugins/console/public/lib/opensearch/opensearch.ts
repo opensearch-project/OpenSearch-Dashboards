@@ -57,7 +57,7 @@ export async function send(
     body: data,
     prependBasePath: true,
     asResponse: true,
-    withLongNumerals: true,
+    withLongNumeralsSupport: true,
   });
 }
 
