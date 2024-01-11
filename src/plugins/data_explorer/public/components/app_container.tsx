@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiPage, EuiPageBody, EuiResizableContainer } from '@elastic/eui';
 import { Suspense } from 'react';
 import { AppMountParameters } from '../../../../core/public';
@@ -20,6 +20,9 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
 
   const { Canvas, Panel, Context } = view;
 
+  const MemoizedPanel = memo(Panel);
+  const MemoizedCanvas = memo(Canvas);
+
   // Render the application DOM.
   return (
     <EuiPage className="deLayout" paddingSize="none">
@@ -31,14 +34,14 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
               <>
                 <EuiResizablePanel initialSize={140} minSize="10%" mode="collapsible">
                   <Sidebar>
-                    <Panel {...params} />
+                    <MemoizedPanel {...params} />
                   </Sidebar>
                 </EuiResizablePanel>
                 <EuiResizableButton />
 
                 <EuiResizablePanel initialSize={1140} minSize="65%" mode="main">
                   <EuiPageBody className="deLayout__canvas">
-                    <Canvas {...params} />
+                    <MemoizedCanvas {...params} />
                   </EuiPageBody>
                 </EuiResizablePanel>
               </>

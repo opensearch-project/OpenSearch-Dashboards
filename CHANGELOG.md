@@ -964,3 +964,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🔩 Tests
 
 - Update caniuse to fix failed integration tests ([#2322](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2322))
+
+### 📈 Features/Enhancements
+
+- Discover page collapsible panels ([#5635](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5635))

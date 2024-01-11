@@ -3,7 +3,6 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 .deSidebar {
   max-width: 620px;
   min-width: 180px;
-  top: 0;
   height: 100%;
 
   @include ouiBreakpoint("xs", "s", "m") {
