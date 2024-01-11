@@ -33,6 +33,7 @@ import { IUiSettingsClient } from '../ui_settings';
 import { OverlayBannersStart, OverlayBannersService } from './banners';
 import { FlyoutService, OverlayFlyoutStart } from './flyout';
 import { ModalService, OverlayModalStart } from './modal';
+import { SidecarService, OverlaySidecarStart } from './sidecar';
 
 interface StartDeps {
   i18n: I18nStart;
@@ -45,6 +46,7 @@ export class OverlayService {
   private bannersService = new OverlayBannersService();
   private modalService = new ModalService();
   private flyoutService = new FlyoutService();
+  private sidecarService = new SidecarService();
 
   public start({ i18n, targetDomElement, uiSettings }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
@@ -56,12 +58,19 @@ export class OverlayService {
     const modalElement = document.createElement('div');
     targetDomElement.appendChild(modalElement);
     const modals = this.modalService.start({ i18n, targetDomElement: modalElement });
+    const sidecarElement = document.createElement('div');
+    targetDomElement.appendChild(sidecarElement);
+    const sidecars = this.sidecarService.start({
+      i18n,
+      targetDomElement: sidecarElement,
+    });
 
     return {
       banners,
       openFlyout: flyouts.open.bind(flyouts),
       openModal: modals.open.bind(modals),
       openConfirm: modals.openConfirm.bind(modals),
+      sidecar: sidecars,
     };
   }
 }
@@ -76,4 +85,6 @@ export interface OverlayStart {
   openModal: OverlayModalStart['open'];
   /** {@link OverlayModalStart#openConfirm} */
   openConfirm: OverlayModalStart['openConfirm'];
+  /** {@link OverlaySidecarStart#open} */
+  sidecar: OverlaySidecarStart;
 }
