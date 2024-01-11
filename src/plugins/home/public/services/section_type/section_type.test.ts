@@ -70,6 +70,18 @@ describe('SectionTypeService', () => {
     });
   });
 
+  describe('start', () => {
+    test('initializes savedHomepageLoader', () => {
+      const core = coreMock.createStart();
+      const data = dataPluginMock.createStartContract();
+
+      const sectionTypeService = new SectionTypeService();
+      sectionTypeService.start({ core, data });
+
+      expect(sectionTypeService.getSavedHomepageLoader()).toBeDefined();
+    });
+  });
+
   describe('getHomepage', () => {
     test('throws if start not called', async () => {
       const sectionTypeService = new SectionTypeService();
@@ -93,6 +105,151 @@ describe('SectionTypeService', () => {
 
       const homepage = sectionTypeService.getHomepage();
       await expect(homepage).resolves.toEqual({ heroes: [], sections: [] });
+    });
+
+    test('returns homepage with registered sections', async () => {
+      const core = coreMock.createStart();
+      const data = dataPluginMock.createStartContract();
+
+      const savedHomepage = {
+        id: '1',
+        attributes: {
+          heros: [],
+          sections: [{ id: 'foo' }, { id: 'bar' }],
+        },
+      };
+
+      core.savedObjects.client.find = jest.fn().mockResolvedValue(
+        Promise.resolve({
+          savedObjects: [savedHomepage],
+          total: 1,
+        })
+      );
+
+      core.savedObjects.client.create = jest.fn().mockResolvedValue(Promise.resolve({ id: '1' }));
+
+      core.savedObjects.client.get = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve({ ...savedHomepage, _version: 1 }));
+
+      const sectionTypeService = new SectionTypeService();
+      const setup = sectionTypeService.setup();
+
+      setup.registerSection({
+        id: 'foo',
+        title: 'Foo',
+        render: () => () => {},
+      });
+      setup.registerSection({
+        id: 'bar',
+        title: 'Bar',
+        render: () => () => {},
+      });
+
+      sectionTypeService.start({ core, data });
+
+      const homepage = sectionTypeService.getHomepage();
+      await expect(homepage).resolves.toEqual({
+        heroes: [],
+        sections: [
+          { id: 'foo', title: 'Foo', render: expect.any(Function) },
+          { id: 'bar', title: 'Bar', render: expect.any(Function) },
+        ],
+      });
+    });
+
+    test('returns homepage with multiple existing homepages', async () => {
+      const core = coreMock.createStart();
+      const data = dataPluginMock.createStartContract();
+
+      const savedHomepage = {
+        id: '1',
+        attributes: {
+          heros: [],
+          sections: [{ id: 'foo' }, { id: 'bar' }],
+        },
+      };
+
+      core.savedObjects.client.find = jest.fn().mockResolvedValue(
+        Promise.resolve({
+          savedObjects: [savedHomepage, { id: '2', attributes: { heros: [], sections: [] } }],
+          total: 2,
+        })
+      );
+
+      core.savedObjects.client.create = jest.fn().mockResolvedValue(Promise.resolve({ id: '1' }));
+
+      core.savedObjects.client.get = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve({ ...savedHomepage, _version: 1 }));
+
+      const sectionTypeService = new SectionTypeService();
+      const setup = sectionTypeService.setup();
+
+      setup.registerSection({
+        id: 'foo',
+        title: 'Foo',
+        render: () => () => {},
+      });
+      setup.registerSection({
+        id: 'bar',
+        title: 'Bar',
+        render: () => () => {},
+      });
+
+      sectionTypeService.start({ core, data });
+
+      const homepage = sectionTypeService.getHomepage();
+      await expect(homepage).resolves.toEqual({
+        heroes: [],
+        sections: [
+          { id: 'foo', title: 'Foo', render: expect.any(Function) },
+          { id: 'bar', title: 'Bar', render: expect.any(Function) },
+        ],
+      });
+    });
+
+    test('filters out sections that are no longer registered', async () => {
+      const core = coreMock.createStart();
+      const data = dataPluginMock.createStartContract();
+
+      const savedHomepage = {
+        id: '1',
+        attributes: {
+          heros: [],
+          sections: [{ id: 'foo' }, { id: 'bar' }],
+        },
+      };
+
+      core.savedObjects.client.find = jest.fn().mockResolvedValue(
+        Promise.resolve({
+          savedObjects: [savedHomepage],
+          total: 1,
+        })
+      );
+
+      core.savedObjects.client.create = jest.fn().mockResolvedValue(Promise.resolve({ id: '1' }));
+
+      core.savedObjects.client.get = jest
+        .fn()
+        .mockResolvedValue(Promise.resolve({ ...savedHomepage, _version: 1 }));
+
+      const sectionTypeService = new SectionTypeService();
+      const setup = sectionTypeService.setup();
+
+      setup.registerSection({
+        id: 'foo',
+        title: 'Foo',
+        render: () => () => {},
+      });
+
+      sectionTypeService.start({ core, data });
+
+      const homepage = sectionTypeService.getHomepage();
+      await expect(homepage).resolves.toEqual({
+        heroes: [],
+        sections: [{ id: 'foo', title: 'Foo', render: expect.any(Function) }],
+      });
     });
   });
 
@@ -149,6 +306,15 @@ describe('SectionTypeService', () => {
         { id: 'foo', title: 'Foo', render: expect.any(Function) },
         { id: 'bar', title: 'Bar', render: expect.any(Function) },
       ]);
+    });
+  });
+
+  describe('getSavedHomepageLoader', () => {
+    test('throws if start not called', () => {
+      const sectionTypeService = new SectionTypeService();
+      expect(() => sectionTypeService.getSavedHomepageLoader()).toThrowErrorMatchingInlineSnapshot(
+        `"SectionTypeService has not been started yet."`
+      );
     });
   });
 });
