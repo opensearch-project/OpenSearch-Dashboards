@@ -14,7 +14,7 @@ interface Props {
 
 export const HeroSection: FC<Props> = ({ render }) => {
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj="homepageHeroSection">
       <LazyRender render={render} />
     </EuiPanel>
   );

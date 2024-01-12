@@ -37,7 +37,7 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
 
   const memoizedContent = useMemo(
     () => (
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction="row" data-test-subj="homepageSectionContent">
         {hasDescriptionSection && (
           <EuiFlexItem grow={1}>
             <EuiText>{description}</EuiText>
@@ -59,7 +59,12 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
   );
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      color="transparent"
+      data-test-subj="homepageSection"
+    >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
