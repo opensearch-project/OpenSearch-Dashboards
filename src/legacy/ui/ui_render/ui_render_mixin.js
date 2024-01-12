@@ -120,7 +120,6 @@ export function uiRenderMixin(osdServer, server, config) {
               themeVersion === 'v7'
                 ? `${basePath}/node_modules/@osd/ui-framework/dist/kui_dark.css`
                 : `${basePath}/node_modules/@osd/ui-framework/dist/kui_next_dark.css`,
-              `${basePath}/ui/legacy_dark_theme.css`,
             ]
           : [
               themeVersion === 'v7'
@@ -129,7 +128,6 @@ export function uiRenderMixin(osdServer, server, config) {
               themeVersion === 'v7'
                 ? `${basePath}/node_modules/@osd/ui-framework/dist/kui_light.css`
                 : `${basePath}/node_modules/@osd/ui-framework/dist/kui_next_light.css`,
-              `${basePath}/ui/legacy_light_theme.css`,
             ]),
       ];
 
