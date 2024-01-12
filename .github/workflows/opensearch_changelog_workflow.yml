@@ -1,4 +1,4 @@
-name: Parse Changelog
+name: OpenSearch Changelog Workflow
 
 on:
   pull_request_target:
