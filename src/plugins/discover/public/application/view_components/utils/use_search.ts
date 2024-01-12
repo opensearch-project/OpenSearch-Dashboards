@@ -156,6 +156,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       // Execute the search
       const fetchResp = await searchSource.fetch({
         abortSignal: fetchStateRef.current.abortController.signal,
+        withLongNumeralsSupport: true,
       });
 
       inspectorRequest
