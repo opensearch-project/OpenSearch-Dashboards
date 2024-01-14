@@ -20,3 +20,5 @@ jobs:
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           changeset_path: changelogs/fragments
+          GH_APP_DOMAIN: ${{secrets.GH_APP_DOMAIN}}
+          CHANGELOG_PR_BRIDGE_SECRET_KEY: ${{secrets.CHANGELOG_PR_BRIDGE_SECRET_KEY}}
