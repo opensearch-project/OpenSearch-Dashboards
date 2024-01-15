@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { MouseEvent, useCallback, TouchEvent, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import classNames from 'classnames';
 import './rsizable_button.scss';
 import { getPosition } from './helper';
@@ -34,33 +34,28 @@ export const ResizableButton = ({
 
   const initialMouseXorY = useRef(0);
   const initialFlyoutSize = useRef(flyoutSize);
-  const setFocus = (e: MouseEvent<HTMLButtonElement>) => e.currentTarget.focus();
-
-  const onMouseMove = useCallback(
-    (event) => {
-      let offset;
-      if (dockedDirection === 'left') {
-        offset = getPosition(event, isHorizontal) - initialMouseXorY.current;
-      } else {
-        offset = initialMouseXorY.current - getPosition(event, isHorizontal);
-      }
-      const newFlyoutSize = initialFlyoutSize.current + offset;
-
-      onResize(Math.max(newFlyoutSize, minSize));
-    },
-    [isHorizontal, dockedDirection, minSize, onResize]
-  );
-
-  const onMouseUp = useCallback(() => {
-    initialMouseXorY.current = 0;
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-    window.removeEventListener('touchmove', onMouseMove);
-    window.removeEventListener('touchend', onMouseUp);
-  }, [onMouseMove]);
+  const setFocus = (e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.focus();
 
   const onMouseDown = useCallback(
-    (event: MouseEvent | TouchEvent) => {
+    (event: React.MouseEvent | React.TouchEvent) => {
+      const onMouseUp = () => {
+        initialMouseXorY.current = 0;
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        window.removeEventListener('touchmove', onMouseMove);
+        window.removeEventListener('touchend', onMouseUp);
+      };
+      const onMouseMove = (e: MouseEvent | TouchEvent) => {
+        let offset;
+        if (dockedDirection === 'left') {
+          offset = getPosition(e, isHorizontal) - initialMouseXorY.current;
+        } else {
+          offset = initialMouseXorY.current - getPosition(e, isHorizontal);
+        }
+        const newFlyoutSize = initialFlyoutSize.current + offset;
+
+        onResize(Math.max(newFlyoutSize, minSize));
+      };
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);
       window.addEventListener('touchmove', onMouseMove);
@@ -68,7 +63,7 @@ export const ResizableButton = ({
       initialMouseXorY.current = getPosition(event, isHorizontal);
       initialFlyoutSize.current = flyoutSize;
     },
-    [isHorizontal, flyoutSize, onMouseMove, onMouseUp]
+    [isHorizontal, flyoutSize, dockedDirection, minSize, onResize]
   );
 
   return (
