@@ -11,15 +11,15 @@
   display: flex;
 
   &.osdSidecarFlyout--dockedRight {
-    top: 0 !important;
-    height: 100vh !important;
+    top: 0;
+    height: 100vh;
     right: 0;
     flex-direction: row;
   }
 
   &.osdSidecarFlyout--dockedLeft {
-    top: 0 !important;
-    height: 100vh !important;
+    top: 0;
+    height: 100vh;
     left: 0;
     flex-direction: row-reverse;
   }
@@ -36,5 +36,6 @@
 
   .osdSidecarMountWrapper {
     width: 100%;
+    height: 100%;
   }
 }
