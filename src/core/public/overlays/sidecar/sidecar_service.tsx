@@ -4,20 +4,16 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import classNames from 'classnames';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
-import { MountWrapper } from '../../utils';
 import './sidecar_service.scss';
-import { ResizableButton } from './resizable_button';
 import { OverlayRef } from '../types';
-
+import { Sidecar } from './sidecar';
 /**
  * A SidecarRef is a reference to an opened sidecar panel. It offers methods to
  * close the sidecar panel again. If you open a sidecar panel you should make
@@ -140,7 +136,6 @@ export class SidecarService {
         if (this.activeSidecar) {
           setSidecarConfig({ paddingSize: 0 });
           this.activeSidecar.close();
-          this.cleanupDom();
         }
 
         const sidecar = new SidecarRef();
@@ -149,60 +144,24 @@ export class SidecarService {
         // If a sidecar gets closed through it's SidecarRef, remove it from the dom
         sidecar.onClose.then(() => {
           if (this.activeSidecar === sidecar) {
-            setSidecarConfig({ paddingSize: 0 });
             this.cleanupDom();
           }
         });
 
-        const Sidecar = () => {
-          const sidecarConfig = useObservable(sidecarConfig$, undefined);
-
-          const classes = classNames(
-            'osdSidecarFlyout',
-            {
-              'osdSidecarFlyout--dockedRight': sidecarConfig?.dockedDirection === 'right',
-              'osdSidecarFlyout--dockedLeft': sidecarConfig?.dockedDirection === 'left',
-              'osdSidecarFlyout--dockedBottom': sidecarConfig?.dockedDirection === 'bottom',
-              'osdSidecarFlyout--hide': sidecarConfig?.isHidden === true,
-            },
-            options.className
-          );
-          const handleResize = (newSize: number) => {
-            setSidecarConfig({
-              paddingSize: newSize,
-            });
-          };
-
-          const flyoutSizeStyle = useMemo(
-            () =>
-              sidecarConfig?.dockedDirection === 'bottom'
-                ? {
-                    height: sidecarConfig?.paddingSize,
-                  }
-                : {
-                    width: sidecarConfig?.paddingSize,
-                  },
-            [sidecarConfig]
-          );
-
-          return (
-            <i18n.Context>
-              <div {...options} style={flyoutSizeStyle} className={classes}>
-                <ResizableButton
-                  isHorizontal={sidecarConfig?.dockedDirection !== 'bottom'}
-                  onResize={handleResize}
-                  dockedDirection={sidecarConfig?.dockedDirection}
-                  flyoutSize={sidecarConfig?.paddingSize ?? 0}
-                  minSize={sidecarConfig?.minSize}
-                />
-                <MountWrapper mount={mount} className="osdSidecarMountWrapper" />
-              </div>
-            </i18n.Context>
-          );
-        };
         this.activeSidecar = sidecar;
 
-        render(React.createElement(Sidecar), this.targetDomElement);
+        render(
+          React.createElement(() => (
+            <Sidecar
+              sidecarConfig$={sidecarConfig$}
+              setSidecarConfig={setSidecarConfig}
+              options={options}
+              i18n={i18n}
+              mount={mount}
+            />
+          )),
+          this.targetDomElement
+        );
 
         return sidecar;
       },

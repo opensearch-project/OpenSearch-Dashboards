@@ -23,7 +23,7 @@ export const getOsdSidecarPaddingStyle = (config: ISidecarConfig | undefined) =>
   ) {
     const { dockedDirection, paddingSize } = config;
     return {
-      [`padding-${dockedDirection}`]: paddingSize,
+      [`padding${dockedDirection === 'left' ? 'Left' : 'Right'}`]: paddingSize,
     };
   }
   return {};
