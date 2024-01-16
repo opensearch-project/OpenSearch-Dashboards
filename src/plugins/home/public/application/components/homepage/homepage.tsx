@@ -5,28 +5,49 @@
 
 import React, { useState, useEffect } from 'react';
 import { useMount } from 'react-use';
+import { Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiPageTemplate, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
-import { Homepage as HomepageType } from '../../../services/section_type/section_type';
+import {
+  HeroSection as HeroSectionType,
+  Section as SectionType,
+} from '../../../services/section_type/section_type';
 import { getServices } from '../../opensearch_dashboards_services';
 import { HeroSection } from './hero_section';
 import { Section } from './section';
 import { Footer } from './footer';
 
-export const Homepage = () => {
-  const { sectionTypes, application, chrome } = getServices();
-  const getUrl = application.getUrlForApp;
-
-  // TODO: ideally, this should be some sort of observable so changes can be made without having to explicitly hit a save button
-  const [homepage, setHomepage] = useState<HomepageType>();
-  const [error, setError] = useState();
-  const isLoading = !homepage && !error;
+const useHomepage = () => {
+  const { sectionTypes } = getServices();
+  const [heroes, setHeroes] = useState<HeroSectionType[]>();
+  const [sections, setSections] = useState<SectionType[]>();
+  const [error, setError] = useState<unknown>();
 
   useEffect(() => {
-    // TODO: maybe this could have some sort of retry mechanism?
-    sectionTypes.getHomepage().then(setHomepage).catch(setError);
+    const homepage = sectionTypes.getHomepage();
+
+    const subscriptions = new Subscription();
+    subscriptions.add(homepage.heroes$.subscribe(setHeroes));
+    subscriptions.add(homepage.sections$.subscribe(setSections));
+    subscriptions.add(homepage.error$.subscribe(setError));
+
+    return () => {
+      subscriptions.unsubscribe();
+      homepage.cleanup();
+    };
   }, [sectionTypes]);
+
+  const isLoading = !heroes && !sections;
+
+  return { heroes, sections, error, isLoading };
+};
+
+export const Homepage = () => {
+  const { application, chrome } = getServices();
+  const getUrl = application.getUrlForApp;
+
+  const { heroes, sections, error, isLoading } = useHomepage();
 
   useMount(() => {
     chrome.setBreadcrumbs([
@@ -61,7 +82,7 @@ export const Homepage = () => {
     </EuiButtonEmpty>,
   ].reverse();
 
-  const hero = homepage!.heroes[0];
+  const hero = heroes?.[0];
 
   return (
     <EuiPageTemplate
@@ -82,7 +103,7 @@ export const Homepage = () => {
       }}
     >
       {hero && <HeroSection render={hero.render} />}
-      {homepage!.sections.map(({ render, title, description, links }, i) => (
+      {sections?.map(({ render, title, description, links }, i) => (
         <Section key={i} title={title} description={description} links={links} render={render} />
       ))}
       <EuiHorizontalRule />

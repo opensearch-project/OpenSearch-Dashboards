@@ -4,6 +4,8 @@
  */
 
 import { CoreStart } from 'opensearch-dashboards/public';
+import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { EuiLinkAnchorProps } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectLoader } from '../../../../saved_objects/public';
@@ -27,13 +29,16 @@ export interface Section {
 }
 
 export interface Homepage {
-  heroes: HeroSection[];
-  sections: Section[];
+  heroes$: Observable<HeroSection[] | undefined>;
+  sections$: Observable<Section[] | undefined>;
+  error$: Observable<unknown | undefined>;
+  saveHomepage(heroes: HeroSection[], sections: Section[]): void;
+  cleanup(): void;
 }
 
 export class SectionTypeService {
-  private heroSections: { [key: string]: HeroSection } = {};
-  private sections: { [key: string]: Section } = {};
+  private heroSections: Record<string, HeroSection> = {};
+  private sections: Record<string, Section> = {};
   private savedHomepageLoader?: SavedObjectLoader;
 
   public setup() {
@@ -84,7 +89,65 @@ export class SectionTypeService {
    * Currently, if there are multiple candidates for the homepage, the first one will be returned.
    * This may change in the future.
    */
-  public async getHomepage(): Promise<Homepage> {
+  public getHomepage(): Homepage {
+    const heroesSubject = new BehaviorSubject<HeroSection[] | undefined>(undefined);
+    const sectionsSubject = new BehaviorSubject<Section[] | undefined>(undefined);
+    const errorSubject = new BehaviorSubject<unknown | undefined>(undefined);
+
+    const subscriptions = new Subscription();
+
+    this.fetchHomepageData()
+      .then((homepage) => {
+        const initialHeroes = Array.isArray(homepage.heros) ? homepage.heros : [homepage.heros];
+        const initialSections = Array.isArray(homepage.sections)
+          ? homepage.sections
+          : [homepage.sections];
+
+        heroesSubject.next(initialHeroes.map((hero) => this.heroSections[hero.id]).filter(Boolean));
+        sectionsSubject.next(
+          initialSections.map((section) => this.sections[section.id]).filter(Boolean)
+        );
+
+        // TODO: make this debounce time configurable
+        const combinedSave$ = combineLatest([heroesSubject, sectionsSubject]).pipe(
+          debounceTime(1000)
+        );
+
+        subscriptions.add(
+          combinedSave$.subscribe(([heroes, sections]) => {
+            if (heroes) {
+              homepage.heros = heroes.map((hero) => ({ id: hero.id }));
+            }
+
+            if (sections) {
+              homepage.sections = sections.map((section) => ({ id: section.id }));
+            }
+
+            if (heroes || sections) {
+              homepage.save({});
+            }
+          })
+        );
+      })
+      .catch((e) => {
+        errorSubject.next(e);
+      });
+
+    return {
+      heroes$: heroesSubject.asObservable(),
+      sections$: sectionsSubject.asObservable(),
+      error$: errorSubject.asObservable(),
+      saveHomepage: (heroes, sections) => {
+        heroesSubject.next(heroes);
+        sectionsSubject.next(sections);
+      },
+      cleanup: () => {
+        subscriptions.unsubscribe();
+      },
+    };
+  }
+
+  private async fetchHomepageData(): Promise<SavedHomepage> {
     if (!this.savedHomepageLoader) {
       throw new Error('SectionTypeService has not been started yet.');
     }
@@ -98,16 +161,7 @@ export class SectionTypeService {
       await homepage.save({});
     }
 
-    // TODO: is there a better/maybe more performant way to do this?
-    const heroes = Array.isArray(homepage.heros) ? homepage.heros : [homepage.heros];
-    const sections = Array.isArray(homepage.sections) ? homepage.sections : [homepage.sections];
-
-    // Sections and heroes _could_ be undefined if the user creates a homepage with plugins then
-    // starts Dashboards without those plugins. In this case, we just ignore those sections.
-    return {
-      heroes: heroes.map((hero) => this.heroSections[hero.id]).filter(Boolean),
-      sections: sections.map((section) => this.sections[section.id]).filter(Boolean),
-    };
+    return homepage;
   }
 
   public getHeroSectionTypes() {
