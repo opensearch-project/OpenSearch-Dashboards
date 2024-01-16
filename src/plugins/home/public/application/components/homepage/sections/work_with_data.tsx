@@ -30,14 +30,30 @@ const Card: FC<{
   footerButtonProps?: EuiButtonProps;
   footerUrl: string;
   footerText: string;
-}> = ({ imgSrc, imgAlt, title, description, footerButtonProps, footerUrl, footerText }) => (
+  footerExternal?: boolean;
+}> = ({
+  imgSrc,
+  imgAlt,
+  title,
+  description,
+  footerButtonProps,
+  footerUrl,
+  footerText,
+  footerExternal,
+}) => (
   <EuiFlexItem grow={1}>
     <EuiCard
       image={<EuiImage src={imgSrc} alt={imgAlt} />}
       title={title}
       description={description}
       footer={
-        <EuiButton size="s" fullWidth href={footerUrl} {...footerButtonProps}>
+        <EuiButton
+          size="s"
+          fullWidth
+          href={footerUrl}
+          target={footerExternal ? '_blank' : undefined}
+          {...footerButtonProps}
+        >
           {footerText}
         </EuiButton>
       }
@@ -59,7 +75,7 @@ const render = renderFn(() => {
           defaultMessage: 'Sample data image',
         })}
         title={i18n.translate('home.sections.workWithData.sampleData.title', {
-          defaultMessage: 'Start with Sample Data',
+          defaultMessage: 'Start with sample data',
         })}
         description={i18n.translate('home.sections.workWithData.sampleData.description', {
           defaultMessage:
@@ -87,6 +103,7 @@ const render = renderFn(() => {
         footerText={i18n.translate('home.sections.workWithData.ingest.button', {
           defaultMessage: 'Ingestion Documentation',
         })}
+        footerExternal
       />
       <Card
         imgSrc={darkMode ? discoverDark : discoverLight}
@@ -94,7 +111,7 @@ const render = renderFn(() => {
           defaultMessage: 'Explore image',
         })}
         title={i18n.translate('home.sections.workWithData.explore.title', {
-          defaultMessage: 'Explore Data',
+          defaultMessage: 'Explore data',
         })}
         description={i18n.translate('home.sections.workWithData.explore.description', {
           defaultMessage:
@@ -105,6 +122,7 @@ const render = renderFn(() => {
         footerText={i18n.translate('home.sections.workWithData.explore.button', {
           defaultMessage: 'Discover documentation',
         })}
+        footerExternal
       />
     </EuiFlexGroup>
   );

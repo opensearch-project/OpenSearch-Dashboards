@@ -68,15 +68,16 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            iconType={isExpanded ? 'arrowUp' : 'arrowRight'}
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             onClick={toggleExpanded}
             size="s"
             iconSize="m"
+            color="text"
             aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <EuiTitle size="l">
+          <EuiTitle size="m">
             <h2>{title}</h2>
           </EuiTitle>
         </EuiFlexItem>

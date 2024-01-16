@@ -48,18 +48,21 @@ const render = renderFn(() => {
         defaultMessage: 'OpenSearch Dashboards quickstart',
       }),
       href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
+      target: '_blank',
     },
     {
       label: i18n.translate('home.sections.learnBasics.gettingStarted.dataVis', {
         defaultMessage: 'Building data visualizations',
       }),
       href: 'https://opensearch.org/docs/latest/dashboards/visualize/viz-index/',
+      target: '_blank',
     },
     {
       label: i18n.translate('home.sections.learnBasics.gettingStarted.dashboards', {
         defaultMessage: 'Creating dashboards',
       }),
       href: 'https://opensearch.org/docs/latest/dashboards/dashboard/index/',
+      target: '_blank',
     },
   ];
 
@@ -69,18 +72,21 @@ const render = renderFn(() => {
         defaultMessage: 'Get familiar with Discover',
       }),
       href: 'https://opensearch.org/docs/latest/dashboards/discover/index-discover/',
+      target: '_blank',
     },
     {
       label: i18n.translate('home.sections.learnBasics.dataDiscovery.runQueries', {
         defaultMessage: 'Run queries in the Dev Tools Console',
       }),
       href: 'https://opensearch.org/docs/latest/dashboards/dev-tools/run-queries/',
+      target: '_blank',
     },
     {
       label: i18n.translate('home.sections.learnBasics.dataDiscovery.indexes', {
         defaultMessage: 'Working with indexes',
       }),
       href: 'https://opensearch.org/docs/latest/dashboards/im-dashboards/index/',
+      target: '_blank',
     },
   ];
 
@@ -90,18 +96,21 @@ const render = renderFn(() => {
         defaultMessage: 'Get familiar with Log Explorer',
       }),
       href: 'https://opensearch.org/docs/latest/observing-your-data/event-analytics/',
+      target: '_blank',
     },
     {
       label: i18n.translate('home.sections.learnBasics.observability.prometheus', {
         defaultMessage: 'Explore prometheus metrics',
       }),
       href: 'https://opensearch.org/docs/latest/observing-your-data/prometheusmetrics/',
+      target: '_blank',
     },
     {
       label: i18n.translate('home.sections.learnBasics.observability.traces', {
         defaultMessage: 'Dive into traces and spans',
       }),
       href: 'https://opensearch.org/docs/latest/observing-your-data/trace/ta-dashboards/',
+      target: '_blank',
     },
   ];
 
@@ -138,7 +147,7 @@ export const learnBasicsSection: Section = {
     defaultMessage: 'Learn OpenSearch basics',
   }),
   description: i18n.translate('home.sections.learnBasics.description', {
-    defaultMessage: 'Core concepts to get you started with OpenSearch',
+    defaultMessage: 'Core concepts to get you started with OpenSearch.',
   }),
   links: [
     {
@@ -148,6 +157,7 @@ export const learnBasicsSection: Section = {
       url: 'https://opensearch.org/docs/latest/',
       props: {
         external: true,
+        target: '_blank',
       },
     },
   ],
