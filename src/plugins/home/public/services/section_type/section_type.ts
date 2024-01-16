@@ -147,6 +147,9 @@ export class SectionTypeService {
     };
   }
 
+  // In the future, it may be useful to get the current state of the homepage without using observables. If that
+  // is the case, this function could be extended to produce usable heroes and sections, as well as a save function
+  // that properly saves the data.
   private async fetchHomepageData(): Promise<SavedHomepage> {
     if (!this.savedHomepageLoader) {
       throw new Error('SectionTypeService has not been started yet.');
