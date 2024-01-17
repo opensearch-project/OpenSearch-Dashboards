@@ -39,7 +39,7 @@ export const Footer: React.FC = () => {
           size="xs"
         >
           <FormattedMessage
-            id="opensearch-dashboards-react.pageFooter.changeHomeRouteLink"
+            id="home.footer.changeHomeRouteLink"
             defaultMessage="Display a different page on log in"
           />
         </EuiButtonEmpty>
@@ -51,18 +51,15 @@ export const Footer: React.FC = () => {
         onClick={() => {
           setDefaultRoute(HOME_APP_BASE_PATH);
           toasts.addSuccess({
-            title: i18n.translate(
-              'opensearch-dashboards-react.pageFooter.changeDefaultRouteSuccessToast',
-              {
-                defaultMessage: 'Landing page updated',
-              }
-            ),
+            title: i18n.translate('home.footer.changeDefaultRouteSuccessToast', {
+              defaultMessage: 'Landing page updated',
+            }),
           });
         }}
         size="xs"
       >
         <FormattedMessage
-          id="opensearch-dashboards-react.pageFooter.makeDefaultRouteLink"
+          id="home.footer.makeDefaultRouteLink"
           defaultMessage="Make this my landing page"
         />
       </EuiButtonEmpty>
@@ -81,7 +78,7 @@ export const Footer: React.FC = () => {
             size="xs"
           >
             <FormattedMessage
-              id="opensearch-dashboards-react.pageFooter.appDirectoryButtonLabel"
+              id="home.footer.appDirectoryButtonLabel"
               defaultMessage="View app directory"
             />
           </EuiButtonEmpty>
