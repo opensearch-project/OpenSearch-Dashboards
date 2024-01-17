@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FC, PropsWithChildren } from 'react';
 import { useMount } from 'react-use';
 import { Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
@@ -43,11 +43,11 @@ const useHomepage = () => {
   return { heroes, sections, error, isLoading };
 };
 
-export const Homepage = () => {
-  const { application, chrome } = getServices();
-  const getUrl = application.getUrlForApp;
-
-  const { heroes, sections, error, isLoading } = useHomepage();
+const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
+  const {
+    application: { getUrlForApp },
+    chrome,
+  } = getServices();
 
   useMount(() => {
     chrome.setBreadcrumbs([
@@ -57,32 +57,21 @@ export const Homepage = () => {
     ]);
   });
 
-  if (error) {
-    // TODO: what is the correct way to handle errors here?
-    // eslint-disable-next-line no-console
-    console.error(error);
-
-    return <span>Error loading homepage</span>;
-  }
-
-  if (isLoading) {
-    return <span>Loading...</span>;
-  }
-
   // TODO: this ends up being reversed on the page, so we reverse the array here. There is a performance cost to this, so todo manually reverse it
   const sideItems: React.ReactNode[] = [
-    <EuiButtonEmpty iconType="indexOpen" href={getUrl('home', { path: '#/tutorial_directory' })}>
+    <EuiButtonEmpty
+      iconType="indexOpen"
+      href={getUrlForApp('home', { path: '#/tutorial_directory' })}
+    >
       <FormattedMessage id="home.addData" defaultMessage="Add data" />
     </EuiButtonEmpty>,
-    <EuiButtonEmpty iconType="gear" href={getUrl('management')}>
+    <EuiButtonEmpty iconType="gear" href={getUrlForApp('management')}>
       <FormattedMessage id="home.manage" defaultMessage="Manage" />
     </EuiButtonEmpty>,
-    <EuiButtonEmpty iconType="wrench" href={getUrl('dev_tools', { path: '#/console' })}>
+    <EuiButtonEmpty iconType="wrench" href={getUrlForApp('dev_tools', { path: '#/console' })}>
       <FormattedMessage id="home.devTools" defaultMessage="Dev tools" />
     </EuiButtonEmpty>,
   ].reverse();
-
-  const hero = heroes?.[0];
 
   return (
     <EuiPageTemplate
@@ -102,12 +91,36 @@ export const Homepage = () => {
         className: 'home-homepage-pageBody',
       }}
     >
+      {children}
+    </EuiPageTemplate>
+  );
+};
+
+export const Homepage = () => {
+  const { heroes, sections, error, isLoading } = useHomepage();
+
+  if (error) {
+    // TODO: what is the correct way to handle errors here?
+    // eslint-disable-next-line no-console
+    console.error(error);
+
+    return <span>Error loading homepage</span>;
+  }
+
+  if (isLoading) {
+    return <span>Loading...</span>;
+  }
+
+  const hero = heroes?.[0];
+
+  return (
+    <Layout>
       {hero && <HeroSection render={hero.render} />}
       {sections?.map(({ render, title, description, links }, i) => (
         <Section key={i} title={title} description={description} links={links} render={render} />
       ))}
       <EuiHorizontalRule />
       <Footer />
-    </EuiPageTemplate>
+    </Layout>
   );
 };
