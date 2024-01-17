@@ -90,9 +90,15 @@ export class SectionTypeService {
    * This may change in the future.
    */
   public getHomepage(): Homepage {
-    const heroesSubject = new BehaviorSubject<HeroSection[] | undefined>(undefined);
-    const sectionsSubject = new BehaviorSubject<Section[] | undefined>(undefined);
-    const errorSubject = new BehaviorSubject<unknown | undefined>(undefined);
+    // TODO: this should return some sort of way to know if the homepage is still loading
+    // TODO: errors should be tested
+    if (!this.savedHomepageLoader) {
+      throw new Error('SectionTypeService has not been started yet.');
+    }
+
+    const heroes$ = new BehaviorSubject<HeroSection[] | undefined>(undefined);
+    const sections$ = new BehaviorSubject<Section[] | undefined>(undefined);
+    const error$ = new BehaviorSubject<unknown | undefined>(undefined);
 
     const subscriptions = new Subscription();
 
@@ -103,15 +109,12 @@ export class SectionTypeService {
           ? homepage.sections
           : [homepage.sections];
 
-        heroesSubject.next(initialHeroes.map((hero) => this.heroSections[hero.id]).filter(Boolean));
-        sectionsSubject.next(
-          initialSections.map((section) => this.sections[section.id]).filter(Boolean)
-        );
+        heroes$.next(initialHeroes.map((hero) => this.heroSections[hero.id]).filter(Boolean));
+        sections$.next(initialSections.map((section) => this.sections[section.id]).filter(Boolean));
+        error$.next(undefined);
 
         // TODO: make this debounce time configurable
-        const combinedSave$ = combineLatest([heroesSubject, sectionsSubject]).pipe(
-          debounceTime(1000)
-        );
+        const combinedSave$ = combineLatest([heroes$, sections$]).pipe(debounceTime(1000));
 
         subscriptions.add(
           combinedSave$.subscribe(([heroes, sections]) => {
@@ -124,22 +127,25 @@ export class SectionTypeService {
             }
 
             if (heroes || sections) {
-              homepage.save({});
+              homepage
+                .save({})
+                .then(() => error$.next(undefined))
+                .catch((e) => error$.next(e));
             }
           })
         );
       })
       .catch((e) => {
-        errorSubject.next(e);
+        error$.next(e);
       });
 
     return {
-      heroes$: heroesSubject.asObservable(),
-      sections$: sectionsSubject.asObservable(),
-      error$: errorSubject.asObservable(),
+      heroes$: heroes$.asObservable(),
+      sections$: sections$.asObservable(),
+      error$: error$.asObservable(),
       saveHomepage: (heroes, sections) => {
-        heroesSubject.next(heroes);
-        sectionsSubject.next(sections);
+        heroes$.next(heroes);
+        sections$.next(sections);
       },
       cleanup: () => {
         subscriptions.unsubscribe();

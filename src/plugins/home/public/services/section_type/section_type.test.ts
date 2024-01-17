@@ -3,9 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable } from 'rxjs';
+import { filter, first } from 'rxjs/operators';
 import { SectionTypeService } from './section_type';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
+
+function expectObservable<T>(observable: Observable<T>) {
+  expect(observable).toBeDefined();
+  expect(observable).toBeInstanceOf(Observable);
+
+  return expect(
+    observable
+      .pipe(
+        filter((val) => val !== undefined),
+        first()
+      )
+      .toPromise()
+  ).resolves;
+}
 
 describe('SectionTypeService', () => {
   describe('setup', () => {
@@ -85,7 +101,7 @@ describe('SectionTypeService', () => {
   describe('getHomepage', () => {
     test('throws if start not called', async () => {
       const sectionTypeService = new SectionTypeService();
-      await expect(sectionTypeService.getHomepage()).rejects.toThrowErrorMatchingInlineSnapshot(
+      expect(() => sectionTypeService.getHomepage()).toThrowErrorMatchingInlineSnapshot(
         `"SectionTypeService has not been started yet."`
       );
     });
@@ -104,7 +120,12 @@ describe('SectionTypeService', () => {
       sectionTypeService.start({ core, data });
 
       const homepage = sectionTypeService.getHomepage();
-      await expect(homepage).resolves.toEqual({ heroes: [], sections: [] });
+      expect(homepage).toBeDefined();
+
+      await expectObservable(homepage.heroes$).toEqual([]);
+      await expectObservable(homepage.sections$).toEqual([]);
+
+      homepage.cleanup();
     });
 
     test('returns homepage with registered sections', async () => {
@@ -149,64 +170,14 @@ describe('SectionTypeService', () => {
       sectionTypeService.start({ core, data });
 
       const homepage = sectionTypeService.getHomepage();
-      await expect(homepage).resolves.toEqual({
-        heroes: [],
-        sections: [
-          { id: 'foo', title: 'Foo', render: expect.any(Function) },
-          { id: 'bar', title: 'Bar', render: expect.any(Function) },
-        ],
-      });
-    });
 
-    test('returns homepage with multiple existing homepages', async () => {
-      const core = coreMock.createStart();
-      const data = dataPluginMock.createStartContract();
+      await expectObservable(homepage.heroes$).toEqual([]);
+      await expectObservable(homepage.sections$).toEqual([
+        { id: 'foo', title: 'Foo', render: expect.any(Function) },
+        { id: 'bar', title: 'Bar', render: expect.any(Function) },
+      ]);
 
-      const savedHomepage = {
-        id: '1',
-        attributes: {
-          heros: [],
-          sections: [{ id: 'foo' }, { id: 'bar' }],
-        },
-      };
-
-      core.savedObjects.client.find = jest.fn().mockResolvedValue(
-        Promise.resolve({
-          savedObjects: [savedHomepage, { id: '2', attributes: { heros: [], sections: [] } }],
-          total: 2,
-        })
-      );
-
-      core.savedObjects.client.create = jest.fn().mockResolvedValue(Promise.resolve({ id: '1' }));
-
-      core.savedObjects.client.get = jest
-        .fn()
-        .mockResolvedValue(Promise.resolve({ ...savedHomepage, _version: 1 }));
-
-      const sectionTypeService = new SectionTypeService();
-      const setup = sectionTypeService.setup();
-
-      setup.registerSection({
-        id: 'foo',
-        title: 'Foo',
-        render: () => () => {},
-      });
-      setup.registerSection({
-        id: 'bar',
-        title: 'Bar',
-        render: () => () => {},
-      });
-
-      sectionTypeService.start({ core, data });
-
-      const homepage = sectionTypeService.getHomepage();
-      await expect(homepage).resolves.toEqual({
-        heroes: [],
-        sections: [
-          { id: 'foo', title: 'Foo', render: expect.any(Function) },
-          { id: 'bar', title: 'Bar', render: expect.any(Function) },
-        ],
-      });
+      homepage.cleanup();
     });
 
     test('filters out sections that are no longer registered', async () => {
@@ -246,10 +217,12 @@ describe('SectionTypeService', () => {
       sectionTypeService.start({ core, data });
 
       const homepage = sectionTypeService.getHomepage();
-      await expect(homepage).resolves.toEqual({
-        heroes: [],
-        sections: [{ id: 'foo', title: 'Foo', render: expect.any(Function) }],
-      });
+      await expectObservable(homepage.heroes$).toEqual([]);
+      await expectObservable(homepage.sections$).toEqual([
+        { id: 'foo', title: 'Foo', render: expect.any(Function) },
+      ]);
+
+      homepage.cleanup();
     });
   });
 

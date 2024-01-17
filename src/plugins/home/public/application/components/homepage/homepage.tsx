@@ -57,16 +57,16 @@ export const Homepage = () => {
     ]);
   });
 
-  if (isLoading) {
-    return <span>Loading...</span>;
-  }
-
   if (error) {
     // TODO: what is the correct way to handle errors here?
     // eslint-disable-next-line no-console
     console.error(error);
 
     return <span>Error loading homepage</span>;
+  }
+
+  if (isLoading) {
+    return <span>Loading...</span>;
   }
 
   // TODO: this ends up being reversed on the page, so we reverse the array here. There is a performance cost to this, so todo manually reverse it

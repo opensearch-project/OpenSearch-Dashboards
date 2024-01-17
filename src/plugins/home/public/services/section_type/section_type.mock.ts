@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SectionTypeService, SectionTypeServiceSetup } from './section_type';
+import { SectionTypeService, SectionTypeServiceSetup, HeroSection, Section } from './section_type';
+import { Subject } from 'rxjs';
 
 const createSetupMock = (): jest.Mocked<SectionTypeServiceSetup> => {
   return {
@@ -12,16 +13,17 @@ const createSetupMock = (): jest.Mocked<SectionTypeServiceSetup> => {
   };
 };
 
-const createMock = (): jest.Mocked<PublicMethodsOf<SectionTypeService>> => {
-  const service = {
+const createMock = () => {
+  const service: jest.Mocked<PublicMethodsOf<SectionTypeService>> = {
     setup: jest.fn(),
     start: jest.fn(),
-    getHomepage: jest.fn(() =>
-      Promise.resolve({
-        heroes: [],
-        sections: [],
-      })
-    ),
+    getHomepage: jest.fn(() => ({
+      heroes$: new Subject<HeroSection[] | undefined>().asObservable(),
+      sections$: new Subject<Section[] | undefined>().asObservable(),
+      error$: new Subject<unknown>().asObservable(),
+      saveHomepage: jest.fn(),
+      cleanup: jest.fn(),
+    })),
     getHeroSectionTypes: jest.fn(() => []),
     getSectionTypes: jest.fn(() => []),
     getSavedHomepageLoader: jest.fn(() => ({ get: jest.fn() } as any)),
