@@ -135,7 +135,7 @@ describe('SectionTypeService', () => {
       const savedHomepage = {
         id: '1',
         attributes: {
-          heros: [],
+          heroes: [],
           sections: [{ id: 'foo' }, { id: 'bar' }],
         },
       };
@@ -187,7 +187,7 @@ describe('SectionTypeService', () => {
       const savedHomepage = {
         id: '1',
         attributes: {
-          heros: [],
+          heroes: [],
           sections: [{ id: 'foo' }, { id: 'bar' }],
         },
       };

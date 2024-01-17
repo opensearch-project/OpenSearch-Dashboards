@@ -35,7 +35,7 @@ export const homepageSavedObjectType: SavedObjectsType = {
       kibanaSavedObjectMeta: {
         properties: { searchSourceJSON: { type: 'text', index: false } },
       },
-      heros: {
+      heroes: {
         type: 'object',
         properties: {
           id: { type: 'keyword' },

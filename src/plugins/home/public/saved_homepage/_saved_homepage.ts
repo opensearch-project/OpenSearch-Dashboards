@@ -19,7 +19,7 @@ export interface SerializedSection {
 
 export interface SavedHomepage extends SavedObject {
   // NOTE: this type allows both an object and an array of objects. As of now, we only support a single hero, but in the future we'll allow for a carousel of heroes.
-  heros: SerializedHeroSection[] | SerializedHeroSection;
+  heroes: SerializedHeroSection[] | SerializedHeroSection;
   sections: SerializedSection[] | SerializedSection;
 }
 
@@ -29,7 +29,7 @@ export function createSavedHomepageClass(services: SavedObjectOpenSearchDashboar
   class SavedHomepage extends SavedObjectClass {
     public static type: string = 'homepage';
     public static mapping: Record<string, string> = {
-      heros: 'object',
+      heroes: 'object',
       sections: 'object',
     };
 
@@ -43,7 +43,7 @@ export function createSavedHomepageClass(services: SavedObjectOpenSearchDashboar
         mapping: SavedHomepage.mapping,
         id: (opts.id as string) || '',
         defaults: {
-          heros: [],
+          heroes: [],
           sections: [{ id: 'home:workWithData' }, { id: 'home:learnBasics' }],
         },
       });

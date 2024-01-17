@@ -104,7 +104,7 @@ export class SectionTypeService {
 
     this.fetchHomepageData()
       .then((homepage) => {
-        const initialHeroes = Array.isArray(homepage.heros) ? homepage.heros : [homepage.heros];
+        const initialHeroes = Array.isArray(homepage.heroes) ? homepage.heroes : [homepage.heroes];
         const initialSections = Array.isArray(homepage.sections)
           ? homepage.sections
           : [homepage.sections];
@@ -119,7 +119,7 @@ export class SectionTypeService {
         subscriptions.add(
           combinedSave$.subscribe(([heroes, sections]) => {
             if (heroes) {
-              homepage.heros = heroes.map((hero) => ({ id: hero.id }));
+              homepage.heroes = heroes.map((hero) => ({ id: hero.id }));
             }
 
             if (sections) {
