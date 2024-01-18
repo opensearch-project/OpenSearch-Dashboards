@@ -19,31 +19,31 @@ Below is the current default value.
 ```
 (Note that `frame-ancestors 'self'` is used to only allow self embedding and prevent clickjacking by default.)
 
-For OSD users who want to make changes, e.g allow this site `https://example-site.org` to embed OSD pages, they can update CSP rules through CURL.
+For OSD users who want to make changes to allow a new site to embed OSD pages, they can update CSP rules through CURL.
 (Note that the commands following could be first obtained from a copy as curl option from the network tab of a browser development tool and then replaced with the API names)
 
 ```
-curl 'http://{osd endpoint}/api/configuration_provider/updateCspRules' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty' --data-raw '{"value":"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self' https://example-site.org"}'
+curl '{osd endpoint}/api/configuration_provider/updateCspRules' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty' --data-raw '{"value":"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self' {new site}"}'
 
 ```
 
 Below is the CURL command to delete CSP rules.
 
 ```
-curl 'http://{osd endpoint}/api/configuration_provider/deleteCspRules' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty'
+curl '{osd endpoint}/api/configuration_provider/deleteCspRules' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty'
 
 ```
 
 Below is the CURL command to check if CSP rules exist in the new index.
 
 ```
-curl 'http://{osd endpoint}/api/configuration_provider/existsCspRules'
+curl '{osd endpoint}/api/configuration_provider/existsCspRules'
 ```
 
 Below is the CURL command to get the CSP rules from the new index.
 
 ```
-curl 'http://{osd endpoint}/api/configuration_provider/getCspRules'
+curl '{osd endpoint}/api/configuration_provider/getCspRules'
 
 ```
 
