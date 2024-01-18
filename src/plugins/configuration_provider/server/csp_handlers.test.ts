@@ -10,6 +10,9 @@ import {
 } from '../../../core/server/http/router/request';
 import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { createCspRulesPreResponseHandler } from './csp_handlers';
+import { MockedLogger, loggerMock } from '@osd/logging/target/mocks';
+
+const ERROR_MESSAGE = 'Service unavailable';
 
 const forgeRequest = ({
   headers = {},
@@ -30,32 +33,28 @@ const forgeRequest = ({
   });
 };
 
-const DEFAULT_DYNAMIC_CONFIG_INDEX = '.opensearch_dashboards_config';
-
 describe('CSP handlers', () => {
   let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
+  let logger: MockedLogger;
 
   beforeEach(() => {
     jest.resetAllMocks();
     toolkit = httpServerMock.createToolkit();
+    logger = loggerMock.create();
   });
 
   it('adds the CSP headers provided by the client', async () => {
     const coreSetup = coreMock.createSetup();
     const cspRules = "frame-ancestors 'self'";
 
-    const cspClient = {
-      exists: jest.fn().mockReturnValue(true),
-      get: jest.fn().mockReturnValue(cspRules),
+    const configurationClient = {
+      existsCspRules: jest.fn().mockReturnValue(true),
+      getCspRules: jest.fn().mockReturnValue(cspRules),
     };
 
-    const getCspClient = jest.fn().mockReturnValue(cspClient);
+    const getConfigurationClient = jest.fn().mockReturnValue(configurationClient);
 
-    const handler = createCspRulesPreResponseHandler(
-      coreSetup,
-      DEFAULT_DYNAMIC_CONFIG_INDEX,
-      getCspClient
-    );
+    const handler = createCspRulesPreResponseHandler(coreSetup, getConfigurationClient, logger);
     const request = forgeRequest({ method: 'get', headers: { 'sec-fetch-dest': 'document' } });
 
     toolkit.next.mockReturnValue('next' as any);
@@ -72,26 +71,22 @@ describe('CSP handlers', () => {
       },
     });
 
-    expect(cspClient.exists).toBeCalledTimes(1);
-    expect(cspClient.get).toBeCalledTimes(1);
+    expect(configurationClient.existsCspRules).toBeCalledTimes(1);
+    expect(configurationClient.getCspRules).toBeCalledTimes(1);
   });
 
   it('do not add CSP headers when the client returns empty', async () => {
     const coreSetup = coreMock.createSetup();
     const emptyCspRules = '';
 
-    const cspClient = {
-      exists: jest.fn().mockReturnValue(true),
-      get: jest.fn().mockReturnValue(emptyCspRules),
+    const configurationClient = {
+      existsCspRules: jest.fn().mockReturnValue(true),
+      getCspRules: jest.fn().mockReturnValue(emptyCspRules),
     };
 
-    const getCspClient = jest.fn().mockReturnValue(cspClient);
+    const getConfigurationClient = jest.fn().mockReturnValue(configurationClient);
 
-    const handler = createCspRulesPreResponseHandler(
-      coreSetup,
-      DEFAULT_DYNAMIC_CONFIG_INDEX,
-      getCspClient
-    );
+    const handler = createCspRulesPreResponseHandler(coreSetup, getConfigurationClient, logger);
     const request = forgeRequest({ method: 'get', headers: { 'sec-fetch-dest': 'document' } });
 
     toolkit.next.mockReturnValue('next' as any);
@@ -103,25 +98,21 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({});
 
-    expect(cspClient.exists).toBeCalledTimes(1);
-    expect(cspClient.get).toBeCalledTimes(1);
+    expect(configurationClient.existsCspRules).toBeCalledTimes(1);
+    expect(configurationClient.getCspRules).toBeCalledTimes(1);
   });
 
   it('do not add CSP headers when the configuration does not exist', async () => {
     const coreSetup = coreMock.createSetup();
 
-    const cspClient = {
-      exists: jest.fn().mockReturnValue(false),
-      get: jest.fn(),
+    const configurationClient = {
+      existsCspRules: jest.fn().mockReturnValue(false),
+      getCspRules: jest.fn(),
     };
 
-    const getCspClient = jest.fn().mockReturnValue(cspClient);
+    const getConfigurationClient = jest.fn().mockReturnValue(configurationClient);
 
-    const handler = createCspRulesPreResponseHandler(
-      coreSetup,
-      DEFAULT_DYNAMIC_CONFIG_INDEX,
-      getCspClient
-    );
+    const handler = createCspRulesPreResponseHandler(coreSetup, getConfigurationClient, logger);
     const request = forgeRequest({ method: 'get', headers: { 'sec-fetch-dest': 'document' } });
 
     toolkit.next.mockReturnValue('next' as any);
@@ -133,25 +124,21 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toBeCalledTimes(1);
     expect(toolkit.next).toBeCalledWith({});
 
-    expect(cspClient.exists).toBeCalledTimes(1);
-    expect(cspClient.get).toBeCalledTimes(0);
+    expect(configurationClient.existsCspRules).toBeCalledTimes(1);
+    expect(configurationClient.getCspRules).toBeCalledTimes(0);
   });
 
   it('do not add CSP headers when request dest exists and shall skip', async () => {
     const coreSetup = coreMock.createSetup();
 
-    const cspClient = {
-      exists: jest.fn(),
-      get: jest.fn(),
+    const configurationClient = {
+      existsCspRules: jest.fn(),
+      getCspRules: jest.fn(),
     };
 
-    const getCspClient = jest.fn().mockReturnValue(cspClient);
+    const getConfigurationClient = jest.fn().mockReturnValue(configurationClient);
 
-    const handler = createCspRulesPreResponseHandler(
-      coreSetup,
-      DEFAULT_DYNAMIC_CONFIG_INDEX,
-      getCspClient
-    );
+    const handler = createCspRulesPreResponseHandler(coreSetup, getConfigurationClient, logger);
 
     const cssSecFetchDest = 'css';
     const request = forgeRequest({ method: 'get', headers: { 'sec-fetch-dest': cssSecFetchDest } });
@@ -165,25 +152,21 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toBeCalledTimes(1);
     expect(toolkit.next).toBeCalledWith({});
 
-    expect(cspClient.exists).toBeCalledTimes(0);
-    expect(cspClient.get).toBeCalledTimes(0);
+    expect(configurationClient.existsCspRules).toBeCalledTimes(0);
+    expect(configurationClient.getCspRules).toBeCalledTimes(0);
   });
 
   it('do not add CSP headers when request dest does not exist', async () => {
     const coreSetup = coreMock.createSetup();
 
-    const cspClient = {
-      exists: jest.fn(),
-      get: jest.fn(),
+    const configurationClient = {
+      existsCspRules: jest.fn(),
+      getCspRules: jest.fn(),
     };
 
-    const getCspClient = jest.fn().mockReturnValue(cspClient);
+    const getConfigurationClient = jest.fn().mockReturnValue(configurationClient);
 
-    const handler = createCspRulesPreResponseHandler(
-      coreSetup,
-      DEFAULT_DYNAMIC_CONFIG_INDEX,
-      getCspClient
-    );
+    const handler = createCspRulesPreResponseHandler(coreSetup, getConfigurationClient, logger);
 
     const request = forgeRequest({ method: 'get', headers: {} });
 
@@ -196,7 +179,40 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toBeCalledTimes(1);
     expect(toolkit.next).toBeCalledWith({});
 
-    expect(cspClient.exists).toBeCalledTimes(0);
-    expect(cspClient.get).toBeCalledTimes(0);
+    expect(configurationClient.existsCspRules).toBeCalledTimes(0);
+    expect(configurationClient.getCspRules).toBeCalledTimes(0);
+  });
+
+  it('do not the CSP headers when error happens', async () => {
+    const coreSetup = coreMock.createSetup();
+    const error = new Error(ERROR_MESSAGE);
+
+    const configurationClient = {
+      existsCspRules: jest.fn().mockImplementation(() => {
+        throw error;
+      }),
+      getCspRules: jest.fn(),
+    };
+
+    const getConfigurationClient = jest.fn().mockReturnValue(configurationClient);
+
+    const handler = createCspRulesPreResponseHandler(coreSetup, getConfigurationClient, logger);
+    const request = forgeRequest({ method: 'get', headers: { 'sec-fetch-dest': 'document' } });
+
+    toolkit.next.mockReturnValue('next' as any);
+
+    const result = await handler(request, {} as any, toolkit);
+
+    expect(result).toEqual('next');
+
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(toolkit.next).toBeCalledWith({});
+
+    expect(configurationClient.existsCspRules).toBeCalledTimes(1);
+    expect(configurationClient.getCspRules).not.toBeCalled();
+
+    expect(logger.error).toBeCalledWith(
+      `Failure happened in CSP rules pre response handler due to ${error}`
+    );
   });
 });

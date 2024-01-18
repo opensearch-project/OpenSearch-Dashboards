@@ -4,13 +4,13 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { CspConfigurationProviderPlugin } from './plugin';
+import { ConfigurationProviderPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, OpenSearch Dashboards Platform `plugin()` initializer.
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new CspConfigurationProviderPlugin(initializerContext);
+  return new ConfigurationProviderPlugin(initializerContext);
 }
 
-export { CspConfigurationProviderPluginSetup, CspConfigurationProviderPluginStart } from './types';
+export { ConfigurationProviderPluginSetup, ConfigurationProviderPluginStart } from './types';

@@ -5,6 +5,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ## [Unreleased]
 
 ### 💥 Breaking Changes
+- Support dynamic CSP rules to mitigate clickjacking ([#5641](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5641))
 
 ### Deprecations
 

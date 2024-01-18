@@ -1,5 +1,5 @@
 {
-  "id": "cspConfigurationProvider",
+  "id": "configurationProvider",
   "version": "1.0.0",
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
