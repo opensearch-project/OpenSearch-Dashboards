@@ -23,27 +23,27 @@ For OSD users who want to make changes, e.g allow this site `https://example-sit
 (Note that the commands following could be first obtained from a copy as curl option from the network tab of a browser development tool and then replaced with the API names)
 
 ```
-curl 'http://localhost:5601/api/configuration_provider/updateCspRules' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty' --data-raw '{"value":"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self' https://example-site.org"}'
+curl 'http://{osd endpoint}/api/configuration_provider/updateCspRules' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty' --data-raw '{"value":"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self' https://example-site.org"}'
 
 ```
 
 Below is the CURL command to delete CSP rules.
 
 ```
-curl 'http://localhost:5601/api/configuration_provider/deleteCspRules' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty'
+curl 'http://{osd endpoint}/api/configuration_provider/deleteCspRules' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty'
 
 ```
 
 Below is the CURL command to check if CSP rules exist in the new index.
 
 ```
-curl 'http://localhost:5601/api/configuration_provider/existsCspRules'
+curl 'http://{osd endpoint}/api/configuration_provider/existsCspRules'
 ```
 
 Below is the CURL command to get the CSP rules from the new index.
 
 ```
-curl 'http://localhost:5601/api/configuration_provider/getCspRules'
+curl 'http://{osd endpoint}/api/configuration_provider/getCspRules'
 
 ```
 
