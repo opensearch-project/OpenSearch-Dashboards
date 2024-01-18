@@ -33,6 +33,7 @@ import { OverlayService, OverlayStart } from './overlay_service';
 import { overlayBannersServiceMock } from './banners/banners_service.mock';
 import { overlayFlyoutServiceMock } from './flyout/flyout_service.mock';
 import { overlayModalServiceMock } from './modal/modal_service.mock';
+import { overlaySidecarServiceMock } from './sidecar/sidecar_service.mock';
 
 const createStartContractMock = () => {
   const overlayStart = overlayModalServiceMock.createStartContract();
@@ -41,6 +42,7 @@ const createStartContractMock = () => {
     openModal: overlayStart.open,
     openConfirm: overlayStart.openConfirm,
     banners: overlayBannersServiceMock.createStartContract(),
+    sidecar: overlaySidecarServiceMock.createStartContract(),
   };
   return startContract;
 };
