@@ -8,6 +8,7 @@ import {
   IRouter,
   IScopedClusterClient,
   Logger,
+  OpenSearchDashboardsRequest,
   OpenSearchDashboardsResponseFactory,
 } from '../../../../core/server';
 import { ConfigurationClient } from '../types';
@@ -25,16 +26,7 @@ export function defineRoutes(
     async (context, request, response) => {
       const client = getConfigurationClient(context.core.opensearch.client);
 
-      try {
-        const result = await client.existsCspRules();
-        return response.ok({
-          body: {
-            exists: result,
-          },
-        });
-      } catch (e) {
-        return errorResponse(response, e);
-      }
+      return await handleExistsCspRules(client, response, logger);
     }
   );
 
@@ -46,17 +38,7 @@ export function defineRoutes(
     async (context, request, response) => {
       const client = getConfigurationClient(context.core.opensearch.client);
 
-      try {
-        const result = await client.getCspRules();
-
-        return response.ok({
-          body: {
-            cspRules: result,
-          },
-        });
-      } catch (e) {
-        return errorResponse(response, e);
-      }
+      return await handleGetCspRules(client, response, logger);
     }
   );
 
@@ -70,25 +52,9 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const inputCspRules = request.body.value.trim();
-
-      if (!inputCspRules) {
-        return errorResponse(response, new Error('Cannot update CSP rules to emtpy!'));
-      }
-
       const client = getConfigurationClient(context.core.opensearch.client);
 
-      try {
-        const updatedRules = await client.updateCspRules(inputCspRules);
-
-        return response.ok({
-          body: {
-            updatedRules,
-          },
-        });
-      } catch (e) {
-        return errorResponse(response, e);
-      }
+      return await handleUpdateCspRules(client, request, response, logger);
     }
   );
 
@@ -100,19 +66,93 @@ export function defineRoutes(
     async (context, request, response) => {
       const client = getConfigurationClient(context.core.opensearch.client);
 
-      try {
-        const deletedCspRulesName = await client.deleteCspRules();
-
-        return response.ok({
-          body: {
-            deletedCspRulesName,
-          },
-        });
-      } catch (e) {
-        return errorResponse(response, e);
-      }
+      return await handleDeleteCspRules(client, response, logger);
     }
   );
+}
+
+export async function handleExistsCspRules(
+  client: ConfigurationClient,
+  response: OpenSearchDashboardsResponseFactory,
+  logger: Logger
+) {
+  try {
+    const result = await client.existsCspRules();
+    return response.ok({
+      body: {
+        exists: result,
+      },
+    });
+  } catch (e) {
+    logger.error(e);
+    return errorResponse(response, e);
+  }
+}
+
+export async function handleGetCspRules(
+  client: ConfigurationClient,
+  response: OpenSearchDashboardsResponseFactory,
+  logger: Logger
+) {
+  try {
+    const result = await client.getCspRules();
+
+    return response.ok({
+      body: {
+        cspRules: result,
+      },
+    });
+  } catch (e) {
+    logger.error(e);
+    return errorResponse(response, e);
+  }
+}
+
+export async function handleUpdateCspRules(
+  client: ConfigurationClient,
+  request: OpenSearchDashboardsRequest,
+  response: OpenSearchDashboardsResponseFactory,
+  logger: Logger
+) {
+  const inputCspRules = request.body.value.trim();
+
+  if (!inputCspRules) {
+    const error = new Error('Cannot update CSP rules to emtpy!');
+    logger.error(error);
+    return errorResponse(response, error);
+  }
+
+  try {
+    const updatedRules = await client.updateCspRules(inputCspRules);
+
+    return response.ok({
+      body: {
+        updatedRules,
+      },
+    });
+  } catch (e) {
+    logger.error(e);
+    return errorResponse(response, e);
+  }
+}
+
+export async function handleDeleteCspRules(
+  client: ConfigurationClient,
+  response: OpenSearchDashboardsResponseFactory,
+  logger: Logger
+) {
+  try {
+    const deletedCspRulesName = await client.deleteCspRules();
+
+    return response.ok({
+      body: {
+        deletedCspRulesName,
+      },
+    });
+  } catch (e) {
+    logger.error(e);
+    return errorResponse(response, e);
+  }
 }
 
 export function errorResponse(response: OpenSearchDashboardsResponseFactory, error: any) {
