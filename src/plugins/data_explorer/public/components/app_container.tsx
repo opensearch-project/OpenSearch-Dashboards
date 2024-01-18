@@ -32,7 +32,12 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
           <EuiResizableContainer>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
-                <EuiResizablePanel initialSize={25} minSize="10%" mode="collapsible">
+                <EuiResizablePanel
+                  initialSize={25}
+                  minSize="10%"
+                  mode="collapsible"
+                  style={{ paddingRight: 8 }}
+                >
                   <Sidebar>
                     <MemoizedPanel {...params} />
                   </Sidebar>
