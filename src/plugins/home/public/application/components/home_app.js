@@ -57,9 +57,12 @@ export function HomeApp({ directories, solutions }) {
     addBasePath,
     environmentService,
     telemetry,
+    homeConfig,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
+
+  console.log(homeConfig.disableNewHomePage);
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -93,7 +96,7 @@ export function HomeApp({ directories, solutions }) {
           <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
           </Route>
-          <Route exact path="/legacy">
+          <Route exact path={homeConfig.disableNewHomePage ? '/' : '/legacy'}>
             <Home
               addBasePath={addBasePath}
               directories={directories}
@@ -104,9 +107,11 @@ export function HomeApp({ directories, solutions }) {
               telemetry={telemetry}
             />
           </Route>
-          <Route exact path="/">
-            <Homepage />
-          </Route>
+          {!homeConfig.disableNewHomePage && (
+            <Route exact path="/">
+              <Homepage />
+            </Route>
+          )}
           <Route path="*" exact={true} component={RedirectToDefaultApp} />
         </Switch>
       </Router>
