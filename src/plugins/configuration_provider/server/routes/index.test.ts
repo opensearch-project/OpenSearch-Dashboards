@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { defineRoutes } from '.';
 import { loggerMock } from '@osd/logging/target/mocks';
 import { httpServiceMock } from '../../../../core/server/mocks';
