@@ -34,12 +34,21 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { AppWrapper, AppContainer } from './app_containers';
+import { ISidecarConfig } from '../overlays';
 
 describe('AppWrapper', () => {
   it('toggles the `hidden-chrome` class depending on the chrome visibility state', () => {
     const chromeVisible$ = new BehaviorSubject<boolean>(true);
+    const sidecarConfig$ = new BehaviorSubject<ISidecarConfig>({
+      dockedDirection: 'right',
+      paddingSize: 640,
+    });
 
-    const component = mount(<AppWrapper chromeVisible$={chromeVisible$}>app-content</AppWrapper>);
+    const component = mount(
+      <AppWrapper chromeVisible$={chromeVisible$} sidecarConfig$={sidecarConfig$}>
+        app-content
+      </AppWrapper>
+    );
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
         class="app-wrapper"
