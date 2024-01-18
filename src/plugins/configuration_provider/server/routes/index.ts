@@ -21,15 +21,9 @@ export function defineRoutes(
     {
       path: '/api/configuration_provider/existsCspRules',
       validate: false,
-      // validate: {
-      //   params: schema.object({
-      //     configurationName: schema.string(),
-      //   }),
-      // },
     },
     async (context, request, response) => {
       const client = getConfigurationClient(context.core.opensearch.client);
-      // const configurationName = request.params.configurationName;
 
       try {
         const result = await client.existsCspRules();
@@ -48,17 +42,9 @@ export function defineRoutes(
     {
       path: '/api/configuration_provider/getCspRules',
       validate: false,
-      // validate: {
-      //   params: schema.object({
-      //     configurationName: schema.string(),
-      //     cspRulesName: schema.string(),
-      //   }),
-      // },
     },
     async (context, request, response) => {
       const client = getConfigurationClient(context.core.opensearch.client);
-      // const configurationName = request.params.configurationName;
-      // const cspRulesName = request.params.cspRulesName;
 
       try {
         const result = await client.getCspRules();
@@ -127,13 +113,11 @@ export function defineRoutes(
       }
     }
   );
+}
 
-  function errorResponse(response: OpenSearchDashboardsResponseFactory, error: any) {
-    logger.info('Error from esClient call: ' + JSON.stringify(error));
-
-    return response.custom({
-      statusCode: error?.statusCode || 500,
-      body: error,
-    });
-  }
+export function errorResponse(response: OpenSearchDashboardsResponseFactory, error: any) {
+  return response.custom({
+    statusCode: error?.statusCode || 500,
+    body: error,
+  });
 }
