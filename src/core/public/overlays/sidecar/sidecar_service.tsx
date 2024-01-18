@@ -74,7 +74,7 @@ export interface OverlaySidecarStart {
    * Override the default support config
    * @param config The updated support config
    */
-  setSidecarConfig(config: ISidecarConfig): void;
+  setSidecarConfig(config: Partial<ISidecarConfig>): void;
 
   /**
    * Get an observable of the current locked state of the nav drawer.
@@ -107,8 +107,8 @@ interface StartDeps {
 }
 
 export interface ISidecarConfig {
-  dockedDirection?: 'left' | 'right' | 'bottom';
-  paddingSize?: number;
+  dockedDirection: 'left' | 'right' | 'bottom';
+  paddingSize: number;
   minSize?: number;
   isHidden?: boolean;
 }
@@ -125,7 +125,13 @@ export class SidecarService {
     const getSidecarConfig$ = () => sidecarConfig$.pipe(takeUntil(this.stop$));
 
     const setSidecarConfig = (config: Partial<ISidecarConfig>) => {
-      sidecarConfig$.next({ ...sidecarConfig$.value, ...config });
+      if (
+        sidecarConfig$.value ||
+        // init
+        (!sidecarConfig$.value && config.dockedDirection && config.paddingSize)
+      ) {
+        sidecarConfig$.next({ ...sidecarConfig$.value, ...config } as ISidecarConfig);
+      }
     };
 
     return {
