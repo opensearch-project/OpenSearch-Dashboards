@@ -37,28 +37,28 @@ describe('configuration provider routes', () => {
 
       expect(router.get).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: '/api/configuration_provider/existsCspRules',
+          path: '/api/configuration/existsCspRules',
         }),
         expect.any(Function)
       );
 
       expect(router.get).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: '/api/configuration_provider/getCspRules',
+          path: '/api/configuration/getCspRules',
         }),
         expect.any(Function)
       );
 
       expect(router.post).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: '/api/configuration_provider/updateCspRules',
+          path: '/api/configuration/updateCspRules',
         }),
         expect.any(Function)
       );
 
       expect(router.post).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: '/api/configuration_provider/deleteCspRules',
+          path: '/api/configuration/deleteCspRules',
         }),
         expect.any(Function)
       );

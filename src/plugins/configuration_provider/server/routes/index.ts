@@ -20,7 +20,7 @@ export function defineRoutes(
 ) {
   router.get(
     {
-      path: '/api/configuration_provider/existsCspRules',
+      path: '/api/configuration/existsCspRules',
       validate: false,
     },
     async (context, request, response) => {
@@ -32,7 +32,7 @@ export function defineRoutes(
 
   router.get(
     {
-      path: '/api/configuration_provider/getCspRules',
+      path: '/api/configuration/getCspRules',
       validate: false,
     },
     async (context, request, response) => {
@@ -44,7 +44,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: '/api/configuration_provider/updateCspRules',
+      path: '/api/configuration/updateCspRules',
       validate: {
         body: schema.object({
           value: schema.string(),
@@ -60,7 +60,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: '/api/configuration_provider/deleteCspRules',
+      path: '/api/configuration/deleteCspRules',
       validate: false,
     },
     async (context, request, response) => {
@@ -141,6 +141,8 @@ export async function handleDeleteCspRules(
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
+  logger.info('handleDeleteCspRules');
+
   try {
     const deletedCspRulesName = await client.deleteCspRules();
 

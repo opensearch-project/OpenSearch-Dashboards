@@ -10,6 +10,7 @@ import {
 import { OpenSearchConfigurationClient } from './provider';
 import { MockedLogger, loggerMock } from '@osd/logging/target/mocks';
 import { GetResponse } from 'src/core/server';
+import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 
 const INDEX_NAME = 'test_index';
 const INDEX_DOCUMENT_NAME = 'csp.rules';
@@ -254,6 +255,68 @@ describe('OpenSearchConfigurationClient', () => {
       });
 
       expect(logger.error).toBeCalledWith(`Failed to call deleteCspRules due to error ${error}`);
+    });
+
+    it('return deleted document ID when deletion fails due to index not found', async () => {
+      const error = new ResponseError({
+        statusCode: 401,
+        body: {
+          error: {
+            type: 'index_not_found_exception',
+          },
+        },
+        warnings: [],
+        headers: {
+          'WWW-Authenticate': 'content',
+        },
+        meta: {} as any,
+      });
+
+      opensearchClient.asCurrentUser.delete.mockImplementation(() => {
+        return opensearchClientMock.createErrorTransportRequestPromise(error);
+      });
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const deletedCspRulesName = await client.deleteCspRules();
+
+      expect(deletedCspRulesName).toBe(INDEX_DOCUMENT_NAME);
+
+      expect(opensearchClient.asCurrentUser.delete).toBeCalledWith({
+        index: INDEX_NAME,
+        id: INDEX_DOCUMENT_NAME,
+      });
+
+      expect(logger.error).not.toBeCalled();
+    });
+
+    it('return deleted document ID when deletion fails due to document not found', async () => {
+      const error = new ResponseError({
+        statusCode: 401,
+        body: {
+          result: 'not_found',
+        },
+        warnings: [],
+        headers: {
+          'WWW-Authenticate': 'content',
+        },
+        meta: {} as any,
+      });
+
+      opensearchClient.asCurrentUser.delete.mockImplementation(() => {
+        return opensearchClientMock.createErrorTransportRequestPromise(error);
+      });
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const deletedCspRulesName = await client.deleteCspRules();
+
+      expect(deletedCspRulesName).toBe(INDEX_DOCUMENT_NAME);
+
+      expect(opensearchClient.asCurrentUser.delete).toBeCalledWith({
+        index: INDEX_NAME,
+        id: INDEX_DOCUMENT_NAME,
+      });
+
+      expect(logger.error).not.toBeCalled();
     });
   });
 });

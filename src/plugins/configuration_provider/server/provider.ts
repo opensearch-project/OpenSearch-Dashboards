@@ -87,6 +87,16 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
 
       return CSP_RULES_DOC_ID;
     } catch (e) {
+      if (e?.body?.error?.type === 'index_not_found_exception') {
+        this.logger.info('Attemp to delete a not found index.');
+        return CSP_RULES_DOC_ID;
+      }
+
+      if (e?.body?.result === 'not_found') {
+        this.logger.info('Attemp to delete a not found document.');
+        return CSP_RULES_DOC_ID;
+      }
+
       const errorMessage = `Failed to call deleteCspRules due to error ${e}`;
 
       this.logger.error(errorMessage);
