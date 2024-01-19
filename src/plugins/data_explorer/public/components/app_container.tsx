@@ -4,7 +4,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiPage, EuiPageBody, EuiResizableContainer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiResizableContainer, useIsWithinBreakpoints } from '@elastic/eui';
 import { Suspense } from 'react';
 import { AppMountParameters } from '../../../../core/public';
 import { Sidebar } from './sidebar';
@@ -13,6 +13,7 @@ import { View } from '../services/view_service/view';
 import './app_container.scss';
 
 export const AppContainer = ({ view, params }: { view?: View; params: AppMountParameters }) => {
+  const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
   // TODO: Make this more robust.
   if (!view) {
     return <NoView />;
@@ -29,12 +30,12 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
       {/* TODO: improve fallback state */}
       <Suspense fallback={<div>Loading...</div>}>
         <Context {...params}>
-          <EuiResizableContainer>
+          <EuiResizableContainer direction={isMobile ? 'vertical' : 'horizontal'}>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
                   initialSize={25}
-                  minSize="10%"
+                  minSize="260px"
                   mode="collapsible"
                   style={{ paddingRight: 8 }}
                 >
@@ -44,7 +45,7 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
                 </EuiResizablePanel>
                 <EuiResizableButton />
 
-                <EuiResizablePanel initialSize={75} minSize="65%" mode="main">
+                <EuiResizablePanel initialSize={75} minSize="65%" mode="main" paddingSize="none">
                   <EuiPageBody className="deLayout__canvas">
                     <MemoizedCanvas {...params} />
                   </EuiPageBody>
