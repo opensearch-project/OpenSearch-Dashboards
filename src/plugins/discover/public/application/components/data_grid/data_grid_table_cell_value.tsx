@@ -17,7 +17,7 @@ import { stringify } from '@osd/std';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 
-function fetchSourceTypeDataCell(
+export function fetchSourceTypeDataCell(
   idxPattern: IndexPattern,
   row: Record<string, unknown>,
   columnId: string,

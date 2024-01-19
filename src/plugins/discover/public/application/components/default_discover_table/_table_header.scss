@@ -1,0 +1,18 @@
+.osdDocTableHeader {
+    white-space: nowrap;
+    text-align: left;
+}
+  
+.osdDocTableHeader button {
+    margin-left: $euiSizeXS;
+}
+  
+.osdDocTableHeader__move,
+.osdDocTableHeader__sortChange {
+    opacity: 0;
+  
+    &:focus,
+    th:hover & {
+      opacity: 1;
+    }
+}

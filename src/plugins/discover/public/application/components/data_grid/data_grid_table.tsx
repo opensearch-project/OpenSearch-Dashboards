@@ -19,6 +19,7 @@ import { buildColumns } from '../../utils/columns';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverServices } from '../../../build_services';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import { DefaultDiscoverTable } from '../default_discover_table/default_discover_table';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -95,7 +96,7 @@ export const DataGridTable = ({
     rows,
   ]);
 
-  const dataGridTableColumns = useMemo(
+  const displayedTableColumns = useMemo(
     () =>
       buildDataGridColumns(
         adjustedColumns,
@@ -139,22 +140,27 @@ export const DataGridTable = ({
 
   const table = useMemo(
     () => (
-      <EuiDataGrid
-        aria-labelledby="aria-labelledby"
-        columns={dataGridTableColumns}
-        columnVisibility={dataGridTableColumnsVisibility}
-        leadingControlColumns={leadingControlColumns}
-        data-test-subj="docTable"
-        pagination={pagination}
-        renderCellValue={renderCellValue}
-        rowCount={rowCount}
-        sorting={sorting}
-        toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
-        rowHeightsOptions={rowHeightsOptions}
+      // <EuiDataGrid
+      //   aria-labelledby="aria-labelledby"
+      //   columns={dataGridTableColumns}
+      //   columnVisibility={dataGridTableColumnsVisibility}
+      //   leadingControlColumns={leadingControlColumns}
+      //   data-test-subj="docTable"
+      //   pagination={pagination}
+      //   renderCellValue={renderCellValue}
+      //   rowCount={rowCount}
+      //   sorting={sorting}
+      //   toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
+      //   rowHeightsOptions={rowHeightsOptions}
+      // />
+      <DefaultDiscoverTable 
+        displayedTableColumns={displayedTableColumns}
+        rows={rows}
+        indexPattern={indexPattern}
       />
     ),
     [
-      dataGridTableColumns,
+      displayedTableColumns,
       dataGridTableColumnsVisibility,
       leadingControlColumns,
       pagination,
@@ -184,9 +190,9 @@ export const DataGridTable = ({
         data-test-subj="discoverTable"
       >
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-          <EuiPanel paddingSize="s" style={{ height: '100%' }}>
+        
             {table}
-          </EuiPanel>
+        
         </EuiPanel>
         {inspectedHit && (
           <DataGridFlyout
