@@ -141,8 +141,6 @@ export async function handleDeleteCspRules(
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
-  logger.info('handleDeleteCspRules');
-
   try {
     const deletedCspRulesName = await client.deleteCspRules();
 
