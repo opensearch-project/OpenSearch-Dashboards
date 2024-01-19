@@ -48,8 +48,8 @@ import {
 import { METRIC_TYPE } from '@osd/analytics';
 import { FormattedMessage } from '@osd/i18n/react';
 import { Logos } from 'opensearch-dashboards/public';
-import { getServices } from '../opensearch_dashboards_services';
-import { TelemetryPluginStart } from '../../../../telemetry/public';
+import { getServices } from '../../opensearch_dashboards_services';
+import { TelemetryPluginStart } from '../../../../../telemetry/public';
 import { SampleDataCard } from './sample_data';
 
 interface Props {

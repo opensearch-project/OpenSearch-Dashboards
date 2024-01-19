@@ -32,14 +32,14 @@ import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { Home } from './home';
-import { NewThemeModal } from './new_theme_modal';
+import { NewThemeModal } from '../new_theme_modal';
 
-import { FeatureCatalogueCategory } from '../../services';
+import { FeatureCatalogueCategory } from '../../../services';
 
 const mockHomeConfig = jest.fn();
 const mockUiSettings = jest.fn();
 
-jest.mock('../opensearch_dashboards_services', () => ({
+jest.mock('../../opensearch_dashboards_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
     tutorialVariables: () => ({}),
@@ -56,7 +56,7 @@ jest.mock('../opensearch_dashboards_services', () => ({
   }),
 }));
 
-jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
+jest.mock('../../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   OverviewPageHeader: jest.fn().mockReturnValue(<></>),
   withOpenSearchDashboards: jest.fn((component) => component),

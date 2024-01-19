@@ -31,7 +31,7 @@
 import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import PropTypes from 'prop-types';
-import { Home } from './home';
+import { Home } from './legacy/home';
 import { Homepage } from './homepage';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';

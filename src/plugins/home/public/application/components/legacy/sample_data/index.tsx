@@ -42,7 +42,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { getServices } from '../../opensearch_dashboards_services';
+import { getServices } from '../../../opensearch_dashboards_services';
 
 interface Props {
   urlBasePath: string;
