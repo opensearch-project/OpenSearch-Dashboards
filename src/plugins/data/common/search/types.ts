@@ -76,6 +76,11 @@ export interface IOpenSearchDashboardsSearchResponse<RawResponse = any> {
    */
   isPartial?: boolean;
 
+  /**
+   * Indicates whether the results returned need long numerals treatment
+   */
+  withLongNumeralsSupport?: boolean;
+
   rawResponse: RawResponse;
 }
 
