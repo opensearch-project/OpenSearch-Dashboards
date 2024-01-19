@@ -9,21 +9,21 @@
  * GitHub history for details.
  */
 
-import './_table_header.scss'
+import './_table_header.scss';
 
 import React from 'react';
+import { AnyAsyncThunk } from '@reduxjs/toolkit/dist/matchers';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { SortOrder, getDefaultSort } from '../../view_components/utils/get_default_sort';
-import { AnyAsyncThunk } from '@reduxjs/toolkit/dist/matchers';
 import { TableHeaderColumn } from './table_header_column';
 
 interface Props {
-  displayedTableColumns:any;
-  //columns: string[];
+  displayedTableColumns: any;
+  // columns: string[];
   defaultSortOrder: string;
-  //hideTimeColumn: boolean;
+  // hideTimeColumn: boolean;
   indexPattern: IndexPattern;
-  //isShortDots: boolean;
+  // isShortDots: boolean;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
@@ -31,30 +31,30 @@ interface Props {
 }
 
 export function TableHeader({
-  //columns,
+  // columns,
   displayedTableColumns,
   defaultSortOrder,
-  //hideTimeColumn,
+  // hideTimeColumn,
   indexPattern,
-  //isShortDots,
+  // isShortDots,
   onChangeSortOrder,
   onMoveColumn,
   onRemoveColumn,
   sortOrder,
 }: Props) {
-  //const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
-  console.log("displayedTableColumns", displayedTableColumns)
+  // const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
+  console.log('displayedTableColumns', displayedTableColumns);
   return (
     <tr data-test-subj="docTableHeader" className="osdDocTableHeader">
       <th style={{ width: '24px' }} />
-      {displayedTableColumns.map((col:any) => {
+      {displayedTableColumns.map((col: any) => {
         return (
           <TableHeaderColumn
             key={col.id}
-            colLeftIdx={-1} //TODO
-            colRightIdx={-1} //TODO
+            colLeftIdx={-1} // TODO
+            colRightIdx={-1} // TODO
             displayName={col.display}
-            isRemoveable={false} //TODO
+            isRemoveable={false} // TODO
             isSortable={col.isSortable}
             name={col.schema}
             sortOrder={

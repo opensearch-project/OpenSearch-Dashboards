@@ -153,7 +153,7 @@ export const DataGridTable = ({
       //   toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
       //   rowHeightsOptions={rowHeightsOptions}
       // />
-      <DefaultDiscoverTable 
+      <DefaultDiscoverTable
         displayedTableColumns={displayedTableColumns}
         rows={rows}
         indexPattern={indexPattern}
@@ -189,10 +189,8 @@ export const DataGridTable = ({
         data-description={description}
         data-test-subj="discoverTable"
       >
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
-        
-            {table}
-        
+        <EuiPanel hasBorder={false} hasShadow={true} paddingSize="s" style={{ margin: '8px' }}>
+          {table}
         </EuiPanel>
         {inspectedHit && (
           <DataGridFlyout
