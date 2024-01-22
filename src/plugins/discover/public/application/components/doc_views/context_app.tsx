@@ -7,7 +7,11 @@ import React, { useMemo, Fragment } from 'react';
 import { useCallback } from 'react';
 import { SurrDocType } from './context/api/context';
 import { ActionBar } from './context/components/action_bar/action_bar';
-import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
+import {
+  CONTEXT_STEP_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  TABLE_LEGACY,
+} from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { LOADING_STATUS } from './context/utils/context_query_state';
@@ -16,6 +20,7 @@ import { DataGridTable } from '../data_grid/data_grid_table';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { AppState } from './context/utils/context_state';
+import { LegacyHtmlTable } from '../legacy_table/table';
 
 export interface Props {
   onAddFilter: DocViewFilterFn;
@@ -93,24 +98,28 @@ export function ContextApp({
         onChangeCount={onChangeCount}
         type={SurrDocType.PREDECESSORS}
       />
-      <div className="dscDocsGrid">
-        <DataGridTable
-          aria-label={'ContextTable'}
-          columns={columns}
-          indexPattern={indexPattern}
-          onAddColumn={() => {}}
-          onFilter={onAddFilter}
-          onRemoveColumn={() => {}}
-          onSetColumns={() => {}}
-          onSort={() => {}}
-          sort={sort}
-          rows={rows}
-          displayTimeColumn={displayTimeColumn}
-          services={services}
-          isToolbarVisible={false}
-          isContextView={true}
-        />
-      </div>
+      {services.uiSettings?.get(TABLE_LEGACY) ? (
+        <LegacyHtmlTable />
+      ) : (
+        <div className="dscDocsGrid">
+          <DataGridTable
+            aria-label={'ContextTable'}
+            columns={columns}
+            indexPattern={indexPattern}
+            onAddColumn={() => {}}
+            onFilter={onAddFilter}
+            onRemoveColumn={() => {}}
+            onSetColumns={() => {}}
+            onSort={() => {}}
+            sort={sort}
+            rows={rows}
+            displayTimeColumn={displayTimeColumn}
+            services={services}
+            isToolbarVisible={false}
+            isContextView={true}
+          />
+        </div>
+      )}
       <ActionBar
         defaultStepSize={defaultStepSize}
         docCount={successorCount}

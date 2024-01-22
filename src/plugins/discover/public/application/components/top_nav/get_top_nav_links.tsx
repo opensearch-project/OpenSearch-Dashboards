@@ -17,7 +17,11 @@ import {
   showSaveModal,
 } from '../../../../../saved_objects/public';
 import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  TABLE_LEGACY,
+} from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
@@ -38,6 +42,7 @@ export const getTopNavLinks = (
     store,
     data: { query },
     osdUrlStateStorage,
+    uiSettings,
   } = services;
 
   const newSearch = {
@@ -218,7 +223,26 @@ export const getTopNavLinks = (
     },
   };
 
+  const newTable: TopNavMenuData = {
+    id: 'table-new',
+    label: i18n.translate('discover.localMenu.newTableTitle', {
+      defaultMessage: 'New Table',
+    }),
+    description: i18n.translate('discover.localMenu.newTableDescription', {
+      defaultMessage: 'New Data Grid Table Experience',
+    }),
+    testId: 'tableNewButton',
+    run: async () => {
+      const useLegacyTable = uiSettings.get(TABLE_LEGACY);
+      await uiSettings.set(TABLE_LEGACY, !useLegacyTable);
+      window.location.reload();
+    },
+    type: 'toggle' as const,
+    emphasize: uiSettings.get(TABLE_LEGACY) ? false : true,
+  };
+
   return [
+    newTable,
     newSearch,
     ...(capabilities.discover?.save ? [saveSearch] : []),
     openSearch,

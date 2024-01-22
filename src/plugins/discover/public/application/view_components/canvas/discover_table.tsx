@@ -22,6 +22,8 @@ import { SortOrder } from '../../../saved_searches/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { popularizeField } from '../../helpers/popularize_field';
+import { TABLE_LEGACY } from '../../../../common';
+import { LegacyHtmlTable } from '../../components/legacy_table/table';
 
 interface Props {
   rows?: OpenSearchSearchHit[];
@@ -90,7 +92,9 @@ export const DiscoverTable = ({ rows }: Props) => {
     return <div>{'loading...'}</div>;
   }
 
-  return (
+  return services.uiSettings?.get(TABLE_LEGACY) ? (
+    <LegacyHtmlTable />
+  ) : (
     <DataGridTable
       columns={columns}
       indexPattern={indexPattern}
