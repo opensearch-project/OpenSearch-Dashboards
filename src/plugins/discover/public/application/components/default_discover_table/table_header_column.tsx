@@ -9,9 +9,11 @@
  * GitHub history for details.
  */
 
+import './_table_header.scss';
+
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiFieldText, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from '../../view_components/utils/get_default_sort';
 
 interface Props {
@@ -115,6 +117,7 @@ export function TableHeaderColumn({
       onClick: handleChangeSortOrder,
       testSubject: `docTableHeaderFieldSort_${name}`,
       tooltip: getSortButtonAriaLabel(),
+      iconType: 'sortable',
     },
     // Remove Button
     {
@@ -129,10 +132,11 @@ export function TableHeaderColumn({
       tooltip: i18n.translate('discover.docTable.tableHeader.removeColumnButtonTooltip', {
         defaultMessage: 'Remove Column',
       }),
+      iconType: 'cross',
     },
     // Move Left Button
     {
-      active: colLeftIdx >= 0 && typeof onMoveColumn === 'function',
+      active: (colLeftIdx >= 0 && typeof onMoveColumn === 'function') || true,
       ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the left',
         values: { columnName: name },
@@ -143,10 +147,11 @@ export function TableHeaderColumn({
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
         defaultMessage: 'Move column to the left',
       }),
+      iconType: 'sortLeft',
     },
     // Move Right Button
     {
-      active: colRightIdx >= 0 && typeof onMoveColumn === 'function',
+      active: (colRightIdx >= 0 && typeof onMoveColumn === 'function') || true,
       ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the right',
         values: { columnName: name },
@@ -157,8 +162,11 @@ export function TableHeaderColumn({
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonTooltip', {
         defaultMessage: 'Move column to the right',
       }),
+      iconType: 'sortRight',
     },
   ];
+
+  console.log('column head buttons', buttons);
 
   return (
     <th data-test-subj="docTableHeaderField">
@@ -172,7 +180,8 @@ export function TableHeaderColumn({
               content={button.tooltip}
               key={`button-${idx}`}
             >
-              <button
+              <EuiIcon
+                type={`${button.iconType}`}
                 aria-label={button.ariaLabel}
                 className={button.className}
                 data-test-subj={button.testSubject}

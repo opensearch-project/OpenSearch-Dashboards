@@ -54,9 +54,9 @@ export function TableHeader({
             colLeftIdx={-1} // TODO
             colRightIdx={-1} // TODO
             displayName={col.display}
-            isRemoveable={false} // TODO
+            isRemoveable={true} // TODO
             isSortable={col.isSortable}
-            name={col.schema}
+            name={col.display}
             sortOrder={
               sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
             }
