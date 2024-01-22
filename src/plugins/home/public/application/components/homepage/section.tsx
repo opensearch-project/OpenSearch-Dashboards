@@ -24,7 +24,6 @@ interface Props {
   links?: SectionType['links'];
 }
 
-// TODO: the way this is implemented currently will mount and unmount whenever the section is expanded/collapsed. Do we want to keep it this way?
 export const Section: FC<Props> = ({ render, title, description, links }) => {
   const [isExpanded, setExpanded] = useState(true);
 
