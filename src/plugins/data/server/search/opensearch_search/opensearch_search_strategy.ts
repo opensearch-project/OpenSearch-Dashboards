@@ -49,11 +49,11 @@ export const opensearchSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage,
-  dataSource?: DataSourcePluginSetup
+  dataSource?: DataSourcePluginSetup,
+  withLongNumeralsSupport?: boolean
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
-      logger.debug(`search ${request.params?.index}`);
       const config = await config$.pipe(first()).toPromise();
       const uiSettingsClient = await context.core.uiSettings.client;
 
@@ -73,7 +73,7 @@ export const opensearchSearchStrategyProvider = (
       });
 
       try {
-        const client = await decideClient(context, request);
+        const client = await decideClient(context, request, withLongNumeralsSupport);
         const promise = shimAbortSignal(client.search(params), options?.abortSignal);
 
         const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
@@ -87,6 +87,7 @@ export const opensearchSearchStrategyProvider = (
           isRunning: false,
           rawResponse,
           ...getTotalLoaded(rawResponse._shards),
+          withLongNumeralsSupport,
         };
       } catch (e) {
         if (usage) usage.trackError();

@@ -35,7 +35,7 @@ import { monaco } from '@osd/monaco';
 import { Parser } from 'pegjs';
 
 // @ts-ignore
-import { parse } from '../_generated_/chain';
+import { parse } from '../../common/_generated_/chain';
 
 import { ArgValueSuggestions, FunctionArg, Location } from '../helpers/arg_value_suggestions';
 import { ITimelineFunction, TimelineFunctionArgs } from '../../common/types';
