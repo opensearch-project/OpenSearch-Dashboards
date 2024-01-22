@@ -212,9 +212,6 @@ describe('DataSourceManagement: Utils.ts', () => {
     expect(isValidUrl('')).toBeFalsy();
     expect(isValidUrl('test')).toBeFalsy();
 
-    /* False cases: path name scenario*/
-    expect(isValidUrl('https://test.com/_somepath')).toBeFalsy();
-
     /* True cases */
     expect(isValidUrl('https://test.com')).toBeTruthy();
     expect(isValidUrl('http://test.com')).toBeTruthy();

@@ -103,11 +103,7 @@ export async function testConnection(
 export const isValidUrl = (endpoint: string) => {
   try {
     const url = new URL(endpoint);
-    return (
-      Boolean(url) &&
-      (url.protocol === 'http:' || url.protocol === 'https:') &&
-      (!url.pathname || url.pathname.length === 0 || url.pathname === '/')
-    );
+    return Boolean(url) && (url.protocol === 'http:' || url.protocol === 'https:');
   } catch (e) {
     return false;
   }

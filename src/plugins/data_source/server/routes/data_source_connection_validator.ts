@@ -14,10 +14,21 @@ export class DataSourceConnectionValidator {
 
   async validate() {
     try {
+      let validationResponse;
       // Amazon OpenSearch Serverless does not support .info() API
-      if (this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless)
-        return await this.callDataCluster.cat.indices();
-      return await this.callDataCluster.info();
+      if (
+        this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
+      ) {
+        validationResponse = await this.callDataCluster.cat.indices();
+      } else {
+        validationResponse = await this.callDataCluster.info();
+      }
+
+      if (validationResponse?.statusCode === 200) {
+        return validationResponse;
+      }
+
+      throw new Error(JSON.stringify(validationResponse?.body));
     } catch (e) {
       throw createDataSourceError(e);
     }

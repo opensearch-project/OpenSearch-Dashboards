@@ -131,34 +131,6 @@ export const getMappedDataSources = [
   },
 ];
 
-export const mockDataSourceAttributesWithValidEndpoint = {
-  id: 'test',
-  title: 'create-test-ds',
-  description: 'jest testing',
-  endpoint: 'https://test.com',
-  auth: {
-    type: AuthType.UsernamePasswordType,
-    credentials: {
-      username: 'test123',
-      password: 'test123',
-    },
-  },
-};
-
-export const mockDataSourceAttributesWithInvalidEndpoint = {
-  id: 'test',
-  title: 'create-test-ds',
-  description: 'jest testing',
-  endpoint: 'https://test.com/_somepath',
-  auth: {
-    type: AuthType.UsernamePasswordType,
-    credentials: {
-      username: 'test123',
-      password: 'test123',
-    },
-  },
-};
-
 export const mockDataSourceAttributesWithAuth = {
   id: 'test',
   title: 'create-test-ds',
