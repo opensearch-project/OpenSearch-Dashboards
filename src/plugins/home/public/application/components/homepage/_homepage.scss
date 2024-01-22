@@ -5,3 +5,7 @@
   // This is otherwise not possible with the props on EuiPageTemplate.
   padding: 0 $euiSizeL;
 }
+
+.home-homepage-body--fill {
+  min-height: $euiSize * 50;
+}

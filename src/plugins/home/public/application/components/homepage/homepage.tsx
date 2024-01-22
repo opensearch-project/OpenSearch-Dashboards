@@ -3,12 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, FC, PropsWithChildren } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMount } from 'react-use';
 import { Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiPageTemplate, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiPageTemplate,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiIcon,
+} from '@elastic/eui';
 import {
   HeroSection as HeroSectionType,
   Section as SectionType,
@@ -43,7 +51,89 @@ const useHomepage = () => {
   return { heroes, sections, error, isLoading };
 };
 
-const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
+const Content = () => {
+  const { heroes, sections, error, isLoading } = useHomepage();
+  const { toastNotifications } = getServices();
+
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+
+    toastNotifications.addDanger({
+      title: i18n.translate('home.loadingError.title', {
+        defaultMessage: 'Error loading homepage',
+      }),
+      text: i18n.translate('home.loadingError.description', {
+        defaultMessage:
+          'There was an error loading the homepage. Please refresh the page to try again.',
+      }),
+    });
+
+    // TODO: added a toast, but is there a better way to surface this error?
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }, [toastNotifications, error]);
+
+  if (error) {
+    return (
+      <EuiFlexGroup
+        className="home-homepage-body--fill"
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="cross" color="danger" size="xxl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="home.errorText"
+            defaultMessage="There was an error loading the homepage."
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup
+        className="home-homepage-body--fill"
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner
+            aria-label={i18n.translate('home.loadingSpinner', {
+              defaultMessage: 'Loading homepage',
+            })}
+            size="xl"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage id="home.loadingText" defaultMessage="Loading..." />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  const hero = heroes?.[0];
+
+  return (
+    <>
+      {hero && <HeroSection render={hero.render} />}
+      {sections?.map(({ render, title, description, links }, i) => (
+        <Section key={i} title={title} description={description} links={links} render={render} />
+      ))}
+      <EuiHorizontalRule />
+      <Footer />
+    </>
+  );
+};
+
+export const Homepage = () => {
   const {
     application: { getUrlForApp },
     chrome,
@@ -91,36 +181,7 @@ const Layout: FC<PropsWithChildren<{}>> = ({ children }) => {
         className: 'home-homepage-pageBody',
       }}
     >
-      {children}
+      <Content />
     </EuiPageTemplate>
-  );
-};
-
-export const Homepage = () => {
-  const { heroes, sections, error, isLoading } = useHomepage();
-
-  if (error) {
-    // TODO: what is the correct way to handle errors here?
-    // eslint-disable-next-line no-console
-    console.error(error);
-
-    return <span>Error loading homepage</span>;
-  }
-
-  if (isLoading) {
-    return <span>Loading...</span>;
-  }
-
-  const hero = heroes?.[0];
-
-  return (
-    <Layout>
-      {hero && <HeroSection render={hero.render} />}
-      {sections?.map(({ render, title, description, links }, i) => (
-        <Section key={i} title={title} description={description} links={links} render={render} />
-      ))}
-      <EuiHorizontalRule />
-      <Footer />
-    </Layout>
   );
 };

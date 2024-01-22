@@ -62,8 +62,6 @@ export function HomeApp({ directories, solutions }) {
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 
-  console.log(homeConfig.disableNewHomePage);
-
   const renderTutorialDirectory = (props) => {
     return (
       <TutorialDirectory
