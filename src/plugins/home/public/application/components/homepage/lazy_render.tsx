@@ -13,12 +13,13 @@ interface Props {
 export const LazyRender: FC<Props> = ({ render }) => {
   const ref = useRef(null);
 
-  // by using a useEffect here, this should be a 2 birds with 1 stone situation, where we defer rendering and also get the unmount behavior at the same time
+  // by using a useEffect here, we should be getting both defered rendering and also get the unmount behavior
   useEffect(() => {
     if (!ref.current) {
       return;
     }
 
+    // TODO: support error handling here
     return render(ref.current);
   }, [render]);
 
