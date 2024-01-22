@@ -147,21 +147,20 @@ export const Homepage = () => {
     ]);
   });
 
-  // TODO: this ends up being reversed on the page, so we reverse the array here. There is a performance cost to this, so todo manually reverse it
   const sideItems: React.ReactNode[] = [
+    <EuiButtonEmpty iconType="wrench" href={getUrlForApp('dev_tools', { path: '#/console' })}>
+      <FormattedMessage id="home.devTools" defaultMessage="Dev tools" />
+    </EuiButtonEmpty>,
+    <EuiButtonEmpty iconType="gear" href={getUrlForApp('management')}>
+      <FormattedMessage id="home.manage" defaultMessage="Manage" />
+    </EuiButtonEmpty>,
     <EuiButtonEmpty
       iconType="indexOpen"
       href={getUrlForApp('home', { path: '#/tutorial_directory' })}
     >
       <FormattedMessage id="home.addData" defaultMessage="Add data" />
     </EuiButtonEmpty>,
-    <EuiButtonEmpty iconType="gear" href={getUrlForApp('management')}>
-      <FormattedMessage id="home.manage" defaultMessage="Manage" />
-    </EuiButtonEmpty>,
-    <EuiButtonEmpty iconType="wrench" href={getUrlForApp('dev_tools', { path: '#/console' })}>
-      <FormattedMessage id="home.devTools" defaultMessage="Dev tools" />
-    </EuiButtonEmpty>,
-  ].reverse();
+  ];
 
   return (
     <EuiPageTemplate
