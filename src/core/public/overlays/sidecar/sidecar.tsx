@@ -28,9 +28,9 @@ export const Sidecar = ({ sidecarConfig$, options, setSidecarConfig, i18n, mount
   const classes = classNames(
     'osdSidecarFlyout',
     {
-      'osdSidecarFlyout--dockedRight': sidecarConfig?.dockedDirection === 'right',
-      'osdSidecarFlyout--dockedLeft': sidecarConfig?.dockedDirection === 'left',
-      'osdSidecarFlyout--dockedBottom': sidecarConfig?.dockedDirection === 'bottom',
+      'osdSidecarFlyout--dockedRight': sidecarConfig?.dockedMode === 'right',
+      'osdSidecarFlyout--dockedLeft': sidecarConfig?.dockedMode === 'left',
+      'osdSidecarFlyout--dockedTakeover': sidecarConfig?.dockedMode === 'takeover',
       'osdSidecarFlyout--hide': sidecarConfig?.isHidden === true,
     },
     options.className
@@ -46,7 +46,7 @@ export const Sidecar = ({ sidecarConfig$, options, setSidecarConfig, i18n, mount
 
   const flyoutSizeStyle = useMemo(
     () =>
-      sidecarConfig?.dockedDirection === 'bottom'
+      sidecarConfig?.dockedMode === 'takeover'
         ? {
             height: sidecarConfig?.paddingSize,
           }
@@ -60,9 +60,9 @@ export const Sidecar = ({ sidecarConfig$, options, setSidecarConfig, i18n, mount
     <i18n.Context>
       <div data-test-subj={options['data-test-subj']} style={flyoutSizeStyle} className={classes}>
         <ResizableButton
-          isHorizontal={sidecarConfig?.dockedDirection !== 'bottom'}
+          isHorizontal={sidecarConfig?.dockedMode !== 'takeover'}
           onResize={handleResize}
-          dockedDirection={sidecarConfig?.dockedDirection}
+          dockedMode={sidecarConfig?.dockedMode}
           flyoutSize={sidecarConfig?.paddingSize ?? 0}
           minSize={sidecarConfig?.minSize}
         />

@@ -13,19 +13,19 @@ interface Props {
   isHorizontal: boolean;
   onResize: (size: number) => void;
   flyoutSize: number;
-  dockedDirection: ISidecarConfig['dockedDirection'] | undefined;
+  dockedMode: ISidecarConfig['dockedMode'] | undefined;
   minSize?: number;
 }
 
 const MIN_SIDECAR_SIZE = 200;
 
 export const ResizableButton = ({
-  dockedDirection,
+  dockedMode,
   onResize,
   flyoutSize,
   minSize = MIN_SIDECAR_SIZE,
 }: Props) => {
-  const isHorizontal = dockedDirection !== 'bottom';
+  const isHorizontal = dockedMode !== 'takeover';
 
   const classes = classNames('resizableButton', {
     'resizableButton--vertical': !isHorizontal,
@@ -47,7 +47,7 @@ export const ResizableButton = ({
       };
       const onMouseMove = (e: MouseEvent | TouchEvent) => {
         let offset;
-        if (dockedDirection === 'left') {
+        if (dockedMode === 'left') {
           offset = getPosition(e, isHorizontal) - initialMouseXorY.current;
         } else {
           offset = initialMouseXorY.current - getPosition(e, isHorizontal);
@@ -63,7 +63,7 @@ export const ResizableButton = ({
       initialMouseXorY.current = getPosition(event, isHorizontal);
       initialFlyoutSize.current = flyoutSize;
     },
-    [isHorizontal, flyoutSize, dockedDirection, minSize, onResize]
+    [isHorizontal, flyoutSize, dockedMode, minSize, onResize]
   );
 
   return (

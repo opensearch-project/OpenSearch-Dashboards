@@ -14,7 +14,7 @@ const createStartContractMock = () => {
     setSidecarConfig: jest.fn(),
     getSidecarConfig$: jest.fn().mockReturnValue(
       new BehaviorSubject<ISidecarConfig>({
-        dockedDirection: 'right',
+        dockedMode: 'right',
         paddingSize: 640,
       })
     ),

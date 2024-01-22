@@ -107,7 +107,8 @@ interface StartDeps {
 }
 
 export interface ISidecarConfig {
-  dockedDirection: 'left' | 'right' | 'bottom';
+  // takeover mode will docked to bottom
+  dockedMode: 'left' | 'right' | 'takeover';
   paddingSize: number;
   minSize?: number;
   isHidden?: boolean;
@@ -128,7 +129,7 @@ export class SidecarService {
       if (
         sidecarConfig$.value ||
         // init
-        (!sidecarConfig$.value && config.dockedDirection && config.paddingSize)
+        (!sidecarConfig$.value && config.dockedMode && config.paddingSize)
       ) {
         sidecarConfig$.next({ ...sidecarConfig$.value, ...config } as ISidecarConfig);
       }

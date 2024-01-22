@@ -22,13 +22,10 @@ export const getPosition = (
 };
 
 export const getOsdSidecarPaddingStyle = (config: ISidecarConfig | undefined) => {
-  if (
-    !config?.isHidden &&
-    (config?.dockedDirection === 'left' || config?.dockedDirection === 'right')
-  ) {
-    const { dockedDirection, paddingSize } = config;
+  if (!config?.isHidden && (config?.dockedMode === 'left' || config?.dockedMode === 'right')) {
+    const { dockedMode, paddingSize } = config;
     return {
-      [`padding${dockedDirection === 'left' ? 'Left' : 'Right'}`]: paddingSize,
+      [`padding${dockedMode === 'left' ? 'Left' : 'Right'}`]: paddingSize,
     };
   }
   return {};

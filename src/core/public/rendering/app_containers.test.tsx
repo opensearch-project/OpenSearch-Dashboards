@@ -40,7 +40,7 @@ describe('AppWrapper', () => {
   it('toggles the `hidden-chrome` class depending on the chrome visibility state', () => {
     const chromeVisible$ = new BehaviorSubject<boolean>(true);
     const sidecarConfig$ = new BehaviorSubject<ISidecarConfig>({
-      dockedDirection: 'right',
+      dockedMode: 'right',
       paddingSize: 640,
     });
 

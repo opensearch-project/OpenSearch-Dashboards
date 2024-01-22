@@ -74,7 +74,7 @@ function mockProps() {
     survey: '/',
     logos: chromeServiceMock.createStartContract().logos,
     sidecarConfig$: new BehaviorSubject<ISidecarConfig>({
-      dockedDirection: 'right',
+      dockedMode: 'right',
       paddingSize: 640,
     }),
   };
