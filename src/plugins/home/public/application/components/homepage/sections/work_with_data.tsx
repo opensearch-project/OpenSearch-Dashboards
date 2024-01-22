@@ -16,11 +16,6 @@ import { i18n } from '@osd/i18n';
 import { Section } from '../../../../services/section_type/section_type';
 import { renderFn } from './utils';
 import { getServices } from '../../../opensearch_dashboards_services';
-import ecommerceLight from '../../../../assets/sample_data_resources/ecommerce/dashboard_new.png';
-import ecommerceDark from '../../../../assets/sample_data_resources/ecommerce/dashboard_dark_new.png';
-import ingestion from '../../../../assets/ingestion.png';
-import discoverLight from '../../../../assets/discover_light.png';
-import discoverDark from '../../../../assets/discover_dark.png';
 
 const Card: FC<{
   imgSrc: string;
@@ -40,27 +35,31 @@ const Card: FC<{
   footerUrl,
   footerText,
   footerExternal,
-}) => (
-  <EuiFlexItem grow={1}>
-    <EuiCard
-      image={<EuiImage src={imgSrc} alt={imgAlt} />}
-      title={title}
-      description={description}
-      footer={
-        <EuiButton
-          size="s"
-          fullWidth
-          href={footerUrl}
-          target={footerExternal ? '_blank' : undefined}
-          {...footerButtonProps}
-        >
-          {footerText}
-        </EuiButton>
-      }
-      textAlign="left"
-    />
-  </EuiFlexItem>
-);
+}) => {
+  const { addBasePath } = getServices();
+
+  return (
+    <EuiFlexItem grow={1}>
+      <EuiCard
+        image={<EuiImage src={addBasePath(imgSrc)} alt={imgAlt} />}
+        title={title}
+        description={description}
+        footer={
+          <EuiButton
+            size="s"
+            fullWidth
+            href={footerUrl}
+            target={footerExternal ? '_blank' : undefined}
+            {...footerButtonProps}
+          >
+            {footerText}
+          </EuiButton>
+        }
+        textAlign="left"
+      />
+    </EuiFlexItem>
+  );
+};
 
 const render = renderFn(() => {
   const services = getServices();
@@ -70,7 +69,9 @@ const render = renderFn(() => {
   return (
     <EuiFlexGroup wrap direction="row" alignItems="stretch">
       <Card
-        imgSrc={darkMode ? ecommerceDark : ecommerceLight}
+        imgSrc={`/plugins/home/assets/sample_data_resources/ecommerce/${
+          darkMode ? 'dashboard_dark_new.png' : 'dashboard_new.png'
+        }`}
         imgAlt={i18n.translate('home.sections.workWithData.sampleData.alt', {
           defaultMessage: 'Sample data image',
         })}
@@ -87,7 +88,7 @@ const render = renderFn(() => {
         })}
       />
       <Card
-        imgSrc={ingestion}
+        imgSrc="/plugins/home/assets/ingestion.png"
         imgAlt={i18n.translate('home.sections.workWithData.ingest.alt', {
           defaultMessage: 'Ingestion image',
         })}
@@ -106,7 +107,7 @@ const render = renderFn(() => {
         footerExternal
       />
       <Card
-        imgSrc={darkMode ? discoverDark : discoverLight}
+        imgSrc={`/plugins/home/assets/${darkMode ? 'discover_dark.png' : 'discover_light.png'}`}
         imgAlt={i18n.translate('home.sections.workWithData.explore.alt', {
           defaultMessage: 'Explore image',
         })}
