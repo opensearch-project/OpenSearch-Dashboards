@@ -37,7 +37,7 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
                   initialSize={25}
                   minSize="260px"
                   mode="collapsible"
-                  style={{ paddingRight: 8 }}
+                  style={isMobile ? { paddingBottom: 8 } : { paddingRight: 8 }}
                 >
                   <Sidebar>
                     <MemoizedPanel {...params} />
