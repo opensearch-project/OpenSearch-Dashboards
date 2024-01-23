@@ -105,11 +105,6 @@ describe('DataSourceSelectable', () => {
             getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
             getName: jest.fn().mockReturnValue('Index patterns'),
           } as unknown) as DataSourceType,
-          ({
-            getDataSet: jest.fn().mockResolvedValue([]),
-            getType: jest.fn().mockReturnValue('s3glue'),
-            getName: jest.fn().mockReturnValue('Amazon S3'),
-          } as unknown) as DataSourceType,
         ]}
         dataSourceOptionList={mockDataSourceOptionList}
         selectedSources={selectedSourcesMock}
@@ -155,11 +150,6 @@ describe('DataSourceSelectable', () => {
     render(
       <DataSourceSelectable
         dataSources={[
-          ({
-            getDataSet: jest.fn().mockResolvedValue([]),
-            getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
-            getName: jest.fn().mockReturnValue('Index patterns'),
-          } as unknown) as DataSourceType,
           ({
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('s3glue'),
