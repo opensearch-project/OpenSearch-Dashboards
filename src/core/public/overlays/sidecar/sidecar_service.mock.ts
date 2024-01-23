@@ -6,7 +6,7 @@
 import type { PublicMethodsOf } from '@osd/utility-types';
 import { SidecarService, OverlaySidecarStart } from './sidecar_service';
 import { BehaviorSubject } from 'rxjs';
-import { ISidecarConfig } from './sidecar_service';
+import { ISidecarConfig, SIDECAR_DOCKED_MODE } from './sidecar_service';
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<OverlaySidecarStart> = {
@@ -14,7 +14,7 @@ const createStartContractMock = () => {
     setSidecarConfig: jest.fn(),
     getSidecarConfig$: jest.fn().mockReturnValue(
       new BehaviorSubject<ISidecarConfig>({
-        dockedMode: 'right',
+        dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
         paddingSize: 640,
       })
     ),

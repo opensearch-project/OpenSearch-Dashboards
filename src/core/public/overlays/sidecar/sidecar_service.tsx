@@ -106,9 +106,14 @@ interface StartDeps {
   targetDomElement: Element;
 }
 
+export enum SIDECAR_DOCKED_MODE {
+  LEFT = 'left',
+  RIGHT = 'right',
+  TAKEOVER = 'takeover',
+}
 export interface ISidecarConfig {
   // takeover mode will docked to bottom
-  dockedMode: 'left' | 'right' | 'takeover';
+  dockedMode: SIDECAR_DOCKED_MODE;
   paddingSize: number;
   minSize?: number;
   isHidden?: boolean;

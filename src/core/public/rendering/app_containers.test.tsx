@@ -34,13 +34,13 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { AppWrapper, AppContainer } from './app_containers';
-import { ISidecarConfig } from '../overlays';
+import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../overlays';
 
 describe('AppWrapper', () => {
   it('toggles the `hidden-chrome` class depending on the chrome visibility state', () => {
     const chromeVisible$ = new BehaviorSubject<boolean>(true);
     const sidecarConfig$ = new BehaviorSubject<ISidecarConfig>({
-      dockedMode: 'right',
+      dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
       paddingSize: 640,
     });
 

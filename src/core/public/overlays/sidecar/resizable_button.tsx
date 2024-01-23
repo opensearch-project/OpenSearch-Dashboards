@@ -7,7 +7,7 @@ import React, { useCallback, useRef } from 'react';
 import classNames from 'classnames';
 import './rsizable_button.scss';
 import { getPosition } from './helper';
-import { ISidecarConfig } from './sidecar_service';
+import { ISidecarConfig, SIDECAR_DOCKED_MODE } from './sidecar_service';
 
 interface Props {
   isHorizontal: boolean;
@@ -25,7 +25,7 @@ export const ResizableButton = ({
   flyoutSize,
   minSize = MIN_SIDECAR_SIZE,
 }: Props) => {
-  const isHorizontal = dockedMode !== 'takeover';
+  const isHorizontal = dockedMode !== SIDECAR_DOCKED_MODE.TAKEOVER;
 
   const classes = classNames('resizableButton', {
     'resizableButton--vertical': !isHorizontal,
