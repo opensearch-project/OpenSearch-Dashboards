@@ -25,6 +25,9 @@ import { getServices } from '../../opensearch_dashboards_services';
 import { HeroSection } from './hero_section';
 import { Section } from './section';
 import { Footer } from './footer';
+import { Welcome } from '../welcome';
+
+const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
 const useHomepage = () => {
   const { sectionTypes } = getServices();
@@ -51,9 +54,63 @@ const useHomepage = () => {
   return { heroes, sections, error, isLoading };
 };
 
+const useShowWelcome = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isNewInstance, setIsNewInstance] = useState(false);
+  const { homeConfig, savedObjectsClient } = getServices();
+
+  const isWelcomeEnabled = !(
+    homeConfig.disableWelcomeScreen || localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
+  );
+
+  useEffect(() => {
+    if (!isWelcomeEnabled) {
+      setIsLoading(false);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    savedObjectsClient
+      .find({
+        type: 'index-pattern',
+        fields: ['title'],
+        search: `*`,
+        searchFields: ['title'],
+        perPage: 1,
+      })
+      .then((resp) => {
+        setIsLoading(false);
+        setIsNewInstance(resp.total === 0);
+      });
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [isWelcomeEnabled, savedObjectsClient]);
+
+  return {
+    isLoading,
+    showWelcome: isWelcomeEnabled && isNewInstance,
+    onSkip: () => {
+      localStorage.setItem(KEY_ENABLE_WELCOME, 'false');
+      setIsNewInstance(false);
+    },
+  };
+};
+
 const Content = () => {
-  const { heroes, sections, error, isLoading } = useHomepage();
-  const { toastNotifications } = getServices();
+  const { heroes, sections, error, isLoading: isHomepageLoading } = useHomepage();
+  const {
+    chrome: { logos },
+    getBasePath,
+    injectedMetadata: { getBranding },
+    telemetry,
+    toastNotifications,
+  } = getServices();
+  const { isLoading: isWelcomeLoading, showWelcome, onSkip } = useShowWelcome();
 
   useEffect(() => {
     if (!error) {
@@ -96,7 +153,7 @@ const Content = () => {
     );
   }
 
-  if (isLoading) {
+  if (isHomepageLoading || isWelcomeLoading) {
     return (
       <EuiFlexGroup
         className="home-homepage-body--fill"
@@ -119,6 +176,18 @@ const Content = () => {
     );
   }
 
+  if (showWelcome) {
+    return (
+      <Welcome
+        urlBasePath={getBasePath()}
+        onSkip={onSkip}
+        telemetry={telemetry}
+        branding={getBranding()}
+        logos={logos}
+      />
+    );
+  }
+
   const hero = heroes?.[0];
 
   return (
@@ -137,7 +206,19 @@ export const Homepage = () => {
   const {
     application: { getUrlForApp },
     chrome,
+    injectedMetadata: { getBranding },
   } = getServices();
+
+  const branding = getBranding();
+  // TODO: is there a better way to check if the title is custom?
+  const title =
+    branding.applicationTitle !== 'OpenSearch Dashboards'
+      ? i18n.translate('home.customBrandingTitle', {
+          defaultMessage: '{title} - Home',
+          values: { title: branding.applicationTitle },
+        })
+      : i18n.translate('home.title', { defaultMessage: 'Home' });
+  const mark = (branding.darkMode && branding.mark?.darkModeUrl) || branding.mark?.defaultUrl;
 
   useMount(() => {
     chrome.setBreadcrumbs([
@@ -148,7 +229,11 @@ export const Homepage = () => {
   });
 
   const sideItems: React.ReactNode[] = [
-    <EuiButtonEmpty iconType="wrench" href={getUrlForApp('dev_tools', { path: '#/console' })}>
+    <EuiButtonEmpty
+      iconType="wrench"
+      href={getUrlForApp('dev_tools', { path: '#/console' })}
+      data-test-subj="homeSynopsisLinkconsole"
+    >
       <FormattedMessage id="home.devTools" defaultMessage="Dev tools" />
     </EuiButtonEmpty>,
     <EuiButtonEmpty iconType="gear" href={getUrlForApp('management')}>
@@ -166,9 +251,13 @@ export const Homepage = () => {
     <EuiPageTemplate
       restrictWidth={1400}
       pageHeader={{
-        pageTitle: i18n.translate('home.title', { defaultMessage: 'Home' }),
+        pageTitle: <span data-test-subj="dashboardCustomTitle">{title}</span>,
         rightSideItems: sideItems,
         alignItems: 'center',
+        iconType: mark,
+        iconProps: {
+          'data-test-subj': mark && 'dashboardCustomLogo',
+        },
       }}
       pageContentProps={{
         color: 'transparent',

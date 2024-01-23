@@ -44,7 +44,7 @@ import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { NewThemeModal } from '../new_theme_modal';
 import { SolutionsSection } from './solutions_section';
-import { Welcome } from './welcome';
+import { Welcome } from '../welcome';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 const KEY_ENABLE_NEW_THEME_MODAL = 'home:newThemeModal:show';
