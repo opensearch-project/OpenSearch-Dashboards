@@ -13,7 +13,7 @@ import './_table_header.scss';
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFieldText, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldText, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from '../../view_components/utils/get_default_sort';
 
 interface Props {
@@ -136,7 +136,7 @@ export function TableHeaderColumn({
     },
     // Move Left Button
     {
-      active: (colLeftIdx >= 0 && typeof onMoveColumn === 'function') || true,
+      active: colLeftIdx >= 0 && typeof onMoveColumn === 'function',
       ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the left',
         values: { columnName: name },
@@ -151,7 +151,7 @@ export function TableHeaderColumn({
     },
     // Move Right Button
     {
-      active: (colRightIdx >= 0 && typeof onMoveColumn === 'function') || true,
+      active: colRightIdx >= 0 && typeof onMoveColumn === 'function',
       ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the right',
         values: { columnName: name },
@@ -169,7 +169,7 @@ export function TableHeaderColumn({
   console.log('column head buttons', buttons);
 
   return (
-    <th data-test-subj="docTableHeaderField">
+    <th data-test-subj="docTableHeaderField" className="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`}>
         {displayName}
         {buttons
@@ -177,13 +177,14 @@ export function TableHeaderColumn({
           .map((button, idx) => (
             <EuiToolTip
               id={`docTableHeader-${name}-tt`}
+              delay="long"
               content={button.tooltip}
               key={`button-${idx}`}
             >
-              <EuiIcon
-                type={`${button.iconType}`}
+              <EuiButtonIcon
+                iconType={`${button.iconType}`}
                 aria-label={button.ariaLabel}
-                className={button.className}
+                className="docTableHeaderField__actionButton"
                 data-test-subj={button.testSubject}
                 onClick={button.onClick}
               />

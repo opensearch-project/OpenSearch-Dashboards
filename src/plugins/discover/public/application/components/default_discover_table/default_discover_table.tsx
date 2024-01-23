@@ -23,7 +23,10 @@ export const DefaultDiscoverTable = ({
   // toolbarVisibility,
   // rowHeightsOptions,
   indexPattern,
+  sortOrder,
+  onChangeSortOrder,
 }) => {
+  // console.log("sorting", sorting)
   return (
     indexPattern && (
       <table data-test-subj="docTable" className="osd-table table">
@@ -34,10 +37,10 @@ export const DefaultDiscoverTable = ({
             // hideTimeColumn,
             indexPattern={indexPattern}
             // isShortDots,
-            onChangeSortOrder={() => {}}
+            onChangeSortOrder={onChangeSortOrder}
             onMoveColumn={() => {}}
             onRemoveColumn={() => {}}
-            sortOrder={[]}
+            sortOrder={sortOrder}
           />
         </thead>
         <tbody>

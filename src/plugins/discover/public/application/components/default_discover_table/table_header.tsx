@@ -43,18 +43,27 @@ export function TableHeader({
   sortOrder,
 }: Props) {
   // const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
-  console.log('displayedTableColumns', displayedTableColumns);
+  // console.log('displayedTableColumns', displayedTableColumns);
+  console.log('timefield name', indexPattern.timeFieldName);
+  const timeColName = indexPattern.timeFieldName;
   return (
     <tr data-test-subj="docTableHeader" className="osdDocTableHeader">
       <th style={{ width: '24px' }} />
-      {displayedTableColumns.map((col: any) => {
+      {displayedTableColumns.map((col: any, idx, cols) => {
+        const colLeftIdx =
+          !col.actions.showMoveLeft || idx - 1 <= 0 || col.id === timeColName ? -1 : idx - 1;
+        const colRightIdx =
+          !col.actions.showMoveRight || idx + 1 >= cols.length || col.id === timeColName
+            ? -1
+            : idx + 1;
+        console.log('index', colLeftIdx, colRightIdx);
         return (
           <TableHeaderColumn
             key={col.id}
-            colLeftIdx={-1} // TODO
-            colRightIdx={-1} // TODO
+            colLeftIdx={colLeftIdx}
+            colRightIdx={colRightIdx}
             displayName={col.display}
-            isRemoveable={true} // TODO
+            isRemoveable={col.actions.showHide}
             isSortable={col.isSortable}
             name={col.display}
             sortOrder={

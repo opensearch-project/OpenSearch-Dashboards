@@ -138,6 +138,11 @@ export const DataGridTable = ({
     ];
   }, []);
 
+  // console.log("sorting in data grid", sort)
+  // console.log("onsort", onSort)
+
+  console.log('displayedTableColumns', displayedTableColumns);
+
   const table = useMemo(
     () => (
       // <EuiDataGrid
@@ -157,6 +162,8 @@ export const DataGridTable = ({
         displayedTableColumns={displayedTableColumns}
         rows={rows}
         indexPattern={indexPattern}
+        sortOrder={sort}
+        onChangeSortOrder={onSort}
       />
     ),
     [

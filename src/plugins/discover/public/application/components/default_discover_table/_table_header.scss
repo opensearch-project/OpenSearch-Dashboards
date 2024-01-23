@@ -16,3 +16,19 @@
       opacity: 1;
     }
 }
+
+.docTableHeaderField {
+    &__actionButton {
+        opacity: 0;
+        transition: opacity $euiAnimSpeedFast;
+
+        @include ouiBreakpoint("xs", "s", "m") {
+        opacity: 1;
+      }
+    }
+
+    &:hover &__actionButton,
+    &:focus &__actionButton {
+        opacity: 1;
+    }
+}
