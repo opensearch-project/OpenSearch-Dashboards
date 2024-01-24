@@ -108,9 +108,9 @@ export function HomeApp({ directories, solutions }) {
           <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
           </Route>
-          {homeConfig.disableNewHomePage ? (
+          {homeConfig.disableNextHomePage ? (
             <>
-              <Route exact path="/new">
+              <Route exact path="/next-home">
                 {homepage}
               </Route>
               <Route exact path="/">
@@ -119,7 +119,7 @@ export function HomeApp({ directories, solutions }) {
             </>
           ) : (
             <>
-              <Route exact path="/legacy">
+              <Route exact path="/legacy-home">
                 {legacyHome}
               </Route>
               <Route exact path="/">
