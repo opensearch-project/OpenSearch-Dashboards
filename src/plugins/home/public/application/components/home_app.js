@@ -85,6 +85,20 @@ export function HomeApp({ directories, solutions }) {
     );
   };
 
+  const legacyHome = (
+    <Home
+      addBasePath={addBasePath}
+      directories={directories}
+      solutions={solutions}
+      find={savedObjectsClient.find}
+      localStorage={localStorage}
+      urlBasePath={getBasePath()}
+      telemetry={telemetry}
+    />
+  );
+
+  const homepage = <Homepage />;
+
   return (
     <I18nProvider>
       <Router>
@@ -94,21 +108,24 @@ export function HomeApp({ directories, solutions }) {
           <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
           </Route>
-          <Route exact path={homeConfig.disableNewHomePage ? '/' : '/legacy'}>
-            <Home
-              addBasePath={addBasePath}
-              directories={directories}
-              solutions={solutions}
-              find={savedObjectsClient.find}
-              localStorage={localStorage}
-              urlBasePath={getBasePath()}
-              telemetry={telemetry}
-            />
-          </Route>
-          {!homeConfig.disableNewHomePage && (
-            <Route exact path="/">
-              <Homepage />
-            </Route>
+          {homeConfig.disableNewHomePage ? (
+            <>
+              <Route exact path="/new">
+                {homepage}
+              </Route>
+              <Route exact path="/">
+                {legacyHome}
+              </Route>
+            </>
+          ) : (
+            <>
+              <Route exact path="/legacy">
+                {legacyHome}
+              </Route>
+              <Route exact path="/">
+                {homepage}
+              </Route>
+            </>
           )}
           <Route path="*" exact={true} component={RedirectToDefaultApp} />
         </Switch>
