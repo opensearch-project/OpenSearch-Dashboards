@@ -39,7 +39,7 @@
 #home.disableNewThemeModal: false
 
 # Set the value to true to disable the new homepage experience
-#home.disableNewHomePage: false
+#home.disableNewHomePage: true
 
 # Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
 # This settings should be used for large clusters or for clusters with ingest heavy nodes.
