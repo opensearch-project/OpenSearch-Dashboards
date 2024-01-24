@@ -27,6 +27,7 @@ export interface DataGridTableProps {
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
+  onReorderColumn: (col: string, source: number, destination: number) => void;
   onSort: (sort: SortOrder[]) => void;
   rows: OpenSearchSearchHit[];
   onSetColumns: (columns: string[]) => void;
@@ -45,6 +46,7 @@ export const DataGridTable = ({
   onAddColumn,
   onFilter,
   onRemoveColumn,
+  onReorderColumn,
   onSetColumns,
   onSort,
   sort,
@@ -164,6 +166,8 @@ export const DataGridTable = ({
         indexPattern={indexPattern}
         sortOrder={sort}
         onChangeSortOrder={onSort}
+        onRemoveColumn={onRemoveColumn}
+        onReorderColumn={onReorderColumn}
       />
     ),
     [

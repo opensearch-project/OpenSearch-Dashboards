@@ -38,7 +38,7 @@ export function TableHeader({
   indexPattern,
   // isShortDots,
   onChangeSortOrder,
-  onMoveColumn,
+  onReorderColumn,
   onRemoveColumn,
   sortOrder,
 }: Props) {
@@ -57,9 +57,11 @@ export function TableHeader({
             ? -1
             : idx + 1;
         console.log('index', colLeftIdx, colRightIdx);
+
         return (
           <TableHeaderColumn
             key={col.id}
+            currentIdx={idx}
             colLeftIdx={colLeftIdx}
             colRightIdx={colRightIdx}
             displayName={col.display}
@@ -69,7 +71,7 @@ export function TableHeader({
             sortOrder={
               sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
             }
-            onMoveColumn={onMoveColumn}
+            onReorderColumn={onReorderColumn}
             onRemoveColumn={onRemoveColumn}
             onChangeSortOrder={onChangeSortOrder}
           />

@@ -13,18 +13,11 @@ import { TableRow } from './table_rows';
 export const DefaultDiscoverTable = ({
   displayedTableColumns,
   rows,
-  // dataGridTableColumnsVisibility,
-  // leadingControlColumns,
-  // pagination,
-  // renderCellValue,
-  // rowCount,
-  // sorting,
-  // isToolbarVisible,
-  // toolbarVisibility,
-  // rowHeightsOptions,
   indexPattern,
   sortOrder,
   onChangeSortOrder,
+  onRemoveColumn,
+  onReorderColumn,
 }) => {
   // console.log("sorting", sorting)
   return (
@@ -38,8 +31,8 @@ export const DefaultDiscoverTable = ({
             indexPattern={indexPattern}
             // isShortDots,
             onChangeSortOrder={onChangeSortOrder}
-            onMoveColumn={() => {}}
-            onRemoveColumn={() => {}}
+            onReorderColumn={onReorderColumn}
+            onRemoveColumn={onRemoveColumn}
             sortOrder={sortOrder}
           />
         </thead>

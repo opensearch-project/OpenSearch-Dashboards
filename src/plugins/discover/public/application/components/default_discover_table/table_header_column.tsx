@@ -36,6 +36,7 @@ const sortDirectionToIcon: Record<string, string> = {
 };
 
 export function TableHeaderColumn({
+  currentIdx,
   colLeftIdx,
   colRightIdx,
   displayName,
@@ -43,7 +44,7 @@ export function TableHeaderColumn({
   isSortable,
   name,
   onChangeSortOrder,
-  onMoveColumn,
+  onReorderColumn,
   onRemoveColumn,
   sortOrder,
 }: Props) {
@@ -136,13 +137,13 @@ export function TableHeaderColumn({
     },
     // Move Left Button
     {
-      active: colLeftIdx >= 0 && typeof onMoveColumn === 'function',
+      active: colLeftIdx >= 0 && typeof onReorderColumn === 'function',
       ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the left',
         values: { columnName: name },
       }),
       className: 'fa fa-angle-double-left osdDocTableHeader__move',
-      onClick: () => onMoveColumn && onMoveColumn(name, colLeftIdx),
+      onClick: () => onReorderColumn && onReorderColumn(name, currentIdx, colLeftIdx),
       testSubject: `docTableMoveLeftHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
         defaultMessage: 'Move column to the left',
@@ -151,13 +152,13 @@ export function TableHeaderColumn({
     },
     // Move Right Button
     {
-      active: colRightIdx >= 0 && typeof onMoveColumn === 'function',
+      active: colRightIdx >= 0 && typeof onReorderColumn === 'function',
       ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the right',
         values: { columnName: name },
       }),
       className: 'fa fa-angle-double-right osdDocTableHeader__move',
-      onClick: () => onMoveColumn && onMoveColumn(name, colRightIdx),
+      onClick: () => onReorderColumn && onReorderColumn(name, currentIdx, colRightIdx),
       testSubject: `docTableMoveRightHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonTooltip', {
         defaultMessage: 'Move column to the right',
