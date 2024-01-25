@@ -20,7 +20,7 @@ export function defineRoutes(
 ) {
   router.get(
     {
-      path: '/api/configuration/existsCspRules',
+      path: '/api/config/csp/exists',
       validate: false,
     },
     async (context, request, response) => {
@@ -32,7 +32,7 @@ export function defineRoutes(
 
   router.get(
     {
-      path: '/api/configuration/getCspRules',
+      path: '/api/config/csp/get',
       validate: false,
     },
     async (context, request, response) => {
@@ -44,7 +44,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: '/api/configuration/updateCspRules',
+      path: '/api/config/csp/update',
       validate: {
         body: schema.object({
           value: schema.string(),
@@ -60,7 +60,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: '/api/configuration/deleteCspRules',
+      path: '/api/config/csp/delete',
       validate: false,
     },
     async (context, request, response) => {
