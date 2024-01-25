@@ -286,6 +286,8 @@ _This step is only needed if you want your dev environment to also start with se
 
 To startup the OpenSearch snapshot with security
 
+> OpenSearch has strong password requirements and will fail to bootstrap if the password requirements are not met. e.g. myStrongPassword123!
+
 1. Run `export OPENSEARCH_INITIAL_ADMIN_PASSWORD=<initial admin password>` since it's needed by the configuration script
 2. Run `yarn opensearch snapshot --security`
 3. Wait a few seconds while the plugin is installed, configured, and OpenSearch starts up.
