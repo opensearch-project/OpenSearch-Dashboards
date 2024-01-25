@@ -1,7 +1,4 @@
-.osdDocTableCell__dataField {
-    white-space: pre-wrap;
-  }
-  
+
   .osdDocTableCell__toggleDetails {
     padding: 4px 0 0 !important;
   }
@@ -18,18 +15,22 @@
    * 3. Show on focus to enable keyboard accessibility.
    */
   
-  .osdDocTableRowFilterButton {
-    appearance: none;
-    background-color: $euiColorEmptyShade;
-    border: none;
-    padding: 0 $euiSizeXS;
-    font-size: $euiFontSizeS;
-    line-height: 1; /* 1 */
-    display: inline-block;
-    opacity: 0; /* 2 */
-  
-    &:focus {
-      opacity: 1; /* 3 */
+  .osdDocTableCell {
+    white-space: pre-wrap;
+
+    &__filterButton {
+      opacity: 0;
+      transition: opacity $euiAnimSpeedFast;
+
+      @include ouiBreakpoint("xs", "s", "m") {
+        opacity: 1;
+      }
+    }
+
+    &:hover &__filterButton,
+    &:focus &__filterButton {
+        opacity: 1;
     }
   }
+
   

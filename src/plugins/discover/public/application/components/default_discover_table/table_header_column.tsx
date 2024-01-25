@@ -167,8 +167,6 @@ export function TableHeaderColumn({
     },
   ];
 
-  console.log('column head buttons', buttons);
-
   return (
     <th data-test-subj="docTableHeaderField" className="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`}>
@@ -178,7 +176,6 @@ export function TableHeaderColumn({
           .map((button, idx) => (
             <EuiToolTip
               id={`docTableHeader-${name}-tt`}
-              delay="long"
               content={button.tooltip}
               key={`button-${idx}`}
             >

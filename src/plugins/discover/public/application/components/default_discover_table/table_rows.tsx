@@ -10,14 +10,23 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGridColumn, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { AnyAction } from '@reduxjs/toolkit';
 import { fatalErrorsServiceMock } from 'src/core/public/mocks';
 import { TableCell } from './table_cell';
 import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
 import { DocViewer } from '../doc_viewer/doc_viewer';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { IndexPattern } from '../../../opensearch_dashboards_services';
 
-export const TableRow = ({ row, columns, indexPattern }) => {
+export interface TableRowProps {
+  row: OpenSearchSearchHit;
+  rowIndex: number;
+  columns: EuiDataGridColumn[];
+  indexPattern: IndexPattern;
+}
+
+export const TableRow = ({ row, rowIndex, columns, indexPattern }: TableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   console.log('row', row);
   const tableRow = (
@@ -38,6 +47,7 @@ export const TableRow = ({ row, columns, indexPattern }) => {
             key={row._id + column.id}
             column={column}
             row={row}
+            rowIndex={rowIndex}
             indexPattern={indexPattern}
           />
         );
