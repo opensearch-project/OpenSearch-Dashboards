@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ISourceDataSet, IndexPatternOption } from '../datasource';
@@ -118,13 +118,24 @@ export const DataSourceSelectable = ({
     [onDataSourceSelect]
   );
 
+  const memorizedDataSourceOptionList = useMemo(() => {
+    return dataSourceOptionList.map((dsGroup: DataSourceGroup) => {
+      return {
+        ...dsGroup,
+        options: [...dsGroup.options].sort((ds1, ds2) => {
+          return ds1.label.localeCompare(ds2.label, undefined, { sensitivity: 'base' });
+        }),
+      };
+    });
+  }, [dataSourceOptionList]);
+
   return (
     <EuiComboBox
       data-test-subj="dataExplorerDSSelect"
       placeholder={i18n.translate('data.datasource.selectADatasource', {
         defaultMessage: 'Select a datasource',
       })}
-      options={dataSourceOptionList as any}
+      options={memorizedDataSourceOptionList as any}
       selectedOptions={selectedSources as any}
       onChange={handleSourceChange}
       singleSelection={singleSelection}
