@@ -115,7 +115,6 @@ export interface ISidecarConfig {
   // takeover mode will docked to bottom
   dockedMode: SIDECAR_DOCKED_MODE;
   paddingSize: number;
-  minSize?: number;
   isHidden?: boolean;
 }
 

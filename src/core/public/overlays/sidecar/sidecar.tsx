@@ -60,11 +60,9 @@ export const Sidecar = ({ sidecarConfig$, options, setSidecarConfig, i18n, mount
     <i18n.Context>
       <div data-test-subj={options['data-test-subj']} style={flyoutSizeStyle} className={classes}>
         <ResizableButton
-          isHorizontal={sidecarConfig?.dockedMode !== 'takeover'}
           onResize={handleResize}
           dockedMode={sidecarConfig?.dockedMode}
           flyoutSize={sidecarConfig?.paddingSize ?? 0}
-          minSize={sidecarConfig?.minSize}
         />
         <MountWrapper mount={mount} className="osdSidecarMountWrapper" />
       </div>

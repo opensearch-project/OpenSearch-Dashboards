@@ -10,21 +10,14 @@ import { getPosition } from './helper';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from './sidecar_service';
 
 interface Props {
-  isHorizontal: boolean;
   onResize: (size: number) => void;
   flyoutSize: number;
   dockedMode: ISidecarConfig['dockedMode'] | undefined;
-  minSize?: number;
 }
 
-const MIN_SIDECAR_SIZE = 200;
+const MIN_SIDECAR_SIZE = 350;
 
-export const ResizableButton = ({
-  dockedMode,
-  onResize,
-  flyoutSize,
-  minSize = MIN_SIDECAR_SIZE,
-}: Props) => {
+export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => {
   const isHorizontal = dockedMode !== SIDECAR_DOCKED_MODE.TAKEOVER;
 
   const classes = classNames('resizableButton', {
@@ -54,7 +47,7 @@ export const ResizableButton = ({
         }
         const newFlyoutSize = initialFlyoutSize.current + offset;
 
-        onResize(Math.max(newFlyoutSize, minSize));
+        onResize(Math.max(newFlyoutSize, MIN_SIDECAR_SIZE));
       };
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);
@@ -63,7 +56,7 @@ export const ResizableButton = ({
       initialMouseXorY.current = getPosition(event, isHorizontal);
       initialFlyoutSize.current = flyoutSize;
     },
-    [isHorizontal, flyoutSize, dockedMode, minSize, onResize]
+    [isHorizontal, flyoutSize, dockedMode, onResize]
   );
 
   return (
