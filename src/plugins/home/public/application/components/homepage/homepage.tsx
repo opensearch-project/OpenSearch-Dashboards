@@ -141,7 +141,7 @@ const Content = () => {
         alignItems="center"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="cross" color="danger" size="xxl" />
+          <EuiIcon type="alert" color="danger" size="xxl" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FormattedMessage

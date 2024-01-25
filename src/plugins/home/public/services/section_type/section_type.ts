@@ -161,7 +161,7 @@ export class SectionTypeService {
       throw new Error('SectionTypeService has not been started yet.');
     }
 
-    // TODO: this will ignore multiple homepages if there are more than one. Maybe we want some other logic here?
+    // TODO: this will use the first hit even if there are more than one homepage. Maybe we want some other logic here?
     const { hits } = await this.savedHomepageLoader.find();
     const id = hits[0]?.id as string | undefined;
     const homepage: SavedHomepage = await this.savedHomepageLoader.get(id);

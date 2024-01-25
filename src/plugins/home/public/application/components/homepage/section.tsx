@@ -4,6 +4,7 @@
  */
 
 import React, { FC, useState, useMemo } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiPanel,
   EuiButtonIcon,
@@ -28,7 +29,7 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
   const [isExpanded, setExpanded] = useState(true);
 
   const hasDescription = !!description;
-  const hasLinks = !!links && links.length > 0;
+  const hasLinks = Array.isArray(links) && links.length > 0;
   const hasDescriptionSection = hasDescription || hasLinks;
   const hasDescriptionSpacer = hasDescription && hasLinks;
 
@@ -72,7 +73,11 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
             size="s"
             iconSize="m"
             color="text"
-            aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
+            aria-label={
+              isExpanded
+                ? i18n.translate('home.section.collapse', { defaultMessage: 'Collapse section' })
+                : i18n.translate('home.section.expand', { defaultMessage: 'Expand section' })
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
