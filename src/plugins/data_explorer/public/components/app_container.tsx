@@ -38,7 +38,6 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
                   minSize="260px"
                   mode="collapsible"
                   paddingSize="none"
-                  paddingSize="none"
                   style={isMobile ? { paddingBottom: 8 } : { paddingRight: 8 }}
                 >
                   <Sidebar>
