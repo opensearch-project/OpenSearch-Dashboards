@@ -5,10 +5,12 @@
 
 import React, { FC } from 'react';
 import {
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCard,
   EuiIcon,
+  EuiTitle,
+  EuiSpacer,
   EuiListGroup,
   EuiListGroupItemProps,
   IconType,
@@ -24,17 +26,21 @@ const Card: FC<{
   listItems: EuiListGroupItemProps[];
 }> = ({ iconType, title, listItems }) => (
   <EuiFlexItem grow={1}>
-    <EuiCard
-      icon={<EuiIcon type={iconType} size="xl" />}
-      title={
-        <>
-          {title} <EuiIcon type="popout" />
-        </>
-      }
-      layout="horizontal"
-    >
-      <EuiListGroup className="home-basics-listGroup" listItems={listItems} />
-    </EuiCard>
+    <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={iconType} size="xl" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="s">
+          <span>{title}</span>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="popout" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="m" />
+    <EuiListGroup listItems={listItems} flush />
   </EuiFlexItem>
 );
 
@@ -115,29 +121,31 @@ const render = renderFn(() => {
   ];
 
   return (
-    <EuiFlexGroup wrap direction="row" alignItems="stretch">
-      <Card
-        iconType={logos.Mark.url}
-        title={i18n.translate('home.sections.learnBasics.gettingStarted.title', {
-          defaultMessage: 'Getting started',
-        })}
-        listItems={gettingStartedLinks}
-      />
-      <Card
-        iconType="discoverApp"
-        title={i18n.translate('home.sections.learnBasics.dataDiscovery.title', {
-          defaultMessage: 'Explore data',
-        })}
-        listItems={dataDiscoveryLinks}
-      />
-      <Card
-        iconType="eye"
-        title={i18n.translate('home.sections.learnBasics.observability.title', {
-          defaultMessage: 'Observability',
-        })}
-        listItems={observabilityLinks}
-      />
-    </EuiFlexGroup>
+    <EuiPanel>
+      <EuiFlexGroup wrap direction="row" alignItems="stretch" gutterSize="xl">
+        <Card
+          iconType={logos.Mark.url}
+          title={i18n.translate('home.sections.learnBasics.gettingStarted.title', {
+            defaultMessage: 'Getting started',
+          })}
+          listItems={gettingStartedLinks}
+        />
+        <Card
+          iconType="discoverApp"
+          title={i18n.translate('home.sections.learnBasics.dataDiscovery.title', {
+            defaultMessage: 'Explore data',
+          })}
+          listItems={dataDiscoveryLinks}
+        />
+        <Card
+          iconType="eye"
+          title={i18n.translate('home.sections.learnBasics.observability.title', {
+            defaultMessage: 'Observability',
+          })}
+          listItems={observabilityLinks}
+        />
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 });
 
