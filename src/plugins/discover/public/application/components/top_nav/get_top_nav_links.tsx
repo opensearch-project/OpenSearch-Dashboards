@@ -7,6 +7,7 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { showOpenSearchPanel } from './show_open_search_panel';
+import { showTableFeedbacksPanel } from './show_table_feedbacks_panel';
 import { SavedSearch } from '../../../saved_searches';
 import { Adapters } from '../../../../../inspector/public';
 import { TopNavMenuData } from '../../../../../navigation/public';
@@ -20,7 +21,7 @@ import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
-  TABLE_LEGACY,
+  DATA_GRID_TABLE,
 } from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
@@ -224,21 +225,31 @@ export const getTopNavLinks = (
   };
 
   const newTable: TopNavMenuData = {
-    id: 'table-new',
+    id: 'table-datagrid',
     label: i18n.translate('discover.localMenu.newTableTitle', {
-      defaultMessage: 'New Table',
+      defaultMessage: 'Try new Discover features',
     }),
     description: i18n.translate('discover.localMenu.newTableDescription', {
       defaultMessage: 'New Data Grid Table Experience',
     }),
-    testId: 'tableNewButton',
+    testId: 'datagridTableButton',
     run: async () => {
-      const useLegacyTable = uiSettings.get(TABLE_LEGACY);
-      await uiSettings.set(TABLE_LEGACY, !useLegacyTable);
-      window.location.reload();
+      // fetch current state of DATA_GRID_TABLE settings
+      // if data grid table is used, when switch to legacy table, show feedbacks panel
+      // if legacy table is used, when switch to data grid table, simply set table and reload
+      const useDatagridTable = uiSettings.get(DATA_GRID_TABLE);
+      if (useDatagridTable) {
+        showTableFeedbacksPanel({
+          I18nContext: core.i18n.Context,
+          services,
+        });
+      } else {
+        await uiSettings.set(DATA_GRID_TABLE, true);
+        window.location.reload();
+      }
     },
     type: 'toggle' as const,
-    emphasize: uiSettings.get(TABLE_LEGACY) ? false : true,
+    emphasize: uiSettings.get(DATA_GRID_TABLE) ? true : false,
   };
 
   return [
@@ -302,7 +313,7 @@ const getSharingData = async ({
   const searchSourceInstance = searchSource.createCopy();
   const indexPattern = await searchSourceInstance.getField('index');
 
-  const { searchFields, selectFields } = await getSharingDataFields(
+  const { searchFields } = await getSharingDataFields(
     state.columns,
     services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
     indexPattern?.timeFieldName

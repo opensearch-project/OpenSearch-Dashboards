@@ -10,7 +10,7 @@ import { ActionBar } from './context/components/action_bar/action_bar';
 import {
   CONTEXT_STEP_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
-  TABLE_LEGACY,
+  DATA_GRID_TABLE,
 } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -98,9 +98,7 @@ export function ContextApp({
         onChangeCount={onChangeCount}
         type={SurrDocType.PREDECESSORS}
       />
-      {services.uiSettings?.get(TABLE_LEGACY) ? (
-        <LegacyHtmlTable />
-      ) : (
+      {services.uiSettings?.get(DATA_GRID_TABLE) ? (
         <div className="dscDocsGrid">
           <DataGridTable
             aria-label={'ContextTable'}
@@ -119,6 +117,8 @@ export function ContextApp({
             isContextView={true}
           />
         </div>
+      ) : (
+        <LegacyHtmlTable />
       )}
       <ActionBar
         defaultStepSize={defaultStepSize}

@@ -44,7 +44,7 @@ import {
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
-  TABLE_LEGACY,
+  DATA_GRID_TABLE,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -187,15 +187,15 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     category: ['discover'],
     schema: schema.boolean(),
   },
-  [TABLE_LEGACY]: {
-    name: i18n.translate('discover.advancedSettings.useLegacyTable', {
-      defaultMessage: 'Use legacy table',
+  [DATA_GRID_TABLE]: {
+    name: i18n.translate('discover.advancedSettings.useDataGridTable', {
+      defaultMessage: 'Use data grid table',
     }),
-    value: true,
-    description: i18n.translate('discover.advancedSettings.useLegacyTableDescription', {
+    value: false,
+    description: i18n.translate('discover.advancedSettings.useDataGridTableDescription', {
       defaultMessage:
         'Discover adopts a data grid table layout that includes better sorting and resizable columns. ' +
-        'Disable this option if would like to try out the new table view.',
+        'Enable this option if would like to try out the new table view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),

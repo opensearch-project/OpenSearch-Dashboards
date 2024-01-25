@@ -12,7 +12,7 @@ import {
   DataGridTableProps,
 } from '../application/components/data_grid/data_grid_table';
 import { VisualizationNoResults } from '../../../visualizations/public';
-import { TABLE_LEGACY } from '../../common';
+import { DATA_GRID_TABLE } from '../../common';
 import { getServices } from '../opensearch_dashboards_services';
 import { LegacyHtmlTable } from '../application/components/legacy_table/table';
 import './search_embeddable.scss';
@@ -57,12 +57,12 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
       >
         (
         {discoverEmbeddableProps.totalHitCount !== 0 ? (
-          services.uiSettings?.get(TABLE_LEGACY) ? (
-            <LegacyHtmlTable />
-          ) : (
+          services.uiSettings?.get(DATA_GRID_TABLE) ? (
             <EuiFlexItem style={{ minHeight: 0 }} className="osdDocTable__container">
               <DataGridTableMemoized {...discoverEmbeddableProps} />
             </EuiFlexItem>
+          ) : (
+            <LegacyHtmlTable />
           )
         ) : (
           <EuiFlexItem>

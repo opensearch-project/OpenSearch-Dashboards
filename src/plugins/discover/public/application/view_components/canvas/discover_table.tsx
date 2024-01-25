@@ -22,7 +22,7 @@ import { SortOrder } from '../../../saved_searches/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { popularizeField } from '../../helpers/popularize_field';
-import { TABLE_LEGACY } from '../../../../common';
+import { DATA_GRID_TABLE } from '../../../../common';
 import { LegacyHtmlTable } from '../../components/legacy_table/table';
 
 interface Props {
@@ -92,9 +92,7 @@ export const DiscoverTable = ({ rows }: Props) => {
     return <div>{'loading...'}</div>;
   }
 
-  return services.uiSettings?.get(TABLE_LEGACY) ? (
-    <LegacyHtmlTable />
-  ) : (
+  return services.uiSettings?.get(DATA_GRID_TABLE) ? (
     <DataGridTable
       columns={columns}
       indexPattern={indexPattern}
@@ -109,5 +107,7 @@ export const DiscoverTable = ({ rows }: Props) => {
       title={savedSearch?.id ? savedSearch.title : ''}
       description={savedSearch?.id ? savedSearch.description : ''}
     />
+  ) : (
+    <LegacyHtmlTable />
   );
 };
