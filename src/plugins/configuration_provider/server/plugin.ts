@@ -65,7 +65,7 @@ export class ConfigurationProviderPlugin
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    this.configurationIndexName = config.opensearchDashboards.dynamic_config_index;
+    this.configurationIndexName = config.opensearchDashboards.config_index;
 
     core.http.registerOnPreResponse(
       createCspRulesPreResponseHandler(core, this.getConfigurationClient.bind(this), this.logger)
