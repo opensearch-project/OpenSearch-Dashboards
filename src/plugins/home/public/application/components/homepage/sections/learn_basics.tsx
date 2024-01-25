@@ -26,7 +26,7 @@ const Card: FC<{
   listItems: EuiListGroupItemProps[];
 }> = ({ iconType, title, listItems }) => (
   <EuiFlexItem grow={1}>
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+    <EuiFlexGroup direction="row" alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={iconType} size="xl" />
       </EuiFlexItem>
