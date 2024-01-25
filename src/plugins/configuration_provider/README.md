@@ -10,7 +10,7 @@ The first use case onboarding to this new index is to support updating Content S
 
 ## Configuration
 
-By default, the new index does not exist. For OSD users who do not need customized CSP rules, there is no need to create this index. The system will then use whatever CSP rules aggregated by the values of `csp.rules` from OSD YAML file and default values.
+By default, the new index does not exist. For OSD users who do not need customized CSP rules, the index won't exist at all. The system will then use whatever CSP rules aggregated by the values of `csp.rules` from OSD YAML file and default values.
 
 Below is the current default value.
 
