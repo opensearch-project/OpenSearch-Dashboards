@@ -273,7 +273,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
                 hasActiveFilters={activeFiltersCount > 0}
                 aria-label={filterBtnAriaLabel}
                 data-test-subj="toggleFieldFilterButton"
-                numFilters={activeFiltersCount} // {NUM_FILTERS} https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5650
+                numFilters={activeFiltersCount} // {NUM_FILTERS} https://github.com/opensearch-project/oui/issues/1219
                 onClick={handleFacetButtonClicked}
                 numActiveFilters={activeFiltersCount}
                 isSelected={isPopoverOpen}
