@@ -140,11 +140,6 @@ export const DataGridTable = ({
     ];
   }, []);
 
-  // console.log("sorting in data grid", sort)
-  // console.log("onsort", onSort)
-
-  console.log('displayedTableColumns', displayedTableColumns);
-
   const table = useMemo(
     () => (
       // <EuiDataGrid
@@ -162,12 +157,46 @@ export const DataGridTable = ({
       // />
       <DefaultDiscoverTable
         displayedTableColumns={displayedTableColumns}
+        columns={adjustedColumns}
         rows={rows}
         indexPattern={indexPattern}
         sortOrder={sort}
         onChangeSortOrder={onSort}
         onRemoveColumn={onRemoveColumn}
         onReorderColumn={onReorderColumn}
+        onAddColumn={onAddColumn}
+        onFilter={onFilter}
+        onClose={() => setInspectedHit(undefined)}
+      />
+    ),
+    [
+      displayedTableColumns,
+      dataGridTableColumnsVisibility,
+      leadingControlColumns,
+      pagination,
+      renderCellValue,
+      rowCount,
+      sorting,
+      isToolbarVisible,
+      rowHeightsOptions,
+      adjustedColumns,
+    ]
+  );
+
+  const dataGridTable = useMemo(
+    () => (
+      <EuiDataGrid
+        aria-labelledby="aria-labelledby"
+        columns={displayedTableColumns}
+        columnVisibility={dataGridTableColumnsVisibility}
+        leadingControlColumns={leadingControlColumns}
+        data-test-subj="docTable"
+        pagination={pagination}
+        renderCellValue={renderCellValue}
+        rowCount={rowCount}
+        sorting={sorting}
+        toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
+        rowHeightsOptions={rowHeightsOptions}
       />
     ),
     [
@@ -183,6 +212,7 @@ export const DataGridTable = ({
     ]
   );
 
+  console.log('adjustColumns higher level', adjustedColumns);
   return (
     <DiscoverGridContextProvider
       value={{
@@ -202,6 +232,7 @@ export const DataGridTable = ({
       >
         <EuiPanel hasBorder={false} hasShadow={true} paddingSize="s" style={{ margin: '8px' }}>
           {table}
+          {dataGridTable}
         </EuiPanel>
         {inspectedHit && (
           <DataGridFlyout

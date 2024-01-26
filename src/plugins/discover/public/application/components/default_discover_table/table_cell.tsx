@@ -40,11 +40,8 @@ export const TableCell = ({ column, row, rowIndex, indexPattern }: TableCellProp
   // const flattenedRow = flattenedRows
   //   ? (flattenedRows[rowIndex] as Record<string, unknown>)
   //   : undefined;
-  // console.log("column", column)
-  // console.log("row", row)
 
   const fieldInfo = indexPattern.fields.getByName(column.id);
-  // console.log("fieldInfo", fieldInfo)
 
   if (typeof singleRow === 'undefined') {
     return (
@@ -147,7 +144,7 @@ export const TableCell = ({ column, row, rowIndex, indexPattern }: TableCellProp
         className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
       >
         <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
-        <span>
+        <span className="osdDocTableCell__filter">
           {fieldInfo?.filterable ? filterForButton() : null}
           {fieldInfo?.filterable ? filterOutButton() : null}
         </span>

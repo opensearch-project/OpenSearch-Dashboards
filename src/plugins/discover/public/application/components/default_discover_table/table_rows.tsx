@@ -16,19 +16,33 @@ import { fatalErrorsServiceMock } from 'src/core/public/mocks';
 import { TableCell } from './table_cell';
 import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
 import { DocViewer } from '../doc_viewer/doc_viewer';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 
 export interface TableRowProps {
   row: OpenSearchSearchHit;
   rowIndex: number;
-  columns: EuiDataGridColumn[];
+  displayedTableColumns: EuiDataGridColumn[];
+  columns: string[];
   indexPattern: IndexPattern;
+  onRemoveColumn: (column: string) => void;
+  onAddColumn: (column: string) => void;
+  onFilter: DocViewFilterFn;
+  onClose: () => void;
 }
 
-export const TableRow = ({ row, rowIndex, columns, indexPattern }: TableRowProps) => {
+export const TableRow = ({
+  row,
+  rowIndex,
+  displayedTableColumns,
+  columns,
+  indexPattern,
+  onRemoveColumn,
+  onAddColumn,
+  onFilter,
+  onClose,
+}: TableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  console.log('row', row);
   const tableRow = (
     <tr>
       <td data-test-subj="docTableExpandToggleColumn" className="osdDocTableCell__toggleDetails">
@@ -41,7 +55,7 @@ export const TableRow = ({ row, rowIndex, columns, indexPattern }: TableRowProps
           className="osdDocTableCell__toggleDetails"
         />
       </td>
-      {columns.map((column) => {
+      {displayedTableColumns.map((column) => {
         return (
           <TableCell
             key={row._id + column.id}
@@ -54,18 +68,17 @@ export const TableRow = ({ row, rowIndex, columns, indexPattern }: TableRowProps
       })}
     </tr>
   );
-  console.log('columns size', columns);
-  const columnFields: string[] = columns.map((column: any) => column.id);
+  const columnFields: string[] = displayedTableColumns.map((column: any) => column.id);
 
   const expandedTableRow = (
     <tr>
       <td
         style={{ borderTop: 'none', background: 'white', padding: '5px' }}
-        colSpan={columns.length + 2}
+        colSpan={displayedTableColumns.length + 2}
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="folderOpen" /> <span>{columns.size}</span>
+            <EuiIcon type="folderOpen" /> <span>{displayedTableColumns.size}</span>
           </EuiFlexItem>
           <EuiFlexItem>
             <h4
@@ -78,16 +91,28 @@ export const TableRow = ({ row, rowIndex, columns, indexPattern }: TableRowProps
             </h4>
           </EuiFlexItem>
           <EuiFlexItem>
-            {DocViewerLinks({ columns: columnFields, hit: row, indexPattern })}
+            <DocViewerLinks hit={row} indexPattern={indexPattern} columns={columns} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup>
           <EuiFlexItem>
-            {DocViewer({
-              columns: columnFields,
-              hit: row,
-              indexPattern,
-            })}
+            <DocViewer
+              hit={row}
+              columns={columns}
+              indexPattern={indexPattern}
+              onRemoveColumn={(columnName: string) => {
+                onRemoveColumn(columnName);
+                onClose();
+              }}
+              onAddColumn={(columnName: string) => {
+                onAddColumn(columnName);
+                onClose();
+              }}
+              filter={(mapping, value, mode) => {
+                onFilter(mapping, value, mode);
+                onClose();
+              }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </td>

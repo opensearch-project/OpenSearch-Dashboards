@@ -8,29 +8,37 @@ import './_doc_table.scss';
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { TableHeader } from './table_header';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TableRow } from './table_rows';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { SortOrder } from '../../../saved_searches/types';
 
 export interface DefaultDiscoverTableProps {
   displayedTableColumns: EuiDataGridColumn[];
+  columns: string[];
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
   sortOrder: SortOrder[];
   onChangeSortOrder: (sort: SortOrder[]) => void;
   onRemoveColumn: (column: string) => void;
   onReorderColumn: (col: string, source: number, destination: number) => void;
+  onAddColumn: (column: string) => void;
+  onFilter: DocViewFilterFn;
+  onClose: () => void;
 }
 
 export const DefaultDiscoverTable = ({
   displayedTableColumns,
+  columns,
   rows,
   indexPattern,
   sortOrder,
   onChangeSortOrder,
   onRemoveColumn,
   onReorderColumn,
+  onAddColumn,
+  onFilter,
+  onClose,
 }: DefaultDiscoverTableProps) => {
   // console.log("sorting", sorting)
   return (
@@ -56,8 +64,13 @@ export const DefaultDiscoverTable = ({
                 key={row._id}
                 row={row}
                 rowIndex={index}
-                columns={displayedTableColumns}
+                displayedTableColumns={displayedTableColumns}
+                columns={columns}
                 indexPattern={indexPattern}
+                onRemoveColumn={onRemoveColumn}
+                onAddColumn={onAddColumn}
+                onFilter={onFilter}
+                onClose={onClose}
               />
             );
           })}

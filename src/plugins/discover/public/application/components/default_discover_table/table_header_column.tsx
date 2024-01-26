@@ -11,18 +11,19 @@
 
 import './_table_header.scss';
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiButtonIcon, EuiFieldText, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from '../../view_components/utils/get_default_sort';
 
 interface Props {
+  currentIdx: number;
   colLeftIdx: number; // idx of the column to the left, -1 if moving is not possible
   colRightIdx: number; // idx of the column to the right, -1 if moving is not possible
-  displayName: string;
+  displayName: ReactNode;
   isRemoveable: boolean;
   isSortable: boolean;
-  name: string;
+  name?: string | ReactNode;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, idx: number) => void;
   onRemoveColumn?: (name: string) => void;
