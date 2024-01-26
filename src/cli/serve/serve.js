@@ -81,11 +81,11 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     set('env', 'development');
 
     if (!has('opensearch.username')) {
-      set('opensearch.username', 'opensearch_dashboards_system');
+      set('opensearch.username', 'kibanaserver');
     }
 
     if (!has('opensearch.password')) {
-      set('opensearch.password', 'changeme');
+      set('opensearch.password', 'kibanaserver');
     }
 
     if (opts.ssl) {
@@ -147,11 +147,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
         set('opensearch.ssl.verificationMode', 'none');
       }
 
-      if (get('opensearch.username') === 'opensearch_dashboards_system') {
+      if (process.env.OPENSEARCH_USERNAME) {
         set('opensearch.username', process.env.OPENSEARCH_USERNAME);
       }
-
-      if (get('opensearch.password') === 'changeme') {
+      if (process.env.OPENSEARCH_PASSWORD) {
         set('opensearch.password', process.env.OPENSEARCH_PASSWORD);
       }
 
