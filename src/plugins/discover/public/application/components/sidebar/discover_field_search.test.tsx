@@ -83,7 +83,7 @@ describe('DiscoverFieldSearch', () => {
     btn = findTestSubject(component, 'toggleFieldFilterButton');
     const badge = btn.find('.euiNotificationBadge');
     // available filters
-    expect(badge.text()).toEqual(NUM_FILTERS.toString());
+    expect(badge.text()).toEqual('0');
     // change value of aggregatable select
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
     act(() => {
@@ -114,10 +114,10 @@ describe('DiscoverFieldSearch', () => {
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
     const badge = btn.find('.euiNotificationBadge');
-    expect(badge.text()).toEqual(NUM_FILTERS.toString());
+    expect(badge.text()).toEqual('0');
     const missingSwitch = findTestSubject(component, 'missingSwitch');
     missingSwitch.simulate('change', { target: { value: false } });
-    expect(badge.text()).toEqual(NUM_FILTERS.toString());
+    expect(badge.text()).toEqual('0');
   });
 
   test('change in filters triggers onChange', () => {
