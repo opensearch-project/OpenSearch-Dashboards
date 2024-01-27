@@ -18,14 +18,11 @@ import {
   showSaveModal,
 } from '../../../../../saved_objects/public';
 import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-  DATA_GRID_TABLE,
-} from '../../../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
+import { getDataGridTableSetting, setDataGridTableSetting } from '../utils/local_storage';
 
 export const getTopNavLinks = (
   services: DiscoverViewServices,
@@ -43,7 +40,7 @@ export const getTopNavLinks = (
     store,
     data: { query },
     osdUrlStateStorage,
-    uiSettings,
+    storage,
   } = services;
 
   const newSearch = {
@@ -227,29 +224,28 @@ export const getTopNavLinks = (
   const newTable: TopNavMenuData = {
     id: 'table-datagrid',
     label: i18n.translate('discover.localMenu.newTableTitle', {
-      defaultMessage: 'Try new Discover features',
+      defaultMessage: 'Try new Discover experience',
     }),
     description: i18n.translate('discover.localMenu.newTableDescription', {
       defaultMessage: 'New Data Grid Table Experience',
     }),
     testId: 'datagridTableButton',
     run: async () => {
-      // fetch current state of DATA_GRID_TABLE settings
-      // if data grid table is used, when switch to legacy table, show feedbacks panel
-      // if legacy table is used, when switch to data grid table, simply set table and reload
-      const useDatagridTable = uiSettings.get(DATA_GRID_TABLE);
+      // Read the current state from localStorage
+      const useDatagridTable = getDataGridTableSetting(storage);
       if (useDatagridTable) {
         showTableFeedbacksPanel({
           I18nContext: core.i18n.Context,
           services,
         });
       } else {
-        await uiSettings.set(DATA_GRID_TABLE, true);
+        // Save the new setting to localStorage
+        setDataGridTableSetting(true, storage);
         window.location.reload();
       }
     },
     type: 'toggle' as const,
-    emphasize: uiSettings.get(DATA_GRID_TABLE) ? true : false,
+    emphasize: getDataGridTableSetting(storage),
   };
 
   return [

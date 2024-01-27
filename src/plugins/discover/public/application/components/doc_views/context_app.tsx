@@ -3,15 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, Fragment } from 'react';
+import React, { useMemo, Fragment, useEffect, useState } from 'react';
 import { useCallback } from 'react';
 import { SurrDocType } from './context/api/context';
 import { ActionBar } from './context/components/action_bar/action_bar';
-import {
-  CONTEXT_STEP_SETTING,
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  DATA_GRID_TABLE,
-} from '../../../../common';
+import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { LOADING_STATUS } from './context/utils/context_query_state';
@@ -21,6 +17,7 @@ import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { AppState } from './context/utils/context_state';
 import { LegacyHtmlTable } from '../legacy_table/table';
+import { getDataGridTableSetting } from '../utils/local_storage';
 
 export interface Props {
   onAddFilter: DocViewFilterFn;
@@ -44,7 +41,7 @@ export function ContextApp({
   appState,
 }: Props) {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { uiSettings } = services;
+  const { uiSettings, storage } = services;
   const defaultStepSize = useMemo(() => parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10), [
     uiSettings,
   ]);
@@ -65,6 +62,15 @@ export function ContextApp({
   const isSuccessorLoading =
     successorsStatus.value === LOADING_STATUS.LOADING ||
     successorsStatus.value === LOADING_STATUS.UNINITIALIZED;
+
+  // State for data grid table setting
+  const [useDataGridTable, setUseDataGridTable] = useState(() => getDataGridTableSetting(storage));
+
+  useEffect(() => {
+    const handler = () => setUseDataGridTable(getDataGridTableSetting(storage));
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, [storage]);
 
   const onChangeCount = useCallback(
     (type: SurrDocType, count: number) => {
@@ -98,7 +104,7 @@ export function ContextApp({
         onChangeCount={onChangeCount}
         type={SurrDocType.PREDECESSORS}
       />
-      {services.uiSettings?.get(DATA_GRID_TABLE) ? (
+      {useDataGridTable ? (
         <div className="dscDocsGrid">
           <DataGridTable
             aria-label={'ContextTable'}

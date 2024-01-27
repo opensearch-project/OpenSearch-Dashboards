@@ -15,7 +15,8 @@ exports[`TableFeedbacksPanel renders correctly 1`] = `
   <EuiModalBody>
     <EuiText>
       <p>
-        Event tables: Documents are now expanded through a flyout. Density, column order, and sorting controls have been improved. 
+        Event tables: Documents are now expanded through a flyout. Density, column order, and sorting controls have been improved.
+         
         <a
           href="https://survey.opensearch.org"
         >

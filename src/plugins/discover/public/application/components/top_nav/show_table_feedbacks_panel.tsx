@@ -9,7 +9,7 @@ import { TableFeedbacksPanel } from './table_feedbacks_panel';
 import { I18nStart } from '../../../../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { DATA_GRID_TABLE } from '../../../../common';
+import { setDataGridTableSetting } from '../utils/local_storage';
 
 let isFeedbackPanelOpen = false;
 
@@ -20,11 +20,11 @@ export function showTableFeedbacksPanel({
   I18nContext: I18nStart['Context'];
   services: DiscoverViewServices;
 }) {
-  // if (isFeedbackPanelOpen) {
-  //   return;
-  // }
+  if (isFeedbackPanelOpen) {
+    return;
+  }
 
-  // isFeedbackPanelOpen = true;
+  isFeedbackPanelOpen = true;
   const container = document.createElement('div');
   const onClose = () => {
     ReactDOM.unmountComponentAtNode(container);
@@ -33,7 +33,8 @@ export function showTableFeedbacksPanel({
   };
 
   const onTurnOff = async () => {
-    await services.uiSettings.set(DATA_GRID_TABLE, false);
+    // Save the new setting to localStorage
+    setDataGridTableSetting(false, services.storage);
     onClose();
     window.location.reload();
   };

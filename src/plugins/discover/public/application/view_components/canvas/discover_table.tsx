@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
@@ -22,7 +22,7 @@ import { SortOrder } from '../../../saved_searches/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { popularizeField } from '../../helpers/popularize_field';
-import { DATA_GRID_TABLE } from '../../../../common';
+import { getDataGridTableSetting } from '../../components/utils/local_storage';
 import { LegacyHtmlTable } from '../../components/legacy_table/table';
 
 interface Props {
@@ -38,6 +38,7 @@ export const DiscoverTable = ({ rows }: Props) => {
     },
     capabilities,
     indexPatterns,
+    storage,
   } = services;
 
   const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
@@ -92,7 +93,7 @@ export const DiscoverTable = ({ rows }: Props) => {
     return <div>{'loading...'}</div>;
   }
 
-  return services.uiSettings?.get(DATA_GRID_TABLE) ? (
+  return getDataGridTableSetting(storage) ? (
     <DataGridTable
       columns={columns}
       indexPattern={indexPattern}

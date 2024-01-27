@@ -12,7 +12,7 @@ import {
   DataGridTableProps,
 } from '../application/components/data_grid/data_grid_table';
 import { VisualizationNoResults } from '../../../visualizations/public';
-import { DATA_GRID_TABLE } from '../../common';
+import { getDataGridTableSetting } from '../application/components/utils/local_storage';
 import { getServices } from '../opensearch_dashboards_services';
 import { LegacyHtmlTable } from '../application/components/legacy_table/table';
 import './search_embeddable.scss';
@@ -29,7 +29,7 @@ export const DataGridTableMemoized = React.memo((props: DataGridTableProps) => (
 ));
 
 export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps) {
-  const services = getServices();
+  const { storage } = getServices();
   const discoverEmbeddableProps = {
     columns: searchProps.columns,
     indexPattern: searchProps.indexPattern,
@@ -55,9 +55,8 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
         responsive={false}
         data-test-subj="embeddedSavedSearchDocTable"
       >
-        (
         {discoverEmbeddableProps.totalHitCount !== 0 ? (
-          services.uiSettings?.get(DATA_GRID_TABLE) ? (
+          getDataGridTableSetting(storage) ? (
             <EuiFlexItem style={{ minHeight: 0 }} className="osdDocTable__container">
               <DataGridTableMemoized {...discoverEmbeddableProps} />
             </EuiFlexItem>
@@ -69,7 +68,6 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
             <VisualizationNoResults />
           </EuiFlexItem>
         )}
-        )
       </EuiFlexGroup>
     </I18nProvider>
   );
