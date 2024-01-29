@@ -143,8 +143,6 @@ export const DataGridTable = ({
     ];
   }, []);
 
-  console.log('sortOrders', sortingColumns);
-
   const legacyDiscoverTable = useMemo(
     () => (
       <LegacyDiscoverTable
@@ -163,15 +161,15 @@ export const DataGridTable = ({
     ),
     [
       displayedTableColumns,
-      dataGridTableColumnsVisibility,
-      leadingControlColumns,
-      pagination,
-      renderCellValue,
-      rowCount,
-      sorting,
-      isToolbarVisible,
-      rowHeightsOptions,
       adjustedColumns,
+      indexPattern,
+      onAddColumn,
+      onColumnSort,
+      onFilter,
+      onRemoveColumn,
+      onReorderColumn,
+      rows,
+      sortingColumns,
     ]
   );
 
@@ -204,7 +202,6 @@ export const DataGridTable = ({
     ]
   );
 
-  console.log('adjustColumns higher level', adjustedColumns);
   return (
     <DiscoverGridContextProvider
       value={{

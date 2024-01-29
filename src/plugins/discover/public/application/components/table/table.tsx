@@ -69,8 +69,6 @@ export function DocViewTable({
             const toggleColumn =
               onRemoveColumn && onAddColumn && Array.isArray(columns)
                 ? () => {
-                    console.log('columns', columns);
-                    console.log('field', field);
                     if (columns.includes(field)) {
                       onRemoveColumn(field);
                     } else {

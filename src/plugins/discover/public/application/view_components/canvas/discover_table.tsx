@@ -67,7 +67,6 @@ export const DiscoverTable = ({ rows }: Props) => {
 
   const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
-    console.log('sorting now!');
     dispatch(setSort(s));
     refetch$.next();
   };

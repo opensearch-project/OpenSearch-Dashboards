@@ -43,7 +43,6 @@ export const LegacyDiscoverTable = ({
   onFilter,
   onClose,
 }: DefaultDiscoverTableProps) => {
-  // console.log("sorting", sorting)
   return (
     indexPattern && (
       <table data-test-subj="docTable" className="osd-table table">

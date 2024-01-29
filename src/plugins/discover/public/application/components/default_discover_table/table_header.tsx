@@ -27,10 +27,10 @@ interface Props {
   onChangeSortOrder?: (cols: EuiDataGridSorting['columns']) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
-  sortOrder: {
+  sortOrder: Array<{
     id: string;
-    direction: "desc" | "asc";
-}[];
+    direction: 'desc' | 'asc';
+  }>;
 }
 
 export function TableHeader({
@@ -45,9 +45,6 @@ export function TableHeader({
   onRemoveColumn,
   sortOrder,
 }: Props) {
-  // const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
-  // console.log('displayedTableColumns', displayedTableColumns);
-
   const timeColName = indexPattern.timeFieldName;
   return (
     <tr data-test-subj="docTableHeader" className="osdDocTableHeader">
@@ -78,7 +75,7 @@ export function TableHeader({
               name={col.display as string}
               sortOrder={
                 sortOrder.length ? sortOrder : []
-                //getDefaultSort(indexPattern, defaultSortOrder).map(([id, direction]) => ({ id, direction }))
+                // getDefaultSort(indexPattern, defaultSortOrder).map(([id, direction]) => ({ id, direction }))
               }
               onReorderColumn={onReorderColumn}
               onRemoveColumn={onRemoveColumn}
