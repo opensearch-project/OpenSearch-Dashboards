@@ -66,12 +66,12 @@ const useShowWelcome = () => {
   useEffect(() => {
     if (!isWelcomeEnabled) {
       setIsLoading(false);
-      setIsWelcomeEnabled(false);
       return;
     }
 
     const timeout = setTimeout(() => {
       setIsLoading(false);
+      setIsWelcomeEnabled(false);
     }, 500);
 
     savedObjectsClient
@@ -85,6 +85,8 @@ const useShowWelcome = () => {
       .then((resp) => {
         setIsLoading(false);
         setIsNewInstance(resp.total === 0);
+
+        clearTimeout(timeout);
       });
 
     return () => {
