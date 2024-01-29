@@ -59,13 +59,14 @@ const useShowWelcome = () => {
   const [isNewInstance, setIsNewInstance] = useState(false);
   const { homeConfig, savedObjectsClient } = getServices();
 
-  const isWelcomeEnabled = !(
-    homeConfig.disableWelcomeScreen || localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
+  const [isWelcomeEnabled, setIsWelcomeEnabled] = useState(
+    !(homeConfig.disableWelcomeScreen || localStorage.getItem(KEY_ENABLE_WELCOME) === 'false')
   );
 
   useEffect(() => {
     if (!isWelcomeEnabled) {
       setIsLoading(false);
+      setIsWelcomeEnabled(false);
       return;
     }
 
@@ -96,7 +97,7 @@ const useShowWelcome = () => {
     showWelcome: isWelcomeEnabled && isNewInstance,
     onSkip: () => {
       localStorage.setItem(KEY_ENABLE_WELCOME, 'false');
-      setIsNewInstance(false);
+      setIsWelcomeEnabled(false);
     },
   };
 };
