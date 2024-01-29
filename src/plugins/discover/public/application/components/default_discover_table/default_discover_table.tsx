@@ -59,13 +59,12 @@ export const LegacyDiscoverTable = ({
           />
         </thead>
         <tbody>
-          {rows.map((row: OpenSearchSearchHit, index: number) => {
+          {rows.map((row: OpenSearchSearchHit) => {
             return (
               <TableRow
                 key={row._id}
                 row={row}
-                rowIndex={index}
-                displayedTableColumns={displayedTableColumns}
+                columnIds={displayedTableColumns.map((column) => column.id)}
                 columns={columns}
                 indexPattern={indexPattern}
                 onRemoveColumn={onRemoveColumn}

@@ -27,6 +27,7 @@ interface Props {
   onChangeSortOrder?: (cols: EuiDataGridSorting['columns']) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
+  onReorderColumn?: (col: string, source: number, destination: number) => void;
   sortOrder: Array<{
     id: string;
     direction: 'desc' | 'asc';
@@ -34,7 +35,6 @@ interface Props {
 }
 
 export function TableHeader({
-  // columns,
   displayedTableColumns,
   defaultSortOrder,
   // hideTimeColumn,

@@ -101,6 +101,7 @@ export function ContextApp({
           onAddColumn={() => {}}
           onFilter={onAddFilter}
           onRemoveColumn={() => {}}
+          onReorderColumn={() => {}}
           onSetColumns={() => {}}
           onSort={() => {}}
           sort={sort}

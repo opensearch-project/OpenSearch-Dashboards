@@ -34,6 +34,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
     onAddColumn: searchProps.onAddColumn,
     onFilter: searchProps.onFilter,
     onRemoveColumn: searchProps.onRemoveColumn,
+    onReorderColumn: searchProps.onReorderColumn,
     onSort: searchProps.onSort,
     rows: searchProps.rows,
     onSetColumns: searchProps.onSetColumns,

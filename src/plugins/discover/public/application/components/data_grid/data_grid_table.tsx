@@ -222,7 +222,7 @@ export const DataGridTable = ({
         <EuiPanel hasBorder={false} hasShadow={true} paddingSize="s" style={{ margin: '8px' }}>
           {getDataGridTableSetting(storage) ? dataGridTable : legacyDiscoverTable}
         </EuiPanel>
-        {inspectedHit && (
+        {getDataGridTableSetting(storage) && inspectedHit && (
           <DataGridFlyout
             indexPattern={indexPattern}
             hit={inspectedHit}

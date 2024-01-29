@@ -9,20 +9,18 @@
  * GitHub history for details.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { EuiButtonIcon, EuiDataGridColumn, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { AnyAction } from '@reduxjs/toolkit';
-import { fatalErrorsServiceMock } from 'src/core/public/mocks';
+import React, { useState } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { TableCell } from './table_cell';
 import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { fetchSourceTypeDataCell } from '../data_grid/data_grid_table_cell_value';
 
 export interface TableRowProps {
   row: OpenSearchSearchHit;
-  rowIndex: number;
-  displayedTableColumns: EuiDataGridColumn[];
+  columnIds: string[];
   columns: string[];
   indexPattern: IndexPattern;
   onRemoveColumn: (column: string) => void;
@@ -33,8 +31,7 @@ export interface TableRowProps {
 
 export const TableRow = ({
   row,
-  rowIndex,
-  displayedTableColumns,
+  columnIds,
   columns,
   indexPattern,
   onRemoveColumn,
@@ -56,16 +53,38 @@ export const TableRow = ({
           className="osdDocTableCell__toggleDetails"
         />
       </td>
-      {displayedTableColumns.map((column) => {
+      {columnIds.map((columnId) => {
+        const fieldInfo = indexPattern.fields.getByName(columnId);
+        const fieldMapping = flattened[columnId];
+
+        if (typeof row === 'undefined') {
+          return (
+            <td
+              data-test-subj="docTableField"
+              className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
+            >
+              <span>-</span>
+            </td>
+          );
+        }
+
+        if (fieldInfo?.type === '_source') {
+          return (
+            <td className="eui-textBreakAll eui-textBreakWord" data-test-subj="docTableField">
+              {fetchSourceTypeDataCell(indexPattern, row, columnId, false)}
+            </td>
+          );
+        }
+
+        const formattedValue = indexPattern.formatField(row, columnId);
         return (
           <TableCell
-            key={row._id + column.id}
-            column={column}
-            row={row}
-            rowIndex={rowIndex}
-            indexPattern={indexPattern}
-            flattened={flattened}
+            key={row._id + columnId}
+            columnId={columnId}
             onFilter={onFilter}
+            filterable={fieldInfo?.filterable}
+            fieldMapping={fieldMapping}
+            formattedValue={formattedValue}
           />
         );
       })}
@@ -76,11 +95,11 @@ export const TableRow = ({
     <tr>
       <td
         style={{ borderTop: 'none', background: 'white', padding: '5px' }}
-        colSpan={displayedTableColumns.length + 2}
+        colSpan={columnIds.length + 2}
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="folderOpen" /> <span>{displayedTableColumns.size}</span>
+            <EuiIcon type="folderOpen" /> <span>{columnIds.length}</span>
           </EuiFlexItem>
           <EuiFlexItem>
             <h4

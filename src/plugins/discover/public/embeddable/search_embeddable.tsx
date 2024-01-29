@@ -80,6 +80,7 @@ export interface SearchProps {
   onRemoveColumn?: (column: string) => void;
   onAddColumn?: (column: string) => void;
   onMoveColumn?: (column: string, index: number) => void;
+  onReorderColumn?: (col: string, source: number, destination: number) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   rows?: any[];
   indexPattern?: IndexPattern;
