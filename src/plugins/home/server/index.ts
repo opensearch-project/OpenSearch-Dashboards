@@ -39,7 +39,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     disableWelcomeScreen: true,
     disableNewThemeModal: true,
-    disableNextHomePage: true,
+    preferNextHomePage: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [

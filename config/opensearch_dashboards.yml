@@ -38,8 +38,8 @@
 # Set the value to true to disable the new theme introduction modal
 #home.disableNewThemeModal: false
 
-# Set the value to true to disable the new homepage experience
-#home.disableNextHomePage: true
+# Set the value to true to make the next homepage the default. Both homepages will be available regardless of this setting.
+#home.preferNextHomePage: false
 
 # Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
 # This settings should be used for large clusters or for clusters with ingest heavy nodes.

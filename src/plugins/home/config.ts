@@ -33,7 +33,7 @@ import { schema, TypeOf } from '@osd/config-schema';
 export const configSchema = schema.object({
   disableWelcomeScreen: schema.boolean({ defaultValue: false }),
   disableNewThemeModal: schema.boolean({ defaultValue: false }),
-  disableNextHomePage: schema.boolean({ defaultValue: true }),
+  preferNextHomePage: schema.boolean({ defaultValue: false }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
