@@ -22,6 +22,9 @@ import { getSortForSearchSource } from '../../view_components/utils/get_sort_for
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
 
+import { showTableFeedbacksPanel } from './show_table_feedbacks_panel';
+import { getDataGridTableSetting, setDataGridTableSetting } from '../utils/local_storage';
+
 export const getTopNavLinks = (
   services: DiscoverViewServices,
   inspectorAdapters: Adapters,
@@ -38,6 +41,7 @@ export const getTopNavLinks = (
     store,
     data: { query },
     osdUrlStateStorage,
+    storage,
   } = services;
 
   const newSearch = {
@@ -218,7 +222,35 @@ export const getTopNavLinks = (
     },
   };
 
+  const newTable: TopNavMenuData = {
+    id: 'table-datagrid',
+    label: i18n.translate('discover.localMenu.newTableTitle', {
+      defaultMessage: 'Try new Discover experience',
+    }),
+    description: i18n.translate('discover.localMenu.newTableDescription', {
+      defaultMessage: 'New Data Grid Table Experience',
+    }),
+    testId: 'datagridTableButton',
+    run: async () => {
+      // Read the current state from localStorage
+      const useDatagridTable = getDataGridTableSetting(storage);
+      if (useDatagridTable) {
+        showTableFeedbacksPanel({
+          I18nContext: core.i18n.Context,
+          services,
+        });
+      } else {
+        // Save the new setting to localStorage
+        setDataGridTableSetting(true, storage);
+        window.location.reload();
+      }
+    },
+    type: 'toggle' as const,
+    emphasize: getDataGridTableSetting(storage),
+  };
+
   return [
+    newTable,
     newSearch,
     ...(capabilities.discover?.save ? [saveSearch] : []),
     openSearch,
@@ -278,7 +310,7 @@ const getSharingData = async ({
   const searchSourceInstance = searchSource.createCopy();
   const indexPattern = await searchSourceInstance.getField('index');
 
-  const { searchFields, selectFields } = await getSharingDataFields(
+  const { searchFields } = await getSharingDataFields(
     state.columns,
     services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
     indexPattern?.timeFieldName

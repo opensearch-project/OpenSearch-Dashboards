@@ -18,10 +18,10 @@ export interface DefaultDiscoverTableProps {
   columns: string[];
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
-  sortOrder: {
+  sortOrder: Array<{
     id: string;
-    direction: "asc" | "desc";
-}[];
+    direction: 'asc' | 'desc';
+  }>;
   onChangeSortOrder: (cols: EuiDataGridSorting['columns']) => void;
   onRemoveColumn: (column: string) => void;
   onReorderColumn: (col: string, source: number, destination: number) => void;
@@ -30,7 +30,7 @@ export interface DefaultDiscoverTableProps {
   onClose: () => void;
 }
 
-export const DefaultDiscoverTable = ({
+export const LegacyDiscoverTable = ({
   displayedTableColumns,
   columns,
   rows,

@@ -11,7 +11,6 @@ import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_c
 import { DocViewInspectButton } from './data_grid_table_docview_inspect_button';
 import { DataGridFlyout } from './data_grid_table_flyout';
 import { DiscoverGridContextProvider } from './data_grid_table_context';
-import { toolbarVisibility } from './constants';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { usePagination } from '../utils/use_pagination';
 import { SortOrder } from '../../../saved_searches/types';
@@ -19,7 +18,9 @@ import { buildColumns } from '../../utils/columns';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverServices } from '../../../build_services';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
-import { DefaultDiscoverTable } from '../default_discover_table/default_discover_table';
+import { LegacyDiscoverTable } from '../default_discover_table/default_discover_table';
+import { toolbarVisibility } from './constants';
+import { getDataGridTableSetting } from '../utils/local_storage';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -38,6 +39,7 @@ export interface DataGridTableProps {
   isToolbarVisible?: boolean;
   isContextView?: boolean;
   isLoading?: boolean;
+  storage: any;
 }
 
 export const DataGridTable = ({
@@ -57,6 +59,7 @@ export const DataGridTable = ({
   isToolbarVisible = true,
   isContextView = false,
   isLoading = false,
+  storage,
 }: DataGridTableProps) => {
   const { services } = useOpenSearchDashboards<DiscoverServices>();
 
@@ -140,24 +143,11 @@ export const DataGridTable = ({
     ];
   }, []);
 
-  console.log("sortOrders", sortingColumns)
+  console.log('sortOrders', sortingColumns);
 
-  const table = useMemo(
+  const legacyDiscoverTable = useMemo(
     () => (
-      // <EuiDataGrid
-      //   aria-labelledby="aria-labelledby"
-      //   columns={dataGridTableColumns}
-      //   columnVisibility={dataGridTableColumnsVisibility}
-      //   leadingControlColumns={leadingControlColumns}
-      //   data-test-subj="docTable"
-      //   pagination={pagination}
-      //   renderCellValue={renderCellValue}
-      //   rowCount={rowCount}
-      //   sorting={sorting}
-      //   toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
-      //   rowHeightsOptions={rowHeightsOptions}
-      // />
-      <DefaultDiscoverTable
+      <LegacyDiscoverTable
         displayedTableColumns={displayedTableColumns}
         columns={adjustedColumns}
         rows={rows}
@@ -185,34 +175,34 @@ export const DataGridTable = ({
     ]
   );
 
-  // const dataGridTable = useMemo(
-  //   () => (
-  //     <EuiDataGrid
-  //       aria-labelledby="aria-labelledby"
-  //       columns={displayedTableColumns}
-  //       columnVisibility={dataGridTableColumnsVisibility}
-  //       leadingControlColumns={leadingControlColumns}
-  //       data-test-subj="docTable"
-  //       pagination={pagination}
-  //       renderCellValue={renderCellValue}
-  //       rowCount={rowCount}
-  //       sorting={sorting}
-  //       toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
-  //       rowHeightsOptions={rowHeightsOptions}
-  //     />
-  //   ),
-  //   [
-  //     displayedTableColumns,
-  //     dataGridTableColumnsVisibility,
-  //     leadingControlColumns,
-  //     pagination,
-  //     renderCellValue,
-  //     rowCount,
-  //     sorting,
-  //     isToolbarVisible,
-  //     rowHeightsOptions,
-  //   ]
-  // );
+  const dataGridTable = useMemo(
+    () => (
+      <EuiDataGrid
+        aria-labelledby="aria-labelledby"
+        columns={displayedTableColumns}
+        columnVisibility={dataGridTableColumnsVisibility}
+        leadingControlColumns={leadingControlColumns}
+        data-test-subj="docTable"
+        pagination={pagination}
+        renderCellValue={renderCellValue}
+        rowCount={rowCount}
+        sorting={sorting}
+        toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
+        rowHeightsOptions={rowHeightsOptions}
+      />
+    ),
+    [
+      displayedTableColumns,
+      dataGridTableColumnsVisibility,
+      leadingControlColumns,
+      pagination,
+      renderCellValue,
+      rowCount,
+      sorting,
+      isToolbarVisible,
+      rowHeightsOptions,
+    ]
+  );
 
   console.log('adjustColumns higher level', adjustedColumns);
   return (
@@ -233,7 +223,7 @@ export const DataGridTable = ({
         data-test-subj="discoverTable"
       >
         <EuiPanel hasBorder={false} hasShadow={true} paddingSize="s" style={{ margin: '8px' }}>
-          {table}
+          {getDataGridTableSetting(storage) ? dataGridTable : legacyDiscoverTable}
         </EuiPanel>
         {inspectedHit && (
           <DataGridFlyout

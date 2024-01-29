@@ -12,6 +12,7 @@ import {
   DataGridTableProps,
 } from '../application/components/data_grid/data_grid_table';
 import { VisualizationNoResults } from '../../../visualizations/public';
+import { getServices } from '../opensearch_dashboards_services';
 import './search_embeddable.scss';
 
 interface SearchEmbeddableProps {
@@ -26,6 +27,7 @@ export const DataGridTableMemoized = React.memo((props: DataGridTableProps) => (
 ));
 
 export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps) {
+  const { storage } = getServices();
   const discoverEmbeddableProps = {
     columns: searchProps.columns,
     indexPattern: searchProps.indexPattern,
@@ -41,6 +43,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
     totalHitCount: searchProps.totalHitCount,
     title: searchProps.title,
     description: searchProps.description,
+    storage,
   } as DiscoverEmbeddableProps;
 
   return (

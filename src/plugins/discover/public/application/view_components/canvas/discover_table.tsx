@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
@@ -37,6 +37,7 @@ export const DiscoverTable = ({ rows }: Props) => {
     },
     capabilities,
     indexPatterns,
+    storage,
   } = services;
 
   const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
@@ -66,7 +67,7 @@ export const DiscoverTable = ({ rows }: Props) => {
 
   const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
-    console.log("sorting now!")
+    console.log('sorting now!');
     dispatch(setSort(s));
     refetch$.next();
   };
@@ -115,6 +116,7 @@ export const DiscoverTable = ({ rows }: Props) => {
       displayTimeColumn={displayTimeColumn}
       title={savedSearch?.id ? savedSearch.title : ''}
       description={savedSearch?.id ? savedSearch.description : ''}
+      storage={storage}
     />
   );
 };
