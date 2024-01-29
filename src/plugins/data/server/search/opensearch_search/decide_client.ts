@@ -9,14 +9,17 @@ import { IOpenSearchSearchRequest } from '..';
 export const decideClient = async (
   context: RequestHandlerContext,
   request: IOpenSearchSearchRequest,
+  withDataSourceEnabled: boolean = false,
   withLongNumeralsSupport: boolean = false
 ): Promise<OpenSearchClient> => {
-  // if data source feature is disabled, return default opensearch client of current user
-  const client =
+  const defaultOpenSearchClient = withLongNumeralsSupport
+    ? context.core.opensearch.client.asCurrentUserWithLongNumeralsSupport
+    : context.core.opensearch.client.asCurrentUser;
+
+  const dataSourceClient =
     request.dataSourceId && context.dataSource
       ? await context.dataSource.opensearch.getClient(request.dataSourceId)
-      : withLongNumeralsSupport
-      ? context.core.opensearch.client.asCurrentUserWithLongNumeralsSupport
-      : context.core.opensearch.client.asCurrentUser;
-  return client;
+      : defaultOpenSearchClient;
+
+  return withDataSourceEnabled ? dataSourceClient : defaultOpenSearchClient;
 };
