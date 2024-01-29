@@ -6,7 +6,7 @@
 import './_doc_table.scss';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TableRow } from './table_rows';
@@ -18,8 +18,11 @@ export interface DefaultDiscoverTableProps {
   columns: string[];
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
-  sortOrder: SortOrder[];
-  onChangeSortOrder: (sort: SortOrder[]) => void;
+  sortOrder: {
+    id: string;
+    direction: "asc" | "desc";
+}[];
+  onChangeSortOrder: (cols: EuiDataGridSorting['columns']) => void;
   onRemoveColumn: (column: string) => void;
   onReorderColumn: (col: string, source: number, destination: number) => void;
   onAddColumn: (column: string) => void;

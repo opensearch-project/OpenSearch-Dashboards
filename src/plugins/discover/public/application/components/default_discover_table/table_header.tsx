@@ -12,7 +12,7 @@
 import './_table_header.scss';
 
 import React from 'react';
-import { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { SortOrder, getDefaultSort } from '../../view_components/utils/get_default_sort';
 import { TableHeaderColumn } from './table_header_column';
@@ -24,10 +24,13 @@ interface Props {
   // hideTimeColumn: boolean;
   indexPattern: IndexPattern;
   // isShortDots: boolean;
-  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
+  onChangeSortOrder?: (cols: EuiDataGridSorting['columns']) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
-  sortOrder: SortOrder[];
+  sortOrder: {
+    id: string;
+    direction: "desc" | "asc";
+}[];
 }
 
 export function TableHeader({
@@ -72,9 +75,10 @@ export function TableHeader({
               displayName={col.display}
               isRemoveable={col.actions && col.actions.showHide ? true : false}
               isSortable={col.isSortable}
-              name={col.display}
+              name={col.display as string}
               sortOrder={
-                sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
+                sortOrder.length ? sortOrder : []
+                //getDefaultSort(indexPattern, defaultSortOrder).map(([id, direction]) => ({ id, direction }))
               }
               onReorderColumn={onReorderColumn}
               onRemoveColumn={onRemoveColumn}

@@ -13,7 +13,7 @@ import './_table_header.scss';
 
 import React, { ReactNode } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiButtonIcon, EuiFieldText, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGridSorting, EuiFieldText, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from '../../view_components/utils/get_default_sort';
 
 interface Props {
@@ -22,12 +22,15 @@ interface Props {
   colRightIdx: number; // idx of the column to the right, -1 if moving is not possible
   displayName: ReactNode;
   isRemoveable: boolean;
-  isSortable: boolean;
-  name?: string | ReactNode;
-  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
+  isSortable?: boolean;
+  name: string;
+  onChangeSortOrder?: (cols: EuiDataGridSorting['columns']) => void;
   onMoveColumn?: (name: string, idx: number) => void;
   onRemoveColumn?: (name: string) => void;
-  sortOrder: SortOrder[];
+  sortOrder: {
+    id: string;
+    direction: "desc" | "asc";
+}[];
 }
 
 const sortDirectionToIcon: Record<string, string> = {
@@ -49,27 +52,47 @@ export function TableHeaderColumn({
   onRemoveColumn,
   sortOrder,
 }: Props) {
-  const [, sortDirection = ''] = sortOrder.find((sortPair) => name === sortPair[0]) || [];
-  const currentSortWithoutColumn = sortOrder.filter((pair) => pair[0] !== name);
-  const currentColumnSort = sortOrder.find((pair) => pair[0] === name);
-  const currentColumnSortDirection = (currentColumnSort && currentColumnSort[1]) || '';
+  //const [, sortDirection = ''] = sortOrder.find((sortPair) => name === sortPair.id) || [];
+  const currentSortWithoutColumn = sortOrder.filter((pair) => pair.id !== name);
+  const currentColumnSort = sortOrder.find((pair) => pair.id === name);
+  const currentColumnSortDirection = (currentColumnSort && currentColumnSort.direction) || '';
 
-  const btnSortIcon = sortDirectionToIcon[sortDirection];
+  const btnSortIcon = sortDirectionToIcon[currentColumnSortDirection];
   const btnSortClassName =
-    sortDirection !== '' ? btnSortIcon : `osdDocTableHeader__sortChange ${btnSortIcon}`;
+  currentColumnSortDirection !== '' ? btnSortIcon : `osdDocTableHeader__sortChange ${btnSortIcon}`;
 
   const handleChangeSortOrder = () => {
     if (!onChangeSortOrder) return;
 
+    let currentSortOrder;
+    let newSortOrder: {
+      id: string;
+      direction: "desc" | "asc";
+  };
     // Cycle goes Unsorted -> Asc -> Desc -> Unsorted
     if (currentColumnSort === undefined) {
-      onChangeSortOrder([...currentSortWithoutColumn, [name, 'asc']]);
+      newSortOrder = {
+        id: name,
+        direction: "asc"
+      }
+      currentSortOrder = [...currentSortWithoutColumn, newSortOrder]
+      onChangeSortOrder(currentSortOrder);
     } else if (currentColumnSortDirection === 'asc') {
-      onChangeSortOrder([...currentSortWithoutColumn, [name, 'desc']]);
+      newSortOrder = {
+        id: name,
+        direction: "desc"
+      }
+      currentSortOrder = [...currentSortWithoutColumn, newSortOrder]
+      onChangeSortOrder(currentSortOrder);
     } else if (currentColumnSortDirection === 'desc' && currentSortWithoutColumn.length === 0) {
       // If we're at the end of the cycle and this is the only existing sort, we switch
       // back to ascending sort instead of removing it.
-      onChangeSortOrder([[name, 'asc']]);
+      newSortOrder = {
+        id: name,
+        direction: "asc"
+      }
+      currentSortOrder = [...currentSortWithoutColumn, newSortOrder]
+      onChangeSortOrder(currentSortOrder);
     } else {
       onChangeSortOrder(currentSortWithoutColumn);
     }
@@ -100,9 +123,9 @@ export function TableHeaderColumn({
 
     if (currentColumnSort === undefined) {
       return sortAscendingMessage;
-    } else if (sortDirection === 'asc') {
+    } else if (currentColumnSortDirection === 'asc') {
       return sortDescendingMessage;
-    } else if (sortDirection === 'desc' && currentSortWithoutColumn.length === 0) {
+    } else if (currentColumnSortDirection === 'desc' && currentSortWithoutColumn.length === 0) {
       return sortAscendingMessage;
     } else {
       return stopSortingMessage;
@@ -119,7 +142,7 @@ export function TableHeaderColumn({
       onClick: handleChangeSortOrder,
       testSubject: `docTableHeaderFieldSort_${name}`,
       tooltip: getSortButtonAriaLabel(),
-      iconType: 'sortable',
+      iconType: "sortable"
     },
     // Remove Button
     {

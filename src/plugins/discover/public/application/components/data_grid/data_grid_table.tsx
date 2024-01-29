@@ -140,6 +140,8 @@ export const DataGridTable = ({
     ];
   }, []);
 
+  console.log("sortOrders", sortingColumns)
+
   const table = useMemo(
     () => (
       // <EuiDataGrid
@@ -160,8 +162,8 @@ export const DataGridTable = ({
         columns={adjustedColumns}
         rows={rows}
         indexPattern={indexPattern}
-        sortOrder={sort}
-        onChangeSortOrder={onSort}
+        sortOrder={sortingColumns}
+        onChangeSortOrder={onColumnSort}
         onRemoveColumn={onRemoveColumn}
         onReorderColumn={onReorderColumn}
         onAddColumn={onAddColumn}
@@ -183,34 +185,34 @@ export const DataGridTable = ({
     ]
   );
 
-  const dataGridTable = useMemo(
-    () => (
-      <EuiDataGrid
-        aria-labelledby="aria-labelledby"
-        columns={displayedTableColumns}
-        columnVisibility={dataGridTableColumnsVisibility}
-        leadingControlColumns={leadingControlColumns}
-        data-test-subj="docTable"
-        pagination={pagination}
-        renderCellValue={renderCellValue}
-        rowCount={rowCount}
-        sorting={sorting}
-        toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
-        rowHeightsOptions={rowHeightsOptions}
-      />
-    ),
-    [
-      displayedTableColumns,
-      dataGridTableColumnsVisibility,
-      leadingControlColumns,
-      pagination,
-      renderCellValue,
-      rowCount,
-      sorting,
-      isToolbarVisible,
-      rowHeightsOptions,
-    ]
-  );
+  // const dataGridTable = useMemo(
+  //   () => (
+  //     <EuiDataGrid
+  //       aria-labelledby="aria-labelledby"
+  //       columns={displayedTableColumns}
+  //       columnVisibility={dataGridTableColumnsVisibility}
+  //       leadingControlColumns={leadingControlColumns}
+  //       data-test-subj="docTable"
+  //       pagination={pagination}
+  //       renderCellValue={renderCellValue}
+  //       rowCount={rowCount}
+  //       sorting={sorting}
+  //       toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
+  //       rowHeightsOptions={rowHeightsOptions}
+  //     />
+  //   ),
+  //   [
+  //     displayedTableColumns,
+  //     dataGridTableColumnsVisibility,
+  //     leadingControlColumns,
+  //     pagination,
+  //     renderCellValue,
+  //     rowCount,
+  //     sorting,
+  //     isToolbarVisible,
+  //     rowHeightsOptions,
+  //   ]
+  // );
 
   console.log('adjustColumns higher level', adjustedColumns);
   return (
@@ -232,7 +234,6 @@ export const DataGridTable = ({
       >
         <EuiPanel hasBorder={false} hasShadow={true} paddingSize="s" style={{ margin: '8px' }}>
           {table}
-          {dataGridTable}
         </EuiPanel>
         {inspectedHit && (
           <DataGridFlyout
