@@ -5,13 +5,12 @@
 
 import './_doc_table.scss';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React from 'react';
 import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TableRow } from './table_rows';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { SortOrder } from '../../../saved_searches/types';
 
 export interface DefaultDiscoverTableProps {
   displayedTableColumns: EuiDataGridColumn[];

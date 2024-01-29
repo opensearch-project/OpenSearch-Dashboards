@@ -23,7 +23,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { indexPatternField } from '../../../../../opensearch_ui_shared/static/forms/helpers/field_validators/index_pattern_field';
 import { fetchSourceTypeDataCell } from '../data_grid/data_grid_table_cell_value';
-import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { useDataGridContext } from '../data_grid/data_grid_table_context';
 
@@ -32,9 +32,18 @@ export interface TableCellProps {
   row: OpenSearchSearchHit;
   rowIndex: number;
   indexPattern: IndexPattern;
+  flattened: Record<string, any>;
+  onFilter: DocViewFilterFn;
 }
 
-export const TableCell = ({ column, row, rowIndex, indexPattern }: TableCellProps) => {
+export const TableCell = ({
+  column,
+  row,
+  rowIndex,
+  indexPattern,
+  flattened,
+  onFilter,
+}: TableCellProps) => {
   const singleRow = row as Record<string, unknown>;
   // const flattenedRows = dataRows ? dataRows.map((hit) => idxPattern.flattenHit(hit)) : [];
   // const flattenedRow = flattenedRows
@@ -42,6 +51,7 @@ export const TableCell = ({ column, row, rowIndex, indexPattern }: TableCellProp
   //   : undefined;
 
   const fieldInfo = indexPattern.fields.getByName(column.id);
+  const fieldMapping = flattened[column.id];
 
   if (typeof singleRow === 'undefined') {
     return (
@@ -68,7 +78,6 @@ export const TableCell = ({ column, row, rowIndex, indexPattern }: TableCellProp
   }
 
   const formattedValue = indexPattern.formatField(singleRow, column.id);
-  // const filterFor = column.cellActions ? column.cellActions[0]
 
   if (typeof formattedValue === 'undefined') {
     return (
@@ -81,61 +90,41 @@ export const TableCell = ({ column, row, rowIndex, indexPattern }: TableCellProp
     );
   } else {
     const sanitizedCellValue = dompurify.sanitize(formattedValue);
-    const { onFilter } = useDataGridContext();
 
-    const filterForButton = () => {
-      const filterForValueText = i18n.translate('discover.filterForValue', {
-        defaultMessage: 'Filter for value',
-      });
-      const filterForValueLabel = i18n.translate('discover.filterForValueLabel', {
-        defaultMessage: 'Filter for value: {value}',
-        values: { value: column.id },
-      });
-      return (
-        <EuiToolTip content={filterForValueText}>
+    const filters = (
+      <span className="osdDocTableCell__filter">
+        <EuiToolTip
+          content={i18n.translate('discover.filterForValue', {
+            defaultMessage: 'Filter for value',
+          })}
+        >
           <EuiButtonIcon
-            onClick={() => {
-              const flattened = indexPattern.flattenHit(row);
-
-              if (flattened) {
-                onFilter(column.id, flattened[column.id], '+');
-              }
-            }}
+            onClick={() => onFilter(column.id, fieldMapping, '+')}
             iconType="plusInCircle"
-            aria-label={filterForValueLabel}
+            aria-label={i18n.translate('discover.filterForValueLabel', {
+              defaultMessage: 'Filter for value',
+            })}
             data-test-subj="filterForValue"
             className="osdDocTableCell__filterButton"
           />
         </EuiToolTip>
-      );
-    };
-
-    const filterOutButton = () => {
-      const filterOutValueText = i18n.translate('discover.filterOutValue', {
-        defaultMessage: 'Filter out value',
-      });
-      const filterOutValueLabel = i18n.translate('discover.filterOutValueLabel', {
-        defaultMessage: 'Filter out value: {value}',
-        values: { value: column.id },
-      });
-      return (
-        <EuiToolTip content={filterOutValueText}>
+        <EuiToolTip
+          content={i18n.translate('discover.filterOutValue', {
+            defaultMessage: 'Filter out value',
+          })}
+        >
           <EuiButtonIcon
-            onClick={() => {
-              const flattened = indexPattern.flattenHit(row);
-
-              if (flattened) {
-                onFilter(column.id, flattened[column.id], '-');
-              }
-            }}
+            onClick={() => onFilter(column.id, fieldMapping, '-')}
             iconType="minusInCircle"
-            aria-label={filterOutValueLabel}
+            aria-label={i18n.translate('discover.filterOutValueLabel', {
+              defaultMessage: 'Filter out value',
+            })}
             data-test-subj="filterOutValue"
             className="osdDocTableCell__filterButton"
           />
         </EuiToolTip>
-      );
-    };
+      </span>
+    );
 
     return (
       // eslint-disable-next-line react/no-danger
@@ -144,10 +133,7 @@ export const TableCell = ({ column, row, rowIndex, indexPattern }: TableCellProp
         className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
       >
         <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
-        <span className="osdDocTableCell__filter">
-          {fieldInfo?.filterable ? filterForButton() : null}
-          {fieldInfo?.filterable ? filterOutButton() : null}
-        </span>
+        {fieldInfo?.filterable && filters}
       </td>
     );
   }

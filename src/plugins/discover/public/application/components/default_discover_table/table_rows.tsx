@@ -42,6 +42,7 @@ export const TableRow = ({
   onFilter,
   onClose,
 }: TableRowProps) => {
+  const flattened = indexPattern.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
   const tableRow = (
     <tr>
@@ -63,12 +64,13 @@ export const TableRow = ({
             row={row}
             rowIndex={rowIndex}
             indexPattern={indexPattern}
+            flattened={flattened}
+            onFilter={onFilter}
           />
         );
       })}
     </tr>
   );
-  const columnFields: string[] = displayedTableColumns.map((column: any) => column.id);
 
   const expandedTableRow = (
     <tr>
