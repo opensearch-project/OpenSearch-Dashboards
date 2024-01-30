@@ -45,7 +45,6 @@ export const config = {
         `script-src 'unsafe-eval' 'self'`,
         `worker-src blob: 'self'`,
         `style-src 'unsafe-inline' 'self'`,
-        `frame-ancestors 'self'`,
       ],
     }),
     strict: schema.boolean({ defaultValue: false }),

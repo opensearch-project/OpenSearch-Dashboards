@@ -20,6 +20,8 @@ const ERROR_RESPONSE = {
   statusCode: 500,
 };
 
+const CSP_RULES = "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'";
+
 describe('configuration provider routes', () => {
   describe('defineRoutes', () => {
     it('check route paths are defined', () => {
@@ -161,10 +163,8 @@ describe('configuration provider routes', () => {
 
   describe('handleGetCspRules', () => {
     it('return CSP rules when client returns CSP rules', async () => {
-      const cspRules = "frame-ancestors 'self'";
-
       const client = {
-        getCspRules: jest.fn().mockReturnValue(cspRules),
+        getCspRules: jest.fn().mockReturnValue(CSP_RULES),
       };
 
       const okResponse = {
@@ -185,7 +185,7 @@ describe('configuration provider routes', () => {
 
       expect(response.ok).toBeCalledWith({
         body: {
-          cspRules,
+          cspRules: CSP_RULES,
         },
       });
 
@@ -224,10 +224,8 @@ describe('configuration provider routes', () => {
 
   describe('handleUpdateCspRules', () => {
     it('return updated CSP rules when client updates CSP rules', async () => {
-      const cspRules = "frame-ancestors 'self'";
-
       const client = {
-        updateCspRules: jest.fn().mockReturnValue(cspRules),
+        updateCspRules: jest.fn().mockReturnValue(CSP_RULES),
       };
 
       const okResponse = {
@@ -236,7 +234,7 @@ describe('configuration provider routes', () => {
 
       const request = {
         body: {
-          value: cspRules,
+          value: CSP_RULES,
         },
       };
 
@@ -254,7 +252,7 @@ describe('configuration provider routes', () => {
 
       expect(response.ok).toBeCalledWith({
         body: {
-          updatedRules: cspRules,
+          updatedRules: CSP_RULES,
         },
       });
 
@@ -262,8 +260,6 @@ describe('configuration provider routes', () => {
     });
 
     it('return error response when client throws error', async () => {
-      const cspRules = "frame-ancestors 'self'";
-
       const error = new Error(ERROR_MESSAGE);
 
       const client = {
@@ -274,7 +270,7 @@ describe('configuration provider routes', () => {
 
       const request = {
         body: {
-          value: cspRules,
+          value: CSP_RULES,
         },
       };
 

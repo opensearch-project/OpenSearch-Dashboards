@@ -15,6 +15,7 @@ import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 const INDEX_NAME = 'test_index';
 const INDEX_DOCUMENT_NAME = 'csp.rules';
 const ERROR_MESSAGE = 'Service unavailable';
+const CSP_RULES = "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'";
 
 describe('OpenSearchConfigurationClient', () => {
   let opensearchClient: ScopedClusterClientMock;
@@ -89,12 +90,10 @@ describe('OpenSearchConfigurationClient', () => {
 
   describe('getCspRules', () => {
     it('returns the csp rules from the index', async () => {
-      const cspRules = "frame-ancestors 'self'";
-
       opensearchClient.asInternalUser.get.mockImplementation(() => {
         return opensearchClientMock.createSuccessTransportRequestPromise({
           _source: {
-            value: cspRules,
+            value: CSP_RULES,
           },
         } as GetResponse<any>);
       });
@@ -102,7 +101,7 @@ describe('OpenSearchConfigurationClient', () => {
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
       const getValue = await client.getCspRules();
 
-      expect(getValue).toBe(cspRules);
+      expect(getValue).toBe(CSP_RULES);
 
       expect(opensearchClient.asInternalUser.get).toBeCalledWith({
         index: INDEX_NAME,
@@ -134,12 +133,10 @@ describe('OpenSearchConfigurationClient', () => {
     });
 
     it('returns empty when value field is missing in opensearch response', async () => {
-      const cspRules = "frame-ancestors 'self'";
-
       opensearchClient.asInternalUser.get.mockImplementation(() => {
         return opensearchClientMock.createSuccessTransportRequestPromise({
           _source: {
-            value_typo: cspRules,
+            value_typo: CSP_RULES,
           },
         } as GetResponse<any>);
       });
@@ -179,27 +176,24 @@ describe('OpenSearchConfigurationClient', () => {
 
   describe('updateCspRules', () => {
     it('runs updated value when opensearch successfully updates', async () => {
-      const cspRules = "frame-ancestors 'self'";
-
       opensearchClient.asCurrentUser.index.mockImplementation(() => {
         return opensearchClientMock.createSuccessTransportRequestPromise({});
       });
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
-      const updated = await client.updateCspRules(cspRules);
+      const updated = await client.updateCspRules(CSP_RULES);
 
-      expect(updated).toBe(cspRules);
+      expect(updated).toBe(CSP_RULES);
 
       expect(opensearchClient.asCurrentUser.index).toBeCalledWith(
-        getIndexInput(INDEX_NAME, INDEX_DOCUMENT_NAME, cspRules)
+        getIndexInput(INDEX_NAME, INDEX_DOCUMENT_NAME, CSP_RULES)
       );
 
       expect(logger.error).not.toBeCalled();
     });
 
     it('throws exception when opensearch throws exception', async () => {
-      const cspRules = "frame-ancestors 'self'";
       const error = new Error(ERROR_MESSAGE);
       opensearchClient.asCurrentUser.index.mockImplementation(() => {
         return opensearchClientMock.createErrorTransportRequestPromise(error);
@@ -207,14 +201,14 @@ describe('OpenSearchConfigurationClient', () => {
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
-      await expect(client.updateCspRules(cspRules)).rejects.toThrowError(ERROR_MESSAGE);
+      await expect(client.updateCspRules(CSP_RULES)).rejects.toThrowError(ERROR_MESSAGE);
 
       expect(opensearchClient.asCurrentUser.index).toBeCalledWith(
-        getIndexInput(INDEX_NAME, INDEX_DOCUMENT_NAME, cspRules)
+        getIndexInput(INDEX_NAME, INDEX_DOCUMENT_NAME, CSP_RULES)
       );
 
       expect(logger.error).toBeCalledWith(
-        `Failed to call updateCspRules with cspRules ${cspRules} due to error ${error}`
+        `Failed to call updateCspRules with cspRules ${CSP_RULES} due to error ${error}`
       );
     });
   });
