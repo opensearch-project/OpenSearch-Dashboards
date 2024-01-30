@@ -57,7 +57,7 @@ export class DataSourcePicker extends React.Component {
       });
   }
 
-  onChang(e) {
+  onChange(e) {
     if (!this._isMounted) return;
     this.setState({
       selectedOption: e,
@@ -77,8 +77,10 @@ export class DataSourcePicker extends React.Component {
         singleSelection={{ asPlainText: true }}
         options={this.state.dataSources}
         selectedOptions={this.state.selectedOption}
-        onChange={(e) => this.onChang(e)}
-        prepend="Data source"
+        onChange={(e) => this.onChange(e)}
+        prepend={i18n.translate('dataSourceComboBoxPrepend', {
+          defaultMessage: 'Data source',
+        })}
         compressed
         isDisabled={this.props.disabled}
       />
