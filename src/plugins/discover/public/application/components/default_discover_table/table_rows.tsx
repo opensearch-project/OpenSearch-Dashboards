@@ -99,7 +99,7 @@ export const TableRow = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="folderOpen" /> <span>{columnIds.length}</span>
+            <EuiIcon type="folderOpen" />
           </EuiFlexItem>
           <EuiFlexItem>
             <h4
