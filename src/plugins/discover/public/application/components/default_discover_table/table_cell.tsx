@@ -12,7 +12,6 @@
 import './_table_cell.scss';
 
 import React from 'react';
-import dompurify from 'dompurify';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
@@ -22,29 +21,22 @@ export interface TableCellProps {
   onFilter: DocViewFilterFn;
   filterable?: boolean;
   fieldMapping?: any;
-  formattedValue: any;
+  sanitizedCellValue: string;
 }
 
 export const TableCell = ({
   columnId,
   onFilter,
-  filterable,
   fieldMapping,
-  formattedValue,
+  sanitizedCellValue,
 }: TableCellProps) => {
-  if (typeof formattedValue === 'undefined') {
-    return (
-      <td
-        data-test-subj="docTableField"
-        className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
-      >
-        <span>-</span>
-      </td>
-    );
-  } else {
-    const sanitizedCellValue = dompurify.sanitize(formattedValue);
-
-    const filters = (
+  return (
+    // eslint-disable-next-line react/no-danger
+    <td
+      data-test-subj="docTableField"
+      className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
+    >
+      <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
       <span className="osdDocTableCell__filter">
         <EuiToolTip
           content={i18n.translate('discover.filterForValue', {
@@ -77,17 +69,6 @@ export const TableCell = ({
           />
         </EuiToolTip>
       </span>
-    );
-
-    return (
-      // eslint-disable-next-line react/no-danger
-      <td
-        data-test-subj="docTableField"
-        className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
-      >
-        <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
-        {filterable && filters}
-      </td>
-    );
-  }
+    </td>
+  );
 };

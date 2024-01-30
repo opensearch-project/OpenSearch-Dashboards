@@ -11,6 +11,7 @@
 
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import dompurify from 'dompurify';
 import { TableCell } from './table_cell';
 import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
 import { DocViewer } from '../doc_viewer/doc_viewer';
@@ -77,14 +78,39 @@ export const TableRow = ({
         }
 
         const formattedValue = indexPattern.formatField(row, columnId);
+
+        if (typeof formattedValue === 'undefined') {
+          return (
+            <td
+              data-test-subj="docTableField"
+              className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
+            >
+              <span>-</span>
+            </td>
+          );
+        }
+
+        const sanitizedCellValue = dompurify.sanitize(formattedValue);
+
+        if (!fieldInfo?.filterable) {
+          return (
+            // eslint-disable-next-line react/no-danger
+            <td
+              data-test-subj="docTableField"
+              className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
+            >
+              <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+            </td>
+          );
+        }
+
         return (
           <TableCell
             key={row._id + columnId}
             columnId={columnId}
             onFilter={onFilter}
-            filterable={fieldInfo?.filterable}
             fieldMapping={fieldMapping}
-            formattedValue={formattedValue}
+            sanitizedCellValue={sanitizedCellValue}
           />
         );
       })}
