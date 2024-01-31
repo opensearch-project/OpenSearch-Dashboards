@@ -34,4 +34,10 @@
     transform: translateY(-3px);
     max-height: calc(10em - 3px);
   }
+
+  dd,
+  dl,
+  dt {
+    font-size: inherit !important;
+  }
 }
