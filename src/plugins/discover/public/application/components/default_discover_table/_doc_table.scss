@@ -69,6 +69,23 @@ doc-table {
   }
 }
 
+.osdDiscoverTable {
+  @include ouiCodeFont;
+
+  & > tbody > tr:not(.osdDiscoverInViewRow):not(.osdDiscoverExpandedRow) {
+    visibility: hidden;
+  }
+
+  .osdDiscoverExpandedRow {
+    background: $euiColorEmptyShade;
+    border-top: none !important;
+
+    & > td {
+      padding: 2em;
+    }
+  }
+}
+
 .osdDocTable__row {
   td {
     position: relative;

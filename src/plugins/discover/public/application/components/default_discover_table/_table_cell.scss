@@ -1,7 +1,3 @@
-.osdDocTable_expandedRow {
-  border-top: none !important;
-}
-
 .osdDocTableCell__toggleDetails {
   padding: 4px 0 0 !important;
 }
@@ -30,5 +26,12 @@
   &:hover &__filterButton,
   &:focus &__filterButton {
     opacity: 1;
+  }
+}
+
+.osdDocTableCell__source {
+  .osdDocTable__limitedHeight {
+    transform: translateY(-3px);
+    max-height: calc(10em - 3px);
   }
 }

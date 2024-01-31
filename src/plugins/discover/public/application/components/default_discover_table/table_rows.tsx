@@ -43,7 +43,7 @@ export const TableRow = ({
   const flattened = indexPattern.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
   const tableRow = (
-    <tr>
+    <tr key={row._id}>
       <td data-test-subj="docTableExpandToggleColumn" className="osdDocTableCell__toggleDetails">
         <EuiButtonIcon
           color="text"
@@ -61,6 +61,7 @@ export const TableRow = ({
         if (typeof row === 'undefined') {
           return (
             <td
+              key={columnId}
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
@@ -71,8 +72,14 @@ export const TableRow = ({
 
         if (fieldInfo?.type === '_source') {
           return (
-            <td className="eui-textBreakAll eui-textBreakWord" data-test-subj="docTableField">
-              {fetchSourceTypeDataCell(indexPattern, row, columnId, false)}
+            <td
+              key={columnId}
+              className="osdDocTableCell eui-textBreakAll eui-textBreakWord osdDocTableCell__source"
+              data-test-subj="docTableField"
+            >
+              <div className="osdDocTable__limitedHeight">
+                {fetchSourceTypeDataCell(indexPattern, row, columnId, false)}
+              </div>
             </td>
           );
         }
@@ -82,6 +89,7 @@ export const TableRow = ({
         if (typeof formattedValue === 'undefined') {
           return (
             <td
+              key={columnId}
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
@@ -95,6 +103,7 @@ export const TableRow = ({
         if (!fieldInfo?.filterable) {
           return (
             <td
+              key={columnId}
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
@@ -106,7 +115,9 @@ export const TableRow = ({
 
         return (
           <TableCell
+            key={columnId}
             columnId={columnId}
+            columnType={fieldInfo?.type}
             onFilter={onFilter}
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
@@ -117,9 +128,9 @@ export const TableRow = ({
   );
 
   const expandedTableRow = (
-    <tr>
-      <td className="osdDocTable_expandedRow" colSpan={columnIds.length + 1}>
-        <EuiFlexGroup justifyContent="center" alignItems="center">
+    <tr className="osdDiscoverExpandedRow" key={'x' + row._id}>
+      <td colSpan={columnIds.length + 2}>
+        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiIcon type="folderOpen" />
           </EuiFlexItem>
