@@ -103,6 +103,7 @@ export const DataSourceSelectable = ({
   setDataSourceOptionList,
   onGetDataSetError, //   onGetDataSetError, Callback for handling get data set errors. Ensure it's memoized.
   singleSelection = { asPlainText: true },
+  ...comboBoxProps
 }: DataSourceSelectableProps) => {
   // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
@@ -120,6 +121,7 @@ export const DataSourceSelectable = ({
 
   return (
     <EuiComboBox
+      {...comboBoxProps}
       data-test-subj="dataExplorerDSSelect"
       placeholder={i18n.translate('data.datasource.selectADatasource', {
         defaultMessage: 'Select a datasource',

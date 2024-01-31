@@ -36,7 +36,7 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
                 <EuiResizablePanel
                   initialSize={20}
                   minSize="260px"
-                  mode="collapsible"
+                  mode={['collapsible', { position: 'top' }]}
                   paddingSize="none"
                 >
                   <Sidebar>

@@ -217,7 +217,6 @@ export const DataGridTable = ({
         paddingSize: 'none' as const,
         style: {
           margin: '0px',
-          marginLeft: '8px',
         },
         color: 'transparent' as const,
       };

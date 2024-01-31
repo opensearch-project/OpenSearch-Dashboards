@@ -96,11 +96,11 @@ export const TableRow = ({
 
         if (!fieldInfo?.filterable) {
           return (
-            // eslint-disable-next-line react/no-danger
             <td
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
+              {/* eslint-disable-next-line react/no-danger */}
               <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
             </td>
           );
@@ -120,11 +120,8 @@ export const TableRow = ({
 
   const expandedTableRow = (
     <tr>
-      <td
-        style={{ borderTop: 'none', background: 'white', padding: '5px' }}
-        colSpan={columnIds.length + 2}
-      >
-        <EuiFlexGroup>
+      <td className="osdDocTable_expandedRow" colSpan={columnIds.length + 1}>
+        <EuiFlexGroup justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type="folderOpen" />
           </EuiFlexItem>
