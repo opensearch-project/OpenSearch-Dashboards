@@ -27,17 +27,19 @@ export function fetchSourceTypeDataCell(
     return <span>{stringify(row[columnId], null, 2)}</span>;
   }
   const formattedRow = idxPattern.formatHit(row);
+  const keys = Object.keys(formattedRow);
 
   return (
     <EuiDescriptionList type="inline" compressed>
-      {Object.keys(formattedRow).map((key) => (
+      {keys.map((key, index) => (
         <Fragment key={key}>
           <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
-            {key}
+            {key + ':'}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription
             dangerouslySetInnerHTML={{ __html: dompurify.sanitize(formattedRow[key]) }}
           />
+          {index !== keys.length - 1 && ' '}
         </Fragment>
       ))}
     </EuiDescriptionList>

@@ -33,7 +33,9 @@ export const TableFeedbacksPanel = ({ onClose, onTurnOff }: TableFeedbacksPanelP
         <p>
           Event tables: Documents are now expanded through a flyout. Density, column order, and
           sorting controls have been improved.{' '}
-          <a href="https://survey.opensearch.org">Provide feedbacks</a>.
+          <a href="https://survey.opensearch.org" target="_blank" rel="noopener noreferrer">
+            Provide feedbacks
+          </a>
         </p>
       </EuiText>
     </EuiModalBody>
