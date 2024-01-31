@@ -42,38 +42,39 @@ export const LegacyDiscoverTable = ({
   onFilter,
   onClose,
 }: DefaultDiscoverTableProps) => {
-  const [intersectingRows, setIntersectingRows] = useState([]);
-  const tableRef = useRef(null);
+  const [renderedRowCount, setRenderedRowCount] = useState(50); // Start with 50 rows
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const loadMoreRows = () => {
+    setRenderedRowCount((prevRowCount) => prevRowCount + 50); // Load 50 more rows
+  };
 
   useEffect(() => {
-    const options = {
-      root: null, // viewport
-      rootMargin: '0px',
-      threshold: 0.5, // 50% of the element is visible
-    };
+    const sentinel = sentinelRef.current;
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMoreRows();
+        }
+      },
+      { threshold: 1.0 }
+    );
 
-    const observer = new IntersectionObserver((entries) => {
-      const visibleRows = entries
-        .filter((entry) => entry.isIntersecting)
-        .map((entry) => Number(entry.target.dataset.index));
-
-      setIntersectingRows((prevIntersectingRows) => [...prevIntersectingRows, ...visibleRows]);
-    }, options);
-
-    const tableRows = tableRef.current.querySelectorAll('tbody tr');
-    tableRows.forEach((row, index) => {
-      observer.observe(row);
-      row.dataset.index = index; // Storing the index for reference
-    });
+    if (sentinelRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
 
     return () => {
-      observer.disconnect();
+      if (observerRef.current && sentinel) {
+        observerRef.current.unobserve(sentinel);
+      }
     };
-  }, [rows, columns]); // Re-run if the data changes
+  }, []);
 
   return (
     indexPattern && (
-      <table data-test-subj="docTable" className="osd-table table" ref={tableRef}>
+      <table data-test-subj="docTable" className="osd-table table">
         <thead>
           <TableHeader
             displayedTableColumns={displayedTableColumns}
@@ -88,10 +89,10 @@ export const LegacyDiscoverTable = ({
           />
         </thead>
         <tbody>
-          {rows.map((row: OpenSearchSearchHit, index: number) => {
+          {rows.slice(0, renderedRowCount).map((row: OpenSearchSearchHit, index: number) => {
             return (
               <TableRow
-                opacity={intersectingRows.includes(index) ? 1 : 0}
+                key={index}
                 row={row}
                 columnIds={displayedTableColumns.map((column) => column.id)}
                 columns={columns}
@@ -103,6 +104,7 @@ export const LegacyDiscoverTable = ({
               />
             );
           })}
+          {renderedRowCount < rows.length && <div ref={sentinelRef} style={{ height: '1px' }} />}
         </tbody>
       </table>
     )
