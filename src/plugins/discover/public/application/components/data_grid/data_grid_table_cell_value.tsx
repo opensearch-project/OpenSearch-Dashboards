@@ -30,7 +30,7 @@ export function fetchSourceTypeDataCell(
   const keys = Object.keys(formattedRow);
 
   return (
-    <EuiDescriptionList type="inline" compressed>
+    <EuiDescriptionList type="inline" compressed className="source">
       {keys.map((key, index) => (
         <Fragment key={key}>
           <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">

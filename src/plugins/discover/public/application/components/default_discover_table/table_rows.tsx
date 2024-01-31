@@ -43,7 +43,7 @@ export const TableRow = ({
   const flattened = indexPattern.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
   const tableRow = (
-    <tr>
+    <tr key={row._id}>
       <td data-test-subj="docTableExpandToggleColumn" className="osdDocTableCell__toggleDetails">
         <EuiButtonIcon
           color="text"
@@ -61,6 +61,7 @@ export const TableRow = ({
         if (typeof row === 'undefined') {
           return (
             <td
+              key={columnId}
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
@@ -71,8 +72,14 @@ export const TableRow = ({
 
         if (fieldInfo?.type === '_source') {
           return (
-            <td className="eui-textBreakAll eui-textBreakWord" data-test-subj="docTableField">
-              {fetchSourceTypeDataCell(indexPattern, row, columnId, false)}
+            <td
+              key={columnId}
+              className="osdDocTableCell eui-textBreakAll eui-textBreakWord osdDocTableCell__source"
+              data-test-subj="docTableField"
+            >
+              <div className="truncate-by-height">
+                {fetchSourceTypeDataCell(indexPattern, row, columnId, false)}
+              </div>
             </td>
           );
         }
@@ -82,6 +89,7 @@ export const TableRow = ({
         if (typeof formattedValue === 'undefined') {
           return (
             <td
+              key={columnId}
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
@@ -95,18 +103,23 @@ export const TableRow = ({
         if (!fieldInfo?.filterable) {
           return (
             <td
+              key={columnId}
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
-              {/* eslint-disable-next-line react/no-danger */}
-              <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+              <div className="truncate-by-height">
+                {/* eslint-disable-next-line react/no-danger */}
+                <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+              </div>
             </td>
           );
         }
 
         return (
           <TableCell
+            key={columnId}
             columnId={columnId}
+            columnType={fieldInfo?.type}
             onFilter={onFilter}
             isTimeField={indexPattern.timeFieldName === columnId}
             fieldMapping={fieldMapping}
@@ -118,9 +131,9 @@ export const TableRow = ({
   );
 
   const expandedTableRow = (
-    <tr>
-      <td className="osdDocTable_expandedRow" colSpan={columnIds.length + 1}>
-        <EuiFlexGroup justifyContent="center" alignItems="center">
+    <tr key={'x' + row._id}>
+      <td className="osdDocTable__detailsParent" colSpan={columnIds.length + 2}>
+        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiIcon type="folderOpen" />
           </EuiFlexItem>

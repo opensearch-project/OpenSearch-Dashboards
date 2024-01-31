@@ -42,6 +42,13 @@ doc-table {
 
 .osd-table,
 .osdDocTable {
+  @include ouiCodeFont;
+
+  // To fight intruding styles that conflict with OUI's
+  & > tbody > tr > td {
+    line-height: inherit;
+  }
+
   /**
     *  Style OpenSearch document _source in table view <dt>key:<dt><dd>value</dd>
     *  Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
