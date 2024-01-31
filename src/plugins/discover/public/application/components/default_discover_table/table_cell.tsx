@@ -31,44 +31,48 @@ export const TableCell = ({
   sanitizedCellValue,
 }: TableCellProps) => {
   return (
-    // eslint-disable-next-line react/no-danger
     <td
       data-test-subj="docTableField"
       className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
     >
-      <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
-      <span className="osdDocTableCell__filter">
-        <EuiToolTip
-          content={i18n.translate('discover.filterForValue', {
-            defaultMessage: 'Filter for value',
-          })}
-        >
-          <EuiButtonIcon
-            onClick={() => onFilter(columnId, fieldMapping, '+')}
-            iconType="plusInCircle"
-            aria-label={i18n.translate('discover.filterForValueLabel', {
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* eslint-disable-next-line react/no-danger */}
+        <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+        <span className="osdDocTableCell__filter">
+          <EuiToolTip
+            content={i18n.translate('discover.filterForValue', {
               defaultMessage: 'Filter for value',
             })}
-            data-test-subj="filterForValue"
-            className="osdDocTableCell__filterButton"
-          />
-        </EuiToolTip>
-        <EuiToolTip
-          content={i18n.translate('discover.filterOutValue', {
-            defaultMessage: 'Filter out value',
-          })}
-        >
-          <EuiButtonIcon
-            onClick={() => onFilter(columnId, fieldMapping, '-')}
-            iconType="minusInCircle"
-            aria-label={i18n.translate('discover.filterOutValueLabel', {
+          >
+            <EuiButtonIcon
+              onClick={() => onFilter(columnId, fieldMapping, '+')}
+              iconType="plusInCircle"
+              aria-label={i18n.translate('discover.filterForValueLabel', {
+                defaultMessage: 'Filter for value',
+              })}
+              data-test-subj="filterForValue"
+              className="osdDocTableCell__filterButton"
+              iconSize={'s'}
+            />
+          </EuiToolTip>
+          <EuiToolTip
+            content={i18n.translate('discover.filterOutValue', {
               defaultMessage: 'Filter out value',
             })}
-            data-test-subj="filterOutValue"
-            className="osdDocTableCell__filterButton"
-          />
-        </EuiToolTip>
-      </span>
+          >
+            <EuiButtonIcon
+              onClick={() => onFilter(columnId, fieldMapping, '-')}
+              iconType="minusInCircle"
+              aria-label={i18n.translate('discover.filterOutValueLabel', {
+                defaultMessage: 'Filter out value',
+              })}
+              data-test-subj="filterOutValue"
+              className="osdDocTableCell__filterButton"
+              iconSize={'s'}
+            />
+          </EuiToolTip>
+        </span>
+      </div>
     </td>
   );
 };

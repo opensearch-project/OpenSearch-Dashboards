@@ -52,6 +52,7 @@ export const TableRow = ({
           aria-label="Next"
           data-test-subj="docTableExpandToggleColumn"
           className="osdDocTableCell__toggleDetails"
+          iconSize={'s'}
         />
       </td>
       {columnIds.map((columnId) => {
