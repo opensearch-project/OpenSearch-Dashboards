@@ -210,6 +210,7 @@ export function TableHeaderColumn({
                 className="docTableHeaderField__actionButton"
                 data-test-subj={button.testSubject}
                 onClick={button.onClick}
+                iconSize="s"
               />
             </EuiToolTip>
           ))}

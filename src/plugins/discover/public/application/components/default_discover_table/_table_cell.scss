@@ -1,34 +1,30 @@
+.osdDocTableCell__toggleDetails {
+  padding: 4px 0 0 !important;
+}
 
-  .osdDocTableCell__toggleDetails {
-    padding: 4px 0 0 !important;
-  }
-  
-  .osdDocTableCell__filter { //TODO: make them appear at top right corner
-    
-  }
-  
-  /**
+.osdDocTableCell__filter { // TODO: make them appear at top right corner
+}
+
+/**
    * 1. Align icon with text in cell.
    * 2. Use opacity to make this element accessible to screen readers and keyboard.
    * 3. Show on focus to enable keyboard accessibility.
    */
-  
-  .osdDocTableCell {
-    white-space: pre-wrap;
 
-    &__filterButton {
-      opacity: 0;
-      transition: opacity $euiAnimSpeedFast;
+.osdDocTableCell {
+  white-space: pre-wrap;
 
-      @include ouiBreakpoint("xs", "s", "m") {
-        opacity: 1;
-      }
-    }
+  &__filterButton {
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast;
 
-    &:hover &__filterButton,
-    &:focus &__filterButton {
-        opacity: 1;
+    @include ouiBreakpoint("xs", "s", "m") {
+      opacity: 1;
     }
   }
 
-  
+  &:hover &__filterButton,
+  &:focus &__filterButton {
+    opacity: 1;
+  }
+}
