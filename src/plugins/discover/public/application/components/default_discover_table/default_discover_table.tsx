@@ -5,7 +5,7 @@
 
 import './_doc_table.scss';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
@@ -42,9 +42,38 @@ export const LegacyDiscoverTable = ({
   onFilter,
   onClose,
 }: DefaultDiscoverTableProps) => {
+  const [intersectingRows, setIntersectingRows] = useState([]);
+  const tableRef = useRef(null);
+
+  useEffect(() => {
+    const options = {
+      root: null, // viewport
+      rootMargin: '0px',
+      threshold: 0.5, // 50% of the element is visible
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      const visibleRows = entries
+        .filter((entry) => entry.isIntersecting)
+        .map((entry) => Number(entry.target.dataset.index));
+
+      setIntersectingRows((prevIntersectingRows) => [...prevIntersectingRows, ...visibleRows]);
+    }, options);
+
+    const tableRows = tableRef.current.querySelectorAll('tbody tr');
+    tableRows.forEach((row, index) => {
+      observer.observe(row);
+      row.dataset.index = index; // Storing the index for reference
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [rows, columns]); // Re-run if the data changes
+
   return (
     indexPattern && (
-      <table data-test-subj="docTable" className="osd-table table">
+      <table data-test-subj="docTable" className="osd-table table" ref={tableRef}>
         <thead>
           <TableHeader
             displayedTableColumns={displayedTableColumns}
@@ -59,10 +88,10 @@ export const LegacyDiscoverTable = ({
           />
         </thead>
         <tbody>
-          {rows.map((row: OpenSearchSearchHit) => {
+          {rows.map((row: OpenSearchSearchHit, index: number) => {
             return (
               <TableRow
-                key={row._id}
+                opacity={intersectingRows.includes(index) ? 1 : 0}
                 row={row}
                 columnIds={displayedTableColumns.map((column) => column.id)}
                 columns={columns}

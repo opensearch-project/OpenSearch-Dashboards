@@ -14,7 +14,6 @@ import './_table_header.scss';
 import React from 'react';
 import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { SortOrder, getDefaultSort } from '../../view_components/utils/get_default_sort';
 import { TableHeaderColumn } from './table_header_column';
 
 interface Props {
@@ -65,7 +64,6 @@ export function TableHeader({
 
           return (
             <TableHeaderColumn
-              key={col.id + idx}
               currentIdx={idx}
               colLeftIdx={colLeftIdx}
               colRightIdx={colRightIdx}

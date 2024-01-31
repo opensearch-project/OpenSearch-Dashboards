@@ -20,6 +20,7 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { fetchSourceTypeDataCell } from '../data_grid/data_grid_table_cell_value';
 
 export interface TableRowProps {
+  opacity: number;
   row: OpenSearchSearchHit;
   columnIds: string[];
   columns: string[];
@@ -31,6 +32,7 @@ export interface TableRowProps {
 }
 
 export const TableRow = ({
+  opacity,
   row,
   columnIds,
   columns,
@@ -43,7 +45,7 @@ export const TableRow = ({
   const flattened = indexPattern.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
   const tableRow = (
-    <tr>
+    <tr style={{ opacity }}>
       <td data-test-subj="docTableExpandToggleColumn" className="osdDocTableCell__toggleDetails">
         <EuiButtonIcon
           color="text"
@@ -106,7 +108,6 @@ export const TableRow = ({
 
         return (
           <TableCell
-            key={row._id + columnId}
             columnId={columnId}
             onFilter={onFilter}
             fieldMapping={fieldMapping}
