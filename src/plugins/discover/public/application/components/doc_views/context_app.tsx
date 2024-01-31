@@ -16,6 +16,7 @@ import { DataGridTable } from '../data_grid/data_grid_table';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { AppState } from './context/utils/context_state';
+import { SortOrder } from '../../../saved_searches/types';
 
 export interface Props {
   onAddFilter: DocViewFilterFn;
@@ -39,7 +40,7 @@ export function ContextApp({
   appState,
 }: Props) {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { uiSettings } = services;
+  const { uiSettings, storage } = services;
   const defaultStepSize = useMemo(() => parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10), [
     uiSettings,
   ]);
@@ -73,7 +74,7 @@ export function ContextApp({
     [setAppState]
   );
 
-  const sort = useMemo(() => {
+  const sort: SortOrder[] = useMemo(() => {
     return [[indexPattern.timeFieldName!, SortDirection.desc]];
   }, [indexPattern]);
 
@@ -107,9 +108,9 @@ export function ContextApp({
           sort={sort}
           rows={rows}
           displayTimeColumn={displayTimeColumn}
-          services={services}
           isToolbarVisible={false}
           isContextView={true}
+          storage={storage}
         />
       </div>
       <ActionBar

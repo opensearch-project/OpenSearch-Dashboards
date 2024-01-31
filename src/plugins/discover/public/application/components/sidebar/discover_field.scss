@@ -14,7 +14,8 @@
   }
 
   &:hover &__actionButton,
-  &:focus &__actionButton {
+  &:focus &__actionButton,
+  .dscSidebarField__actionButton:focus {
     opacity: 1;
   }
 }

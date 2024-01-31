@@ -54,6 +54,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
         direction="column"
         responsive={false}
         data-test-subj="embeddedSavedSearchDocTable"
+        className="eui-xScrollWithShadows eui-yScrollWithShadows"
       >
         {discoverEmbeddableProps.totalHitCount !== 0 ? (
           <EuiFlexItem style={{ minHeight: 0 }} className="osdDocTable__container">

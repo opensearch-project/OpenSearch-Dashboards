@@ -21,6 +21,7 @@ import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { LegacyDiscoverTable } from '../default_discover_table/default_discover_table';
 import { toolbarVisibility } from './constants';
 import { getDataGridTableSetting } from '../utils/local_storage';
+import { Storage } from '../../../../../opensearch_dashboards_utils/public';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -39,7 +40,7 @@ export interface DataGridTableProps {
   isToolbarVisible?: boolean;
   isContextView?: boolean;
   isLoading?: boolean;
-  storage: any;
+  storage: Storage;
 }
 
 export const DataGridTable = ({
@@ -143,6 +144,8 @@ export const DataGridTable = ({
     ];
   }, []);
 
+  const datagridActive = getDataGridTableSetting(storage);
+
   const legacyDiscoverTable = useMemo(
     () => (
       <LegacyDiscoverTable
@@ -202,6 +205,23 @@ export const DataGridTable = ({
     ]
   );
 
+  const tablePanelProps = datagridActive
+    ? {
+        paddingSize: 'none' as const,
+        style: {
+          margin: '8px',
+        },
+        color: 'transparent' as const,
+      }
+    : {
+        paddingSize: 'none' as const,
+        style: {
+          margin: '0px',
+          marginLeft: '8px',
+        },
+        color: 'transparent' as const,
+      };
+
   return (
     <DiscoverGridContextProvider
       value={{
@@ -218,11 +238,12 @@ export const DataGridTable = ({
         data-title={title}
         data-description={description}
         data-test-subj="discoverTable"
+        className="eui-xScrollWithShadows"
       >
-        <EuiPanel hasBorder={false} hasShadow={true} paddingSize="s" style={{ margin: '8px' }}>
-          {getDataGridTableSetting(storage) ? dataGridTable : legacyDiscoverTable}
+        <EuiPanel hasBorder={false} hasShadow={false} {...tablePanelProps}>
+          {datagridActive ? dataGridTable : legacyDiscoverTable}
         </EuiPanel>
-        {getDataGridTableSetting(storage) && inspectedHit && (
+        {datagridActive && inspectedHit && (
           <DataGridFlyout
             indexPattern={indexPattern}
             hit={inspectedHit}
