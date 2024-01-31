@@ -2,7 +2,11 @@
   padding: 4px 0 0 !important;
 }
 
-.osdDocTableCell__filter { // TODO: make them appear at top right corner
+.osdDocTableCell__filter {
+  position: absolute;
+  white-space: nowrap;
+  right: 0;
+  background: $ouiPageBackgroundColor;
 }
 
 /**
@@ -13,8 +17,10 @@
 
 .osdDocTableCell {
   white-space: pre-wrap;
+  position: relative;
 
-  &__filterButton {
+  &__filterButton,
+  &__filter {
     opacity: 0;
     transition: opacity $euiAnimSpeedFast;
 
@@ -24,7 +30,9 @@
   }
 
   &:hover &__filterButton,
-  &:focus &__filterButton {
+  &:focus &__filterButton,
+  &:hover &__filter,
+  &:focus &__filter {
     opacity: 1;
   }
 }
