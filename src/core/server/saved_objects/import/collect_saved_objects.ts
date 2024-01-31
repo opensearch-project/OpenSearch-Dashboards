@@ -81,7 +81,12 @@ export async function collectSavedObjects({
     }),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
-      importIdMap.set(`${obj.type}:${obj.id}`, {});
+      if (dataSourceId) {
+        importIdMap.set(`${dataSourceId}_${obj.type}:${obj.id}`, {});
+      } else {
+        importIdMap.set(`${obj.type}:${obj.id}`, {});
+      }
+
       // Ensure migrations execute on every saved object
       return Object.assign({ migrationVersion: {} }, obj);
     }),

@@ -44,6 +44,7 @@ interface CheckConflictsParams {
   ignoreRegularConflicts?: boolean;
   retries?: SavedObjectsImportRetry[];
   createNewCopies?: boolean;
+  dataSourceId?: string;
 }
 
 const isUnresolvableConflict = (error: SavedObjectError) =>

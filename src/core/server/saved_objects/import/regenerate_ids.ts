@@ -37,6 +37,7 @@ import { SavedObject } from '../types';
  * @param objects The saved objects to generate new IDs for.
  */
 export const regenerateIds = (objects: SavedObject[], dataSourceId: string | undefined) => {
+<<<<<<< HEAD
   const importIdMap = objects
     .filter((object) => object.type !== 'data-source')
     .reduce((acc, object) => {
@@ -48,5 +49,17 @@ export const regenerateIds = (objects: SavedObject[], dataSourceId: string | und
       }
       return acc.set(`${object.type}:${object.id}`, { id: uuidv4(), omitOriginId: true });
     }, new Map<string, { id: string; omitOriginId?: boolean }>());
+=======
+  // add datasource?
+  const importIdMap = objects.reduce((acc, object) => {
+    if (dataSourceId) {
+      return acc.set(`${object.type}:${object.id}`, {
+        id: `${dataSourceId}_${uuidv4()}`,
+        omitOriginId: true,
+      });
+    }
+    return acc.set(`${object.type}:${object.id}`, { id: uuidv4(), omitOriginId: true });
+  }, new Map<string, { id: string; omitOriginId?: boolean }>());
+>>>>>>> update import api only
   return importIdMap;
 };

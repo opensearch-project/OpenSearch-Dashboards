@@ -187,6 +187,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     if (sources.length === 1 && destinations.length === 1) {
       // This is a simple "inexact match" result -- a single import object has a single destination conflict.
       if (params.ignoreRegularConflicts) {
+        // importIdMap.set(`${type}:${id}`, { id: dataSourceId ? `${dataSourceId}_${destinations[0].id}` : `${destinations[0].id}` });
         importIdMap.set(`${type}:${id}`, { id: destinations[0].id });
         pendingOverwrites.add(`${type}:${id}`);
       } else {

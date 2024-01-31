@@ -60,7 +60,11 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
           {
             overwrite: schema.boolean({ defaultValue: false }),
             createNewCopies: schema.boolean({ defaultValue: false }),
+<<<<<<< HEAD
             dataSourceId: schema.maybe(schema.string({ defaultValue: '' })),
+=======
+            dataSourceId: schema.string({ defaultValue: '' }),
+>>>>>>> update import api only
           },
           {
             validate: (object) => {

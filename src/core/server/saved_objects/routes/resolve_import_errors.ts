@@ -58,7 +58,11 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
       validate: {
         query: schema.object({
           createNewCopies: schema.boolean({ defaultValue: false }),
+<<<<<<< HEAD
           dataSourceId: schema.maybe(schema.string({ defaultValue: '' })),
+=======
+          dataSourceId: schema.string({ defaultValue: '' }),
+>>>>>>> update import api only
         }),
         body: schema.object({
           file: schema.stream(),
@@ -93,6 +97,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
       const dataSourceId = req.query.dataSourceId;
 
       // get datasource from saved object service
+<<<<<<< HEAD
       const dataSource = dataSourceId
         ? await context.core.savedObjects.client
             .get('data-source', dataSourceId)
@@ -106,6 +111,19 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         : '';
 
       const dataSourceTitle = dataSource ? dataSource.title : '';
+=======
+      const dataSource = await context.core.savedObjects.client
+        .get('data-source', dataSourceId)
+        .then((response) => {
+          const attributes: any = response?.attributes || {};
+          return {
+            id: response.id,
+            title: attributes.title,
+          };
+        });
+
+      const dataSourceTitle = dataSource.title;
+>>>>>>> update import api only
 
       let readStream: Readable;
       try {

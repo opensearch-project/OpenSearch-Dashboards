@@ -79,6 +79,7 @@ export class SavedObjectTypeRegistry {
    * To only get the visible types (which is the most common use case), use `getVisibleTypes` instead.
    */
   public getAllTypes() {
+    // console.log("[DEBUG] getAllTypes", this.types.values());
     return [...this.types.values()];
   }
 
