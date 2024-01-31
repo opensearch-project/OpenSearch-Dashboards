@@ -6,7 +6,14 @@
 import './_doc_table.scss';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiDataGridColumn,
+  EuiDataGridSorting,
+  EuiProgress,
+} from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TableRow } from './table_rows';
@@ -27,6 +34,7 @@ export interface DefaultDiscoverTableProps {
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onClose: () => void;
+  sampleSize: number;
 }
 
 export const LegacyDiscoverTable = ({
@@ -41,6 +49,7 @@ export const LegacyDiscoverTable = ({
   onAddColumn,
   onFilter,
   onClose,
+  sampleSize,
 }: DefaultDiscoverTableProps) => {
   const [renderedRowCount, setRenderedRowCount] = useState(50); // Start with 50 rows
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -74,39 +83,59 @@ export const LegacyDiscoverTable = ({
 
   return (
     indexPattern && (
-      <table data-test-subj="docTable" className="osd-table table">
-        <thead>
-          <TableHeader
-            displayedTableColumns={displayedTableColumns}
-            defaultSortOrder={''}
-            // hideTimeColumn,
-            indexPattern={indexPattern}
-            // isShortDots,
-            onChangeSortOrder={onChangeSortOrder}
-            onReorderColumn={onReorderColumn}
-            onRemoveColumn={onRemoveColumn}
-            sortOrder={sortOrder}
-          />
-        </thead>
-        <tbody>
-          {rows.slice(0, renderedRowCount).map((row: OpenSearchSearchHit, index: number) => {
-            return (
-              <TableRow
-                key={index}
-                row={row}
-                columnIds={displayedTableColumns.map((column) => column.id)}
-                columns={columns}
-                indexPattern={indexPattern}
-                onRemoveColumn={onRemoveColumn}
-                onAddColumn={onAddColumn}
-                onFilter={onFilter}
-                onClose={onClose}
-              />
-            );
-          })}
-          {renderedRowCount < rows.length && <div ref={sentinelRef} style={{ height: '1px' }} />}
-        </tbody>
-      </table>
+      <>
+        <table data-test-subj="docTable" className="osd-table table">
+          <thead>
+            <TableHeader
+              displayedTableColumns={displayedTableColumns}
+              defaultSortOrder={''}
+              // hideTimeColumn,
+              indexPattern={indexPattern}
+              // isShortDots,
+              onChangeSortOrder={onChangeSortOrder}
+              onReorderColumn={onReorderColumn}
+              onRemoveColumn={onRemoveColumn}
+              sortOrder={sortOrder}
+            />
+          </thead>
+          <tbody>
+            {rows.slice(0, renderedRowCount).map((row: OpenSearchSearchHit, index: number) => {
+              return (
+                <TableRow
+                  key={index}
+                  row={row}
+                  columnIds={displayedTableColumns.map((column) => column.id)}
+                  columns={columns}
+                  indexPattern={indexPattern}
+                  onRemoveColumn={onRemoveColumn}
+                  onAddColumn={onAddColumn}
+                  onFilter={onFilter}
+                  onClose={onClose}
+                />
+              );
+            })}
+          </tbody>
+        </table>
+        {renderedRowCount < rows.length && (
+          <div ref={sentinelRef}>
+            <EuiProgress size="xs" color="accent" />
+          </div>
+        )}
+        {rows.length === sampleSize && (
+          <EuiCallOut className="dscTable__footer" data-test-subj="discoverDocTableFooter">
+            <FormattedMessage
+              id="discover.howToSeeOtherMatchingDocumentsDescription"
+              defaultMessage="These are the first {sampleSize} documents matching
+              your search, refine your search to see others."
+              values={{ sampleSize }}
+            />
+
+            <EuiButtonEmpty onClick={() => window.scrollTo(0, 0)}>
+              <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
+            </EuiButtonEmpty>
+          </EuiCallOut>
+        )}
+      </>
     )
   );
 };
