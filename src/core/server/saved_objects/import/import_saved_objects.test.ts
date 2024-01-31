@@ -47,6 +47,7 @@ import { validateReferences } from './validate_references';
 import { checkConflicts } from './check_conflicts';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
+import { checkConflictsForDataSource } from './check_conflict_for_data_source';
 
 jest.mock('./collect_saved_objects');
 jest.mock('./regenerate_ids');
@@ -54,6 +55,7 @@ jest.mock('./validate_references');
 jest.mock('./check_conflicts');
 jest.mock('./check_origin_conflicts');
 jest.mock('./create_saved_objects');
+jest.mock('./check_conflict_for_data_source');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
@@ -80,6 +82,12 @@ describe('#importSavedObjectsFromStream', () => {
       importIdMap: new Map(),
       pendingOverwrites: new Set(),
     });
+    getMockFn(checkConflictsForDataSource).mockResolvedValue({
+      errors: [],
+      filteredObjects: [],
+      importIdMap: new Map(),
+      pendingOverwrites: new Set(),
+    });
     getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
   });
 
@@ -89,8 +97,12 @@ describe('#importSavedObjectsFromStream', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
+  const testDataSourceId = 'some-datasource';
 
-  const setupOptions = (createNewCopies: boolean = false): SavedObjectsImportOptions => {
+  const setupOptions = (
+    createNewCopies: boolean = false,
+    dataSourceId: string | undefined
+  ): SavedObjectsImportOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
@@ -109,14 +121,17 @@ describe('#importSavedObjectsFromStream', () => {
       typeRegistry,
       namespace,
       createNewCopies,
+      dataSourceId,
     };
   };
-  const createObject = (): SavedObject<{
+  const createObject = (
+    dataSourceId: string | undefined
+  ): SavedObject<{
     title: string;
   }> => {
     return {
       type: 'foo-type',
-      id: uuidv4(),
+      id: dataSourceId ? `${dataSourceId}_${uuidv4()}` : uuidv4(),
       references: [],
       attributes: { title: 'some-title' },
     };
@@ -140,7 +155,7 @@ describe('#importSavedObjectsFromStream', () => {
    */
   describe('module calls', () => {
     test('collects saved objects from stream', async () => {
-      const options = setupOptions();
+      const options = setupOptions(false, undefined);
       const supportedTypes = ['foo-type'];
       typeRegistry.getImportableAndExportableTypes.mockReturnValue(
         supportedTypes.map((name) => ({ name })) as SavedObjectsType[]
@@ -153,8 +168,8 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('validates references', async () => {
-      const options = setupOptions();
-      const collectedObjects = [createObject()];
+      const options = setupOptions(false, undefined);
+      const collectedObjects = [createObject(undefined)];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
         collectedObjects,
@@ -171,8 +186,8 @@ describe('#importSavedObjectsFromStream', () => {
 
     describe('with createNewCopies disabled', () => {
       test('does not regenerate object IDs', async () => {
-        const options = setupOptions();
-        const collectedObjects = [createObject()];
+        const options = setupOptions(false, undefined);
+        const collectedObjects = [createObject(undefined)];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [],
           collectedObjects,
@@ -184,8 +199,8 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('checks conflicts', async () => {
-        const options = setupOptions();
-        const collectedObjects = [createObject()];
+        const options = setupOptions(false, undefined);
+        const collectedObjects = [createObject(undefined)];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [],
           collectedObjects,
@@ -203,8 +218,8 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('checks origin conflicts', async () => {
-        const options = setupOptions();
-        const filteredObjects = [createObject()];
+        const options = setupOptions(false, undefined);
+        const filteredObjects = [createObject(undefined)];
         const importIdMap = new Map();
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [],
@@ -225,10 +240,28 @@ describe('#importSavedObjectsFromStream', () => {
         expect(checkOriginConflicts).toHaveBeenCalledWith(checkOriginConflictsParams);
       });
 
+      test('checks data source conflicts', async () => {
+        const options = setupOptions(false, testDataSourceId);
+        const collectedObjects = [createObject(undefined)];
+        getMockFn(collectSavedObjects).mockResolvedValue({
+          errors: [],
+          collectedObjects,
+          importIdMap: new Map(),
+        });
+
+        await importSavedObjectsFromStream(options);
+        const checkConflictsForDataSourceParams = {
+          objects: collectedObjects,
+          ignoreRegularConflicts: overwrite,
+          dataSourceId: testDataSourceId,
+        };
+        expect(checkConflictsForDataSource).toHaveBeenCalledWith(checkConflictsForDataSourceParams);
+      });
+
       test('creates saved objects', async () => {
-        const options = setupOptions();
-        const collectedObjects = [createObject()];
-        const filteredObjects = [createObject()];
+        const options = setupOptions(false, undefined);
+        const collectedObjects = [createObject(undefined)];
+        const filteredObjects = [createObject(undefined)];
         const errors = [createError(), createError(), createError(), createError()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [errors[0]],
@@ -272,8 +305,8 @@ describe('#importSavedObjectsFromStream', () => {
 
     describe('with createNewCopies enabled', () => {
       test('regenerates object IDs', async () => {
-        const options = setupOptions(true);
-        const collectedObjects = [createObject()];
+        const options = setupOptions(true, undefined);
+        const collectedObjects = [createObject(undefined)];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [],
           collectedObjects,
@@ -281,21 +314,22 @@ describe('#importSavedObjectsFromStream', () => {
         });
 
         await importSavedObjectsFromStream(options);
-        expect(regenerateIds).toHaveBeenCalledWith(collectedObjects);
+        expect(regenerateIds).toHaveBeenCalledWith(collectedObjects, undefined);
       });
 
-      test('does not check conflicts or check origin conflicts', async () => {
-        const options = setupOptions(true);
+      test('does not check conflicts or check origin conflicts or check data source conflict', async () => {
+        const options = setupOptions(true, undefined);
         getMockFn(validateReferences).mockResolvedValue([]);
 
         await importSavedObjectsFromStream(options);
         expect(checkConflicts).not.toHaveBeenCalled();
         expect(checkOriginConflicts).not.toHaveBeenCalled();
+        expect(checkConflictsForDataSource).not.toHaveBeenCalled();
       });
 
       test('creates saved objects', async () => {
-        const options = setupOptions(true);
-        const collectedObjects = [createObject()];
+        const options = setupOptions(true, undefined);
+        const collectedObjects = [createObject(undefined)];
         const errors = [createError(), createError()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [errors[0]],
@@ -326,14 +360,14 @@ describe('#importSavedObjectsFromStream', () => {
 
   describe('results', () => {
     test('returns success=true if no errors occurred', async () => {
-      const options = setupOptions();
+      const options = setupOptions(false, undefined);
 
       const result = await importSavedObjectsFromStream(options);
       expect(result).toEqual({ success: true, successCount: 0 });
     });
 
     test('returns success=false if an error occurred', async () => {
-      const options = setupOptions();
+      const options = setupOptions(false, undefined);
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [createError()],
         collectedObjects: [],
@@ -345,13 +379,20 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     describe('handles a mix of successes and errors and injects metadata', () => {
-      const obj1 = createObject();
-      const tmp = createObject();
+      const obj1 = createObject(undefined);
+      const tmp = createObject(undefined);
       const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
-      const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId
+      const obj3 = { ...createObject(undefined), destinationId: 'another-destinationId' }; // empty originId
       const createdObjects = [obj1, obj2, obj3];
       const error1 = createError();
       const error2 = createError();
+      // add some objects with data source id
+      const dsObj1 = createObject(testDataSourceId);
+      const tmp2 = createObject(testDataSourceId);
+      const dsObj2 = { ...tmp2, destinationId: 'some-destinationId', originId: tmp.id };
+      const dsObj3 = { ...createObject(testDataSourceId), destinationId: 'another-destinationId' };
+      const createdDsObjects = [dsObj1, dsObj2, dsObj3];
+
       // results
       const success1 = {
         type: obj1.type,
@@ -372,8 +413,28 @@ describe('#importSavedObjectsFromStream', () => {
       };
       const errors = [error1, error2];
 
+      const dsSuccess1 = {
+        type: dsObj1.type,
+        id: dsObj1.id,
+        meta: { title: dsObj1.attributes.title, icon: `${dsObj1.type}-icon` },
+      };
+
+      const dsSuccess2 = {
+        type: dsObj2.type,
+        id: dsObj2.id,
+        meta: { title: dsObj2.attributes.title, icon: `${dsObj2.type}-icon` },
+        destinationId: dsObj2.destinationId,
+      };
+
+      const dsSuccess3 = {
+        type: dsObj3.type,
+        id: dsObj3.id,
+        meta: { title: dsObj3.attributes.title, icon: `${dsObj3.type}-icon` },
+        destinationId: dsObj3.destinationId,
+      };
+
       test('with createNewCopies disabled', async () => {
-        const options = setupOptions();
+        const options = setupOptions(false, undefined);
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [],
           filteredObjects: [],
@@ -410,7 +471,7 @@ describe('#importSavedObjectsFromStream', () => {
 
       test('with createNewCopies enabled', async () => {
         // however, we include it here for posterity
-        const options = setupOptions(true);
+        const options = setupOptions(true, undefined);
         getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects });
 
         const result = await importSavedObjectsFromStream(options);
@@ -428,10 +489,73 @@ describe('#importSavedObjectsFromStream', () => {
           errors: errorResults,
         });
       });
+
+      test('with createNewCopies disabled and with data source id', async () => {
+        const options = setupOptions(false, testDataSourceId);
+        getMockFn(checkConflictsForDataSource).mockResolvedValue({
+          errors: [],
+          filteredObjects: [],
+          importIdMap: new Map(),
+          pendingOverwrites: new Set([`${dsSuccess2.type}:${dsSuccess2.id}`]),
+        });
+        getMockFn(checkConflicts).mockResolvedValue({
+          errors: [],
+          filteredObjects: [],
+          importIdMap: new Map(),
+          pendingOverwrites: new Set([
+            `${dsSuccess2.type}:${dsSuccess2.id}`, // the dsSuccess2 object was overwritten
+            `${error2.type}:${error2.id}`, // an attempt was made to overwrite the error2 object
+          ]),
+        });
+        getMockFn(createSavedObjects).mockResolvedValue({
+          errors,
+          createdObjects: createdDsObjects,
+        });
+
+        const result = await importSavedObjectsFromStream(options);
+        // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
+        const successResults = [
+          dsSuccess1,
+          { ...dsSuccess2, overwrite: true },
+          { ...dsSuccess3, createNewCopy: true },
+        ];
+        const errorResults = [
+          { ...error1, meta: { ...error1.meta, icon: `${error1.type}-icon` } },
+          { ...error2, meta: { ...error2.meta, icon: `${error2.type}-icon` }, overwrite: true },
+        ];
+        expect(result).toEqual({
+          success: false,
+          successCount: 3,
+          successResults,
+          errors: errorResults,
+        });
+      });
+
+      test('with createNewCopies enabled and with data source id', async () => {
+        const options = setupOptions(true, testDataSourceId);
+        getMockFn(createSavedObjects).mockResolvedValue({
+          errors,
+          createdObjects: createdDsObjects,
+        });
+
+        const result = await importSavedObjectsFromStream(options);
+        const successDsResults = [dsSuccess1, dsSuccess2, dsSuccess3];
+
+        const errorResults = [
+          { ...error1, meta: { ...error1.meta, icon: `${error1.type}-icon` } },
+          { ...error2, meta: { ...error2.meta, icon: `${error2.type}-icon` } },
+        ];
+        expect(result).toEqual({
+          success: false,
+          successCount: 3,
+          successResults: successDsResults,
+          errors: errorResults,
+        });
+      });
     });
 
     test('accumulates multiple errors', async () => {
-      const options = setupOptions();
+      const options = setupOptions(false, undefined);
       const errors = [createError(), createError(), createError(), createError(), createError()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [errors[0]],

@@ -39,6 +39,8 @@ interface CreateSavedObjectsParams<T> {
   importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
   namespace?: string;
   overwrite?: boolean;
+  dataSourceId?: string;
+  dataSourceTitle?: string;
 }
 interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;
@@ -56,8 +58,11 @@ export const createSavedObjects = async <T>({
   importIdMap,
   namespace,
   overwrite,
+  dataSourceId,
+  dataSourceTitle,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
+
   const errorSet = accumulatedErrors.reduce(
     (acc, { type, id }) => acc.add(`${type}:${id}`),
     new Set<string>()
@@ -76,7 +81,70 @@ export const createSavedObjects = async <T>({
   );
 
   // filter out the 'version' field of each object, if it exists
+
   const objectsToCreate = filteredObjects.map(({ version, ...object }) => {
+    if (dataSourceId) {
+      // @ts-expect-error
+      if (dataSourceTitle && object.attributes.title) {
+        if (
+          object.type === 'dashboard' ||
+          object.type === 'visualization' ||
+          object.type === 'search'
+        ) {
+          // @ts-expect-error
+          object.attributes.title = object.attributes.title + `_${dataSourceTitle}`;
+        }
+      }
+
+      if (object.type === 'index-pattern') {
+        object.references = [
+          {
+            id: `${dataSourceId}`,
+            type: 'data-source',
+            name: 'dataSource',
+          },
+        ];
+      }
+
+      if (object.type === 'visualization' || object.type === 'search') {
+        // @ts-expect-error
+        const searchSourceString = object.attributes?.kibanaSavedObjectMeta?.searchSourceJSON;
+        // @ts-expect-error
+        const visStateString = object.attributes?.visState;
+
+        if (searchSourceString) {
+          const searchSource = JSON.parse(searchSourceString);
+          if (searchSource.index) {
+            const searchSourceIndex = searchSource.index.includes('_')
+              ? searchSource.index.split('_')[searchSource.index.split('_').length - 1]
+              : searchSource.index;
+            searchSource.index = `${dataSourceId}_` + searchSourceIndex;
+
+            // @ts-expect-error
+            object.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+          }
+        }
+
+        if (visStateString) {
+          const visState = JSON.parse(visStateString);
+          const controlList = visState.params?.controls;
+          if (controlList) {
+            // @ts-expect-error
+            controlList.map((control) => {
+              if (control.indexPattern) {
+                const controlIndexPattern = control.indexPattern.includes('_')
+                  ? control.indexPattern.split('_')[control.indexPattern.split('_').length - 1]
+                  : control.indexPattern;
+                control.indexPattern = `${dataSourceId}_` + controlIndexPattern;
+              }
+            });
+          }
+          // @ts-expect-error
+          object.attributes.visState = JSON.stringify(visState);
+        }
+      }
+    }
+
     // use the import ID map to ensure that each reference is being created with the correct ID
     const references = object.references?.map((reference) => {
       const { type, id } = reference;

@@ -36,8 +36,15 @@ import { SavedObject } from '../types';
  *
  * @param objects The saved objects to generate new IDs for.
  */
-export const regenerateIds = (objects: SavedObject[]) => {
+export const regenerateIds = (objects: SavedObject[], dataSourceId: string | undefined) => {
+  // add datasource?
   const importIdMap = objects.reduce((acc, object) => {
+    if (dataSourceId) {
+      return acc.set(`${object.type}:${object.id}`, {
+        id: `${dataSourceId}_${uuidv4()}`,
+        omitOriginId: true,
+      });
+    }
     return acc.set(`${object.type}:${object.id}`, { id: uuidv4(), omitOriginId: true });
   }, new Map<string, { id: string; omitOriginId?: boolean }>());
   return importIdMap;

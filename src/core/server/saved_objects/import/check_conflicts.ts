@@ -44,6 +44,7 @@ interface CheckConflictsParams {
   ignoreRegularConflicts?: boolean;
   retries?: SavedObjectsImportRetry[];
   createNewCopies?: boolean;
+  dataSourceId?: string;
 }
 
 const isUnresolvableConflict = (error: SavedObjectError) =>
@@ -66,7 +67,6 @@ export async function checkConflicts({
   if (objects.length === 0) {
     return { filteredObjects, errors, importIdMap, pendingOverwrites };
   }
-
   const retryMap = retries.reduce(
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
     new Map<string, SavedObjectsImportRetry>()

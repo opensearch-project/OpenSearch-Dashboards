@@ -44,7 +44,7 @@ describe('#regenerateIds', () => {
       .mockReturnValueOnce('uuidv4 #1')
       .mockReturnValueOnce('uuidv4 #2')
       .mockReturnValueOnce('uuidv4 #3');
-    expect(regenerateIds(objects)).toMatchInlineSnapshot(`
+    expect(regenerateIds(objects, '')).toMatchInlineSnapshot(`
       Map {
         "foo:1" => Object {
           "id": "uuidv4 #1",

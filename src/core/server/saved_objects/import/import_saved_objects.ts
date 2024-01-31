@@ -39,6 +39,7 @@ import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
 import { checkConflicts } from './check_conflicts';
 import { regenerateIds } from './regenerate_ids';
+import { checkConflictsForDataSource } from './check_conflict_for_data_source';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -54,6 +55,8 @@ export async function importSavedObjectsFromStream({
   savedObjectsClient,
   typeRegistry,
   namespace,
+  dataSourceId,
+  dataSourceTitle,
 }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
@@ -63,6 +66,7 @@ export async function importSavedObjectsFromStream({
     readStream,
     objectLimit,
     supportedTypes,
+    dataSourceId,
   });
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
   /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
@@ -78,19 +82,40 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
-    importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
+    // randomly generated id
+    importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects, dataSourceId);
   } else {
+    // in check conclict and override mode
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
       objects: collectSavedObjectsResult.collectedObjects,
       savedObjectsClient,
       namespace,
       ignoreRegularConflicts: overwrite,
+      dataSourceId,
     };
+
+    // resolve when data source exist, pass the filtered objects to next check conflict
+    if (dataSourceId) {
+      const checkConflictsForDataSourceResult = await checkConflictsForDataSource({
+        objects: collectSavedObjectsResult.collectedObjects,
+        ignoreRegularConflicts: overwrite,
+        dataSourceId,
+      });
+
+      checkConflictsParams.objects = checkConflictsForDataSourceResult.filteredObjects;
+
+      pendingOverwrites = new Set([
+        ...pendingOverwrites,
+        ...checkConflictsForDataSourceResult.pendingOverwrites,
+      ]);
+    }
+
+    // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsResult = await checkConflicts(checkConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
-    pendingOverwrites = checkConflictsResult.pendingOverwrites;
+    pendingOverwrites = new Set([...pendingOverwrites, ...checkConflictsResult.pendingOverwrites]);
 
     // Check multi-namespace object types for origin conflicts in this namespace
     const checkOriginConflictsParams = {
@@ -118,6 +143,8 @@ export async function importSavedObjectsFromStream({
     importIdMap,
     overwrite,
     namespace,
+    dataSourceId,
+    dataSourceTitle,
   };
   const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
@@ -136,6 +163,7 @@ export async function importSavedObjectsFromStream({
       };
     }
   );
+
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
     const attemptedOverwrite = pendingOverwrites.has(`${error.type}:${error.id}`);

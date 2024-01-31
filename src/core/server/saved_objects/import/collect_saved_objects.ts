@@ -46,6 +46,7 @@ interface CollectSavedObjectsOptions {
   objectLimit: number;
   filter?: (obj: SavedObject) => boolean;
   supportedTypes: string[];
+  dataSourceId?: string;
 }
 
 export async function collectSavedObjects({
@@ -53,6 +54,7 @@ export async function collectSavedObjects({
   objectLimit,
   filter,
   supportedTypes,
+  dataSourceId,
 }: CollectSavedObjectsOptions) {
   const errors: SavedObjectsImportError[] = [];
   const entries: Array<{ type: string; id: string }> = [];
@@ -79,7 +81,12 @@ export async function collectSavedObjects({
     }),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
-      importIdMap.set(`${obj.type}:${obj.id}`, {});
+      if (dataSourceId) {
+        importIdMap.set(`${dataSourceId}_${obj.type}:${obj.id}`, {});
+      } else {
+        importIdMap.set(`${obj.type}:${obj.id}`, {});
+      }
+
       // Ensure migrations execute on every saved object
       return Object.assign({ migrationVersion: {} }, obj);
     }),
