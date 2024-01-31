@@ -32,12 +32,8 @@ export const TableCell = ({
   fieldMapping,
   sanitizedCellValue,
 }: TableCellProps) => {
-  const tdClassNames =
-    columnType === 'date'
-      ? 'osdDocTableCell eui-textNoWrap'
-      : 'osdDocTableCell eui-textBreakAll eui-textBreakWord';
-  return (
-    <td data-test-subj="docTableField" className={tdClassNames}>
+  const content = (
+    <>
       {/* eslint-disable-next-line react/no-danger */}
       <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
       <span className="osdDocTableCell__filter">
@@ -72,6 +68,19 @@ export const TableCell = ({
           />
         </EuiToolTip>
       </span>
+    </>
+  );
+
+  return columnType === 'date' ? (
+    <td data-test-subj="docTableField" className="osdDocTableCell eui-textNoWrap">
+      {content}
+    </td>
+  ) : (
+    <td
+      data-test-subj="docTableField"
+      className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
+    >
+      <div className="osdDocTable__limitedHeight">{content}</div>
     </td>
   );
 };
