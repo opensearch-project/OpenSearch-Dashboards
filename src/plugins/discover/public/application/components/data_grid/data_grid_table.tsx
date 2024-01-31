@@ -160,19 +160,21 @@ export const DataGridTable = ({
         onAddColumn={onAddColumn}
         onFilter={onFilter}
         onClose={() => setInspectedHit(undefined)}
+        sampleSize={pageSizeLimit}
       />
     ),
     [
       displayedTableColumns,
       adjustedColumns,
+      rows,
       indexPattern,
-      onAddColumn,
+      sortingColumns,
       onColumnSort,
-      onFilter,
       onRemoveColumn,
       onReorderColumn,
-      rows,
-      sortingColumns,
+      onAddColumn,
+      onFilter,
+      pageSizeLimit,
     ]
   );
 
