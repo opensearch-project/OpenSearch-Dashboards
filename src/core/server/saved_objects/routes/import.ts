@@ -60,7 +60,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
           {
             overwrite: schema.boolean({ defaultValue: false }),
             createNewCopies: schema.boolean({ defaultValue: false }),
-            dataSourceId: schema.string({ defaultValue: '' }),
+            dataSourceId: schema.maybe(schema.string({ defaultValue: '' })),
           },
           {
             validate: (object) => {
@@ -84,7 +84,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
       }
 
       // get datasource from saved object service
-      const dataSource = await context.core.savedObjects.client
+      const dataSource = dataSourceId ? await context.core.savedObjects.client
         .get('data-source', dataSourceId)
         .then((response) => {
           const attributes: any = response?.attributes || {};
@@ -92,9 +92,9 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
             id: response.id,
             title: attributes.title,
           };
-        });
+        }) : '';
 
-      const dataSourceTitle = dataSource.title;
+      const dataSourceTitle = dataSource ? dataSource.title : '';
 
       let readStream: Readable;
       try {
