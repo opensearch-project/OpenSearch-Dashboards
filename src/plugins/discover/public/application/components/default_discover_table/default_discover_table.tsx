@@ -173,7 +173,7 @@ export const LegacyDiscoverTable = ({
             <EuiProgress size="xs" color="accent" />
           </div>
         )}
-        {rows.length === sampleSize && (
+        {!showPagination && rows.length === sampleSize && (
           <EuiCallOut className="dscTable__footer" data-test-subj="discoverDocTableFooter">
             <FormattedMessage
               id="discover.howToSeeOtherMatchingDocumentsDescription"

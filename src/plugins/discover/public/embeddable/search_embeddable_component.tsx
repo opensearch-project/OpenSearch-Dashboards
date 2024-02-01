@@ -20,7 +20,6 @@ interface SearchEmbeddableProps {
 }
 export interface DiscoverEmbeddableProps extends DataGridTableProps {
   totalHitCount: number;
-  showPagination: boolean;
 }
 
 export const DataGridTableMemoized = React.memo((props: DataGridTableProps) => (
