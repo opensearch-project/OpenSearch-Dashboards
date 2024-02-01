@@ -10,6 +10,7 @@ import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { useDiscoverContext } from '../context';
 import {
   addColumn,
+  moveColumn,
   removeColumn,
   reorderColumn,
   setColumns,
@@ -65,6 +66,10 @@ export const DiscoverTable = ({ rows }: Props) => {
     dispatch(reorderColumn({ source: source - 1, destination: destination - 1 }));
   };
 
+  const onMoveColumn = (colName: string, destination: number) => {
+    dispatch(moveColumn({ columnName: colName, destination }));
+  };
+
   const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
     dispatch(setSort(s));
@@ -106,6 +111,7 @@ export const DiscoverTable = ({ rows }: Props) => {
       indexPattern={indexPattern}
       onAddColumn={onAddColumn}
       onFilter={onAddFilter as DocViewFilterFn}
+      onMoveColumn={onMoveColumn}
       onRemoveColumn={onRemoveColumn}
       onReorderColumn={onReorderColumn}
       onSetColumns={onSetColumns}

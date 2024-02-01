@@ -5,7 +5,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiDataGrid, EuiDataGridSorting, EuiPanel } from '@elastic/eui';
-import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { IndexPattern, getServices } from '../../../opensearch_dashboards_services';
 import { fetchTableDataCell } from './data_grid_table_cell_value';
 import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_columns';
 import { DocViewInspectButton } from './data_grid_table_docview_inspect_button';
@@ -13,24 +13,30 @@ import { DataGridFlyout } from './data_grid_table_flyout';
 import { DiscoverGridContextProvider } from './data_grid_table_context';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { usePagination } from '../utils/use_pagination';
-import { SortOrder } from '../../../saved_searches/types';
 import { buildColumns } from '../../utils/columns';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverServices } from '../../../build_services';
-import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SAMPLE_SIZE_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../../common';
+import { UI_SETTINGS } from '../../../../../data/common';
 import { LegacyDiscoverTable } from '../default_discover_table/default_discover_table';
 import { toolbarVisibility } from './constants';
 import { getDataGridTableSetting } from '../utils/local_storage';
 import { Storage } from '../../../../../opensearch_dashboards_utils/public';
+import { SortOrder } from '../default_discover_table/helper';
 
 export interface DataGridTableProps {
   columns: string[];
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
+  onMoveColumn: (colName: string, destination: number) => void;
   onRemoveColumn: (column: string) => void;
   onReorderColumn: (col: string, source: number, destination: number) => void;
-  onSort: (sort: SortOrder[]) => void;
+  onSort: (s: SortOrder[]) => void;
   rows: OpenSearchSearchHit[];
   onSetColumns: (columns: string[]) => void;
   sort: SortOrder[];
@@ -49,6 +55,7 @@ export const DataGridTable = ({
   indexPattern,
   onAddColumn,
   onFilter,
+  onMoveColumn,
   onRemoveColumn,
   onReorderColumn,
   onSetColumns,
@@ -64,11 +71,17 @@ export const DataGridTable = ({
   storage,
   showPagination,
 }: DataGridTableProps) => {
-  const { services } = useOpenSearchDashboards<DiscoverServices>();
-
+  const services = getServices();
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
-  const pageSizeLimit = services.uiSettings?.get(SAMPLE_SIZE_SETTING);
+  const [pageSizeLimit, isShortDots, hideTimeColumn, defaultSortOrder] = useMemo(() => {
+    return [
+      services.uiSettings.get(SAMPLE_SIZE_SETTING),
+      services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
+      services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
+      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+    ];
+  }, [services.uiSettings]);
   const pagination = usePagination({ rowCount, pageSizeLimit });
 
   let adjustedColumns = buildColumns(columns);
@@ -151,34 +164,38 @@ export const DataGridTable = ({
   const legacyDiscoverTable = useMemo(
     () => (
       <LegacyDiscoverTable
-        displayedTableColumns={displayedTableColumns}
         columns={adjustedColumns}
         rows={rows}
         indexPattern={indexPattern}
-        sortOrder={sortingColumns}
-        onChangeSortOrder={onColumnSort}
+        sort={sort}
+        onSort={onSort}
         onRemoveColumn={onRemoveColumn}
-        onReorderColumn={onReorderColumn}
+        onReorderColumn={onMoveColumn}
         onAddColumn={onAddColumn}
         onFilter={onFilter}
         onClose={() => setInspectedHit(undefined)}
         sampleSize={pageSizeLimit}
         showPagination={showPagination}
+        isShortDots={isShortDots}
+        hideTimeColumn={hideTimeColumn}
+        defaultSortOrder={defaultSortOrder}
       />
     ),
     [
-      displayedTableColumns,
       adjustedColumns,
       rows,
       indexPattern,
-      sortingColumns,
-      onColumnSort,
+      sort,
+      onSort,
       onRemoveColumn,
-      onReorderColumn,
+      onMoveColumn,
       onAddColumn,
       onFilter,
       pageSizeLimit,
       showPagination,
+      defaultSortOrder,
+      hideTimeColumn,
+      isShortDots,
     ]
   );
 
