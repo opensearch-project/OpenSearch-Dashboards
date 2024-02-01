@@ -105,7 +105,7 @@ export const opensearchSearchStrategyProvider = (
       } catch (e) {
         if (usage) usage.trackError();
 
-        if (dataSource) {
+        if (dataSource?.dataSourceEnabled()) {
           throw dataSource.createDataSourceError(e);
         }
         throw e;

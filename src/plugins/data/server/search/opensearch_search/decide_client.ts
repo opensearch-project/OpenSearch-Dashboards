@@ -16,10 +16,7 @@ export const decideClient = async (
     ? context.core.opensearch.client.asCurrentUserWithLongNumeralsSupport
     : context.core.opensearch.client.asCurrentUser;
 
-  const dataSourceClient =
-    request.dataSourceId && context.dataSource
-      ? await context.dataSource.opensearch.getClient(request.dataSourceId)
-      : defaultOpenSearchClient;
-
-  return withDataSourceEnabled ? dataSourceClient : defaultOpenSearchClient;
+  return withDataSourceEnabled && request.dataSourceId && context.dataSource
+    ? await context.dataSource.opensearch.getClient(request.dataSourceId)
+    : defaultOpenSearchClient;
 };
