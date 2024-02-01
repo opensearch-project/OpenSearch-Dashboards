@@ -93,7 +93,7 @@ export const LegacyDiscoverTable = ({
   }, []);
 
   const [activePage, setActivePage] = useState(0);
-  const PAGE_COUNT = Math.ceil(rows.length / pageSize);
+  const pageCount = Math.ceil(rows.length / pageSize);
 
   const goToPage = (pageNumber: number) => {
     const startRow = pageNumber * pageSize;
@@ -116,7 +116,7 @@ export const LegacyDiscoverTable = ({
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiPagination
-                pageCount={PAGE_COUNT}
+                pageCount={pageCount}
                 activePage={activePage}
                 onPageClick={(currentPage) => goToPage(currentPage)}
               />
