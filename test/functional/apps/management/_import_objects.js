@@ -31,7 +31,6 @@
 import expect from '@osd/expect';
 import path from 'path';
 import { keyBy } from 'lodash';
-import { wait } from '@hapi/hoek';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -255,7 +254,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.clickImportDone();
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object with index pattern conflict');
-        wait(10000);
         expect(isSavedObjectImported).to.be(true);
       });
 
