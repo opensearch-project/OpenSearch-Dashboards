@@ -58,9 +58,7 @@ export const LegacyDiscoverTable = ({
 }: DefaultDiscoverTableProps) => {
   const pageSize = 50;
   const [renderedRowCount, setRenderedRowCount] = useState(50); // Start with 50 rows
-  const [displayedRows, setDisplayedRows] = useState(
-    showPagination ? rows.slice(0, pageSize) : rows.slice(0, renderedRowCount)
-  );
+  const [displayedRows, setDisplayedRows] = useState(rows.slice(0, pageSize));
   const [currentRowCounts, setCurrentRowCounts] = useState({
     startRow: 0,
     endRow: pageSize,
@@ -151,24 +149,26 @@ export const LegacyDiscoverTable = ({
             />
           </thead>
           <tbody>
-            {displayedRows.map((row: OpenSearchSearchHit, index: number) => {
-              return (
-                <TableRow
-                  key={index}
-                  row={row}
-                  columnIds={displayedTableColumns.map((column) => column.id)}
-                  columns={columns}
-                  indexPattern={indexPattern}
-                  onRemoveColumn={onRemoveColumn}
-                  onAddColumn={onAddColumn}
-                  onFilter={onFilter}
-                  onClose={onClose}
-                />
-              );
-            })}
+            {(showPagination ? displayedRows : rows.slice(0, renderedRowCount)).map(
+              (row: OpenSearchSearchHit, index: number) => {
+                return (
+                  <TableRow
+                    key={index}
+                    row={row}
+                    columnIds={displayedTableColumns.map((column) => column.id)}
+                    columns={columns}
+                    indexPattern={indexPattern}
+                    onRemoveColumn={onRemoveColumn}
+                    onAddColumn={onAddColumn}
+                    onFilter={onFilter}
+                    onClose={onClose}
+                  />
+                );
+              }
+            )}
           </tbody>
         </table>
-        {renderedRowCount < rows.length && (
+        {!showPagination && renderedRowCount < rows.length && (
           <div ref={sentinelRef}>
             <EuiProgress size="xs" color="accent" />
           </div>
