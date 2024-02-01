@@ -34,9 +34,9 @@ interface Props {
 }
 
 const sortDirectionToIcon: Record<string, string> = {
-  desc: 'fa fa-sort-down',
-  asc: 'fa fa-sort-up',
-  '': 'fa fa-sort',
+  desc: 'sortDown',
+  asc: 'sortUp',
+  '': 'sortable',
 };
 
 export function TableHeaderColumn({
@@ -143,7 +143,7 @@ export function TableHeaderColumn({
       onClick: handleChangeSortOrder,
       testSubject: `docTableHeaderFieldSort_${name}`,
       tooltip: getSortButtonAriaLabel(),
-      iconType: 'sortable',
+      iconType: btnSortIcon,
     },
     // Remove Button
     {
