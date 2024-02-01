@@ -84,15 +84,18 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
       }
 
       // get datasource from saved object service
-      const dataSource = dataSourceId ? await context.core.savedObjects.client
-        .get('data-source', dataSourceId)
-        .then((response) => {
-          const attributes: any = response?.attributes || {};
-          return {
-            id: response.id,
-            title: attributes.title,
-          };
-        }) : '';
+      // dataSource is '' when there is no dataSource pass in the url
+      const dataSource = dataSourceId
+        ? await context.core.savedObjects.client
+            .get('data-source', dataSourceId)
+            .then((response) => {
+              const attributes: any = response?.attributes || {};
+              return {
+                id: response.id,
+                title: attributes.title,
+              };
+            })
+        : '';
 
       const dataSourceTitle = dataSource ? dataSource.title : '';
 
