@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPagination, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import './_pagination.scss';
@@ -14,7 +14,8 @@ interface Props {
   goToPage: (page: number) => void;
   startItem: number;
   endItem: number;
-  totalItems: number;
+  totalItems?: number;
+  sampleSize: number;
 }
 
 export const Pagination = ({
@@ -23,10 +24,22 @@ export const Pagination = ({
   goToPage,
   startItem,
   endItem,
-  totalItems,
+  totalItems = 0,
+  sampleSize,
 }: Props) => {
   return (
     <EuiFlexGroup className="osdDocTable_pagination" alignItems="center" justifyContent="flexEnd">
+      {endItem >= sampleSize && (
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="discover.docTable.limitedSearchResultLabel"
+              defaultMessage="Limited to {sampleSize} results. Refine your search."
+              values={{ sampleSize }}
+            />
+          </EuiTextColor>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <FormattedMessage
           id="discover.docTable.pagerControl.pagesCountLabel"

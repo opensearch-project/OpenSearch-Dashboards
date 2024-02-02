@@ -21,8 +21,6 @@ import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { LegacyDiscoverTable } from '../default_discover_table/default_discover_table';
 import { toolbarVisibility } from './constants';
 import { getDataGridTableSetting } from '../utils/local_storage';
-import { Storage } from '../../../../../opensearch_dashboards_utils/public';
-
 export interface DataGridTableProps {
   columns: string[];
   indexPattern: IndexPattern;
@@ -31,6 +29,7 @@ export interface DataGridTableProps {
   onRemoveColumn: (column: string) => void;
   onReorderColumn: (col: string, source: number, destination: number) => void;
   onSort: (sort: SortOrder[]) => void;
+  hits?: number;
   rows: OpenSearchSearchHit[];
   onSetColumns: (columns: string[]) => void;
   sort: SortOrder[];
@@ -40,7 +39,6 @@ export interface DataGridTableProps {
   isToolbarVisible?: boolean;
   isContextView?: boolean;
   isLoading?: boolean;
-  storage: Storage;
   showPagination?: boolean;
 }
 
@@ -54,6 +52,7 @@ export const DataGridTable = ({
   onSetColumns,
   onSort,
   sort,
+  hits,
   rows,
   displayTimeColumn,
   title = '',
@@ -61,7 +60,6 @@ export const DataGridTable = ({
   isToolbarVisible = true,
   isContextView = false,
   isLoading = false,
-  storage,
   showPagination,
 }: DataGridTableProps) => {
   const { services } = useOpenSearchDashboards<DiscoverServices>();
@@ -146,13 +144,14 @@ export const DataGridTable = ({
     ];
   }, []);
 
-  const datagridActive = getDataGridTableSetting(storage);
+  const datagridActive = getDataGridTableSetting(services.storage);
 
   const legacyDiscoverTable = useMemo(
     () => (
       <LegacyDiscoverTable
         displayedTableColumns={displayedTableColumns}
         columns={adjustedColumns}
+        hits={hits}
         rows={rows}
         indexPattern={indexPattern}
         sortOrder={sortingColumns}
@@ -169,6 +168,7 @@ export const DataGridTable = ({
     [
       displayedTableColumns,
       adjustedColumns,
+      hits,
       rows,
       indexPattern,
       sortingColumns,

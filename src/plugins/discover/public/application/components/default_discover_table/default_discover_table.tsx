@@ -23,6 +23,7 @@ import { Pagination } from './pagination';
 export interface DefaultDiscoverTableProps {
   displayedTableColumns: EuiDataGridColumn[];
   columns: string[];
+  hits?: number;
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
   sortOrder: Array<{
@@ -42,6 +43,7 @@ export interface DefaultDiscoverTableProps {
 export const LegacyDiscoverTable = ({
   displayedTableColumns,
   columns,
+  hits,
   rows,
   indexPattern,
   sortOrder,
@@ -117,7 +119,8 @@ export const LegacyDiscoverTable = ({
             goToPage={goToPage}
             startItem={currentRowCounts.startRow + 1}
             endItem={currentRowCounts.endRow}
-            totalItems={rows.length}
+            totalItems={hits}
+            sampleSize={sampleSize}
           />
         ) : null}
         <table data-test-subj="docTable" className="osd-table table">
@@ -180,7 +183,8 @@ export const LegacyDiscoverTable = ({
             goToPage={goToPage}
             startItem={currentRowCounts.startRow + 1}
             endItem={currentRowCounts.endRow}
-            totalItems={rows.length}
+            totalItems={hits}
+            sampleSize={sampleSize}
           />
         ) : null}
       </div>
