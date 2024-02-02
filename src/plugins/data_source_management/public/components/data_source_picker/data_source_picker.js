@@ -83,6 +83,7 @@ export class DataSourcePicker extends React.Component {
         })}
         compressed
         isDisabled={this.props.disabled}
+        fullWidth={this.props.fullWidth || false}
       />
     );
   }

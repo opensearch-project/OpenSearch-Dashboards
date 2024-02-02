@@ -44,6 +44,7 @@ interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   mountParams: ManagementAppMountParams;
+  dataSourceEnabled: boolean;
 }
 
 let allowedObjectTypes: string[] | undefined;
@@ -58,6 +59,7 @@ export const mountManagementSection = async ({
   core,
   mountParams,
   serviceRegistry,
+  dataSourceEnabled,
 }: MountParams) => {
   const [coreStart, { data, uiActions }, pluginStart] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
@@ -108,6 +110,7 @@ export const mountManagementSection = async ({
                   namespaceRegistry={pluginStart.namespaces}
                   allowedTypes={allowedObjectTypes}
                   setBreadcrumbs={setBreadcrumbs}
+                  dataSourceEnabled={dataSourceEnabled}
                 />
               </Suspense>
             </RedirectToHomeIfUnauthorized>

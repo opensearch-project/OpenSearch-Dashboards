@@ -184,6 +184,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "post": [MockFunction],
           "put": [MockFunction],
         },
+        "selectedDataSourceId": undefined,
         "state": Object {
           "conflictedIndexPatterns": undefined,
           "conflictedSavedObjectsLinkedToSavedSearches": undefined,
@@ -214,7 +215,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           },
           "importCount": 0,
           "importMode": Object {
-            "createNewCopies": false,
+            "createNewCopies": true,
             "overwrite": true,
           },
           "indexPatterns": Array [
@@ -555,7 +556,7 @@ exports[`Flyout should render import step 1`] = `
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
-            defaultMessage="Select a file to import"
+            defaultMessage="Select file"
             id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
             values={Object {}}
           />
@@ -588,11 +589,12 @@ exports[`Flyout should render import step 1`] = `
         <ImportModeControl
           initialValues={
             Object {
-              "createNewCopies": false,
+              "createNewCopies": true,
               "overwrite": true,
             }
           }
           isLegacyFile={false}
+          optionLabel="Import options"
           updateSelection={[Function]}
         />
       </EuiFormRow>
