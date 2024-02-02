@@ -92,7 +92,6 @@ export async function importSavedObjectsFromStream({
       savedObjectsClient,
       namespace,
       ignoreRegularConflicts: overwrite,
-      dataSourceId,
     };
 
     // resolve when data source exist, pass the filtered objects to next check conflict
@@ -111,10 +110,7 @@ export async function importSavedObjectsFromStream({
       ]);
     }
 
-<<<<<<< HEAD
-=======
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
->>>>>>> update import api only
     const checkConflictsResult = await checkConflicts(checkConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
