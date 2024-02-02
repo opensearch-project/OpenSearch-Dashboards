@@ -66,7 +66,7 @@ export function migrateUrlState(oldPath: string, newPath = '/'): string {
   let path = newPath;
   const pathPatterns = [
     {
-      pattern: '#/context/:indexPattern/:id?:appState?',
+      pattern: '#/context/:indexPattern/:id',
       extraState: { docView: 'context' },
       path: `context`,
     },
