@@ -108,6 +108,7 @@ export const TableRow = ({
           <TableCell
             columnId={columnId}
             onFilter={onFilter}
+            isTimeField={indexPattern.timeFieldName === columnId}
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
           />
