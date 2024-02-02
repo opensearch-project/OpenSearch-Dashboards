@@ -267,7 +267,6 @@ const FieldList = ({
     <>
       <EuiButtonEmpty
         iconSide="right"
-        iconSize="s"
         color="text"
         iconType={expanded ? 'arrowDown' : 'arrowRight'}
         onClick={() => setExpanded(!expanded)}
