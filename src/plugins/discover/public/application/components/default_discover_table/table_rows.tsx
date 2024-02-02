@@ -131,7 +131,7 @@ export const TableRow = ({
 
   const expandedTableRow = (
     <tr key={'x' + row._id}>
-      <td className="osdDocTable__detailsParent" colSpan={columnIds.length + 2}>
+      <td className="osdDocTable__detailsParent" colSpan={columnIds.length + 1}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiIcon type="folderOpen" />
