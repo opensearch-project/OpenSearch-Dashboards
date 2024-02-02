@@ -14,20 +14,19 @@ import {
 import { VisualizationNoResults } from '../../../visualizations/public';
 import { getServices } from '../opensearch_dashboards_services';
 import './search_embeddable.scss';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 
 interface SearchEmbeddableProps {
   searchProps: SearchProps;
 }
-export interface DiscoverEmbeddableProps extends DataGridTableProps {
-  totalHitCount: number;
-}
+export type DiscoverEmbeddableProps = DataGridTableProps;
 
 export const DataGridTableMemoized = React.memo((props: DataGridTableProps) => (
   <DataGridTable {...props} />
 ));
 
 export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps) {
-  const { storage } = getServices();
+  const services = getServices();
   const discoverEmbeddableProps = {
     columns: searchProps.columns,
     indexPattern: searchProps.indexPattern,
@@ -42,32 +41,33 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
     sort: searchProps.sort,
     displayTimeColumn: searchProps.displayTimeColumn,
     services: searchProps.services,
-    totalHitCount: searchProps.totalHitCount,
+    hits: searchProps.hits,
     title: searchProps.title,
     description: searchProps.description,
-    storage,
     showPagination: true,
   } as DiscoverEmbeddableProps;
 
   return (
     <I18nProvider>
-      <EuiFlexGroup
-        gutterSize="xs"
-        direction="column"
-        responsive={false}
-        data-test-subj="embeddedSavedSearchDocTable"
-        className="eui-xScrollWithShadows eui-yScrollWithShadows"
-      >
-        {discoverEmbeddableProps.totalHitCount !== 0 ? (
-          <EuiFlexItem style={{ minHeight: 0 }} className="osdDocTable__container">
-            <DataGridTableMemoized {...discoverEmbeddableProps} />
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem>
-            <VisualizationNoResults />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <OpenSearchDashboardsContextProvider services={services}>
+        <EuiFlexGroup
+          gutterSize="xs"
+          direction="column"
+          responsive={false}
+          data-test-subj="embeddedSavedSearchDocTable"
+          className="eui-xScrollWithShadows eui-yScrollWithShadows"
+        >
+          {discoverEmbeddableProps.hits !== 0 ? (
+            <EuiFlexItem style={{ minHeight: 0 }} className="osdDocTable__container">
+              <DataGridTableMemoized {...discoverEmbeddableProps} />
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem>
+              <VisualizationNoResults />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
 }

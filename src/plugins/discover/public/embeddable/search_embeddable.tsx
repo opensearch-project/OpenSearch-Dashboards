@@ -84,7 +84,7 @@ export interface SearchProps {
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   rows?: any[];
   indexPattern?: IndexPattern;
-  totalHitCount?: number;
+  hits?: number;
   isLoading?: boolean;
   displayTimeColumn?: boolean;
   services: DiscoverServices;
@@ -360,7 +360,7 @@ export class SearchEmbeddable
       inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
 
       this.searchProps!.rows = resp.hits.hits;
-      this.searchProps!.totalHitCount = resp.hits.total;
+      this.searchProps!.hits = resp.hits.total;
       this.searchProps!.isLoading = false;
     } catch (error) {
       this.updateOutput({ loading: false, error });

@@ -40,7 +40,7 @@ export function ContextApp({
   appState,
 }: Props) {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { uiSettings, storage } = services;
+  const { uiSettings } = services;
   const defaultStepSize = useMemo(() => parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10), [
     uiSettings,
   ]);
@@ -111,7 +111,6 @@ export function ContextApp({
           displayTimeColumn={displayTimeColumn}
           isToolbarVisible={false}
           isContextView={true}
-          storage={storage}
         />
       </div>
       <ActionBar

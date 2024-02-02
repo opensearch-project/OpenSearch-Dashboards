@@ -14,8 +14,6 @@ import { DiscoverGridContextProvider } from './data_grid_table_context';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { usePagination } from '../utils/use_pagination';
 import { buildColumns } from '../../utils/columns';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DiscoverServices } from '../../../build_services';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
@@ -25,7 +23,6 @@ import { UI_SETTINGS } from '../../../../../data/common';
 import { LegacyDiscoverTable } from '../default_discover_table/default_discover_table';
 import { toolbarVisibility } from './constants';
 import { getDataGridTableSetting } from '../utils/local_storage';
-import { Storage } from '../../../../../opensearch_dashboards_utils/public';
 import { SortOrder } from '../default_discover_table/helper';
 
 export interface DataGridTableProps {
@@ -35,7 +32,7 @@ export interface DataGridTableProps {
   onFilter: DocViewFilterFn;
   onMoveColumn: (colName: string, destination: number) => void;
   onRemoveColumn: (column: string) => void;
-  onReorderColumn: (col: string, source: number, destination: number) => void;
+  hits?: number;
   onSort: (s: SortOrder[]) => void;
   rows: OpenSearchSearchHit[];
   onSetColumns: (columns: string[]) => void;
@@ -46,7 +43,6 @@ export interface DataGridTableProps {
   isToolbarVisible?: boolean;
   isContextView?: boolean;
   isLoading?: boolean;
-  storage: Storage;
   showPagination?: boolean;
 }
 
@@ -57,10 +53,10 @@ export const DataGridTable = ({
   onFilter,
   onMoveColumn,
   onRemoveColumn,
-  onReorderColumn,
   onSetColumns,
   onSort,
   sort,
+  hits,
   rows,
   displayTimeColumn,
   title = '',
@@ -68,7 +64,6 @@ export const DataGridTable = ({
   isToolbarVisible = true,
   isContextView = false,
   isLoading = false,
-  storage,
   showPagination,
 }: DataGridTableProps) => {
   const services = getServices();
@@ -159,12 +154,13 @@ export const DataGridTable = ({
     ];
   }, []);
 
-  const datagridActive = getDataGridTableSetting(storage);
+  const datagridActive = getDataGridTableSetting(services.storage);
 
   const legacyDiscoverTable = useMemo(
     () => (
       <LegacyDiscoverTable
         columns={adjustedColumns}
+        hits={hits}
         rows={rows}
         indexPattern={indexPattern}
         sort={sort}
@@ -183,6 +179,7 @@ export const DataGridTable = ({
     ),
     [
       adjustedColumns,
+      hits,
       rows,
       indexPattern,
       sort,
