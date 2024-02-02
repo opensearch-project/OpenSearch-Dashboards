@@ -111,7 +111,7 @@ export const LegacyDiscoverTable = ({
 
   return (
     indexPattern && (
-      <div>
+      <>
         {showPagination ? (
           <Pagination
             pageCount={pageCount}
@@ -187,7 +187,7 @@ export const LegacyDiscoverTable = ({
             sampleSize={sampleSize}
           />
         ) : null}
-      </div>
+      </>
     )
   );
 };
