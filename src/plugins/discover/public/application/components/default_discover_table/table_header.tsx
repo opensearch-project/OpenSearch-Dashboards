@@ -64,6 +64,7 @@ export function TableHeader({
 
           return (
             <TableHeaderColumn
+              key={idx}
               currentIdx={idx}
               colLeftIdx={colLeftIdx}
               colRightIdx={colRightIdx}

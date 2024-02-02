@@ -1,4 +1,4 @@
-.osdDocTable_expandedRow {
+.osdDocTable__detailsParent {
   border-top: none !important;
 }
 
@@ -30,5 +30,28 @@
   &:hover &__filterButton,
   &:focus &__filterButton {
     opacity: 1;
+  }
+
+  .osdDescriptionListFieldTitle {
+    margin: 0 4px 0 0 !important;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  &.eui-textNoWrap {
+    // To make sure the time-series column never stretches
+    width: 1%;
+  }
+}
+
+.osdDocTableCell__source {
+  .truncate-by-height {
+    transform: translateY(-1.5px);
+    margin-bottom: -1.5px;
+  }
+
+  dd,
+  dl,
+  dt {
+    font-size: inherit !important;
   }
 }
