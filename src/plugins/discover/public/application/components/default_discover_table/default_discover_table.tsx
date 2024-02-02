@@ -12,15 +12,13 @@ import {
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiProgress,
-  EuiPagination,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TableRow } from './table_rows';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { Pagination } from './pagination';
 
 export interface DefaultDiscoverTableProps {
   displayedTableColumns: EuiDataGridColumn[];
@@ -111,28 +109,16 @@ export const LegacyDiscoverTable = ({
 
   return (
     indexPattern && (
-      <>
+      <div>
         {showPagination ? (
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiPagination
-                pageCount={pageCount}
-                activePage={activePage}
-                onPageClick={(currentPage) => goToPage(currentPage)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FormattedMessage
-                id="discover.docTable.pagerControl.pagesCountLabel"
-                defaultMessage="{startItem}&ndash;{endItem} of {totalItems}"
-                values={{
-                  startItem: currentRowCounts.startRow,
-                  endItem: currentRowCounts.endRow,
-                  totalItems: rows.length,
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <Pagination
+            pageCount={pageCount}
+            activePage={activePage}
+            goToPage={goToPage}
+            startItem={currentRowCounts.startRow + 1}
+            endItem={currentRowCounts.endRow}
+            totalItems={rows.length}
+          />
         ) : null}
         <table data-test-subj="docTable" className="osd-table table">
           <thead>
@@ -187,7 +173,17 @@ export const LegacyDiscoverTable = ({
             </EuiButtonEmpty>
           </EuiCallOut>
         )}
-      </>
+        {showPagination ? (
+          <Pagination
+            pageCount={pageCount}
+            activePage={activePage}
+            goToPage={goToPage}
+            startItem={currentRowCounts.startRow + 1}
+            endItem={currentRowCounts.endRow}
+            totalItems={rows.length}
+          />
+        ) : null}
+      </div>
     )
   );
 };
