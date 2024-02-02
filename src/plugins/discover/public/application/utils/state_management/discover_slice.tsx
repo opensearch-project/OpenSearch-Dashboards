@@ -42,7 +42,7 @@ export interface DiscoverState {
    * dirty flag to indicate if the saved search has been modified
    * since the last save
    */
-  isDirty: boolean;
+  isDirty?: boolean;
 }
 
 export interface DiscoverRootState extends RootState {
@@ -128,6 +128,17 @@ export const discoverSlice = createSlice({
         isDirty: true,
       };
     },
+    moveColumn(state, action: PayloadAction<{ columnName: string; destination: number }>) {
+      const columns = utils.moveColumn(
+        state.columns,
+        action.payload.columnName,
+        action.payload.destination
+      );
+      return {
+        ...state,
+        columns,
+      };
+    },
     setColumns(state, action: PayloadAction<{ columns: string[] }>) {
       return {
         ...state,
@@ -167,6 +178,7 @@ export const {
   addColumn,
   removeColumn,
   reorderColumn,
+  moveColumn,
   setColumns,
   setSort,
   setInterval,

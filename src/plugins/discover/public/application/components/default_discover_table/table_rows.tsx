@@ -21,24 +21,24 @@ import { fetchSourceTypeDataCell } from '../data_grid/data_grid_table_cell_value
 
 export interface TableRowProps {
   row: OpenSearchSearchHit;
-  columnIds: string[];
   columns: string[];
   indexPattern: IndexPattern;
   onRemoveColumn: (column: string) => void;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onClose: () => void;
+  isShortDots: boolean;
 }
 
 export const TableRow = ({
   row,
-  columnIds,
   columns,
   indexPattern,
   onRemoveColumn,
   onAddColumn,
   onFilter,
   onClose,
+  isShortDots,
 }: TableRowProps) => {
   const flattened = indexPattern.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -53,14 +53,14 @@ export const TableRow = ({
           data-test-subj="docTableExpandToggleColumn"
         />
       </td>
-      {columnIds.map((columnId) => {
-        const fieldInfo = indexPattern.fields.getByName(columnId);
-        const fieldMapping = flattened[columnId];
+      {columns.map((colName) => {
+        const fieldInfo = indexPattern.fields.getByName(colName);
+        const fieldMapping = flattened[colName];
 
         if (typeof row === 'undefined') {
           return (
             <td
-              key={columnId}
+              key={colName}
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
@@ -72,23 +72,23 @@ export const TableRow = ({
         if (fieldInfo?.type === '_source') {
           return (
             <td
-              key={columnId}
+              key={colName}
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord osdDocTableCell__source"
               data-test-subj="docTableField"
             >
               <div className="truncate-by-height">
-                {fetchSourceTypeDataCell(indexPattern, row, columnId, false)}
+                {fetchSourceTypeDataCell(indexPattern, row, colName, false, isShortDots)}
               </div>
             </td>
           );
         }
 
-        const formattedValue = indexPattern.formatField(row, columnId);
+        const formattedValue = indexPattern.formatField(row, colName);
 
         if (typeof formattedValue === 'undefined') {
           return (
             <td
-              key={columnId}
+              key={colName}
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
@@ -102,7 +102,7 @@ export const TableRow = ({
         if (!fieldInfo?.filterable) {
           return (
             <td
-              key={columnId}
+              key={colName}
               data-test-subj="docTableField"
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
@@ -116,11 +116,10 @@ export const TableRow = ({
 
         return (
           <TableCell
-            key={columnId}
-            columnId={columnId}
-            columnType={fieldInfo?.type}
+            key={colName}
+            columnId={colName}
             onFilter={onFilter}
-            isTimeField={indexPattern.timeFieldName === columnId}
+            isTimeField={indexPattern.timeFieldName === colName}
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
           />

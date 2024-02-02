@@ -33,6 +33,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
     indexPattern: searchProps.indexPattern,
     onAddColumn: searchProps.onAddColumn,
     onFilter: searchProps.onFilter,
+    onMoveColumn: searchProps.onMoveColumn,
     onRemoveColumn: searchProps.onRemoveColumn,
     onReorderColumn: searchProps.onReorderColumn,
     onSort: searchProps.onSort,

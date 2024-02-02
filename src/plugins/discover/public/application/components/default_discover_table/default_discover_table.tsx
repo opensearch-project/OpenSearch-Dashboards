@@ -9,8 +9,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiDataGridColumn,
-  EuiDataGridSorting,
   EuiProgress,
   EuiPagination,
   EuiFlexGroup,
@@ -21,41 +19,51 @@ import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TableRow } from './table_rows';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { SortOrder } from './helper';
+import { getLegacyDisplayedColumns } from './helper';
 
 export interface DefaultDiscoverTableProps {
-  displayedTableColumns: EuiDataGridColumn[];
   columns: string[];
   rows: OpenSearchSearchHit[];
   indexPattern: IndexPattern;
-  sortOrder: Array<{
-    id: string;
-    direction: 'asc' | 'desc';
-  }>;
-  onChangeSortOrder: (cols: EuiDataGridSorting['columns']) => void;
+  sort: SortOrder[];
+  onSort: (s: SortOrder[]) => void;
   onRemoveColumn: (column: string) => void;
-  onReorderColumn: (col: string, source: number, destination: number) => void;
+  onReorderColumn: (colName: string, destination: number) => void;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onClose: () => void;
   sampleSize: number;
+  isShortDots: boolean;
+  hideTimeColumn: boolean;
+  defaultSortOrder: string;
   showPagination?: boolean;
 }
 
 export const LegacyDiscoverTable = ({
-  displayedTableColumns,
   columns,
   rows,
   indexPattern,
-  sortOrder,
-  onChangeSortOrder,
+  sort,
+  onSort,
   onRemoveColumn,
   onReorderColumn,
   onAddColumn,
   onFilter,
   onClose,
   sampleSize,
+  isShortDots,
+  hideTimeColumn,
+  defaultSortOrder,
   showPagination,
 }: DefaultDiscoverTableProps) => {
+  const displayedColumns = getLegacyDisplayedColumns(
+    columns,
+    indexPattern,
+    hideTimeColumn,
+    isShortDots
+  );
+  const displayedColumnNames = displayedColumns.map((column) => column.name);
   const pageSize = 50;
   const [renderedRowCount, setRenderedRowCount] = useState(50); // Start with 50 rows
   const [displayedRows, setDisplayedRows] = useState(rows.slice(0, pageSize));
@@ -137,15 +145,13 @@ export const LegacyDiscoverTable = ({
         <table data-test-subj="docTable" className="osd-table table">
           <thead>
             <TableHeader
-              displayedTableColumns={displayedTableColumns}
-              defaultSortOrder={''}
-              // hideTimeColumn,
+              displayedColumns={displayedColumns}
+              defaultSortOrder={defaultSortOrder}
               indexPattern={indexPattern}
-              // isShortDots,
-              onChangeSortOrder={onChangeSortOrder}
+              onChangeSortOrder={onSort}
               onReorderColumn={onReorderColumn}
               onRemoveColumn={onRemoveColumn}
-              sortOrder={sortOrder}
+              sortOrder={sort}
             />
           </thead>
           <tbody>
@@ -155,13 +161,13 @@ export const LegacyDiscoverTable = ({
                   <TableRow
                     key={index}
                     row={row}
-                    columnIds={displayedTableColumns.map((column) => column.id)}
-                    columns={columns}
+                    columns={displayedColumnNames}
                     indexPattern={indexPattern}
                     onRemoveColumn={onRemoveColumn}
                     onAddColumn={onAddColumn}
                     onFilter={onFilter}
                     onClose={onClose}
+                    isShortDots={isShortDots}
                   />
                 );
               }
