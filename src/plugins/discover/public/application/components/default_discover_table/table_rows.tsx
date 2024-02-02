@@ -51,7 +51,6 @@ export const TableRow = ({
           iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
           aria-label="Next"
           data-test-subj="docTableExpandToggleColumn"
-          className="osdDocTableCell__toggleDetails"
         />
       </td>
       {columnIds.map((columnId) => {
