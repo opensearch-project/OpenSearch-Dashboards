@@ -30,6 +30,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Discover] Added customizable pagination options based on Discover UI settings [#5610](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5610)
 - [Chrome] Introduce registerCollapsibleNavHeader to allow plugins to customize the rendering of nav menu header ([#5244](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5244))
 - [Custom Branding] Relative URL should be allowed for logos ([#5572](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5572))
+- Revert to legacy discover table and add toggle to new discover table ([#5789](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5789))
 
 ### 🐛 Bug Fixes
 
