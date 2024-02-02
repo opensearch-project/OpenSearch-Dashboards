@@ -13,24 +13,20 @@ import './_table_header.scss';
 
 import React, { ReactNode } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiButtonIcon, EuiDataGridSorting, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { SortOrder } from './helper';
 
 interface Props {
-  currentIdx: number;
   colLeftIdx: number; // idx of the column to the left, -1 if moving is not possible
   colRightIdx: number; // idx of the column to the right, -1 if moving is not possible
   displayName: ReactNode;
   isRemoveable: boolean;
   isSortable?: boolean;
   name: string;
-  onChangeSortOrder?: (cols: EuiDataGridSorting['columns']) => void;
-  onMoveColumn?: (name: string, idx: number) => void;
-  onReorderColumn?: (col: string, source: number, destination: number) => void;
+  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
+  onReorderColumn?: (colName: string, destination: number) => void;
   onRemoveColumn?: (name: string) => void;
-  sortOrder: Array<{
-    id: string;
-    direction: 'desc' | 'asc';
-  }>;
+  sortOrder: SortOrder[];
 }
 
 const sortDirectionToIcon: Record<string, string> = {
@@ -40,7 +36,6 @@ const sortDirectionToIcon: Record<string, string> = {
 };
 
 export function TableHeaderColumn({
-  currentIdx,
   colLeftIdx,
   colRightIdx,
   displayName,
@@ -52,9 +47,9 @@ export function TableHeaderColumn({
   onRemoveColumn,
   sortOrder,
 }: Props) {
-  const currentSortWithoutColumn = sortOrder.filter((pair) => pair.id !== name);
-  const currentColumnSort = sortOrder.find((pair) => pair.id === name);
-  const currentColumnSortDirection = (currentColumnSort && currentColumnSort.direction) || '';
+  const currentSortWithoutColumn = sortOrder.filter((pair) => pair[0] !== name);
+  const currentColumnSort = sortOrder.find((pair) => pair[0] === name);
+  const currentColumnSortDirection = (currentColumnSort && currentColumnSort[1]) || '';
 
   const btnSortIcon = sortDirectionToIcon[currentColumnSortDirection];
   const btnSortClassName =
@@ -65,35 +60,15 @@ export function TableHeaderColumn({
   const handleChangeSortOrder = () => {
     if (!onChangeSortOrder) return;
 
-    let currentSortOrder;
-    let newSortOrder: {
-      id: string;
-      direction: 'desc' | 'asc';
-    };
     // Cycle goes Unsorted -> Asc -> Desc -> Unsorted
     if (currentColumnSort === undefined) {
-      newSortOrder = {
-        id: name,
-        direction: 'asc',
-      };
-      currentSortOrder = [...currentSortWithoutColumn, newSortOrder];
-      onChangeSortOrder(currentSortOrder);
+      onChangeSortOrder([...currentSortWithoutColumn, [name, 'asc']]);
     } else if (currentColumnSortDirection === 'asc') {
-      newSortOrder = {
-        id: name,
-        direction: 'desc',
-      };
-      currentSortOrder = [...currentSortWithoutColumn, newSortOrder];
-      onChangeSortOrder(currentSortOrder);
+      onChangeSortOrder([...currentSortWithoutColumn, [name, 'desc']]);
     } else if (currentColumnSortDirection === 'desc' && currentSortWithoutColumn.length === 0) {
       // If we're at the end of the cycle and this is the only existing sort, we switch
       // back to ascending sort instead of removing it.
-      newSortOrder = {
-        id: name,
-        direction: 'asc',
-      };
-      currentSortOrder = [...currentSortWithoutColumn, newSortOrder];
-      onChangeSortOrder(currentSortOrder);
+      onChangeSortOrder([...currentSortWithoutColumn, [name, 'asc']]);
     } else {
       onChangeSortOrder(currentSortWithoutColumn);
     }
@@ -168,7 +143,7 @@ export function TableHeaderColumn({
         values: { columnName: name },
       }),
       className: 'fa fa-angle-double-left osdDocTableHeader__move',
-      onClick: () => onReorderColumn && onReorderColumn(name, currentIdx, colLeftIdx),
+      onClick: () => onReorderColumn && onReorderColumn(name, colLeftIdx),
       testSubject: `docTableMoveLeftHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
         defaultMessage: 'Move column to the left',
@@ -183,7 +158,7 @@ export function TableHeaderColumn({
         values: { columnName: name },
       }),
       className: 'fa fa-angle-double-right osdDocTableHeader__move',
-      onClick: () => onReorderColumn && onReorderColumn(name, currentIdx, colRightIdx),
+      onClick: () => onReorderColumn && onReorderColumn(name, colRightIdx),
       testSubject: `docTableMoveRightHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonTooltip', {
         defaultMessage: 'Move column to the right',

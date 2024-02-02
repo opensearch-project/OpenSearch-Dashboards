@@ -101,6 +101,7 @@ export function ContextApp({
           indexPattern={indexPattern}
           onAddColumn={() => {}}
           onFilter={onAddFilter}
+          onMoveColumn={() => {}}
           onRemoveColumn={() => {}}
           onReorderColumn={() => {}}
           onSetColumns={() => {}}

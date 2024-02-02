@@ -12,76 +12,47 @@
 import './_table_header.scss';
 
 import React from 'react';
-import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { TableHeaderColumn } from './table_header_column';
+import { SortOrder, LegacyDisplayedColumn } from './helper';
+import { getDefaultSort } from '../../view_components/utils/get_default_sort';
 
 interface Props {
-  displayedTableColumns: EuiDataGridColumn[];
-  // columns: string[];
+  displayedColumns: LegacyDisplayedColumn[];
   defaultSortOrder: string;
-  // hideTimeColumn: boolean;
   indexPattern: IndexPattern;
-  // isShortDots: boolean;
-  onChangeSortOrder?: (cols: EuiDataGridSorting['columns']) => void;
-  onMoveColumn?: (name: string, index: number) => void;
+  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onRemoveColumn?: (name: string) => void;
-  onReorderColumn?: (col: string, source: number, destination: number) => void;
-  sortOrder: Array<{
-    id: string;
-    direction: 'desc' | 'asc';
-  }>;
+  onReorderColumn?: (colName: string, destination: number) => void;
+  sortOrder: SortOrder[];
 }
 
 export function TableHeader({
-  displayedTableColumns,
+  displayedColumns,
   defaultSortOrder,
-  // hideTimeColumn,
   indexPattern,
-  // isShortDots,
   onChangeSortOrder,
   onReorderColumn,
   onRemoveColumn,
   sortOrder,
 }: Props) {
-  const timeColName = indexPattern.timeFieldName;
   return (
     <tr data-test-subj="docTableHeader" className="osdDocTableHeader">
       <th style={{ width: '24px' }} />
-      {displayedTableColumns.map(
-        (col: EuiDataGridColumn, idx: number, cols: EuiDataGridColumn[]) => {
-          const colLeftIdx =
-            !col.actions || !col.actions!.showMoveLeft || idx - 1 <= 0 || col.id === timeColName
-              ? -1
-              : idx - 1;
-          const colRightIdx =
-            !col.actions ||
-            !col.actions!.showMoveRight ||
-            idx + 1 >= cols.length ||
-            col.id === timeColName
-              ? -1
-              : idx + 1;
-
-          return (
-            <TableHeaderColumn
-              currentIdx={idx}
-              colLeftIdx={colLeftIdx}
-              colRightIdx={colRightIdx}
-              displayName={col.display}
-              isRemoveable={col.actions && col.actions.showHide ? true : false}
-              isSortable={col.isSortable}
-              name={col.display as string}
-              sortOrder={
-                sortOrder.length ? sortOrder : []
-                // getDefaultSort(indexPattern, defaultSortOrder).map(([id, direction]) => ({ id, direction }))
-              }
-              onReorderColumn={onReorderColumn}
-              onRemoveColumn={onRemoveColumn}
-              onChangeSortOrder={onChangeSortOrder}
-            />
-          );
-        }
-      )}
+      {displayedColumns.map((col) => {
+        return (
+          <TableHeaderColumn
+            key={col.name}
+            {...col}
+            sortOrder={
+              sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
+            }
+            onReorderColumn={onReorderColumn}
+            onRemoveColumn={onRemoveColumn}
+            onChangeSortOrder={onChangeSortOrder}
+          />
+        );
+      })}
     </tr>
   );
 }

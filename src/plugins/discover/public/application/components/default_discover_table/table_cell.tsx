@@ -18,6 +18,7 @@ import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
 export interface TableCellProps {
   columnId: string;
+  isTimeField?: boolean;
   onFilter: DocViewFilterFn;
   filterable?: boolean;
   fieldMapping?: any;
@@ -26,16 +27,14 @@ export interface TableCellProps {
 
 export const TableCell = ({
   columnId,
+  isTimeField,
   onFilter,
   fieldMapping,
   sanitizedCellValue,
 }: TableCellProps) => {
-  return (
-    // eslint-disable-next-line react/no-danger
-    <td
-      data-test-subj="docTableField"
-      className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
-    >
+  const content = (
+    <>
+      {/* eslint-disable-next-line react/no-danger */}
       <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
       <span className="osdDocTableCell__filter">
         <EuiToolTip
@@ -69,6 +68,19 @@ export const TableCell = ({
           />
         </EuiToolTip>
       </span>
+    </>
+  );
+
+  return isTimeField ? (
+    <td data-test-subj="docTableField" className="osdDocTableCell eui-textNoWrap">
+      {content}
+    </td>
+  ) : (
+    <td
+      data-test-subj="docTableField"
+      className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
+    >
+      <div className="osdDocTable__limitedHeight">{content}</div>
     </td>
   );
 };

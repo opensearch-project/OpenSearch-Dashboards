@@ -16,21 +16,24 @@ import {
 import { stringify } from '@osd/std';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { shortenDottedString } from '../../helpers';
 
 export function fetchSourceTypeDataCell(
   idxPattern: IndexPattern,
   row: Record<string, unknown>,
   columnId: string,
-  isDetails: boolean
+  isDetails: boolean,
+  isShortDots: boolean
 ) {
   if (isDetails) {
     return <span>{stringify(row[columnId], null, 2)}</span>;
   }
   const formattedRow = idxPattern.formatHit(row);
-  const keys = Object.keys(formattedRow);
+  const rawKeys = Object.keys(formattedRow);
+  const keys = isShortDots ? rawKeys.map((k) => shortenDottedString(k)) : rawKeys;
 
   return (
-    <EuiDescriptionList type="inline" compressed>
+    <EuiDescriptionList type="inline" compressed className="source">
       {keys.map((key, index) => (
         <Fragment key={key}>
           <EuiDescriptionListTitle className="osdDescriptionListFieldTitle">
