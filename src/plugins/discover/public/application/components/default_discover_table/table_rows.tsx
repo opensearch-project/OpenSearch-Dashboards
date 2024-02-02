@@ -130,9 +130,9 @@ export const TableRow = ({
 
   const expandedTableRow = (
     <tr key={'x' + row._id}>
-      <td className="osdDocTable__detailsParent" colSpan={columns.length + 2}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
+      <td className="osdDocTable__detailsParent" colSpan={columnIds.length + 1}>
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={false} className="osdDocTable__detailsIconContainer">
             <EuiIcon type="folderOpen" />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -149,7 +149,7 @@ export const TableRow = ({
             <DocViewerLinks hit={row} indexPattern={indexPattern} columns={columns} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <DocViewer
               hit={row}

@@ -31,11 +31,11 @@ export const TableFeedbacksPanel = ({ onClose, onTurnOff }: TableFeedbacksPanelP
     <EuiModalBody>
       <EuiText>
         <p>
-          Event tables: Documents are now expanded through a flyout. Density, column order, and
-          sorting controls have been improved.{' '}
+          Help drive future improvements by{' '}
           <a href="https://survey.opensearch.org" target="_blank" rel="noopener noreferrer">
-            Provide feedbacks
-          </a>
+            providing feedback
+          </a>{' '}
+          about your experience.
         </p>
       </EuiText>
     </EuiModalBody>
