@@ -45,6 +45,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
     title: searchProps.title,
     description: searchProps.description,
     storage,
+    showPagination: true,
   } as DiscoverEmbeddableProps;
 
   return (

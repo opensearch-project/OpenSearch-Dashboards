@@ -41,6 +41,7 @@ export interface DataGridTableProps {
   isContextView?: boolean;
   isLoading?: boolean;
   storage: Storage;
+  showPagination?: boolean;
 }
 
 export const DataGridTable = ({
@@ -61,6 +62,7 @@ export const DataGridTable = ({
   isContextView = false,
   isLoading = false,
   storage,
+  showPagination,
 }: DataGridTableProps) => {
   const { services } = useOpenSearchDashboards<DiscoverServices>();
 
@@ -161,6 +163,7 @@ export const DataGridTable = ({
         onFilter={onFilter}
         onClose={() => setInspectedHit(undefined)}
         sampleSize={pageSizeLimit}
+        showPagination={showPagination}
       />
     ),
     [
@@ -175,6 +178,7 @@ export const DataGridTable = ({
       onAddColumn,
       onFilter,
       pageSizeLimit,
+      showPagination,
     ]
   );
 

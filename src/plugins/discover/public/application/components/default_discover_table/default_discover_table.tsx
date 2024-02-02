@@ -12,6 +12,9 @@ import {
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiProgress,
+  EuiPagination,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
@@ -35,6 +38,7 @@ export interface DefaultDiscoverTableProps {
   onFilter: DocViewFilterFn;
   onClose: () => void;
   sampleSize: number;
+  showPagination?: boolean;
 }
 
 export const LegacyDiscoverTable = ({
@@ -50,8 +54,15 @@ export const LegacyDiscoverTable = ({
   onFilter,
   onClose,
   sampleSize,
+  showPagination,
 }: DefaultDiscoverTableProps) => {
+  const pageSize = 50;
   const [renderedRowCount, setRenderedRowCount] = useState(50); // Start with 50 rows
+  const [displayedRows, setDisplayedRows] = useState(rows.slice(0, pageSize));
+  const [currentRowCounts, setCurrentRowCounts] = useState({
+    startRow: 0,
+    endRow: pageSize,
+  });
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -81,9 +92,48 @@ export const LegacyDiscoverTable = ({
     };
   }, []);
 
+  const [activePage, setActivePage] = useState(0);
+  const pageCount = Math.ceil(rows.length / pageSize);
+
+  const goToPage = (pageNumber: number) => {
+    const startRow = pageNumber * pageSize;
+    const endRow =
+      rows.length < pageNumber * pageSize + pageSize
+        ? rows.length
+        : pageNumber * pageSize + pageSize;
+    setCurrentRowCounts({
+      startRow,
+      endRow,
+    });
+    setDisplayedRows(rows.slice(startRow, endRow));
+    setActivePage(pageNumber);
+  };
+
   return (
     indexPattern && (
       <>
+        {showPagination ? (
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiPagination
+                pageCount={pageCount}
+                activePage={activePage}
+                onPageClick={(currentPage) => goToPage(currentPage)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FormattedMessage
+                id="discover.docTable.pagerControl.pagesCountLabel"
+                defaultMessage="{startItem}&ndash;{endItem} of {totalItems}"
+                values={{
+                  startItem: currentRowCounts.startRow,
+                  endItem: currentRowCounts.endRow,
+                  totalItems: rows.length,
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
         <table data-test-subj="docTable" className="osd-table table">
           <thead>
             <TableHeader
@@ -99,29 +149,31 @@ export const LegacyDiscoverTable = ({
             />
           </thead>
           <tbody>
-            {rows.slice(0, renderedRowCount).map((row: OpenSearchSearchHit, index: number) => {
-              return (
-                <TableRow
-                  key={index}
-                  row={row}
-                  columnIds={displayedTableColumns.map((column) => column.id)}
-                  columns={columns}
-                  indexPattern={indexPattern}
-                  onRemoveColumn={onRemoveColumn}
-                  onAddColumn={onAddColumn}
-                  onFilter={onFilter}
-                  onClose={onClose}
-                />
-              );
-            })}
+            {(showPagination ? displayedRows : rows.slice(0, renderedRowCount)).map(
+              (row: OpenSearchSearchHit, index: number) => {
+                return (
+                  <TableRow
+                    key={index}
+                    row={row}
+                    columnIds={displayedTableColumns.map((column) => column.id)}
+                    columns={columns}
+                    indexPattern={indexPattern}
+                    onRemoveColumn={onRemoveColumn}
+                    onAddColumn={onAddColumn}
+                    onFilter={onFilter}
+                    onClose={onClose}
+                  />
+                );
+              }
+            )}
           </tbody>
         </table>
-        {renderedRowCount < rows.length && (
+        {!showPagination && renderedRowCount < rows.length && (
           <div ref={sentinelRef}>
             <EuiProgress size="xs" color="accent" />
           </div>
         )}
-        {rows.length === sampleSize && (
+        {!showPagination && rows.length === sampleSize && (
           <EuiCallOut className="dscTable__footer" data-test-subj="discoverDocTableFooter">
             <FormattedMessage
               id="discover.howToSeeOtherMatchingDocumentsDescription"
