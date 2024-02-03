@@ -58,15 +58,11 @@ export const DiscoverTable = ({ rows }: Props) => {
     dispatch(removeColumn(col));
   };
 
-  const onReorderColumn = (col: string, source: number, destination: number) => {
+  const onMoveColumn = (col: string, destination: number) => {
     if (indexPattern && capabilities.discover?.save) {
       popularizeField(indexPattern, col, indexPatterns);
     }
-    dispatch(reorderColumn({ source: source - 1, destination: destination - 1 }));
-  };
-
-  const onMoveColumn = (colName: string, destination: number) => {
-    dispatch(moveColumn({ columnName: colName, destination }));
+    dispatch(moveColumn({ columnName: col, destination }));
   };
 
   const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
@@ -112,7 +108,6 @@ export const DiscoverTable = ({ rows }: Props) => {
       onFilter={onAddFilter as DocViewFilterFn}
       onMoveColumn={onMoveColumn}
       onRemoveColumn={onRemoveColumn}
-      onReorderColumn={onReorderColumn}
       onSetColumns={onSetColumns}
       onSort={onSetSort}
       sort={sort}

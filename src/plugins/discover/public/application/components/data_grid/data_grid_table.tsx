@@ -23,7 +23,7 @@ import { UI_SETTINGS } from '../../../../../data/common';
 import { LegacyDiscoverTable } from '../default_discover_table/default_discover_table';
 import { toolbarVisibility } from './constants';
 import { getDataGridTableSetting } from '../utils/local_storage';
-import { SortOrder } from '../default_discover_table/helper';
+import { SortDirection, SortOrder } from '../../../saved_searches/types';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -74,7 +74,7 @@ export const DataGridTable = ({
       services.uiSettings.get(SAMPLE_SIZE_SETTING),
       services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
       services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
-      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc') as SortDirection,
     ];
   }, [services.uiSettings]);
   const pagination = usePagination({ rowCount, pageSizeLimit });
@@ -166,7 +166,7 @@ export const DataGridTable = ({
         sort={sort}
         onSort={onSort}
         onRemoveColumn={onRemoveColumn}
-        onReorderColumn={onMoveColumn}
+        onMoveColumn={onMoveColumn}
         onAddColumn={onAddColumn}
         onFilter={onFilter}
         onClose={() => setInspectedHit(undefined)}

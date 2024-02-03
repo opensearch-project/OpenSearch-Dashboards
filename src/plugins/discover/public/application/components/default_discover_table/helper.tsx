@@ -31,7 +31,6 @@
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { shortenDottedString } from '../../helpers';
 
-export type SortOrder = [string, string];
 export interface LegacyDisplayedColumn {
   name: string;
   displayName: string;
