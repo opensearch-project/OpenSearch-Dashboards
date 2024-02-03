@@ -17,7 +17,7 @@
     "@osd/utils": "1.0.0",
     "axios": "^1.6.1",
     "chalk": "^4.1.0",
-    "cheerio": "0.22.0",
+    "cheerio": "1.0.0-rc.1",
     "dedent": "^0.7.0",
     "execa": "^4.0.2",
     "exit-hook": "^2.2.0",
