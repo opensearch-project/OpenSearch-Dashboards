@@ -68,7 +68,12 @@ export class ConfigurationProviderPlugin
     this.configurationIndexName = config.opensearchDashboards.config_index;
 
     core.http.registerOnPreResponse(
-      createCspRulesPreResponseHandler(core, this.getConfigurationClient.bind(this), this.logger)
+      createCspRulesPreResponseHandler(
+        core,
+        core.http.csp.header,
+        this.getConfigurationClient.bind(this),
+        this.logger
+      )
     );
 
     return {
