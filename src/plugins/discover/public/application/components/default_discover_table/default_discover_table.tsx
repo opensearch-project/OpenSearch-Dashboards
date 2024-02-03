@@ -6,11 +6,7 @@
 import './_doc_table.scss';
 
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
@@ -69,7 +65,7 @@ export const LegacyDiscoverTable = ({
   const [displayedRows, setDisplayedRows] = useState(rows.slice(0, pageSize));
   const [currentRowCounts, setCurrentRowCounts] = useState({
     startRow: 0,
-    endRow: pageSize,
+    endRow: rows.length < pageSize ? rows.length : pageSize,
   });
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -127,7 +123,7 @@ export const LegacyDiscoverTable = ({
             goToPage={goToPage}
             startItem={currentRowCounts.startRow + 1}
             endItem={currentRowCounts.endRow}
-            totalItems={hits}
+            totalItems={rows.length}
             sampleSize={sampleSize}
           />
         ) : null}
