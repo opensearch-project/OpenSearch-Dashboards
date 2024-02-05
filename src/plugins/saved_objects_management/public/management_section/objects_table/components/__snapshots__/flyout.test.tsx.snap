@@ -184,6 +184,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "post": [MockFunction],
           "put": [MockFunction],
         },
+        "selectedDataSourceId": undefined,
         "state": Object {
           "conflictedIndexPatterns": undefined,
           "conflictedSavedObjectsLinkedToSavedSearches": undefined,
@@ -214,7 +215,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           },
           "importCount": 0,
           "importMode": Object {
-            "createNewCopies": false,
+            "createNewCopies": true,
             "overwrite": true,
           },
           "indexPatterns": Array [
@@ -525,6 +526,159 @@ Array [
 ]
 `;
 
+exports[`Flyout should render cluster selector and import options 1`] = `
+<EuiFlyout
+  onClose={[MockFunction]}
+  size="s"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        <FormattedMessage
+          defaultMessage="Import saved objects"
+          id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Select file"
+            id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFilePicker
+          accept=".ndjson, .json"
+          compressed={false}
+          display="large"
+          fullWidth={true}
+          initialPromptText={
+            <FormattedMessage
+              defaultMessage="Import"
+              id="savedObjectsManagement.objectsTable.flyout.importPromptText"
+              values={Object {}}
+            />
+          }
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+      <div
+        className="savedObjectImportControlForDataSource"
+      >
+        <EuiSpacer />
+        <EuiFormFieldset
+          legend={
+            Object {
+              "children": <EuiTitle
+                size="xs"
+              >
+                <span>
+                  Import options
+                </span>
+              </EuiTitle>,
+            }
+          }
+        >
+          <ClusterSelector
+            disabled={false}
+            fullWidth={true}
+            notifications={
+              Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addInfo": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              }
+            }
+            onSelectedDataSource={[Function]}
+          />
+        </EuiFormFieldset>
+        <EuiSpacer />
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          fullWidth={true}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          labelType="label"
+        >
+          <ImportModeControl
+            initialValues={
+              Object {
+                "createNewCopies": true,
+                "overwrite": true,
+              }
+            }
+            isLegacyFile={false}
+            optionLabel="Conflict management"
+            updateSelection={[Function]}
+          />
+        </EuiFormRow>
+      </div>
+    </EuiForm>
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          data-test-subj="importSavedObjectsCancelBtn"
+          disabled={false}
+          onClick={[MockFunction]}
+          size="s"
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="importSavedObjectsImportBtn"
+          fill={true}
+          isLoading={false}
+          onClick={[Function]}
+          size="s"
+        >
+          <FormattedMessage
+            defaultMessage="Import"
+            id="savedObjectsManagement.objectsTable.flyout.import.confirmButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
 exports[`Flyout should render import step 1`] = `
 <EuiFlyout
   onClose={[MockFunction]}
@@ -555,7 +709,7 @@ exports[`Flyout should render import step 1`] = `
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
-            defaultMessage="Select a file to import"
+            defaultMessage="Select file"
             id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
             values={Object {}}
           />
@@ -588,11 +742,12 @@ exports[`Flyout should render import step 1`] = `
         <ImportModeControl
           initialValues={
             Object {
-              "createNewCopies": false,
+              "createNewCopies": true,
               "overwrite": true,
             }
           }
           isLegacyFile={false}
+          optionLabel="Import options"
           updateSelection={[Function]}
         />
       </EuiFormRow>
