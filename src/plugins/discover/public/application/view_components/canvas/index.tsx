@@ -89,6 +89,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   }, [dispatch, filteredColumns, indexPattern]);
 
   const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
+  const lastColumn = columns ? columns[columns.length - 1] : '';
 
   return (
     <EuiPanel
@@ -118,7 +119,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
               <MemoizedDiscoverChartContainer {...fetchState} />
             </EuiPanel>
           </EuiPanel>
-          <MemoizedDiscoverTable rows={rows} />
+          <MemoizedDiscoverTable key={`table-${rows?.length}-${lastColumn}`} rows={rows} />
         </>
       )}
     </EuiPanel>
