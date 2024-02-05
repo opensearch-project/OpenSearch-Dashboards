@@ -54,7 +54,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { OverlayStart, HttpStart, SavedObjectsStart } from 'src/core/public';
+import { OverlayStart, HttpStart } from 'src/core/public';
+import { ClusterSelector } from '../../../../../data_source_management/public';
 import {
   IndexPatternsContract,
   IIndexPattern,
@@ -79,9 +80,6 @@ import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import
 import { OverwriteModal } from './overwrite_modal';
 import { ImportModeControl, ImportMode } from './import_mode_control';
 import { ImportSummary } from './import_summary';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { DataSourcePicker } from '../../../../../data_source_management/public/components/data_source_picker/data_source_picker.js';
-
 const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
@@ -818,7 +816,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             ),
           }}
         >
-          <DataSourcePicker
+          <ClusterSelector
             savedObjectsClient={this.props.savedObjects}
             notifications={this.props.notifications.toasts}
             onSelectedDataSource={this.onSelectedDataSourceChange}
