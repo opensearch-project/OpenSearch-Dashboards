@@ -16,6 +16,9 @@ import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_
 import { usePagination } from '../utils/use_pagination';
 import { SortOrder } from '../../../saved_searches/types';
 import { buildColumns } from '../../utils/columns';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DiscoverServices } from '../../../build_services';
+import { SAMPLE_SIZE_SETTING } from '../../../../common';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -52,9 +55,12 @@ export const DataGridTable = ({
   isContextView = false,
   isLoading = false,
 }: DataGridTableProps) => {
+  const { services } = useOpenSearchDashboards<DiscoverServices>();
+
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
-  const pagination = usePagination(rowCount);
+  const pageSizeLimit = services.uiSettings?.get(SAMPLE_SIZE_SETTING);
+  const pagination = usePagination({ rowCount, pageSizeLimit });
 
   let adjustedColumns = buildColumns(columns);
   // handle case where the user removes selected filed and leaves only time column
