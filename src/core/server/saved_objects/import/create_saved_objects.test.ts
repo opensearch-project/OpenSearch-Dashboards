@@ -74,6 +74,9 @@ const obj13 = createObject(OTHER_TYPE, 'id-13'); // -> conflict
 // data source object
 const dataSourceObj1 = createObject(DATA_SOURCE, 'ds-id1'); // -> success
 const dataSourceObj2 = createObject(DATA_SOURCE, 'ds-id2'); // -> conflict
+const dashboardObjWithDataSource = createObject('dashboard', 'ds_dashboard-id1'); // -> success
+const visualizationObjWithDataSource = createObject('visualization', 'ds_visualization-id1'); // -> success
+const searchObjWithDataSource = createObject('search', 'ds_search-id1'); // -> success
 
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
@@ -222,6 +225,13 @@ describe('#createSavedObjects', () => {
         getResultMock.conflict(obj11.type, obj11.id),
         getResultMock.success(obj12, options),
         getResultMock.conflict(obj13.type, obj13.id),
+      ],
+    });
+  };
+
+  const setupMockResultsWithDataSource = (options: CreateSavedObjectsParams) => {
+    bulkCreate.mockResolvedValue({
+      saved_objects: [
         getResultMock.conflict(dataSourceObj2.type, dataSourceObj2.id),
         getResultMock.success(dataSourceObj1, options),
       ],
@@ -277,16 +287,16 @@ describe('#createSavedObjects', () => {
       expect(bulkCreate).toHaveBeenCalledTimes(1);
     });
 
-    test('calls bulkCreate when unresolvable errors or no errors are present with data source objects', async () => {
+    test('calls bulkCreate when unresolvable errors or no errors are present with data source', async () => {
       for (const error of unresolvableErrors) {
         const options = setupParams({ objects: dataSourceObjs, accumulatedErrors: [error] });
-        setupMockResults(options);
+        setupMockResultsWithDataSource(options);
         await createSavedObjects(options);
         expect(bulkCreate).toHaveBeenCalledTimes(1);
         bulkCreate.mockClear();
       }
       const options = setupParams({ objects: dataSourceObjs });
-      setupMockResults(options);
+      setupMockResultsWithDataSource(options);
       await createSavedObjects(options);
       expect(bulkCreate).toHaveBeenCalledTimes(1);
     });
@@ -319,8 +329,13 @@ describe('#createSavedObjects', () => {
     dataSourceId?: string,
     dataSourceTitle?: string
   ) => {
-    const options = setupParams({ objects: objs, namespace, dataSourceId, dataSourceTitle });
-    setupMockResults(options);
+    const options = setupParams({
+      objects: dataSourceObjs,
+      namespace,
+      dataSourceId,
+      dataSourceTitle,
+    });
+    setupMockResultsWithDataSource(options);
 
     await createSavedObjects(options);
     expect(bulkCreate).toHaveBeenCalledTimes(1);
