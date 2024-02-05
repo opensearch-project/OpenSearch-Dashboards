@@ -101,7 +101,7 @@ describe('#importSavedObjectsFromStream', () => {
 
   const setupOptions = (
     createNewCopies: boolean = false,
-    dataSourceId: string | undefined
+    dataSourceId: string | undefined = undefined
   ): SavedObjectsImportOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -125,7 +125,7 @@ describe('#importSavedObjectsFromStream', () => {
     };
   };
   const createObject = (
-    dataSourceId: string | undefined
+    dataSourceId: string | undefined = undefined
   ): SavedObject<{
     title: string;
   }> => {
@@ -155,7 +155,7 @@ describe('#importSavedObjectsFromStream', () => {
    */
   describe('module calls', () => {
     test('collects saved objects from stream', async () => {
-      const options = setupOptions(false, undefined);
+      const options = setupOptions();
       const supportedTypes = ['foo-type'];
       typeRegistry.getImportableAndExportableTypes.mockReturnValue(
         supportedTypes.map((name) => ({ name })) as SavedObjectsType[]
@@ -168,8 +168,8 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('validates references', async () => {
-      const options = setupOptions(false, undefined);
-      const collectedObjects = [createObject(undefined)];
+      const options = setupOptions();
+      const collectedObjects = [createObject()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
         collectedObjects,
@@ -186,8 +186,8 @@ describe('#importSavedObjectsFromStream', () => {
 
     describe('with createNewCopies disabled', () => {
       test('does not regenerate object IDs', async () => {
-        const options = setupOptions(false, undefined);
-        const collectedObjects = [createObject(undefined)];
+        const options = setupOptions();
+        const collectedObjects = [createObject()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [],
           collectedObjects,
@@ -199,8 +199,8 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('checks conflicts', async () => {
-        const options = setupOptions(false, undefined);
-        const collectedObjects = [createObject(undefined)];
+        const options = setupOptions();
+        const collectedObjects = [createObject()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [],
           collectedObjects,
@@ -218,8 +218,8 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('checks origin conflicts', async () => {
-        const options = setupOptions(false, undefined);
-        const filteredObjects = [createObject(undefined)];
+        const options = setupOptions();
+        const filteredObjects = [createObject()];
         const importIdMap = new Map();
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [],
@@ -242,7 +242,7 @@ describe('#importSavedObjectsFromStream', () => {
 
       test('checks data source conflicts', async () => {
         const options = setupOptions(false, testDataSourceId);
-        const collectedObjects = [createObject(undefined)];
+        const collectedObjects = [createObject()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [],
           collectedObjects,
@@ -259,9 +259,9 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('creates saved objects', async () => {
-        const options = setupOptions(false, undefined);
-        const collectedObjects = [createObject(undefined)];
-        const filteredObjects = [createObject(undefined)];
+        const options = setupOptions();
+        const collectedObjects = [createObject()];
+        const filteredObjects = [createObject()];
         const errors = [createError(), createError(), createError(), createError()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [errors[0]],
@@ -305,8 +305,8 @@ describe('#importSavedObjectsFromStream', () => {
 
     describe('with createNewCopies enabled', () => {
       test('regenerates object IDs', async () => {
-        const options = setupOptions(true, undefined);
-        const collectedObjects = [createObject(undefined)];
+        const options = setupOptions(true);
+        const collectedObjects = [createObject()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [],
           collectedObjects,
@@ -318,7 +318,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('does not check conflicts or check origin conflicts or check data source conflict', async () => {
-        const options = setupOptions(true, undefined);
+        const options = setupOptions(true);
         getMockFn(validateReferences).mockResolvedValue([]);
 
         await importSavedObjectsFromStream(options);
@@ -328,8 +328,8 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('creates saved objects', async () => {
-        const options = setupOptions(true, undefined);
-        const collectedObjects = [createObject(undefined)];
+        const options = setupOptions(true);
+        const collectedObjects = [createObject()];
         const errors = [createError(), createError()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [errors[0]],
@@ -360,14 +360,14 @@ describe('#importSavedObjectsFromStream', () => {
 
   describe('results', () => {
     test('returns success=true if no errors occurred', async () => {
-      const options = setupOptions(false, undefined);
+      const options = setupOptions();
 
       const result = await importSavedObjectsFromStream(options);
       expect(result).toEqual({ success: true, successCount: 0 });
     });
 
     test('returns success=false if an error occurred', async () => {
-      const options = setupOptions(false, undefined);
+      const options = setupOptions();
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [createError()],
         collectedObjects: [],
@@ -379,8 +379,8 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     describe('handles a mix of successes and errors and injects metadata', () => {
-      const obj1 = createObject(undefined);
-      const tmp = createObject(undefined);
+      const obj1 = createObject();
+      const tmp = createObject();
       const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
       const obj3 = { ...createObject(undefined), destinationId: 'another-destinationId' }; // empty originId
       const createdObjects = [obj1, obj2, obj3];
