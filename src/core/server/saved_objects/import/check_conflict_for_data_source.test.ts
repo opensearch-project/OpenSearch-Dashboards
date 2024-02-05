@@ -30,7 +30,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
->>>>>>> update import api only
  */
 
 import { mockUuidv4 } from './__mocks__';
@@ -45,11 +44,7 @@ import {
 type SavedObjectType = SavedObject<{ title?: string }>;
 
 /**
-<<<<<<< HEAD
- * Function to create SavedObjectType given a type and ID
-=======
  * Function to create a realistic-looking import object given a type and ID
->>>>>>> update import api only
  */
 const createObject = (type: string, id: string): SavedObjectType => ({
   type,
@@ -95,7 +90,6 @@ const dsObj1 = createObject('type-1', 'ds_id-1'); // -> object with data source 
 const dsObj2 = createObject('type-2', 'ds_id-2'); // -> object with data source id
 const objectsWithDataSource = [dsObj, dsObj1, dsObj2];
 const dsObj1Error = getResultMock.conflict(dsObj1.type, dsObj1.id);
->>>>>>> update import api only
 
 describe('#checkConflictsForDataSource', () => {
   const setupParams = (partial: {
@@ -139,11 +133,7 @@ describe('#checkConflictsForDataSource', () => {
     const params = setupParams({ objects: objectsWithDataSource, dataSourceId: 'ds' });
     const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
     expect(checkConflictsForDataSourceResult).toEqual({
-<<<<<<< HEAD
       filteredObjects: [dataSourceObj1, dataSourceObj2],
-=======
-      filteredObjects: [dsObj1, dsObj2],
->>>>>>> update import api only
       errors: [],
       importIdMap: new Map(),
       pendingOverwrites: new Set(),
@@ -162,25 +152,16 @@ describe('#checkConflictsForDataSource', () => {
       expect.objectContaining({
         filteredObjects: [
           {
-<<<<<<< HEAD
             ...dataSourceObj1,
             id: 'currentDsId_id-1',
           },
           {
             ...dataSourceObj2,
-=======
-            ...dsObj1,
-            id: 'currentDsId_id-1',
-          },
-          {
-            ...dsObj2,
->>>>>>> update import api only
             id: 'currentDsId_id-2',
-          },
+          }
         ],
         errors: [],
         importIdMap: new Map([
-<<<<<<< HEAD
           [
             `${dataSourceObj1.type}:${dataSourceObj1.id}`,
             { id: 'currentDsId_id-1', omitOriginId: true },
@@ -193,24 +174,14 @@ describe('#checkConflictsForDataSource', () => {
         pendingOverwrites: new Set([
           `${dataSourceObj1.type}:${dataSourceObj1.id}`,
           `${dataSourceObj2.type}:${dataSourceObj2.id}`,
-        ]),
-=======
-          [`${dsObj1.type}:${dsObj1.id}`, { id: 'currentDsId_id-1', omitOriginId: true }],
-          [`${dsObj2.type}:${dsObj2.id}`, { id: 'currentDsId_id-2', omitOriginId: true }],
-        ]),
-        pendingOverwrites: new Set([`${dsObj1.type}:${dsObj1.id}`, `${dsObj2.type}:${dsObj2.id}`]),
->>>>>>> update import api only
+        ])
       })
     );
   });
 
   it('can push error when do not override with data source conflict', async () => {
     const params = setupParams({
-<<<<<<< HEAD
-      objects: [dataSourceObj1],
-=======
       objects: [dsObj1],
->>>>>>> update import api only
       ignoreRegularConflicts: false,
       dataSourceId: 'currentDs',
     });
@@ -219,15 +190,9 @@ describe('#checkConflictsForDataSource', () => {
       filteredObjects: [],
       errors: [
         {
-<<<<<<< HEAD
           ...dataSourceObj1Error,
           title: dataSourceObj1.attributes.title,
           meta: { title: dataSourceObj1.attributes.title },
-=======
-          ...dsObj1Error,
-          title: dsObj1.attributes.title,
-          meta: { title: dsObj1.attributes.title },
->>>>>>> update import api only
           error: { type: 'conflict' },
         },
       ],

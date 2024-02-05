@@ -61,18 +61,18 @@ export async function checkConflictsForDataSource({
       // for saved object data source itself, e0c9e490-bdd7-11ee-b216-d78a57002330 return undefined
       const parts = id.split('_'); // this is the array to host the split results of the id
       const previoudDataSourceId = parts.length > 1 ? parts[0] : undefined;
-      // case for import saved object from osd exported
-      // when the imported daved objects with the different dataSourceId comparing to the current dataSourceId
-      // previous data source id not exist, push it to filtered object
-      // no conflict
+      /**
+       * for import saved object from osd exported
+       * when the imported saved objects with the different dataSourceId comparing to the current dataSourceId
+       */
       if (!previoudDataSourceId || previoudDataSourceId === dataSourceId) {
         filteredObjects.push(object);
       } else if (previoudDataSourceId && previoudDataSourceId !== dataSourceId) {
         if (ignoreRegularConflicts) {
-          // ues old key and new value in the importIdMap
-          // old key is used to look up, new key is used to be the id of new object
+          /**
+           * use old key and new value in the importIdMap
+           */
           const omitOriginId = ignoreRegularConflicts;
-          // e.g. e0c9e490-bdd7-11ee-b216-d78a57002330_ff959d40-b880-11e8-a6d9-e546fe2bba5f
           const rawId = parts[1];
           importIdMap.set(`${type}:${id}`, { id: `${dataSourceId}_${rawId}`, omitOriginId });
           pendingOverwrites.add(`${type}:${id}`);
