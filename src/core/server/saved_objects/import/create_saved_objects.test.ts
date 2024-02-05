@@ -53,6 +53,8 @@ const createObject = (type: string, id: string, originId?: string): SavedObject 
 
 const MULTI_NS_TYPE = 'multi';
 const OTHER_TYPE = 'other';
+const DATA_SOURCE = 'data-source';
+
 /**
  * Create a variety of different objects to exercise different import / result scenarios
  */
@@ -69,11 +71,16 @@ const obj10 = createObject(OTHER_TYPE, 'id-10', 'originId-f'); // -> success
 const obj11 = createObject(OTHER_TYPE, 'id-11', 'originId-g'); // -> conflict
 const obj12 = createObject(OTHER_TYPE, 'id-12'); // -> success
 const obj13 = createObject(OTHER_TYPE, 'id-13'); // -> conflict
+// data source object
+const dataSourceObj1 = createObject(DATA_SOURCE, 'ds-id1'); // -> success
+const dataSourceObj2 = createObject(DATA_SOURCE, 'ds-id2'); // -> conflict
+
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
 const importId3 = 'id-foo';
 const importId4 = 'id-bar';
 const importId8 = 'id-baz';
+
 const importIdMap = new Map([
   [`${obj3.type}:${obj3.id}`, { id: importId3, omitOriginId: true }],
   [`${obj4.type}:${obj4.id}`, { id: importId4 }],
@@ -93,6 +100,8 @@ describe('#createSavedObjects', () => {
     accumulatedErrors?: SavedObjectsImportError[];
     namespace?: string;
     overwrite?: boolean;
+    dataSourceId?: string;
+    dataSourceTitle?: string;
   }): CreateSavedObjectsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     bulkCreate = savedObjectsClient.bulkCreate;
@@ -177,6 +186,15 @@ describe('#createSavedObjects', () => {
     expect(createSavedObjectsResult).toEqual({ createdObjects: [], errors: [] });
   });
 
+  test('filters out objects that have errors present with data source', async () => {
+    const error = { type: dataSourceObj1.type, id: dataSourceObj1.id } as SavedObjectsImportError;
+    const options = setupParams({ objects: [dataSourceObj1], accumulatedErrors: [error] });
+
+    const createSavedObjectsResult = await createSavedObjects(options);
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(createSavedObjectsResult).toEqual({ createdObjects: [], errors: [] });
+  });
+
   test('exits early if there are no objects to create', async () => {
     const options = setupParams({ objects: [] });
 
@@ -186,6 +204,7 @@ describe('#createSavedObjects', () => {
   });
 
   const objs = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12, obj13];
+  const dataSourceObjs = [dataSourceObj1, dataSourceObj2];
 
   const setupMockResults = (options: CreateSavedObjectsParams) => {
     bulkCreate.mockResolvedValue({
@@ -203,6 +222,8 @@ describe('#createSavedObjects', () => {
         getResultMock.conflict(obj11.type, obj11.id),
         getResultMock.success(obj12, options),
         getResultMock.conflict(obj13.type, obj13.id),
+        getResultMock.conflict(dataSourceObj2.type, dataSourceObj2.id),
+        getResultMock.success(dataSourceObj1, options),
       ],
     });
   };
@@ -234,6 +255,14 @@ describe('#createSavedObjects', () => {
       }
     });
 
+    test('does not call bulkCreate when resolvable errors are present with data source objects', async () => {
+      for (const error of resolvableErrors) {
+        const options = setupParams({ objects: dataSourceObjs, accumulatedErrors: [error] });
+        await createSavedObjects(options);
+        expect(bulkCreate).not.toHaveBeenCalled();
+      }
+    });
+
     test('calls bulkCreate when unresolvable errors or no errors are present', async () => {
       for (const error of unresolvableErrors) {
         const options = setupParams({ objects: objs, accumulatedErrors: [error] });
@@ -243,6 +272,20 @@ describe('#createSavedObjects', () => {
         bulkCreate.mockClear();
       }
       const options = setupParams({ objects: objs });
+      setupMockResults(options);
+      await createSavedObjects(options);
+      expect(bulkCreate).toHaveBeenCalledTimes(1);
+    });
+
+    test('calls bulkCreate when unresolvable errors or no errors are present with data source objects', async () => {
+      for (const error of unresolvableErrors) {
+        const options = setupParams({ objects: dataSourceObjs, accumulatedErrors: [error] });
+        setupMockResults(options);
+        await createSavedObjects(options);
+        expect(bulkCreate).toHaveBeenCalledTimes(1);
+        bulkCreate.mockClear();
+      }
+      const options = setupParams({ objects: dataSourceObjs });
       setupMockResults(options);
       await createSavedObjects(options);
       expect(bulkCreate).toHaveBeenCalledTimes(1);
@@ -268,6 +311,20 @@ describe('#createSavedObjects', () => {
     const x4 = { ...obj4, id: importId4 }; // this import object already has an originId
     const x8 = { ...obj8, id: importId8, originId: obj8.id }; // this import object doesn't have an originId, so it is set before create
     const argObjs = [obj1, obj2, x3, x4, obj5, obj6, obj7, x8, obj9, obj10, obj11, obj12, obj13];
+    expectBulkCreateArgs.objects(1, argObjs);
+  };
+
+  const testBulkCreateObjectsWithDataSource = async (
+    namespace?: string,
+    dataSourceId?: string,
+    dataSourceTitle?: string
+  ) => {
+    const options = setupParams({ objects: objs, namespace, dataSourceId, dataSourceTitle });
+    setupMockResults(options);
+
+    await createSavedObjects(options);
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    const argObjs = [dataSourceObj1, dataSourceObj2];
     expectBulkCreateArgs.objects(1, argObjs);
   };
   const testBulkCreateOptions = async (namespace?: string) => {
@@ -315,6 +372,16 @@ describe('#createSavedObjects', () => {
     });
     test('returns bulkCreate results that are remapped to IDs of imported objects', async () => {
       await testReturnValue(namespace);
+    });
+  });
+
+  describe('with a data source', () => {
+    test('calls bulkCreate once with input objects', async () => {
+      await testBulkCreateObjectsWithDataSource(
+        'some-namespace',
+        'some-datasource-id',
+        'some-data-source-title'
+      );
     });
   });
 });
