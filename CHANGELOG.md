@@ -8,20 +8,33 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Deprecations
 
+- Rename `withLongNumerals` to `withLongNumeralsSupport` in `HttpFetchOptions` [#5592](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5592)
+
 ### 🛡 Security
 
 - [WS-2021-0638] Bump mocha from `7.2.0` to `10.1.0` ([#2711](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2711))
 - Add support for TLS v1.3 ([#5133](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5133))
 - [CVE-2023-45133] Bump all babel dependencies from `7.16.x` to `7.22.9` to fix upstream vulnerability ([#5428](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5428))
 - [CVE-2023-45857] Bump `axios` from `0.27.2` to `1.6.1` ([#5470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5470))
+- [CVE-2023-26159] Bump `follow-redirects` from `1.15.2` to `1.15.4` ([#5669](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5669))
+- [CVE-2020-8203] Bump `cheerio` from `0.22.0` to `1.0.0-rc.1` to fix vulnerable `lodash` dependency ([#5797](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5797))
 
 ### 📈 Features/Enhancements
 
 - Add support for read-only mode through tenants ([#4498](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4498))
+- Replace OuiSelect component with OuiSuperSelect in data-source plugin ([#5315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5315))
 - [Workspace] Add core workspace service module to enable the implementation of workspace features within OSD plugins ([#5092](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5092))
 - [Workspace] Setup workspace skeleton and implement basic CRUD API ([#5075](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5075))
 - [Decouple] Add new cross compatibility check core service which export functionality for plugins to verify if their OpenSearch plugin counterpart is installed on the cluster or has incompatible version to configure the plugin behavior([#4710](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4710))
+- [Discover] Add long numerals support [#5592](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5592)
 - [Discover] Display inner properties in the left navigation bar [#5429](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5429)
+- [Discover] Added customizable pagination options based on Discover UI settings [#5610](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5610)
+- [Chrome] Introduce registerCollapsibleNavHeader to allow plugins to customize the rendering of nav menu header ([#5244](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5244))
+- [PM] Enhance single version requirements imposed during bootstrapping ([#5675](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5675))
+- [Custom Branding] Relative URL should be allowed for logos ([#5572](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5572))
+- [Discover] Enhanced the data source selector with added sorting functionality ([#5609](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5609))
+- [Multiple Datasource] Add datasource picker component and use it in devtools and tutorial page when multiple datasource is enabled ([#5756](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5756))
+- [Multiple Datasource] Add datasource picker to import saved object flyout when multiple data source is enabled ([#5781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5781))
 
 ### 🐛 Bug Fixes
 
@@ -37,6 +50,11 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Data] Support for custom filters with heterogeneous data fields ([5577](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5577))
 - [BUG][Data] Fix empty suggestion history when querying in search bar [#5349](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5349)
 - [BUG][Discover] Fix what is displayed in `selected fields` when removing columns from canvas [#5537](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5537)
+- [BUG][Discover] Fix advanced setting `discover:modifyColumnsOnSwitch` ([#5508](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5508))
+- [BUG][Discover] Show 0 filters when there are no active filters ([#5508](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5508))
+- [Discover] Fix missing index pattern field from breaking Discover [#5626](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5626)
+- [BUG] Remove duplicate sample data as id 90943e30-9a47-11e8-b64d-95841ca0b247 ([5668](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5668))
+- [BUG][Multiple Datasource] Fix datasource testing connection unexpectedly passed with wrong endpoint [#5663](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5663)
 
 ### 🚞 Infrastructure
 
@@ -46,6 +64,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CI] Enable inputs for manually triggered Cypress test jobs ([#5134](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5134))
 - [CI] Replace usage of deprecated `set-output` in workflows ([#5340](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5340))
 - [Chore] Add `--security` for `opensearch snapshot` and `opensearch_dashboards` to configure local setup with the security plugin ([#5451](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5451))
+- [Chore] Updates default dev environment security credentials ([#5736](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5736))
 
 ### 📝 Documentation
 
@@ -62,13 +81,17 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Replace `node-sass` with `sass-embedded` ([#5338](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5338))
 - Bump `chromedriver` from `107.0.3` to `119.0.1` ([#5465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5465))
 - Bump `typescript` resolution from `4.0.2` to `4.6.4` ([#5470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5470))
-- Add @SuZhou-Joe as a maintainer. ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
+- Bump `OUI` to `1.4.0` ([#5637](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5637))
+- Add @SuZhou-Joe as a maintainer ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
+- Move @seanneumann to emeritus maintainer ([#5634](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5634))
+- Remove `ui-select` dev dependency ([#5660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5660))
 
 ### 🪛 Refactoring
 
 - [Console] Remove unused ul element and its custom styling ([#3993](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3993))
 - Remove unused Sass in `tile_map` plugin ([#4110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4110))
 - [Home] Remove unused tutorials ([#5212](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5212))
+- [UiSharedDeps] Standardize theme JSON imports to be light/dark-mode aware ([#5662](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5662))
 
 ### 🔩 Tests
 
@@ -279,6 +302,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🚞 Infrastructure
 
 ### 📝 Documentation
+
+- added js documentation and a readme file to files in utils folder ([#5540])(https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5540/)
 
 ### 🛠 Maintenance
 
