@@ -29,9 +29,12 @@
  */
 
 // @ts-expect-error published types are useless
-import { stringify as stringifyLockfile } from '@yarnpkg/lockfile';
+import { stringify as stringifyLockfile, parse as parseLockFile } from '@yarnpkg/lockfile';
 import dedent from 'dedent';
 import chalk from 'chalk';
+import path from 'path';
+import { readFileSync } from 'fs';
+import { satisfies, rcompare } from 'semver';
 
 import { writeFile } from './fs';
 import { OpenSearchDashboards } from '../utils/opensearch_dashboards';
@@ -40,8 +43,43 @@ import { log } from './log';
 import { Project } from './project';
 import { ITree, treeToString } from './projects_tree';
 
-export async function validateDependencies(osd: OpenSearchDashboards, yarnLock: YarnLock) {
-  // look through all of the packages in the yarn.lock file to see if
+enum SingleVersionResolution {
+  STRICT = 'strict',
+  LOOSE = 'loose',
+  FORCE = 'force',
+  BRUTE_FORCE = 'brute-force',
+  IGNORE = 'ignore',
+}
+
+export async function validateDependencies(
+  osd: OpenSearchDashboards,
+  yarnLock: YarnLock,
+  /* `singleVersionResolution` controls how violations of single-version-dependencies is applied.
+   *    STRICT (default): throw an error and exit
+   *    LOOSE: identify and install a single version that satisfies all ranges
+   *    BRUTE_FORCE: identify and install the newest version
+   *    IGNORE: show all errors without exiting
+   *
+   * `LOOSE`:
+   *          Reconciles the various versions installed as a result of having multiple ranges for a dependency, by
+   *          choosing one that satisfies all said ranges. Even though installing the chosen version updates the
+   *          lock-files, no package.json changes would be needed.
+   *
+   * `BRUTE_FORCE`:
+   *          With no care for reconciliation, the newest of the various versions installed is chosen, irrespective of
+   *          whether it satisfies any of the ranges. Installing the chosen version updates the lock-files and a range
+   *          in the form of `^<version>` is applied to all `package.json` files that declared the dependency.
+   *
+   * `FORCE`:
+   *          For each dependency, first LOOSE resolution is attempted but if that fails, BRUTE_FORCE is applied.
+   *
+   * `IGNORE`:
+   *          Behaves just like `strict` by showing errors when different ranges of a package are marked as
+   *          dependencies, but it does not terminate the script.
+   */
+  singleVersionResolution: SingleVersionResolution = SingleVersionResolution.STRICT
+) {
+  // look through all the packages in the yarn.lock file to see if
   // we have accidentally installed multiple lodash v4 versions
   const lodash4Versions = new Set<string>();
   const lodash4Reqs = new Set<string>();
@@ -109,11 +147,17 @@ export async function validateDependencies(osd: OpenSearchDashboards, yarnLock: 
     process.exit(1);
   }
 
-  // TODO: remove this once we move into a single package.json
+  let hasIssues = false;
+
   // look through all the package.json files to find packages which have mismatched version ranges
   const depRanges = new Map<string, Array<{ range: string; projects: Project[] }>>();
   for (const project of osd.getAllProjects().values()) {
-    for (const [dep, range] of Object.entries(project.allDependencies)) {
+    for (const [dep, range] of Object.entries(
+      // Don't be bothered with validating dev-deps when validating single-version loosely
+      singleVersionResolution === SingleVersionResolution.LOOSE
+        ? project.productionDependencies
+        : project.allDependencies
+    )) {
       const existingDep = depRanges.get(dep);
       if (!existingDep) {
         depRanges.set(dep, [
@@ -138,21 +182,181 @@ export async function validateDependencies(osd: OpenSearchDashboards, yarnLock: 
     }
   }
 
-  const duplicateRanges = Array.from(depRanges.entries())
-    .filter(([, ranges]) => ranges.length > 1)
-    .reduce(
-      (acc: string[], [dep, ranges]) => [
-        ...acc,
-        dep,
-        ...ranges.map(
-          ({ range, projects }) => `  ${range} => ${projects.map((p) => p.name).join(', ')}`
-        ),
-      ],
-      []
-    )
-    .join('\n        ');
+  const cachedManifests = new Map<string, any>();
+  const violatingSingleVersionDepRanges = new Map<
+    string,
+    Array<{ range: string; projects: Project[] }>
+  >();
+  depRangesLoop: for (const [depName, ranges] of depRanges) {
+    // No violation if just a single range of a dependency is used
+    if (ranges.length === 1) continue;
 
-  if (duplicateRanges) {
+    const installedVersions = new Set<string>();
+    const installedDepVersionsCache = new Map<string, string>();
+    const desiredRanges = new Map<string, Project[]>();
+
+    rangesLoop: for (const { range, projects } of ranges) {
+      for (const project of projects) {
+        if (!cachedManifests.has(project.path))
+          cachedManifests.set(
+            project.path,
+            // If there are errors reading or parsing the lockfiles, don't catch and let them fall through
+            parseLockFile(readFileSync(path.join(project.path, 'yarn.lock'), 'utf-8'))
+          );
+        const { object: deps } = cachedManifests.get(project.path);
+        if (deps?.[`${depName}@${range}`]?.version) {
+          installedVersions.add(deps[`${depName}@${range}`].version);
+          installedDepVersionsCache.set(
+            `${project.name}#${depName}`,
+            deps[`${depName}@${range}`].version
+          );
+        } else {
+          log.warning(`Failed to find the installed version for ${depName}@${range}`);
+          // If we cannot read any one of the installed versions of a depName, there is no point in continuing with it
+          installedVersions.clear();
+          desiredRanges.clear();
+          break rangesLoop;
+        }
+      }
+
+      desiredRanges.set(range, projects);
+    }
+
+    // More than one range is used but couldn't get all the installed versions: call out violation
+    if (installedVersions.size === 0) {
+      violatingSingleVersionDepRanges.set(depName, ranges);
+      continue; // go to the next depRange
+    }
+
+    if (
+      singleVersionResolution === SingleVersionResolution.LOOSE ||
+      // validating with force first acts like loose
+      singleVersionResolution === SingleVersionResolution.FORCE
+    ) {
+      if (installedVersions.size === 1) {
+        hasIssues = true;
+
+        /* When validating single-version loosely, ignore multiple ranges when they result in the installation of
+         * a single version.
+         */
+        log.info(
+          `Ignored single version requirement for ${depName} as all installations are using v${
+            installedVersions.values().next().value
+          }.`
+        );
+
+        continue; // go to the next depRange
+      }
+
+      const sortedInstalledVersion = Array.from(installedVersions).sort(rcompare);
+      const rangePatterns = Array.from(desiredRanges.keys());
+
+      for (const installedVersion of sortedInstalledVersion) {
+        if (rangePatterns.every((range) => satisfies(installedVersion, range))) {
+          // Install the version on all projects that have this dep; keep the original range.
+          for (const { range, projects } of ranges) {
+            for (const project of projects) {
+              // Don't bother updating anything if the desired version is already installed
+              if (installedDepVersionsCache.get(`${project.name}#${depName}`) === installedVersion)
+                continue;
+
+              await project.installDependencyVersion(
+                depName,
+                installedVersion,
+                depName in project.devDependencies,
+                // When validating single-version loosely, when a version change is needed, the range shouldn't change
+                range
+              );
+            }
+          }
+
+          hasIssues = true;
+
+          const conflictingRanges = ranges
+            .map(({ range, projects }) => `${range} => ${projects.map((p) => p.name).join(', ')}`)
+            .join('\n              ');
+          log.warning(dedent`
+
+            [single_version_dependencies] Multiple version ranges for package "${depName}"
+            were found across different package.json files. A suitable version, v${installedVersion}, was
+            identified and installed.
+
+            The conflicting version ranges are:
+              ${conflictingRanges}
+          `);
+
+          // A usable version was identified so no need to check the lower versions
+          continue depRangesLoop; // go to the next depRange
+        }
+      }
+
+      /* Here because a suitable version was not found. When validating single-version loosely and here, give up.
+       * However, don't give up when validating with force and act like brute-force!
+       */
+      if (singleVersionResolution === SingleVersionResolution.LOOSE) {
+        violatingSingleVersionDepRanges.set(depName, ranges);
+        continue; // go to the next depRange
+      }
+    }
+
+    if (
+      singleVersionResolution === SingleVersionResolution.BRUTE_FORCE ||
+      // validating with force here means we failed to get results when acting loosely
+      singleVersionResolution === SingleVersionResolution.FORCE
+    ) {
+      const sortedInstalledVersion = Array.from(installedVersions).sort(rcompare);
+
+      hasIssues = true;
+
+      const suitableVersion = sortedInstalledVersion[0];
+      const suitableRange = `^${suitableVersion}`;
+
+      // Install the version on all projects that have this dep; use the suitable range.
+      for (const { projects } of ranges) {
+        for (const project of projects) {
+          await project.installDependencyVersion(
+            depName,
+            suitableVersion,
+            depName in project.devDependencies,
+            suitableRange
+          );
+        }
+      }
+
+      const conflictingRanges = ranges
+        .map(({ range, projects }) => `${range} => ${projects.map((p) => p.name).join(', ')}`)
+        .join('\n              ');
+      log.warning(dedent`
+
+            [single_version_dependencies] Multiple version ranges for package "${depName}"
+            were found across different package.json files. A version, v${suitableVersion}, was identified as the most recent
+            already installed replacement. All package.json files have been updated to indicate a dependency on \`${depName}@${suitableRange}\`.
+
+            The conflicting version ranges are:
+              ${conflictingRanges}
+          `);
+
+      continue; // go to the next depRange
+    }
+
+    // Here because validation was not loose, forced, or brute-forced; just call out the vilation.
+    violatingSingleVersionDepRanges.set(depName, ranges);
+  }
+
+  if (violatingSingleVersionDepRanges.size > 0) {
+    const duplicateRanges = Array.from(violatingSingleVersionDepRanges.entries())
+      .reduce(
+        (acc: string[], [dep, ranges]) => [
+          ...acc,
+          dep,
+          ...ranges.map(
+            ({ range, projects }) => `  ${range} => ${projects.map((p) => p.name).join(', ')}`
+          ),
+        ],
+        []
+      )
+      .join('\n        ');
+
     log.error(dedent`
 
       [single_version_dependencies] Multiple version ranges for the same dependency
@@ -167,10 +371,12 @@ export async function validateDependencies(osd: OpenSearchDashboards, yarnLock: 
         ${duplicateRanges}
     `);
 
-    process.exit(1);
+    if (singleVersionResolution !== SingleVersionResolution.IGNORE) {
+      process.exit(1);
+    }
   }
 
-  // look for packages that have the the `opensearchDashboards.devOnly` flag in their package.json
+  // look for packages that have the `opensearchDashboards.devOnly` flag in their package.json
   // and make sure they aren't included in the production dependencies of OpenSearch Dashboards
   const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(osd, 'opensearch-dashboards');
   if (devOnlyProjectsInProduction) {
@@ -187,7 +393,9 @@ export async function validateDependencies(osd: OpenSearchDashboards, yarnLock: 
     process.exit(1);
   }
 
-  log.success('yarn.lock analysis completed without any issues');
+  log.success(
+    hasIssues ? 'yarn.lock analysis completed' : 'yarn.lock analysis completed without any issues'
+  );
 }
 
 function getDevOnlyProductionDepsTree(osd: OpenSearchDashboards, projectName: string) {

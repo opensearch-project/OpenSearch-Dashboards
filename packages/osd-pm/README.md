@@ -141,6 +141,40 @@ yarn osd
 Bootstrapping also calls the `osd:bootstrap` script for every included project.
 This is intended for packages that need to be built/transpiled to be usable.
 
+#### Single-version validation
+
+Bootstrapping, by default, applies a `strict` single-version validation where it requires all the dependencies defined
+more than once to have the same version-range in the `package.json` files of Dashboards, packages, and plugins. If a
+violation is identified, bootstrapping terminates with an error. This behavior can be controlled using the 
+`--single-version` switch. Using any switch other than the default can result in the installation of versions of the
+dependencies that were never tested and this could lead to unexpected results.
+
+```
+yarn osd bootstrap --single-version=loose
+```
+In `loose` mode, bootstrapping reconciles the various versions installed as a result of having multiple ranges for a 
+dependency, by choosing one that satisfies all said ranges. Even though installing the chosen version updates the 
+`yarn.lock` files, no `package.json` changes would be needed.
+
+```
+yarn osd bootstrap --single-version=force
+```
+In `force` mode, bootstrapping acts like `loose` for each dependency. If despite that, a suitable version was not found,
+it switches to behave like the `brute-force` mode (see below).
+
+```
+yarn osd bootstrap --single-version=brute-force
+```
+In `brute-force` mode, bootstrapping chooses the newest of the various versions installed, irrespective of whether it 
+satisfies any of the ranges. Installing the chosen version, bootstrapping updates the `yarn.lock` files and applies a 
+range, in the form of `^<version>`, to all `package.json` files that declared the dependency.
+
+```
+yarn osd bootstrap --single-version=ignore
+```
+In `ignore` mode, bootstrapping behaves very similar to the `strict` mode by showing errors when different ranges of a 
+package are marked as dependencies, but without terminating.
+
 ### Running scripts
 
 Some times you want to run the same script across multiple packages and plugins,
