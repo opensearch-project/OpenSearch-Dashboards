@@ -207,7 +207,13 @@ describe('#createSavedObjects', () => {
   });
 
   const objs = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12, obj13];
-  const dataSourceObjs = [dataSourceObj1, dataSourceObj2];
+  const dataSourceObjs = [
+    dataSourceObj1,
+    dataSourceObj2,
+    dashboardObjWithDataSource,
+    visualizationObjWithDataSource,
+    searchObjWithDataSource,
+  ];
 
   const setupMockResults = (options: CreateSavedObjectsParams) => {
     bulkCreate.mockResolvedValue({
@@ -232,8 +238,11 @@ describe('#createSavedObjects', () => {
   const setupMockResultsWithDataSource = (options: CreateSavedObjectsParams) => {
     bulkCreate.mockResolvedValue({
       saved_objects: [
-        getResultMock.conflict(dataSourceObj2.type, dataSourceObj2.id),
-        getResultMock.success(dataSourceObj1, options),
+        getResultMock.conflict(dataSourceObj1.type, dataSourceObj1.id),
+        getResultMock.success(dataSourceObj2, options),
+        getResultMock.success(dashboardObjWithDataSource, options),
+        getResultMock.success(visualizationObjWithDataSource, options),
+        getResultMock.success(searchObjWithDataSource, options),
       ],
     });
   };
@@ -339,13 +348,39 @@ describe('#createSavedObjects', () => {
 
     await createSavedObjects(options);
     expect(bulkCreate).toHaveBeenCalledTimes(1);
-    const argObjs = [dataSourceObj1, dataSourceObj2];
+    const argObjs = [
+      dataSourceObj1,
+      dataSourceObj2,
+      dashboardObjWithDataSource,
+      visualizationObjWithDataSource,
+      searchObjWithDataSource,
+    ];
     expectBulkCreateArgs.objects(1, argObjs);
   };
   const testBulkCreateOptions = async (namespace?: string) => {
     const overwrite = (Symbol() as unknown) as boolean;
     const options = setupParams({ objects: objs, namespace, overwrite });
     setupMockResults(options);
+
+    await createSavedObjects(options);
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    expectBulkCreateArgs.options(1, options);
+  };
+
+  const testBulkCreateOptionsWithDataSource = async (
+    namespace?: string,
+    dataSourceId?: string,
+    dataSourceTitle?: string
+  ) => {
+    const overwrite = (Symbol() as unknown) as boolean;
+    const options = setupParams({
+      objects: dataSourceObjs,
+      namespace,
+      overwrite,
+      dataSourceId,
+      dataSourceTitle,
+    });
+    setupMockResultsWithDataSource(options);
 
     await createSavedObjects(options);
     expect(bulkCreate).toHaveBeenCalledTimes(1);
@@ -363,6 +398,30 @@ describe('#createSavedObjects', () => {
     const transformedResults = [r1, r2, x3, x4, r5, r6, r7, x8, r9, r10, r11, r12, r13];
     const expectedResults = getExpectedResults(transformedResults, objs);
     expect(results).toEqual(expectedResults);
+  };
+
+  const testReturnValueWithDataSource = async (
+    namespace?: string,
+    dataSourceId?: string,
+    dataSourceTitle?: string
+  ) => {
+    const options = setupParams({
+      objects: dataSourceObjs,
+      namespace,
+      dataSourceId,
+      dataSourceTitle,
+    });
+    setupMockResultsWithDataSource(options);
+
+    const results = await createSavedObjects(options);
+    const resultSavedObjectsWithDataSource = (await bulkCreate.mock.results[0].value).saved_objects;
+    const [dsr1, dsr2, dsr3, dsr4, dsr5] = resultSavedObjectsWithDataSource;
+    const transformedResultsWithDataSource = [dsr1, dsr2, dsr3, dsr4, dsr5];
+    const expectedResultsWithDataSource = getExpectedResults(
+      transformedResultsWithDataSource,
+      dataSourceObjs
+    );
+    expect(results).toEqual(expectedResultsWithDataSource);
   };
 
   describe('with an undefined namespace', () => {
@@ -391,8 +450,22 @@ describe('#createSavedObjects', () => {
   });
 
   describe('with a data source', () => {
-    test('calls bulkCreate once with input objects', async () => {
+    test('calls bulkCreate once with input objects with data source id', async () => {
       await testBulkCreateObjectsWithDataSource(
+        'some-namespace',
+        'some-datasource-id',
+        'some-data-source-title'
+      );
+    });
+    test('calls bulkCreate once with input options with data source id', async () => {
+      await testBulkCreateOptionsWithDataSource(
+        'some-namespace',
+        'some-datasource-id',
+        'some-data-source-title'
+      );
+    });
+    test('returns bulkCreate results that are remapped to IDs of imported objects with data source id', async () => {
+      await testReturnValueWithDataSource(
         'some-namespace',
         'some-datasource-id',
         'some-data-source-title'
