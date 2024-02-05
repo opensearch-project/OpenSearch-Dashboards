@@ -135,8 +135,8 @@ var _cli = __webpack_require__(1);
 var _production = __webpack_require__(563);
 var _projects = __webpack_require__(147);
 var _project = __webpack_require__(165);
-var _workspaces = __webpack_require__(329);
-var _config = __webpack_require__(330);
+var _workspaces = __webpack_require__(330);
+var _config = __webpack_require__(331);
 
 /***/ }),
 /* 1 */
@@ -191,7 +191,7 @@ function help() {
   _log.log.info((0, _dedent.default)`
       usage: osd <command> [<args>]
 
-      By default commands are run for OpenSearch Dashboards itself, all packages in the 'packages/'
+      By default, commands are run for OpenSearch Dashboards itself, all packages in the 'packages/'
       folder and for all plugins in './plugins' and '../opensearch-dashboards-extra'.
 
       Available commands:
@@ -204,6 +204,7 @@ function help() {
         -i, --include           Include only specified projects. If left unspecified, it defaults to including all projects.
         --skip-opensearch-dashboards-plugins   Filter all plugins in ./plugins and ../opensearch-dashboards-extra when running command.
         --no-cache              Disable the bootstrap cache
+        --single-version        Set single version validation method: 'strict', 'loose', 'ignore', or 'brute-force'
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
         --quiet                 Set log level to error
@@ -231,7 +232,8 @@ async function run(argv) {
     default: {
       cache: true
     },
-    boolean: ['prefer-offline', 'frozen-lockfile', 'cache']
+    boolean: ['prefer-offline', 'frozen-lockfile', 'cache'],
+    string: ['single-version']
   });
   const args = options._;
   if (options.help || args.length === 0) {
@@ -8978,7 +8980,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.commands = void 0;
 var _bootstrap = __webpack_require__(129);
-var _clean = __webpack_require__(344);
+var _clean = __webpack_require__(345);
 var _run = __webpack_require__(457);
 var _watch = __webpack_require__(458);
 /*
@@ -9033,10 +9035,10 @@ var _link_project_executables = __webpack_require__(130);
 var _log = __webpack_require__(145);
 var _parallelize = __webpack_require__(146);
 var _projects = __webpack_require__(147);
-var _project_checksums = __webpack_require__(331);
-var _bootstrap_cache_file = __webpack_require__(341);
-var _yarn_lock = __webpack_require__(333);
-var _validate_dependencies = __webpack_require__(342);
+var _project_checksums = __webpack_require__(332);
+var _bootstrap_cache_file = __webpack_require__(342);
+var _yarn_lock = __webpack_require__(334);
+var _validate_dependencies = __webpack_require__(343);
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -9074,6 +9076,7 @@ const BootstrapCommand = exports.BootstrapCommand = {
     options,
     osd
   }) {
+    var _options$singleVersi, _options$singleVersi$;
     const batchedProjectsByWorkspace = (0, _projects.topologicallyBatchProjects)(projects, projectGraph, {
       batchByWorkspace: true
     });
@@ -9093,7 +9096,7 @@ const BootstrapCommand = exports.BootstrapCommand = {
       }
     }
     const yarnLock = await (0, _yarn_lock.readYarnLock)(osd);
-    await (0, _validate_dependencies.validateDependencies)(osd, yarnLock);
+    await (0, _validate_dependencies.validateDependencies)(osd, yarnLock, (_options$singleVersi = options['single-version']) === null || _options$singleVersi === void 0 || (_options$singleVersi$ = _options$singleVersi.toLowerCase) === null || _options$singleVersi$ === void 0 ? void 0 : _options$singleVersi$.call(_options$singleVersi));
     await (0, _link_project_executables.linkProjectExecutables)(projects, projectGraph);
 
     /**
@@ -11229,7 +11232,7 @@ var _path = _interopRequireDefault(__webpack_require__(4));
 var _util = __webpack_require__(112);
 var _errors = __webpack_require__(164);
 var _project = __webpack_require__(165);
-var _workspaces = __webpack_require__(329);
+var _workspaces = __webpack_require__(330);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 /*
  * SPDX-License-Identifier: Apache-2.0
@@ -14851,15 +14854,14 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Project = void 0;
-var _fs = _interopRequireDefault(__webpack_require__(134));
-var _path = _interopRequireDefault(__webpack_require__(4));
+var _fs = __webpack_require__(134);
+var _path = __webpack_require__(4);
 var _util = __webpack_require__(112);
 var _errors = __webpack_require__(164);
 var _log = __webpack_require__(145);
 var _package_json = __webpack_require__(166);
 var _scripts = __webpack_require__(282);
-var _targeted_build = __webpack_require__(328);
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _targeted_build = __webpack_require__(329);
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); } /*
@@ -14925,9 +14927,9 @@ class Project {
     _defineProperty(this, "isWorkspaceProject", false);
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
-    this.packageJsonLocation = _path.default.resolve(this.path, 'package.json');
-    this.nodeModulesLocation = _path.default.resolve(this.path, 'node_modules');
-    this.targetLocation = _path.default.resolve(this.path, 'target');
+    this.packageJsonLocation = (0, _path.resolve)(this.path, 'package.json');
+    this.nodeModulesLocation = (0, _path.resolve)(this.path, 'node_modules');
+    this.targetLocation = (0, _path.resolve)(this.path, 'target');
     this.version = this.json.version;
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
@@ -14952,7 +14954,7 @@ class Project {
     if (dependentProjectIsInWorkspace) {
       expectedVersionInPackageJson = project.json.version;
     } else {
-      const relativePathToProject = normalizePath(_path.default.relative(this.path, project.path));
+      const relativePathToProject = normalizePath((0, _path.relative)(this.path, project.path));
       expectedVersionInPackageJson = `link:${relativePathToProject}`;
     }
 
@@ -14984,7 +14986,7 @@ class Project {
    * instead of everything located in the project directory.
    */
   getIntermediateBuildDirectory() {
-    return _path.default.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+    return (0, _path.resolve)(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
   }
   getCleanConfig() {
     return this.json.opensearchDashboards && this.json.opensearchDashboards.clean || {};
@@ -15005,13 +15007,13 @@ class Project {
     }
     if (typeof raw === 'string') {
       return {
-        [this.name]: _path.default.resolve(this.path, raw)
+        [this.name]: (0, _path.resolve)(this.path, raw)
       };
     }
     if (typeof raw === 'object') {
       const binsConfig = {};
       for (const binName of Object.keys(raw)) {
-        binsConfig[binName] = _path.default.resolve(this.path, raw[binName]);
+        binsConfig[binName] = (0, _path.resolve)(this.path, raw[binName]);
       }
       return binsConfig;
     }
@@ -15056,6 +15058,30 @@ class Project {
   }
 
   /**
+   * Install a specific version of a dependency and update the package.json.
+   * When a range is not specified, ^<version> is used. The range is then
+   * placed in the package.json with intentionally no validation.
+   */
+  async installDependencyVersion(depName, version, dev = false, range) {
+    _log.log.info(`[${this.name}] running yarn to install ${depName}@${version}`);
+    _log.log.write('');
+    const rangeToUse = range || `^${version}`;
+    const extraArgs = [`${depName}@${version}`];
+    if (dev) extraArgs.push('--dev');
+    if (this.isWorkspaceProject) {
+      await (0, _scripts.installInDir)(this.path);
+    } else {
+      await (0, _scripts.installInDir)(this.path, extraArgs, true);
+    }
+    _log.log.info(`[${this.name}] updating manifests with ${depName}@${rangeToUse}`);
+    await (0, _scripts.patchFile)(this.packageJsonLocation, `"${depName}": "${version}"`, `"${depName}": "${rangeToUse}"`);
+    // The lock-file of workspace packages are symlinked to the root project's and editing the one in the project suffices
+    await (0, _scripts.patchFile)((0, _path.resolve)(this.path, 'yarn.lock'), `${depName}@${version}`, `${depName}@${rangeToUse}`);
+    _log.log.write('');
+    await this.removeExtraneousNodeModules();
+  }
+
+  /**
    * Yarn workspaces symlinks workspace projects to the root node_modules, even
    * when there is no depenency on the project. This results in unnecicary, and
    * often duplicated code in the build archives.
@@ -15078,12 +15104,12 @@ class Project {
         dependencies,
         devDependencies
       } = this.json;
-      const nodeModulesPath = _path.default.resolve(this.nodeModulesLocation, name);
+      const nodeModulesPath = (0, _path.resolve)(this.nodeModulesLocation, name);
       const isDependency = dependencies && dependencies.hasOwnProperty(name);
       const isDevDependency = devDependencies && devDependencies.hasOwnProperty(name);
-      if (!isDependency && !isDevDependency && _fs.default.existsSync(nodeModulesPath)) {
+      if (!isDependency && !isDevDependency && (0, _fs.existsSync)(nodeModulesPath)) {
         _log.log.debug(`No dependency on ${name}, removing link in node_modules`);
-        _fs.default.unlinkSync(nodeModulesPath);
+        (0, _fs.unlinkSync)(nodeModulesPath);
       }
     });
   }
@@ -25252,10 +25278,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.installInDir = installInDir;
+exports.patchFile = patchFile;
 exports.runScriptInPackage = runScriptInPackage;
 exports.runScriptInPackageStreaming = runScriptInPackageStreaming;
 exports.yarnWorkspacesInfo = yarnWorkspacesInfo;
-var _child_process = __webpack_require__(283);
+var _fs = __webpack_require__(134);
+var _readline = __webpack_require__(283);
+var _child_process = __webpack_require__(284);
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25290,13 +25319,41 @@ const YARN_EXEC = process.env.npm_execpath || 'yarn';
 /**
  * Install all dependencies in the given directory
  */
-async function installInDir(directory, extraArgs = []) {
-  const options = ['install', '--non-interactive', ...extraArgs];
+async function installInDir(directory, extraArgs = [], useAdd = false) {
+  const options = [useAdd ? 'add' : 'install', '--non-interactive', ...extraArgs];
 
   // We pass the mutex flag to ensure only one instance of yarn runs at any
   // given time (e.g. to avoid conflicts).
   await (0, _child_process.spawn)(YARN_EXEC, options, {
     cwd: directory
+  });
+}
+
+/**
+ * Patch a file by replacing a given string
+ */
+function patchFile(filePath, searchValue, replacement) {
+  return new Promise(async (resolve, reject) => {
+    const patchWriter = (0, _fs.createWriteStream)(`${filePath}.patched`, {
+      flags: 'w'
+    });
+    const fileReader = (0, _readline.createInterface)({
+      input: (0, _fs.createReadStream)(filePath),
+      crlfDelay: Infinity
+    });
+    for await (const line of fileReader) {
+      if (line.includes(searchValue)) {
+        patchWriter.write(line.replace(searchValue, replacement) + '\n', 'utf8');
+      } else {
+        patchWriter.write(line + '\n', 'utf8');
+      }
+    }
+    patchWriter.on('finish', () => resolve());
+    patchWriter.on('error', reject);
+    fileReader.close();
+    patchWriter.end();
+    (0, _fs.unlinkSync)(filePath);
+    (0, _fs.renameSync)(`${filePath}.patched`, filePath);
   });
 }
 
@@ -25343,6 +25400,12 @@ async function yarnWorkspacesInfo(directory) {
 
 /***/ }),
 /* 283 */
+/***/ (function(module, exports) {
+
+module.exports = require("readline");
+
+/***/ }),
+/* 284 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25355,8 +25418,8 @@ exports.spawn = spawn;
 exports.spawnStreaming = spawnStreaming;
 var _stream = __webpack_require__(138);
 var _chalk = _interopRequireDefault(__webpack_require__(113));
-var _execa = _interopRequireDefault(__webpack_require__(284));
-var _strongLogTransformer = _interopRequireDefault(__webpack_require__(320));
+var _execa = _interopRequireDefault(__webpack_require__(285));
+var _strongLogTransformer = _interopRequireDefault(__webpack_require__(321));
 var _log = __webpack_require__(145);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 /*
@@ -25438,23 +25501,23 @@ function spawnStreaming(command, args, opts, {
 }
 
 /***/ }),
-/* 284 */
+/* 285 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(4);
-const childProcess = __webpack_require__(285);
-const crossSpawn = __webpack_require__(286);
-const stripFinalNewline = __webpack_require__(299);
-const npmRunPath = __webpack_require__(300);
-const onetime = __webpack_require__(301);
-const makeError = __webpack_require__(303);
-const normalizeStdio = __webpack_require__(308);
-const {spawnedKill, spawnedCancel, setupTimeout, setExitHandler} = __webpack_require__(309);
-const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __webpack_require__(310);
-const {mergePromise, getSpawnedPromise} = __webpack_require__(318);
-const {joinCommand, parseCommand} = __webpack_require__(319);
+const childProcess = __webpack_require__(286);
+const crossSpawn = __webpack_require__(287);
+const stripFinalNewline = __webpack_require__(300);
+const npmRunPath = __webpack_require__(301);
+const onetime = __webpack_require__(302);
+const makeError = __webpack_require__(304);
+const normalizeStdio = __webpack_require__(309);
+const {spawnedKill, spawnedCancel, setupTimeout, setExitHandler} = __webpack_require__(310);
+const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __webpack_require__(311);
+const {mergePromise, getSpawnedPromise} = __webpack_require__(319);
+const {joinCommand, parseCommand} = __webpack_require__(320);
 
 const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100;
 
@@ -25705,21 +25768,21 @@ module.exports.node = (scriptPath, args, options = {}) => {
 
 
 /***/ }),
-/* 285 */
+/* 286 */
 /***/ (function(module, exports) {
 
 module.exports = require("child_process");
 
 /***/ }),
-/* 286 */
+/* 287 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const cp = __webpack_require__(285);
-const parse = __webpack_require__(287);
-const enoent = __webpack_require__(298);
+const cp = __webpack_require__(286);
+const parse = __webpack_require__(288);
+const enoent = __webpack_require__(299);
 
 function spawn(command, args, options) {
     // Parse the arguments
@@ -25757,16 +25820,16 @@ module.exports._enoent = enoent;
 
 
 /***/ }),
-/* 287 */
+/* 288 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const path = __webpack_require__(4);
-const resolveCommand = __webpack_require__(288);
-const escape = __webpack_require__(294);
-const readShebang = __webpack_require__(295);
+const resolveCommand = __webpack_require__(289);
+const escape = __webpack_require__(295);
+const readShebang = __webpack_require__(296);
 
 const isWin = process.platform === 'win32';
 const isExecutableRegExp = /\.(?:com|exe)$/i;
@@ -25855,15 +25918,15 @@ module.exports = parse;
 
 
 /***/ }),
-/* 288 */
+/* 289 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const path = __webpack_require__(4);
-const which = __webpack_require__(289);
-const getPathKey = __webpack_require__(293);
+const which = __webpack_require__(290);
+const getPathKey = __webpack_require__(294);
 
 function resolveCommandAttempt(parsed, withoutPathExt) {
     const env = parsed.options.env || process.env;
@@ -25914,7 +25977,7 @@ module.exports = resolveCommand;
 
 
 /***/ }),
-/* 289 */
+/* 290 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const isWindows = process.platform === 'win32' ||
@@ -25923,7 +25986,7 @@ const isWindows = process.platform === 'win32' ||
 
 const path = __webpack_require__(4)
 const COLON = isWindows ? ';' : ':'
-const isexe = __webpack_require__(290)
+const isexe = __webpack_require__(291)
 
 const getNotFoundError = (cmd) =>
   Object.assign(new Error(`not found: ${cmd}`), { code: 'ENOENT' })
@@ -26045,15 +26108,15 @@ which.sync = whichSync
 
 
 /***/ }),
-/* 290 */
+/* 291 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var fs = __webpack_require__(134)
 var core
 if (process.platform === 'win32' || global.TESTING_WINDOWS) {
-  core = __webpack_require__(291)
-} else {
   core = __webpack_require__(292)
+} else {
+  core = __webpack_require__(293)
 }
 
 module.exports = isexe
@@ -26108,7 +26171,7 @@ function sync (path, options) {
 
 
 /***/ }),
-/* 291 */
+/* 292 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = isexe
@@ -26156,7 +26219,7 @@ function sync (path, options) {
 
 
 /***/ }),
-/* 292 */
+/* 293 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = isexe
@@ -26203,7 +26266,7 @@ function checkMode (stat, options) {
 
 
 /***/ }),
-/* 293 */
+/* 294 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26226,7 +26289,7 @@ module.exports.default = pathKey;
 
 
 /***/ }),
-/* 294 */
+/* 295 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26278,14 +26341,14 @@ module.exports.argument = escapeArgument;
 
 
 /***/ }),
-/* 295 */
+/* 296 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const fs = __webpack_require__(134);
-const shebangCommand = __webpack_require__(296);
+const shebangCommand = __webpack_require__(297);
 
 function readShebang(command) {
     // Read the first 150 bytes from the file
@@ -26308,12 +26371,12 @@ module.exports = readShebang;
 
 
 /***/ }),
-/* 296 */
+/* 297 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const shebangRegex = __webpack_require__(297);
+const shebangRegex = __webpack_require__(298);
 
 module.exports = (string = '') => {
 	const match = string.match(shebangRegex);
@@ -26334,7 +26397,7 @@ module.exports = (string = '') => {
 
 
 /***/ }),
-/* 297 */
+/* 298 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26343,7 +26406,7 @@ module.exports = /^#!(.*)/;
 
 
 /***/ }),
-/* 298 */
+/* 299 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26409,7 +26472,7 @@ module.exports = {
 
 
 /***/ }),
-/* 299 */
+/* 300 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26432,13 +26495,13 @@ module.exports = input => {
 
 
 /***/ }),
-/* 300 */
+/* 301 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(4);
-const pathKey = __webpack_require__(293);
+const pathKey = __webpack_require__(294);
 
 const npmRunPath = options => {
 	options = {
@@ -26486,12 +26549,12 @@ module.exports.env = options => {
 
 
 /***/ }),
-/* 301 */
+/* 302 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const mimicFn = __webpack_require__(302);
+const mimicFn = __webpack_require__(303);
 
 const calledFunctions = new WeakMap();
 
@@ -26537,7 +26600,7 @@ module.exports.callCount = function_ => {
 
 
 /***/ }),
-/* 302 */
+/* 303 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26557,12 +26620,12 @@ module.exports.default = mimicFn;
 
 
 /***/ }),
-/* 303 */
+/* 304 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const {signalsByName} = __webpack_require__(304);
+const {signalsByName} = __webpack_require__(305);
 
 const getErrorPrefix = ({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled}) => {
 	if (timedOut) {
@@ -26650,14 +26713,14 @@ module.exports = makeError;
 
 
 /***/ }),
-/* 304 */
+/* 305 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(exports,"__esModule",{value:true});exports.signalsByNumber=exports.signalsByName=void 0;var _os=__webpack_require__(121);
 
-var _signals=__webpack_require__(305);
-var _realtime=__webpack_require__(307);
+var _signals=__webpack_require__(306);
+var _realtime=__webpack_require__(308);
 
 
 
@@ -26727,14 +26790,14 @@ const signalsByNumber=getSignalsByNumber();exports.signalsByNumber=signalsByNumb
 //# sourceMappingURL=main.js.map
 
 /***/ }),
-/* 305 */
+/* 306 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(exports,"__esModule",{value:true});exports.getSignals=void 0;var _os=__webpack_require__(121);
 
-var _core=__webpack_require__(306);
-var _realtime=__webpack_require__(307);
+var _core=__webpack_require__(307);
+var _realtime=__webpack_require__(308);
 
 
 
@@ -26768,7 +26831,7 @@ return{name,number,description,supported,action,forced,standard};
 //# sourceMappingURL=signals.js.map
 
 /***/ }),
-/* 306 */
+/* 307 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27047,7 +27110,7 @@ standard:"other"}];exports.SIGNALS=SIGNALS;
 //# sourceMappingURL=core.js.map
 
 /***/ }),
-/* 307 */
+/* 308 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27072,7 +27135,7 @@ const SIGRTMAX=64;exports.SIGRTMAX=SIGRTMAX;
 //# sourceMappingURL=realtime.js.map
 
 /***/ }),
-/* 308 */
+/* 309 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27131,7 +27194,7 @@ module.exports.node = opts => {
 
 
 /***/ }),
-/* 309 */
+/* 310 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27250,14 +27313,14 @@ module.exports = {
 
 
 /***/ }),
-/* 310 */
+/* 311 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const isStream = __webpack_require__(311);
-const getStream = __webpack_require__(312);
-const mergeStream = __webpack_require__(317);
+const isStream = __webpack_require__(312);
+const getStream = __webpack_require__(313);
+const mergeStream = __webpack_require__(318);
 
 // `input` option
 const handleInput = (spawned, input) => {
@@ -27354,7 +27417,7 @@ module.exports = {
 
 
 /***/ }),
-/* 311 */
+/* 312 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27389,14 +27452,14 @@ module.exports = isStream;
 
 
 /***/ }),
-/* 312 */
+/* 313 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const {constants: BufferConstants} = __webpack_require__(313);
-const pump = __webpack_require__(314);
-const bufferStream = __webpack_require__(316);
+const {constants: BufferConstants} = __webpack_require__(314);
+const pump = __webpack_require__(315);
+const bufferStream = __webpack_require__(317);
 
 class MaxBufferError extends Error {
 	constructor() {
@@ -27456,17 +27519,17 @@ module.exports.MaxBufferError = MaxBufferError;
 
 
 /***/ }),
-/* 313 */
+/* 314 */
 /***/ (function(module, exports) {
 
 module.exports = require("buffer");
 
 /***/ }),
-/* 314 */
+/* 315 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var once = __webpack_require__(163)
-var eos = __webpack_require__(315)
+var eos = __webpack_require__(316)
 var fs = __webpack_require__(134) // we only need fs to get the ReadStream and WriteStream prototypes
 
 var noop = function () {}
@@ -27550,7 +27613,7 @@ module.exports = pump
 
 
 /***/ }),
-/* 315 */
+/* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var once = __webpack_require__(163);
@@ -27650,7 +27713,7 @@ module.exports = eos;
 
 
 /***/ }),
-/* 316 */
+/* 317 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27709,7 +27772,7 @@ module.exports = options => {
 
 
 /***/ }),
-/* 317 */
+/* 318 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27757,7 +27820,7 @@ module.exports = function (/*streams...*/) {
 
 
 /***/ }),
-/* 318 */
+/* 319 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27810,7 +27873,7 @@ module.exports = {
 
 
 /***/ }),
-/* 319 */
+/* 320 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27849,7 +27912,7 @@ module.exports = {
 
 
 /***/ }),
-/* 320 */
+/* 321 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright IBM Corp. 2014,2018. All Rights Reserved.
@@ -27857,12 +27920,12 @@ module.exports = {
 // This file is licensed under the Apache License 2.0.
 // License text available at https://opensource.org/licenses/Apache-2.0
 
-module.exports = __webpack_require__(321);
-module.exports.cli = __webpack_require__(325);
+module.exports = __webpack_require__(322);
+module.exports.cli = __webpack_require__(326);
 
 
 /***/ }),
-/* 321 */
+/* 322 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27877,9 +27940,9 @@ var stream = __webpack_require__(138);
 var util = __webpack_require__(112);
 var fs = __webpack_require__(134);
 
-var through = __webpack_require__(322);
-var duplexer = __webpack_require__(323);
-var StringDecoder = __webpack_require__(324).StringDecoder;
+var through = __webpack_require__(323);
+var duplexer = __webpack_require__(324);
+var StringDecoder = __webpack_require__(325).StringDecoder;
 
 module.exports = Logger;
 
@@ -28068,7 +28131,7 @@ function lineMerger(host) {
 
 
 /***/ }),
-/* 322 */
+/* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stream = __webpack_require__(138)
@@ -28182,7 +28245,7 @@ function through (write, end, opts) {
 
 
 /***/ }),
-/* 323 */
+/* 324 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stream = __webpack_require__(138)
@@ -28275,13 +28338,13 @@ function duplex(writer, reader) {
 
 
 /***/ }),
-/* 324 */
+/* 325 */
 /***/ (function(module, exports) {
 
 module.exports = require("string_decoder");
 
 /***/ }),
-/* 325 */
+/* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28292,11 +28355,11 @@ module.exports = require("string_decoder");
 
 
 
-var minimist = __webpack_require__(326);
+var minimist = __webpack_require__(327);
 var path = __webpack_require__(4);
 
-var Logger = __webpack_require__(321);
-var pkg = __webpack_require__(327);
+var Logger = __webpack_require__(322);
+var pkg = __webpack_require__(328);
 
 module.exports = cli;
 
@@ -28350,7 +28413,7 @@ function usage($0, p) {
 
 
 /***/ }),
-/* 326 */
+/* 327 */
 /***/ (function(module, exports) {
 
 module.exports = function (args, opts) {
@@ -28605,13 +28668,13 @@ function isConstructorOrProto (obj, key) {
 
 
 /***/ }),
-/* 327 */
+/* 328 */
 /***/ (function(module) {
 
 module.exports = JSON.parse("{\"name\":\"strong-log-transformer\",\"version\":\"2.1.0\",\"description\":\"Stream transformer that prefixes lines with timestamps and other things.\",\"author\":\"Ryan Graham <ryan@strongloop.com>\",\"license\":\"Apache-2.0\",\"repository\":{\"type\":\"git\",\"url\":\"git://github.com/strongloop/strong-log-transformer\"},\"keywords\":[\"logging\",\"streams\"],\"bugs\":{\"url\":\"https://github.com/strongloop/strong-log-transformer/issues\"},\"homepage\":\"https://github.com/strongloop/strong-log-transformer\",\"directories\":{\"test\":\"test\"},\"bin\":{\"sl-log-transformer\":\"bin/sl-log-transformer.js\"},\"main\":\"index.js\",\"scripts\":{\"test\":\"tap --100 test/test-*\"},\"dependencies\":{\"duplexer\":\"^0.1.1\",\"minimist\":\"^1.2.0\",\"through\":\"^2.3.4\"},\"devDependencies\":{\"tap\":\"^12.0.1\"},\"engines\":{\"node\":\">=4\"}}");
 
 /***/ }),
-/* 328 */
+/* 329 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28624,7 +28687,7 @@ exports.BuildTargets = void 0;
 exports.buildTargetedPackage = buildTargetedPackage;
 var _promises = __webpack_require__(143);
 var _path = __webpack_require__(4);
-var _child_process = __webpack_require__(283);
+var _child_process = __webpack_require__(284);
 var _log = __webpack_require__(145);
 /*
  * Copyright OpenSearch Contributors
@@ -28666,7 +28729,7 @@ async function buildTargetedPackage({
 }
 
 /***/ }),
-/* 329 */
+/* 330 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28680,7 +28743,7 @@ exports.workspacePackagePaths = workspacePackagePaths;
 var _glob = _interopRequireDefault(__webpack_require__(148));
 var _path = _interopRequireDefault(__webpack_require__(4));
 var _util = __webpack_require__(112);
-var _config = __webpack_require__(330);
+var _config = __webpack_require__(331);
 var _fs = __webpack_require__(131);
 var _package_json = __webpack_require__(166);
 var _projects = __webpack_require__(147);
@@ -28775,7 +28838,7 @@ function packagesFromGlobPattern({
 }
 
 /***/ }),
-/* 330 */
+/* 331 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28850,7 +28913,7 @@ function getProjectPaths({
 }
 
 /***/ }),
-/* 331 */
+/* 332 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28861,9 +28924,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getAllChecksums = getAllChecksums;
 var _promises = __webpack_require__(143);
-var _crypto = _interopRequireDefault(__webpack_require__(332));
-var _execa = _interopRequireDefault(__webpack_require__(284));
-var _yarn_lock = __webpack_require__(333);
+var _crypto = _interopRequireDefault(__webpack_require__(333));
+var _execa = _interopRequireDefault(__webpack_require__(285));
+var _yarn_lock = __webpack_require__(334);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 /*
  * SPDX-License-Identifier: Apache-2.0
@@ -29044,13 +29107,13 @@ async function getAllChecksums(osd, log, yarnLock) {
 }
 
 /***/ }),
-/* 332 */
+/* 333 */
 /***/ (function(module, exports) {
 
 module.exports = require("crypto");
 
 /***/ }),
-/* 333 */
+/* 334 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29061,8 +29124,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.readYarnLock = readYarnLock;
 exports.resolveDepsForProject = resolveDepsForProject;
-var _lockfile = __webpack_require__(334);
-var _crossPlatform = __webpack_require__(335);
+var _lockfile = __webpack_require__(335);
+var _crossPlatform = __webpack_require__(336);
 var _path = __webpack_require__(4);
 var _fs = __webpack_require__(131);
 /*
@@ -29194,7 +29257,7 @@ function resolveDepsForProject({
 }
 
 /***/ }),
-/* 334 */
+/* 335 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports =
@@ -30753,7 +30816,7 @@ module.exports = invariant;
 /* 9 */
 /***/ (function(module, exports) {
 
-module.exports = __webpack_require__(332);
+module.exports = __webpack_require__(333);
 
 /***/ }),
 /* 10 */,
@@ -33077,7 +33140,7 @@ function onceStrict (fn) {
 /* 63 */
 /***/ (function(module, exports) {
 
-module.exports = __webpack_require__(313);
+module.exports = __webpack_require__(314);
 
 /***/ }),
 /* 64 */,
@@ -39472,25 +39535,6 @@ module.exports = process && support(supportLevel);
 /******/ ]);
 
 /***/ }),
-/* 335 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-const tslib_1 = __webpack_require__(7);
-tslib_1.__exportStar(__webpack_require__(336), exports);
-tslib_1.__exportStar(__webpack_require__(337), exports);
-tslib_1.__exportStar(__webpack_require__(338), exports);
-
-/***/ }),
 /* 336 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -39504,8 +39548,27 @@ tslib_1.__exportStar(__webpack_require__(338), exports);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+const tslib_1 = __webpack_require__(7);
+tslib_1.__exportStar(__webpack_require__(337), exports);
+tslib_1.__exportStar(__webpack_require__(338), exports);
+tslib_1.__exportStar(__webpack_require__(339), exports);
+
+/***/ }),
+/* 337 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.realshortpathSync = exports.realShortPathSync = exports.realpathSync = exports.realPathSync = exports.resolveToShortNameSync = exports.resolveToShortPathSync = exports.resolveToFullNameSync = exports.resolveToFullPathSync = exports.shortNameSupportedSync = exports.shortNamesSupportedSync = exports.standardize = exports.NAMESPACE_PREFIX = void 0;
-const child_process_1 = __webpack_require__(285);
+const child_process_1 = __webpack_require__(286);
 const path_1 = __webpack_require__(4);
 const fs_1 = __webpack_require__(134);
 exports.NAMESPACE_PREFIX = process.platform === 'win32' ? '\\\\?\\' : '';
@@ -39627,7 +39690,7 @@ exports.realShortPathSync = realShortPathSync;
 exports.realshortpathSync = exports.realShortPathSync;
 
 /***/ }),
-/* 337 */
+/* 338 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39641,7 +39704,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.PROCESS_POSIX_WORKING_DIR = exports.PROCESS_WORKING_DIR = void 0;
-const path_1 = __webpack_require__(336);
+const path_1 = __webpack_require__(337);
 /**
  * The full pathname of the working directory of the process
  * @constant
@@ -39656,7 +39719,7 @@ exports.PROCESS_WORKING_DIR = (0, path_1.resolveToFullPathSync)(process.cwd());
 exports.PROCESS_POSIX_WORKING_DIR = (0, path_1.standardize)(exports.PROCESS_WORKING_DIR);
 
 /***/ }),
-/* 338 */
+/* 339 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39696,8 +39759,8 @@ const tslib_1 = __webpack_require__(7);
  * under the License.
  */
 const path_1 = __webpack_require__(4);
-const load_json_file_1 = tslib_1.__importDefault(__webpack_require__(339));
-const path_2 = __webpack_require__(336);
+const load_json_file_1 = tslib_1.__importDefault(__webpack_require__(340));
+const path_2 = __webpack_require__(337);
 const readOpenSearchDashboardsPkgJson = dir => {
   try {
     const path = (0, path_1.resolve)(dir, 'package.json');
@@ -39762,7 +39825,7 @@ const relativeToRepoRoot = path => {
 exports.relativeToRepoRoot = relativeToRepoRoot;
 
 /***/ }),
-/* 339 */
+/* 340 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39770,7 +39833,7 @@ exports.relativeToRepoRoot = relativeToRepoRoot;
 const path = __webpack_require__(4);
 const {promisify} = __webpack_require__(112);
 const fs = __webpack_require__(133);
-const stripBom = __webpack_require__(340);
+const stripBom = __webpack_require__(341);
 const parseJson = __webpack_require__(168);
 
 const parse = (data, filePath, options = {}) => {
@@ -39788,7 +39851,7 @@ module.exports.sync = (filePath, options) => parse(fs.readFileSync(filePath, 'ut
 
 
 /***/ }),
-/* 340 */
+/* 341 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39810,7 +39873,7 @@ module.exports = string => {
 
 
 /***/ }),
-/* 341 */
+/* 342 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39909,7 +39972,7 @@ class BootstrapCacheFile {
 exports.BootstrapCacheFile = BootstrapCacheFile;
 
 /***/ }),
-/* 342 */
+/* 343 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39919,12 +39982,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.validateDependencies = validateDependencies;
-var _lockfile = __webpack_require__(334);
+var _lockfile = __webpack_require__(335);
 var _dedent = _interopRequireDefault(__webpack_require__(2));
 var _chalk = _interopRequireDefault(__webpack_require__(113));
-var _fs = __webpack_require__(131);
+var _path = _interopRequireDefault(__webpack_require__(4));
+var _fs = __webpack_require__(134);
+var _semver = __webpack_require__(191);
+var _fs2 = __webpack_require__(131);
 var _log = __webpack_require__(145);
-var _projects_tree = __webpack_require__(343);
+var _projects_tree = __webpack_require__(344);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 /*
  * SPDX-License-Identifier: Apache-2.0
@@ -39936,7 +40002,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
  */
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -39955,11 +40020,41 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
-
 // @ts-expect-error published types are useless
-
-async function validateDependencies(osd, yarnLock) {
-  // look through all of the packages in the yarn.lock file to see if
+var SingleVersionResolution = /*#__PURE__*/function (SingleVersionResolution) {
+  SingleVersionResolution["STRICT"] = "strict";
+  SingleVersionResolution["LOOSE"] = "loose";
+  SingleVersionResolution["FORCE"] = "force";
+  SingleVersionResolution["BRUTE_FORCE"] = "brute-force";
+  SingleVersionResolution["IGNORE"] = "ignore";
+  return SingleVersionResolution;
+}(SingleVersionResolution || {});
+async function validateDependencies(osd, yarnLock,
+/* `singleVersionResolution` controls how violations of single-version-dependencies is applied.
+ *    STRICT (default): throw an error and exit
+ *    LOOSE: identify and install a single version that satisfies all ranges
+ *    BRUTE_FORCE: identify and install the newest version
+ *    IGNORE: show all errors without exiting
+ *
+ * `LOOSE`:
+ *          Reconciles the various versions installed as a result of having multiple ranges for a dependency, by
+ *          choosing one that satisfies all said ranges. Even though installing the chosen version updates the
+ *          lock-files, no package.json changes would be needed.
+ *
+ * `BRUTE_FORCE`:
+ *          With no care for reconciliation, the newest of the various versions installed is chosen, irrespective of
+ *          whether it satisfies any of the ranges. Installing the chosen version updates the lock-files and a range
+ *          in the form of `^<version>` is applied to all `package.json` files that declared the dependency.
+ *
+ * `FORCE`:
+ *          For each dependency, first LOOSE resolution is attempted but if that fails, BRUTE_FORCE is applied.
+ *
+ * `IGNORE`:
+ *          Behaves just like `strict` by showing errors when different ranges of a package are marked as
+ *          dependencies, but it does not terminate the script.
+ */
+singleVersionResolution = SingleVersionResolution.STRICT) {
+  // look through all the packages in the yarn.lock file to see if
   // we have accidentally installed multiple lodash v4 versions
   const lodash4Versions = new Set();
   const lodash4Reqs = new Set();
@@ -39977,7 +40072,7 @@ async function validateDependencies(osd, yarnLock) {
     for (const req of lodash4Reqs) {
       delete yarnLock[req];
     }
-    await (0, _fs.writeFile)(osd.getAbsolute('yarn.lock'), (0, _lockfile.stringify)(yarnLock), 'utf8');
+    await (0, _fs2.writeFile)(osd.getAbsolute('yarn.lock'), (0, _lockfile.stringify)(yarnLock), 'utf8');
     _log.log.error((0, _dedent.default)`
 
       Multiple version of lodash v4 were detected, so they have been removed
@@ -40022,12 +40117,14 @@ async function validateDependencies(osd, yarnLock) {
     `);
     process.exit(1);
   }
+  let hasIssues = false;
 
-  // TODO: remove this once we move into a single package.json
   // look through all the package.json files to find packages which have mismatched version ranges
   const depRanges = new Map();
   for (const project of osd.getAllProjects().values()) {
-    for (const [dep, range] of Object.entries(project.allDependencies)) {
+    for (const [dep, range] of Object.entries(
+    // Don't be bothered with validating dev-deps when validating single-version loosely
+    singleVersionResolution === SingleVersionResolution.LOOSE ? project.productionDependencies : project.allDependencies)) {
       const existingDep = depRanges.get(dep);
       if (!existingDep) {
         depRanges.set(dep, [{
@@ -40047,11 +40144,145 @@ async function validateDependencies(osd, yarnLock) {
       existingRange.projects.push(project);
     }
   }
-  const duplicateRanges = Array.from(depRanges.entries()).filter(([, ranges]) => ranges.length > 1).reduce((acc, [dep, ranges]) => [...acc, dep, ...ranges.map(({
-    range,
-    projects
-  }) => `  ${range} => ${projects.map(p => p.name).join(', ')}`)], []).join('\n        ');
-  if (duplicateRanges) {
+  const cachedManifests = new Map();
+  const violatingSingleVersionDepRanges = new Map();
+  depRangesLoop: for (const [depName, ranges] of depRanges) {
+    // No violation if just a single range of a dependency is used
+    if (ranges.length === 1) continue;
+    const installedVersions = new Set();
+    const installedDepVersionsCache = new Map();
+    const desiredRanges = new Map();
+    rangesLoop: for (const {
+      range,
+      projects
+    } of ranges) {
+      for (const project of projects) {
+        var _deps;
+        if (!cachedManifests.has(project.path)) cachedManifests.set(project.path,
+        // If there are errors reading or parsing the lockfiles, don't catch and let them fall through
+        (0, _lockfile.parse)((0, _fs.readFileSync)(_path.default.join(project.path, 'yarn.lock'), 'utf-8')));
+        const {
+          object: deps
+        } = cachedManifests.get(project.path);
+        if (deps !== null && deps !== void 0 && (_deps = deps[`${depName}@${range}`]) !== null && _deps !== void 0 && _deps.version) {
+          installedVersions.add(deps[`${depName}@${range}`].version);
+          installedDepVersionsCache.set(`${project.name}#${depName}`, deps[`${depName}@${range}`].version);
+        } else {
+          _log.log.warning(`Failed to find the installed version for ${depName}@${range}`);
+          // If we cannot read any one of the installed versions of a depName, there is no point in continuing with it
+          installedVersions.clear();
+          desiredRanges.clear();
+          break rangesLoop;
+        }
+      }
+      desiredRanges.set(range, projects);
+    }
+
+    // More than one range is used but couldn't get all the installed versions: call out violation
+    if (installedVersions.size === 0) {
+      violatingSingleVersionDepRanges.set(depName, ranges);
+      continue; // go to the next depRange
+    }
+
+    if (singleVersionResolution === SingleVersionResolution.LOOSE ||
+    // validating with force first acts like loose
+    singleVersionResolution === SingleVersionResolution.FORCE) {
+      if (installedVersions.size === 1) {
+        hasIssues = true;
+
+        /* When validating single-version loosely, ignore multiple ranges when they result in the installation of
+         * a single version.
+         */
+        _log.log.info(`Ignored single version requirement for ${depName} as all installations are using v${installedVersions.values().next().value}.`);
+        continue; // go to the next depRange
+      }
+
+      const sortedInstalledVersion = Array.from(installedVersions).sort(_semver.rcompare);
+      const rangePatterns = Array.from(desiredRanges.keys());
+      for (const installedVersion of sortedInstalledVersion) {
+        if (rangePatterns.every(range => (0, _semver.satisfies)(installedVersion, range))) {
+          // Install the version on all projects that have this dep; keep the original range.
+          for (const {
+            range,
+            projects
+          } of ranges) {
+            for (const project of projects) {
+              // Don't bother updating anything if the desired version is already installed
+              if (installedDepVersionsCache.get(`${project.name}#${depName}`) === installedVersion) continue;
+              await project.installDependencyVersion(depName, installedVersion, depName in project.devDependencies,
+              // When validating single-version loosely, when a version change is needed, the range shouldn't change
+              range);
+            }
+          }
+          hasIssues = true;
+          const conflictingRanges = ranges.map(({
+            range,
+            projects
+          }) => `${range} => ${projects.map(p => p.name).join(', ')}`).join('\n              ');
+          _log.log.warning((0, _dedent.default)`
+
+            [single_version_dependencies] Multiple version ranges for package "${depName}"
+            were found across different package.json files. A suitable version, v${installedVersion}, was
+            identified and installed.
+
+            The conflicting version ranges are:
+              ${conflictingRanges}
+          `);
+
+          // A usable version was identified so no need to check the lower versions
+          continue depRangesLoop; // go to the next depRange
+        }
+      }
+
+      /* Here because a suitable version was not found. When validating single-version loosely and here, give up.
+       * However, don't give up when validating with force and act like brute-force!
+       */
+      if (singleVersionResolution === SingleVersionResolution.LOOSE) {
+        violatingSingleVersionDepRanges.set(depName, ranges);
+        continue; // go to the next depRange
+      }
+    }
+
+    if (singleVersionResolution === SingleVersionResolution.BRUTE_FORCE ||
+    // validating with force here means we failed to get results when acting loosely
+    singleVersionResolution === SingleVersionResolution.FORCE) {
+      const sortedInstalledVersion = Array.from(installedVersions).sort(_semver.rcompare);
+      hasIssues = true;
+      const suitableVersion = sortedInstalledVersion[0];
+      const suitableRange = `^${suitableVersion}`;
+
+      // Install the version on all projects that have this dep; use the suitable range.
+      for (const {
+        projects
+      } of ranges) {
+        for (const project of projects) {
+          await project.installDependencyVersion(depName, suitableVersion, depName in project.devDependencies, suitableRange);
+        }
+      }
+      const conflictingRanges = ranges.map(({
+        range,
+        projects
+      }) => `${range} => ${projects.map(p => p.name).join(', ')}`).join('\n              ');
+      _log.log.warning((0, _dedent.default)`
+
+            [single_version_dependencies] Multiple version ranges for package "${depName}"
+            were found across different package.json files. A version, v${suitableVersion}, was identified as the most recent
+            already installed replacement. All package.json files have been updated to indicate a dependency on \`${depName}@${suitableRange}\`.
+
+            The conflicting version ranges are:
+              ${conflictingRanges}
+          `);
+      continue; // go to the next depRange
+    }
+
+    // Here because validation was not loose, forced, or brute-forced; just call out the vilation.
+    violatingSingleVersionDepRanges.set(depName, ranges);
+  }
+  if (violatingSingleVersionDepRanges.size > 0) {
+    const duplicateRanges = Array.from(violatingSingleVersionDepRanges.entries()).reduce((acc, [dep, ranges]) => [...acc, dep, ...ranges.map(({
+      range,
+      projects
+    }) => `  ${range} => ${projects.map(p => p.name).join(', ')}`)], []).join('\n        ');
     _log.log.error((0, _dedent.default)`
 
       [single_version_dependencies] Multiple version ranges for the same dependency
@@ -40065,10 +40296,12 @@ async function validateDependencies(osd, yarnLock) {
 
         ${duplicateRanges}
     `);
-    process.exit(1);
+    if (singleVersionResolution !== SingleVersionResolution.IGNORE) {
+      process.exit(1);
+    }
   }
 
-  // look for packages that have the the `opensearchDashboards.devOnly` flag in their package.json
+  // look for packages that have the `opensearchDashboards.devOnly` flag in their package.json
   // and make sure they aren't included in the production dependencies of OpenSearch Dashboards
   const devOnlyProjectsInProduction = getDevOnlyProductionDepsTree(osd, 'opensearch-dashboards');
   if (devOnlyProjectsInProduction) {
@@ -40083,7 +40316,7 @@ async function validateDependencies(osd, yarnLock) {
     `);
     process.exit(1);
   }
-  _log.log.success('yarn.lock analysis completed without any issues');
+  _log.log.success(hasIssues ? 'yarn.lock analysis completed' : 'yarn.lock analysis completed without any issues');
 }
 function getDevOnlyProductionDepsTree(osd, projectName) {
   const project = osd.getProject(projectName);
@@ -40100,7 +40333,7 @@ function getDevOnlyProductionDepsTree(osd, projectName) {
 }
 
 /***/ }),
-/* 343 */
+/* 344 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40113,7 +40346,7 @@ exports.renderProjectsTree = renderProjectsTree;
 exports.treeToString = treeToString;
 var _chalk = _interopRequireDefault(__webpack_require__(113));
 var _path = _interopRequireDefault(__webpack_require__(4));
-var _crossPlatform = __webpack_require__(335);
+var _crossPlatform = __webpack_require__(336);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 /*
  * SPDX-License-Identifier: Apache-2.0
@@ -40259,7 +40492,7 @@ function addProjectToTree(tree, pathParts, project) {
 }
 
 /***/ }),
-/* 344 */
+/* 345 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40269,8 +40502,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.CleanCommand = void 0;
-var _del = _interopRequireDefault(__webpack_require__(345));
-var _ora = _interopRequireDefault(__webpack_require__(434));
+var _del = _interopRequireDefault(__webpack_require__(346));
+var _ora = _interopRequireDefault(__webpack_require__(435));
 var _path = __webpack_require__(4);
 var _fs = __webpack_require__(131);
 var _log = __webpack_require__(145);
@@ -40366,21 +40599,21 @@ const CleanCommand = exports.CleanCommand = {
 };
 
 /***/ }),
-/* 345 */
+/* 346 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const {promisify} = __webpack_require__(112);
 const path = __webpack_require__(4);
-const globby = __webpack_require__(346);
-const isGlob = __webpack_require__(358);
-const slash = __webpack_require__(425);
+const globby = __webpack_require__(347);
+const isGlob = __webpack_require__(359);
+const slash = __webpack_require__(426);
 const gracefulFs = __webpack_require__(133);
-const isPathCwd = __webpack_require__(427);
-const isPathInside = __webpack_require__(428);
-const rimraf = __webpack_require__(429);
-const pMap = __webpack_require__(430);
+const isPathCwd = __webpack_require__(428);
+const isPathInside = __webpack_require__(429);
+const rimraf = __webpack_require__(430);
+const pMap = __webpack_require__(431);
 
 const rimrafP = promisify(rimraf);
 
@@ -40512,18 +40745,18 @@ module.exports.sync = (patterns, {force, dryRun, cwd = process.cwd(), ...options
 
 
 /***/ }),
-/* 346 */
+/* 347 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const fs = __webpack_require__(134);
-const arrayUnion = __webpack_require__(347);
-const merge2 = __webpack_require__(348);
-const fastGlob = __webpack_require__(349);
-const dirGlob = __webpack_require__(421);
-const gitignore = __webpack_require__(423);
-const {FilterStream, UniqueStream} = __webpack_require__(426);
+const arrayUnion = __webpack_require__(348);
+const merge2 = __webpack_require__(349);
+const fastGlob = __webpack_require__(350);
+const dirGlob = __webpack_require__(422);
+const gitignore = __webpack_require__(424);
+const {FilterStream, UniqueStream} = __webpack_require__(427);
 
 const DEFAULT_FILTER = () => false;
 
@@ -40700,7 +40933,7 @@ module.exports.gitignore = gitignore;
 
 
 /***/ }),
-/* 347 */
+/* 348 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40712,7 +40945,7 @@ module.exports = (...arguments_) => {
 
 
 /***/ }),
-/* 348 */
+/* 349 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40863,18 +41096,18 @@ function pauseStreams (streams, options) {
 
 
 /***/ }),
-/* 349 */
+/* 350 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const taskManager = __webpack_require__(350);
-const patternManager = __webpack_require__(379);
-const async_1 = __webpack_require__(380);
-const stream_1 = __webpack_require__(417);
-const sync_1 = __webpack_require__(418);
-const settings_1 = __webpack_require__(420);
-const utils = __webpack_require__(351);
+const taskManager = __webpack_require__(351);
+const patternManager = __webpack_require__(380);
+const async_1 = __webpack_require__(381);
+const stream_1 = __webpack_require__(418);
+const sync_1 = __webpack_require__(419);
+const settings_1 = __webpack_require__(421);
+const utils = __webpack_require__(352);
 async function FastGlob(source, options) {
     assertPatternsInput(source);
     const works = getWorks(source, async_1.default, options);
@@ -40938,14 +41171,14 @@ module.exports = FastGlob;
 
 
 /***/ }),
-/* 350 */
+/* 351 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertPatternGroupToTask = exports.convertPatternGroupsToTasks = exports.groupPatternsByBaseDirectory = exports.getNegativePatternsAsPositive = exports.getPositivePatterns = exports.convertPatternsToTasks = exports.generate = void 0;
-const utils = __webpack_require__(351);
+const utils = __webpack_require__(352);
 function generate(patterns, settings) {
     const positivePatterns = getPositivePatterns(patterns);
     const negativePatterns = getNegativePatternsAsPositive(patterns, settings.ignore);
@@ -41025,31 +41258,31 @@ exports.convertPatternGroupToTask = convertPatternGroupToTask;
 
 
 /***/ }),
-/* 351 */
+/* 352 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.string = exports.stream = exports.pattern = exports.path = exports.fs = exports.errno = exports.array = void 0;
-const array = __webpack_require__(352);
+const array = __webpack_require__(353);
 exports.array = array;
-const errno = __webpack_require__(353);
+const errno = __webpack_require__(354);
 exports.errno = errno;
-const fs = __webpack_require__(354);
+const fs = __webpack_require__(355);
 exports.fs = fs;
-const path = __webpack_require__(355);
+const path = __webpack_require__(356);
 exports.path = path;
-const pattern = __webpack_require__(356);
+const pattern = __webpack_require__(357);
 exports.pattern = pattern;
-const stream = __webpack_require__(377);
+const stream = __webpack_require__(378);
 exports.stream = stream;
-const string = __webpack_require__(378);
+const string = __webpack_require__(379);
 exports.string = string;
 
 
 /***/ }),
-/* 352 */
+/* 353 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41078,7 +41311,7 @@ exports.splitWhen = splitWhen;
 
 
 /***/ }),
-/* 353 */
+/* 354 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41092,7 +41325,7 @@ exports.isEnoentCodeError = isEnoentCodeError;
 
 
 /***/ }),
-/* 354 */
+/* 355 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41118,7 +41351,7 @@ exports.createDirentFromStats = createDirentFromStats;
 
 
 /***/ }),
-/* 355 */
+/* 356 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41158,7 +41391,7 @@ exports.removeLeadingDotSegment = removeLeadingDotSegment;
 
 
 /***/ }),
-/* 356 */
+/* 357 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41166,8 +41399,8 @@ exports.removeLeadingDotSegment = removeLeadingDotSegment;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.matchAny = exports.convertPatternsToRe = exports.makeRe = exports.getPatternParts = exports.expandBraceExpansion = exports.expandPatternsWithBraceExpansion = exports.isAffectDepthOfReadingPattern = exports.endsWithSlashGlobStar = exports.hasGlobStar = exports.getBaseDirectory = exports.isPatternRelatedToParentDirectory = exports.getPatternsOutsideCurrentDirectory = exports.getPatternsInsideCurrentDirectory = exports.getPositivePatterns = exports.getNegativePatterns = exports.isPositivePattern = exports.isNegativePattern = exports.convertToNegativePattern = exports.convertToPositivePattern = exports.isDynamicPattern = exports.isStaticPattern = void 0;
 const path = __webpack_require__(4);
-const globParent = __webpack_require__(357);
-const micromatch = __webpack_require__(360);
+const globParent = __webpack_require__(358);
+const micromatch = __webpack_require__(361);
 const GLOBSTAR = '**';
 const ESCAPE_SYMBOL = '\\';
 const COMMON_GLOB_SYMBOLS_RE = /[*?]|^!/;
@@ -41334,13 +41567,13 @@ exports.matchAny = matchAny;
 
 
 /***/ }),
-/* 357 */
+/* 358 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isGlob = __webpack_require__(358);
+var isGlob = __webpack_require__(359);
 var pathPosixDirname = __webpack_require__(4).posix.dirname;
 var isWin32 = __webpack_require__(121).platform() === 'win32';
 
@@ -41416,7 +41649,7 @@ function isGlobby(str) {
 
 
 /***/ }),
-/* 358 */
+/* 359 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!
@@ -41426,7 +41659,7 @@ function isGlobby(str) {
  * Released under the MIT License.
  */
 
-var isExtglob = __webpack_require__(359);
+var isExtglob = __webpack_require__(360);
 var chars = { '{': '}', '(': ')', '[': ']'};
 var strictCheck = function(str) {
   if (str[0] === '!') {
@@ -41572,7 +41805,7 @@ module.exports = function isGlob(str, options) {
 
 
 /***/ }),
-/* 359 */
+/* 360 */
 /***/ (function(module, exports) {
 
 /*!
@@ -41598,16 +41831,16 @@ module.exports = function isExtglob(str) {
 
 
 /***/ }),
-/* 360 */
+/* 361 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const util = __webpack_require__(112);
-const braces = __webpack_require__(361);
-const picomatch = __webpack_require__(371);
-const utils = __webpack_require__(374);
+const braces = __webpack_require__(362);
+const picomatch = __webpack_require__(372);
+const utils = __webpack_require__(375);
 const isEmptyString = val => val === '' || val === './';
 
 /**
@@ -42072,16 +42305,16 @@ module.exports = micromatch;
 
 
 /***/ }),
-/* 361 */
+/* 362 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const stringify = __webpack_require__(362);
-const compile = __webpack_require__(364);
-const expand = __webpack_require__(368);
-const parse = __webpack_require__(369);
+const stringify = __webpack_require__(363);
+const compile = __webpack_require__(365);
+const expand = __webpack_require__(369);
+const parse = __webpack_require__(370);
 
 /**
  * Expand the given pattern or create a regex-compatible string.
@@ -42249,13 +42482,13 @@ module.exports = braces;
 
 
 /***/ }),
-/* 362 */
+/* 363 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const utils = __webpack_require__(363);
+const utils = __webpack_require__(364);
 
 module.exports = (ast, options = {}) => {
   let stringify = (node, parent = {}) => {
@@ -42288,7 +42521,7 @@ module.exports = (ast, options = {}) => {
 
 
 /***/ }),
-/* 363 */
+/* 364 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42407,14 +42640,14 @@ exports.flatten = (...args) => {
 
 
 /***/ }),
-/* 364 */
+/* 365 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const fill = __webpack_require__(365);
-const utils = __webpack_require__(363);
+const fill = __webpack_require__(366);
+const utils = __webpack_require__(364);
 
 const compile = (ast, options = {}) => {
   let walk = (node, parent = {}) => {
@@ -42471,7 +42704,7 @@ module.exports = compile;
 
 
 /***/ }),
-/* 365 */
+/* 366 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42485,7 +42718,7 @@ module.exports = compile;
 
 
 const util = __webpack_require__(112);
-const toRegexRange = __webpack_require__(366);
+const toRegexRange = __webpack_require__(367);
 
 const isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
 
@@ -42727,7 +42960,7 @@ module.exports = fill;
 
 
 /***/ }),
-/* 366 */
+/* 367 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42740,7 +42973,7 @@ module.exports = fill;
 
 
 
-const isNumber = __webpack_require__(367);
+const isNumber = __webpack_require__(368);
 
 const toRegexRange = (min, max, options) => {
   if (isNumber(min) === false) {
@@ -43022,7 +43255,7 @@ module.exports = toRegexRange;
 
 
 /***/ }),
-/* 367 */
+/* 368 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43047,15 +43280,15 @@ module.exports = function(num) {
 
 
 /***/ }),
-/* 368 */
+/* 369 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const fill = __webpack_require__(365);
-const stringify = __webpack_require__(362);
-const utils = __webpack_require__(363);
+const fill = __webpack_require__(366);
+const stringify = __webpack_require__(363);
+const utils = __webpack_require__(364);
 
 const append = (queue = '', stash = '', enclose = false) => {
   let result = [];
@@ -43167,13 +43400,13 @@ module.exports = expand;
 
 
 /***/ }),
-/* 369 */
+/* 370 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const stringify = __webpack_require__(362);
+const stringify = __webpack_require__(363);
 
 /**
  * Constants
@@ -43195,7 +43428,7 @@ const {
   CHAR_SINGLE_QUOTE, /* ' */
   CHAR_NO_BREAK_SPACE,
   CHAR_ZERO_WIDTH_NOBREAK_SPACE
-} = __webpack_require__(370);
+} = __webpack_require__(371);
 
 /**
  * parse
@@ -43507,7 +43740,7 @@ module.exports = parse;
 
 
 /***/ }),
-/* 370 */
+/* 371 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43571,27 +43804,27 @@ module.exports = {
 
 
 /***/ }),
-/* 371 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = __webpack_require__(372);
-
-
-/***/ }),
 /* 372 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+module.exports = __webpack_require__(373);
+
+
+/***/ }),
+/* 373 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 const path = __webpack_require__(4);
-const scan = __webpack_require__(373);
-const parse = __webpack_require__(376);
-const utils = __webpack_require__(374);
-const constants = __webpack_require__(375);
+const scan = __webpack_require__(374);
+const parse = __webpack_require__(377);
+const utils = __webpack_require__(375);
+const constants = __webpack_require__(376);
 const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
 
 /**
@@ -43930,13 +44163,13 @@ module.exports = picomatch;
 
 
 /***/ }),
-/* 373 */
+/* 374 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const utils = __webpack_require__(374);
+const utils = __webpack_require__(375);
 const {
   CHAR_ASTERISK,             /* * */
   CHAR_AT,                   /* @ */
@@ -43953,7 +44186,7 @@ const {
   CHAR_RIGHT_CURLY_BRACE,    /* } */
   CHAR_RIGHT_PARENTHESES,    /* ) */
   CHAR_RIGHT_SQUARE_BRACKET  /* ] */
-} = __webpack_require__(375);
+} = __webpack_require__(376);
 
 const isPathSeparator = code => {
   return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
@@ -44328,7 +44561,7 @@ module.exports = scan;
 
 
 /***/ }),
-/* 374 */
+/* 375 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44341,7 +44574,7 @@ const {
   REGEX_REMOVE_BACKSLASH,
   REGEX_SPECIAL_CHARS,
   REGEX_SPECIAL_CHARS_GLOBAL
-} = __webpack_require__(375);
+} = __webpack_require__(376);
 
 exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
 exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
@@ -44399,7 +44632,7 @@ exports.wrapOutput = (input, state = {}, options = {}) => {
 
 
 /***/ }),
-/* 375 */
+/* 376 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44585,14 +44818,14 @@ module.exports = {
 
 
 /***/ }),
-/* 376 */
+/* 377 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const constants = __webpack_require__(375);
-const utils = __webpack_require__(374);
+const constants = __webpack_require__(376);
+const utils = __webpack_require__(375);
 
 /**
  * Constants
@@ -45683,14 +45916,14 @@ module.exports = parse;
 
 
 /***/ }),
-/* 377 */
+/* 378 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.merge = void 0;
-const merge2 = __webpack_require__(348);
+const merge2 = __webpack_require__(349);
 function merge(streams) {
     const mergedStream = merge2(streams);
     streams.forEach((stream) => {
@@ -45707,7 +45940,7 @@ function propagateCloseEventToSources(streams) {
 
 
 /***/ }),
-/* 378 */
+/* 379 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -45725,7 +45958,7 @@ exports.isEmpty = isEmpty;
 
 
 /***/ }),
-/* 379 */
+/* 380 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -45753,14 +45986,14 @@ exports.removeDuplicateSlashes = removeDuplicateSlashes;
 
 
 /***/ }),
-/* 380 */
+/* 381 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = __webpack_require__(381);
-const provider_1 = __webpack_require__(410);
+const stream_1 = __webpack_require__(382);
+const provider_1 = __webpack_require__(411);
 class ProviderAsync extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -45788,16 +46021,16 @@ exports.default = ProviderAsync;
 
 
 /***/ }),
-/* 381 */
+/* 382 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const stream_1 = __webpack_require__(138);
-const fsStat = __webpack_require__(382);
-const fsWalk = __webpack_require__(387);
-const reader_1 = __webpack_require__(409);
+const fsStat = __webpack_require__(383);
+const fsWalk = __webpack_require__(388);
+const reader_1 = __webpack_require__(410);
 class ReaderStream extends reader_1.default {
     constructor() {
         super(...arguments);
@@ -45850,16 +46083,16 @@ exports.default = ReaderStream;
 
 
 /***/ }),
-/* 382 */
+/* 383 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.statSync = exports.stat = exports.Settings = void 0;
-const async = __webpack_require__(383);
-const sync = __webpack_require__(384);
-const settings_1 = __webpack_require__(385);
+const async = __webpack_require__(384);
+const sync = __webpack_require__(385);
+const settings_1 = __webpack_require__(386);
 exports.Settings = settings_1.default;
 function stat(path, optionsOrSettingsOrCallback, callback) {
     if (typeof optionsOrSettingsOrCallback === 'function') {
@@ -45883,7 +46116,7 @@ function getSettings(settingsOrOptions = {}) {
 
 
 /***/ }),
-/* 383 */
+/* 384 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -45926,7 +46159,7 @@ function callSuccessCallback(callback, result) {
 
 
 /***/ }),
-/* 384 */
+/* 385 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -45956,13 +46189,13 @@ exports.read = read;
 
 
 /***/ }),
-/* 385 */
+/* 386 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = __webpack_require__(386);
+const fs = __webpack_require__(387);
 class Settings {
     constructor(_options = {}) {
         this._options = _options;
@@ -45979,7 +46212,7 @@ exports.default = Settings;
 
 
 /***/ }),
-/* 386 */
+/* 387 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46003,17 +46236,17 @@ exports.createFileSystemAdapter = createFileSystemAdapter;
 
 
 /***/ }),
-/* 387 */
+/* 388 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Settings = exports.walkStream = exports.walkSync = exports.walk = void 0;
-const async_1 = __webpack_require__(388);
-const stream_1 = __webpack_require__(405);
-const sync_1 = __webpack_require__(406);
-const settings_1 = __webpack_require__(408);
+const async_1 = __webpack_require__(389);
+const stream_1 = __webpack_require__(406);
+const sync_1 = __webpack_require__(407);
+const settings_1 = __webpack_require__(409);
 exports.Settings = settings_1.default;
 function walk(directory, optionsOrSettingsOrCallback, callback) {
     if (typeof optionsOrSettingsOrCallback === 'function') {
@@ -46044,13 +46277,13 @@ function getSettings(settingsOrOptions = {}) {
 
 
 /***/ }),
-/* 388 */
+/* 389 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const async_1 = __webpack_require__(389);
+const async_1 = __webpack_require__(390);
 class AsyncProvider {
     constructor(_root, _settings) {
         this._root = _root;
@@ -46081,17 +46314,17 @@ function callSuccessCallback(callback, entries) {
 
 
 /***/ }),
-/* 389 */
+/* 390 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = __webpack_require__(157);
-const fsScandir = __webpack_require__(390);
-const fastq = __webpack_require__(401);
-const common = __webpack_require__(403);
-const reader_1 = __webpack_require__(404);
+const fsScandir = __webpack_require__(391);
+const fastq = __webpack_require__(402);
+const common = __webpack_require__(404);
+const reader_1 = __webpack_require__(405);
 class AsyncReader extends reader_1.default {
     constructor(_root, _settings) {
         super(_root, _settings);
@@ -46185,16 +46418,16 @@ exports.default = AsyncReader;
 
 
 /***/ }),
-/* 390 */
+/* 391 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Settings = exports.scandirSync = exports.scandir = void 0;
-const async = __webpack_require__(391);
-const sync = __webpack_require__(398);
-const settings_1 = __webpack_require__(399);
+const async = __webpack_require__(392);
+const sync = __webpack_require__(399);
+const settings_1 = __webpack_require__(400);
 exports.Settings = settings_1.default;
 function scandir(path, optionsOrSettingsOrCallback, callback) {
     if (typeof optionsOrSettingsOrCallback === 'function') {
@@ -46218,18 +46451,18 @@ function getSettings(settingsOrOptions = {}) {
 
 
 /***/ }),
-/* 391 */
+/* 392 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readdir = exports.readdirWithFileTypes = exports.read = void 0;
-const fsStat = __webpack_require__(382);
-const rpl = __webpack_require__(392);
-const constants_1 = __webpack_require__(394);
-const utils = __webpack_require__(395);
-const common = __webpack_require__(397);
+const fsStat = __webpack_require__(383);
+const rpl = __webpack_require__(393);
+const constants_1 = __webpack_require__(395);
+const utils = __webpack_require__(396);
+const common = __webpack_require__(398);
 function read(directory, settings, callback) {
     if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
         readdirWithFileTypes(directory, settings, callback);
@@ -46329,13 +46562,13 @@ function callSuccessCallback(callback, result) {
 
 
 /***/ }),
-/* 392 */
+/* 393 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*! run-parallel. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 module.exports = runParallel
 
-const queueMicrotask = __webpack_require__(393)
+const queueMicrotask = __webpack_require__(394)
 
 function runParallel (tasks, cb) {
   let results, pending, keys
@@ -46386,7 +46619,7 @@ function runParallel (tasks, cb) {
 
 
 /***/ }),
-/* 393 */
+/* 394 */
 /***/ (function(module, exports) {
 
 /*! queue-microtask. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
@@ -46401,7 +46634,7 @@ module.exports = typeof queueMicrotask === 'function'
 
 
 /***/ }),
-/* 394 */
+/* 395 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46425,19 +46658,19 @@ exports.IS_SUPPORT_READDIR_WITH_FILE_TYPES = IS_MATCHED_BY_MAJOR || IS_MATCHED_B
 
 
 /***/ }),
-/* 395 */
+/* 396 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fs = void 0;
-const fs = __webpack_require__(396);
+const fs = __webpack_require__(397);
 exports.fs = fs;
 
 
 /***/ }),
-/* 396 */
+/* 397 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46463,7 +46696,7 @@ exports.createDirentFromStats = createDirentFromStats;
 
 
 /***/ }),
-/* 397 */
+/* 398 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46483,17 +46716,17 @@ exports.joinPathSegments = joinPathSegments;
 
 
 /***/ }),
-/* 398 */
+/* 399 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readdir = exports.readdirWithFileTypes = exports.read = void 0;
-const fsStat = __webpack_require__(382);
-const constants_1 = __webpack_require__(394);
-const utils = __webpack_require__(395);
-const common = __webpack_require__(397);
+const fsStat = __webpack_require__(383);
+const constants_1 = __webpack_require__(395);
+const utils = __webpack_require__(396);
+const common = __webpack_require__(398);
 function read(directory, settings) {
     if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
         return readdirWithFileTypes(directory, settings);
@@ -46544,15 +46777,15 @@ exports.readdir = readdir;
 
 
 /***/ }),
-/* 399 */
+/* 400 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(4);
-const fsStat = __webpack_require__(382);
-const fs = __webpack_require__(400);
+const fsStat = __webpack_require__(383);
+const fs = __webpack_require__(401);
 class Settings {
     constructor(_options = {}) {
         this._options = _options;
@@ -46575,7 +46808,7 @@ exports.default = Settings;
 
 
 /***/ }),
-/* 400 */
+/* 401 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46601,7 +46834,7 @@ exports.createFileSystemAdapter = createFileSystemAdapter;
 
 
 /***/ }),
-/* 401 */
+/* 402 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46609,7 +46842,7 @@ exports.createFileSystemAdapter = createFileSystemAdapter;
 
 /* eslint-disable no-var */
 
-var reusify = __webpack_require__(402)
+var reusify = __webpack_require__(403)
 
 function fastqueue (context, worker, concurrency) {
   if (typeof context === 'function') {
@@ -46891,7 +47124,7 @@ module.exports.promise = queueAsPromised
 
 
 /***/ }),
-/* 402 */
+/* 403 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46931,7 +47164,7 @@ module.exports = reusify
 
 
 /***/ }),
-/* 403 */
+/* 404 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46969,13 +47202,13 @@ exports.joinPathSegments = joinPathSegments;
 
 
 /***/ }),
-/* 404 */
+/* 405 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const common = __webpack_require__(403);
+const common = __webpack_require__(404);
 class Reader {
     constructor(_root, _settings) {
         this._root = _root;
@@ -46987,14 +47220,14 @@ exports.default = Reader;
 
 
 /***/ }),
-/* 405 */
+/* 406 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const stream_1 = __webpack_require__(138);
-const async_1 = __webpack_require__(389);
+const async_1 = __webpack_require__(390);
 class StreamProvider {
     constructor(_root, _settings) {
         this._root = _root;
@@ -47028,13 +47261,13 @@ exports.default = StreamProvider;
 
 
 /***/ }),
-/* 406 */
+/* 407 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const sync_1 = __webpack_require__(407);
+const sync_1 = __webpack_require__(408);
 class SyncProvider {
     constructor(_root, _settings) {
         this._root = _root;
@@ -47049,15 +47282,15 @@ exports.default = SyncProvider;
 
 
 /***/ }),
-/* 407 */
+/* 408 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const fsScandir = __webpack_require__(390);
-const common = __webpack_require__(403);
-const reader_1 = __webpack_require__(404);
+const fsScandir = __webpack_require__(391);
+const common = __webpack_require__(404);
+const reader_1 = __webpack_require__(405);
 class SyncReader extends reader_1.default {
     constructor() {
         super(...arguments);
@@ -47115,14 +47348,14 @@ exports.default = SyncReader;
 
 
 /***/ }),
-/* 408 */
+/* 409 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(4);
-const fsScandir = __webpack_require__(390);
+const fsScandir = __webpack_require__(391);
 class Settings {
     constructor(_options = {}) {
         this._options = _options;
@@ -47148,15 +47381,15 @@ exports.default = Settings;
 
 
 /***/ }),
-/* 409 */
+/* 410 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(4);
-const fsStat = __webpack_require__(382);
-const utils = __webpack_require__(351);
+const fsStat = __webpack_require__(383);
+const utils = __webpack_require__(352);
 class Reader {
     constructor(_settings) {
         this._settings = _settings;
@@ -47188,17 +47421,17 @@ exports.default = Reader;
 
 
 /***/ }),
-/* 410 */
+/* 411 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(4);
-const deep_1 = __webpack_require__(411);
-const entry_1 = __webpack_require__(414);
-const error_1 = __webpack_require__(415);
-const entry_2 = __webpack_require__(416);
+const deep_1 = __webpack_require__(412);
+const entry_1 = __webpack_require__(415);
+const error_1 = __webpack_require__(416);
+const entry_2 = __webpack_require__(417);
 class Provider {
     constructor(_settings) {
         this._settings = _settings;
@@ -47243,14 +47476,14 @@ exports.default = Provider;
 
 
 /***/ }),
-/* 411 */
+/* 412 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(351);
-const partial_1 = __webpack_require__(412);
+const utils = __webpack_require__(352);
+const partial_1 = __webpack_require__(413);
 class DeepFilter {
     constructor(_settings, _micromatchOptions) {
         this._settings = _settings;
@@ -47312,13 +47545,13 @@ exports.default = DeepFilter;
 
 
 /***/ }),
-/* 412 */
+/* 413 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const matcher_1 = __webpack_require__(413);
+const matcher_1 = __webpack_require__(414);
 class PartialMatcher extends matcher_1.default {
     match(filepath) {
         const parts = filepath.split('/');
@@ -47357,13 +47590,13 @@ exports.default = PartialMatcher;
 
 
 /***/ }),
-/* 413 */
+/* 414 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(351);
+const utils = __webpack_require__(352);
 class Matcher {
     constructor(_patterns, _settings, _micromatchOptions) {
         this._patterns = _patterns;
@@ -47414,13 +47647,13 @@ exports.default = Matcher;
 
 
 /***/ }),
-/* 414 */
+/* 415 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(351);
+const utils = __webpack_require__(352);
 class EntryFilter {
     constructor(_settings, _micromatchOptions) {
         this._settings = _settings;
@@ -47481,13 +47714,13 @@ exports.default = EntryFilter;
 
 
 /***/ }),
-/* 415 */
+/* 416 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(351);
+const utils = __webpack_require__(352);
 class ErrorFilter {
     constructor(_settings) {
         this._settings = _settings;
@@ -47503,13 +47736,13 @@ exports.default = ErrorFilter;
 
 
 /***/ }),
-/* 416 */
+/* 417 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(351);
+const utils = __webpack_require__(352);
 class EntryTransformer {
     constructor(_settings) {
         this._settings = _settings;
@@ -47536,15 +47769,15 @@ exports.default = EntryTransformer;
 
 
 /***/ }),
-/* 417 */
+/* 418 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const stream_1 = __webpack_require__(138);
-const stream_2 = __webpack_require__(381);
-const provider_1 = __webpack_require__(410);
+const stream_2 = __webpack_require__(382);
+const provider_1 = __webpack_require__(411);
 class ProviderStream extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -47574,14 +47807,14 @@ exports.default = ProviderStream;
 
 
 /***/ }),
-/* 418 */
+/* 419 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const sync_1 = __webpack_require__(419);
-const provider_1 = __webpack_require__(410);
+const sync_1 = __webpack_require__(420);
+const provider_1 = __webpack_require__(411);
 class ProviderSync extends provider_1.default {
     constructor() {
         super(...arguments);
@@ -47604,15 +47837,15 @@ exports.default = ProviderSync;
 
 
 /***/ }),
-/* 419 */
+/* 420 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const fsStat = __webpack_require__(382);
-const fsWalk = __webpack_require__(387);
-const reader_1 = __webpack_require__(409);
+const fsStat = __webpack_require__(383);
+const fsWalk = __webpack_require__(388);
+const reader_1 = __webpack_require__(410);
 class ReaderSync extends reader_1.default {
     constructor() {
         super(...arguments);
@@ -47654,7 +47887,7 @@ exports.default = ReaderSync;
 
 
 /***/ }),
-/* 420 */
+/* 421 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -47718,13 +47951,13 @@ exports.default = Settings;
 
 
 /***/ }),
-/* 421 */
+/* 422 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(4);
-const pathType = __webpack_require__(422);
+const pathType = __webpack_require__(423);
 
 const getExtensions = extensions => extensions.length > 1 ? `{${extensions.join(',')}}` : extensions[0];
 
@@ -47800,7 +48033,7 @@ module.exports.sync = (input, options) => {
 
 
 /***/ }),
-/* 422 */
+/* 423 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -47850,7 +48083,7 @@ exports.isSymlinkSync = isTypeSync.bind(null, 'lstatSync', 'isSymbolicLink');
 
 
 /***/ }),
-/* 423 */
+/* 424 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -47858,9 +48091,9 @@ exports.isSymlinkSync = isTypeSync.bind(null, 'lstatSync', 'isSymbolicLink');
 const {promisify} = __webpack_require__(112);
 const fs = __webpack_require__(134);
 const path = __webpack_require__(4);
-const fastGlob = __webpack_require__(349);
-const gitIgnore = __webpack_require__(424);
-const slash = __webpack_require__(425);
+const fastGlob = __webpack_require__(350);
+const gitIgnore = __webpack_require__(425);
+const slash = __webpack_require__(426);
 
 const DEFAULT_IGNORE = [
 	'**/node_modules/**',
@@ -47977,7 +48210,7 @@ module.exports.sync = options => {
 
 
 /***/ }),
-/* 424 */
+/* 425 */
 /***/ (function(module, exports) {
 
 // A simple implementation of make-array
@@ -48586,7 +48819,7 @@ if (
 
 
 /***/ }),
-/* 425 */
+/* 426 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48604,7 +48837,7 @@ module.exports = path => {
 
 
 /***/ }),
-/* 426 */
+/* 427 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48657,7 +48890,7 @@ module.exports = {
 
 
 /***/ }),
-/* 427 */
+/* 428 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48679,7 +48912,7 @@ module.exports = path_ => {
 
 
 /***/ }),
-/* 428 */
+/* 429 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48698,7 +48931,7 @@ module.exports = (childPath, parentPath) => {
 
 
 /***/ }),
-/* 429 */
+/* 430 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const assert = __webpack_require__(140)
@@ -49064,12 +49297,12 @@ rimraf.sync = rimrafSync
 
 
 /***/ }),
-/* 430 */
+/* 431 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const AggregateError = __webpack_require__(431);
+const AggregateError = __webpack_require__(432);
 
 module.exports = async (
 	iterable,
@@ -49152,13 +49385,13 @@ module.exports = async (
 
 
 /***/ }),
-/* 431 */
+/* 432 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const indentString = __webpack_require__(432);
-const cleanStack = __webpack_require__(433);
+const indentString = __webpack_require__(433);
+const cleanStack = __webpack_require__(434);
 
 const cleanInternalStack = stack => stack.replace(/\s+at .*aggregate-error\/index.js:\d+:\d+\)?/g, '');
 
@@ -49206,7 +49439,7 @@ module.exports = AggregateError;
 
 
 /***/ }),
-/* 432 */
+/* 433 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49248,7 +49481,7 @@ module.exports = (string, count = 1, options) => {
 
 
 /***/ }),
-/* 433 */
+/* 434 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49295,12 +49528,12 @@ module.exports = (stack, options) => {
 
 
 /***/ }),
-/* 434 */
+/* 435 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const readline = __webpack_require__(435);
+const readline = __webpack_require__(283);
 const chalk = __webpack_require__(436);
 const cliCursor = __webpack_require__(439);
 const cliSpinners = __webpack_require__(441);
@@ -49659,12 +49892,6 @@ module.exports.promise = (action, options) => {
 	return spinner;
 };
 
-
-/***/ }),
-/* 435 */
-/***/ (function(module, exports) {
-
-module.exports = require("readline");
 
 /***/ }),
 /* 436 */
@@ -50141,7 +50368,7 @@ exports.toggle = (force, writableStream) => {
 
 "use strict";
 
-const onetime = __webpack_require__(301);
+const onetime = __webpack_require__(302);
 const signalExit = __webpack_require__(274);
 
 module.exports = onetime(() => {
@@ -57750,7 +57977,7 @@ exports.runCommand = runCommand;
 var _errors = __webpack_require__(164);
 var _log = __webpack_require__(145);
 var _projects = __webpack_require__(147);
-var _projects_tree = __webpack_require__(343);
+var _projects_tree = __webpack_require__(344);
 var _opensearch_dashboards = __webpack_require__(559);
 /*
  * SPDX-License-Identifier: Apache-2.0
@@ -57840,10 +58067,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.OpenSearchDashboards = void 0;
 var _path = _interopRequireDefault(__webpack_require__(4));
 var _multimatch = _interopRequireDefault(__webpack_require__(560));
-var _isPathInside = _interopRequireDefault(__webpack_require__(428));
-var _yarn_lock = __webpack_require__(333);
+var _isPathInside = _interopRequireDefault(__webpack_require__(429));
+var _yarn_lock = __webpack_require__(334);
 var _projects = __webpack_require__(147);
-var _config = __webpack_require__(330);
+var _config = __webpack_require__(331);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
@@ -57983,7 +58210,7 @@ exports.OpenSearchDashboards = OpenSearchDashboards;
 "use strict";
 
 const minimatch = __webpack_require__(151);
-const arrayUnion = __webpack_require__(347);
+const arrayUnion = __webpack_require__(348);
 const arrayDiffer = __webpack_require__(561);
 const arrify = __webpack_require__(562);
 
@@ -58083,9 +58310,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.buildProductionProjects = buildProductionProjects;
 var _cpy = _interopRequireDefault(__webpack_require__(565));
-var _del = _interopRequireDefault(__webpack_require__(345));
+var _del = _interopRequireDefault(__webpack_require__(346));
 var _path = __webpack_require__(4);
-var _config = __webpack_require__(330);
+var _config = __webpack_require__(331);
 var _fs = __webpack_require__(131);
 var _log = __webpack_require__(145);
 var _package_json = __webpack_require__(166);
@@ -58387,7 +58614,7 @@ module.exports = (source, destination, {
 
 "use strict";
 
-const AggregateError = __webpack_require__(431);
+const AggregateError = __webpack_require__(432);
 
 module.exports = async (
 	iterable,
@@ -58943,8 +59170,8 @@ exports.convertPatternGroupToTask = convertPatternGroupToTask;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = __webpack_require__(4);
-var globParent = __webpack_require__(357);
-var isGlob = __webpack_require__(358);
+var globParent = __webpack_require__(358);
+var isGlob = __webpack_require__(359);
 var micromatch = __webpack_require__(575);
 var GLOBSTAR = '**';
 /**
@@ -81438,7 +81665,7 @@ exports.flatten = flatten;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var merge2 = __webpack_require__(348);
+var merge2 = __webpack_require__(349);
 /**
  * Merge multiple streams and propagate their errors into one stream in parallel.
  */
@@ -82303,7 +82530,7 @@ module.exports = function hasGlob(val) {
  * Licensed under the MIT License.
  */
 
-var isExtglob = __webpack_require__(359);
+var isExtglob = __webpack_require__(360);
 
 module.exports = function isGlob(str) {
   if (typeof str !== 'string' || str === '') {

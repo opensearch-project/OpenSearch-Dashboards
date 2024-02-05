@@ -42,7 +42,7 @@ function help() {
     dedent`
       usage: osd <command> [<args>]
 
-      By default commands are run for OpenSearch Dashboards itself, all packages in the 'packages/'
+      By default, commands are run for OpenSearch Dashboards itself, all packages in the 'packages/'
       folder and for all plugins in './plugins' and '../opensearch-dashboards-extra'.
 
       Available commands:
@@ -57,6 +57,7 @@ function help() {
         -i, --include           Include only specified projects. If left unspecified, it defaults to including all projects.
         --skip-opensearch-dashboards-plugins   Filter all plugins in ./plugins and ../opensearch-dashboards-extra when running command.
         --no-cache              Disable the bootstrap cache
+        --single-version        Set single version validation method: 'strict', 'loose', 'ignore', or 'brute-force'
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
         --quiet                 Set log level to error
@@ -92,6 +93,7 @@ export async function run(argv: string[]) {
       cache: true,
     },
     boolean: ['prefer-offline', 'frozen-lockfile', 'cache'],
+    string: ['single-version'],
   });
 
   const args = options._;
