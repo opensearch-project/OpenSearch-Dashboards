@@ -344,7 +344,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Dashboard De-Angular] Add more unit tests for utils folder ([#4641](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4641))
 - [Dashboard De-Angular] Add unit tests for dashboard_listing and dashboard_top_nav ([#4640](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4640))
 - Optimize `augment-vis` saved obj searching by adding arg to saved obj client ([#4595](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4595))
-- [Enhancement] Update import api to have data source id to allow import saved objects from uploading files to have data source ([#5777](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5777))
+- Change SavedObjects' Import API to allow selecting a data source when uploading files ([#5777](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5777))
 
 ### 🐛 Bug Fixes
 
