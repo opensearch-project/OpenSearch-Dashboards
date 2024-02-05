@@ -34,8 +34,6 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
 import { getServices } from '../opensearch_dashboards_services';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { DataSourcePicker } from '../../../../data_source_management/public/components/data_source_picker/data_source_picker';
 
 import {
   EuiPage,
@@ -53,6 +51,7 @@ import {
 import { getTutorials } from '../load_tutorials';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
+import { ClusterSelector } from '../../../../data_source_management/public';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -228,8 +227,8 @@ class TutorialDirectoryUi extends React.Component {
     const { isDataSourceEnabled } = this.state;
 
     return isDataSourceEnabled ? (
-      <div className="sampledataSourcePicker">
-        <DataSourcePicker
+      <div className="sampleDataClusterSelector">
+        <ClusterSelector
           savedObjectsClient={getServices().savedObjectsClient}
           notifications={getServices().toastNotifications}
           onSelectedDataSource={this.onSelectedDataSourceChange}
