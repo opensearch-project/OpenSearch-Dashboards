@@ -1,35 +1,6 @@
 /*
-<<<<<<< HEAD
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
-=======
- * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
  */
 
 import { mockUuidv4 } from './__mocks__';
@@ -76,20 +47,12 @@ const obj1 = createObject('type-1', 'id-1'); // -> success
 const obj2 = createObject('type-2', 'id-2'); // -> conflict
 const obj3 = createObject('type-3', 'id-3'); // -> unresolvable conflict
 const obj4 = createObject('type-4', 'id-4'); // -> invalid type
-<<<<<<< HEAD
 const dataSourceObj = createObject('data-source', 'data-source-id-1'); // -> data-source type, no need to add in the filteredObjects
 const objects = [obj1, obj2, obj3, obj4];
 const dataSourceObj1 = createObject('type-1', 'ds_id-1'); // -> object with data source id
 const dataSourceObj2 = createObject('type-2', 'ds_id-2'); // -> object with data source id
 const objectsWithDataSource = [dataSourceObj, dataSourceObj1, dataSourceObj2];
 const dataSourceObj1Error = getResultMock.conflict(dataSourceObj1.type, dataSourceObj1.id);
-=======
-const dsObj = createObject('data-source', 'data-source-id-1'); // -> data-source type, no need to add in the filteredObjects
-const objects = [obj1, obj2, obj3, obj4];
-const dsObj1 = createObject('type-1', 'ds_id-1'); // -> object with data source id
-const dsObj2 = createObject('type-2', 'ds_id-2'); // -> object with data source id
-const objectsWithDataSource = [dsObj, dsObj1, dsObj2];
-const dsObj1Error = getResultMock.conflict(dsObj1.type, dsObj1.id);
 
 describe('#checkConflictsForDataSource', () => {
   const setupParams = (partial: {
@@ -158,7 +121,7 @@ describe('#checkConflictsForDataSource', () => {
           {
             ...dataSourceObj2,
             id: 'currentDsId_id-2',
-          }
+          },
         ],
         errors: [],
         importIdMap: new Map([
@@ -174,14 +137,14 @@ describe('#checkConflictsForDataSource', () => {
         pendingOverwrites: new Set([
           `${dataSourceObj1.type}:${dataSourceObj1.id}`,
           `${dataSourceObj2.type}:${dataSourceObj2.id}`,
-        ])
+        ]),
       })
     );
   });
 
   it('can push error when do not override with data source conflict', async () => {
     const params = setupParams({
-      objects: [dsObj1],
+      objects: [dataSourceObj1],
       ignoreRegularConflicts: false,
       dataSourceId: 'currentDs',
     });
