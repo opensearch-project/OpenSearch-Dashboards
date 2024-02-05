@@ -496,6 +496,10 @@ exports[`Node.js version validation non-new Node.js version using a comparator w
 
 exports[`Node.js version validation non-new Node.js version using a comparator with a complete version, and the tilde operator ~4.55.666, should not accept v4.56.667, a minor upgrade with higher patch 1`] = `"OpenSearch Dashboards cannot start up using the Node.js runtime v4.56.667. Please use a Node.js runtime version that is v4.55.666 or greater and lower than v4.56.0."`;
 
+exports[`Node.js version validation non-new Node.js version using a comparator with a complete version, and the tilde operator ~4.55.666, should not accept v4.56.667, a minor upgrade with higher patch 2`] = `"OpenSearch Dashboards cannot start up using the Node.js runtime v4.56.666. Please use a Node.js runtime version that is v4.55.666 or greater and lower than v4.56.0."`;
+
+exports[`Node.js version validation non-new Node.js version using a comparator with a complete version, and the tilde operator ~4.55.666, should not accept v4.56.667, a minor upgrade with higher patch 3`] = `"OpenSearch Dashboards cannot start up using the Node.js runtime v4.56.667. Please use a Node.js runtime version that is v4.55.666 or greater and lower than v4.56.0."`;
+
 exports[`Node.js version validation non-new Node.js version using a comparator with a complete version, and the tilde operator ~4.55.666, should not accept v5.54.665, a major upgrade with lower minor and lower patch 1`] = `"OpenSearch Dashboards cannot start up using the Node.js runtime v5.54.665. Please use a Node.js runtime version that is v4.55.666 or greater and lower than v4.56.0."`;
 
 exports[`Node.js version validation non-new Node.js version using a comparator with a complete version, and the tilde operator ~4.55.666, should not accept v5.54.666, a major upgrade with lower minor and same patch 1`] = `"OpenSearch Dashboards cannot start up using the Node.js runtime v5.54.666. Please use a Node.js runtime version that is v4.55.666 or greater and lower than v4.56.0."`;

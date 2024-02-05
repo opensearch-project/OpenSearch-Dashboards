@@ -39,6 +39,12 @@ describe('#regenerateIds', () => {
     { type: 'baz', id: '3' },
   ] as any) as SavedObject[];
 
+  const dataSourceObjects = ([{ type: 'data-source', id: '1' }] as any) as SavedObject[];
+
+  test('can filter out data source object', () => {
+    expect(regenerateIds(dataSourceObjects, '').size).toBe(0);
+  });
+
   test('returns expected values', () => {
     mockUuidv4
       .mockReturnValueOnce('uuidv4 #1')
