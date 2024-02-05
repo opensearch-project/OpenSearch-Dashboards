@@ -14,16 +14,17 @@ import './_table_header.scss';
 import React from 'react';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { TableHeaderColumn } from './table_header_column';
-import { SortOrder, LegacyDisplayedColumn } from './helper';
+import { LegacyDisplayedColumn } from './helper';
 import { getDefaultSort } from '../../view_components/utils/get_default_sort';
+import { SortDirection, SortOrder } from '../../../saved_searches/types';
 
 interface Props {
   displayedColumns: LegacyDisplayedColumn[];
-  defaultSortOrder: string;
+  defaultSortOrder: SortDirection;
   indexPattern: IndexPattern;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onRemoveColumn?: (name: string) => void;
-  onReorderColumn?: (colName: string, destination: number) => void;
+  onMoveColumn?: (colName: string, destination: number) => void;
   sortOrder: SortOrder[];
 }
 
@@ -32,7 +33,7 @@ export function TableHeader({
   defaultSortOrder,
   indexPattern,
   onChangeSortOrder,
-  onReorderColumn,
+  onMoveColumn,
   onRemoveColumn,
   sortOrder,
 }: Props) {
@@ -47,7 +48,7 @@ export function TableHeader({
             sortOrder={
               sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
             }
-            onReorderColumn={onReorderColumn}
+            onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
             onChangeSortOrder={onChangeSortOrder}
           />

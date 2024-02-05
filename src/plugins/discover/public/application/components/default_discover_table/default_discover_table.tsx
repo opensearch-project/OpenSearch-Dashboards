@@ -13,8 +13,8 @@ import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_
 import { TableRow } from './table_rows';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { Pagination } from './pagination';
-import { SortOrder } from './helper';
 import { getLegacyDisplayedColumns } from './helper';
+import { SortDirection, SortOrder } from '../../../saved_searches/types';
 
 export interface DefaultDiscoverTableProps {
   columns: string[];
@@ -24,14 +24,14 @@ export interface DefaultDiscoverTableProps {
   sort: SortOrder[];
   onSort: (s: SortOrder[]) => void;
   onRemoveColumn: (column: string) => void;
-  onReorderColumn: (colName: string, destination: number) => void;
+  onMoveColumn: (colName: string, destination: number) => void;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
   onClose: () => void;
   sampleSize: number;
   isShortDots: boolean;
   hideTimeColumn: boolean;
-  defaultSortOrder: string;
+  defaultSortOrder: SortDirection;
   showPagination?: boolean;
 }
 
@@ -43,7 +43,7 @@ export const LegacyDiscoverTable = ({
   sort,
   onSort,
   onRemoveColumn,
-  onReorderColumn,
+  onMoveColumn,
   onAddColumn,
   onFilter,
   onClose,
@@ -123,7 +123,7 @@ export const LegacyDiscoverTable = ({
             goToPage={goToPage}
             startItem={currentRowCounts.startRow + 1}
             endItem={currentRowCounts.endRow}
-            totalItems={rows.length}
+            totalItems={hits}
             sampleSize={sampleSize}
           />
         ) : null}
@@ -134,7 +134,7 @@ export const LegacyDiscoverTable = ({
               defaultSortOrder={defaultSortOrder}
               indexPattern={indexPattern}
               onChangeSortOrder={onSort}
-              onReorderColumn={onReorderColumn}
+              onMoveColumn={onMoveColumn}
               onRemoveColumn={onRemoveColumn}
               sortOrder={sort}
             />

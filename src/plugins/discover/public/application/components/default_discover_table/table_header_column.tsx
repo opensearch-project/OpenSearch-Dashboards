@@ -14,7 +14,7 @@ import './_table_header.scss';
 import React, { ReactNode } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { SortOrder } from './helper';
+import { SortOrder } from '../../../saved_searches/types';
 
 interface Props {
   colLeftIdx: number; // idx of the column to the left, -1 if moving is not possible
@@ -24,7 +24,7 @@ interface Props {
   isSortable?: boolean;
   name: string;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
-  onReorderColumn?: (colName: string, destination: number) => void;
+  onMoveColumn?: (colName: string, destination: number) => void;
   onRemoveColumn?: (name: string) => void;
   sortOrder: SortOrder[];
 }
@@ -43,7 +43,7 @@ export function TableHeaderColumn({
   isSortable,
   name,
   onChangeSortOrder,
-  onReorderColumn,
+  onMoveColumn,
   onRemoveColumn,
   sortOrder,
 }: Props) {
@@ -137,13 +137,13 @@ export function TableHeaderColumn({
     },
     // Move Left Button
     {
-      active: colLeftIdx >= 0 && typeof onReorderColumn === 'function',
+      active: colLeftIdx >= 0 && typeof onMoveColumn === 'function',
       ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the left',
         values: { columnName: name },
       }),
       className: 'fa fa-angle-double-left osdDocTableHeader__move',
-      onClick: () => onReorderColumn && onReorderColumn(name, colLeftIdx),
+      onClick: () => onMoveColumn && onMoveColumn(name, colLeftIdx),
       testSubject: `docTableMoveLeftHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
         defaultMessage: 'Move column to the left',
@@ -152,13 +152,13 @@ export function TableHeaderColumn({
     },
     // Move Right Button
     {
-      active: colRightIdx >= 0 && typeof onReorderColumn === 'function',
+      active: colRightIdx >= 0 && typeof onMoveColumn === 'function',
       ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the right',
         values: { columnName: name },
       }),
       className: 'fa fa-angle-double-right osdDocTableHeader__move',
-      onClick: () => onReorderColumn && onReorderColumn(name, colRightIdx),
+      onClick: () => onMoveColumn && onMoveColumn(name, colRightIdx),
       testSubject: `docTableMoveRightHeader-${name}`,
       tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonTooltip', {
         defaultMessage: 'Move column to the right',
