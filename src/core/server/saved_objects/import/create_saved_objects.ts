@@ -163,7 +163,7 @@ export const createSavedObjects = async <T>({
     }
     return { ...object, ...(references && { references }) };
   });
-
+console.log("objectIdMap", objectIdMap)
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
   let expectedResults = objectsToCreate;
   if (!accumulatedErrors.some(({ error: { type } }) => resolvableErrors.includes(type))) {

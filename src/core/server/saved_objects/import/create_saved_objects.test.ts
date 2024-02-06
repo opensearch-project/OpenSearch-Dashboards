@@ -94,8 +94,6 @@ const searchObj = {
     },
   },
 }; // -> success
-const targetDataSourceId = 'target-data-source-id';
-
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
 const importId3 = 'id-foo';
