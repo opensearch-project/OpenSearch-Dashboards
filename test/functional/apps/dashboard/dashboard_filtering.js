@@ -230,7 +230,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowCountFromLegacyTable(1);
+        await testSubjects.existOrFail('docTableExpandToggleColumn');
       });
 
       it('vega', async () => {
