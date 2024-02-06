@@ -8,7 +8,11 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ISourceDataSet, IndexPatternOption } from '../datasource';
 import { DataSourceType, GenericDataSource } from '../datasource_services';
-import { DataSourceGroup, DataSourceSelectableProps } from './types';
+import {
+  DataSourceGroup,
+  DataSourceSelectableProps,
+  DataSourceSelectorConfigurations,
+} from './types';
 
 type DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS' | 's3glue' | 'spark';
 
@@ -63,11 +67,22 @@ export const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetTyp
 };
 
 // Convert data sets into a structured format suitable for selector rendering.
-const getSourceList = (allDataSets: ISourceDataSet[]) => {
+const getSourceList = (
+  allDataSets: ISourceDataSet[],
+  dataSourceSelectorConfigs: DataSourceSelectorConfigurations
+) => {
   const finalList = [] as DataSourceGroup[];
   allDataSets.forEach((curDataSet) => {
     const typeKey = curDataSet.ds.getType() as DataSourceTypeKey;
-    const groupName = DATASOURCE_TYPE_DISPLAY_NAME_MAP[typeKey] || 'Default Group';
+    let groupName =
+      DATASOURCE_TYPE_DISPLAY_NAME_MAP[typeKey] ||
+      `Default Group${dataSourceSelectorConfigs.customGroupTitleExtension || ''}`;
+
+    // add '- Opens in Log Explorer' to hint user that selecting these types of data sources
+    // will lead to redirection to log explorer
+    if (typeKey !== 'DEFAULT_INDEX_PATTERNS') {
+      groupName = `${groupName}${dataSourceSelectorConfigs.customGroupTitleExtension || ''}`;
+    }
 
     const existingGroup = finalList.find((item) => item.label === groupName);
     const mappedOptions = curDataSet.data_sets.map((dataSet) =>
@@ -104,16 +119,17 @@ export const DataSourceSelectable = ({
   setDataSourceOptionList,
   onGetDataSetError, //   onGetDataSetError, Callback for handling get data set errors. Ensure it's memoized.
   singleSelection = { asPlainText: true },
+  dataSourceSelectorConfigs,
   ...comboBoxProps
 }: DataSourceSelectableProps) => {
   // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
     Promise.all(getDataSets(dataSources))
       .then((results) => {
-        setDataSourceOptionList(getSourceList(results));
+        setDataSourceOptionList(getSourceList(results, dataSourceSelectorConfigs));
       })
       .catch((e) => onGetDataSetError(e));
-  }, [dataSources, setDataSourceOptionList, onGetDataSetError]);
+  }, [dataSources, setDataSourceOptionList, onGetDataSetError, dataSourceSelectorConfigs]);
 
   const handleSourceChange = useCallback(
     (selectedOptions: any) => onDataSourceSelect(selectedOptions),

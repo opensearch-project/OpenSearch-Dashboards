@@ -24,6 +24,9 @@ import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
 
+const LOG_EXPLORER_TITLE_HINT = ' - Opens in Log Explorer';
+const DATA_SOURCE_SELECTOR_CONFIGS = { customGroupTitleExtension: LOG_EXPLORER_TITLE_HINT };
+
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
   const dispatch = useTypedDispatch();
@@ -190,6 +193,7 @@ export const Sidebar: FC = ({ children }) => {
             onDataSourceSelect={handleSourceSelection}
             selectedSources={selectedSources}
             onGetDataSetError={handleGetDataSetError}
+            dataSourceSelectorConfigs={DATA_SOURCE_SELECTOR_CONFIGS}
             fullWidth
           />
         </EuiSplitPanel.Inner>

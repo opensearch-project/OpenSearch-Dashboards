@@ -30,4 +30,9 @@ export interface DataSourceSelectableProps extends Pick<EuiComboBoxProps<unknown
   dataSourceOptionList: DataSourceGroup[];
   selectedSources: DataSourceOption[];
   setDataSourceOptionList: (dataSourceList: DataSourceGroup[]) => void;
+  dataSourceSelectorConfigs: DataSourceSelectorConfigurations;
+}
+
+export interface DataSourceSelectorConfigurations {
+  customGroupTitleExtension: string;
 }
