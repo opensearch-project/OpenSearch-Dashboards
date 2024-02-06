@@ -369,7 +369,7 @@ describe('#importSavedObjectsFromStream', () => {
         });
 
         await resolveSavedObjectsImportErrors(options);
-        expect(regenerateIds).toHaveBeenCalledWith(collectedObjects);
+        expect(regenerateIds).toHaveBeenCalledWith(collectedObjects, undefined);
       });
 
       test('creates saved objects', async () => {
