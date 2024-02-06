@@ -134,7 +134,6 @@ export const Sidebar: FC = ({ children }) => {
   const showModal = useCallback(
     (dsName: string, dsType: string) => {
       setModalContent(getRedirectModal(dsName, dsType));
-      // setIsModalVisible(true);
     },
     [setModalContent, getRedirectModal]
   );
