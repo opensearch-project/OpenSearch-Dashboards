@@ -192,13 +192,15 @@ export default function ({ getService, getPageObjects }) {
     describe('saved search filtering', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.switchDiscoverTable('new');
+        await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultDataRange();
       });
 
       it('are added when a cell magnifying glass is clicked', async function () {
-        await PageObjects.discover.switchDiscoverTable('new');
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
 

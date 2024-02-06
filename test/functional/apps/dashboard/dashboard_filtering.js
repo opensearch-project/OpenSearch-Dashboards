@@ -79,6 +79,10 @@ export default function ({ getService, getPageObjects }) {
 
     describe('adding a filter that excludes all data', () => {
       before(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.switchDiscoverTable('new');
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
@@ -189,7 +193,6 @@ export default function ({ getService, getPageObjects }) {
     describe('disabling a filter unfilters the data on', function () {
       before(async () => {
         await filterBar.toggleFilterEnabled('bytes');
-        await PageObjects.discover.switchDiscoverTable('new');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
       });
@@ -227,7 +230,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowCount(1);
+        await dashboardExpect.savedSearchRowCountFromLegacyTable(1);
       });
 
       it('vega', async () => {
