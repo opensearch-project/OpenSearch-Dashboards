@@ -62,7 +62,6 @@ export const createSavedObjects = async <T>({
   dataSourceTitle,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
-
   const errorSet = accumulatedErrors.reduce(
     (acc, { type, id }) => acc.add(`${type}:${id}`),
     new Set<string>()

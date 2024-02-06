@@ -66,6 +66,7 @@ export async function checkConflicts({
   if (objects.length === 0) {
     return { filteredObjects, errors, importIdMap, pendingOverwrites };
   }
+
   const retryMap = retries.reduce(
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
     new Map<string, SavedObjectsImportRetry>()
