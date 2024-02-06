@@ -39,7 +39,14 @@ export default function ({ getService, getPageObjects }) {
   const opensearchArchiver = getService('opensearchArchiver');
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'visualize',
+    'timePicker',
+    'discover',
+  ]);
 
   describe('dashboard filter bar', () => {
     before(async () => {
@@ -191,6 +198,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('are added when a cell magnifying glass is clicked', async function () {
+        await PageObjects.discover.switchDiscoverTable('new');
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
 

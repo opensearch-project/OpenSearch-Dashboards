@@ -46,7 +46,14 @@ export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const security = getService('security');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'visualize',
+    'timePicker',
+    'discover',
+  ]);
 
   describe('dashboard filtering', function () {
     this.tags('includeFirefox');
@@ -182,6 +189,7 @@ export default function ({ getService, getPageObjects }) {
     describe('disabling a filter unfilters the data on', function () {
       before(async () => {
         await filterBar.toggleFilterEnabled('bytes');
+        await PageObjects.discover.switchDiscoverTable('new');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
       });
