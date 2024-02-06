@@ -53,12 +53,7 @@ export async function checkConflictsForDataSource({
     } = object;
     const { destinationId } = retryMap.get(`${type}:${id}`) || {};
 
-    if (!object.type.includes('data-source')) {
-      // check the previous data source existed or not
-      // by extract it from the id
-      // e.g. e0c9e490-bdd7-11ee-b216-d78a57002330_ff959d40-b880-11e8-a6d9-e546fe2bba5f
-      // e0c9e490-bdd7-11ee-b216-d78a57002330 is the data source id
-      // for saved object data source itself, e0c9e490-bdd7-11ee-b216-d78a57002330 return undefined
+    if (object.type !== 'data-source') {
       const parts = id.split('_'); // this is the array to host the split results of the id
       const previoudDataSourceId = parts.length > 1 ? parts[0] : undefined;
       /**

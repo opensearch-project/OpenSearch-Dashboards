@@ -389,11 +389,11 @@ describe('#importSavedObjectsFromStream', () => {
       const error1 = createError();
       const error2 = createError();
       // add some objects with data source id
-      const dsObj1 = createObject(testDataSourceId);
+      const dataSourceObj1 = createObject(testDataSourceId);
       const tmp2 = createObject(testDataSourceId);
-      const dsObj2 = { ...tmp2, destinationId: 'some-destinationId', originId: tmp.id };
-      const dsObj3 = { ...createObject(testDataSourceId), destinationId: 'another-destinationId' };
-      const createdDsObjects = [dsObj1, dsObj2, dsObj3];
+      const dataSourceObj2 = { ...tmp2, destinationId: 'some-destinationId', originId: tmp.id };
+      const dataSourceObj3 = { ...createObject(testDataSourceId), destinationId: 'another-destinationId' };
+      const createdDsObjects = [dataSourceObj1, dataSourceObj2, dataSourceObj3];
 
       // results
       const success1 = {
@@ -416,23 +416,23 @@ describe('#importSavedObjectsFromStream', () => {
       const errors = [error1, error2];
 
       const dsSuccess1 = {
-        type: dsObj1.type,
-        id: dsObj1.id,
-        meta: { title: dsObj1.attributes.title, icon: `${dsObj1.type}-icon` },
+        type: dataSourceObj1.type,
+        id: dataSourceObj1.id,
+        meta: { title: dataSourceObj1.attributes.title, icon: `${dataSourceObj1.type}-icon` },
       };
 
       const dsSuccess2 = {
-        type: dsObj2.type,
-        id: dsObj2.id,
-        meta: { title: dsObj2.attributes.title, icon: `${dsObj2.type}-icon` },
-        destinationId: dsObj2.destinationId,
+        type: dataSourceObj2.type,
+        id: dataSourceObj2.id,
+        meta: { title: dataSourceObj2.attributes.title, icon: `${dataSourceObj2.type}-icon` },
+        destinationId: dataSourceObj2.destinationId,
       };
 
       const dsSuccess3 = {
-        type: dsObj3.type,
-        id: dsObj3.id,
-        meta: { title: dsObj3.attributes.title, icon: `${dsObj3.type}-icon` },
-        destinationId: dsObj3.destinationId,
+        type: dataSourceObj3.type,
+        id: dataSourceObj3.id,
+        meta: { title: dataSourceObj3.attributes.title, icon: `${dataSourceObj3.type}-icon` },
+        destinationId: dataSourceObj3.destinationId,
       };
 
       test('with createNewCopies disabled', async () => {
