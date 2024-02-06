@@ -144,13 +144,14 @@ describe('Testing fetchTableDataCell function', () => {
 
     expect(comp).toMatchInlineSnapshot(`
       <EuiDescriptionList
+        className="source"
         compressed={true}
         type="inline"
       >
         <EuiDescriptionListTitle
           className="osdDescriptionListFieldTitle"
         >
-          order_date
+          order_date:
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           dangerouslySetInnerHTML={
