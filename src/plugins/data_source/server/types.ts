@@ -53,6 +53,8 @@ declare module 'src/core/server' {
 
 export interface DataSourcePluginSetup {
   createDataSourceError: (err: any) => DataSourceError;
+  dataSourceEnabled: () => boolean;
+  defaultClusterEnabled: () => boolean;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourcePluginStart {}
