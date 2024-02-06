@@ -78,6 +78,24 @@ const dashboardObjWithDataSource = createObject('dashboard', 'ds_dashboard-id1')
 const visualizationObjWithDataSource = createObject('visualization', 'ds_visualization-id1'); // -> success
 const searchObjWithDataSource = createObject('search', 'ds_search-id1'); // -> success
 
+// objs without data source id, used to test can get saved object with data source id
+const searchObj = {
+  id: '6aea5700-ac94-11e8-a651-614b2788174a',
+  type: 'search',
+  attributes: {
+    title: 'some-title',
+  },
+  references: [],
+  source: {
+    title: 'mysavedsearch',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON:
+        '{"index":"4c3f3c30-ac94-11e8-a651-614b2788174a","highlightAll":true,"version":true,"query":{"query":"","language":"lucene"},"filter":[]}',
+    },
+  },
+}; // -> success
+const targetDataSourceId = 'target-data-source-id';
+
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
 const importId3 = 'id-foo';
@@ -246,6 +264,11 @@ describe('#createSavedObjects', () => {
       ],
     });
   };
+  const setupMockResultsToConstructDataSource = (options: CreateSavedObjectsParams) => {
+    bulkCreate.mockResolvedValue({
+      saved_objects: [getResultMock.success(searchObj, options)],
+    });
+  };
 
   describe('handles accumulated errors as expected', () => {
     const resolvableErrors: SavedObjectsImportError[] = [
@@ -357,6 +380,24 @@ describe('#createSavedObjects', () => {
     ];
     expectBulkCreateArgs.objects(1, argObjs);
   };
+
+  const testBulkCreateObjectsToAddDataSource = async (
+    namespace?: string,
+    dataSourceId?: string,
+    dataSourceTitle?: string
+  ) => {
+    const options = setupParams({
+      objects: [searchObj],
+      namespace,
+      dataSourceId,
+      dataSourceTitle,
+    });
+    setupMockResultsToConstructDataSource(options);
+    const result = (await createSavedObjects(options)).createdObjects[0] as SavedObject;
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(result.attributes)).toBe('{"title":"some-title_some-data-source-title"}');
+  };
+
   const testBulkCreateOptions = async (namespace?: string) => {
     const overwrite = (Symbol() as unknown) as boolean;
     const options = setupParams({ objects: objs, namespace, overwrite });
@@ -466,6 +507,14 @@ describe('#createSavedObjects', () => {
     });
     test('returns bulkCreate results that are remapped to IDs of imported objects with data source id', async () => {
       await testReturnValueWithDataSource(
+        'some-namespace',
+        'some-datasource-id',
+        'some-data-source-title'
+      );
+    });
+
+    test('can correct attach datasource id to a search object', async () => {
+      await testBulkCreateObjectsToAddDataSource(
         'some-namespace',
         'some-datasource-id',
         'some-data-source-title'
