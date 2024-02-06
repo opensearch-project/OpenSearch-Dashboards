@@ -4,7 +4,18 @@
  */
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
+import {
+  EuiPageSideBar,
+  EuiSplitPanel,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalHeaderTitle,
+  EuiModalFooter,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSourceGroup, DataSourceSelectable, DataSourceType } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
@@ -19,6 +30,8 @@ export const Sidebar: FC = ({ children }) => {
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSourceType[]>([]);
+  const [modalContent, setModalContent] = useState<React.ReactNode | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const {
     services: {
@@ -59,6 +72,67 @@ export const Sidebar: FC = ({ children }) => {
     }
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
+  const closeModal = useCallback(() => setIsModalVisible(false), [setIsModalVisible]);
+
+  const redirectToLogExplorer = useCallback(
+    (dsName: string, dsType: string) => {
+      return application.navigateToUrl(
+        `../observability-logs#/explorer?datasourceName=${dsName}&datasourceType=${dsType}`
+      );
+    },
+    [application]
+  );
+
+  // show log explorer redirection modal when non-index data source clicked
+  const getRedirectModal = useCallback(
+    (dsName: string, dsType: string) => {
+      return (
+        <EuiModal onClose={closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <h1>
+                {i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalTitle', {
+                  defaultMessage: 'Open in Log Explorer',
+                })}
+              </h1>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText>
+              {i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalMessage', {
+                defaultMessage:
+                  'Selecting this data source will open the Log Explorer application, where you can query \
+                data using PPL/SQL.',
+              })}
+            </EuiText>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
+            <EuiButton
+              onClick={() => {
+                redirectToLogExplorer(dsName, dsType);
+              }}
+              fill
+            >
+              {i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalFooterButtonTxt', {
+                defaultMessage: 'Open in Log Explorer ',
+              })}
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      );
+    },
+    [closeModal, redirectToLogExplorer]
+  );
+
+  const showModal = useCallback(
+    (dsName: string, dsType: string) => {
+      setModalContent(getRedirectModal(dsName, dsType));
+      setIsModalVisible(true);
+    },
+    [setModalContent, setIsModalVisible, getRedirectModal]
+  );
+
   const handleSourceSelection = useCallback(
     (selectedDataSources: DataSourceOption[]) => {
       if (selectedDataSources.length === 0) {
@@ -68,14 +142,13 @@ export const Sidebar: FC = ({ children }) => {
       // Temporary redirection solution for 2.11, where clicking non-index-pattern datasource
       // will redirect user to Observability event explorer
       if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-        return application.navigateToUrl(
-          `../observability-logs#/explorer?datasourceName=${selectedDataSources[0].label}&datasourceType=${selectedDataSources[0].type}`
-        );
+        showModal(selectedDataSources[0].label, selectedDataSources[0].type);
+        return;
       }
       setSelectedSources(selectedDataSources);
       dispatch(setIndexPattern(selectedDataSources[0].value));
     },
-    [application, dispatch]
+    [dispatch, showModal, setSelectedSources]
   );
 
   const handleGetDataSetError = useCallback(
@@ -117,6 +190,7 @@ export const Sidebar: FC = ({ children }) => {
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>
+        {isModalVisible && modalContent}
       </EuiSplitPanel.Outer>
     </EuiPageSideBar>
   );
