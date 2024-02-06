@@ -43,12 +43,7 @@ const getResultMock = {
 /**
  * Create a variety of different objects to exercise different import / result scenarios
  */
-const obj1 = createObject('type-1', 'id-1'); // -> success
-const obj2 = createObject('type-2', 'id-2'); // -> conflict
-const obj3 = createObject('type-3', 'id-3'); // -> unresolvable conflict
-const obj4 = createObject('type-4', 'id-4'); // -> invalid type
 const dataSourceObj = createObject('data-source', 'data-source-id-1'); // -> data-source type, no need to add in the filteredObjects
-const objects = [obj1, obj2, obj3, obj4];
 const dataSourceObj1 = createObject('type-1', 'ds_id-1'); // -> object with data source id
 const dataSourceObj2 = createObject('type-2', 'ds_id-2'); // -> object with data source id
 const objectsWithDataSource = [dataSourceObj, dataSourceObj1, dataSourceObj2];
