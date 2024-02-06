@@ -67,7 +67,7 @@ export async function checkConflictsForDataSource({
         });
       } else if (previoudDataSourceId === dataSourceId) {
         filteredObjects.push(object);
-      } else if (previoudDataSourceId && previoudDataSourceId !== dataSourceId) {
+      } else {
         if (ignoreRegularConflicts) {
           /**
            * use old key and new value in the importIdMap
