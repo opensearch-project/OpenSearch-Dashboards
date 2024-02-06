@@ -222,13 +222,18 @@ export const getTopNavLinks = (
     },
   };
 
+  const newDiscoverButtonLabel = i18n.translate('discover.localMenu.discoverButton.label.new', {
+    defaultMessage: 'Try new Discover',
+  });
+  const oldDiscoverButtonLabel = i18n.translate('discover.localMenu.discoverButton.label.old', {
+    defaultMessage: 'Use legacy Discover',
+  });
+  const isNewDiscover = getDataGridTableSetting(storage);
   const newTable: TopNavMenuData = {
     id: 'table-datagrid',
-    label: i18n.translate('discover.localMenu.newTableTitle', {
-      defaultMessage: 'Try new Discover experience',
-    }),
+    label: isNewDiscover ? oldDiscoverButtonLabel : newDiscoverButtonLabel,
     description: i18n.translate('discover.localMenu.newTableDescription', {
-      defaultMessage: 'New Data Grid Table Experience',
+      defaultMessage: 'New Discover toggle Experience',
     }),
     testId: 'datagridTableButton',
     run: async () => {
@@ -245,8 +250,7 @@ export const getTopNavLinks = (
         window.location.reload();
       }
     },
-    type: 'toggle' as const,
-    emphasize: getDataGridTableSetting(storage),
+    iconType: isNewDiscover ? 'editorUndo' : 'cheer',
   };
 
   return [
