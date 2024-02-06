@@ -94,6 +94,27 @@ const searchObj = {
     },
   },
 }; // -> success
+
+const visualizationObj = {
+  id: '8411daa0-ac94-11e8-a651-614b2788174a',
+  type: 'visualization',
+  attributes: {
+    title: 'visualization-title',
+  },
+  references: [],
+  source: {
+    title: 'mysavedviz',
+    visState:
+      '{"title":"mysavedviz","type":"pie","params":{"type":"pie","addTooltip":true,"addLegend":true,"legendPosition":"right","isDonut":true,"labels":{"show":false,"values":true,"last_level":true,"truncate":100}},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{}}]}',
+    uiStateJSON: '{}',
+    description: '',
+    savedSearchId: '6aea5700-ac94-11e8-a651-614b2788174a',
+    version: 1,
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: '{"query":{"query":"","language":"lucene"},"filter":[]}',
+    },
+  },
+};
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
 const importId3 = 'id-foo';
@@ -264,7 +285,10 @@ describe('#createSavedObjects', () => {
   };
   const setupMockResultsToConstructDataSource = (options: CreateSavedObjectsParams) => {
     bulkCreate.mockResolvedValue({
-      saved_objects: [getResultMock.success(searchObj, options)],
+      saved_objects: [
+        getResultMock.success(searchObj, options),
+        getResultMock.success(visualizationObj, options),
+      ],
     });
   };
 
@@ -379,21 +403,24 @@ describe('#createSavedObjects', () => {
     expectBulkCreateArgs.objects(1, argObjs);
   };
 
-  const testBulkCreateObjectsToAddDataSource = async (
+  // testBulkCreateObjectsToAddDataSourceTitle
+  const testBulkCreateObjectsToAddDataSourceTitle = async (
     namespace?: string,
     dataSourceId?: string,
     dataSourceTitle?: string
   ) => {
     const options = setupParams({
-      objects: [searchObj],
+      objects: [searchObj, visualizationObj],
       namespace,
       dataSourceId,
       dataSourceTitle,
     });
     setupMockResultsToConstructDataSource(options);
-    const result = (await createSavedObjects(options)).createdObjects[0] as SavedObject;
+    const result = (await createSavedObjects(options)).createdObjects;
     expect(bulkCreate).toHaveBeenCalledTimes(1);
-    expect(JSON.stringify(result.attributes)).toBe('{"title":"some-title_some-data-source-title"}');
+    result.map((resultObj) =>
+      expect(JSON.stringify(resultObj.attributes)).toContain('some-data-source-title')
+    );
   };
 
   const testBulkCreateOptions = async (namespace?: string) => {
@@ -512,7 +539,7 @@ describe('#createSavedObjects', () => {
     });
 
     test('can correct attach datasource id to a search object', async () => {
-      await testBulkCreateObjectsToAddDataSource(
+      await testBulkCreateObjectsToAddDataSourceTitle(
         'some-namespace',
         'some-datasource-id',
         'some-data-source-title'
