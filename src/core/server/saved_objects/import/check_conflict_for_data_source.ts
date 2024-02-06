@@ -70,7 +70,6 @@ export async function checkConflictsForDataSource({
           const omitOriginId = ignoreRegularConflicts;
           const rawId = parts[1];
           importIdMap.set(`${type}:${id}`, { id: `${dataSourceId}_${rawId}`, omitOriginId });
-          pendingOverwrites.add(`${type}:${id}`);
           filteredObjects.push({ ...object, id: `${dataSourceId}_${rawId}` });
         } else {
           // not override
