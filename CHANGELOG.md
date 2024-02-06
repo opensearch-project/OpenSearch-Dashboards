@@ -57,7 +57,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG] Remove duplicate sample data as id 90943e30-9a47-11e8-b64d-95841ca0b247 ([5668](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5668))
 - [BUG][Multiple Datasource] Fix datasource testing connection unexpectedly passed with wrong endpoint [#5663](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5663)
 - [BUG][Multiple Datasource] Datasource id is required if multiple datasource is enabled and no default cluster supported [#5751](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5751)
-- [BUG][Multiple Datasource] Dy default turn on default cluster [#5811](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5811)
 
 ### 🚞 Infrastructure
 
