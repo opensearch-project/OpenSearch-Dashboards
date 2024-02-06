@@ -161,6 +161,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.switchDiscoverTable('new');
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -279,6 +280,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.switchDiscoverTable('new');
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -375,6 +377,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.switchDiscoverTable('new');
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -473,6 +476,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = 'Sep 17, 2015 @ 19:22:00.000';
         const toTime = 'Sep 18, 2015 @ 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.switchDiscoverTable('new');
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
