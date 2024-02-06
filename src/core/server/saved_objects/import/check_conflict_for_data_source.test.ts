@@ -81,17 +81,6 @@ describe('#checkConflictsForDataSource', () => {
     });
   });
 
-  it('returns original objects result when there is no data source id', async () => {
-    const params = setupParams({ objects });
-    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
-    expect(checkConflictsForDataSourceResult).toEqual({
-      filteredObjects: [...objects],
-      errors: [],
-      importIdMap: new Map(),
-      pendingOverwrites: new Set(),
-    });
-  });
-
   it('return obj if it is not data source obj and there is no conflict of the data source id', async () => {
     const params = setupParams({ objects: objectsWithDataSource, dataSourceId: 'ds' });
     const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);

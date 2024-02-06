@@ -102,7 +102,6 @@ describe('#importSavedObjectsFromStream', () => {
   const setupOptions = (
     createNewCopies: boolean = false,
     dataSourceId: string | undefined = undefined
-
   ): SavedObjectsImportOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -392,7 +391,10 @@ describe('#importSavedObjectsFromStream', () => {
       const dataSourceObj1 = createObject(testDataSourceId);
       const tmp2 = createObject(testDataSourceId);
       const dataSourceObj2 = { ...tmp2, destinationId: 'some-destinationId', originId: tmp.id };
-      const dataSourceObj3 = { ...createObject(testDataSourceId), destinationId: 'another-destinationId' };
+      const dataSourceObj3 = {
+        ...createObject(testDataSourceId),
+        destinationId: 'another-destinationId',
+      };
       const createdDsObjects = [dataSourceObj1, dataSourceObj2, dataSourceObj3];
 
       // results
