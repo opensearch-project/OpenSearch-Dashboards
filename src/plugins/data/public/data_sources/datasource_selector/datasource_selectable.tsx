@@ -74,9 +74,7 @@ const getSourceList = (
   const finalList = [] as DataSourceGroup[];
   allDataSets.forEach((curDataSet) => {
     const typeKey = curDataSet.ds.getType() as DataSourceTypeKey;
-    let groupName =
-      DATASOURCE_TYPE_DISPLAY_NAME_MAP[typeKey] ||
-      `Default Group${dataSourceSelectorConfigs.customGroupTitleExtension || ''}`;
+    let groupName = DATASOURCE_TYPE_DISPLAY_NAME_MAP[typeKey] || `Default Group`;
 
     // add '- Opens in Log Explorer' to hint user that selecting these types of data sources
     // will lead to redirection to log explorer

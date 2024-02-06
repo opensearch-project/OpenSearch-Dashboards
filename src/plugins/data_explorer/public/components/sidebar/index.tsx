@@ -34,7 +34,6 @@ export const Sidebar: FC = ({ children }) => {
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSourceType[]>([]);
   const [modalContent, setModalContent] = useState<React.ReactNode | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const {
     services: {
@@ -75,8 +74,6 @@ export const Sidebar: FC = ({ children }) => {
     }
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
-  const closeModal = useCallback(() => setIsModalVisible(false), [setIsModalVisible]);
-
   const redirectToLogExplorer = useCallback(
     (dsName: string, dsType: string) => {
       return application.navigateToUrl(
@@ -89,7 +86,7 @@ export const Sidebar: FC = ({ children }) => {
   const getRedirectModal = useCallback(
     (dsName: string, dsType: string) => {
       return (
-        <EuiModal onClose={closeModal}>
+        <EuiModal onClose={() => setModalContent(null)}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <h1>
@@ -109,7 +106,7 @@ export const Sidebar: FC = ({ children }) => {
             </EuiText>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal}>
+            <EuiButtonEmpty onClick={() => setModalContent(null)}>
               {i18n.translate(
                 'dataExplorer.sidebar.LogExplorerRedirectionModalFooterCancelButtonTxt',
                 {
@@ -131,15 +128,15 @@ export const Sidebar: FC = ({ children }) => {
         </EuiModal>
       );
     },
-    [closeModal, redirectToLogExplorer]
+    [redirectToLogExplorer]
   );
 
   const showModal = useCallback(
     (dsName: string, dsType: string) => {
       setModalContent(getRedirectModal(dsName, dsType));
-      setIsModalVisible(true);
+      // setIsModalVisible(true);
     },
-    [setModalContent, setIsModalVisible, getRedirectModal]
+    [setModalContent, getRedirectModal]
   );
 
   const handleSourceSelection = useCallback(
@@ -200,7 +197,7 @@ export const Sidebar: FC = ({ children }) => {
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>
-        {isModalVisible && modalContent}
+        {modalContent}
       </EuiSplitPanel.Outer>
     </EuiPageSideBar>
   );
