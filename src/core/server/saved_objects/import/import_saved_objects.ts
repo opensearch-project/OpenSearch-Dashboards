@@ -135,7 +135,9 @@ export async function importSavedObjectsFromStream({
 
   // Create objects in bulk
   const createSavedObjectsParams = {
-    objects: dataSourceId ? collectSavedObjectsResult.collectedObjects.filter(object => object.type !== 'data-source') : collectSavedObjectsResult.collectedObjects,
+    objects: dataSourceId
+      ? collectSavedObjectsResult.collectedObjects.filter((object) => object.type !== 'data-source')
+      : collectSavedObjectsResult.collectedObjects,
     accumulatedErrors: errorAccumulator,
     savedObjectsClient,
     importIdMap,
