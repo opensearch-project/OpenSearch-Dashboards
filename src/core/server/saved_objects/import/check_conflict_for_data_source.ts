@@ -56,33 +56,27 @@ export async function checkConflictsForDataSource({
     if (object.type !== 'data-source') {
       const parts = id.split('_'); // this is the array to host the split results of the id
       const previoudDataSourceId = parts.length > 1 ? parts[0] : undefined;
+      const rawId = previoudDataSourceId ? parts[1] : parts[0];
+
       /**
        * for import saved object from osd exported
        * when the imported saved objects with the different dataSourceId comparing to the current dataSourceId
        */
-      if (!previoudDataSourceId) {
-        filteredObjects.push({
-          ...object,
-          id: `${dataSourceId}_${object.id}`,
-        });
-      } else if (previoudDataSourceId === dataSourceId) {
+
+      if (
+        previoudDataSourceId &&
+        previoudDataSourceId !== dataSourceId &&
+        !ignoreRegularConflicts
+      ) {
+        const error = { type: 'conflict' as 'conflict', ...(destinationId && { destinationId }) };
+        errors.push({ type, id, title, meta: { title }, error });
+      } else if (previoudDataSourceId && previoudDataSourceId === dataSourceId) {
         filteredObjects.push(object);
       } else {
-        if (ignoreRegularConflicts) {
-          /**
-           * use old key and new value in the importIdMap
-           */
-          const omitOriginId = ignoreRegularConflicts;
-          const rawId = parts[1];
-          importIdMap.set(`${type}:${id}`, { id: `${dataSourceId}_${rawId}`, omitOriginId });
-          pendingOverwrites.add(`${type}:${id}`);
-          filteredObjects.push({ ...object, id: `${dataSourceId}_${rawId}` });
-        } else {
-          // not override
-          // push error
-          const error = { type: 'conflict' as 'conflict', ...(destinationId && { destinationId }) };
-          errors.push({ type, id, title, meta: { title }, error });
-        }
+        const omitOriginId = ignoreRegularConflicts;
+        importIdMap.set(`${type}:${id}`, { id: `${dataSourceId}_${rawId}`, omitOriginId });
+        pendingOverwrites.add(`${type}:${id}`);
+        filteredObjects.push({ ...object, id: `${dataSourceId}_${rawId}` });
       }
     }
   });
