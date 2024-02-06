@@ -47,3 +47,4 @@ export const regenerateIds = (objects: SavedObject[], dataSourceId: string | und
   }, new Map<string, { id: string; omitOriginId?: boolean }>());
   return importIdMap;
 };
+
