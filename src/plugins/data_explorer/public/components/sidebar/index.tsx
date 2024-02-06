@@ -83,7 +83,6 @@ export const Sidebar: FC = ({ children }) => {
     [application]
   );
 
-  // show log explorer redirection modal when non-index data source clicked
   const getRedirectModal = useCallback(
     (dsName: string, dsType: string) => {
       return (
@@ -139,8 +138,8 @@ export const Sidebar: FC = ({ children }) => {
         setSelectedSources(selectedDataSources);
         return;
       }
-      // Temporary redirection solution for 2.11, where clicking non-index-pattern datasource
-      // will redirect user to Observability event explorer
+      // Temporary redirection solution for 2.11, where clicking non-index-pattern data sources
+      // will prompt users with modal explaining they are being redirected to Observability log explorer
       if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
         showModal(selectedDataSources[0].label, selectedDataSources[0].type);
         return;
