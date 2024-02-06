@@ -60,7 +60,12 @@ export async function checkConflictsForDataSource({
        * for import saved object from osd exported
        * when the imported saved objects with the different dataSourceId comparing to the current dataSourceId
        */
-      if (!previoudDataSourceId || previoudDataSourceId === dataSourceId) {
+      if (!previoudDataSourceId) {
+        filteredObjects.push({
+          ...object,
+          id: `${dataSourceId}_${object.id}`,
+        });
+      } else if (previoudDataSourceId === dataSourceId) {
         filteredObjects.push(object);
       } else if (previoudDataSourceId && previoudDataSourceId !== dataSourceId) {
         if (ignoreRegularConflicts) {
@@ -70,6 +75,7 @@ export async function checkConflictsForDataSource({
           const omitOriginId = ignoreRegularConflicts;
           const rawId = parts[1];
           importIdMap.set(`${type}:${id}`, { id: `${dataSourceId}_${rawId}`, omitOriginId });
+          pendingOverwrites.add(`${type}:${id}`);
           filteredObjects.push({ ...object, id: `${dataSourceId}_${rawId}` });
         } else {
           // not override
