@@ -106,7 +106,14 @@ export const Sidebar: FC = ({ children }) => {
             </EuiText>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={closeModal}>
+              {i18n.translate(
+                'dataExplorer.sidebar.LogExplorerRedirectionModalFooterCancelButtonTxt',
+                {
+                  defaultMessage: 'Cancel',
+                }
+              )}
+            </EuiButtonEmpty>
             <EuiButton
               onClick={() => {
                 redirectToLogExplorer(dsName, dsType);
