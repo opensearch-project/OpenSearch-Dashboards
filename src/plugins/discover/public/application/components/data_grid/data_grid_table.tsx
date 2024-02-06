@@ -4,7 +4,12 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { EuiDataGrid, EuiDataGridSorting, EuiPanel } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiDataGridSorting,
+  EuiDataGridToolBarVisibilityOptions,
+  EuiPanel,
+} from '@elastic/eui';
 import { IndexPattern, getServices } from '../../../opensearch_dashboards_services';
 import { fetchTableDataCell } from './data_grid_table_cell_value';
 import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_columns';
@@ -21,9 +26,9 @@ import {
 } from '../../../../common';
 import { UI_SETTINGS } from '../../../../../data/common';
 import { LegacyDiscoverTable } from '../default_discover_table/default_discover_table';
-import { toolbarVisibility } from './constants';
 import { getDataGridTableSetting } from '../utils/local_storage';
 import { SortDirection, SortOrder } from '../../../saved_searches/types';
+import { useToolbarOptions } from './data_grid_toolbar';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -69,6 +74,7 @@ export const DataGridTable = ({
   const services = getServices();
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
+  const { lineCount, toolbarOptions } = useToolbarOptions();
   const [pageSizeLimit, isShortDots, hideTimeColumn, defaultSortOrder] = useMemo(() => {
     return [
       services.uiSettings.get(SAMPLE_SIZE_SETTING),
@@ -94,10 +100,10 @@ export const DataGridTable = ({
   const rowHeightsOptions = useMemo(
     () => ({
       defaultHeight: {
-        lineCount: adjustedColumns.includes('_source') ? 3 : 1,
+        lineCount,
       },
     }),
-    [adjustedColumns]
+    [lineCount]
   );
 
   const onColumnSort = useCallback(
@@ -208,7 +214,7 @@ export const DataGridTable = ({
         renderCellValue={renderCellValue}
         rowCount={rowCount}
         sorting={sorting}
-        toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
+        toolbarVisibility={isToolbarVisible ? toolbarOptions : false}
         rowHeightsOptions={rowHeightsOptions}
       />
     ),
@@ -221,6 +227,7 @@ export const DataGridTable = ({
       rowCount,
       sorting,
       isToolbarVisible,
+      toolbarOptions,
       rowHeightsOptions,
     ]
   );
