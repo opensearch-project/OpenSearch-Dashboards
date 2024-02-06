@@ -44,8 +44,7 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { DataSourcePicker } from '../../data_source_management/public/components/data_source_picker/data_source_picker';
+import { ClusterSelector } from '../../data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
@@ -131,12 +130,13 @@ function DevToolsWrapper({
           </EuiToolTip>
         ))}
         {dataSourceEnabled ? (
-          <div className="devAppDataSourcePicker">
-            <DataSourcePicker
+          <div className="devAppClusterSelector">
+            <ClusterSelector
               savedObjectsClient={savedObjects.client}
               notifications={toasts}
               onSelectedDataSource={onChange}
               disabled={!dataSourceEnabled}
+              fullWidth={false}
             />
           </div>
         ) : null}

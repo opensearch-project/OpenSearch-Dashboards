@@ -31,6 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -73,6 +74,7 @@ export interface SetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   uiActions: UiActionsSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface StartDependencies {
@@ -100,7 +102,7 @@ export class SavedObjectsManagementPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, management, uiActions }: SetupDependencies
+    { home, management, uiActions, dataSource }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
@@ -136,6 +138,7 @@ export class SavedObjectsManagementPlugin
           core,
           serviceRegistry: this.serviceRegistry,
           mountParams,
+          dataSourceEnabled: !!dataSource,
         });
       },
     });
