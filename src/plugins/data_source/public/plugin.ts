@@ -26,7 +26,11 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   }
 
   public start(core: CoreStart): DataSourcePluginStart {
-    return {};
+    const config = this.initializerContext.config.get();
+    return {
+      dataSourceEnabled: config.enabled,
+      defaultClusterEnabled: config.defaultCluster,
+    };
   }
 
   public stop() {}

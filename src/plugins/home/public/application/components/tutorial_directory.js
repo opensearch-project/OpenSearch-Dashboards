@@ -69,6 +69,8 @@ class TutorialDirectoryUi extends React.Component {
     // and sample code snippets to instruct users to add data
     this.tabs = [];
 
+    const isDefaultClusterEnabled = getServices().dataSource?.defaultClusterEnabled ?? true;
+
     let openTab = SAMPLE_DATA_TAB_ID;
     if (
       props.openTab &&
@@ -83,6 +85,7 @@ class TutorialDirectoryUi extends React.Component {
       tutorialCards: [],
       notices: getServices().tutorialService.getDirectoryNotices(),
       isDataSourceEnabled: !!getServices().dataSource,
+      isDefaultClusterEnabled: isDefaultClusterEnabled,
     };
   }
 
@@ -224,7 +227,7 @@ class TutorialDirectoryUi extends React.Component {
   };
 
   renderDataSourceSelector = () => {
-    const { isDataSourceEnabled } = this.state;
+    const { isDataSourceEnabled, isDefaultClusterEnabled } = this.state;
 
     return isDataSourceEnabled ? (
       <div className="sampleDataClusterSelector">
@@ -233,6 +236,7 @@ class TutorialDirectoryUi extends React.Component {
           notifications={getServices().toastNotifications}
           onSelectedDataSource={this.onSelectedDataSourceChange}
           disabled={!isDataSourceEnabled}
+          defaultClusterEnabled={isDefaultClusterEnabled}
         />
       </div>
     ) : null;
