@@ -82,4 +82,56 @@ describe('discoverSlice', () => {
     const result = discoverSlice.reducer(initialState, action);
     expect(result.sort).toEqual([['field2', 'desc']]);
   });
+
+  it('should handle moveColumn', () => {
+    initialState = {
+      columns: ['column1', 'column2', 'column3'],
+      sort: [],
+    };
+    const action = {
+      type: 'discover/moveColumn',
+      payload: { columnName: 'column2', destination: 0 },
+    };
+    const result = discoverSlice.reducer(initialState, action);
+    expect(result.columns).toEqual(['column2', 'column1', 'column3']);
+  });
+
+  it('should maintain columns order when moving a column to its current position', () => {
+    initialState = {
+      columns: ['column1', 'column2', 'column3'],
+      sort: [],
+    };
+    const action = {
+      type: 'discover/moveColumn',
+      payload: { columnName: 'column2', destination: 1 },
+    };
+    const result = discoverSlice.reducer(initialState, action);
+    expect(result.columns).toEqual(['column1', 'column2', 'column3']);
+  });
+
+  it('should handle moveColumn when destination is out of range', () => {
+    initialState = {
+      columns: ['column1', 'column2', 'column3'],
+      sort: [],
+    };
+    const action = {
+      type: 'discover/moveColumn',
+      payload: { columnName: 'column1', destination: 5 },
+    };
+    const result = discoverSlice.reducer(initialState, action);
+    expect(result.columns).toEqual(['column1', 'column2', 'column3']);
+  });
+
+  it('should not change columns if column to move does not exist', () => {
+    initialState = {
+      columns: ['column1', 'column2', 'column3'],
+      sort: [],
+    };
+    const action = {
+      type: 'discover/moveColumn',
+      payload: { columnName: 'nonExistingColumn', destination: 0 },
+    };
+    const result = discoverSlice.reducer(initialState, action);
+    expect(result.columns).toEqual(['column1', 'column2', 'column3']);
+  });
 });
