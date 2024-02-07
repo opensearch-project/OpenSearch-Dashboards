@@ -43,6 +43,15 @@ export interface DiscoverState {
    * since the last save
    */
   isDirty?: boolean;
+  /**
+   * Metadata for the view
+   */
+  metadata?: {
+    /**
+     * Number of lines to display per row
+     */
+    lineCount?: number;
+  };
 }
 
 export interface DiscoverRootState extends RootState {
@@ -170,6 +179,15 @@ export const discoverSlice = createSlice({
         isDirty: false,
       };
     },
+    setMetadata(state, action: PayloadAction<Partial<DiscoverState['metadata']>>) {
+      return {
+        ...state,
+        metadata: {
+          ...state.metadata,
+          ...action.payload,
+        },
+      };
+    },
   },
 });
 
@@ -185,5 +203,6 @@ export const {
   setState,
   updateState,
   setSavedSearchId,
+  setMetadata,
 } = discoverSlice.actions;
 export const { reducer } = discoverSlice;
