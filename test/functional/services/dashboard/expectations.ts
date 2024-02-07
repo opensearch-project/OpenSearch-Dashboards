@@ -240,6 +240,17 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       });
     }
 
+    async savedSearchRowCountFromLegacyTable(expectedCount: number) {
+      log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
+      await retry.try(async () => {
+        const savedSearchRows = await testSubjects.findAll(
+          'docTableExpandToggleColumn',
+          findTimeout
+        );
+        expect(savedSearchRows.length).to.be(expectedCount);
+      });
+    }
+
     async seriesElementCount(expectedCount: number) {
       log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
       await retry.try(async () => {
