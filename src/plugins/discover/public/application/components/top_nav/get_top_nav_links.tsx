@@ -5,8 +5,8 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 import { DiscoverViewServices } from '../../../build_services';
-import { showOpenSearchPanel } from './show_open_search_panel';
 import { SavedSearch } from '../../../saved_searches';
 import { Adapters } from '../../../../../inspector/public';
 import { TopNavMenuData } from '../../../../../navigation/public';
@@ -16,14 +16,17 @@ import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../saved_objects/public';
+import {
+  OpenSearchDashboardsContextProvider,
+  toMountPoint,
+} from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
-
-import { showTableFeedbacksPanel } from './show_table_feedbacks_panel';
 import { getDataGridTableSetting, setDataGridTableSetting } from '../utils/local_storage';
+import { OpenSearchPanel } from './open_search_panel';
 
 export const getTopNavLinks = (
   services: DiscoverViewServices,
@@ -166,11 +169,20 @@ export const getTopNavLinks = (
     }),
     testId: 'discoverOpenButton',
     run: () => {
-      showOpenSearchPanel({
-        makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
-        I18nContext: core.i18n.Context,
-        services,
-      });
+      const flyoutSession = services.overlays.openFlyout(
+        toMountPoint(
+          <OpenSearchDashboardsContextProvider services={services}>
+            <OpenSearchPanel
+              onClose={() => {
+                if (flyoutSession) {
+                  flyoutSession.close();
+                }
+              }}
+              makeUrl={(searchId) => `#/view/${encodeURIComponent(searchId)}`}
+            />
+          </OpenSearchDashboardsContextProvider>
+        )
+      );
     },
   };
 
@@ -201,7 +213,7 @@ export const getTopNavLinks = (
           ...sharingData,
           title: savedSearch.title,
         },
-        isDirty: !savedSearch.id || state.isDirty,
+        isDirty: !savedSearch.id || state.isDirty || false,
       });
     },
   };
@@ -238,12 +250,34 @@ export const getTopNavLinks = (
     testId: 'datagridTableButton',
     run: async () => {
       // Read the current state from localStorage
-      const useDatagridTable = getDataGridTableSetting(storage);
-      if (useDatagridTable) {
-        showTableFeedbacksPanel({
-          I18nContext: core.i18n.Context,
-          services,
-        });
+      const newDiscoverEnabled = getDataGridTableSetting(storage);
+      if (newDiscoverEnabled) {
+        const confirmed = await services.overlays.openConfirm(
+          toMountPoint(
+            <EuiText>
+              <p>
+                Help drive future improvements by{' '}
+                <a href="https://survey.opensearch.org" target="_blank" rel="noopener noreferrer">
+                  providing feedback
+                </a>{' '}
+                about your experience.
+              </p>
+            </EuiText>
+          ),
+          {
+            title: i18n.translate('discover.localMenu.newTableConfirmModalTitle', {
+              defaultMessage: 'Share your thoughts on the latest Discover features',
+            }),
+            cancelButtonText: 'Cancel',
+            confirmButtonText: 'Turn off new features',
+            defaultFocusedButton: 'confirm',
+          }
+        );
+
+        if (confirmed) {
+          setDataGridTableSetting(false, storage);
+          window.location.reload();
+        }
       } else {
         // Save the new setting to localStorage
         setDataGridTableSetting(true, storage);
