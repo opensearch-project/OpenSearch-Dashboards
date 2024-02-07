@@ -94,6 +94,7 @@ export interface FlyoutProps {
   http: HttpStart;
   search: DataPublicPluginStart['search'];
   dataSourceEnabled: boolean;
+  defaultClusterEnabled: boolean;
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
 }
@@ -821,6 +822,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             notifications={this.props.notifications.toasts}
             onSelectedDataSource={this.onSelectedDataSourceChange}
             disabled={!this.props.dataSourceEnabled}
+            defaultClusterEnabled={this.props.defaultClusterEnabled}
             fullWidth={true}
           />
         </EuiFormFieldset>

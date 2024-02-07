@@ -139,6 +139,7 @@ export class SavedObjectsManagementPlugin
           serviceRegistry: this.serviceRegistry,
           mountParams,
           dataSourceEnabled: !!dataSource,
+          defaultClusterEnabled: dataSource?.defaultClusterEnabled ?? true,
         });
       },
     });
