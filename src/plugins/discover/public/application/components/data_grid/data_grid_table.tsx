@@ -26,7 +26,7 @@ import {
 } from '../../../../common';
 import { UI_SETTINGS } from '../../../../../data/common';
 import { LegacyDiscoverTable } from '../default_discover_table/default_discover_table';
-import { getDataGridTableSetting } from '../utils/local_storage';
+import { getNewDiscoverSetting } from '../utils/local_storage';
 import { SortDirection, SortOrder } from '../../../saved_searches/types';
 import { useToolbarOptions } from './data_grid_toolbar';
 import { useSelector } from '../../utils/state_management';
@@ -163,7 +163,7 @@ export const DataGridTable = ({
     ];
   }, []);
 
-  const datagridActive = getDataGridTableSetting(services.storage);
+  const newDiscoverEnabled = getNewDiscoverSetting(services.storage);
 
   const legacyDiscoverTable = useMemo(
     () => (
@@ -235,7 +235,7 @@ export const DataGridTable = ({
     ]
   );
 
-  const tablePanelProps = datagridActive
+  const tablePanelProps = newDiscoverEnabled
     ? {
         paddingSize: 'none' as const,
         style: {
@@ -270,9 +270,9 @@ export const DataGridTable = ({
         className="eui-xScrollWithShadows"
       >
         <EuiPanel hasBorder={false} hasShadow={false} {...tablePanelProps}>
-          {datagridActive ? dataGridTable : legacyDiscoverTable}
+          {newDiscoverEnabled ? dataGridTable : legacyDiscoverTable}
         </EuiPanel>
-        {datagridActive && inspectedHit && (
+        {newDiscoverEnabled && inspectedHit && (
           <DataGridFlyout
             indexPattern={indexPattern}
             hit={inspectedHit}

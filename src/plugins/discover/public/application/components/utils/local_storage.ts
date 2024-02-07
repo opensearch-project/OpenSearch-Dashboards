@@ -5,13 +5,13 @@
 
 import { Storage } from '../../../../../opensearch_dashboards_utils/public';
 
-export const DATA_GRID_TABLE_KEY = 'discover:dataGridTable';
+export const NEW_DISCOVER_KEY = 'discover:newExpereince';
 
-export const getDataGridTableSetting = (storage: Storage): boolean => {
-  const storedValue = storage.get(DATA_GRID_TABLE_KEY);
+export const getNewDiscoverSetting = (storage: Storage): boolean => {
+  const storedValue = storage.get(NEW_DISCOVER_KEY);
   return storedValue !== null ? JSON.parse(storedValue) : false;
 };
 
-export const setDataGridTableSetting = (value: boolean, storage: Storage) => {
-  storage.set(DATA_GRID_TABLE_KEY, JSON.stringify(value));
+export const setNewDiscoverSetting = (value: boolean, storage: Storage) => {
+  storage.set(NEW_DISCOVER_KEY, JSON.stringify(value));
 };
