@@ -236,7 +236,7 @@
 # vis_builder.enabled: false
 
 # Set the value of this setting to true to enable multiple data source feature.
-#data_source.enabled: true
+#data_source.enabled: false
 # Set the value of this setting to false to disable default cluster in data source feature.
 #data_source.defaultCluster: true
 # Set the value of these settings to customize crypto materials to encryption saved credentials
