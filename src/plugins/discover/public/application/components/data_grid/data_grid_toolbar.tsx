@@ -11,25 +11,23 @@ import {
   EuiRange,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { setMetadata, useDispatch, useSelector } from '../../utils/state_management';
+import { useLocalStorage } from 'react-use';
 
-const AddtitionalControls = () => {
-  const { metadata } = useSelector((state) => state.discover);
-  const dispatch = useDispatch();
+const AddtitionalControls = ({
+  setLineCount,
+  lineCount,
+}: {
+  setLineCount: (lineCount: number) => void;
+  lineCount: number;
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const [localLineCount, setLocalLineCount] = useState(metadata?.lineCount || 1);
-
   const handleRangeChange = (e: any) => {
-    setLocalLineCount(Number(e.target.value));
-  };
-
-  const handleRangeUpdateComplete = () => {
-    dispatch(setMetadata({ lineCount: localLineCount }));
+    setLineCount(Number(e.target.value));
   };
 
   const onButtonClick = () => setIsPopoverOpen((open) => !open);
-  const closePopover = () => setIsPopoverOpen(false);
+  const closePopover = () => {};
 
   const button = (
     <EuiButtonEmpty
@@ -47,33 +45,37 @@ const AddtitionalControls = () => {
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiFormRow label="Line Count" display="rowCompressed">
         <EuiRange
-          value={localLineCount}
+          value={lineCount}
           min={1}
           max={50}
           compressed
           name="Line Count"
           showInput
           onChange={handleRangeChange}
-          onMouseUp={handleRangeUpdateComplete}
-          onBlur={handleRangeUpdateComplete}
         />
       </EuiFormRow>
     </EuiPopover>
   );
 };
 
-export const useToolbarOptions = () => {
-  const toolbarOptions: EuiDataGridToolBarVisibilityOptions = {
+export const useToolbarOptions = (): {
+  toolbarOptions: EuiDataGridToolBarVisibilityOptions | boolean;
+  lineCount: number;
+} => {
+  const [lineCount, setLineCount] = useLocalStorage('discover:lineCount', 1);
+
+  const toolbarOptions = {
     showColumnSelector: {
       allowHide: false,
       allowReorder: true,
     },
     showStyleSelector: false,
     showFullScreenSelector: false,
-    additionalControls: <AddtitionalControls />,
+    additionalControls: <AddtitionalControls setLineCount={setLineCount} lineCount={lineCount} />,
   };
 
   return {
     toolbarOptions,
+    lineCount,
   };
 };

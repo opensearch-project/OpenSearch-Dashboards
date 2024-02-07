@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, Fragment } from 'react';
-import { useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { SurrDocType } from './context/api/context';
 import { ActionBar } from './context/components/action_bar/action_bar';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
@@ -84,7 +83,7 @@ export function ContextApp({
   );
 
   return (
-    <Fragment>
+    <>
       <ActionBar
         defaultStepSize={defaultStepSize}
         docCount={predecessorCount}
@@ -103,7 +102,6 @@ export function ContextApp({
           onFilter={onAddFilter}
           onMoveColumn={() => {}}
           onRemoveColumn={() => {}}
-          onReorderColumn={() => {}}
           onSetColumns={() => {}}
           onSort={() => {}}
           sort={sort}
@@ -122,6 +120,6 @@ export function ContextApp({
         onChangeCount={onChangeCount}
         type={SurrDocType.SUCCESSORS}
       />
-    </Fragment>
+    </>
   );
 }

@@ -4,12 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import {
-  EuiDataGrid,
-  EuiDataGridSorting,
-  EuiDataGridToolBarVisibilityOptions,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridSorting, EuiPanel } from '@elastic/eui';
 import { IndexPattern, getServices } from '../../../opensearch_dashboards_services';
 import { fetchTableDataCell } from './data_grid_table_cell_value';
 import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_columns';
@@ -29,7 +24,6 @@ import { LegacyDiscoverTable } from '../default_discover_table/default_discover_
 import { getNewDiscoverSetting } from '../utils/local_storage';
 import { SortDirection, SortOrder } from '../../../saved_searches/types';
 import { useToolbarOptions } from './data_grid_toolbar';
-import { useSelector } from '../../utils/state_management';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -73,10 +67,9 @@ export const DataGridTable = ({
   showPagination,
 }: DataGridTableProps) => {
   const services = getServices();
-  const { metadata } = useSelector((state) => state.discover);
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
-  const { toolbarOptions } = useToolbarOptions();
+  const { toolbarOptions, lineCount } = useToolbarOptions();
   const [pageSizeLimit, isShortDots, hideTimeColumn, defaultSortOrder] = useMemo(() => {
     return [
       services.uiSettings.get(SAMPLE_SIZE_SETTING),
@@ -102,10 +95,10 @@ export const DataGridTable = ({
   const rowHeightsOptions = useMemo(
     () => ({
       defaultHeight: {
-        lineCount: metadata?.lineCount || (includeSourceInColumns ? 3 : 1),
+        lineCount: lineCount || (includeSourceInColumns ? 3 : 1),
       },
     }),
-    [includeSourceInColumns, metadata?.lineCount]
+    [includeSourceInColumns, lineCount]
   );
 
   const onColumnSort = useCallback(
