@@ -34,7 +34,7 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from 'src/plugins/embeddable/public';
-import { Filter, IIndexPattern, TimeRange, Query } from '../../../../data/public';
+import { Filter, IIndexPattern, TimeRange, Query } from 'src/plugins/data/public';
 import { SortOrder } from '../saved_searches/types';
 import { SavedSearch } from '../saved_searches';
 
