@@ -51,7 +51,8 @@ export function fetchSourceTypeDataCell(
 
 export const fetchTableDataCell = (
   idxPattern: IndexPattern,
-  dataRows: OpenSearchSearchHit[] | undefined
+  dataRows: OpenSearchSearchHit[] | undefined,
+  isShortDots: boolean
 ) => ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
   const singleRow = dataRows ? (dataRows[rowIndex] as Record<string, unknown>) : undefined;
   const flattenedRows = dataRows ? dataRows.map((hit) => idxPattern.flattenHit(hit)) : [];
@@ -73,7 +74,7 @@ export const fetchTableDataCell = (
   }
 
   if (fieldInfo?.type === '_source') {
-    return fetchSourceTypeDataCell(idxPattern, singleRow, columnId, isDetails);
+    return fetchSourceTypeDataCell(idxPattern, singleRow, columnId, isDetails, isShortDots);
   }
 
   const formattedValue = idxPattern.formatField(singleRow, columnId);

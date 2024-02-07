@@ -11,15 +11,22 @@ import {
   EuiRange,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { setMetadata, useDispatch, useSelector } from '../../utils/state_management';
 
-const AddtitionalControls = ({
-  lineCount,
-  setLineCount,
-}: {
-  lineCount: number;
-  setLineCount: (height: number) => void;
-}) => {
+const AddtitionalControls = () => {
+  const { metadata } = useSelector((state) => state.discover);
+  const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const [localLineCount, setLocalLineCount] = useState(metadata?.lineCount || 1);
+
+  const handleRangeChange = (e: any) => {
+    setLocalLineCount(Number(e.target.value));
+  };
+
+  const handleRangeUpdateComplete = () => {
+    dispatch(setMetadata({ lineCount: localLineCount }));
+  };
 
   const onButtonClick = () => setIsPopoverOpen((open) => !open);
   const closePopover = () => setIsPopoverOpen(false);
@@ -40,13 +47,15 @@ const AddtitionalControls = ({
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiFormRow label="Line Count" display="rowCompressed">
         <EuiRange
-          value={lineCount}
+          value={localLineCount}
           min={1}
           max={50}
           compressed
           name="Line Count"
           showInput
-          onChange={(e: any) => setLineCount(Number(e.target.value))}
+          onChange={handleRangeChange}
+          onMouseUp={handleRangeUpdateComplete}
+          onBlur={handleRangeUpdateComplete}
         />
       </EuiFormRow>
     </EuiPopover>
@@ -54,8 +63,6 @@ const AddtitionalControls = ({
 };
 
 export const useToolbarOptions = () => {
-  const [lineCount, setLineCount] = useState(3);
-
   const toolbarOptions: EuiDataGridToolBarVisibilityOptions = {
     showColumnSelector: {
       allowHide: false,
@@ -63,11 +70,10 @@ export const useToolbarOptions = () => {
     },
     showStyleSelector: false,
     showFullScreenSelector: false,
-    additionalControls: <AddtitionalControls lineCount={lineCount} setLineCount={setLineCount} />,
+    additionalControls: <AddtitionalControls />,
   };
 
   return {
     toolbarOptions,
-    lineCount,
   };
 };

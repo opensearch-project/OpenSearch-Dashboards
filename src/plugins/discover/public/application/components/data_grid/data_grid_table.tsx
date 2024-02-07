@@ -29,6 +29,7 @@ import { LegacyDiscoverTable } from '../default_discover_table/default_discover_
 import { getNewDiscoverSetting } from '../utils/local_storage';
 import { SortDirection, SortOrder } from '../../../saved_searches/types';
 import { useToolbarOptions } from './data_grid_toolbar';
+import { useSelector } from '../../utils/state_management';
 
 export interface DataGridTableProps {
   columns: string[];
@@ -72,9 +73,10 @@ export const DataGridTable = ({
   showPagination,
 }: DataGridTableProps) => {
   const services = getServices();
+  const { metadata } = useSelector((state) => state.discover);
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
-  const { lineCount, toolbarOptions } = useToolbarOptions();
+  const { toolbarOptions } = useToolbarOptions();
   const [pageSizeLimit, isShortDots, hideTimeColumn, defaultSortOrder] = useMemo(() => {
     return [
       services.uiSettings.get(SAMPLE_SIZE_SETTING),
@@ -100,10 +102,10 @@ export const DataGridTable = ({
   const rowHeightsOptions = useMemo(
     () => ({
       defaultHeight: {
-        lineCount,
+        lineCount: metadata?.lineCount || (includeSourceInColumns ? 3 : 1),
       },
     }),
-    [lineCount]
+    [includeSourceInColumns, metadata?.lineCount]
   );
 
   const onColumnSort = useCallback(
@@ -113,8 +115,9 @@ export const DataGridTable = ({
     [onSort]
   );
 
-  const renderCellValue = useMemo(() => fetchTableDataCell(indexPattern, rows), [
+  const renderCellValue = useMemo(() => fetchTableDataCell(indexPattern, rows, isShortDots), [
     indexPattern,
+    isShortDots,
     rows,
   ]);
 
