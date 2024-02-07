@@ -235,6 +235,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Bump OpenSearch-Dashboards 2.10.0 to use nodejs 18.16.0 version ([#4948](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4948))
 - Bump `oui` to `1.3.0` ([#4941](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4941))
 - Add @curq as maintainer ([#4760](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4760))
+- Bump OpenSearch Dashboards to use nodejs v18.19.0 ([#4948](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5830))
 
 ### 🪛 Refactoring
 
