@@ -25,7 +25,7 @@ import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
-import { getDataGridTableSetting, setDataGridTableSetting } from '../utils/local_storage';
+import { getNewDiscoverSetting, setNewDiscoverSetting } from '../utils/local_storage';
 import { OpenSearchPanel } from './open_search_panel';
 
 export const getTopNavLinks = (
@@ -240,7 +240,7 @@ export const getTopNavLinks = (
   const oldDiscoverButtonLabel = i18n.translate('discover.localMenu.discoverButton.label.old', {
     defaultMessage: 'Use legacy Discover',
   });
-  const isNewDiscover = getDataGridTableSetting(storage);
+  const isNewDiscover = getNewDiscoverSetting(storage);
   const newTable: TopNavMenuData = {
     id: 'table-datagrid',
     label: isNewDiscover ? oldDiscoverButtonLabel : newDiscoverButtonLabel,
@@ -250,7 +250,7 @@ export const getTopNavLinks = (
     testId: 'datagridTableButton',
     run: async () => {
       // Read the current state from localStorage
-      const newDiscoverEnabled = getDataGridTableSetting(storage);
+      const newDiscoverEnabled = getNewDiscoverSetting(storage);
       if (newDiscoverEnabled) {
         const confirmed = await services.overlays.openConfirm(
           toMountPoint(
@@ -275,12 +275,12 @@ export const getTopNavLinks = (
         );
 
         if (confirmed) {
-          setDataGridTableSetting(false, storage);
+          setNewDiscoverSetting(false, storage);
           window.location.reload();
         }
       } else {
         // Save the new setting to localStorage
-        setDataGridTableSetting(true, storage);
+        setNewDiscoverSetting(true, storage);
         window.location.reload();
       }
     },
