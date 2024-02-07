@@ -58,6 +58,7 @@ import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_leg
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataExplorerServices } from '../../data_explorer/public';
+import { Storage } from '../../opensearch_dashboards_utils/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -82,6 +83,7 @@ export interface DiscoverServices {
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
+  storage: Storage;
 }
 
 export function buildServices(
@@ -97,6 +99,7 @@ export function buildServices(
     overlays: core.overlays,
   };
   const savedObjectService = createSavedSearchesLoader(services);
+  const storage = new Storage(localStorage);
 
   return {
     addBasePath: core.http.basePath.prepend,
@@ -123,6 +126,7 @@ export function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
+    storage,
   };
 }
 

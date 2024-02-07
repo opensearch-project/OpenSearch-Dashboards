@@ -36,9 +36,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
-  describe('custom doc views', function () {
+  describe('custom doc views with datagrid table', function () {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.switchDiscoverTable('new');
       // TODO: change back to setDefaultRange() once we resolve
       // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5241
       await PageObjects.timePicker.setDefaultRangeForDiscover();
