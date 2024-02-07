@@ -34,27 +34,27 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const PageObjects = getPageObjects(['common']);
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
-  // describe('context app', function () {
-  //   this.tags('ciGroup1');
+  describe('context app', function () {
+    this.tags('ciGroup1');
 
-  //   before(async function () {
-  //     await browser.setWindowSize(1200, 800);
-  //     await opensearchArchiver.loadIfNeeded('logstash_functional');
-  //     await opensearchArchiver.load('visualize');
-  //     await opensearchDashboardsServer.uiSettings.replace({
-  //       defaultIndex: 'logstash-*',
-  //     });
-  //     await PageObjects.common.navigateToApp('discover');
-  //   });
+    before(async function () {
+      await browser.setWindowSize(1200, 800);
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.load('visualize');
+      await opensearchDashboardsServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+      });
+      await PageObjects.common.navigateToApp('discover');
+    });
 
-  //   after(function unloadMakelogs() {
-  //     return opensearchArchiver.unload('logstash_functional');
-  //   });
+    after(function unloadMakelogs() {
+      return opensearchArchiver.unload('logstash_functional');
+    });
 
-  //   loadTestFile(require.resolve('./_context_navigation'));
-  //   loadTestFile(require.resolve('./_discover_navigation'));
-  //   loadTestFile(require.resolve('./_filters'));
-  //   loadTestFile(require.resolve('./_size'));
-  //   loadTestFile(require.resolve('./_date_nanos'));
-  // });
+    loadTestFile(require.resolve('./_context_navigation'));
+    loadTestFile(require.resolve('./_discover_navigation'));
+    loadTestFile(require.resolve('./_filters'));
+    loadTestFile(require.resolve('./_size'));
+    loadTestFile(require.resolve('./_date_nanos'));
+  });
 }
