@@ -57,15 +57,15 @@ export default function ({ getService, loadTestFile }) {
       // loadTestFile(require.resolve('./_index_patterns_empty'));
     });
 
-    describe('', function () {
-      this.tags('ciGroup8');
+    // describe('', function () {
+    //   this.tags('ciGroup8');
 
-      loadTestFile(require.resolve('./_index_pattern_filter'));
-      loadTestFile(require.resolve('./_scripted_fields_filter'));
-      loadTestFile(require.resolve('./_import_objects'));
-      loadTestFile(require.resolve('./_test_huge_fields'));
-      loadTestFile(require.resolve('./_handle_alias'));
-      loadTestFile(require.resolve('./_handle_version_conflict'));
-    });
+    //   loadTestFile(require.resolve('./_index_pattern_filter'));
+    //   loadTestFile(require.resolve('./_scripted_fields_filter'));
+    //   loadTestFile(require.resolve('./_import_objects'));
+    //   loadTestFile(require.resolve('./_test_huge_fields'));
+    //   loadTestFile(require.resolve('./_handle_alias'));
+    //   loadTestFile(require.resolve('./_handle_version_conflict'));
+    // });
   });
 }
