@@ -22,7 +22,6 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
   const { Canvas, Panel, Context } = view;
 
   const MemoizedPanel = memo(Panel);
-  const MemoizedCanvas = memo(Canvas);
 
   // Render the application DOM.
   return (
@@ -47,7 +46,7 @@ export const AppContainer = ({ view, params }: { view?: View; params: AppMountPa
 
                 <EuiResizablePanel initialSize={80} minSize="65%" mode="main" paddingSize="none">
                   <EuiPageBody className="deLayout__canvas">
-                    <MemoizedCanvas {...params} />
+                    <Canvas {...params} />
                   </EuiPageBody>
                 </EuiResizablePanel>
               </>
