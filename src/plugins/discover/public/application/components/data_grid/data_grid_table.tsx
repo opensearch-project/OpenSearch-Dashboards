@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './_data_grid_table.scss';
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiDataGrid, EuiDataGridSorting, EuiPanel } from '@elastic/eui';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
@@ -151,6 +153,7 @@ export const DataGridTable = ({
         sorting={sorting}
         toolbarVisibility={isToolbarVisible ? toolbarVisibility : false}
         rowHeightsOptions={rowHeightsOptions}
+        className="discoverDataGrid"
       />
     ),
     [
