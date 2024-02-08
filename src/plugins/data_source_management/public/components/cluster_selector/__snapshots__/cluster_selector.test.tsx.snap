@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ClusterSelector should render normally 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={true}
+  data-test-subj="clusterSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={Array []}
+  placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;

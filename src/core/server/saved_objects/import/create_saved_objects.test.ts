@@ -53,6 +53,8 @@ const createObject = (type: string, id: string, originId?: string): SavedObject 
 
 const MULTI_NS_TYPE = 'multi';
 const OTHER_TYPE = 'other';
+const DATA_SOURCE = 'data-source';
+
 /**
  * Create a variety of different objects to exercise different import / result scenarios
  */
@@ -69,11 +71,56 @@ const obj10 = createObject(OTHER_TYPE, 'id-10', 'originId-f'); // -> success
 const obj11 = createObject(OTHER_TYPE, 'id-11', 'originId-g'); // -> conflict
 const obj12 = createObject(OTHER_TYPE, 'id-12'); // -> success
 const obj13 = createObject(OTHER_TYPE, 'id-13'); // -> conflict
+// data source object
+const dataSourceObj1 = createObject(DATA_SOURCE, 'ds-id1'); // -> success
+const dataSourceObj2 = createObject(DATA_SOURCE, 'ds-id2'); // -> conflict
+const dashboardObjWithDataSource = createObject('dashboard', 'ds_dashboard-id1'); // -> success
+const visualizationObjWithDataSource = createObject('visualization', 'ds_visualization-id1'); // -> success
+const searchObjWithDataSource = createObject('search', 'ds_search-id1'); // -> success
+
+// objs without data source id, used to test can get saved object with data source id
+const searchObj = {
+  id: '6aea5700-ac94-11e8-a651-614b2788174a',
+  type: 'search',
+  attributes: {
+    title: 'some-title',
+  },
+  references: [],
+  source: {
+    title: 'mysavedsearch',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON:
+        '{"index":"4c3f3c30-ac94-11e8-a651-614b2788174a","highlightAll":true,"version":true,"query":{"query":"","language":"lucene"},"filter":[]}',
+    },
+  },
+}; // -> success
+
+const visualizationObj = {
+  id: '8411daa0-ac94-11e8-a651-614b2788174a',
+  type: 'visualization',
+  attributes: {
+    title: 'visualization-title',
+  },
+  references: [],
+  source: {
+    title: 'mysavedviz',
+    visState:
+      '{"title":"mysavedviz","type":"pie","params":{"type":"pie","addTooltip":true,"addLegend":true,"legendPosition":"right","isDonut":true,"labels":{"show":false,"values":true,"last_level":true,"truncate":100}},"aggs":[{"id":"1","enabled":true,"type":"count","schema":"metric","params":{}}]}',
+    uiStateJSON: '{}',
+    description: '',
+    savedSearchId: '6aea5700-ac94-11e8-a651-614b2788174a',
+    version: 1,
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: '{"query":{"query":"","language":"lucene"},"filter":[]}',
+    },
+  },
+};
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
 const importId3 = 'id-foo';
 const importId4 = 'id-bar';
 const importId8 = 'id-baz';
+
 const importIdMap = new Map([
   [`${obj3.type}:${obj3.id}`, { id: importId3, omitOriginId: true }],
   [`${obj4.type}:${obj4.id}`, { id: importId4 }],
@@ -93,6 +140,8 @@ describe('#createSavedObjects', () => {
     accumulatedErrors?: SavedObjectsImportError[];
     namespace?: string;
     overwrite?: boolean;
+    dataSourceId?: string;
+    dataSourceTitle?: string;
   }): CreateSavedObjectsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     bulkCreate = savedObjectsClient.bulkCreate;
@@ -177,6 +226,15 @@ describe('#createSavedObjects', () => {
     expect(createSavedObjectsResult).toEqual({ createdObjects: [], errors: [] });
   });
 
+  test('filters out objects that have errors present with data source', async () => {
+    const error = { type: dataSourceObj1.type, id: dataSourceObj1.id } as SavedObjectsImportError;
+    const options = setupParams({ objects: [dataSourceObj1], accumulatedErrors: [error] });
+
+    const createSavedObjectsResult = await createSavedObjects(options);
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(createSavedObjectsResult).toEqual({ createdObjects: [], errors: [] });
+  });
+
   test('exits early if there are no objects to create', async () => {
     const options = setupParams({ objects: [] });
 
@@ -186,6 +244,13 @@ describe('#createSavedObjects', () => {
   });
 
   const objs = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12, obj13];
+  const dataSourceObjs = [
+    dataSourceObj1,
+    dataSourceObj2,
+    dashboardObjWithDataSource,
+    visualizationObjWithDataSource,
+    searchObjWithDataSource,
+  ];
 
   const setupMockResults = (options: CreateSavedObjectsParams) => {
     bulkCreate.mockResolvedValue({
@@ -203,6 +268,26 @@ describe('#createSavedObjects', () => {
         getResultMock.conflict(obj11.type, obj11.id),
         getResultMock.success(obj12, options),
         getResultMock.conflict(obj13.type, obj13.id),
+      ],
+    });
+  };
+
+  const setupMockResultsWithDataSource = (options: CreateSavedObjectsParams) => {
+    bulkCreate.mockResolvedValue({
+      saved_objects: [
+        getResultMock.conflict(dataSourceObj1.type, dataSourceObj1.id),
+        getResultMock.success(dataSourceObj2, options),
+        getResultMock.success(dashboardObjWithDataSource, options),
+        getResultMock.success(visualizationObjWithDataSource, options),
+        getResultMock.success(searchObjWithDataSource, options),
+      ],
+    });
+  };
+  const setupMockResultsToConstructDataSource = (options: CreateSavedObjectsParams) => {
+    bulkCreate.mockResolvedValue({
+      saved_objects: [
+        getResultMock.success(searchObj, options),
+        getResultMock.success(visualizationObj, options),
       ],
     });
   };
@@ -234,6 +319,14 @@ describe('#createSavedObjects', () => {
       }
     });
 
+    test('does not call bulkCreate when resolvable errors are present with data source objects', async () => {
+      for (const error of resolvableErrors) {
+        const options = setupParams({ objects: dataSourceObjs, accumulatedErrors: [error] });
+        await createSavedObjects(options);
+        expect(bulkCreate).not.toHaveBeenCalled();
+      }
+    });
+
     test('calls bulkCreate when unresolvable errors or no errors are present', async () => {
       for (const error of unresolvableErrors) {
         const options = setupParams({ objects: objs, accumulatedErrors: [error] });
@@ -244,6 +337,20 @@ describe('#createSavedObjects', () => {
       }
       const options = setupParams({ objects: objs });
       setupMockResults(options);
+      await createSavedObjects(options);
+      expect(bulkCreate).toHaveBeenCalledTimes(1);
+    });
+
+    test('calls bulkCreate when unresolvable errors or no errors are present with data source', async () => {
+      for (const error of unresolvableErrors) {
+        const options = setupParams({ objects: dataSourceObjs, accumulatedErrors: [error] });
+        setupMockResultsWithDataSource(options);
+        await createSavedObjects(options);
+        expect(bulkCreate).toHaveBeenCalledTimes(1);
+        bulkCreate.mockClear();
+      }
+      const options = setupParams({ objects: dataSourceObjs });
+      setupMockResultsWithDataSource(options);
       await createSavedObjects(options);
       expect(bulkCreate).toHaveBeenCalledTimes(1);
     });
@@ -270,10 +377,76 @@ describe('#createSavedObjects', () => {
     const argObjs = [obj1, obj2, x3, x4, obj5, obj6, obj7, x8, obj9, obj10, obj11, obj12, obj13];
     expectBulkCreateArgs.objects(1, argObjs);
   };
+
+  const testBulkCreateObjectsWithDataSource = async (
+    namespace?: string,
+    dataSourceId?: string,
+    dataSourceTitle?: string
+  ) => {
+    const options = setupParams({
+      objects: dataSourceObjs,
+      namespace,
+      dataSourceId,
+      dataSourceTitle,
+    });
+    setupMockResultsWithDataSource(options);
+
+    await createSavedObjects(options);
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    const argObjs = [
+      dataSourceObj1,
+      dataSourceObj2,
+      dashboardObjWithDataSource,
+      visualizationObjWithDataSource,
+      searchObjWithDataSource,
+    ];
+    expectBulkCreateArgs.objects(1, argObjs);
+  };
+
+  // testBulkCreateObjectsToAddDataSourceTitle
+  const testBulkCreateObjectsToAddDataSourceTitle = async (
+    namespace?: string,
+    dataSourceId?: string,
+    dataSourceTitle?: string
+  ) => {
+    const options = setupParams({
+      objects: [searchObj, visualizationObj],
+      namespace,
+      dataSourceId,
+      dataSourceTitle,
+    });
+    setupMockResultsToConstructDataSource(options);
+    const result = (await createSavedObjects(options)).createdObjects;
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    result.map((resultObj) =>
+      expect(JSON.stringify(resultObj.attributes)).toContain('some-data-source-title')
+    );
+  };
+
   const testBulkCreateOptions = async (namespace?: string) => {
     const overwrite = (Symbol() as unknown) as boolean;
     const options = setupParams({ objects: objs, namespace, overwrite });
     setupMockResults(options);
+
+    await createSavedObjects(options);
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    expectBulkCreateArgs.options(1, options);
+  };
+
+  const testBulkCreateOptionsWithDataSource = async (
+    namespace?: string,
+    dataSourceId?: string,
+    dataSourceTitle?: string
+  ) => {
+    const overwrite = (Symbol() as unknown) as boolean;
+    const options = setupParams({
+      objects: dataSourceObjs,
+      namespace,
+      overwrite,
+      dataSourceId,
+      dataSourceTitle,
+    });
+    setupMockResultsWithDataSource(options);
 
     await createSavedObjects(options);
     expect(bulkCreate).toHaveBeenCalledTimes(1);
@@ -291,6 +464,30 @@ describe('#createSavedObjects', () => {
     const transformedResults = [r1, r2, x3, x4, r5, r6, r7, x8, r9, r10, r11, r12, r13];
     const expectedResults = getExpectedResults(transformedResults, objs);
     expect(results).toEqual(expectedResults);
+  };
+
+  const testReturnValueWithDataSource = async (
+    namespace?: string,
+    dataSourceId?: string,
+    dataSourceTitle?: string
+  ) => {
+    const options = setupParams({
+      objects: dataSourceObjs,
+      namespace,
+      dataSourceId,
+      dataSourceTitle,
+    });
+    setupMockResultsWithDataSource(options);
+
+    const results = await createSavedObjects(options);
+    const resultSavedObjectsWithDataSource = (await bulkCreate.mock.results[0].value).saved_objects;
+    const [dsr1, dsr2, dsr3, dsr4, dsr5] = resultSavedObjectsWithDataSource;
+    const transformedResultsWithDataSource = [dsr1, dsr2, dsr3, dsr4, dsr5];
+    const expectedResultsWithDataSource = getExpectedResults(
+      transformedResultsWithDataSource,
+      dataSourceObjs
+    );
+    expect(results).toEqual(expectedResultsWithDataSource);
   };
 
   describe('with an undefined namespace', () => {
@@ -315,6 +512,38 @@ describe('#createSavedObjects', () => {
     });
     test('returns bulkCreate results that are remapped to IDs of imported objects', async () => {
       await testReturnValue(namespace);
+    });
+  });
+
+  describe('with a data source', () => {
+    test('calls bulkCreate once with input objects with data source id', async () => {
+      await testBulkCreateObjectsWithDataSource(
+        'some-namespace',
+        'some-datasource-id',
+        'some-data-source-title'
+      );
+    });
+    test('calls bulkCreate once with input options with data source id', async () => {
+      await testBulkCreateOptionsWithDataSource(
+        'some-namespace',
+        'some-datasource-id',
+        'some-data-source-title'
+      );
+    });
+    test('returns bulkCreate results that are remapped to IDs of imported objects with data source id', async () => {
+      await testReturnValueWithDataSource(
+        'some-namespace',
+        'some-datasource-id',
+        'some-data-source-title'
+      );
+    });
+
+    test('can correct attach datasource id to a search object', async () => {
+      await testBulkCreateObjectsToAddDataSourceTitle(
+        'some-namespace',
+        'some-datasource-id',
+        'some-data-source-title'
+      );
     });
   });
 });

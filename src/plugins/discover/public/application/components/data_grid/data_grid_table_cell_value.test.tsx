@@ -66,7 +66,7 @@ const customizedIndexPatternMock = getMockedIndexPatternWithCustomizedFields(
 
 describe('Testing fetchTableDataCell function', () => {
   it('should display empty span if no data', () => {
-    const DataGridTableCellValue = fetchTableDataCell(indexPatternMock, dataRowsMock);
+    const DataGridTableCellValue = fetchTableDataCell(indexPatternMock, dataRowsMock, false);
     const comp = shallow(
       <DataGridTableCellValue
         rowIndex={100}
@@ -86,7 +86,7 @@ describe('Testing fetchTableDataCell function', () => {
   });
 
   it('should display empty span if field is not defined in index pattern', () => {
-    const DataGridTableCellValue = fetchTableDataCell(indexPatternMock, dataRowsMock);
+    const DataGridTableCellValue = fetchTableDataCell(indexPatternMock, dataRowsMock, false);
     const comp = shallow(
       <DataGridTableCellValue
         rowIndex={0}
@@ -106,7 +106,11 @@ describe('Testing fetchTableDataCell function', () => {
   });
 
   it('should display JSON string representation of the data if columnId is _source and isDetails is false', () => {
-    const DataGridTableCellValue = fetchTableDataCell(customizedIndexPatternMock, dataRowsMock);
+    const DataGridTableCellValue = fetchTableDataCell(
+      customizedIndexPatternMock,
+      dataRowsMock,
+      false
+    );
     const comp = shallow(
       <DataGridTableCellValue
         rowIndex={0}
@@ -130,7 +134,11 @@ describe('Testing fetchTableDataCell function', () => {
   });
 
   it('should display EuiDescriptionList if columnId is _source and isDetails is false', () => {
-    const DataGridTableCellValue = fetchTableDataCell(customizedIndexPatternMock, dataRowsMock);
+    const DataGridTableCellValue = fetchTableDataCell(
+      customizedIndexPatternMock,
+      dataRowsMock,
+      false
+    );
     const comp = shallow(
       <DataGridTableCellValue
         rowIndex={0}
@@ -144,13 +152,14 @@ describe('Testing fetchTableDataCell function', () => {
 
     expect(comp).toMatchInlineSnapshot(`
       <EuiDescriptionList
+        className="source"
         compressed={true}
         type="inline"
       >
         <EuiDescriptionListTitle
           className="osdDescriptionListFieldTitle"
         >
-          order_date
+          order_date:
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           dangerouslySetInnerHTML={
@@ -164,7 +173,11 @@ describe('Testing fetchTableDataCell function', () => {
   });
 
   it('should correctly display data if columnId is in index pattern and is not _source', () => {
-    const DataGridTableCellValue = fetchTableDataCell(customizedIndexPatternMock, dataRowsMock);
+    const DataGridTableCellValue = fetchTableDataCell(
+      customizedIndexPatternMock,
+      dataRowsMock,
+      false
+    );
     const comp = shallow(
       <DataGridTableCellValue
         rowIndex={0}
