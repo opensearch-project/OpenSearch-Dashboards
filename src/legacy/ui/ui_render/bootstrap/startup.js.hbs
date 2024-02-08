@@ -14,7 +14,6 @@ var browserThemeVersion = uiSettings['theme:version'] || {};
 
 var rawDarkMode = typeof browserDarkMode.userValue !== 'boolean' ? {{configDarkMode}} : browserDarkMode.userValue;
 
-debugger;
 if (useBrowserColorScheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches !== rawDarkMode) {
   uiSettings['theme:darkMode'] = window.matchMedia('(prefers-color-scheme: dark)').matches;
   window.localStorage.setItem('uiSettings', JSON.stringify(uiSettings));
