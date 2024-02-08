@@ -24,7 +24,9 @@ import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
 
-const LOG_EXPLORER_TITLE_HINT = ' - Opens in Log Explorer';
+const LOG_EXPLORER_TITLE_HINT = i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
+  defaultMessage: ' - Opens in Log Explorer',
+});
 const DATA_SOURCE_SELECTOR_CONFIGS = { customGroupTitleExtension: LOG_EXPLORER_TITLE_HINT };
 
 export const Sidebar: FC = ({ children }) => {

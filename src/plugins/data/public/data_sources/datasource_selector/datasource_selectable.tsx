@@ -17,10 +17,17 @@ import {
 type DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS' | 's3glue' | 'spark';
 
 // Mapping between datasource type and its display name.
+// Temporary solution, will be removed along with refactoring of data source APIs
 const DATASOURCE_TYPE_DISPLAY_NAME_MAP: Record<DataSourceTypeKey, string> = {
-  DEFAULT_INDEX_PATTERNS: 'Index patterns',
-  s3glue: 'Amazon S3',
-  spark: 'Spark',
+  DEFAULT_INDEX_PATTERNS: i18n.translate('dataExplorer.dataSourceSelector.indexPatternGroupTitle', {
+    defaultMessage: 'Index patterns',
+  }),
+  s3glue: i18n.translate('dataExplorer.dataSourceSelector.amazonS3GroupTitle', {
+    defaultMessage: 'Amazon S3',
+  }),
+  spark: i18n.translate('dataExplorer.dataSourceSelector.sparkGroupTitle', {
+    defaultMessage: 'Spark',
+  }),
 };
 
 type DataSetType = ISourceDataSet['data_sets'][number];
@@ -74,7 +81,11 @@ const getSourceList = (
   const finalList = [] as DataSourceGroup[];
   allDataSets.forEach((curDataSet) => {
     const typeKey = curDataSet.ds.getType() as DataSourceTypeKey;
-    let groupName = DATASOURCE_TYPE_DISPLAY_NAME_MAP[typeKey] || `Default Group`;
+    let groupName =
+      DATASOURCE_TYPE_DISPLAY_NAME_MAP[typeKey] ||
+      i18n.translate('dataExplorer.dataSourceSelector.defaultGroupTitle', {
+        defaultMessage: 'Default Group',
+      });
 
     // add '- Opens in Log Explorer' to hint user that selecting these types of data sources
     // will lead to redirection to log explorer
