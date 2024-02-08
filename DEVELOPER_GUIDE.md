@@ -179,6 +179,7 @@ For windows:
 $ wsl -d docker-desktop
 $ sysctl -w vm.max_map_count=262144
 ```
+
 ### Next Steps
 
 Now that you have a development environment to play with, there are a number of different paths you may take next.
@@ -235,6 +236,7 @@ $ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plu
 Note - if you add the [`security` plugin](https://github.com/opensearch-project/security), you'll also need to [configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security).
 
 ### Plugin development
+
 The osd-plugin-generator tool makes it easier to create a plugin for OpenSearch Dashboards. It sets up the basic structure of the project and provides scripts to build it. Refer to [osd-plugin-generator](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator) for more details.
 
 #### Other snapshot configuration options
@@ -280,29 +282,26 @@ This method can also be used to develop against the [full distribution of OpenSe
 
 ### Configure OpenSearch Dashboards for security
 
-_This step is only mandatory if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+_This step is only needed if you want your dev environment to also start with security. To do so both the OpenSearch node and OpenSearch Dashboards cluster need to have the security plugin installed. Follow the steps below to get setup correctly._
 
-> 1. Run `export initialAdminPassword=<initial admin password>` since it's needed by the configuration script
-> 2. Run `yarn opensearch snapshot --security`
-> 3. Wait a few seconds while the plugin is installed, configured, and OpenSearch starts up.
+To startup the OpenSearch snapshot with security
 
-Then within another window. You can start:
+> OpenSearch has strong password requirements and will fail to bootstrap if the password requirements are not met. e.g. myStrongPassword123!
 
-> 1. Run `export OPENSEARCH_USERNAME=admin`
-> 2. Run `export OPENSEARCH_PASSWORD=<initial admin password>`
-> 3. Optional: Run `export OPENSEARCH_SECURITY_READONLY_ROLE=<read only role>`
-> 4. Run `yarn start:security`
-> 5. Navigate to OpenSearch Dashboards and login with the above username and password.
+1. Run `export OPENSEARCH_INITIAL_ADMIN_PASSWORD=<initial admin password>` since it's needed by the configuration script
+2. Run `yarn opensearch snapshot --security`
+3. Wait a few seconds while the plugin is installed, configured, and OpenSearch starts up.
 
-Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
-changes to the default [`opensearch_dashboards.yml`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/config/opensearch_dashboards.yml#L25-L72) in order to connect to OpenSearch.
+Then within another window you can start OpenSearch Dashboards:
 
-```yml
-opensearch.hosts: ["https://localhost:9200"]
-opensearch.username: "admin" # Default username on the docker image
-opensearch.password: "admin" # Default password on the docker image
-opensearch.ssl.verificationMode: none
-```
+_First make sure to clone the https://github.com/opensearch-project/security-dashboards-plugin repo into the plugins folder and build it (Using `yarn build`). You can follow the instructions here https://github.com/opensearch-project/security-dashboards-plugin/blob/main/DEVELOPER_GUIDE.md#install-opensearch-dashboards-with-security-dashboards-plugin._
+
+> You do not have to edit the `config/opensearch-dashboards.yml` file since the `yarn start:security` command sets up the default overrides automatically
+
+Then do the following:
+
+1. Run `yarn start:security`
+2. Navigate to OpenSearch Dashboards and login with the username `admin` and password `<initial admin password>`.
 
 For more detailed documentation, see [Configure TLS for OpenSearch Dashboards](https://opensearch.org/docs/latest/install-and-configure/install-dashboards/tls).
 

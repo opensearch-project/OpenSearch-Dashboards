@@ -29,10 +29,9 @@
  */
 
 import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { SortOrder } from '../../../saved_searches/types';
 // @ts-ignore
 import { isSortable } from './get_sort';
-
-export type SortOrder = [string, string];
 
 /**
  * use in case the user didn't manually sort.
@@ -40,7 +39,7 @@ export type SortOrder = [string, string];
  */
 export function getDefaultSort(
   indexPattern: IndexPattern,
-  defaultSortOrder: string = 'desc'
+  defaultSortOrder: 'asc' | 'desc' = 'desc'
 ): SortOrder[] {
   if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
     return [[indexPattern.timeFieldName, defaultSortOrder]];

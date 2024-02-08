@@ -43,6 +43,8 @@ export default function ({ getService, getPageObjects }) {
 
   describe('context view for date_nanos', () => {
     before(async function () {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.switchDiscoverTable('new');
       await security.testUser.setRoles([
         'opensearch_dashboards_admin',
         'opensearch_dashboards_date_nanos',

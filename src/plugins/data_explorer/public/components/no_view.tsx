@@ -11,7 +11,7 @@ export const NoView = () => {
   return (
     <EuiPageTemplate
       template="centeredContent"
-      className="dePageTemplate"
+      className="deLayout"
       pageContentProps={{
         role: 'alertdialog',
         color: 'plain',

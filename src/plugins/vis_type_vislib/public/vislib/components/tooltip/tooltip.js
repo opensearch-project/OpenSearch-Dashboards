@@ -34,13 +34,13 @@ import $ from 'jquery';
 
 import { Binder } from '../../lib/binder';
 import { positionTooltip } from './position_tooltip';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 let allContents = [];
 
-const tooltipColumnPadding = parseInt(theme.euiSizeXS || 0, 10) * 2;
-const tooltipTableMargin = parseInt(theme.euiSizeS || 0, 10) * 2;
-const tooltipMaxWidth = parseInt(theme.euiSizeXL || 0, 10) * 10;
+const tooltipColumnPadding = parseInt(euiThemeVars.euiSizeXS || 0, 10) * 2;
+const tooltipTableMargin = parseInt(euiThemeVars.euiSizeS || 0, 10) * 2;
+const tooltipMaxWidth = parseInt(euiThemeVars.euiSizeXL || 0, 10) * 10;
 
 /**
  * Add tooltip and listeners to visualization elements

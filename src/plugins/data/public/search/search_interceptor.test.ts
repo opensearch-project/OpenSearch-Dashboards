@@ -32,7 +32,11 @@ import { setImmediate } from 'timers';
 
 import { CoreSetup } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
-import { IOpenSearchSearchRequest } from '../../common/search';
+import {
+  IOpenSearchSearchRequest,
+  OPENSEARCH_SEARCH_STRATEGY,
+  OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY,
+} from '../../common';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../common';
 import { SearchTimeoutError, PainlessError } from './errors';
@@ -203,6 +207,83 @@ describe('SearchInterceptor', () => {
         done();
       };
       response.subscribe({ error });
+    });
+
+    test('Should use the default strategy when no strategy or long-numerals support is requested', async () => {
+      const mockResponse: any = { result: 200 };
+      mockCoreSetup.http.fetch.mockResolvedValueOnce(mockResponse);
+      const mockRequest: IOpenSearchSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
+
+      await response.toPromise();
+
+      expect(mockCoreSetup.http.fetch).toBeCalledWith(
+        expect.objectContaining({
+          path: `/internal/search/${OPENSEARCH_SEARCH_STRATEGY}`,
+        })
+      );
+    });
+
+    test('Should use the correct strategy when long-numerals support with no specific strategy is requested', async () => {
+      const mockResponse: any = { result: 200 };
+      mockCoreSetup.http.fetch.mockResolvedValueOnce(mockResponse);
+      const mockRequest: IOpenSearchSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest, {
+        withLongNumeralsSupport: true,
+      });
+
+      await response.toPromise();
+
+      expect(mockCoreSetup.http.fetch).toBeCalledWith(
+        expect.objectContaining({
+          path: `/internal/search/${OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY}`,
+        })
+      );
+    });
+
+    test('Should use the requested strategy when no long-numerals support is requested', async () => {
+      const mockResponse: any = { result: 200 };
+      mockCoreSetup.http.fetch.mockResolvedValueOnce(mockResponse);
+      const mockRequest: IOpenSearchSearchRequest = {
+        params: {},
+      };
+
+      const strategy = 'unregistered-strategy';
+      const response = searchInterceptor.search(mockRequest, { strategy });
+
+      await response.toPromise();
+
+      expect(mockCoreSetup.http.fetch).toBeCalledWith(
+        expect.objectContaining({
+          path: `/internal/search/${strategy}`,
+        })
+      );
+    });
+
+    test('Should use the requested strategy even when long-numerals support is requested', async () => {
+      const mockResponse: any = { result: 200 };
+      mockCoreSetup.http.fetch.mockResolvedValueOnce(mockResponse);
+      const mockRequest: IOpenSearchSearchRequest = {
+        params: {},
+      };
+
+      const strategy = 'unregistered-strategy';
+      const response = searchInterceptor.search(mockRequest, {
+        strategy,
+        withLongNumeralsSupport: true,
+      });
+
+      await response.toPromise();
+
+      expect(mockCoreSetup.http.fetch).toBeCalledWith(
+        expect.objectContaining({
+          path: `/internal/search/${strategy}`,
+        })
+      );
     });
   });
 });

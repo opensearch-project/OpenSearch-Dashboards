@@ -53,11 +53,8 @@ describe('Datasource Management: Create Datasource form', () => {
   };
 
   const setAuthTypeValue = (testSubjId: string, value: string) => {
-    component.find(testSubjId).last().simulate('change', {
-      target: {
-        value,
-      },
-    });
+    component.find(testSubjId).last().simulate('click');
+    component.find({ id: value }).last().simulate('click');
   };
 
   beforeEach(() => {
@@ -103,7 +100,7 @@ describe('Datasource Management: Create Datasource form', () => {
 
     const { authType, username, password } = getFields(component);
 
-    expect(authType.prop('value')).toBe(AuthType.NoAuth);
+    expect(authType.prop('valueOfSelected')).toBe(AuthType.NoAuth);
     expect(username.exists()).toBeFalsy(); // username field does not exist when No Auth option is selected
     expect(password.exists()).toBeFalsy(); // password field does not exist when No Auth option is selected
   });

@@ -839,7 +839,9 @@ describe('Fetch', () => {
         },
       });
 
-      await expect(fetchInstance.fetch('/my/path', { withLongNumerals: true })).resolves.toEqual({
+      await expect(
+        fetchInstance.fetch('/my/path', { withLongNumeralsSupport: true })
+      ).resolves.toEqual({
         'long-max': longPositive,
         'long-min': longNegative,
       });
@@ -854,7 +856,9 @@ describe('Fetch', () => {
         },
       });
 
-      await expect(fetchInstance.fetch('/my/path', { withLongNumerals: true })).resolves.toEqual({
+      await expect(
+        fetchInstance.fetch('/my/path', { withLongNumeralsSupport: true })
+      ).resolves.toEqual({
         'long-max': longPositive,
         'long-min': longNegative,
       });

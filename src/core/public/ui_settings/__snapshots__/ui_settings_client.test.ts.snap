@@ -62,6 +62,10 @@ exports[`#overrideLocalDefault key has no user value synchronously modifies the 
 
 exports[`#overrideLocalDefault key has no user value synchronously modifies the value returned by getAll(): getAll after override 1`] = `
 Object {
+  "aLongNumeral": Object {
+    "type": "number",
+    "value": "9007199254741002",
+  },
   "dateFormat": Object {
     "value": "bar",
   },
@@ -70,6 +74,10 @@ Object {
 
 exports[`#overrideLocalDefault key has no user value synchronously modifies the value returned by getAll(): getAll before override 1`] = `
 Object {
+  "aLongNumeral": Object {
+    "type": "number",
+    "value": "9007199254741002",
+  },
   "dateFormat": Object {
     "value": "Browser",
   },
@@ -82,6 +90,10 @@ exports[`#overrideLocalDefault key with user value does not modify the return va
 
 exports[`#overrideLocalDefault key with user value is included in the return value of getAll: getAll after override 1`] = `
 Object {
+  "aLongNumeral": Object {
+    "type": "number",
+    "value": "9007199254741002",
+  },
   "dateFormat": Object {
     "userValue": "foo",
     "value": "bar",
@@ -91,6 +103,10 @@ Object {
 
 exports[`#overrideLocalDefault key with user value is included in the return value of getAll: getAll before override 1`] = `
 Object {
+  "aLongNumeral": Object {
+    "type": "number",
+    "value": "9007199254741002",
+  },
   "dateFormat": Object {
     "userValue": "foo",
     "value": "Browser",
@@ -104,6 +120,10 @@ exports[`#overrideLocalDefault key with user value returns default override when
 
 exports[`#overrideLocalDefault key with user value returns default override when setting removed: getAll after override 1`] = `
 Object {
+  "aLongNumeral": Object {
+    "type": "number",
+    "value": "9007199254741002",
+  },
   "dateFormat": Object {
     "value": "bar",
   },
@@ -112,6 +132,10 @@ Object {
 
 exports[`#overrideLocalDefault key with user value returns default override when setting removed: getAll before override 1`] = `
 Object {
+  "aLongNumeral": Object {
+    "type": "number",
+    "value": "9007199254741002",
+  },
   "dateFormat": Object {
     "userValue": "foo",
     "value": "bar",

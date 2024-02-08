@@ -69,7 +69,7 @@ export const BootstrapCommand: ICommand = {
 
     const yarnLock = await readYarnLock(osd);
 
-    await validateDependencies(osd, yarnLock);
+    await validateDependencies(osd, yarnLock, options['single-version']?.toLowerCase?.());
 
     await linkProjectExecutables(projects, projectGraph);
 

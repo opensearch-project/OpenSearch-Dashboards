@@ -40,7 +40,7 @@ import {
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { coreMock, notificationServiceMock } from '../../../../../../core/public/mocks';
 import { serviceRegistryMock } from '../../../services/service_registry.mock';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
@@ -90,6 +90,21 @@ describe('Flyout', () => {
 
   it('should render import step', async () => {
     const component = shallowRender(defaultProps);
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render cluster selector and import options', async () => {
+    const component = shallowRender({
+      ...defaultProps,
+      dataSourceEnabled: true,
+      notifications: notificationServiceMock.createStartContract(),
+    });
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -192,10 +207,15 @@ describe('Flyout', () => {
       component.setState({ file: mockFile, isLegacyFile: false });
       await component.instance().import();
 
-      expect(importFileMock).toHaveBeenCalledWith(defaultProps.http, mockFile, {
-        createNewCopies: false,
-        overwrite: true,
-      });
+      expect(importFileMock).toHaveBeenCalledWith(
+        defaultProps.http,
+        mockFile,
+        {
+          createNewCopies: true,
+          overwrite: true,
+        },
+        undefined
+      );
       expect(component.state()).toMatchObject({
         conflictedIndexPatterns: undefined,
         conflictedSavedObjectsLinkedToSavedSearches: undefined,

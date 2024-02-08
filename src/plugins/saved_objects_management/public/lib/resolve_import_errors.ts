@@ -89,12 +89,16 @@ async function callResolveImportErrorsApi(
   http: HttpStart,
   file: File,
   retries: any,
-  createNewCopies: boolean
+  createNewCopies: boolean,
+  selectedDataSourceId?: string
 ): Promise<SavedObjectsImportResponse> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('retries', JSON.stringify(retries));
   const query = createNewCopies ? { createNewCopies } : {};
+  if (selectedDataSourceId) {
+    query.dataSourceId = selectedDataSourceId;
+  }
   return http.post<any>('/api/saved_objects/_resolve_import_errors', {
     headers: {
       // Important to be undefined, it forces proper headers to be set for FormData
@@ -167,6 +171,7 @@ export async function resolveImportErrors({
   http,
   getConflictResolutions,
   state,
+  selectedDataSourceId,
 }: {
   http: HttpStart;
   getConflictResolutions: (
@@ -180,6 +185,7 @@ export async function resolveImportErrors({
     file?: File;
     importMode: { createNewCopies: boolean; overwrite: boolean };
   };
+  selectedDataSourceId: string;
 }) {
   const retryDecisionCache = new Map<string, RetryDecision>();
   const replaceReferencesCache = new Map<string, Reference[]>();
@@ -264,7 +270,13 @@ export async function resolveImportErrors({
     }
 
     // Call API
-    const response = await callResolveImportErrorsApi(http, file!, retries, createNewCopies);
+    const response = await callResolveImportErrorsApi(
+      http,
+      file!,
+      retries,
+      createNewCopies,
+      selectedDataSourceId
+    );
     importCount = response.successCount; // reset the success count since we retry all successful results each time
     failedImports = [];
     for (const { error, ...obj } of response.errors || []) {

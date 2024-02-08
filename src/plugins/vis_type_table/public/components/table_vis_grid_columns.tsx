@@ -15,6 +15,7 @@ export const getDataGridColumns = (
   event: IInterpreterRenderHandlers['event'],
   columnWidths: ColumnWidth[]
 ) => {
+  const formattedColumnIds = table.formattedColumns.map((column) => column.id);
   const filterBucket = (rowIndex: number, columnIndex: number, negate: boolean) => {
     event({
       name: 'filterBucket',
@@ -22,7 +23,7 @@ export const getDataGridColumns = (
         data: [
           {
             table: {
-              columns: table.columns,
+              columns: table.columns.filter((column) => formattedColumnIds.includes(column.id)),
               rows: table.rows,
             },
             row: rowIndex,

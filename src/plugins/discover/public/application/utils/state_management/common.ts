@@ -21,3 +21,13 @@ export const reorderColumn = (columns: string[], source: number, destination: nu
   newColumns.splice(destination, 0, removed);
   return newColumns;
 };
+
+export function moveColumn(columns: string[], columnName: string, newIndex: number) {
+  if (newIndex < 0 || newIndex >= columns.length || !columns.includes(columnName)) {
+    return columns;
+  }
+  const modifiedColumns = [...columns];
+  modifiedColumns.splice(modifiedColumns.indexOf(columnName), 1); // remove at old index
+  modifiedColumns.splice(newIndex, 0, columnName); // insert before new index
+  return modifiedColumns;
+}

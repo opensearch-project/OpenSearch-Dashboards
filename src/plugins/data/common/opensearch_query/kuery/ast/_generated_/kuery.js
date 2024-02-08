@@ -233,8 +233,14 @@ module.exports = (function() {
             if (sequence === 'true') return buildLiteralNode(true);
             if (sequence === 'false') return buildLiteralNode(false);
             if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
-            const isNumberPattern = /^(-?[1-9]+\d*([.]\d+)?)$|^(-?0[.]\d*[1-9]+)$|^0$|^0.0$|^[.]\d{1,}$/
-            return buildLiteralNode(isNumberPattern.test(sequence) ? Number(sequence) : sequence);
+            const isNumberPattern = /^(-?[1-9]+\d*([.]\d+)?)$|^(-?0[.]\d*[1-9]+)$|^0$|^0.0$|^[.]\d{1,}$/;
+            return buildLiteralNode(
+              isNumberPattern.test(sequence)
+                ? isFinite(sequence) && (sequence > Number.MAX_SAFE_INTEGER || sequence < Number.MIN_SAFE_INTEGER)
+                  ? BigInt(sequence)
+                  : Number(sequence)
+                : sequence
+            );
           },
         peg$c50 = { type: "any", description: "any character" },
         peg$c51 = "*",

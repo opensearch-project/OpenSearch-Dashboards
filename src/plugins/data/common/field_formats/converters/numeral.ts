@@ -56,11 +56,14 @@ export abstract class NumeralFormat extends FieldFormat {
   protected getConvertedValue(val: any): string {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
-    if (typeof val !== 'number') {
+
+    const isBigInt = typeof val === 'bigint';
+
+    if (typeof val !== 'number' && !isBigInt) {
       val = parseFloat(val);
     }
 
-    if (isNaN(val)) return '';
+    if (!isBigInt && isNaN(val)) return '';
 
     const previousLocale = numeral.language();
     const defaultLocale =

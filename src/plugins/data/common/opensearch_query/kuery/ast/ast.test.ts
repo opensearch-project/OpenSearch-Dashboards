@@ -182,6 +182,21 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    test('should support long numerals', () => {
+      const lowerBigInt = BigInt(Number.MIN_SAFE_INTEGER) - 11n;
+      const upperBigInt = BigInt(Number.MAX_SAFE_INTEGER) + 11n;
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('range', 'bytes', {
+          gt: lowerBigInt,
+        }),
+        nodeTypes.function.buildNode('range', 'bytes', {
+          lt: upperBigInt,
+        }),
+      ]);
+      const actual = fromKueryExpression(`bytes > ${lowerBigInt} and bytes < ${upperBigInt}`);
+      expect(actual).toEqual(expected);
+    });
+
     test('should support inclusive range operators', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('range', 'bytes', {
@@ -284,6 +299,7 @@ describe('kuery AST API', () => {
       const booleanFalseLiteral = nodeTypes.literal.buildNode(false);
       const booleanTrueLiteral = nodeTypes.literal.buildNode(true);
       const numberLiteral = nodeTypes.literal.buildNode(42);
+      const upperBigInt = BigInt(Number.MAX_SAFE_INTEGER) + 11n;
 
       expect(fromLiteralExpression('foo')).toEqual(stringLiteral);
       expect(fromLiteralExpression('true')).toEqual(booleanTrueLiteral);
@@ -302,6 +318,7 @@ describe('kuery AST API', () => {
       expect(fromLiteralExpression('790.9').value).toEqual(790.9);
       expect(fromLiteralExpression('0.0001').value).toEqual(0.0001);
       expect(fromLiteralExpression('96565646732345').value).toEqual(96565646732345);
+      expect(fromLiteralExpression(upperBigInt.toString()).value).toEqual(upperBigInt);
 
       expect(fromLiteralExpression('..4').value).toEqual('..4');
       expect(fromLiteralExpression('.3text').value).toEqual('.3text');
@@ -316,6 +333,7 @@ describe('kuery AST API', () => {
       expect(fromLiteralExpression('-.4').value).toEqual('-.4');
       expect(fromLiteralExpression('-0').value).toEqual('-0');
       expect(fromLiteralExpression('00949').value).toEqual('00949');
+      expect(fromLiteralExpression(`00${upperBigInt}`).value).toEqual(`00${upperBigInt}`);
     });
 
     test('should allow escaping of special characters with a backslash', () => {

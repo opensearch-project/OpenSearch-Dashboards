@@ -8,7 +8,6 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | ------------------------- | --------------------------------------------------- | ----------- |
 | Anan Zhuang               | [ananzh](https://github.com/ananzh)                 | Amazon      |
 | Kawika (Rocky) Avilla     | [kavilla](https://github.com/kavilla)               | Amazon      |
-| Sean Neumann              | [seanneumann](https://github.com/seanneumann)       | Amazon      |
 | Miki Barahmand            | [AMoo-Miki](https://github.com/AMoo-Miki)           | Amazon      |
 | Ashwin P Chandran         | [ashwin-pc](https://github.com/ashwin-pc)           | Amazon      |
 | Josh Romero               | [joshuarrrr](https://github.com/joshuarrrr)         | Amazon      |
@@ -26,8 +25,9 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 
 ## Emeritus
 
-| Maintainer    | GitHub ID                                 | Affiliation |
-| ------------- | ----------------------------------------- | ----------- |
-| Tommy Markley | [tmarkley](https://github.com/tmarkley)   | Amazon      |
-| Mihir Soni    | [mihirsoni](https://github.com/mihirsoni) | Amazon      |
-| Bishoy Boktor | [boktorbb](https://github.com/boktorbb)   | Amazon      |
+| Maintainer    | GitHub ID                                     | Affiliation |
+| ------------- |-----------------------------------------------|-------------|
+| Tommy Markley | [tmarkley](https://github.com/tmarkley)       | Amazon      |
+| Mihir Soni    | [mihirsoni](https://github.com/mihirsoni)     | Amazon      |
+| Bishoy Boktor | [boktorbb](https://github.com/boktorbb)       | Amazon      |
+| Sean Neumann  | [seanneumann](https://github.com/seanneumann) | Contributor |

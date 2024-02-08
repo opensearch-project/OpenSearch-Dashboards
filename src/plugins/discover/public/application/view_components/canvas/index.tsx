@@ -112,14 +112,10 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       )}
       {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
       {fetchState.status === ResultStatus.READY && (
-        <>
-          <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
-            <EuiPanel>
-              <MemoizedDiscoverChartContainer {...fetchState} />
-            </EuiPanel>
-          </EuiPanel>
+        <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
+          <MemoizedDiscoverChartContainer {...fetchState} />
           <MemoizedDiscoverTable rows={rows} />
-        </>
+        </EuiPanel>
       )}
     </EuiPanel>
   );

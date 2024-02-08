@@ -7,7 +7,7 @@
  * @experimental These interfaces are experimental and might change in future releases.
  */
 
-import { EuiComboBoxSingleSelectionShape } from '@elastic/eui';
+import { EuiComboBoxProps, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
 import { GenericDataSource } from '../datasource_services';
 
 export interface DataSourceGroup {
@@ -22,7 +22,7 @@ export interface DataSourceOption {
   ds: GenericDataSource;
 }
 
-export interface DataSourceSelectableProps {
+export interface DataSourceSelectableProps extends Pick<EuiComboBoxProps<unknown>, 'fullWidth'> {
   dataSources: GenericDataSource[];
   onDataSourceSelect: (dataSourceOption: DataSourceOption[]) => void;
   singleSelection?: boolean | EuiComboBoxSingleSelectionShape;

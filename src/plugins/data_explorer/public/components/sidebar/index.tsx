@@ -11,6 +11,7 @@ import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import './index.scss';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
@@ -91,8 +92,18 @@ export const Sidebar: FC = ({ children }) => {
 
   return (
     <EuiPageSideBar className="deSidebar" sticky>
-      <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
-        <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
+      <EuiSplitPanel.Outer
+        className="eui-yScroll deSidebar_panel"
+        hasBorder={true}
+        borderRadius="none"
+        color="transparent"
+      >
+        <EuiSplitPanel.Inner
+          paddingSize="s"
+          grow={false}
+          color="transparent"
+          className="deSidebar_dataSource"
+        >
           <DataSourceSelectable
             dataSources={activeDataSources}
             dataSourceOptionList={dataSourceOptionList}
@@ -100,9 +111,10 @@ export const Sidebar: FC = ({ children }) => {
             onDataSourceSelect={handleSourceSelection}
             selectedSources={selectedSources}
             onGetDataSetError={handleGetDataSetError}
+            fullWidth
           />
         </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
+        <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>

@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { createReadStream, createWriteStream, unlinkSync, renameSync } from 'fs';
+import { createInterface } from 'readline';
 import { spawn, spawnStreaming } from './child_process';
 import { Project } from './project';
 
@@ -45,13 +47,47 @@ interface WorkspacesInfo {
 /**
  * Install all dependencies in the given directory
  */
-export async function installInDir(directory: string, extraArgs: string[] = []) {
-  const options = ['install', '--non-interactive', ...extraArgs];
+export async function installInDir(directory: string, extraArgs: string[] = [], useAdd = false) {
+  const options = [useAdd ? 'add' : 'install', '--non-interactive', ...extraArgs];
 
   // We pass the mutex flag to ensure only one instance of yarn runs at any
   // given time (e.g. to avoid conflicts).
   await spawn(YARN_EXEC, options, {
     cwd: directory,
+  });
+}
+
+/**
+ * Patch a file by replacing a given string
+ */
+export function patchFile(
+  filePath: string,
+  searchValue: string,
+  replacement: string
+): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    const patchWriter = createWriteStream(`${filePath}.patched`, {
+      flags: 'w',
+    });
+    const fileReader = createInterface({
+      input: createReadStream(filePath),
+      crlfDelay: Infinity,
+    });
+    for await (const line of fileReader) {
+      if (line.includes(searchValue)) {
+        patchWriter.write(line.replace(searchValue, replacement) + '\n', 'utf8');
+      } else {
+        patchWriter.write(line + '\n', 'utf8');
+      }
+    }
+
+    patchWriter.on('finish', () => resolve());
+    patchWriter.on('error', reject);
+
+    fileReader.close();
+    patchWriter.end();
+    unlinkSync(filePath);
+    renameSync(`${filePath}.patched`, filePath);
   });
 }
 

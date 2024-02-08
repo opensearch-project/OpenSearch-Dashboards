@@ -87,6 +87,8 @@ export interface HttpResponseOptions {
   body?: HttpResponsePayload;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
+  /** Indicates if alternate serialization should be employed */
+  withLongNumeralsSupport?: boolean;
 }
 
 /**

@@ -285,6 +285,7 @@ export const parse = (
     if (
       numeralsAreNumbers &&
       typeof val === 'number' &&
+      isFinite(val) &&
       (val < Number.MAX_SAFE_INTEGER || val > Number.MAX_SAFE_INTEGER)
     ) {
       numeralsAreNumbers = false;

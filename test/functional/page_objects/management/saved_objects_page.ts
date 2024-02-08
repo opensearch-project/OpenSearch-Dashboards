@@ -50,15 +50,22 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await this.waitTableIsLoaded();
     }
 
-    async importFile(path: string, overwriteAll = true) {
+    async importFile(path: string, overwriteAll = true, isLegacy = false) {
       log.debug(`importFile(${path})`);
 
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       await PageObjects.common.setFileInputPath(path);
 
+      if (!isLegacy) {
+        await testSubjects.click(
+          'savedObjectsManagement-importModeControl-createNewCopiesDisabled'
+        );
+      }
+
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
+
         const radio = await testSubjects.find(
           'savedObjectsManagement-importModeControl-overwriteRadioGroup'
         );

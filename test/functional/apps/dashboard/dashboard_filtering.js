@@ -46,7 +46,14 @@ export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const security = getService('security');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'visualize',
+    'timePicker',
+    'discover',
+  ]);
 
   describe('dashboard filtering', function () {
     this.tags('includeFirefox');
@@ -72,6 +79,10 @@ export default function ({ getService, getPageObjects }) {
 
     describe('adding a filter that excludes all data', () => {
       before(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.switchDiscoverTable('new');
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
@@ -219,7 +230,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowCount(1);
+        await testSubjects.existOrFail('docTableExpandToggleColumn');
       });
 
       it('vega', async () => {

@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPageContent,
-  EuiSelect,
+  EuiSuperSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -124,8 +124,7 @@ export class CreateDataSourceForm extends React.Component<
     });
   };
 
-  onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const authType = e.target.value as AuthType;
+  onChangeAuthType = (authType: AuthType) => {
     this.setState({
       auth: {
         ...this.state.auth,
@@ -140,13 +139,13 @@ export class CreateDataSourceForm extends React.Component<
     });
   };
 
-  onChangeSigV4ServiceName = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  onChangeSigV4ServiceName = (service: SigV4ServiceName) => {
     this.setState({
       auth: {
         ...this.state.auth,
         credentials: {
           ...this.state.auth.credentials,
-          service: e.target.value as SigV4ServiceName,
+          service,
         },
       },
     });
@@ -425,10 +424,10 @@ export class CreateDataSourceForm extends React.Component<
                 defaultMessage: 'Service Name',
               })}
             >
-              <EuiSelect
+              <EuiSuperSelect
                 options={sigV4ServiceOptions}
-                value={this.state.auth.credentials.service}
-                onChange={(e) => this.onChangeSigV4ServiceName(e)}
+                valueOfSelected={this.state.auth.credentials.service}
+                onChange={(value) => this.onChangeSigV4ServiceName(value)}
                 name="ServiceName"
                 data-test-subj="createDataSourceFormSigV4ServiceTypeSelect"
               />
@@ -598,10 +597,10 @@ export class CreateDataSourceForm extends React.Component<
             {/* Credential source */}
             <EuiSpacer size="l" />
             <EuiFormRow>
-              <EuiSelect
+              <EuiSuperSelect
                 options={credentialSourceOptions}
-                value={this.state.auth.type}
-                onChange={(e) => this.onChangeAuthType(e)}
+                valueOfSelected={this.state.auth.type}
+                onChange={(value) => this.onChangeAuthType(value)}
                 name="Credential"
                 data-test-subj="createDataSourceFormAuthTypeSelect"
               />

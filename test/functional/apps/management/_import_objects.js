@@ -226,7 +226,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('should import saved objects', async function () {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects.json')
+          path.join(__dirname, 'exports', '_import_objects.json'),
+          true,
+          true
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
@@ -237,7 +239,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects-conflicts.json')
+          path.join(__dirname, 'exports', '_import_objects-conflicts.json'),
+          true,
+          true
         );
         await PageObjects.savedObjects.checkImportLegacyWarning();
         await PageObjects.savedObjects.checkImportConflictsWarning();
@@ -258,7 +262,8 @@ export default function ({ getService, getPageObjects }) {
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.json'),
-          false
+          false,
+          true
         );
 
         await PageObjects.savedObjects.checkImportLegacyWarning();
@@ -278,7 +283,8 @@ export default function ({ getService, getPageObjects }) {
         // so that we can be prompted to override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.json'),
-          false
+          false,
+          true
         );
 
         await PageObjects.savedObjects.checkImportLegacyWarning();
@@ -298,7 +304,8 @@ export default function ({ getService, getPageObjects }) {
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_multiple_exists.json'),
-          false
+          false,
+          true
         );
 
         await PageObjects.savedObjects.checkImportLegacyWarning();
@@ -325,7 +332,8 @@ export default function ({ getService, getPageObjects }) {
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_index_patterns_multiple_exists.json'),
-          false
+          false,
+          true
         );
 
         // Override the index patterns.
@@ -343,13 +351,17 @@ export default function ({ getService, getPageObjects }) {
 
       it('should import saved objects linked to saved searches', async function () {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_saved_search.json')
+          path.join(__dirname, 'exports', '_import_objects_saved_search.json'),
+          true,
+          true
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
 
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'),
+          true,
+          true
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
@@ -361,7 +373,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'),
+          true,
+          true
         );
         await PageObjects.savedObjects.checkImportFailedWarning();
         await PageObjects.savedObjects.clickImportDone();
@@ -374,7 +388,9 @@ export default function ({ getService, getPageObjects }) {
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
         // First, import the saved search
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_saved_search.json')
+          path.join(__dirname, 'exports', '_import_objects_saved_search.json'),
+          true,
+          true
         );
         // Wait for all the saves to happen
         await PageObjects.savedObjects.checkImportSucceeded();
@@ -387,7 +403,9 @@ export default function ({ getService, getPageObjects }) {
         // Last, import a saved object connected to the saved search
         // This should NOT show the conflicts
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json'),
+          true,
+          true
         );
         // Wait for all the saves to happen
         await PageObjects.savedObjects.checkNoneImported();
@@ -401,7 +419,9 @@ export default function ({ getService, getPageObjects }) {
       it('should import saved objects with index patterns when index patterns already exists', async () => {
         // First, import the objects
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
+          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'),
+          true,
+          true
         );
         await PageObjects.savedObjects.clickImportDone();
 
@@ -417,7 +437,9 @@ export default function ({ getService, getPageObjects }) {
 
         // Then, import the objects
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
+          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'),
+          true,
+          true
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();

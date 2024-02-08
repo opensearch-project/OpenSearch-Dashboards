@@ -66,12 +66,12 @@ export function migrateUrlState(oldPath: string, newPath = '/'): string {
   let path = newPath;
   const pathPatterns = [
     {
-      pattern: '#/context/:indexPattern/:id\\?:appState?',
+      pattern: '#/context/:indexPattern/:id',
       extraState: { docView: 'context' },
       path: `context`,
     },
     {
-      pattern: '#/doc/:indexPattern/:index\\?:appState?',
+      pattern: '#/doc/:indexPattern/:id',
       extraState: { docView: 'doc' },
       path: `doc`,
     },
@@ -99,6 +99,7 @@ export function migrateUrlState(oldPath: string, newPath = '/'): string {
     case `doc`:
     case `context`:
       path = oldPath;
+      break;
     case `discover`:
     case `savedSearch`:
       const params = matchPath<DiscoverParams>(oldPath, {

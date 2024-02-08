@@ -41,11 +41,13 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
-  const PageObjects = getPageObjects(['common', 'context']);
+  const PageObjects = getPageObjects(['common', 'context', 'discover']);
 
   describe('context filters', function contextSize() {
     beforeEach(async function () {
       await browser.refresh();
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.switchDiscoverTable('new');
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });

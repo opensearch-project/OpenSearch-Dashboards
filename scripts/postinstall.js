@@ -71,6 +71,19 @@ const run = async () => {
       },
     ])
   );
+  promises.push(
+    patchFile('node_modules/rison-node/js/rison.js', [
+      {
+        from: 'return Number(s)',
+        to:
+          'return isFinite(s) && (s > Number.MAX_SAFE_INTEGER || s < Number.MIN_SAFE_INTEGER) ? BigInt(s) : Number(s)',
+      },
+      {
+        from: 's = {',
+        to: 's = {\n            bigint: x => x.toString(),',
+      },
+    ])
+  );
 
   await Promise.all(promises);
 };

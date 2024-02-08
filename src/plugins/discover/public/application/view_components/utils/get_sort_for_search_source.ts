@@ -31,8 +31,7 @@
 import { OpenSearchQuerySortValue, IndexPattern } from '../../../opensearch_dashboards_services';
 import { getSort } from './get_sort';
 import { getDefaultSort } from './get_default_sort';
-
-export type SortOrder = [string, string];
+import { SortDirection, SortOrder } from '../../../saved_searches/types';
 
 /**
  * Prepares sort for search source, that's sending the request to OpenSearch
@@ -44,7 +43,7 @@ export type SortOrder = [string, string];
 export function getSortForSearchSource(
   sort?: SortOrder[],
   indexPattern?: IndexPattern,
-  defaultDirection: string = 'desc'
+  defaultDirection: SortDirection = 'desc'
 ): OpenSearchQuerySortValue[] {
   if (!sort || !indexPattern) {
     return [];

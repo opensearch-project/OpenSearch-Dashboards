@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
-
 const { version } = require('../../package.json');
 const OPENSEARCH_DASHBOARDS_INSTALL_DIR =
   process.env.OPENSEARCH_DASHBOARDS_INSTALL_DIR ||
@@ -232,9 +230,5 @@ module.exports = function () {
       cmd: YARN,
       args: ['run', 'grunt', 'test:projects'],
     },
-
-    ...getFunctionalTestGroupRunConfigs({
-      opensearchDashboardsInstallDir: OPENSEARCH_DASHBOARDS_INSTALL_DIR,
-    }),
   };
 };

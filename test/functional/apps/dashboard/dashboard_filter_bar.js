@@ -39,7 +39,14 @@ export default function ({ getService, getPageObjects }) {
   const opensearchArchiver = getService('opensearchArchiver');
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'visualize',
+    'timePicker',
+    'discover',
+  ]);
 
   describe('dashboard filter bar', () => {
     before(async () => {
@@ -185,6 +192,9 @@ export default function ({ getService, getPageObjects }) {
     describe('saved search filtering', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.switchDiscoverTable('new');
+        await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultDataRange();

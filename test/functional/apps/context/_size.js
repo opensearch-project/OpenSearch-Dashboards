@@ -37,11 +37,13 @@ export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['context']);
+  const PageObjects = getPageObjects(['common', 'context', 'discover']);
   let expectedRowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
   describe('context size', function contextSize() {
     before(async function () {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.switchDiscoverTable('new');
       await opensearchDashboardsServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,

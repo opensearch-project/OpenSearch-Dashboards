@@ -47,6 +47,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
+import { parse, stringify } from '@osd/std';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -99,7 +100,7 @@ class FilterEditorUI extends Component<Props, State> {
       params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias,
-      queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
+      queryDsl: stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
     };
   }
@@ -430,7 +431,7 @@ class FilterEditorUI extends Component<Props, State> {
 
     if (isCustomEditorOpen) {
       try {
-        return Boolean(JSON.parse(queryDsl));
+        return Boolean(parse(queryDsl));
       } catch (e) {
         return false;
       }
@@ -501,7 +502,7 @@ class FilterEditorUI extends Component<Props, State> {
     if (isCustomEditorOpen) {
       const { index, disabled, negate } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
-      const body = JSON.parse(queryDsl);
+      const body = parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {

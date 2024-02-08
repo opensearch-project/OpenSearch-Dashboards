@@ -187,6 +187,8 @@ export interface SavedObjectsImportOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  dataSourceId?: string;
+  dataSourceTitle?: string;
 }
 
 /**
@@ -208,6 +210,8 @@ export interface SavedObjectsResolveImportErrorsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  dataSourceId?: string;
+  dataSourceTitle?: string;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
