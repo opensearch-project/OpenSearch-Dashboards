@@ -26,8 +26,6 @@ var rawThemeVersion = browserThemeVersion.userValue || '{{configThemeVersion}}'
 var darkMode = rawDarkMode ? 'dark' : 'light';
 var themeVersion = rawThemeVersion === 'v7' ? 'v7' : 'v8';
 
-console.log(themeVersion, darkMode, window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-
 window.__osdThemeTag__ = themeVersion + darkMode;
 
 var themeSourceKey = themeVersion === 'v7' ? 'v7' : 'default';
