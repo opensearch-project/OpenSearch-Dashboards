@@ -10,18 +10,39 @@ import { PLUGIN_NAME } from '../common';
 import { ManagementSetup } from '../../management/public';
 import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
 import { DataSourceColumn } from './components/data_source_column/data_source_column';
+import {
+  AuthMethodUIElements,
+  IAuthenticationMethodRegistery,
+  AuthenticationMethodRegistery,
+} from './auth_registry';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   indexPatternManagement: IndexPatternManagementSetup;
 }
 
+export interface DataSourceManagementPluginSetup {
+  registerAuthenticationMethod: (name: string, authMethodValues: AuthMethodUIElements) => void;
+}
+
+export interface DataSourceManagementPluginStart {
+  getAuthenticationMethodRegistery: () => IAuthenticationMethodRegistery;
+}
+
 const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
-  implements Plugin<void, void, DataSourceManagementSetupDependencies> {
+  implements
+    Plugin<
+      DataSourceManagementPluginSetup,
+      DataSourceManagementPluginStart,
+      DataSourceManagementSetupDependencies
+    > {
+  private started = false;
+  private authMethodsRegistry = new AuthenticationMethodRegistery();
+
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<DataSourceManagementPluginStart>,
     { management, indexPatternManagement }: DataSourceManagementSetupDependencies
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
@@ -47,9 +68,28 @@ export class DataSourceManagementPlugin
         return mountManagementSection(core.getStartServices, params);
       },
     });
+
+    const registerAuthenticationMethod = (
+      name: string,
+      authMethodUIElements: AuthMethodUIElements
+    ) => {
+      if (this.started) {
+        throw new Error(
+          'cannot call `registerAuthenticationMethod` after data source management startup.'
+        );
+      }
+      this.authMethodsRegistry.registerAuthenticationMethod(name, authMethodUIElements);
+    };
+
+    return { registerAuthenticationMethod };
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    this.started = true;
+    return {
+      getAuthenticationMethodRegistery: () => this.authMethodsRegistry,
+    };
+  }
 
   public stop() {}
 }
