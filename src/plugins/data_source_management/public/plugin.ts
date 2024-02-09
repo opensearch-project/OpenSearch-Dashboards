@@ -11,7 +11,7 @@ import { ManagementSetup } from '../../management/public';
 import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
 import { DataSourceColumn } from './components/data_source_column/data_source_column';
 import {
-  AuthMethodUIElements,
+  AuthenticationMethod,
   IAuthenticationMethodRegistery,
   AuthenticationMethodRegistery,
 } from './auth_registry';
@@ -22,7 +22,7 @@ export interface DataSourceManagementSetupDependencies {
 }
 
 export interface DataSourceManagementPluginSetup {
-  registerAuthenticationMethod: (name: string, authMethodValues: AuthMethodUIElements) => void;
+  registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
 }
 
 export interface DataSourceManagementPluginStart {
@@ -69,16 +69,13 @@ export class DataSourceManagementPlugin
       },
     });
 
-    const registerAuthenticationMethod = (
-      name: string,
-      authMethodUIElements: AuthMethodUIElements
-    ) => {
+    const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {
         throw new Error(
           'cannot call `registerAuthenticationMethod` after data source management startup.'
         );
       }
-      this.authMethodsRegistry.registerAuthenticationMethod(name, authMethodUIElements);
+      this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
     };
 
     return { registerAuthenticationMethod };

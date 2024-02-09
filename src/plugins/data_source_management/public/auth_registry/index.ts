@@ -5,6 +5,6 @@
 
 export {
   IAuthenticationMethodRegistery,
-  AuthMethodUIElements,
+  AuthenticationMethod,
   AuthenticationMethodRegistery,
 } from './authentication_methods_registry';

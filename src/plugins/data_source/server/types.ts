@@ -46,7 +46,7 @@ export type DataSourceCredentialsProvider = (
   options: DataSourceCredentialsProviderOptions
 ) => Promise<UsernamePasswordTypedContent | SigV4Content>;
 
-export interface AuthMethodType {
+export interface AuthenticationMethod {
   name: string;
   authType: AuthType;
   credentialProvider: DataSourceCredentialsProvider;
@@ -78,7 +78,7 @@ export interface DataSourcePluginSetup {
   createDataSourceError: (err: any) => DataSourceError;
   dataSourceEnabled: () => boolean;
   defaultClusterEnabled: () => boolean;
-  registerCredentialProvider: (method: AuthMethodType) => void;
+  registerCredentialProvider: (method: AuthenticationMethod) => void;
 }
 
 export interface DataSourcePluginStart {

@@ -23,7 +23,7 @@ import { LoggingAuditor } from './audit/logging_auditor';
 import { CryptographyService, CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
 import { DataSourceSavedObjectsClientWrapper, dataSource } from './saved_objects';
-import { AuthMethodType, DataSourcePluginSetup, DataSourcePluginStart } from './types';
+import { AuthenticationMethod, DataSourcePluginSetup, DataSourcePluginStart } from './types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
 
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
@@ -124,7 +124,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       authRegistryPromise
     );
 
-    const registerCredentialProvider = (method: AuthMethodType) => {
+    const registerCredentialProvider = (method: AuthenticationMethod) => {
       this.logger.debug(`Registered Credential Provider for authType = ${method.name}`);
       if (this.started) {
         throw new Error('cannot call `registerCredentialProvider` after service startup.');

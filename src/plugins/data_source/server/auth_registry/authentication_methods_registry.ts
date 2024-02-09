@@ -4,7 +4,7 @@
  */
 
 import { deepFreeze } from '@osd/std';
-import { AuthMethodType } from '../../server/types';
+import { AuthenticationMethod } from '../../server/types';
 
 export type IAuthenticationMethodRegistery = Omit<
   AuthenticationMethodRegistery,
@@ -12,16 +12,16 @@ export type IAuthenticationMethodRegistery = Omit<
 >;
 
 export class AuthenticationMethodRegistery {
-  private readonly authMethods = new Map<string, AuthMethodType>();
+  private readonly authMethods = new Map<string, AuthenticationMethod>();
   /**
    * Register a authMethods with function to return credentials inside the registry.
    * Authentication Method can only be registered once. subsequent calls with the same method name will throw an error.
    */
-  public registerAuthenticationMethod(method: AuthMethodType) {
+  public registerAuthenticationMethod(method: AuthenticationMethod) {
     if (this.authMethods.has(method.name)) {
       throw new Error(`Authentication method '${method.name}' is already registered`);
     }
-    this.authMethods.set(method.name, deepFreeze(method) as AuthMethodType);
+    this.authMethods.set(method.name, deepFreeze(method) as AuthenticationMethod);
   }
 
   public getAllAuthenticationMethods() {

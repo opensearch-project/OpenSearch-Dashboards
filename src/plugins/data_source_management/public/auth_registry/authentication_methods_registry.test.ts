@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthenticationMethodRegistery } from './authentication_methods_registry';
-import { AuthenticationMethod } from '../../server/types';
-import { AuthType } from '../../common/data_sources';
+import {
+  AuthenticationMethodRegistery,
+  AuthenticationMethod,
+} from './authentication_methods_registry';
+import React from 'react';
 
 const createAuthenticationMethod = (
   authMethod: Partial<AuthenticationMethod>
 ): AuthenticationMethod => ({
   name: 'unknown',
-  authType: AuthType.NoAuth,
-  credentialProvider: jest.fn(),
+  credentialForm: React.createElement('div', {}, 'Hello, world!'),
+  credentialSourceOption: {
+    value: 'unknown',
+  },
   ...authMethod,
 });
 
@@ -61,20 +65,18 @@ describe('AuthenticationMethodRegistery', () => {
       registry.registerAuthenticationMethod(
         createAuthenticationMethod({
           name: 'typeA',
-          authType: AuthType.NoAuth,
         })
       );
 
       const typeA = registry.getAuthenticationMethod('typeA')!;
 
       expect(() => {
-        typeA.authType = AuthType.SigV4;
+        typeA.credentialForm = React.createElement('div', {}, 'Welcome!');
       }).toThrow();
       expect(() => {
-        typeA.name = 'foo';
-      }).toThrow();
-      expect(() => {
-        typeA.credentialProvider = jest.fn();
+        typeA.credentialSourceOption = {
+          value: 'typeA',
+        };
       }).toThrow();
     });
   });
