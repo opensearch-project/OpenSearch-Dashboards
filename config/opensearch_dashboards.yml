@@ -29,6 +29,10 @@
 # dashboards. OpenSearch Dashboards creates a new index if the index doesn't already exist.
 #opensearchDashboards.index: ".opensearch_dashboards"
 
+# OpenSearch Dashboards uses an index in OpenSearch to store dynamic configurations.
+# This shall be a different index from opensearchDashboards.index.
+# opensearchDashboards.config_index: ".opensearch_dashboards_config"
+
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"
 
