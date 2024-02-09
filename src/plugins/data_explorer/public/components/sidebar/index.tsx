@@ -120,7 +120,7 @@ export const Sidebar: FC = ({ children }) => {
               onClick={() => {
                 redirectToLogExplorer(dsName, dsType);
               }}
-              data-test-subj="dataExplorer__dataSourceSelectorModelOpenInExplorerBtn"
+              data-test-subj="dataExplorer__DSSModalOpenInExplorerBtn"
               fill
             >
               {i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalFooterButtonTxt', {
