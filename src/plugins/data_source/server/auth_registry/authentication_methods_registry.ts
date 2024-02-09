@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthMethodValues } from '../../server/types';
+import { deepFreeze } from '@osd/std';
+import { AuthMethodType } from '../../server/types';
 
 export type IAuthenticationMethodRegistery = Omit<
   AuthenticationMethodRegistery,
@@ -11,16 +12,16 @@ export type IAuthenticationMethodRegistery = Omit<
 >;
 
 export class AuthenticationMethodRegistery {
-  private readonly authMethods = new Map<string, AuthMethodValues>();
+  private readonly authMethods = new Map<string, AuthMethodType>();
   /**
    * Register a authMethods with function to return credentials inside the registry.
    * Authentication Method can only be registered once. subsequent calls with the same method name will throw an error.
    */
-  public registerAuthenticationMethod(name: string, authMethodValues: AuthMethodValues) {
-    if (this.authMethods.has(name)) {
-      throw new Error(`Authentication method '${name}' is already registered`);
+  public registerAuthenticationMethod(method: AuthMethodType) {
+    if (this.authMethods.has(method.name)) {
+      throw new Error(`Authentication method '${method.name}' is already registered`);
     }
-    this.authMethods.set(name, authMethodValues);
+    this.authMethods.set(method.name, deepFreeze(method) as AuthMethodType);
   }
 
   public getAllAuthenticationMethods() {
