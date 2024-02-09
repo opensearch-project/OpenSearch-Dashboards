@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ClusterSelector should render normally 1`] = `
+exports[`ClusterSelector should render normally with defaultCluster is enabled 1`] = `
 <EuiComboBox
   aria-label="Select a data source"
   async={false}
@@ -21,6 +21,29 @@ exports[`ClusterSelector should render normally 1`] = `
       },
     ]
   }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`ClusterSelector should render normally with defaultCluster is not enabled 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={true}
+  data-test-subj="clusterSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={Array []}
+  placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={Array []}
   singleSelection={
     Object {
       "asPlainText": true,

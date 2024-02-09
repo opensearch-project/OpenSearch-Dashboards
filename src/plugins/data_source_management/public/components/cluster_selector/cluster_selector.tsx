@@ -42,7 +42,7 @@ export class ClusterSelector extends React.Component<ClusterSelectorProps, Clust
     super(props);
 
     this.state = {
-      clusterOptions: [],
+      clusterOptions: this.props.defaultClusterEnabled ? [LocalCluster] : [],
       selectedOption: this.props.defaultClusterEnabled ? [LocalCluster] : [],
     };
   }

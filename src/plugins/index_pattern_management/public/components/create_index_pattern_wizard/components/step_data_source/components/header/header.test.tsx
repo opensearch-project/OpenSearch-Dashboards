@@ -26,6 +26,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        defaultClusterEnabled={true}
       />
     );
 
@@ -53,6 +54,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        defaultClusterEnabled={true}
       />
     );
 
@@ -79,6 +81,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        defaultClusterEnabled={true}
       />
     );
 
@@ -95,5 +98,24 @@ describe('Header', () => {
         .find('[data-test-subj="createIndexPatternStepDataSourceNextStepButton"]')
         .prop('isDisabled')
     ).toEqual(false);
+  });
+
+  it('should disable next step when default cluster is not enabled and no option selected', () => {
+    const component = shallowWithIntl(
+      <Header
+        onDataSourceSelected={() => {}}
+        dataSourceRef={{ type: 'type', id: 'id', title: 'title' }!}
+        goToNextStep={() => {}}
+        isNextStepDisabled={true}
+        stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        defaultClusterEnabled={false}
+      />
+    );
+
+    expect(
+      component
+        .find('[data-test-subj="createIndexPatternStepDataSourceNextStepButton"]')
+        .prop('isDisabled')
+    ).toEqual(true);
   });
 });

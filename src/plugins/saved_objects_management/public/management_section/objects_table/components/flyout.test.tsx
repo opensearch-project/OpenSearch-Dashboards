@@ -99,10 +99,27 @@ describe('Flyout', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render cluster selector and import options', async () => {
+  it('should render cluster selector and import options when defaultCluster is enabled', async () => {
     const component = shallowRender({
       ...defaultProps,
       dataSourceEnabled: true,
+      defaultClusterEnabled: true,
+      notifications: notificationServiceMock.createStartContract(),
+    });
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render cluster selector and import options when defaultCluster us not enabled', async () => {
+    const component = shallowRender({
+      ...defaultProps,
+      dataSourceEnabled: true,
+      defaultClusterEnabled: false,
       notifications: notificationServiceMock.createStartContract(),
     });
 

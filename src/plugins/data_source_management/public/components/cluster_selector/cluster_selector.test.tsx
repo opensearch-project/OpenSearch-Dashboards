@@ -19,18 +19,39 @@ describe('ClusterSelector', () => {
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
+  });
+
+  it('should render normally with defaultCluster is enabled', () => {
     component = shallow(
       <ClusterSelector
         savedObjectsClient={client}
         notifications={toasts}
         onSelectedDataSource={jest.fn()}
         disabled={false}
+        defaultClusterEnabled={true}
         fullWidth={false}
       />
     );
+    expect(component).toMatchSnapshot();
+    expect(client.find).toBeCalledWith({
+      fields: ['id', 'description', 'title'],
+      perPage: 10000,
+      type: 'data-source',
+    });
+    expect(toasts.addWarning).toBeCalledTimes(0);
   });
 
-  it('should render normally', () => {
+  it('should render normally with defaultCluster is not enabled', () => {
+    component = shallow(
+      <ClusterSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        defaultClusterEnabled={false}
+        fullWidth={false}
+      />
+    );
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
       fields: ['id', 'description', 'title'],
