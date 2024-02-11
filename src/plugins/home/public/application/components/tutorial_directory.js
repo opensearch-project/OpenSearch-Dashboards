@@ -188,6 +188,7 @@ class TutorialDirectoryUi extends React.Component {
           addBasePath={this.props.addBasePath}
           dataSourceId={this.state.selectedDataSourceId}
           isDataSourceEnabled={this.state.isDataSourceEnabled}
+          isDefaultClusterEnabled={this.state.isDefaultClusterEnabled}
         />
       );
     }
