@@ -848,9 +848,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
 
     let confirmButton;
 
-    let importButtonDisbled = false;
+    let importButtonDisabled = false;
     if (this.props.dataSourceEnabled && this.props.hideLocalCluster && !selectedDataSourceId) {
-      importButtonDisbled = true;
+      importButtonDisabled = true;
     }
 
     if (status === 'success') {
@@ -884,7 +884,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           size="s"
           fill
           isLoading={status === 'loading'}
-          disabled={importButtonDisbled}
+          disabled={importButtonDisabled}
           data-test-subj="importSavedObjectsImportBtn"
         >
           <FormattedMessage
