@@ -86,7 +86,6 @@ describe('#importSavedObjectsFromStream', () => {
       errors: [],
       filteredObjects: [],
       importIdMap: new Map(),
-      pendingOverwrites: new Set(),
     });
     getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
   });
@@ -500,7 +499,6 @@ describe('#importSavedObjectsFromStream', () => {
           errors: [],
           filteredObjects: [],
           importIdMap: new Map(),
-          pendingOverwrites: new Set([`${dsSuccess2.type}:${dsSuccess2.id}`]),
         });
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [],
