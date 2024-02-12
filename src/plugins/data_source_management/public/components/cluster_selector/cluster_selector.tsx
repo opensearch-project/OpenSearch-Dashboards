@@ -21,7 +21,7 @@ interface ClusterSelectorProps {
   notifications: ToastsStart;
   onSelectedDataSource: (clusterOption: ClusterOption[]) => void;
   disabled: boolean;
-  defaultClusterEnabled: boolean;
+  hideLocalCluster: boolean;
   fullWidth: boolean;
 }
 
@@ -42,8 +42,8 @@ export class ClusterSelector extends React.Component<ClusterSelectorProps, Clust
     super(props);
 
     this.state = {
-      clusterOptions: this.props.defaultClusterEnabled ? [LocalCluster] : [],
-      selectedOption: this.props.defaultClusterEnabled ? [LocalCluster] : [],
+      clusterOptions: this.props.hideLocalCluster ? [] : [LocalCluster],
+      selectedOption: this.props.hideLocalCluster ? [] : [LocalCluster],
     };
   }
 
@@ -61,8 +61,8 @@ export class ClusterSelector extends React.Component<ClusterSelectorProps, Clust
             label: dataSource.title,
           }));
 
-          if (this.props.defaultClusterEnabled) {
-            clusterOptions.push(LocalCluster);
+          if (!this.props.hideLocalCluster) {
+            clusterOptions.unshift(LocalCluster);
           }
 
           if (!this._isMounted) return;

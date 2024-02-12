@@ -66,11 +66,11 @@ export class SampleDataSetCard extends React.Component {
 
   renderBtn = () => {
     const dataSourceEnabled = this.props.isDataSourceEnabled;
-    const defaultClusterEnabled = this.props.isDefaultClusterEnabled;
+    const hideLocalCluster = this.props.isLocalClusterHidden;
     const dataSourceId = this.props.dataSourceId;
-    let buttonDisabled = false;
 
-    if (dataSourceEnabled && !defaultClusterEnabled) {
+    let buttonDisabled = false;
+    if (dataSourceEnabled && hideLocalCluster) {
       buttonDisabled = dataSourceId === undefined;
     }
 

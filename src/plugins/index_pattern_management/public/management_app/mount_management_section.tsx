@@ -71,7 +71,7 @@ export async function mountManagementSection(
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
   const dataSourceEnabled = dataSource?.dataSourceEnabled ?? false;
-  const defaultClusterEnabled = dataSource?.defaultClusterEnabled ?? true;
+  const hideLocalCluster = dataSource?.hideLocalCluster ?? false;
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
@@ -91,7 +91,7 @@ export async function mountManagementSection(
     setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
     dataSourceEnabled,
-    defaultClusterEnabled,
+    hideLocalCluster,
   };
 
   ReactDOM.render(

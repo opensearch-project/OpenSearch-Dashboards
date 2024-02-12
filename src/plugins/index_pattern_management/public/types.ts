@@ -59,7 +59,7 @@ export interface IndexPatternManagmentContext {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getMlCardState: () => MlCardState;
   dataSourceEnabled: boolean;
-  defaultClusterEnabled: boolean;
+  hideLocalCluster: boolean;
 }
 
 export type IndexPatternManagmentContextValue = OpenSearchDashboardsReactContextValue<

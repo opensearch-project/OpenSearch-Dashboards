@@ -13,11 +13,11 @@ import { Header } from './components/header';
 interface StepDataSourceProps {
   goToNextStep: (dataSourceRef: DataSourceRef) => void;
   stepInfo: StepInfo;
-  defaultClusterEnabled: boolean;
+  hideLocalCluster: boolean;
 }
 
 export const StepDataSource = (props: StepDataSourceProps) => {
-  const { goToNextStep, stepInfo, defaultClusterEnabled } = props;
+  const { goToNextStep, stepInfo, hideLocalCluster } = props;
 
   const [selectedDataSource, setSelectedDataSource] = useState<DataSourceRef>();
   const [isNextStepDisabled, setIsNextStepDisabled] = useState(true);
@@ -38,7 +38,7 @@ export const StepDataSource = (props: StepDataSourceProps) => {
           goToNextStep={() => goToNextStep(selectedDataSource!)}
           isNextStepDisabled={isNextStepDisabled}
           stepInfo={stepInfo}
-          defaultClusterEnabled={defaultClusterEnabled}
+          hideLocalCluster={hideLocalCluster}
         />
       </EuiPageContent>
     );

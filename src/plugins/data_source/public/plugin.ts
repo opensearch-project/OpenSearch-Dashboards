@@ -21,7 +21,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     const config = this.initializerContext.config.get();
     return {
       dataSourceEnabled: config.enabled,
-      defaultClusterEnabled: config.defaultCluster,
+      hideLocalCluster: config.hideLocalCluster,
     };
   }
 
@@ -29,7 +29,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     const config = this.initializerContext.config.get();
     return {
       dataSourceEnabled: config.enabled,
-      defaultClusterEnabled: config.defaultCluster,
+      hideLocalCluster: config.hideLocalCluster,
     };
   }
 

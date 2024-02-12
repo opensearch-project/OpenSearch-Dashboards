@@ -5,10 +5,10 @@
 
 export interface DataSourcePluginSetup {
   dataSourceEnabled: boolean;
-  defaultClusterEnabled: boolean;
+  hideLocalCluster: boolean;
 }
 
 export interface DataSourcePluginStart {
   dataSourceEnabled: boolean;
-  defaultClusterEnabled: boolean;
+  hideLocalCluster: boolean;
 }

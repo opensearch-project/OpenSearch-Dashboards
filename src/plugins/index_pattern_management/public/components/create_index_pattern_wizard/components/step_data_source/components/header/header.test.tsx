@@ -26,7 +26,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
-        defaultClusterEnabled={true}
+        hideLocalCluster={true}
       />
     );
 
@@ -54,7 +54,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
-        defaultClusterEnabled={true}
+        hideLocalCluster={true}
       />
     );
 
@@ -81,7 +81,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
-        defaultClusterEnabled={true}
+        hideLocalCluster={true}
       />
     );
 
@@ -108,7 +108,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
-        defaultClusterEnabled={false}
+        hideLocalCluster={false}
       />
     );
 

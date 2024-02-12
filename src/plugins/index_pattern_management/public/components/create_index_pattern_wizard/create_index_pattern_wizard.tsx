@@ -280,7 +280,7 @@ export class CreateIndexPatternWizard extends Component<
       currentStepNumber: getCurrentStepNumber(step, this.dataSourceEnabled),
     };
 
-    const defaultClusterEnabled = this.context.services.defaultClusterEnabled;
+    const hideLocalCluster = this.context.services.hideLocalCluster;
 
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;
@@ -296,7 +296,7 @@ export class CreateIndexPatternWizard extends Component<
           <StepDataSource
             goToNextStep={this.goToNextFromDataSource}
             stepInfo={stepInfo}
-            defaultClusterEnabled={defaultClusterEnabled}
+            hideLocalCluster={hideLocalCluster}
           />
         </EuiPageContent>
       );

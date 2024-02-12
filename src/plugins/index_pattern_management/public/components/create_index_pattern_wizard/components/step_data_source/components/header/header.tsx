@@ -34,7 +34,7 @@ interface HeaderProps {
   goToNextStep: (dataSourceRef: DataSourceRef) => void;
   isNextStepDisabled: boolean;
   stepInfo: StepInfo;
-  defaultClusterEnabled: boolean;
+  hideLocalCluster: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
@@ -44,12 +44,12 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
     goToNextStep,
     isNextStepDisabled,
     stepInfo,
-    defaultClusterEnabled,
+    hideLocalCluster,
   } = props;
   const { currentStepNumber, totalStepNumber } = stepInfo;
 
-  const [defaultChecked, setDefaultChecked] = useState(defaultClusterEnabled);
-  const [dataSourceChecked, setDataSourceChecked] = useState(!defaultClusterEnabled);
+  const [defaultChecked, setDefaultChecked] = useState(!hideLocalCluster);
+  const [dataSourceChecked, setDataSourceChecked] = useState(hideLocalCluster);
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -121,7 +121,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
             defaultMessage="Pick a data source within which to configure index patterns."
           />
         </EuiText>
-        {defaultClusterEnabled && (
+        {!hideLocalCluster && (
           <EuiFlexItem grow={false}>
             <EuiSpacer size="m" />
             <EuiRadio

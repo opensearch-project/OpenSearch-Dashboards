@@ -28,7 +28,7 @@ describe('ClusterSelector', () => {
         notifications={toasts}
         onSelectedDataSource={jest.fn()}
         disabled={false}
-        defaultClusterEnabled={true}
+        hideLocalCluster={false}
         fullWidth={false}
       />
     );
@@ -48,7 +48,7 @@ describe('ClusterSelector', () => {
         notifications={toasts}
         onSelectedDataSource={jest.fn()}
         disabled={false}
-        defaultClusterEnabled={false}
+        hideLocalCluster={true}
         fullWidth={false}
       />
     );

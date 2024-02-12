@@ -103,7 +103,7 @@ describe('Flyout', () => {
     const component = shallowRender({
       ...defaultProps,
       dataSourceEnabled: true,
-      defaultClusterEnabled: true,
+      hideLocalCluster: false,
       notifications: notificationServiceMock.createStartContract(),
     });
 
@@ -119,7 +119,7 @@ describe('Flyout', () => {
     const component = shallowRender({
       ...defaultProps,
       dataSourceEnabled: true,
-      defaultClusterEnabled: false,
+      hideLocalCluster: true,
       notifications: notificationServiceMock.createStartContract(),
     });
 
