@@ -437,7 +437,7 @@ describe('#importSavedObjectsFromStream', () => {
       };
 
       test('with createNewCopies disabled', async () => {
-        const options = setupOptions(false, undefined);
+        const options = setupOptions();
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [],
           filteredObjects: [],
@@ -557,7 +557,7 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('accumulates multiple errors', async () => {
-      const options = setupOptions(false, undefined);
+      const options = setupOptions();
       const errors = [createError(), createError(), createError(), createError(), createError()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [errors[0]],
