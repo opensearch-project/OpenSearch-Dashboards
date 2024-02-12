@@ -843,10 +843,15 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderFooter() {
-    const { isLegacyFile, status } = this.state;
+    const { isLegacyFile, status, selectedDataSourceId } = this.state;
     const { done, close } = this.props;
 
     let confirmButton;
+
+    let importButtonDisbled = false;
+    if (this.props.dataSourceEnabled && this.props.hideLocalCluster && !selectedDataSourceId) {
+      importButtonDisbled = true;
+    }
 
     if (status === 'success') {
       confirmButton = (
@@ -879,6 +884,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           size="s"
           fill
           isLoading={status === 'loading'}
+          disabled={importButtonDisbled}
           data-test-subj="importSavedObjectsImportBtn"
         >
           <FormattedMessage
