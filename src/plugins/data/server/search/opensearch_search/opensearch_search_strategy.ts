@@ -75,7 +75,7 @@ export const opensearchSearchStrategyProvider = (
       try {
         if (
           dataSource?.dataSourceEnabled() &&
-          !dataSource?.defaultClusterEnabled() &&
+          dataSource?.hideLocalCluster() &&
           !request.dataSourceId
         ) {
           throw new Error(`Data source id is required when no openseach hosts config provided`);

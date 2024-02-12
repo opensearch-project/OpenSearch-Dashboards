@@ -146,7 +146,7 @@ describe('OpenSearch search strategy', () => {
         return new DataSourceError({});
       },
       dataSourceEnabled: jest.fn(() => true),
-      defaultClusterEnabled: jest.fn(() => false),
+      hideLocalCluster: jest.fn(() => true),
     };
 
     const opensearchSearch = await opensearchSearchStrategyProvider(
@@ -172,7 +172,7 @@ describe('OpenSearch search strategy', () => {
         return new DataSourceError({});
       },
       dataSourceEnabled: jest.fn(() => true),
-      defaultClusterEnabled: jest.fn(() => false),
+      hideLocalCluster: jest.fn(() => true),
     };
 
     try {
@@ -211,7 +211,7 @@ describe('OpenSearch search strategy', () => {
         return new DataSourceError({});
       },
       dataSourceEnabled: jest.fn(() => true),
-      defaultClusterEnabled: jest.fn(() => true),
+      hideLocalCluster: jest.fn(() => false),
     };
 
     const opensearchSearch = await opensearchSearchStrategyProvider(
@@ -237,7 +237,7 @@ describe('OpenSearch search strategy', () => {
         return new DataSourceError({});
       },
       dataSourceEnabled: jest.fn(() => true),
-      defaultClusterEnabled: jest.fn(() => true),
+      hideLocalCluster: jest.fn(() => false),
     };
 
     const opensearchSearch = await opensearchSearchStrategyProvider(
