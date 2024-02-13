@@ -4,8 +4,7 @@
  */
 import { coreMock } from '../../../core/public/mocks';
 import { DataSourceManagementPluginStart } from './plugin';
-import { testDataSourceManagementPlugin } from './mocks';
-import { createAuthenticationMethod } from './auth_registry';
+import { testDataSourceManagementPlugin, createAuthenticationMethod } from './mocks';
 
 describe('#dataSourceManagement', () => {
   let coreSetup: any;

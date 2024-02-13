@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { throwError } from 'rxjs';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { AuthType } from './types';
@@ -14,6 +15,7 @@ import {
 } from './plugin';
 import { managementPluginMock } from '../../management/public/mocks';
 import { mockManagementPlugin as indexPatternManagementPluginMock } from '../../index_pattern_management/public/mocks';
+import { AuthenticationMethod } from './auth_registry';
 
 /* Mock Types */
 
@@ -225,3 +227,14 @@ export const testDataSourceManagementPlugin = (
   };
   return { setup, doStart };
 };
+
+export const createAuthenticationMethod = (
+  authMethod: Partial<AuthenticationMethod>
+): AuthenticationMethod => ({
+  name: 'unknown',
+  credentialForm: React.createElement('div', {}, 'Hello, world!'),
+  credentialSourceOption: {
+    value: 'unknown',
+  },
+  ...authMethod,
+});
