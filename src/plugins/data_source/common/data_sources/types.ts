@@ -11,9 +11,13 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   endpoint: string;
   auth: {
     type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content | undefined;
+    credentials: UsernamePasswordTypedContent | SigV4Content | undefined | AuthTypeContent;
   };
   lastUpdatedTime?: string;
+}
+
+export interface AuthTypeContent {
+  [key: string]: string;
 }
 
 /**
