@@ -8,3 +8,5 @@ export {
   AuthenticationMethod,
   AuthenticationMethodRegistery,
 } from './authentication_methods_registry';
+
+export { createAuthenticationMethod } from './authentication_methods_registry.test';

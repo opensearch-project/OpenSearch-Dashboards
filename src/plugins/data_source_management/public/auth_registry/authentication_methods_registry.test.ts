@@ -9,7 +9,7 @@ import {
 } from './authentication_methods_registry';
 import React from 'react';
 
-const createAuthenticationMethod = (
+export const createAuthenticationMethod = (
   authMethod: Partial<AuthenticationMethod>
 ): AuthenticationMethod => ({
   name: 'unknown',
