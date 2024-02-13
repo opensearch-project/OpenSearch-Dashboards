@@ -39,6 +39,10 @@ export interface DiscoverState {
    */
   savedSearch?: string;
   /**
+   * id of the used saved query
+   */
+  savedQuery?: string;
+  /**
    * dirty flag to indicate if the saved search has been modified
    * since the last save
    */
@@ -179,6 +183,12 @@ export const discoverSlice = createSlice({
         isDirty: false,
       };
     },
+    setSavedQueryId(state, action: PayloadAction<string>) {
+      return {
+        ...state,
+        savedQuery: action.payload,
+      };
+    },
     setMetadata(state, action: PayloadAction<Partial<DiscoverState['metadata']>>) {
       return {
         ...state,
@@ -203,6 +213,7 @@ export const {
   setState,
   updateState,
   setSavedSearchId,
+  setSavedQueryId,
   setMetadata,
 } = discoverSlice.actions;
 export const { reducer } = discoverSlice;

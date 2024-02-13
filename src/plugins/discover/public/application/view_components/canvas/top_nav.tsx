@@ -14,6 +14,7 @@ import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDiscoverContext } from '../context';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { opensearchFilters, connectStorageToQueryState } from '../../../../../data/public';
+import { setSavedQueryId, useDispatch, useSelector } from '../../utils/state_management';
 
 export interface TopNavProps {
   opts: {
@@ -26,6 +27,8 @@ export const TopNav = ({ opts }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
+  const { savedQuery } = useSelector((state) => state.discover);
+  const dispatch = useDispatch();
 
   const {
     navigation: {
@@ -86,6 +89,17 @@ export const TopNav = ({ opts }: TopNavProps) => {
       showSearchBar
       showDatePicker={showDatePicker}
       showSaveQuery
+      onQueryChange={(query) => {
+        console.log('query', query);
+      }}
+      onSavedQueryUpdated={(query) => {
+        console.log('query', query);
+      }}
+      savedQueryId={savedQuery}
+      onSavedQueryIdChange={(savedQueryId?: string) => {
+        console.log('saved query id change');
+        dispatch(setSavedQueryId(savedQueryId));
+      }}
       useDefaultBehaviors
       setMenuMountPoint={opts.setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
