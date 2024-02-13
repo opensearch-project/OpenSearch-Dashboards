@@ -526,7 +526,7 @@ Array [
 ]
 `;
 
-exports[`Flyout should render cluster selector and import options when defaultCluster is enabled 1`] = `
+exports[`Flyout should render cluster selector and import options when local cluster option is hidden 1`] = `
 <EuiFlyout
   onClose={[MockFunction]}
   size="s"
@@ -596,9 +596,9 @@ exports[`Flyout should render cluster selector and import options when defaultCl
           }
         >
           <ClusterSelector
-            defaultClusterEnabled={true}
             disabled={false}
             fullWidth={true}
+            hideLocalCluster={true}
             notifications={
               Object {
                 "add": [MockFunction],
@@ -663,6 +663,7 @@ exports[`Flyout should render cluster selector and import options when defaultCl
       >
         <EuiButton
           data-test-subj="importSavedObjectsImportBtn"
+          disabled={true}
           fill={true}
           isLoading={false}
           onClick={[Function]}
@@ -680,7 +681,7 @@ exports[`Flyout should render cluster selector and import options when defaultCl
 </EuiFlyout>
 `;
 
-exports[`Flyout should render cluster selector and import options when defaultCluster us not enabled 1`] = `
+exports[`Flyout should render cluster selector and import options when local cluster option is not hidden 1`] = `
 <EuiFlyout
   onClose={[MockFunction]}
   size="s"
@@ -750,9 +751,9 @@ exports[`Flyout should render cluster selector and import options when defaultCl
           }
         >
           <ClusterSelector
-            defaultClusterEnabled={false}
             disabled={false}
             fullWidth={true}
+            hideLocalCluster={false}
             notifications={
               Object {
                 "add": [MockFunction],
@@ -817,6 +818,7 @@ exports[`Flyout should render cluster selector and import options when defaultCl
       >
         <EuiButton
           data-test-subj="importSavedObjectsImportBtn"
+          disabled={false}
           fill={true}
           isLoading={false}
           onClick={[Function]}
@@ -933,6 +935,7 @@ exports[`Flyout should render import step 1`] = `
       >
         <EuiButton
           data-test-subj="importSavedObjectsImportBtn"
+          disabled={false}
           fill={true}
           isLoading={false}
           onClick={[Function]}

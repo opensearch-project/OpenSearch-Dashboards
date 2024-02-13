@@ -21,7 +21,7 @@ describe('ClusterSelector', () => {
     } as any;
   });
 
-  it('should render normally with defaultCluster is enabled', () => {
+  it('should render normally with local cluster not hidden', () => {
     component = shallow(
       <ClusterSelector
         savedObjectsClient={client}
@@ -41,7 +41,7 @@ describe('ClusterSelector', () => {
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
 
-  it('should render normally with defaultCluster is not enabled', () => {
+  it('should render normally with local cluster is hidden', () => {
     component = shallow(
       <ClusterSelector
         savedObjectsClient={client}

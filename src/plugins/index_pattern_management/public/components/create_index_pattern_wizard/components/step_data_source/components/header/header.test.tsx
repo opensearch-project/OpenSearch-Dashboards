@@ -26,7 +26,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
-        hideLocalCluster={true}
+        hideLocalCluster={false}
       />
     );
 
@@ -54,7 +54,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
-        hideLocalCluster={true}
+        hideLocalCluster={false}
       />
     );
 
@@ -81,7 +81,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
-        hideLocalCluster={true}
+        hideLocalCluster={false}
       />
     );
 
@@ -100,7 +100,7 @@ describe('Header', () => {
     ).toEqual(false);
   });
 
-  it('should disable next step when default cluster is not enabled and no option selected', () => {
+  it('should disable next step when local cluster option is hidden and no other option selected', () => {
     const component = shallowWithIntl(
       <Header
         onDataSourceSelected={() => {}}
@@ -108,7 +108,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
-        hideLocalCluster={false}
+        hideLocalCluster={true}
       />
     );
 

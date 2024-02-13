@@ -99,7 +99,7 @@ describe('Flyout', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render cluster selector and import options when defaultCluster is enabled', async () => {
+  it('should render cluster selector and import options when local cluster option is not hidden', async () => {
     const component = shallowRender({
       ...defaultProps,
       dataSourceEnabled: true,
@@ -115,7 +115,7 @@ describe('Flyout', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render cluster selector and import options when defaultCluster us not enabled', async () => {
+  it('should render cluster selector and import options when local cluster option is hidden', async () => {
     const component = shallowRender({
       ...defaultProps,
       dataSourceEnabled: true,
