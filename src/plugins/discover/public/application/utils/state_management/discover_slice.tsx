@@ -183,7 +183,7 @@ export const discoverSlice = createSlice({
         isDirty: false,
       };
     },
-    setSavedQueryId(state, action: PayloadAction<string>) {
+    setSavedQueryId(state, action: PayloadAction<string | undefined>) {
       return {
         ...state,
         savedQuery: action.payload,

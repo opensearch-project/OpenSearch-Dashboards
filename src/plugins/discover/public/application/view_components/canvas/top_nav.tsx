@@ -13,7 +13,6 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDiscoverContext } from '../context';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
-import { opensearchFilters, connectStorageToQueryState } from '../../../../../data/public';
 import { setSavedQueryId, useDispatch, useSelector } from '../../utils/state_management';
 
 export interface TopNavProps {
@@ -39,15 +38,9 @@ export const TopNav = ({ opts }: TopNavProps) => {
     },
     data,
     chrome,
-    osdUrlStateStorage,
   } = services;
 
   const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
-
-  connectStorageToQueryState(services.data.query, osdUrlStateStorage, {
-    filters: opensearchFilters.FilterStateStore.APP_STATE,
-    query: true,
-  });
 
   useEffect(() => {
     let isMounted = true;
@@ -89,15 +82,8 @@ export const TopNav = ({ opts }: TopNavProps) => {
       showSearchBar
       showDatePicker={showDatePicker}
       showSaveQuery
-      onQueryChange={(query) => {
-        console.log('query', query);
-      }}
-      onSavedQueryUpdated={(query) => {
-        console.log('query', query);
-      }}
       savedQueryId={savedQuery}
       onSavedQueryIdChange={(savedQueryId?: string) => {
-        console.log('saved query id change');
         dispatch(setSavedQueryId(savedQueryId));
       }}
       useDefaultBehaviors
