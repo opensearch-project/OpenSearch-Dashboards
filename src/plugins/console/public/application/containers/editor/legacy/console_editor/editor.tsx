@@ -229,7 +229,9 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
   }, [sendCurrentRequestToOpenSearch, openDocumentation]);
 
   const tooltipDefaultMessage =
-    dataSourceId === undefined ? 'Please select datasource' : `Click to send request`;
+    dataSourceId === undefined ? 'Select a Data Source' : `Click to send request`;
+
+  const toolTipButtonDiasbled = dataSourceId === undefined;
 
   return (
     <div style={abs} className="conApp">
@@ -253,7 +255,7 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
                   defaultMessage: tooltipDefaultMessage,
                 })}
                 className="conApp__editorActionButton conApp__editorActionButton--success"
-                disabled={dataSourceId === undefined}
+                disabled={toolTipButtonDiasbled}
               >
                 <EuiIcon type="play" />
               </button>

@@ -140,7 +140,7 @@ describe('OpenSearch search strategy', () => {
     expect(response).toHaveProperty('rawResponse');
   });
 
-  it('dataSource enabled and default cluster disabled, send request with dataSourceId get data source client', async () => {
+  it('dataSource enabled and local cluster hidden, send request with dataSourceId get data source client', async () => {
     const mockDataSourcePluginSetupWithDataSourceEnabled: DataSourcePluginSetup = {
       createDataSourceError(err: any): DataSourceError {
         return new DataSourceError({});
@@ -166,7 +166,7 @@ describe('OpenSearch search strategy', () => {
     expect(mockOpenSearchApiCaller).not.toBeCalled();
   });
 
-  it('dataSource enabled and default cluster disabled, send request with empty dataSourceId should throw exception', async () => {
+  it('dataSource enabled and local cluster hidden, send request with empty dataSourceId should throw exception', async () => {
     const mockDataSourcePluginSetupWithDataSourceEnabled: DataSourcePluginSetup = {
       createDataSourceError(err: any): DataSourceError {
         return new DataSourceError({});
@@ -205,7 +205,7 @@ describe('OpenSearch search strategy', () => {
     expect(mockDataSourceApiCaller).not.toBeCalled();
   });
 
-  it('dataSource enabled and default cluster enabled, send request with dataSourceId get datasource client', async () => {
+  it('dataSource enabled and local cluster not hidden, send request with dataSourceId get datasource client', async () => {
     const mockDataSourcePluginSetupWithDataSourceEnabled: DataSourcePluginSetup = {
       createDataSourceError(err: any): DataSourceError {
         return new DataSourceError({});
@@ -231,7 +231,7 @@ describe('OpenSearch search strategy', () => {
     expect(mockOpenSearchApiCaller).not.toBeCalled();
   });
 
-  it('dataSource enabled and default cluster enabled, send request without dataSourceId get default client', async () => {
+  it('dataSource enabled and local cluster not hidden, send request without dataSourceId get default client', async () => {
     const mockDataSourcePluginSetupWithDataSourceEnabled: DataSourcePluginSetup = {
       createDataSourceError(err: any): DataSourceError {
         return new DataSourceError({});
