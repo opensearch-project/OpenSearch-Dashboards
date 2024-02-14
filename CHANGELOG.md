@@ -66,6 +66,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource] Fix datasource testing connection unexpectedly passed with wrong endpoint [#5663](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5663)
 - [Table Visualization] Fix filter action buttons for split table aggregations ([#5619](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5619))
 - [BUG][Multiple Datasource] Datasource id is required if multiple datasource is enabled and no default cluster supported [#5751](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5751)
+- Fix save query management render bug on discover ([#5867](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5867))
 
 ### 🚞 Infrastructure
 
