@@ -229,7 +229,7 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
   }, [sendCurrentRequestToOpenSearch, openDocumentation]);
 
   const tooltipDefaultMessage =
-    dataSourceId === undefined ? 'Select a data source' : `Click to send request`;
+    dataSourceId === undefined ? `Select a data source` : `Click to send request`;
 
   const toolTipButtonDiasbled = dataSourceId === undefined;
 
