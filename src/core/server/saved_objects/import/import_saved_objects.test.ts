@@ -247,6 +247,12 @@ describe('#importSavedObjectsFromStream', () => {
           collectedObjects,
           importIdMap: new Map(),
         });
+        getMockFn(checkConflicts).mockResolvedValue({
+          errors: [],
+          filteredObjects: collectedObjects,
+          importIdMap: new Map([['bar', { id: 'newId1' }]]),
+          pendingOverwrites: new Set(),
+        });
 
         await importSavedObjectsFromStream(options);
         const checkConflictsForDataSourceParams = {
