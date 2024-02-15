@@ -59,10 +59,12 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
+import { QueryEnhancement } from '../types';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
+  queryEnhancements?: Map<string, QueryEnhancement>;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
@@ -108,6 +110,7 @@ const KEY_CODES = {
 };
 
 // Needed for React.lazy
+// TODO: SQL export this and let people extended this
 // eslint-disable-next-line import/no-default-export
 export default class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
@@ -129,10 +132,25 @@ export default class QueryStringInputUI extends Component<Props, State> {
   private componentIsUnmounting = false;
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
+  private getQueryStringInitialValue = (language: string) => {
+    const input = this.props.queryEnhancements?.get(language)?.searchBar?.queryStringInput;
+    // TODO: SQL replace with data_source length
+    if (!input || !input.initialValue || this.state.indexPatterns.length === 0) return '';
+    const defaultDataSource = this.state.indexPatterns[0];
+    return input.initialValue.replace(
+      '<data_source>',
+      typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title
+    );
+  };
+
   private getQueryString = () => {
+    if (!this.props.query.query) {
+      return this.getQueryStringInitialValue(this.props.query.language);
+    }
     return toUser(this.props.query.query);
   };
 
+  // TODO: SQL don't do this here? || Fetch data sources
   private fetchIndexPatterns = async () => {
     const stringPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern === 'string'
@@ -457,6 +475,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
+  // TODO: SQL consider moving language select language of setting search source here
+  // Should consider creating search source then
   private onSelectLanguage = (language: string) => {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
@@ -466,9 +486,18 @@ export default class QueryStringInputUI extends Component<Props, State> {
     });
 
     this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
-
-    const newQuery = { query: '', language };
+    // TODO: SQL proof you can modify search bar, consider remove the extra stuff here
+    // Will work on adding more to search bar of UI service
+    // const input = this.props.queryEnhancement?.ui?.queryStringInput;
+    // const submitOnLanguageSelect = input?.submitOnLanguageSelect ?? true;
+    const newQuery = {
+      query: this.getQueryStringInitialValue(language),
+      language,
+    };
     this.onChange(newQuery);
+    // if (submitOnLanguageSelect) {
+    //   this.onSubmit(newQuery);
+    // }
     this.onSubmit(newQuery);
   };
 

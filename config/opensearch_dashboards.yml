@@ -313,3 +313,5 @@
 
 # Set the value to true to enable workspace feature
 # workspace.enabled: false
+opensearch_alerting.enabled: false
+opensearch_security.enabled: false

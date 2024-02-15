@@ -110,6 +110,18 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
   }
 
   fetchSelectedIndexPattern = async (indexPatternId: string) => {
+    // if (this.props.df) {
+    //   const df = this.props.df.getDataFrame();
+    //   if (df && this.isMounted) {
+    //     this.setState({
+    //       selectedIndexPattern: {
+    //         value: df.name,
+    //         label: df.name,
+    //       },
+    //     });
+    //     return;
+    //   }
+    // }
     if (!indexPatternId) {
       this.setState({
         selectedIndexPattern: undefined,

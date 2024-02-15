@@ -46,6 +46,7 @@ import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
 import './discover_field.scss';
+import { DiscoverFieldEdit } from './discover_field_edit';
 
 export interface DiscoverFieldProps {
   /**
@@ -113,9 +114,14 @@ export const DiscoverField = ({
     defaultMessage: 'View {field} summary',
     values: { field: field.name },
   });
+  const editLabelAria = i18n.translate('discover.fieldChooser.discoverField.editButtonAriaLabel', {
+    defaultMessage: 'Edit {field}',
+    values: { field: field.name },
+  });
   const isSourceField = field.name === '_source';
 
   const [infoIsOpen, setOpen] = useState(false);
+  const [editIsOpen, setEditIsOpen] = useState(false);
 
   const toggleDisplay = (f: IndexPatternField) => {
     if (selected) {
@@ -239,6 +245,43 @@ export const DiscoverField = ({
                 field={field}
                 indexPattern={indexPattern}
                 onAddFilter={onAddFilter}
+              />
+            )}
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
+      {!isSourceField && indexPattern.id === 'data_frame' && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            ownFocus
+            display="block"
+            isOpen={editIsOpen}
+            closePopover={() => setEditIsOpen(false)}
+            anchorPosition="rightUp"
+            button={
+              <EuiButtonIcon
+                iconType="pencil"
+                size="xs"
+                onClick={() => setEditIsOpen((state) => !state)}
+                aria-label={editLabelAria}
+                data-test-subj={`field-${field.name}-showEdit`}
+                className="dscSidebarField__actionButton"
+              />
+            }
+            panelClassName="dscSidebarItem__fieldPopoverPanel"
+          >
+            <EuiPopoverTitle>
+              {' '}
+              {i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
+                defaultMessage: 'Edit field',
+              })}
+            </EuiPopoverTitle>
+            {editIsOpen && (
+              <DiscoverFieldEdit
+                columns={columns}
+                details={getDetails(field)}
+                field={field}
+                indexPattern={indexPattern}
               />
             )}
           </EuiPopover>

@@ -28,6 +28,8 @@
  * under the License.
  */
 
+// TODO: SQL this file seems important
+
 import { get, trimEnd, debounce } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
@@ -235,6 +237,11 @@ export class SearchInterceptor {
         abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+
+      // TODO: SQL this isn't the right place but if core includes SQL then we dont need to do this
+      // TODO: hack setting to undefined
+      // console.log(request);
+      // console.log(options);
 
       return this.runSearch(
         request,

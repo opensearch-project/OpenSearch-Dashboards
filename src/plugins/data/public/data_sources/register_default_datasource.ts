@@ -7,8 +7,9 @@ import { i18n } from '@osd/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 import { DataPublicPluginStart } from '../types';
 import { DefaultDslDataSource } from './default_datasource';
+import { DataSourceTypeKey } from './datasource';
 
-export const DEFAULT_DATASOURCE_TYPE = 'DEFAULT_INDEX_PATTERNS';
+export const DEFAULT_DATASOURCE_TYPE: DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS';
 export const DEFAULT_DATASOURCE_NAME = i18n.translate('data.datasource.type.openSearchDefault', {
   defaultMessage: 'OpenSearch Default',
 });

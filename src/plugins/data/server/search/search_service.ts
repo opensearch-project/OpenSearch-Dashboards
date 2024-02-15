@@ -73,6 +73,12 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
+import {
+  IDataFrame,
+  IDataFrameResponse,
+  createDataFrameCache,
+  dataFrameToSpec,
+} from '../../common';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -98,6 +104,7 @@ export interface SearchRouteDependencies {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
+  private readonly dfCache = createDataFrameCache();
   private defaultSearchStrategyName: string = OPENSEARCH_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
 
@@ -166,7 +173,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       });
 
     return {
-      __enhance: (enhancements: SearchEnhancements) => {
+      __enhance: (enhancements?: SearchEnhancements) => {
+        if (!enhancements) return;
         if (this.searchStrategies.hasOwnProperty(enhancements.defaultStrategy)) {
           this.defaultSearchStrategyName = enhancements.defaultStrategy;
         }
@@ -237,6 +245,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               }),
               loadingCount$: new BehaviorSubject(0),
             },
+            df: {
+              get: () => this.dfCache.get(),
+              set: async (dataFrame: IDataFrame) => {
+                this.dfCache.set(dataFrame);
+                const dataSet = await scopedIndexPatterns.create(dataFrameToSpec(dataFrame), true);
+                scopedIndexPatterns.getIndexPatternCache().set(dataSet.title!, dataSet);
+              },
+              clear: () => {
+                if (this.dfCache.get() === undefined) return;
+                scopedIndexPatterns.getIndexPatternCache().clear(this.dfCache.get()!.name!);
+                this.dfCache.clear();
+              },
+            },
           };
 
           return this.searchSourceService.start(scopedIndexPatterns, searchSourceDependencies);
@@ -251,7 +272,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private registerSearchStrategy = <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -261,7 +284,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private search = <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     context: RequestHandlerContext,
     searchRequest: SearchStrategyRequest,
@@ -274,7 +299,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private getSearchStrategy = <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     name: string
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
