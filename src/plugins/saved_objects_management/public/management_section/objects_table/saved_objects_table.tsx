@@ -115,6 +115,7 @@ export interface SavedObjectsTableProps {
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   dateFormat: string;
   dataSourceEnabled: boolean;
+  hideLocalCluster: boolean;
 }
 
 export interface SavedObjectsTableState {
@@ -560,6 +561,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         overlays={this.props.overlays}
         search={this.props.search}
         dataSourceEnabled={this.props.dataSourceEnabled}
+        hideLocalCluster={this.props.hideLocalCluster}
         savedObjects={this.props.savedObjectsClient}
         notifications={this.props.notifications}
       />
