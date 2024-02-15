@@ -48,6 +48,7 @@ export function createSavedSearchClass(services: SavedObjectOpenSearchDashboards
       columns: 'keyword',
       sort: 'keyword',
       version: 'integer',
+      columnWidths: 'object',
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
@@ -67,6 +68,7 @@ export function createSavedSearchClass(services: SavedObjectOpenSearchDashboards
           columns: 'keyword',
           sort: 'keyword',
           version: 'integer',
+          columnWidths: 'object',
         },
         searchSource: true,
         defaults: {

@@ -69,7 +69,9 @@ export type RefetchSubject = Subject<SearchRefetch>;
 export const useSearch = (services: DiscoverViewServices) => {
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
-  const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
+  const { savedSearch: savedSearchId, sort, interval, columnWidths } = useSelector(
+    (state) => state.discover
+  );
   const { data, filterManager, getSavedSearchById, core, toastNotifications, chrome } = services;
   const indexPattern = useIndexPattern(services);
   const timefilter = data.query.timefilter.timefilter;

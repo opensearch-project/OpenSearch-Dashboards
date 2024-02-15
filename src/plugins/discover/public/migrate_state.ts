@@ -6,6 +6,7 @@
 import { matchPath } from 'react-router-dom';
 import { getStateFromOsdUrl, setStateToOsdUrl } from '../../opensearch_dashboards_utils/public';
 import { Filter, Query } from '../../data/public';
+import { ColumnWidths } from './application/components/data_grid/data_grid_table_columns';
 
 interface CommonParams {
   appState?: string;
@@ -54,6 +55,7 @@ export interface LegacyDiscoverState {
    * id of the used saved query
    */
   savedQuery?: string;
+  columnWidths?: ColumnWidths;
 }
 
 // TODO: Write unit tests once all routes have been migrated.
@@ -115,7 +117,7 @@ export function migrateUrlState(oldPath: string, newPath = '/'): string {
 
       if (!appState) return path;
 
-      const { columns, filters, index, interval, query, sort, savedQuery } = appState;
+      const { columns, filters, index, interval, query, sort, savedQuery, columnWidths } = appState;
 
       const _q = {
         query,
@@ -128,6 +130,7 @@ export function migrateUrlState(oldPath: string, newPath = '/'): string {
           interval,
           sort,
           savedQuery,
+          columnWidths,
         },
         metadata: {
           indexPattern: index,

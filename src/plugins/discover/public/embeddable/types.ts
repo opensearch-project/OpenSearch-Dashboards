@@ -37,6 +37,7 @@ import {
 import { Filter, IIndexPattern, TimeRange, Query } from 'src/plugins/data/public';
 import { SortOrder } from '../saved_searches/types';
 import { SavedSearch } from '../saved_searches';
+import { ColumnWidths } from '../application/components/data_grid/data_grid_table_columns';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -45,6 +46,7 @@ export interface SearchInput extends EmbeddableInput {
   hidePanelTitles?: boolean;
   columns?: string[];
   sort?: SortOrder[];
+  columnWidths?: ColumnWidths;
 }
 
 export interface SearchOutput extends EmbeddableOutput {

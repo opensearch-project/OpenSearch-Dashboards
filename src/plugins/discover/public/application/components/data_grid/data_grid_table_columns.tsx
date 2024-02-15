@@ -8,22 +8,38 @@ import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getCellActions } from './data_grid_table_cell_actions';
 
+export interface ColumnWidth {
+  width?: number;
+}
+
+export interface ColumnWidths {
+  [columnName: string]: ColumnWidth;
+}
+
 export function buildDataGridColumns(
   columnNames: string[],
   idxPattern: IndexPattern,
   displayTimeColumn: boolean,
   includeSourceInColumns: boolean,
-  isContextView: boolean
+  isContextView: boolean,
+  columnWidths?: ColumnWidths
 ) {
   const timeFieldName = idxPattern.timeFieldName;
   let columnsToUse = columnNames;
+  const getColumnWidth = (columnName: string) => columnWidths?.[columnName]?.width ?? 0;
 
   if (displayTimeColumn && timeFieldName && !columnNames.includes(timeFieldName)) {
     columnsToUse = [timeFieldName, ...columnNames];
   }
 
   return columnsToUse.map((colName) =>
-    generateDataGridTableColumn(colName, idxPattern, includeSourceInColumns, isContextView)
+    generateDataGridTableColumn(
+      colName,
+      idxPattern,
+      includeSourceInColumns,
+      isContextView,
+      getColumnWidth(colName)
+    )
   );
 }
 
@@ -31,7 +47,8 @@ export function generateDataGridTableColumn(
   colName: string,
   idxPattern: IndexPattern,
   includeSourceInColumns: boolean,
-  isContextView: boolean
+  isContextView: boolean,
+  columnWidth: number | undefined = 0
 ) {
   const timeLabel = i18n.translate('discover.timeLabel', {
     defaultMessage: 'Time',
@@ -68,6 +85,9 @@ export function generateDataGridTableColumn(
     dataGridCol.display = i18n.translate('discover.sourceLabel', {
       defaultMessage: 'Source',
     });
+  }
+  if (columnWidth > 0) {
+    dataGridCol.initialWidth = Number(columnWidth);
   }
   return dataGridCol;
 }

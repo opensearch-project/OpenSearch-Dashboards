@@ -104,6 +104,7 @@ export function ContextApp({
           onRemoveColumn={() => {}}
           onSetColumns={() => {}}
           onSort={() => {}}
+          onColumnResize={() => {}}
           sort={sort}
           rows={rows}
           displayTimeColumn={displayTimeColumn}

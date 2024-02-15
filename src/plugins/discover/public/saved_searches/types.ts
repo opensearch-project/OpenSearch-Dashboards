@@ -30,6 +30,7 @@
 
 import { SavedObject } from '../../../saved_objects/public';
 import { ISearchSource } from '../../../data/public';
+import { ColumnWidths } from '../application/components/data_grid/data_grid_table_columns';
 
 export type SortDirection = 'asc' | 'desc';
 export type SortOrder = [string, SortDirection];
@@ -42,6 +43,7 @@ export interface SavedSearch
   description?: string;
   columns: string[];
   sort: SortOrder[];
+  columnWidths?: ColumnWidths;
 }
 export interface SavedSearchLoader {
   get: (id: string) => Promise<SavedSearch>;

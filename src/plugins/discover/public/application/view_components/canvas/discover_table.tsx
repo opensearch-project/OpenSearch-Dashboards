@@ -4,6 +4,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { EuiDataGridProps } from '@elastic/eui';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
@@ -14,6 +15,7 @@ import {
   removeColumn,
   setColumns,
   setSort,
+  setColumnWidths,
   useDispatch,
   useSelector,
 } from '../../utils/state_management';
@@ -41,7 +43,7 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
   } = services;
 
   const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
-  const { columns, sort } = useSelector((state) => state.discover);
+  const { columns, sort, columnWidths } = useSelector((state) => state.discover);
   const dispatch = useDispatch();
   const onAddColumn = (col: string) => {
     if (indexPattern && capabilities.discover?.save) {
@@ -85,6 +87,14 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
     },
     [filterManager, indexPattern]
   );
+
+  const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
+    ({ columnId, width }: { columnId: string; width: number }) => {
+      dispatch(setColumnWidths({ columnName: columnId, width }));
+    },
+    [dispatch]
+  );
+
   const displayTimeColumn = useMemo(
     () => !!(!uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && indexPattern?.isTimeBased()),
     [indexPattern, uiSettings]
@@ -103,6 +113,7 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
   return (
     <DataGridTable
       columns={columns}
+      columnWidths={columnWidths}
       indexPattern={indexPattern}
       onAddColumn={onAddColumn}
       onFilter={onAddFilter as DocViewFilterFn}
@@ -110,6 +121,7 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
       onRemoveColumn={onRemoveColumn}
       onSetColumns={onSetColumns}
       onSort={onSetSort}
+      onColumnResize={onColumnResize}
       sort={sort}
       rows={rows}
       displayTimeColumn={displayTimeColumn}

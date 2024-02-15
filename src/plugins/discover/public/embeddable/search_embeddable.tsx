@@ -67,9 +67,11 @@ import { SearchEmbeddableComponent } from './search_embeddable_component';
 import { DiscoverServices } from '../build_services';
 import * as columnActions from '../application/utils/state_management/common';
 import { buildColumns } from '../application/utils/columns';
+import { ColumnWidths } from '../application/components/data_grid/data_grid_table_columns';
 
 export interface SearchProps {
   columns?: string[];
+  columnWidths?: ColumnWidths;
   description?: string;
   sort?: SortOrder[];
   onSort?: (sort: SortOrder[]) => void;
@@ -81,6 +83,7 @@ export interface SearchProps {
   onMoveColumn?: (column: string, index: number) => void;
   onReorderColumn?: (col: string, source: number, destination: number) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
+  onColumnResize?: ({ columnId, width }: { columnId: string; width: number }) => void;
   rows?: any[];
   indexPattern?: IndexPattern;
   hits?: number;
@@ -217,6 +220,7 @@ export class SearchEmbeddable
 
     const searchProps: SearchProps = {
       columns: this.savedSearch.columns,
+      columnWidths: this.savedSearch.columnWidths,
       sort: [],
       inspectorAdapters: this.inspectorAdaptors,
       rows: [],
@@ -296,6 +300,12 @@ export class SearchEmbeddable
         embeddable: this,
         filters,
       });
+    };
+
+    searchProps.onColumnResize = ({ columnId, width }: { columnId: string; width: number }) => {
+      const columnWidthsState = { ...searchProps.columnWidths };
+      columnWidthsState[columnId] = { width };
+      this.updateInput({ columnWidths: columnWidthsState });
     };
 
     this.pushContainerStateParamsToProps(searchProps);
@@ -386,6 +396,7 @@ export class SearchEmbeddable
     searchProps.columns = this.input.columns || this.savedSearch.columns;
     searchProps.sort = this.input.sort || this.savedSearch.sort;
     searchProps.sharedItemTitle = this.panelTitle;
+    searchProps.columnWidths = this.input.columnWidths || this.savedSearch.columnWidths;
 
     if (isFetchRequired) {
       this.filtersSearchSource!.setField('filter', this.input.filters);

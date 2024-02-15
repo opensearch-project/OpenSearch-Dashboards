@@ -134,4 +134,35 @@ describe('discoverSlice', () => {
     const result = discoverSlice.reducer(initialState, action);
     expect(result.columns).toEqual(['column1', 'column2', 'column3']);
   });
+
+  it('should handle setColumnWidths', () => {
+    // Add columnWidths to the state only in this test
+    const stateWithColumnWidths = { ...initialState, columnWidths: {} };
+    const action = {
+      type: 'discover/setColumnWidths',
+      payload: { columnName: 'column1', width: 100 },
+    };
+    const result = discoverSlice.reducer(stateWithColumnWidths, action);
+    expect(result.columnWidths).toEqual({ column1: { width: 100 } });
+  });
+
+  it('should update column width if already set', () => {
+    const stateWithColumnWidths = { ...initialState, columnWidths: { column1: { width: 150 } } };
+    const action = {
+      type: 'discover/setColumnWidths',
+      payload: { columnName: 'column1', width: 200 },
+    };
+    const result = discoverSlice.reducer(stateWithColumnWidths, action);
+    expect(result.columnWidths).toEqual({ column1: { width: 200 } });
+  });
+
+  it('should add new column width while maintaining existing ones', () => {
+    const stateWithColumnWidths = { ...initialState, columnWidths: { column1: { width: 150 } } };
+    const action = {
+      type: 'discover/setColumnWidths',
+      payload: { columnName: 'column2', width: 100 },
+    };
+    const result = discoverSlice.reducer(stateWithColumnWidths, action);
+    expect(result.columnWidths).toEqual({ column1: { width: 150 }, column2: { width: 100 } });
+  });
 });
