@@ -22,19 +22,37 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
     this.logger = inputLogger;
   }
 
-  async existsConfig(): Promise<boolean> {
+  async createConfig(): Promise<string> {
     try {
-      const exists = await this.client.asInternalUser.indices.exists({
+      await this.client.asCurrentUser.indices.create({
         index: this.configurationIndexName,
       });
 
-      return exists.body;
+      return this.configurationIndexName;
     } catch (e) {
-      const errorMessage = `Failed to call existsConfig due to error ${e}`;
+      const errorMessage = `Failed to call createConfig due to error ${e}`;
 
       this.logger.error(errorMessage);
 
       throw e;
     }
   }
+
+  async getConfig(): Promise<string> {
+    try {
+      const data = await this.client.asInternalUser.search({
+        index: this.configurationIndexName,
+      });
+
+      return JSON.stringify(data.body.hits.hits);
+    } catch (e) {
+      const errorMessage = `Failed to call getConfig due to error ${e}`;
+
+      this.logger.error(errorMessage);
+
+      throw e;
+    }
+  }
+
+
 }

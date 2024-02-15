@@ -13,27 +13,56 @@ export function defineRoutes(
 ) {
   router.get(
     {
-      path: '/api/appconfig/exists',
+      path: '/api/appconfig',
       validate: false,
     },
     async (context, request, response) => {
       const client = getConfigurationClient(context.core.opensearch.client);
 
-      return await handleExistsConfig(client, response, logger);
+      return await handleGetConfig(client, response, logger);
+    }
+  );
+  router.post(
+    {
+      path: '/api/appconfig',
+      validate: false,
+    },
+    async (context, request, response) => {
+      const client = getConfigurationClient(context.core.opensearch.client);
+
+      return await handleCreateConfig(client, response, logger);
     }
   );
 }
 
-export async function handleExistsConfig(
+export async function handleCreateConfig(
   client: ConfigurationClient,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
   try {
-    const result = await client.existsConfig();
+    const result = await client.createConfig();
     return response.ok({
       body: {
-        exists: result,
+        createdIndexName: result,
+      },
+    });
+  } catch (e) {
+    logger.error(e);
+    return errorResponse(response, e);
+  }
+}
+
+export async function handleGetConfig(
+  client: ConfigurationClient,
+  response: OpenSearchDashboardsResponseFactory,
+  logger: Logger
+) {
+  try {
+    const result = await client.getConfig();
+    return response.ok({
+      body: {
+        config: result,
       },
     });
   } catch (e) {

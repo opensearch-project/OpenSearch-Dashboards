@@ -53,8 +53,7 @@ export class ApplicationConfigPlugin
       this.logger
     );
 
-    this.setConfigurationClient(openSearchConfigurationClient);
-    return this.configurationClient;
+    return openSearchConfigurationClient;
   }
 
   public async setup(core: CoreSetup) {
@@ -78,5 +77,5 @@ export class ApplicationConfigPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }
