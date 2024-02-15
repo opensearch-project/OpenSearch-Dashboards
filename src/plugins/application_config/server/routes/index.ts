@@ -13,7 +13,7 @@ export function defineRoutes(
 ) {
   router.get(
     {
-      path: '/api/config/exists',
+      path: '/api/appconfig/exists',
       validate: false,
     },
     async (context, request, response) => {
