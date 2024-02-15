@@ -33,19 +33,10 @@ import { pluginInitializerContextConfigMock } from '../../../../../core/server/m
 import { opensearchSearchStrategyProvider } from './opensearch_search_strategy';
 import { DataSourceError } from '../../../../data_source/server/lib/error';
 import { DataSourcePluginSetup } from '../../../../data_source/server';
-import { SearchUsage } from '../collectors';
 
 describe('OpenSearch search strategy', () => {
   const mockLogger: any = {
     debug: () => {},
-  };
-  const mockSearchUsage: SearchUsage = {
-    trackError(): Promise<void> {
-      return Promise.resolve(undefined);
-    },
-    trackSuccess(duration: number): Promise<void> {
-      return Promise.resolve(undefined);
-    },
   };
   const body = {
     body: {
@@ -140,21 +131,8 @@ describe('OpenSearch search strategy', () => {
     expect(response).toHaveProperty('rawResponse');
   });
 
-  it('dataSource enabled and local cluster hidden, send request with dataSourceId get data source client', async () => {
-    const mockDataSourcePluginSetupWithDataSourceEnabled: DataSourcePluginSetup = {
-      createDataSourceError(err: any): DataSourceError {
-        return new DataSourceError({});
-      },
-      dataSourceEnabled: jest.fn(() => true),
-      hideLocalCluster: jest.fn(() => true),
-    };
-
-    const opensearchSearch = await opensearchSearchStrategyProvider(
-      mockConfig$,
-      mockLogger,
-      mockSearchUsage,
-      mockDataSourcePluginSetupWithDataSourceEnabled
-    );
+  it('dataSource enabled, send request with dataSourceId get data source client', async () => {
+    const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
 
     await opensearchSearch.search(
       (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
@@ -164,35 +142,6 @@ describe('OpenSearch search strategy', () => {
     );
     expect(mockDataSourceApiCaller).toBeCalled();
     expect(mockOpenSearchApiCaller).not.toBeCalled();
-  });
-
-  it('dataSource enabled and local cluster hidden, send request with empty dataSourceId should throw exception', async () => {
-    const mockDataSourcePluginSetupWithDataSourceEnabled: DataSourcePluginSetup = {
-      createDataSourceError(err: any): DataSourceError {
-        return new DataSourceError({});
-      },
-      dataSourceEnabled: jest.fn(() => true),
-      hideLocalCluster: jest.fn(() => true),
-    };
-
-    try {
-      const opensearchSearch = opensearchSearchStrategyProvider(
-        mockConfig$,
-        mockLogger,
-        mockSearchUsage,
-        mockDataSourcePluginSetupWithDataSourceEnabled
-      );
-
-      await opensearchSearch.search(
-        (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
-        {
-          dataSourceId: '',
-        }
-      );
-    } catch (e) {
-      expect(e).toBeTruthy();
-      expect(e).toBeInstanceOf(DataSourceError);
-    }
   });
 
   it('dataSource disabled, send request with dataSourceId get default client', async () => {
@@ -205,47 +154,8 @@ describe('OpenSearch search strategy', () => {
     expect(mockDataSourceApiCaller).not.toBeCalled();
   });
 
-  it('dataSource enabled and local cluster not hidden, send request with dataSourceId get datasource client', async () => {
-    const mockDataSourcePluginSetupWithDataSourceEnabled: DataSourcePluginSetup = {
-      createDataSourceError(err: any): DataSourceError {
-        return new DataSourceError({});
-      },
-      dataSourceEnabled: jest.fn(() => true),
-      hideLocalCluster: jest.fn(() => false),
-    };
-
-    const opensearchSearch = await opensearchSearchStrategyProvider(
-      mockConfig$,
-      mockLogger,
-      mockSearchUsage,
-      mockDataSourcePluginSetupWithDataSourceEnabled
-    );
-
-    await opensearchSearch.search(
-      (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
-      {
-        dataSourceId,
-      }
-    );
-    expect(mockDataSourceApiCaller).toBeCalled();
-    expect(mockOpenSearchApiCaller).not.toBeCalled();
-  });
-
-  it('dataSource enabled and local cluster not hidden, send request without dataSourceId get default client', async () => {
-    const mockDataSourcePluginSetupWithDataSourceEnabled: DataSourcePluginSetup = {
-      createDataSourceError(err: any): DataSourceError {
-        return new DataSourceError({});
-      },
-      dataSourceEnabled: jest.fn(() => true),
-      hideLocalCluster: jest.fn(() => false),
-    };
-
-    const opensearchSearch = await opensearchSearchStrategyProvider(
-      mockConfig$,
-      mockLogger,
-      mockSearchUsage,
-      mockDataSourcePluginSetupWithDataSourceEnabled
-    );
+  it('dataSource enabled, send request without dataSourceId get default client', async () => {
+    const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
 
     await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {});
     expect(mockOpenSearchApiCaller).toBeCalled();

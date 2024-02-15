@@ -134,8 +134,6 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     return {
       createDataSourceError: (e: any) => createDataSourceError(e),
-      dataSourceEnabled: () => config.enabled,
-      hideLocalCluster: () => config.hideLocalCluster,
       registerCredentialProvider,
     };
   }

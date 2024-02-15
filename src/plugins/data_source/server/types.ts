@@ -76,8 +76,6 @@ declare module 'src/core/server' {
 
 export interface DataSourcePluginSetup {
   createDataSourceError: (err: any) => DataSourceError;
-  dataSourceEnabled: () => boolean;
-  hideLocalCluster: () => boolean;
   registerCredentialProvider: (method: AuthenticationMethod) => void;
 }
 
