@@ -1,8 +1,11 @@
+import { IScopedClusterClient } from 'src/core/server';
+
 export interface ApplicationConfigPluginSetup {
-  setConfigurationClient: (inputConfigurationClient: ConfigurationClient) => void;
+  getConfigurationClient: (inputOpenSearchClient: IScopedClusterClient) => ConfigurationClient;
+  registerConfigurationClient: (inputConfigurationClient: ConfigurationClient) => void;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ApplicationConfigPluginStart { }
+export interface ApplicationConfigPluginStart {}
 
 export interface ConfigurationClient {
   getConfig(): Promise<string>;

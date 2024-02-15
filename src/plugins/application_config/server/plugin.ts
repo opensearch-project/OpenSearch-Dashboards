@@ -38,11 +38,12 @@ export class ApplicationConfigPlugin
     this.configurationIndexName = '';
   }
 
-  private setConfigurationClient(inputConfigurationClient: ConfigurationClient) {
+  private registerConfigurationClient(inputConfigurationClient: ConfigurationClient) {
+    this.logger.info('Register a configuration client.');
     this.configurationClient = inputConfigurationClient;
   }
 
-  private getConfigurationClient(inputOpenSearchClient: IScopedClusterClient) {
+  private getConfigurationClient(inputOpenSearchClient: IScopedClusterClient): ConfigurationClient {
     if (this.configurationClient) {
       return this.configurationClient;
     }
@@ -68,7 +69,8 @@ export class ApplicationConfigPlugin
     defineRoutes(router, this.getConfigurationClient.bind(this), this.logger);
 
     return {
-      setConfigurationClient: this.setConfigurationClient.bind(this),
+      getConfigurationClient: this.getConfigurationClient.bind(this),
+      registerConfigurationClient: this.registerConfigurationClient.bind(this),
     };
   }
 
@@ -77,5 +79,5 @@ export class ApplicationConfigPlugin
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }

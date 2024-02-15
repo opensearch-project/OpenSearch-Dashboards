@@ -53,6 +53,4 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
       throw e;
     }
   }
-
-
 }
