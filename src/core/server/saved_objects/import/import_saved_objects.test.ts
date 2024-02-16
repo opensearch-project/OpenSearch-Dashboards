@@ -86,7 +86,6 @@ describe('#importSavedObjectsFromStream', () => {
       errors: [],
       filteredObjects: [],
       importIdMap: new Map(),
-      pendingOverwrites: new Set(),
     });
     getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
   });
@@ -247,6 +246,12 @@ describe('#importSavedObjectsFromStream', () => {
           errors: [],
           collectedObjects,
           importIdMap: new Map(),
+        });
+        getMockFn(checkConflicts).mockResolvedValue({
+          errors: [],
+          filteredObjects: collectedObjects,
+          importIdMap: new Map([['bar', { id: 'newId1' }]]),
+          pendingOverwrites: new Set(),
         });
 
         await importSavedObjectsFromStream(options);
@@ -438,7 +443,7 @@ describe('#importSavedObjectsFromStream', () => {
       };
 
       test('with createNewCopies disabled', async () => {
-        const options = setupOptions(false, undefined);
+        const options = setupOptions();
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [],
           filteredObjects: [],
@@ -500,7 +505,6 @@ describe('#importSavedObjectsFromStream', () => {
           errors: [],
           filteredObjects: [],
           importIdMap: new Map(),
-          pendingOverwrites: new Set([`${dsSuccess2.type}:${dsSuccess2.id}`]),
         });
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [],
@@ -559,7 +563,7 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('accumulates multiple errors', async () => {
-      const options = setupOptions(false, undefined);
+      const options = setupOptions();
       const errors = [createError(), createError(), createError(), createError(), createError()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [errors[0]],
