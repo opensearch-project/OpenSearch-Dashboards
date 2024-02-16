@@ -83,6 +83,7 @@ class TutorialDirectoryUi extends React.Component {
       tutorialCards: [],
       notices: getServices().tutorialService.getDirectoryNotices(),
       isDataSourceEnabled: !!getServices().dataSource,
+      isLocalClusterHidden: getServices().dataSource?.hideLocalCluster ?? false,
     };
   }
 
@@ -185,6 +186,7 @@ class TutorialDirectoryUi extends React.Component {
           addBasePath={this.props.addBasePath}
           dataSourceId={this.state.selectedDataSourceId}
           isDataSourceEnabled={this.state.isDataSourceEnabled}
+          isLocalClusterHidden={this.state.isLocalClusterHidden}
         />
       );
     }
@@ -224,7 +226,7 @@ class TutorialDirectoryUi extends React.Component {
   };
 
   renderDataSourceSelector = () => {
-    const { isDataSourceEnabled } = this.state;
+    const { isDataSourceEnabled, isLocalClusterHidden } = this.state;
 
     return isDataSourceEnabled ? (
       <div className="sampleDataClusterSelector">
@@ -233,6 +235,7 @@ class TutorialDirectoryUi extends React.Component {
           notifications={getServices().toastNotifications}
           onSelectedDataSource={this.onSelectedDataSourceChange}
           disabled={!isDataSourceEnabled}
+          hideLocalCluster={isLocalClusterHidden}
         />
       </div>
     ) : null;
