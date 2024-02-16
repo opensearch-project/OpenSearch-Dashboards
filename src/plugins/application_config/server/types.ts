@@ -10,5 +10,9 @@ export interface ApplicationConfigPluginStart {}
 export interface ConfigurationClient {
   getConfig(): Promise<string>;
 
-  createConfig(): void;
+  getFeildConfig(documentName, fieldName);
+
+  updateFeildConfig(documentName, fieldName, newValue);
+
+  deleteFeildConfig(documentName, fieldName);
 }

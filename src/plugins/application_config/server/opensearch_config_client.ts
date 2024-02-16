@@ -22,20 +22,16 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
     this.logger = inputLogger;
   }
 
-  async createConfig(): Promise<string> {
-    try {
-      await this.client.asCurrentUser.indices.create({
-        index: this.configurationIndexName,
-      });
+  async getFeildConfig(documentName: any, fieldName: any) {
+    throw new Error('Method not implemented.');
+  }
 
-      return this.configurationIndexName;
-    } catch (e) {
-      const errorMessage = `Failed to call createConfig due to error ${e}`;
+  updateFeildConfig(documentName: any, fieldName: any, newValue: any) {
+    throw new Error('Method not implemented.');
+  }
 
-      this.logger.error(errorMessage);
-
-      throw e;
-    }
+  deleteFeildConfig(documentName: any, fieldName: any) {
+    throw new Error('Method not implemented.');
   }
 
   async getConfig(): Promise<string> {
