@@ -18,13 +18,13 @@ interface ImportIdMapEntry {
 }
 
 /**
- * function to check the conflict when multiple data sources are enabled.
+ * function to only check the data souerce conflict when multiple data sources are enabled.
  * the purpose of this function is to check the conflict of the imported saved objects and data source
  * @param objects, this the array of saved objects to be verified whether contains the data source conflict
  * @param ignoreRegularConflicts whether to override
  * @param retries import operations list
  * @param dataSourceId the id to identify the data source
- * @returns {filteredObjects, errors, importIdMap, pendingOverwrites }
+ * @returns {filteredObjects, errors, importIdMap }
  */
 export async function checkConflictsForDataSource({
   objects,
@@ -35,11 +35,9 @@ export async function checkConflictsForDataSource({
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const errors: SavedObjectsImportError[] = [];
   const importIdMap = new Map<string, ImportIdMapEntry>();
-  const pendingOverwrites = new Set<string>();
-
   // exit early if there are no objects to check
   if (objects.length === 0) {
-    return { filteredObjects, errors, importIdMap, pendingOverwrites };
+    return { filteredObjects, errors, importIdMap };
   }
   const retryMap = retries.reduce(
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
@@ -73,13 +71,15 @@ export async function checkConflictsForDataSource({
       } else if (previoudDataSourceId && previoudDataSourceId === dataSourceId) {
         filteredObjects.push(object);
       } else {
+        /**
+         * Only update importIdMap and filtered objects
+         */
         const omitOriginId = ignoreRegularConflicts;
         importIdMap.set(`${type}:${id}`, { id: `${dataSourceId}_${rawId}`, omitOriginId });
-        pendingOverwrites.add(`${type}:${id}`);
         filteredObjects.push({ ...object, id: `${dataSourceId}_${rawId}` });
       }
     }
   });
 
-  return { filteredObjects, errors, importIdMap, pendingOverwrites };
+  return { filteredObjects, errors, importIdMap };
 }
