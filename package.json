@@ -77,7 +77,10 @@
     "docs:acceptApiChanges": "scripts/use_node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "osd:bootstrap": "scripts/use_node scripts/build_ts_refs && scripts/use_node scripts/register_git_hook",
     "spec_to_console": "scripts/use_node scripts/spec_to_console",
-    "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\""
+    "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\"",
+    "cypress:run-without-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=false",
+    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500"
+ 
   },
   "repository": {
     "type": "git",
@@ -226,7 +229,9 @@
     "type-detect": "^4.0.8",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "@opensearch-dashboards-test/opensearch-dashboards-test-library": "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz"
+    
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",
@@ -355,6 +360,7 @@
     "chromedriver": "^119.0.1",
     "classnames": "2.3.1",
     "compare-versions": "3.5.1",
+    "cypress": "9.5.4",
     "d3": "3.5.17",
     "d3-cloud": "1.2.5",
     "dedent": "^0.7.0",
