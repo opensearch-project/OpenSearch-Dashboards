@@ -75,10 +75,12 @@ export const opensearchSearchStrategyProvider = (
 
       try {
         const isOpenSearchHostsEmpty =
-          openSearchServiceSetup.legacy.client.config.hosts.length === 0;
+          openSearchServiceSetup?.legacy.client.config.hosts.length === 0;
+
         if (dataSource?.dataSourceEnabled() && isOpenSearchHostsEmpty && !request.dataSourceId) {
           throw new Error(`Data source id is required when no openseach hosts config provided`);
         }
+
         const client = await decideClient(
           context,
           request,

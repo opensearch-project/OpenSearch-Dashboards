@@ -29,14 +29,33 @@
  */
 
 import { RequestHandlerContext } from '../../../../../core/server';
-import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
+import {
+  opensearchServiceMock,
+  pluginInitializerContextConfigMock,
+} from '../../../../../core/server/mocks';
 import { opensearchSearchStrategyProvider } from './opensearch_search_strategy';
 import { DataSourceError } from '../../../../data_source/server/lib/error';
 import { DataSourcePluginSetup } from '../../../../data_source/server';
+import { SearchUsage } from '../collectors';
 
 describe('OpenSearch search strategy', () => {
   const mockLogger: any = {
     debug: () => {},
+  };
+  const mockSearchUsage: SearchUsage = {
+    trackError(): Promise<void> {
+      return Promise.resolve(undefined);
+    },
+    trackSuccess(duration: number): Promise<void> {
+      return Promise.resolve(undefined);
+    },
+  };
+  const mockDataSourcePluginSetupWithDataSourceEnabled: DataSourcePluginSetup = {
+    createDataSourceError(err: any): DataSourceError {
+      return new DataSourceError({});
+    },
+    dataSourceEnabled: jest.fn(() => true),
+    registerCredentialProvider: jest.fn(),
   };
   const body = {
     body: {
@@ -131,8 +150,23 @@ describe('OpenSearch search strategy', () => {
     expect(response).toHaveProperty('rawResponse');
   });
 
-  it('dataSource enabled, send request with dataSourceId get data source client', async () => {
-    const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
+  it('dataSource enabled, config host exist, send request with dataSourceId should get data source client', async () => {
+    const mockOpenSearchServiceSetup = opensearchServiceMock.createSetup();
+    mockOpenSearchServiceSetup.legacy.client = {
+      callAsInternalUser: jest.fn(),
+      asScoped: jest.fn(),
+      config: {
+        hosts: ['some host'],
+      },
+    };
+
+    const opensearchSearch = opensearchSearchStrategyProvider(
+      mockConfig$,
+      mockLogger,
+      mockSearchUsage,
+      mockDataSourcePluginSetupWithDataSourceEnabled,
+      mockOpenSearchServiceSetup
+    );
 
     await opensearchSearch.search(
       (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
@@ -140,11 +174,72 @@ describe('OpenSearch search strategy', () => {
         dataSourceId,
       }
     );
+
     expect(mockDataSourceApiCaller).toBeCalled();
     expect(mockOpenSearchApiCaller).not.toBeCalled();
   });
 
-  it('dataSource disabled, send request with dataSourceId get default client', async () => {
+  it('dataSource enabled, config host exist, send request without dataSourceId should get default client', async () => {
+    const mockOpenSearchServiceSetup = opensearchServiceMock.createSetup();
+    mockOpenSearchServiceSetup.legacy.client = {
+      callAsInternalUser: jest.fn(),
+      asScoped: jest.fn(),
+      config: {
+        hosts: ['some host'],
+      },
+    };
+
+    const opensearchSearch = opensearchSearchStrategyProvider(
+      mockConfig$,
+      mockLogger,
+      mockSearchUsage,
+      mockDataSourcePluginSetupWithDataSourceEnabled,
+      mockOpenSearchServiceSetup
+    );
+
+    await opensearchSearch.search(
+      (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
+      {
+        dataSourceId: 'Some dataSourceId',
+      }
+    );
+
+    expect(mockDataSourceApiCaller).toBeCalled();
+    expect(mockOpenSearchApiCaller).not.toBeCalled();
+  });
+
+  it('dataSource enabled, config host exist, send request without dataSourceId should throw exception', async () => {
+    const mockOpenSearchServiceSetup = opensearchServiceMock.createSetup();
+    mockOpenSearchServiceSetup.legacy.client = {
+      callAsInternalUser: jest.fn(),
+      asScoped: jest.fn(),
+      config: {
+        hosts: [],
+      },
+    };
+
+    try {
+      const opensearchSearch = opensearchSearchStrategyProvider(
+        mockConfig$,
+        mockLogger,
+        mockSearchUsage,
+        mockDataSourcePluginSetupWithDataSourceEnabled,
+        mockOpenSearchServiceSetup
+      );
+
+      await opensearchSearch.search(
+        (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
+        {
+          dataSourceId: '',
+        }
+      );
+    } catch (e) {
+      expect(e).toBeTruthy();
+      expect(e).toBeInstanceOf(DataSourceError);
+    }
+  });
+
+  it('dataSource disabled, send request with dataSourceId should get default client', async () => {
     const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
 
     await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {
@@ -154,11 +249,17 @@ describe('OpenSearch search strategy', () => {
     expect(mockDataSourceApiCaller).not.toBeCalled();
   });
 
-  it('dataSource enabled, send request without dataSourceId get default client', async () => {
+  it('dataSource disabled, send request without dataSourceId should get default client', async () => {
     const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {});
-    expect(mockOpenSearchApiCaller).toBeCalled();
-    expect(mockDataSourceApiCaller).not.toBeCalled();
+    const dataSourceIdToBeTested = [undefined, ''];
+
+    for (const testDataSourceId of dataSourceIdToBeTested) {
+      await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {
+        dataSourceId: testDataSourceId,
+      });
+      expect(mockOpenSearchApiCaller).toBeCalled();
+      expect(mockDataSourceApiCaller).not.toBeCalled();
+    }
   });
 });
