@@ -135,6 +135,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     return {
       createDataSourceError: (e: any) => createDataSourceError(e),
       registerCredentialProvider,
+      dataSourceEnabled: () => config.enabled,
     };
   }
 

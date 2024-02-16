@@ -29,7 +29,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { SharedGlobalConfig, Logger } from 'opensearch-dashboards/server';
+import { SharedGlobalConfig, Logger, OpenSearchServiceSetup } from 'opensearch-dashboards/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@opensearch-project/opensearch';
@@ -73,7 +73,16 @@ export const opensearchSearchStrategyProvider = (
       });
 
       try {
-        const client = await decideClient(context, request, withLongNumeralsSupport);
+        const isOpenSearchHostsEmpty = config.opensearch.hosts.length === 0;
+        if (dataSource?.dataSourceEnabled() && isOpenSearchHostsEmpty && !request.dataSourceId) {
+          throw new Error(`Data source id is required when no openseach hosts config provided`);
+        }
+        const client = await decideClient(
+          context,
+          request,
+          dataSource?.dataSourceEnabled(),
+          withLongNumeralsSupport
+        );
         const promise = shimAbortSignal(client.search(params), options?.abortSignal);
 
         const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
@@ -92,7 +101,7 @@ export const opensearchSearchStrategyProvider = (
       } catch (e) {
         if (usage) usage.trackError();
 
-        if (dataSource && request.dataSourceId) {
+        if (dataSource?.dataSourceEnabled()) {
           throw dataSource.createDataSourceError(e);
         }
         throw e;

@@ -288,7 +288,7 @@ export interface Plugin<
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
   opensearchDashboards: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
-  opensearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
+  opensearch: ['hosts', 'shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
   savedObjects: ['maxImportPayloadBytes'] as const,
 };
