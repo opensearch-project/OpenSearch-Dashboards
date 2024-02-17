@@ -1,0 +1,7 @@
+{
+  "prefix": "XCompat-plugin-example1",
+  "paths": {
+    "XCompat-plugin-example1": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
