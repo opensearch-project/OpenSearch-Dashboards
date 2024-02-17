@@ -8,11 +8,11 @@ export interface ApplicationConfigPluginSetup {
 export interface ApplicationConfigPluginStart {}
 
 export interface ConfigurationClient {
-  getConfig(): Promise<string>;
+  getConfig(): Promise<Map<string, string>>;
 
-  getFeildConfig(documentName, fieldName);
+  getEntityConfig(entity: string): Promise<any>;
 
-  updateFeildConfig(documentName, fieldName, newValue);
+  updateEntityConfig(entity: string, newValue: string): Promise<string>;
 
-  deleteFeildConfig(documentName, fieldName);
+  deleteEntityConfig(entity: string): Promise<string>;
 }

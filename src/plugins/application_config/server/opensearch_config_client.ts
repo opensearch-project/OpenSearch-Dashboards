@@ -22,25 +22,79 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
     this.logger = inputLogger;
   }
 
-  async getFeildConfig(documentName: any, fieldName: any) {
-    throw new Error('Method not implemented.');
+  async getEntityConfig(entity: string) {
+    try {
+      const data = await this.client.asInternalUser.get({
+        index: this.configurationIndexName,
+        id: entity,
+      });
+
+      this.logger.info(`*** result is  ${JSON.stringify(data)}`);
+
+      return data?.body?._source?.value || '';
+    } catch (e) {
+      const errorMessage = `Failed to get entity ${entity} due to error ${e}`;
+
+      this.logger.error(errorMessage);
+
+      throw e;
+    }
   }
 
-  updateFeildConfig(documentName: any, fieldName: any, newValue: any) {
-    throw new Error('Method not implemented.');
+  async updateEntityConfig(entity: string, newValue: string) {
+    try {
+      await this.client.asCurrentUser.index({
+        index: this.configurationIndexName,
+        id: entity,
+        body: {
+          value: newValue,
+        },
+      });
+
+      return newValue;
+    } catch (e) {
+      const errorMessage = `Failed to update entity ${entity} with newValue ${newValue} due to error ${e}`;
+
+      this.logger.error(errorMessage);
+
+      throw e;
+    }
   }
 
-  deleteFeildConfig(documentName: any, fieldName: any) {
-    throw new Error('Method not implemented.');
+  async deleteEntityConfig(entity: string) {
+    try {
+      await this.client.asCurrentUser.delete({
+        index: this.configurationIndexName,
+        id: entity,
+      });
+
+      return entity;
+    } catch (e) {
+      if (e?.body?.error?.type === 'index_not_found_exception') {
+        this.logger.info('Attemp to delete a not found index.');
+        return entity;
+      }
+
+      if (e?.body?.result === 'not_found') {
+        this.logger.info('Attemp to delete a not found document.');
+        return entity;
+      }
+
+      const errorMessage = `Failed to delete entity ${entity} due to error ${e}`;
+
+      this.logger.error(errorMessage);
+
+      throw e;
+    }
   }
 
-  async getConfig(): Promise<string> {
+  async getConfig(): Promise<any> {
     try {
       const data = await this.client.asInternalUser.search({
         index: this.configurationIndexName,
       });
 
-      return JSON.stringify(data.body.hits.hits);
+      return this.transformIndexSearchResponse(data.body.hits.hits);
     } catch (e) {
       const errorMessage = `Failed to call getConfig due to error ${e}`;
 
@@ -48,5 +102,16 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
 
       throw e;
     }
+  }
+
+  transformIndexSearchResponse(hits) {
+    const configurations = {};
+
+    for (let i = 0; i < hits.length; i++) {
+      const doc = hits[i];
+      configurations[doc._id] = doc?._source?.value;
+    }
+
+    return configurations;
   }
 }
