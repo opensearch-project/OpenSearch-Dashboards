@@ -27,9 +27,16 @@ import {
   getDataSource,
   generateCacheKey,
 } from './configure_client_utils';
+import { CustomApiSchemaRegistry } from '../schema_registry';
 
 export const configureClient = async (
-  { dataSourceId, savedObjects, cryptography, testClientDataSourceAttr }: DataSourceClientParams,
+  {
+    dataSourceId,
+    savedObjects,
+    cryptography,
+    testClientDataSourceAttr,
+    customApiSchemaRegistryPromise,
+  }: DataSourceClientParams,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   logger: Logger
@@ -68,6 +75,7 @@ export const configureClient = async (
       dataSource,
       openSearchClientPoolSetup.addClientToPool,
       config,
+      customApiSchemaRegistryPromise,
       cryptography,
       rootClient,
       dataSourceId,
@@ -87,6 +95,7 @@ export const configureClient = async (
  *
  * @param rootClient root client for the given data source.
  * @param dataSourceAttr data source saved object attributes
+ * @param customApiSchemaRegistryPromise custom api schema registry promise to be used when initiating client to register api schema
  * @param cryptography cryptography service for password encryption / decryption
  * @param config data source config
  * @param addClientToPool function to add client to client pool
@@ -98,6 +107,7 @@ const getQueryClient = async (
   dataSourceAttr: DataSourceAttributes,
   addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void,
   config: DataSourcePluginConfigType,
+  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>,
   cryptography?: CryptographyServiceSetup,
   rootClient?: Client,
   dataSourceId?: string,
@@ -107,7 +117,8 @@ const getQueryClient = async (
     auth: { type },
     endpoint,
   } = dataSourceAttr;
-  const clientOptions = parseClientOptions(config, endpoint);
+  const registeredSchema = (await customApiSchemaRegistryPromise).getAll();
+  const clientOptions = parseClientOptions(config, endpoint, registeredSchema);
   const cacheKey = generateCacheKey(dataSourceAttr, dataSourceId);
 
   switch (type) {
