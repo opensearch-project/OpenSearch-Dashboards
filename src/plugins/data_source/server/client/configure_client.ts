@@ -29,7 +29,13 @@ import {
 } from './configure_client_utils';
 
 export const configureClient = async (
-  { dataSourceId, savedObjects, cryptography, testClientDataSourceAttr }: DataSourceClientParams,
+  {
+    dataSourceId,
+    savedObjects,
+    cryptography,
+    testClientDataSourceAttr,
+    customApiSchemaRegistryPromise,
+  }: DataSourceClientParams,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   logger: Logger
@@ -64,10 +70,13 @@ export const configureClient = async (
       dataSourceId
     ) as Client;
 
+    const registeredSchema = (await customApiSchemaRegistryPromise).getAll();
+
     return await getQueryClient(
       dataSource,
       openSearchClientPoolSetup.addClientToPool,
       config,
+      registeredSchema,
       cryptography,
       rootClient,
       dataSourceId,
@@ -87,6 +96,7 @@ export const configureClient = async (
  *
  * @param rootClient root client for the given data source.
  * @param dataSourceAttr data source saved object attributes
+ * @param registeredSchema registered API schema
  * @param cryptography cryptography service for password encryption / decryption
  * @param config data source config
  * @param addClientToPool function to add client to client pool
@@ -98,6 +108,7 @@ const getQueryClient = async (
   dataSourceAttr: DataSourceAttributes,
   addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void,
   config: DataSourcePluginConfigType,
+  registeredSchema: any[],
   cryptography?: CryptographyServiceSetup,
   rootClient?: Client,
   dataSourceId?: string,
@@ -107,7 +118,7 @@ const getQueryClient = async (
     auth: { type },
     endpoint,
   } = dataSourceAttr;
-  const clientOptions = parseClientOptions(config, endpoint);
+  const clientOptions = parseClientOptions(config, endpoint, registeredSchema);
   const cacheKey = generateCacheKey(dataSourceAttr, dataSourceId);
 
   switch (type) {
