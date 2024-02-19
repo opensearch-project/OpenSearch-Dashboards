@@ -22,6 +22,7 @@ import { opensearchClientMock } from '../../../../core/server/opensearch/client/
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { DataSourceClientParams } from '../types';
+import { CustomApiSchemaRegistry } from '../schema_registry';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
@@ -38,12 +39,14 @@ describe('configureClient', () => {
   let dataSourceClientParams: DataSourceClientParams;
   let usernamePasswordAuthContent: UsernamePasswordTypedContent;
   let sigV4AuthContent: SigV4Content;
+  let customApiSchemaRegistry: CustomApiSchemaRegistry;
 
   beforeEach(() => {
     dsClient = opensearchClientMock.createInternalClient();
     logger = loggingSystemMock.createLogger();
     savedObjectsMock = savedObjectsClientMock.create();
     cryptographyMock = cryptographyServiceSetupMock.create();
+    customApiSchemaRegistry = new CustomApiSchemaRegistry();
 
     config = {
       enabled: true,
@@ -95,6 +98,7 @@ describe('configureClient', () => {
       dataSourceId: DATA_SOURCE_ID,
       savedObjects: savedObjectsMock,
       cryptography: cryptographyMock,
+      customApiSchemaRegistryPromise: Promise.resolve(customApiSchemaRegistry),
     };
 
     ClientMock.mockImplementation(() => dsClient);

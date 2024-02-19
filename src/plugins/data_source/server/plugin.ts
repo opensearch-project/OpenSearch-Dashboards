@@ -31,6 +31,7 @@ import { ensureRawRequest } from '../../../../src/core/server/http/router';
 import { createDataSourceError } from './lib/error';
 import { registerTestConnectionRoute } from './routes/test_connection';
 import { AuthenticationMethodRegistery, IAuthenticationMethodRegistery } from './auth_registry';
+import { CustomApiSchemaRegistry } from './schema_registry';
 
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
@@ -39,6 +40,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   private readonly config$: Observable<DataSourcePluginConfigType>;
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistery();
+  private customApiSchemaRegistry = new CustomApiSchemaRegistry();
 
   constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
     this.logger = this.initializerContext.logger.get();
@@ -104,6 +106,11 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       return dataSourcePluginStart.getAuthenticationMethodRegistery();
     });
 
+    const customApiSchemaRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
+      const dataSourcePluginStart = selfStart as DataSourcePluginStart;
+      return dataSourcePluginStart.getCustomApiSchemaRegistry();
+    });
+
     // Register data source plugin context to route handler context
     core.http.registerRouteHandlerContext(
       'dataSource',
@@ -112,7 +119,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
         cryptographyServiceSetup,
         this.logger,
         auditTrailPromise,
-        authRegistryPromise
+        authRegistryPromise,
+        customApiSchemaRegistryPromise
       )
     );
 
@@ -135,6 +143,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     return {
       createDataSourceError: (e: any) => createDataSourceError(e),
       registerCredentialProvider,
+      registerCustomApiSchema: (schema: any) => this.customApiSchemaRegistry.register(schema),
     };
   }
 
@@ -143,6 +152,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     this.started = true;
     return {
       getAuthenticationMethodRegistery: () => this.authMethodsRegistry,
+      getCustomApiSchemaRegistry: () => this.customApiSchemaRegistry,
     };
   }
 
@@ -155,7 +165,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     cryptography: CryptographyServiceSetup,
     logger: Logger,
     auditTrailPromise: Promise<AuditorFactory>,
-    authRegistryPromise: Promise<IAuthenticationMethodRegistery>
+    authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
+    customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'dataSource'> => {
     return (context, req) => {
       return {
@@ -169,6 +180,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
               dataSourceId,
               savedObjects: context.core.savedObjects.client,
               cryptography,
+              customApiSchemaRegistryPromise,
             });
           },
           legacy: {
@@ -177,6 +189,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
                 dataSourceId,
                 savedObjects: context.core.savedObjects.client,
                 cryptography,
+                customApiSchemaRegistryPromise,
               });
             },
           },
