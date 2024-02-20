@@ -66,8 +66,12 @@ export class CreateDataSourceForm extends React.Component<
   static contextType = contextType;
   public readonly context!: DataSourceManagementContextValue;
 
+  enabledAuthTypes: string[];
+
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
+
+    this.enabledAuthTypes = context.services.enabledAuthTypes;
 
     this.state = {
       formErrorsByField: { ...defaultValidation },

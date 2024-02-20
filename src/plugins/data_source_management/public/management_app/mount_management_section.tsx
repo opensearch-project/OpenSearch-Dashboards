@@ -16,7 +16,7 @@ import { ManagementAppMountParams } from '../../../management/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
 import { DataSourceTableWithRouter } from '../components/data_source_table';
-import { DataSourceManagementContext } from '../types';
+import { AuthType, DataSourceManagementContext } from '../types';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
 
 export interface DataSourceManagementStartDependencies {
@@ -32,6 +32,8 @@ export async function mountManagementSection(
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
   ] = await getStartServices();
 
+  const allSupportedAuthTypes = Object.keys(AuthType);
+
   const deps: DataSourceManagementContext = {
     chrome,
     application,
@@ -42,7 +44,10 @@ export async function mountManagementSection(
     http,
     docLinks,
     setBreadcrumbs: params.setBreadcrumbs,
-    enabledAuthTypes: dataSource.enabledAuthTypes,
+    enabledAuthTypes:
+      dataSource.enabledAuthTypes.length === 0
+        ? allSupportedAuthTypes
+        : dataSource.enabledAuthTypes,
   };
 
   ReactDOM.render(
