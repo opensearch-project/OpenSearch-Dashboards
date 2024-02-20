@@ -38,18 +38,18 @@ export class ApplicationConfigPlugin
     this.configurationIndexName = '';
   }
 
-  private registerConfigurationClient(inputConfigurationClient: ConfigurationClient) {
+  private registerConfigurationClient(configurationClient: ConfigurationClient) {
     this.logger.info('Register a configuration client.');
-    this.configurationClient = inputConfigurationClient;
+    this.configurationClient = configurationClient;
   }
 
-  private getConfigurationClient(inputOpenSearchClient: IScopedClusterClient): ConfigurationClient {
+  private getConfigurationClient(configurationClient: IScopedClusterClient): ConfigurationClient {
     if (this.configurationClient) {
       return this.configurationClient;
     }
 
     const openSearchConfigurationClient = new OpenSearchConfigurationClient(
-      inputOpenSearchClient,
+      configurationClient,
       this.configurationIndexName,
       this.logger
     );
