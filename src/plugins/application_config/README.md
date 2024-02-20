@@ -1,12 +1,14 @@
-# applicationConfig
+# ApplicationConfig Plugin
 
-A OpenSearch Dashboards plugin
+An OpenSearch Dashboards plugin for application configuration service and OpenSearch implementation.
+
+---
+
+## Introduction
 
 This plugin introduces the support of dynamic application configurations as opposed to the existing static configuration in OSD YAML file `opensearch_dashboards.yml`. It stores the configuration in an index whose default name is `.opensearch_dashboards_config` and could be customized through the key `opensearchDashboards.config_index` in OSD YAML file. Initially the new index does not exist. Only OSD users who need dynamic configurations will create it.
 
 It also provides an interface `ConfigurationClient` for future extensions of external configuration clients. A default implementation based on OpenSearch as database is used.
-
----
 
 ## Configuration
 
