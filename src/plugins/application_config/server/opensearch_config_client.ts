@@ -13,13 +13,13 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   private readonly logger: Logger;
 
   constructor(
-    inputOpenSearchClient: IScopedClusterClient,
-    inputConfigurationIndexName: string,
-    inputLogger: Logger
+    openSearchClient: IScopedClusterClient,
+    configurationIndexName: string,
+    logger: Logger
   ) {
-    this.client = inputOpenSearchClient;
-    this.configurationIndexName = inputConfigurationIndexName;
-    this.logger = inputLogger;
+    this.client = openSearchClient;
+    this.configurationIndexName = configurationIndexName;
+    this.logger = logger;
   }
 
   async getEntityConfig(entity: string) {
