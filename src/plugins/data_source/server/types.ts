@@ -19,6 +19,7 @@ import {
 import { CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceError } from './lib/error';
 import { IAuthenticationMethodRegistery } from './auth_registry';
+import { CustomApiSchemaRegistry } from './schema_registry';
 
 export interface LegacyClientCallAPIParams {
   endpoint: string;
@@ -34,6 +35,8 @@ export interface DataSourceClientParams {
   dataSourceId?: string;
   // required when creating test client
   testClientDataSourceAttr?: DataSourceAttributes;
+  // custom API schema registry promise, required for getting registered custom API schema
+  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>;
 }
 
 export interface DataSourceCredentialsProviderOptions {
@@ -77,9 +80,11 @@ declare module 'src/core/server' {
 export interface DataSourcePluginSetup {
   createDataSourceError: (err: any) => DataSourceError;
   registerCredentialProvider: (method: AuthenticationMethod) => void;
+  registerCustomApiSchema: (schema: any) => void;
   dataSourceEnabled: () => boolean;
 }
 
 export interface DataSourcePluginStart {
   getAuthenticationMethodRegistery: () => IAuthenticationMethodRegistery;
+  getCustomApiSchemaRegistry: () => CustomApiSchemaRegistry;
 }

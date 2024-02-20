@@ -40,6 +40,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Add datasource picker to import saved object flyout when multiple data source is enabled ([#5781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5781))
 - [Multiple Datasource] Add interfaces to register add-on authentication method from plug-in module ([#5851](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5851))
 - [Multiple Datasource] Able to Hide "Local Cluster" option from datasource DropDown ([#5827](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5827))
+- [Multiple Datasource] Add api registry and allow it to be added into client config in data source plugin ([#5895](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5895))
 
 ### 🐛 Bug Fixes
 
@@ -77,6 +78,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CI] Enable inputs for manually triggered Cypress test jobs ([#5134](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5134))
 - [CI] Replace usage of deprecated `set-output` in workflows ([#5340](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5340))
 - [Chore] Add `--security` for `opensearch snapshot` and `opensearch_dashboards` to configure local setup with the security plugin ([#5451](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5451))
+- [Tests] Add Github workflow for Test Orchestrator in FT Repo to run cypress tests within Dashboards repo ([#5725](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5725))
 - [Chore] Updates default dev environment security credentials ([#5736](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5736))
 
 ### 📝 Documentation
