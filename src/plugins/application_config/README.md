@@ -47,7 +47,17 @@ While a default OpenSearch based client is implemented, OSD users can use extern
 
 Let's call this plugin `MyConfigurationClientPlugin`.
 
-First, this plugin will need to implement a class `MyConfigurationClient` based on interface `ConfigurationClient` defined in the `types.ts` under directory `src/plugins/application_config/server/types.ts`.
+First, this plugin will need to implement a class `MyConfigurationClient` based on interface `ConfigurationClient` defined in the `types.ts` under directory `src/plugins/application_config/server/types.ts`. Below are the functions inside the interface.
+
+```
+  getConfig(): Promise<Map<string, string>>;
+
+  getEntityConfig(entity: string): Promise<string>;
+
+  updateEntityConfig(entity: string, newValue: string): Promise<string>;
+
+  deleteEntityConfig(entity: string): Promise<string>;
+```
 
 Second, this plugin needs to declare `applicationConfig` as its dependency by adding it to `requiredPlugins` in its own `opensearch_dashboards.json`.
 
@@ -77,6 +87,12 @@ Then the plugin will import the new type `AppPluginSetupDependencies` and add to
   }
 
 ```
+
+## Onboarding Configurations
+
+Since the APIs and interfaces can take an entity, a new use case to this plugin could just pass their entity into the parameters. There is no need to implement new APIs or interfaces. To programmatically call the functions in `ConfigurationClient` from a plugin (the caller plugin), below is the code example.
+
+Similar to [section](#external-configuration-clients), a new type `AppPluginSetupDependencies` which encapsulates `ApplicationConfigPluginSetup` is needed. Then it can be imported into the `setup` function of the caller plugin. Then the caller plugin will have access to the `getConfigurationClient` and `registerConfigurationClient` exposed by `ApplicationConfigPluginSetup`.
 
 ## Development
 
