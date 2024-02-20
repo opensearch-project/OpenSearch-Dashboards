@@ -32,6 +32,7 @@ export interface DataSourceManagementContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  enabledAuthTypes: string[];
 }
 
 export interface DataSourceTableItem {

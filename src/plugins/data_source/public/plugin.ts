@@ -22,6 +22,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     return {
       dataSourceEnabled: config.enabled,
       hideLocalCluster: config.hideLocalCluster,
+      enabledAuthTypes: config.enabledAuthTypes,
     };
   }
 
@@ -30,6 +31,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     return {
       dataSourceEnabled: config.enabled,
       hideLocalCluster: config.hideLocalCluster,
+      enabledAuthTypes: config.enabledAuthTypes,
     };
   }
 

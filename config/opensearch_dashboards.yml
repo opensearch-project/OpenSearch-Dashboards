@@ -270,6 +270,15 @@
 #    'ff00::/8',
 # ]
 
+# Full AuthType list: ['NoAuth', 'UsernamePasswordType', 'SigV4'].
+# Add / Remove elements in this list to Enable / Diasble auth types.
+# If this setting is commented then all options will be available.
+data_source.enabledAuthTypes: [
+  'NoAuth',
+  'UsernamePasswordType',
+  'SigV4',
+]
+
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"
 

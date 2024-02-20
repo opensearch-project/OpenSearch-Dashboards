@@ -39,6 +39,9 @@ export const configSchema = schema.object({
     appender: fileAppenderSchema,
   }),
   endpointDeniedIPs: schema.maybe(schema.arrayOf(schema.string())),
+  enabledAuthTypes: schema.arrayOf(schema.string(), {
+    defaultValue: ['NoAuth', 'UsernamePasswordType', 'SigV4'],
+  }),
 });
 
 export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;

@@ -10,6 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { ManagementAppMountParams } from '../../../management/public';
 
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
@@ -24,7 +25,8 @@ export interface DataSourceManagementStartDependencies {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  dataSource: DataSourcePluginSetup
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
@@ -40,6 +42,7 @@ export async function mountManagementSection(
     http,
     docLinks,
     setBreadcrumbs: params.setBreadcrumbs,
+    enabledAuthTypes: dataSource.enabledAuthTypes,
   };
 
   ReactDOM.render(

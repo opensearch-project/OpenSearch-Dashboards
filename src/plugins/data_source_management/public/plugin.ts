@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
 import { PLUGIN_NAME } from '../common';
@@ -19,6 +20,7 @@ import {
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   indexPatternManagement: IndexPatternManagementSetup;
+  dataSource: DataSourcePluginSetup;
 }
 
 export interface DataSourceManagementPluginSetup {
@@ -43,7 +45,7 @@ export class DataSourceManagementPlugin
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
-    { management, indexPatternManagement }: DataSourceManagementSetupDependencies
+    { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
@@ -65,7 +67,7 @@ export class DataSourceManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params);
+        return mountManagementSection(core.getStartServices, params, dataSource);
       },
     });
 
