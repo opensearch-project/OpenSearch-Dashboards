@@ -112,7 +112,7 @@ export const DataSection: React.FC<{ initiallyOpen?: boolean }> = ({ initiallyOp
       title={i18n.translate('home.data.title', { defaultMessage: 'Work with data' })}
       description={i18n.translate('home.data.description', {
         defaultMessage:
-          'Get started by ingesting data to access rebust and visual data exploration capabilities. Not ready to ingest data yet? Use our sample data to explore and get familiar with OpenSearch capabilities.',
+          'Get started by ingesting data to access robust data visualization and exploration capabilities. Not ready to ingest data yet? Use our sample data to explore and get familiar with OpenSearch capabilities.',
       })}
       categories={categories}
       initiallyOpen={initiallyOpen}
