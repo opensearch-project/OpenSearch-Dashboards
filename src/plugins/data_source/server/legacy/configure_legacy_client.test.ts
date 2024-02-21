@@ -15,6 +15,7 @@ import { OpenSearchClientPoolSetup } from '../client';
 import { ConfigOptions } from 'elasticsearch';
 import { ClientMock, parseClientOptionsMock } from './configure_legacy_client.test.mocks';
 import { configureLegacyClient } from './configure_legacy_client';
+import { CustomApiSchemaRegistry } from '../schema_registry';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
@@ -35,6 +36,7 @@ describe('configureLegacyClient', () => {
   };
   let dataSourceClientParams: DataSourceClientParams;
   let callApiParams: LegacyClientCallAPIParams;
+  const customApiSchemaRegistry = new CustomApiSchemaRegistry();
 
   const mockResponse = { data: 'ping' };
 
@@ -98,6 +100,7 @@ describe('configureLegacyClient', () => {
       dataSourceId: DATA_SOURCE_ID,
       savedObjects: savedObjectsMock,
       cryptography: cryptographyMock,
+      customApiSchemaRegistryPromise: Promise.resolve(customApiSchemaRegistry),
     };
 
     ClientMock.mockImplementation(() => mockOpenSearchClientInstance);
