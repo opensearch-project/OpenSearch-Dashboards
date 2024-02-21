@@ -46,6 +46,9 @@ interface MountParams {
   appMountParams?: AppMountParameters;
   title: string;
   allowedObjectTypes?: string[];
+  mountParams: ManagementAppMountParams;
+  dataSourceEnabled: boolean;
+  hideLocalCluster: boolean;
 }
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
@@ -56,6 +59,8 @@ export const mountManagementSection = async ({
   serviceRegistry,
   title,
   allowedObjectTypes,
+  dataSourceEnabled,
+  hideLocalCluster,
 }: MountParams) => {
   const [coreStart, { data, uiActions }, pluginStart] = await core.getStartServices();
   const usedMountParams = appMountParams || ({} as ManagementAppMountParams);
@@ -113,6 +118,8 @@ export const mountManagementSection = async ({
                     allowedTypes={allowedObjectTypes}
                     setBreadcrumbs={setBreadcrumbs}
                     title={title}
+                    dataSourceEnabled={dataSourceEnabled}
+                    hideLocalCluster={hideLocalCluster}
                   />
                 </PageWrapper>
               </Suspense>

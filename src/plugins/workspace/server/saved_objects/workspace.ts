@@ -8,7 +8,10 @@ import { SavedObjectsType, WORKSPACE_TYPE } from '../../../../core/server';
 export const workspace: SavedObjectsType = {
   name: WORKSPACE_TYPE,
   namespaceType: 'agnostic',
-  hidden: false,
+  /**
+   * Disable operation by using saved objects APIs on workspace metadata
+   */
+  hidden: true,
   /**
    * workspace won't appear in management page.
    */
@@ -21,9 +24,6 @@ export const workspace: SavedObjectsType = {
       description: {
         type: 'text',
       },
-      /**
-       * In opensearch, string[] is also mapped to text
-       */
       features: {
         type: 'keyword',
       },

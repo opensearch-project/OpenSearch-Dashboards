@@ -53,7 +53,9 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
       await PageObjects.savedObjects.importFile(
-        path.join(__dirname, 'exports', 'timezonetest_6_2_4.json')
+        path.join(__dirname, 'exports', 'timezonetest_6_2_4.json'),
+        true,
+        true
       );
       await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.common.navigateToApp('dashboard');

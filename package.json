@@ -23,6 +23,7 @@
   "bugs": {
     "url": "http://github.com/opensearch-project/OpenSearch-Dashboards/issues"
   },
+  "packageManager": "yarn@1.22.19",
   "opensearchDashboards": {
     "clean": {
       "extraPatterns": [
@@ -63,6 +64,7 @@
     "build": "scripts/use_node scripts/build --all-platforms",
     "start": "scripts/use_node scripts/opensearch_dashboards --dev",
     "start:docker": "scripts/use_node scripts/opensearch_dashboards --dev --opensearch.hosts=$OPENSEARCH_HOSTS --opensearch.ignoreVersionMismatch=true --server.host=$SERVER_HOST",
+    "start:security": "scripts/use_node scripts/opensearch_dashboards --dev --security",
     "debug": "scripts/use_node --nolazy --inspect scripts/opensearch_dashboards --dev",
     "debug-break": "scripts/use_node --nolazy --inspect-brk scripts/opensearch_dashboards --dev",
     "lint": "yarn run lint:es && yarn run lint:style",
@@ -75,7 +77,10 @@
     "docs:acceptApiChanges": "scripts/use_node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "osd:bootstrap": "scripts/use_node scripts/build_ts_refs && scripts/use_node scripts/register_git_hook",
     "spec_to_console": "scripts/use_node scripts/spec_to_console",
-    "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\""
+    "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\"",
+    "cypress:run-without-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=false",
+    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500"
+ 
   },
   "repository": {
     "type": "git",
@@ -86,6 +91,8 @@
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
     "**/d3-color": "^3.1.0",
+    "**/elasticsearch/agentkeepalive": "^4.5.0",
+    "**/follow-redirects": "^1.15.4",
     "**/glob-parent": "^6.0.0",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/json-schema": "^0.4.0",
@@ -94,14 +101,15 @@
     "**/node-jose": "^2.2.0",
     "**/nth-check": "^2.0.1",
     "**/trim": "^0.0.3",
-    "**/typescript": "4.0.2",
+    "**/typescript": "4.6.4",
     "**/unset-value": "^2.0.1",
     "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
     "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1",
     "**/semver": "^7.5.3",
     "**/set-value": "^4.1.0",
     "**/xml2js": "^0.5.0",
-    "**/yaml": "^2.2.2"
+    "**/yaml": "^2.2.2",
+    "**/@babel/traverse": "^7.23.2"
   },
   "workspaces": {
     "packages": [
@@ -123,9 +131,9 @@
   "dependencies": {
     "@aws-crypto/client-node": "^3.1.1",
     "@elastic/datemath": "5.0.3",
-    "@elastic/eui": "npm:@opensearch-project/oui@1.3.0",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.5.1",
     "@elastic/good": "^9.0.1-kibana3",
-    "@elastic/numeral": "^2.5.0",
+    "@elastic/numeral": "npm:@amoo-miki/numeral@2.6.0",
     "@elastic/request-crypto": "2.0.0",
     "@elastic/safer-lodash-set": "0.0.0",
     "@hapi/accept": "^5.0.2",
@@ -158,9 +166,6 @@
     "JSONStream": "1.3.5",
     "abortcontroller-polyfill": "^1.4.0",
     "ajv": "^8.11.0",
-    "angular": "^1.8.2",
-    "angular-elastic": "^2.5.1",
-    "angular-sanitize": "^1.8.0",
     "bluebird": "3.5.5",
     "chalk": "^4.1.0",
     "chokidar": "^3.4.2",
@@ -224,13 +229,15 @@
     "type-detect": "^4.0.8",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "@opensearch-dashboards-test/opensearch-dashboards-test-library": "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz"
+    
   },
   "devDependencies": {
-    "@babel/core": "^7.16.5",
-    "@babel/parser": "^7.16.6",
-    "@babel/register": "^7.16.5",
-    "@babel/types": "^7.16.0",
+    "@babel/core": "^7.22.9",
+    "@babel/parser": "^7.22.9",
+    "@babel/register": "^7.22.9",
+    "@babel/types": "^7.22.9",
     "@elastic/apm-rum": "^5.6.1",
     "@elastic/charts": "31.1.0",
     "@elastic/ems-client": "7.10.0",
@@ -262,8 +269,6 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.2",
     "@testing-library/react-hooks": "^7.0.2",
-    "@types/angular": "^1.8.4",
-    "@types/angular-mocks": "^1.7.1",
     "@types/archiver": "^5.3.1",
     "@types/babel__core": "^7.1.17",
     "@types/bluebird": "^3.1.1",
@@ -344,10 +349,6 @@
     "@types/zen-observable": "^0.8.0",
     "@typescript-eslint/eslint-plugin": "^3.10.0",
     "@typescript-eslint/parser": "^3.10.0",
-    "angular-aria": "^1.8.0",
-    "angular-mocks": "^1.8.2",
-    "angular-recursion": "^1.0.5",
-    "angular-route": "^1.8.0",
     "archiver": "^5.3.0",
     "axe-core": "^4.0.2",
     "babel-eslint": "^10.0.3",
@@ -355,10 +356,11 @@
     "brace": "0.11.1",
     "chai": "3.5.0",
     "chance": "1.0.18",
-    "cheerio": "0.22.0",
-    "chromedriver": "^107.0.3",
+    "cheerio": "1.0.0-rc.1",
+    "chromedriver": "^119.0.1",
     "classnames": "2.3.1",
     "compare-versions": "3.5.1",
+    "cypress": "9.5.4",
     "d3": "3.5.17",
     "d3-cloud": "1.2.5",
     "dedent": "^0.7.0",
@@ -424,7 +426,6 @@
     "ms-chromium-edge-driver": "^0.4.3",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
-    "ngreact": "^0.5.1",
     "nock": "12.0.3",
     "node-stream-zip": "^1.15.0",
     "normalize-path": "^3.0.0",
@@ -461,7 +462,6 @@
     "tough-cookie": "^4.1.3",
     "tree-kill": "^1.2.2",
     "typescript": "4.0.2",
-    "ui-select": "0.19.8",
     "vega": "^5.23.0",
     "vega-interpreter": "npm:@amoo-miki/vega-forced-csp-compliant-interpreter@1.0.6",
     "vega-lite": "^5.6.0",

@@ -36,10 +36,6 @@ import { createHash } from 'crypto';
 import Axios from 'axios';
 import { ToolingLog } from '@osd/dev-utils';
 
-// https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
-// @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
-import AxiosHttpAdapter from 'axios/lib/adapters/http';
-
 import { mkdirp } from './fs';
 
 function tryUnlink(path: string) {
@@ -77,7 +73,7 @@ export async function download(options: DownloadOptions): Promise<void> {
     const response = await Axios.request({
       url,
       responseType: 'stream',
-      adapter: AxiosHttpAdapter,
+      adapter: 'http',
     });
 
     if (response.status !== 200) {

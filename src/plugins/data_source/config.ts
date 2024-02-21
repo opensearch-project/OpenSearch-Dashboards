@@ -13,6 +13,7 @@ const WRAPPING_KEY_SIZE: number = 32;
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  hideLocalCluster: schema.boolean({ defaultValue: false }),
   encryption: schema.object({
     wrappingKeyName: schema.string({
       minLength: KEY_NAME_MIN_LENGTH,

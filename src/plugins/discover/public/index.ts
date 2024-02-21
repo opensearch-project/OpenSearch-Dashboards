@@ -37,7 +37,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
-// TODO: Fix embeddable after removing Angular
-// export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './application/embeddable';
+
+export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './embeddable';
 export { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from './url_generator';
-export { NEW_DISCOVER_APP } from '../common';

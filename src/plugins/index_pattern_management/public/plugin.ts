@@ -39,7 +39,7 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { DataSourcePluginStart } from 'src/plugins/data_source/public';
+import { DataSourcePluginSetup, DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import {
   IndexPatternManagementService,
@@ -53,6 +53,7 @@ import { reactRouterNavigate } from '../../opensearch_dashboards_react/public';
 
 export interface IndexPatternManagementSetupDependencies {
   urlForwarding: UrlForwardingSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface IndexPatternManagementStartDependencies {
@@ -84,9 +85,11 @@ export class IndexPatternManagementPlugin
 
   public setup(
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
-    { urlForwarding }: IndexPatternManagementSetupDependencies
+    dependencies: IndexPatternManagementSetupDependencies
   ) {
     const newAppPath = IPM_APP_ID;
+    const { urlForwarding, dataSource } = dependencies;
+
     const legacyPatternsPath = 'management/opensearch-dashboards/index_patterns';
 
     urlForwarding.forwardApp(
@@ -131,8 +134,11 @@ export class IndexPatternManagementPlugin
           basePath: params.appBasePath,
         };
 
-        return mountManagementSection(core.getStartServices, managementParams, () =>
-          this.indexPatternManagementService.environmentService.getEnvironment().ml()
+        return mountManagementSection(
+          core.getStartServices,
+          managementParams,
+          () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
+          dataSource
         );
       },
     });

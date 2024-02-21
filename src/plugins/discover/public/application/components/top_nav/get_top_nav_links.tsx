@@ -5,10 +5,9 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 import { DiscoverViewServices } from '../../../build_services';
-import { showOpenSearchPanel } from './show_open_search_panel';
 import { SavedSearch } from '../../../saved_searches';
-import { NEW_DISCOVER_APP } from '../../../../common';
 import { Adapters } from '../../../../../inspector/public';
 import { TopNavMenuData } from '../../../../../navigation/public';
 import { ISearchSource, unhashUrl } from '../../../opensearch_dashboards_services';
@@ -17,9 +16,17 @@ import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../saved_objects/public';
+import {
+  OpenSearchDashboardsContextProvider,
+  toMountPoint,
+} from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
+import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
+import { syncQueryStateWithUrl } from '../../../../../data/public';
+import { getNewDiscoverSetting, setNewDiscoverSetting } from '../utils/local_storage';
+import { OpenSearchPanel } from './open_search_panel';
 
 export const getTopNavLinks = (
   services: DiscoverViewServices,
@@ -30,12 +37,14 @@ export const getTopNavLinks = (
     history,
     inspector,
     core,
-    uiSettings,
     capabilities,
     share,
     toastNotifications,
     chrome,
     store,
+    data: { query },
+    osdUrlStateStorage,
+    storage,
   } = services;
 
   const newSearch = {
@@ -47,11 +56,9 @@ export const getTopNavLinks = (
       defaultMessage: 'New Search',
     }),
     run() {
-      setTimeout(() => {
-        history().push('/');
-        // TODO: figure out why a history push doesn't update the app state. The page reload is a hack around it
-        window.location.reload();
-      }, 0);
+      core.application.navigateToApp('discover', {
+        path: '#/',
+      });
     },
     testId: 'discoverNewButton',
   };
@@ -105,19 +112,14 @@ export const getTopNavLinks = (
               history().push(`/view/${encodeURIComponent(id)}`);
             } else {
               chrome.docTitle.change(savedSearch.lastSavedTitle);
-              chrome.setBreadcrumbs([
-                {
-                  text: i18n.translate('discover.discoverBreadcrumbTitle', {
-                    defaultMessage: 'Discover',
-                  }),
-                  href: '#/',
-                },
-                { text: savedSearch.title },
-              ]);
+              chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedSearch.title }]);
             }
 
             // set App state to clean
             store!.dispatch({ type: setSavedSearchId.type, payload: id });
+
+            // starts syncing `_g` portion of url with query services
+            syncQueryStateWithUrl(query, osdUrlStateStorage);
 
             return { id };
           }
@@ -167,11 +169,20 @@ export const getTopNavLinks = (
     }),
     testId: 'discoverOpenButton',
     run: () => {
-      showOpenSearchPanel({
-        makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
-        I18nContext: core.i18n.Context,
-        services,
-      });
+      const flyoutSession = services.overlays.openFlyout(
+        toMountPoint(
+          <OpenSearchDashboardsContextProvider services={services}>
+            <OpenSearchPanel
+              onClose={() => {
+                if (flyoutSession) {
+                  flyoutSession.close();
+                }
+              }}
+              makeUrl={(searchId) => `#/view/${encodeURIComponent(searchId)}`}
+            />
+          </OpenSearchDashboardsContextProvider>
+        )
+      );
     },
   };
 
@@ -194,7 +205,7 @@ export const getTopNavLinks = (
       share?.toggleShareContextMenu({
         anchorElement,
         allowEmbed: false,
-        allowShortUrl: capabilities.discover.createShortUrl as boolean,
+        allowShortUrl: capabilities.discover?.createShortUrl as boolean,
         shareableUrl: unhashUrl(window.location.href),
         objectId: savedSearch.id,
         objectType: 'search',
@@ -202,7 +213,7 @@ export const getTopNavLinks = (
           ...sharingData,
           title: savedSearch.title,
         },
-        isDirty: !savedSearch.id || state.isDirty,
+        isDirty: !savedSearch.id || state.isDirty || false,
       });
     },
   };
@@ -223,27 +234,63 @@ export const getTopNavLinks = (
     },
   };
 
-  const legacyDiscover: TopNavMenuData = {
-    id: 'discover-new',
-    label: i18n.translate('discover.localMenu.newDiscoverTitle', {
-      defaultMessage: 'New Discover',
+  const newDiscoverButtonLabel = i18n.translate('discover.localMenu.discoverButton.label.new', {
+    defaultMessage: 'Try new Discover',
+  });
+  const oldDiscoverButtonLabel = i18n.translate('discover.localMenu.discoverButton.label.old', {
+    defaultMessage: 'Use legacy Discover',
+  });
+  const isNewDiscover = getNewDiscoverSetting(storage);
+  const newTable: TopNavMenuData = {
+    id: 'table-datagrid',
+    label: isNewDiscover ? oldDiscoverButtonLabel : newDiscoverButtonLabel,
+    description: i18n.translate('discover.localMenu.newTableDescription', {
+      defaultMessage: 'New Discover toggle Experience',
     }),
-    description: i18n.translate('discover.localMenu.newDiscoverDescription', {
-      defaultMessage: 'New Discover Experience',
-    }),
-    testId: 'discoverNewButton',
+    testId: 'datagridTableButton',
     run: async () => {
-      await uiSettings.set(NEW_DISCOVER_APP, false);
-      window.location.reload();
+      // Read the current state from localStorage
+      const newDiscoverEnabled = getNewDiscoverSetting(storage);
+      if (newDiscoverEnabled) {
+        const confirmed = await services.overlays.openConfirm(
+          toMountPoint(
+            <EuiText>
+              <p>
+                Help drive future improvements by{' '}
+                <a href="https://survey.opensearch.org" target="_blank" rel="noopener noreferrer">
+                  providing feedback
+                </a>{' '}
+                about your experience.
+              </p>
+            </EuiText>
+          ),
+          {
+            title: i18n.translate('discover.localMenu.newTableConfirmModalTitle', {
+              defaultMessage: 'Share your thoughts on the latest Discover features',
+            }),
+            cancelButtonText: 'Cancel',
+            confirmButtonText: 'Turn off new features',
+            defaultFocusedButton: 'confirm',
+          }
+        );
+
+        if (confirmed) {
+          setNewDiscoverSetting(false, storage);
+          window.location.reload();
+        }
+      } else {
+        // Save the new setting to localStorage
+        setNewDiscoverSetting(true, storage);
+        window.location.reload();
+      }
     },
-    type: 'toggle' as const,
-    emphasize: true,
+    iconType: isNewDiscover ? 'editorUndo' : 'cheer',
   };
 
   return [
-    legacyDiscover,
+    newTable,
     newSearch,
-    ...(capabilities.discover.save ? [saveSearch] : []),
+    ...(capabilities.discover?.save ? [saveSearch] : []),
     openSearch,
     ...(share ? [shareSearch] : []), // Show share option only if share plugin is available
     inspectSearch,
@@ -301,7 +348,7 @@ const getSharingData = async ({
   const searchSourceInstance = searchSource.createCopy();
   const indexPattern = await searchSourceInstance.getField('index');
 
-  const { searchFields, selectFields } = await getSharingDataFields(
+  const { searchFields } = await getSharingDataFields(
     state.columns,
     services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
     indexPattern?.timeFieldName

@@ -189,6 +189,8 @@ export interface SavedObjectsImportOptions {
   createNewCopies: boolean;
   /** if specified, will import in given workspaces, else will import as global object */
   workspaces?: string[];
+  dataSourceId?: string;
+  dataSourceTitle?: string;
 }
 
 /**
@@ -212,6 +214,8 @@ export interface SavedObjectsResolveImportErrorsOptions {
   createNewCopies: boolean;
   /** if specified, will import in given workspaces, else will import as global object */
   workspaces?: string[];
+  dataSourceId?: string;
+  dataSourceTitle?: string;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };

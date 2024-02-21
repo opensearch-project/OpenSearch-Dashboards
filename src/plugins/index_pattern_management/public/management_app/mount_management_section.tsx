@@ -40,6 +40,7 @@ import {
   ScopedHistory,
   StartServicesAccessor,
 } from 'src/core/public';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import {
@@ -68,15 +69,17 @@ const readOnlyBadge = {
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
   params: AppMountParameters,
-  getMlCardState: () => MlCardState
+  getMlCardState: () => MlCardState,
+  dataSource?: DataSourcePluginSetup
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data, dataSource },
+    { data },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
-  const dataSourceEnabled = !!dataSource;
+  const dataSourceEnabled = dataSource?.dataSourceEnabled ?? false;
+  const hideLocalCluster = dataSource?.hideLocalCluster ?? false;
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
@@ -107,6 +110,7 @@ export async function mountManagementSection(
     setBreadcrumbs: setBreadcrumbsScope,
     getMlCardState,
     dataSourceEnabled,
+    hideLocalCluster,
   };
 
   ReactDOM.render(

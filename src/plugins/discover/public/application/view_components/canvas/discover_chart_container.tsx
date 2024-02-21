@@ -13,14 +13,14 @@ import { DiscoverChart } from '../../components/chart/chart';
 
 export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: SearchData) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { uiSettings, data } = services;
+  const { uiSettings, data, core } = services;
   const { indexPattern, savedSearch } = useDiscoverContext();
 
   const isTimeBased = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
     indexPattern,
   ]);
 
-  if (!hits || !chartData || !bucketInterval) return null;
+  if (!hits) return null;
 
   return (
     <DiscoverChart
@@ -30,8 +30,7 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
       data={data}
       hits={hits}
       resetQuery={() => {
-        window.location.href = `#/view/${savedSearch?.id}`;
-        window.location.reload();
+        core.application.navigateToApp('discover', { path: `#/view/${savedSearch?.id}` });
       }}
       services={services}
       showResetButton={!!savedSearch && !!savedSearch.id}

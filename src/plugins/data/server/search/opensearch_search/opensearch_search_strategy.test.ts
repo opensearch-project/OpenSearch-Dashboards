@@ -31,6 +31,8 @@
 import { RequestHandlerContext } from '../../../../../core/server';
 import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import { opensearchSearchStrategyProvider } from './opensearch_search_strategy';
+import { DataSourceError } from '../../../../data_source/server/lib/error';
+import { DataSourcePluginSetup } from '../../../../data_source/server';
 
 describe('OpenSearch search strategy', () => {
   const mockLogger: any = {

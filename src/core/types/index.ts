@@ -40,3 +40,4 @@ export * from './saved_objects';
 export * from './serializable';
 export * from './custom_branding';
 export * from './workspace';
+export * from './cross_compatibility';

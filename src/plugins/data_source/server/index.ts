@@ -8,6 +8,10 @@ import { DataSourcePlugin } from './plugin';
 import { configSchema, DataSourcePluginConfigType } from '../config';
 
 export const config: PluginConfigDescriptor<DataSourcePluginConfigType> = {
+  exposeToBrowser: {
+    enabled: true,
+    hideLocalCluster: true,
+  },
   schema: configSchema,
 };
 

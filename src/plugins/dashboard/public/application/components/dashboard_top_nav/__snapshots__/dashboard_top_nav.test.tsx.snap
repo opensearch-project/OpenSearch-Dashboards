@@ -689,6 +689,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -1650,6 +1651,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -2611,6 +2613,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -3572,6 +3575,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -4533,6 +4537,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",
@@ -5494,6 +5499,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                   },
+                  "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql",
                     "boolean_query": "https://opensearch.org/docs/mocked-test-branch/dashboards/dql/#boolean-query",

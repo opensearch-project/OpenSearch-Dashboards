@@ -50,6 +50,8 @@ const SavedObjectsTablePage = ({
   namespaceRegistry,
   setBreadcrumbs,
   title,
+  dataSourceEnabled,
+  hideLocalCluster,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -60,6 +62,8 @@ const SavedObjectsTablePage = ({
   namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   title: string;
+  dataSourceEnabled: boolean;
+  hideLocalCluster: boolean;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
@@ -104,6 +108,8 @@ const SavedObjectsTablePage = ({
         return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
       }}
       title={title}
+      dataSourceEnabled={dataSourceEnabled}
+      hideLocalCluster={hideLocalCluster}
     />
   );
 };

@@ -25,7 +25,7 @@ env:
   TEST_OPENSEARCH_TRANSPORT_PORT: 9403
   TEST_OPENSEARCH_PORT: 9400
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  NODE_OPTIONS: "--max-old-space-size=6144 --dns-result-order=ipv4first"
+  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
 
 jobs:
   build-lint-test:
@@ -44,6 +44,14 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           git config --global core.autocrlf false
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -142,6 +150,14 @@ jobs:
         run: |
           git config --global core.autocrlf false
 
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -208,6 +224,95 @@ jobs:
             test/*/failure_debug/
             test/*/screenshots/
 
+  plugin-functional-tests:
+    name: Run plugin functional tests on ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            name: Linux
+          - os: windows-latest
+            name: Windows
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: echo Running plugin functional tests
+
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v3
+        if: matrix.os != 'windows-latest'
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Setup chromedriver
+        run: node scripts/upgrade_chromedriver.js
+
+      - name: Run bootstrap (Linux)
+        if: matrix.os != 'windows-latest'
+        run: yarn osd bootstrap
+
+      - name: Run bootstrap (Windows)
+        if: matrix.os == 'windows-latest'
+        run: yarn osd bootstrap || yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
+
+      - name: Run functional plugin tests
+        id: plugin-ftr-tests
+        run: node scripts/functional_tests.js --config test/plugin_functional/config.ts
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: failure-artifacts-plugin-functional-${{ matrix.os }}
+          path: |
+            test/*/failure_debug/
+            test/*/screenshots/
+
   build-min-artifact-tests:
     name: Build min release artifacts on ${{ matrix.name }}
     strategy:
@@ -233,6 +338,14 @@ jobs:
         run: |
           git config --global core.autocrlf false
         working-directory: .
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -310,7 +423,19 @@ jobs:
         working-directory: ./artifacts
     strategy:
       matrix:
-        version: [osd-2.0.0, osd-2.1.0, osd-2.2.0, osd-2.3.0, osd-2.4.0, osd-2.5.0, osd-2.6.0, osd-2.7.0, osd-2.8.0, osd-2.9.0]
+        version:
+          [
+            osd-2.0.0,
+            osd-2.1.0,
+            osd-2.2.0,
+            osd-2.3.0,
+            osd-2.4.0,
+            osd-2.5.0,
+            osd-2.6.0,
+            osd-2.7.0,
+            osd-2.8.0,
+            osd-2.9.0,
+          ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -344,7 +469,7 @@ jobs:
         id: verify-opensearch-exists
         run: |
           if curl -I -L ${{ env.OPENSEARCH_URL }}; then
-            echo "::set-output name=version-exists::true"
+            echo "name=version-exists::true" >> $GITHUB_OUTPUT
           fi
 
       - name: Skipping tests

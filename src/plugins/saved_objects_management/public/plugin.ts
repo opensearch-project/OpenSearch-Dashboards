@@ -31,6 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -79,6 +80,7 @@ export interface SetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   uiActions: UiActionsSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface StartDependencies {

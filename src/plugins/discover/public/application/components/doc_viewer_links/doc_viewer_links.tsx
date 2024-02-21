@@ -15,7 +15,7 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
     .map((item) => {
       const { generateCb, href, ...props } = item;
       const listItem: EuiListGroupItemProps = {
-        'data-test-subj': 'docTableRowAction',
+        'data-test-subj': `docTableRowAction`,
         ...props,
         href: generateCb ? generateCb(renderProps).url : href,
       };
@@ -27,7 +27,12 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       {listItems.map((item, index) => (
         <EuiFlexItem key={index} grow={false}>
-          <EuiLink href={item.href} target="_blank" style={{ fontWeight: 'normal' }}>
+          <EuiLink
+            href={item.href}
+            target="_blank"
+            style={{ fontWeight: 'normal' }}
+            data-test-subj={`${item['data-test-subj']}-${index}`}
+          >
             {item.label}
           </EuiLink>
         </EuiFlexItem>

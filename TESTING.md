@@ -24,7 +24,7 @@ In general, we recommend four tiers of tests:
 
 # Requirements
 * Install the latest NodeJS, [NPM](https://www.npmjs.com/get-npm) and [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable)
-    * `nvm install v14.20.1`
+    * `nvm install v18.19.0`
     * `npm install -g yarn`
 
 # Running tests

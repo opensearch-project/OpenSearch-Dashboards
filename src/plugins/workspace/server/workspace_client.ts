@@ -4,7 +4,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { omit } from 'lodash';
 import type {
   SavedObject,
   SavedObjectsClientContract,
@@ -25,7 +24,7 @@ import {
   PERSONAL_WORKSPACE_ID_PREFIX,
 } from '../../../core/server';
 import {
-  IWorkspaceDBImpl,
+  IWorkspaceClientImpl,
   WorkspaceFindOptions,
   IResponse,
   IRequestDetail,
@@ -143,7 +142,7 @@ const INVALID_PERMISSION_MODES_COMBINATION = i18n.translate('workspace.invalid.p
   defaultMessage: 'Invalid workspace permission mode combination',
 });
 
-export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
+export class WorkspaceClientWithSavedObject implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
   private logger: Logger;
 
@@ -159,13 +158,16 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   ): SavedObjectsClientContract | undefined {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
       excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+      includedHiddenTypes: [WORKSPACE_TYPE],
     });
   }
 
   private getSavedObjectClientsFromRequestDetail(
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract {
-    return requestDetail.context.core.savedObjects.client;
+    return this.savedObjects?.getScopedClient(requestDetail.request, {
+      includedHiddenTypes: [WORKSPACE_TYPE],
+    }) as SavedObjectsClientContract;
   }
   private getFlattenedResultWithSavedObject(
     savedObject: SavedObject<WorkspaceAttribute>
@@ -286,7 +288,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   public async create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'>
-  ): ReturnType<IWorkspaceDBImpl['create']> {
+  ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
       const { permissions, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
@@ -331,7 +333,7 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
   public async list(
     requestDetail: IRequestDetail,
     options: WorkspaceFindOptions
-  ): ReturnType<IWorkspaceDBImpl['list']> {
+  ): ReturnType<IWorkspaceClientImpl['list']> {
     try {
       const { permissionModes, ...restOptions } = options;
       const resultResp = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<
@@ -341,8 +343,8 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceDBImpl {
         type: WORKSPACE_TYPE,
         ...(permissionModes ? { ACLSearchParams: { permissionModes } } : {}),
       });
-      const others = omit(resultResp, 'saved_objects');
-      let savedObjects = resultResp.saved_objects;
+      const { saved_objects: resultSavedObjects, ...others } = resultResp;
+      let savedObjects = resultSavedObjects;
       const scopedClientWithoutPermissionCheck = this.getScopedClientWithoutPermission(
         requestDetail
       );

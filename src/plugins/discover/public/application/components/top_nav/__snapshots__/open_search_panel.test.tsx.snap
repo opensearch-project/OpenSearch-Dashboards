@@ -14,7 +14,7 @@ exports[`render 1`] = `
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Open search"
+          defaultMessage="OpenSearch"
           id="discover.topNav.openSearchPanel.openSearchTitle"
           values={Object {}}
         />

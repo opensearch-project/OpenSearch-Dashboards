@@ -190,12 +190,20 @@ export class Fetch {
       if (NDJSON_CONTENT.test(contentType)) {
         body = await response.blob();
       } else if (JSON_CONTENT.test(contentType)) {
-        body = fetchOptions.withLongNumerals ? parse(await response.text()) : await response.json();
+        // ToDo: [3.x] Remove withLongNumerals
+        body =
+          fetchOptions.withLongNumeralsSupport || fetchOptions.withLongNumerals
+            ? parse(await response.text())
+            : await response.json();
       } else {
         const text = await response.text();
 
         try {
-          body = fetchOptions.withLongNumerals ? parse(text) : JSON.parse(text);
+          // ToDo: [3.x] Remove withLongNumerals
+          body =
+            fetchOptions.withLongNumeralsSupport || fetchOptions.withLongNumerals
+              ? parse(text)
+              : JSON.parse(text);
         } catch (err) {
           body = text;
         }
@@ -212,6 +220,8 @@ export class Fetch {
   }
 
   private shorthand(method: string): HttpHandler {
+    // ToDo: find why 'TResponseBody' of HttpHandler is not assignable to type 'HttpResponse<any>'
+    // @ts-expect-error
     return (pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
       const optionsWithPath = validateFetchArguments(pathOrOptions, options);
       return this.fetch({ ...optionsWithPath, method });
