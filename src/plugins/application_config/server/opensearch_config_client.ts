@@ -29,8 +29,6 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
         id: entity,
       });
 
-      this.logger.info(`*** result is  ${JSON.stringify(data)}`);
-
       return data?.body?._source?.value || '';
     } catch (e) {
       const errorMessage = `Failed to get entity ${entity} due to error ${e}`;
