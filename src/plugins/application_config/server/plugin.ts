@@ -58,7 +58,7 @@ export class ApplicationConfigPlugin
   }
 
   public async setup(core: CoreSetup) {
-    this.logger.debug('applicationConfig: Setup');
+    this.logger.info('applicationConfig: Setup');
     const router = core.http.createRouter();
 
     const config = await this.config$.pipe(first()).toPromise();
@@ -75,7 +75,7 @@ export class ApplicationConfigPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('applicationConfig: Started');
+    this.logger.info('applicationConfig: Started');
     return {};
   }
 
