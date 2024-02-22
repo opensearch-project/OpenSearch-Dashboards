@@ -39,8 +39,16 @@ export const configSchema = schema.object({
     appender: fileAppenderSchema,
   }),
   endpointDeniedIPs: schema.maybe(schema.arrayOf(schema.string())),
-  enabledAuthTypes: schema.arrayOf(schema.string(), {
-    defaultValue: ['NoAuth', 'UsernamePasswordType', 'SigV4'],
+  authTypes: schema.object({
+    NoAuthentication: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    UsernamePassword: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    AWSSigV4: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
   }),
 });
 

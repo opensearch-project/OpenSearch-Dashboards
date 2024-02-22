@@ -16,6 +16,7 @@ import {
   IAuthenticationMethodRegistery,
   AuthenticationMethodRegistery,
 } from './auth_registry';
+import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -67,7 +68,7 @@ export class DataSourceManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, dataSource);
+        return mountManagementSection(core.getStartServices, params, this.authMethodsRegistry);
       },
     });
 
@@ -79,6 +80,16 @@ export class DataSourceManagementPlugin
       }
       this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
     };
+
+    if (dataSource.noAuthenticationTypeEnabled) {
+      registerAuthenticationMethod(noAuthCredentialAuthMethod);
+    }
+    if (dataSource.usernamePasswordAuthEnabled) {
+      registerAuthenticationMethod(usernamePasswordAuthMethod);
+    }
+    if (dataSource.awsSigV4AuthEnabled) {
+      registerAuthenticationMethod(sigV4AuthMethod);
+    }
 
     return { registerAuthenticationMethod };
   }

@@ -8,7 +8,7 @@ import { EuiSuperSelectOption } from '@elastic/eui';
 
 export interface AuthenticationMethod {
   name: string;
-  credentialForm: React.JSX.Element;
+  credentialForm?: React.JSX.Element;
   credentialSourceOption: EuiSuperSelectOption<string>;
 }
 

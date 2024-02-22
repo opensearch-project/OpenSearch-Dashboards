@@ -11,7 +11,7 @@ export const config: PluginConfigDescriptor<DataSourcePluginConfigType> = {
   exposeToBrowser: {
     enabled: true,
     hideLocalCluster: true,
-    enabledAuthTypes: true,
+    authTypes: true,
   },
   schema: configSchema,
 };

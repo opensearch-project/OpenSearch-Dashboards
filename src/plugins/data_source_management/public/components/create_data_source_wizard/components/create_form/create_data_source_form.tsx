@@ -18,13 +18,13 @@ import {
   EuiSuperSelect,
   EuiSpacer,
   EuiText,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import {
   AuthType,
-  credentialSourceOptions,
   DataSourceAttributes,
   DataSourceManagementContextValue,
   UsernamePasswordTypedContent,
@@ -55,7 +55,7 @@ export interface CreateDataSourceState {
   endpoint: string;
   auth: {
     type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content;
+    credentials: UsernamePasswordTypedContent | SigV4Content | undefined;
   };
 }
 
@@ -66,12 +66,16 @@ export class CreateDataSourceForm extends React.Component<
   static contextType = contextType;
   public readonly context!: DataSourceManagementContextValue;
 
-  enabledAuthTypes: string[];
+  authOptions: Array<EuiSuperSelectOption<string>>;
 
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
 
-    this.enabledAuthTypes = context.services.enabledAuthTypes;
+    this.authOptions = context.services.authenticationMethodRegistery
+      .getAllAuthenticationMethods()
+      .map((authMethod) => {
+        return authMethod.credentialSourceOption;
+      });
 
     this.state = {
       formErrorsByField: { ...defaultValidation },
@@ -602,7 +606,7 @@ export class CreateDataSourceForm extends React.Component<
             <EuiSpacer size="l" />
             <EuiFormRow>
               <EuiSuperSelect
-                options={credentialSourceOptions}
+                options={this.authOptions}
                 valueOfSelected={this.state.auth.type}
                 onChange={(value) => this.onChangeAuthType(value)}
                 name="Credential"

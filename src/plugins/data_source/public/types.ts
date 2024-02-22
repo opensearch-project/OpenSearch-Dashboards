@@ -6,11 +6,15 @@
 export interface DataSourcePluginSetup {
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
-  enabledAuthTypes: string[];
+  noAuthenticationTypeEnabled: boolean;
+  usernamePasswordAuthEnabled: boolean;
+  awsSigV4AuthEnabled: boolean;
 }
 
 export interface DataSourcePluginStart {
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
-  enabledAuthTypes: string[];
+  noAuthenticationTypeEnabled: boolean;
+  usernamePasswordAuthEnabled: boolean;
+  awsSigV4AuthEnabled: boolean;
 }
