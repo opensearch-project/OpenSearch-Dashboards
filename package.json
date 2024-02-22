@@ -77,7 +77,8 @@
     "docs:acceptApiChanges": "scripts/use_node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "osd:bootstrap": "scripts/use_node scripts/build_ts_refs && scripts/use_node scripts/register_git_hook",
     "spec_to_console": "scripts/use_node scripts/spec_to_console",
-    "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\""
+    "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\"",
+    "release_note:generate": "scripts/use_node scripts/generate_release_note"
   },
   "repository": {
     "type": "git",
