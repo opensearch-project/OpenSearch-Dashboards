@@ -107,7 +107,9 @@ export class SavedObjectsManagementPlugin
   private serviceRegistry = new SavedObjectsManagementServiceRegistry();
 
   private registerLibrarySubApp(
-    coreSetup: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>
+    coreSetup: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
+    dataSourceEnabled: boolean,
+    hideLocalCluster: boolean
   ) {
     const core = coreSetup;
     const mountWrapper = ({
@@ -124,6 +126,8 @@ export class SavedObjectsManagementPlugin
         appMountParams,
         title,
         allowedObjectTypes,
+        dataSourceEnabled,
+        hideLocalCluster,
       });
     };
 
@@ -165,7 +169,7 @@ export class SavedObjectsManagementPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, uiActions }: SetupDependencies
+    { home, uiActions, dataSource }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
@@ -194,7 +198,7 @@ export class SavedObjectsManagementPlugin
     // depends on `getStartServices`, should not be awaited
     registerServices(this.serviceRegistry, core.getStartServices);
 
-    this.registerLibrarySubApp(core);
+    this.registerLibrarySubApp(core, !!dataSource, dataSource?.hideLocalCluster ?? false);
 
     return {
       actions: actionSetup,

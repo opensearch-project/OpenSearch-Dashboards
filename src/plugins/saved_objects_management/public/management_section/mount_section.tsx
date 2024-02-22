@@ -46,7 +46,6 @@ interface MountParams {
   appMountParams?: AppMountParameters;
   title: string;
   allowedObjectTypes?: string[];
-  mountParams: ManagementAppMountParams;
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
 }
