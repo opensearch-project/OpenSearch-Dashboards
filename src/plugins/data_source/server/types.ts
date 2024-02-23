@@ -37,6 +37,10 @@ export interface DataSourceClientParams {
   testClientDataSourceAttr?: DataSourceAttributes;
   // custom API schema registry promise, required for getting registered custom API schema
   customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>;
+  // When client parameters are required to be retrieved from the request header, the caller should provide the request.
+  request?: OpenSearchDashboardsRequest;
+  // To retrieve the credentials provider for the authentication method from the registry in order to return the client.
+  authRegistry?: IAuthenticationMethodRegistery;
 }
 
 export interface DataSourceCredentialsProviderOptions {
