@@ -15,7 +15,7 @@ import { ConfigurationClient } from '../types';
 
 export function defineRoutes(
   router: IRouter,
-  getConfigurationClient: (inputOpenSearchClient: IScopedClusterClient) => ConfigurationClient,
+  getConfigurationClient: (configurationClient: IScopedClusterClient) => ConfigurationClient,
   logger: Logger
 ) {
   router.get(
@@ -154,8 +154,8 @@ export async function handleGetConfig(
   }
 }
 
-export function errorResponse(response: OpenSearchDashboardsResponseFactory, error: any) {
-  return response.custom({
+function errorResponse(response: OpenSearchDashboardsResponseFactory, error: any) {
+  return response.customError({
     statusCode: error?.statusCode || 500,
     body: error,
   });
