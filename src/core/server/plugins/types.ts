@@ -289,7 +289,7 @@ export const SharedGlobalConfigKeys = {
   // We can add more if really needed
   opensearchDashboards: [
     'index',
-    'config_index',
+    'configIndex',
     'autocompleteTerminateAfter',
     'autocompleteTimeout',
   ] as const,

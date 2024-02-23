@@ -62,7 +62,7 @@ export class ApplicationConfigPlugin
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    this.configurationIndexName = config.opensearchDashboards.config_index;
+    this.configurationIndexName = config.opensearchDashboards.configIndex;
 
     // Register server side APIs
     defineRoutes(router, this.getConfigurationClient.bind(this), this.logger);
@@ -77,5 +77,5 @@ export class ApplicationConfigPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }

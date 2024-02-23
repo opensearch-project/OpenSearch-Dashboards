@@ -31,7 +31,7 @@
 
 # OpenSearch Dashboards uses an index in OpenSearch to store dynamic configurations.
 # This shall be a different index from opensearchDashboards.index.
-# opensearchDashboards.config_index: ".opensearch_dashboards_config"
+# opensearchDashboards.configIndex: ".opensearch_dashboards_config"
 
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"

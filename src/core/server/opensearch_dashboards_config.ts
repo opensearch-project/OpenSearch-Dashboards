@@ -48,7 +48,7 @@ export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     index: schema.string({ defaultValue: '.kibana' }),
-    config_index: schema.string({ defaultValue: '.opensearch_dashboards_config' }),
+    configIndex: schema.string({ defaultValue: '.opensearch_dashboards_config' }),
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
     branding: schema.object({
