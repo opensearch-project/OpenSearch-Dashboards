@@ -17,6 +17,7 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../../../../types';
+import { AuthenticationMethodRegistery } from 'src/plugins/data_source_management/public/auth_registry';
 
 const titleIdentifier = '[data-test-subj="createDataSourceFormTitleField"]';
 const descriptionIdentifier = `[data-test-subj="createDataSourceFormDescriptionField"]`;
@@ -26,6 +27,7 @@ const usernameIdentifier = '[data-test-subj="createDataSourceFormUsernameField"]
 const passwordIdentifier = '[data-test-subj="createDataSourceFormPasswordField"]';
 const createButtonIdentifier = '[data-test-subj="createDataSourceButton"]';
 const testConnectionButtonIdentifier = '[data-test-subj="createDataSourceTestConnectionButton"]';
+const authOptionSelectorIdentifier = '[data-test-subj="createDataSourceFormAuthTypeSelect"]';
 
 describe('Datasource Management: Create Datasource form', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
@@ -233,5 +235,131 @@ describe('Datasource Management: Create Datasource form', () => {
     blurOnField(passwordIdentifier);
     // @ts-ignore
     expect(component.find(passwordIdentifier).first().props().isInvalid).toBe(false);
+  });
+});
+
+describe('Datasource Management: Create Datasource form with different authType configurations', () => {
+  let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  const mockSubmitHandler = jest.fn();
+  const mockTestConnectionHandler = jest.fn();
+  const mockCancelHandler = jest.fn();
+
+  /* Scenario 1: Should render the page normally with all authMethod combinations */
+  test('should render normally with all authMethod combinations', () => {
+    const authMethodCombinationsToBeTested = [
+      [noAuthCredentialAuthMethod],
+      [usernamePasswordAuthMethod],
+      [sigV4AuthMethod],
+      [noAuthCredentialAuthMethod, usernamePasswordAuthMethod],
+      [noAuthCredentialAuthMethod, sigV4AuthMethod],
+      [usernamePasswordAuthMethod, sigV4AuthMethod],
+      [noAuthCredentialAuthMethod, usernamePasswordAuthMethod, sigV4AuthMethod],
+    ];
+
+    authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
+      const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+
+      authMethodCombination.forEach((authMethod) => {
+        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+      });
+
+      component = mount(
+        wrapWithIntl(
+          <CreateDataSourceForm
+            handleTestConnection={mockTestConnectionHandler}
+            handleSubmit={mockSubmitHandler}
+            handleCancel={mockCancelHandler}
+            existingDatasourceNamesList={['dup20']}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+
+      const testConnBtn = component.find(testConnectionButtonIdentifier).last();
+      expect(testConnBtn.prop('disabled')).toBe(true);
+    });
+  });
+
+  /* Scenario 2: options selector should be disabled when only one authMethod supported */
+  test('options selector should be disabled when only one authMethod supported', () => {
+    const authMethodCombinationsToBeTested = [
+      [noAuthCredentialAuthMethod],
+      [usernamePasswordAuthMethod],
+      [sigV4AuthMethod],
+    ];
+
+    authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
+      const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+
+      authMethodCombination.forEach((authMethod) => {
+        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+      });
+
+      component = mount(
+        wrapWithIntl(
+          <CreateDataSourceForm
+            handleTestConnection={mockTestConnectionHandler}
+            handleSubmit={mockSubmitHandler}
+            handleCancel={mockCancelHandler}
+            existingDatasourceNamesList={['dup20']}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+
+      const authOptionSelector = component.find(authOptionSelectorIdentifier).last();
+      expect(authOptionSelector.prop('disabled')).toBe(true);
+    });
+  });
+
+  /* Scenario 3: options selector should not be disabled when more than one authMethod supported */
+  test('options selector should not be disabled when more than one authMethod supported', () => {
+    const authMethodCombinationsToBeTested = [
+      [sigV4AuthMethod, usernamePasswordAuthMethod],
+      [noAuthCredentialAuthMethod, sigV4AuthMethod],
+      [noAuthCredentialAuthMethod, usernamePasswordAuthMethod],
+      [noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod],
+    ];
+
+    authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
+      const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+
+      authMethodCombination.forEach((authMethod) => {
+        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+      });
+
+      component = mount(
+        wrapWithIntl(
+          <CreateDataSourceForm
+            handleTestConnection={mockTestConnectionHandler}
+            handleSubmit={mockSubmitHandler}
+            handleCancel={mockCancelHandler}
+            existingDatasourceNamesList={['dup20']}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+
+      const authOptionSelector = component.find(authOptionSelectorIdentifier).last();
+      expect(authOptionSelector.prop('disabled')).toBe(false);
+    });
   });
 });

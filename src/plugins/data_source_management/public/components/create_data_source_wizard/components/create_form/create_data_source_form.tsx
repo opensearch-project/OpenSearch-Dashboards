@@ -28,8 +28,6 @@ import {
   DataSourceAttributes,
   DataSourceManagementContextValue,
   UsernamePasswordTypedContent,
-  defaultAuthType,
-  noAuthCredentialAuthMethod,
   sigV4ServiceOptions,
 } from '../../../../types';
 import { Header } from '../header';
@@ -40,7 +38,7 @@ import {
   isTitleValid,
   performDataSourceFormValidation,
 } from '../../../validation';
-import { isValidUrl } from '../../../utils';
+import { getDefaultAuthMethod, isValidUrl } from '../../../utils';
 
 export interface CreateDataSourceProps {
   existingDatasourceNamesList: string[];
@@ -75,18 +73,11 @@ export class CreateDataSourceForm extends React.Component<
 
     const authenticationMethodRegistery = context.services.authenticationMethodRegistery;
     const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
+    const initialSelectedAuthMethod = getDefaultAuthMethod(authenticationMethodRegistery);
 
     this.authOptions = registeredAuthMethods.map((authMethod) => {
       return authMethod.credentialSourceOption;
     });
-
-    const defaultAuthMethod =
-      registeredAuthMethods.length > 0
-        ? authenticationMethodRegistery.getAuthenticationMethod(registeredAuthMethods[0].name)
-        : noAuthCredentialAuthMethod;
-
-    const initialSelectedAuthMethod =
-      authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
 
     this.state = {
       formErrorsByField: { ...defaultValidation },
