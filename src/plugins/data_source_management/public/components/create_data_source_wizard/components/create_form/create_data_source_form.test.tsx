@@ -11,7 +11,12 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../../opensearc
 import { CreateDataSourceForm } from './create_data_source_form';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { AuthType } from '../../../../types';
+import {
+  AuthType,
+  noAuthCredentialAuthMethod,
+  sigV4AuthMethod,
+  usernamePasswordAuthMethod,
+} from '../../../../types';
 
 const titleIdentifier = '[data-test-subj="createDataSourceFormTitleField"]';
 const descriptionIdentifier = `[data-test-subj="createDataSourceFormDescriptionField"]`;
@@ -24,6 +29,14 @@ const testConnectionButtonIdentifier = '[data-test-subj="createDataSourceTestCon
 
 describe('Datasource Management: Create Datasource form', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+    noAuthCredentialAuthMethod
+  );
+  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+    usernamePasswordAuthMethod
+  );
+  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(sigV4AuthMethod);
+
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const mockSubmitHandler = jest.fn();
   const mockTestConnectionHandler = jest.fn();

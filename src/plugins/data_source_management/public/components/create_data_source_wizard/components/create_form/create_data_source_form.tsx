@@ -30,7 +30,6 @@ import {
   UsernamePasswordTypedContent,
   defaultAuthType,
   noAuthCredentialAuthMethod,
-  noAuthCredentialField,
   sigV4ServiceOptions,
 } from '../../../../types';
 import { Header } from '../header';
