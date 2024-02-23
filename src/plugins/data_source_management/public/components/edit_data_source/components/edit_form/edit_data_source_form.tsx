@@ -782,6 +782,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             options={this.authOptions}
             valueOfSelected={this.state.auth.type}
             onChange={(value) => this.onChangeAuthType(value)}
+            disabled={this.authOptions.length <= 1}
             name="Credential"
             data-test-subj="editDataSourceSelectAuthType"
           />

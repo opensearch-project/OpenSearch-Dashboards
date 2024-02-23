@@ -84,6 +84,7 @@ export class CreateDataSourceForm extends React.Component<
       registeredAuthMethods.length > 0
         ? authenticationMethodRegistery.getAuthenticationMethod(registeredAuthMethods[0].name)
         : noAuthCredentialAuthMethod;
+
     const initialSelectedAuthMethod =
       authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
 
@@ -618,6 +619,7 @@ export class CreateDataSourceForm extends React.Component<
                 options={this.authOptions}
                 valueOfSelected={this.state.auth.type}
                 onChange={(value) => this.onChangeAuthType(value)}
+                disabled={this.authOptions.length <= 1}
                 name="Credential"
                 data-test-subj="createDataSourceFormAuthTypeSelect"
               />
