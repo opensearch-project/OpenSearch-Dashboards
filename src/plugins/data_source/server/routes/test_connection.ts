@@ -11,12 +11,13 @@ import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
 
-export const registerTestConnectionRoute = (
+export const registerTestConnectionRoute = async (
   router: IRouter,
   dataSourceServiceSetup: DataSourceServiceSetup,
   cryptography: CryptographyServiceSetup,
   authRegistryPromise: Promise<IAuthenticationMethodRegistery>
 ) => {
+  const authRegistry = await authRegistryPromise;
   router.post(
     {
       path: '/internal/data-source-management/validate',
@@ -65,6 +66,8 @@ export const registerTestConnectionRoute = (
             cryptography,
             dataSourceId,
             testClientDataSourceAttr: dataSourceAttr as DataSourceAttributes,
+            request,
+            authRegistry,
           }
         );
 
