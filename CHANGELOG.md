@@ -54,6 +54,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🔩 Tests
 
+- Add functional test cypress workflow improvements and enable the workflow for in-house Dashboards tests ([#6061](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6061))
+
 ## [2.12.0 - 2024-02-20](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.12.0)
 
 ### 💥 Breaking Changes
