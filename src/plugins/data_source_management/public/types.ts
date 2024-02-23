@@ -69,11 +69,7 @@ export const noAuthCredentialOption = {
   }),
 };
 
-export const noAuthCredentialField = {
-  username: '',
-  password: '',
-  service: 'es',
-};
+export const noAuthCredentialField = {};
 
 export const noAuthCredentialAuthMethod = {
   name: AuthType.NoAuth,

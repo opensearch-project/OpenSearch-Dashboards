@@ -10,7 +10,7 @@ export interface AuthenticationMethod {
   name: string;
   credentialSourceOption: EuiSuperSelectOption<string>;
   credentialForm?: React.JSX.Element;
-  crendentialFormField?: any;
+  crendentialFormField?: { [key: string]: [value: string] };
 }
 
 export type IAuthenticationMethodRegistery = Omit<

@@ -30,6 +30,7 @@ import {
   UsernamePasswordTypedContent,
   defaultAuthType,
   noAuthCredentialAuthMethod,
+  noAuthCredentialField,
   sigV4ServiceOptions,
 } from '../../../../types';
 import { Header } from '../header';
@@ -314,6 +315,9 @@ export class CreateDataSourceForm extends React.Component<
         secretKey: this.state.auth.credentials.secretKey,
         service: this.state.auth.credentials.service || SigV4ServiceName.OpenSearch,
       } as SigV4Content;
+    }
+    if (this.state.auth.type === AuthType.NoAuth) {
+      credentials = {};
     }
 
     return {
