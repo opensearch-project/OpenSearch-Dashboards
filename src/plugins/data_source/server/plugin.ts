@@ -169,7 +169,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
     customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'dataSource'> => {
-    return (context, req) => {
+    return async (context, req) => {
+      const authRegistry = await authRegistryPromise;
       return {
         opensearch: {
           getClient: (dataSourceId: string) => {
@@ -182,6 +183,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
               savedObjects: context.core.savedObjects.client,
               cryptography,
               customApiSchemaRegistryPromise,
+              request: req,
+              authRegistry,
             });
           },
           legacy: {
@@ -191,6 +194,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
                 savedObjects: context.core.savedObjects.client,
                 cryptography,
                 customApiSchemaRegistryPromise,
+                request: req,
+                authRegistry,
               });
             },
           },

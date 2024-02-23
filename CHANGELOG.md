@@ -41,6 +41,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Add interfaces to register add-on authentication method from plug-in module ([#5851](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5851))
 - [Multiple Datasource] Able to Hide "Local Cluster" option from datasource DropDown ([#5827](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5827))
 - [Multiple Datasource] Add api registry and allow it to be added into client config in data source plugin ([#5895](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5895))
+- [Multiple Datasource] Concatenate data source name with index pattern name and change delimiter to double colon ([#5907](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5907))
+- [Multiple Datasource] Refactor client and legacy client to use authentication registry ([#5881](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5881))
 
 ### 🐛 Bug Fixes
 
@@ -68,6 +70,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG] Remove duplicate sample data as id 90943e30-9a47-11e8-b64d-95841ca0b247 ([5668](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5668))
 - [BUG][Multiple Datasource] Fix datasource testing connection unexpectedly passed with wrong endpoint [#5663](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5663)
 - [Table Visualization] Fix filter action buttons for split table aggregations ([#5619](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5619))
+- [BUG][Discover] Allow saved sort from search embeddable to load in Dashboard ([#5934](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5934))
 - [BUG] [Multiple Datasource] datasource id is required if there is no open-search hosts config ([#5882](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5882))
 
 ### 🚞 Infrastructure
@@ -80,6 +83,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Chore] Add `--security` for `opensearch snapshot` and `opensearch_dashboards` to configure local setup with the security plugin ([#5451](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5451))
 - [Tests] Add Github workflow for Test Orchestrator in FT Repo to run cypress tests within Dashboards repo ([#5725](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5725))
 - [Chore] Updates default dev environment security credentials ([#5736](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5736))
+- [Tests] Baseline screenshots for area and tsvb functional tests ([#5915](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5915))
 
 ### 📝 Documentation
 
@@ -100,6 +104,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add @SuZhou-Joe as a maintainer ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
 - Move @seanneumann to emeritus maintainer ([#5634](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5634))
 - Remove `ui-select` dev dependency ([#5660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5660))
+- Bump `chromedriver` dependency to `121.0.1"` ([#5926](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5926))
 
 ### 🪛 Refactoring
 
