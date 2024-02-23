@@ -77,5 +77,5 @@ export class ApplicationConfigPlugin
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }
