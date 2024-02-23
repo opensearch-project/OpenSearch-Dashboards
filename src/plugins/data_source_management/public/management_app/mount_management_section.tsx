@@ -15,7 +15,7 @@ import { ManagementAppMountParams } from '../../../management/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
 import { DataSourceTableWithRouter } from '../components/data_source_table';
-import { AuthType, DataSourceManagementContext } from '../types';
+import { DataSourceManagementContext } from '../types';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
 import { AuthenticationMethodRegistery } from '../auth_registry';
 

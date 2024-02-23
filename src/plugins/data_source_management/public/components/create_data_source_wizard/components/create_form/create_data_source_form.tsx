@@ -28,6 +28,8 @@ import {
   DataSourceAttributes,
   DataSourceManagementContextValue,
   UsernamePasswordTypedContent,
+  defaultAuthType,
+  noAuthCredentialAuthMethod,
   sigV4ServiceOptions,
 } from '../../../../types';
 import { Header } from '../header';
@@ -66,16 +68,24 @@ export class CreateDataSourceForm extends React.Component<
   static contextType = contextType;
   public readonly context!: DataSourceManagementContextValue;
 
-  authOptions: Array<EuiSuperSelectOption<string>>;
+  authOptions: Array<EuiSuperSelectOption<string>> = [];
 
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
 
-    this.authOptions = context.services.authenticationMethodRegistery
-      .getAllAuthenticationMethods()
-      .map((authMethod) => {
-        return authMethod.credentialSourceOption;
-      });
+    const authenticationMethodRegistery = context.services.authenticationMethodRegistery;
+    const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
+
+    this.authOptions = registeredAuthMethods.map((authMethod) => {
+      return authMethod.credentialSourceOption;
+    });
+
+    const defaultAuthMethod =
+      registeredAuthMethods.length > 0
+        ? authenticationMethodRegistery.getAuthenticationMethod(registeredAuthMethods[0].name)
+        : noAuthCredentialAuthMethod;
+    const initialSelectedAuthMethod =
+      authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
 
     this.state = {
       formErrorsByField: { ...defaultValidation },
@@ -83,10 +93,9 @@ export class CreateDataSourceForm extends React.Component<
       description: '',
       endpoint: '',
       auth: {
-        type: AuthType.UsernamePasswordType,
+        type: initialSelectedAuthMethod?.name,
         credentials: {
-          username: '',
-          password: '',
+          ...initialSelectedAuthMethod?.crendentialFormField,
         },
       },
     };

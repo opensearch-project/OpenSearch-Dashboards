@@ -60,6 +60,8 @@ export enum AuthType {
   SigV4 = 'sigv4',
 }
 
+export const defaultAuthType = AuthType.UsernamePasswordType;
+
 export const noAuthCredentialOption = {
   value: AuthType.NoAuth,
   inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.NoAuthentication', {
@@ -67,11 +69,34 @@ export const noAuthCredentialOption = {
   }),
 };
 
+export const noAuthCredentialField = {
+  username: '',
+  password: '',
+  service: 'es',
+};
+
+export const noAuthCredentialAuthMethod = {
+  name: AuthType.NoAuth,
+  credentialSourceOption: noAuthCredentialOption,
+  crendentialFormField: noAuthCredentialField,
+};
+
 export const usernamePasswordCredentialOption = {
   value: AuthType.UsernamePasswordType,
   inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.UsernamePassword', {
     defaultMessage: 'Username & Password',
   }),
+};
+
+export const usernamePasswordCredentialField = {
+  username: '',
+  password: '',
+};
+
+export const usernamePasswordAuthMethod = {
+  name: AuthType.UsernamePasswordType,
+  credentialSourceOption: usernamePasswordCredentialOption,
+  crendentialFormField: usernamePasswordCredentialField,
 };
 
 export const sigV4CredentialOption = {
@@ -96,19 +121,17 @@ export const sigV4ServiceOptions = [
   },
 ];
 
-export const noAuthCredentialAuthMethod = {
-  name: AuthType.NoAuth,
-  credentialSourceOption: noAuthCredentialOption,
-};
-
-export const usernamePasswordAuthMethod = {
-  name: AuthType.UsernamePasswordType,
-  credentialSourceOption: usernamePasswordCredentialOption,
+export const sigV4CredentialField = {
+  region: '',
+  accessKey: '',
+  secretKey: '',
+  service: '',
 };
 
 export const sigV4AuthMethod = {
   name: AuthType.SigV4,
   credentialSourceOption: sigV4CredentialOption,
+  crendentialFormField: sigV4CredentialField,
 };
 
 export const credentialSourceOptions = [
