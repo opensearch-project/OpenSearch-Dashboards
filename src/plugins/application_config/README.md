@@ -1,6 +1,6 @@
 # ApplicationConfig Plugin
 
-An OpenSearch Dashboards plugin for application configuration service and OpenSearch implementation.
+An experimental OpenSearch Dashboards plugin for application configuration service and OpenSearch implementation.
 
 ---
 
@@ -10,9 +10,17 @@ This plugin introduces the support of dynamic application configurations as oppo
 
 It also provides an interface `ConfigurationClient` for future extensions of external configuration clients. A default implementation based on OpenSearch as database is used.
 
+This plugin is disabled by default.
+
 ## Configuration
 
-OSD users who want to set up application configurations can perform such through CURL the OSD APIs.
+OSD users who want to set up application configurations will first need to enable this plugin by the following line in OSD YML.
+```
+application_config.enabled: true
+
+```
+
+Then they can perform configuration operations through CURL the OSD APIs.
 
 (Note that the commands following could be first obtained from a copy as curl option from the network tab of a browser development tool and then replaced with the API names)
 
