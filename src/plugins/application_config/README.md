@@ -15,6 +15,7 @@ This plugin is disabled by default.
 ## Configuration
 
 OSD users who want to set up application configurations will first need to enable this plugin by the following line in OSD YML.
+
 ```
 application_config.enabled: true
 
