@@ -159,7 +159,7 @@ describe('OpenSearch Configuration Client', () => {
       expect(value).toBe('config1');
     });
 
-    it('throws exception when opensearch throws exception', async () => {
+    it('throws error when opensearch throws error', async () => {
       const error = new Error(ERROR_MESSAGE);
 
       opensearchClient.asCurrentUser.delete.mockImplementation(() => {
@@ -172,5 +172,31 @@ describe('OpenSearch Configuration Client', () => {
     });
   });
 
-  describe('updateEntityConfig', () => {});
+  describe('updateEntityConfig', () => {
+    it('returns updated value when opensearch updates successfully', async () => {
+      opensearchClient.asCurrentUser.index.mockImplementation(() => {
+        return opensearchClientMock.createSuccessTransportRequestPromise({});
+      });
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+
+      const value = await client.updateEntityConfig('config1', 'newValue1');
+
+      expect(value).toBe('newValue1');
+    });
+
+    it('throws error when opensearch throws error', async () => {
+      const error = new Error(ERROR_MESSAGE);
+
+      opensearchClient.asCurrentUser.index.mockImplementation(() => {
+        return opensearchClientMock.createErrorTransportRequestPromise(error);
+      });
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+
+      await expect(client.updateEntityConfig('config1', 'newValue1')).rejects.toThrowError(
+        ERROR_MESSAGE
+      );
+    });
+  });
 });
