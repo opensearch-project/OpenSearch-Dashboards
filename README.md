@@ -1,6 +1,7 @@
 <img src="https://opensearch.org/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg" height="64px"/>
 
-- [Welcome!](#welcome)
+- [Welcome](#welcome)
+- [Code Summary](#code-summary)
 - [Project Resources](#project-resources)
 - [Code of Conduct](#code-of-conduct)
 - [License](#license)
@@ -10,7 +11,7 @@
 
 OpenSearch Dashboards is an open-source data visualization tool designed to work with OpenSearch. OpenSearch Dashboards gives you data visualization tools to improve and automate business intelligence and support data-driven decision-making and strategic planning.
 
-We aim to be an exceptional community-driven platform and to foster open participation and collective contribution with all contributors. Stay up to date on what's happening with the OpenSearch Project by tracking GitHub [issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues) and [pull requests](https://github.com/opensearch-project/OpenSearch-Dashboards/pulls). 
+We aim to be an exceptional community-driven platform and to foster open participation and collective contribution with all contributors. Stay up to date on what's happening with the OpenSearch Project by tracking GitHub [issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues) and [pull requests](https://github.com/opensearch-project/OpenSearch-Dashboards/pulls).
 
 You can [contribute to this project](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/CONTRIBUTING.md) by [opening issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose) to give feedback, share ideas, identify bugs, and contribute code.
 
@@ -24,17 +25,17 @@ Set up your [OpenSearch Dashboards development environment](https://github.com/o
 
 ## Project Resources
 
-* [Project Website](https://opensearch.org/)
-* [Downloads](https://opensearch.org/downloads.html)
-* [Documentation](https://opensearch.org/docs/)
-* Need help? See the [communication guide](COMMUNICATIONS.md) for various options
-* [Project Principles](https://opensearch.org/#principles)
-* [Developer Guide](DEVELOPER_GUIDE.md)
-* [Contributing to OpenSearch](CONTRIBUTING.md)
-* [Maintainer Responsibilities](MAINTAINERS.md)
-* [Release Management](RELEASING.md)
-* [Testing](TESTING.md)
-* [Security](SECURITY.md)
+- [Project Website](https://opensearch.org/)
+- [Downloads](https://opensearch.org/downloads.html)
+- [Documentation](https://opensearch.org/docs/)
+- Need help? See the [communication guide](COMMUNICATIONS.md) for various options
+- [Project Principles](https://opensearch.org/#principles)
+- [Developer Guide](DEVELOPER_GUIDE.md)
+- [Contributing to OpenSearch](CONTRIBUTING.md)
+- [Maintainer Responsibilities](MAINTAINERS.md)
+- [Release Management](RELEASING.md)
+- [Testing](TESTING.md)
+- [Security](SECURITY.md)
 
 ## Code of Conduct
 
