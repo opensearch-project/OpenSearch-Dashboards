@@ -35,9 +35,6 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         osd: {
           workspace: {
             enabled: true,
-            permission: {
-              enabled: true,
-            },
           },
         },
       },
