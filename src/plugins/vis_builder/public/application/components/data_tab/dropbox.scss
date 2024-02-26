@@ -17,8 +17,8 @@
 
   &__container {
     display: grid;
-    grid-gap: $euiSizeXS / 2;
-    padding: $euiSizeS - ($euiSizeXS / 2) $euiSizeS $euiSizeS $euiSizeS;
+    grid-gap: calc($euiSizeXS / 2);
+    padding: calc($euiSizeS - ($euiSizeXS / 2)) $euiSizeS $euiSizeS $euiSizeS;
     background-color: $euiColorLightShade;
     border-radius: $euiBorderRadius;
   }
@@ -32,7 +32,7 @@
   }
 
   &__draggable {
-    padding: $euiSizeXS / 2 0;
+    padding: calc($euiSizeXS / 2) 0;
     animation: pop-in $euiAnimSpeedSlow $euiAnimSlightResistance forwards;
     transform-origin: bottom;
 

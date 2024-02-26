@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { DataSourcePluginStart } from 'src/plugins/data_source/public';
+import { DataSourcePluginSetup, DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import {
   IndexPatternManagementService,
@@ -44,6 +44,7 @@ import { ManagementSetup } from '../../management/public';
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
   urlForwarding: UrlForwardingSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface IndexPatternManagementStartDependencies {
@@ -75,8 +76,10 @@ export class IndexPatternManagementPlugin
 
   public setup(
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
-    { management, urlForwarding }: IndexPatternManagementSetupDependencies
+    dependencies: IndexPatternManagementSetupDependencies
   ) {
+    const { urlForwarding, management, dataSource } = dependencies;
+
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
     if (!opensearchDashboardsSection) {
@@ -103,8 +106,11 @@ export class IndexPatternManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, () =>
-          this.indexPatternManagementService.environmentService.getEnvironment().ml()
+        return mountManagementSection(
+          core.getStartServices,
+          params,
+          () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
+          dataSource
         );
       },
     });

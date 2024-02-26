@@ -239,6 +239,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       <I18nProvider>
         <OpenSearchDashboardsContextProvider services={this.options}>
           <DashboardViewport
+            key={this.id}
             renderEmpty={this.renderEmpty}
             logos={this.logos}
             container={this}
