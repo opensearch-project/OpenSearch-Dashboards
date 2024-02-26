@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Parse changelog entries and submit request for changset creation
         # uses: BigSamu/OpenSearch_Changelog_Workflow@main
-        uses: ashwin-pc/OpenSearch_Changelog_Workflow@skip-came-changelog
+        uses: BigSamu/OpenSearch_Changelog_Workflow@feat/manual-changesets
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           CHANGELOG_PR_BRIDGE_URL_DOMAIN: ${{secrets.CHANGELOG_PR_BRIDGE_URL_DOMAIN}}
