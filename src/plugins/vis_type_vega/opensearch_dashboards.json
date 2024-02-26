@@ -11,7 +11,7 @@
     "inspector",
     "uiActions"
   ],
-  "optionalPlugins": ["home", "usageCollection"],
+  "optionalPlugins": ["home", "usageCollection", "dataSource"],
   "requiredBundles": [
     "opensearchDashboardsUtils",
     "opensearchDashboardsReact",

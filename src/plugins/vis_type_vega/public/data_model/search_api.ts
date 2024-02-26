@@ -61,6 +61,7 @@ export class SearchAPI {
     return combineLatest(
       searchRequests.map((request) => {
         const requestId = request.name;
+        const dataSourceId = request.dataSourceId;
         const params = getSearchParamsFromRequest(request, {
           getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
         });
@@ -70,7 +71,9 @@ export class SearchAPI {
           requestResponders[requestId].json(params.body);
         }
 
-        return search({ params }, { abortSignal: this.abortSignal }).pipe(
+        const searchApiParams = dataSourceId ? { params, dataSourceId } : { params };
+
+        return search(searchApiParams, { abortSignal: this.abortSignal }).pipe(
           tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
           map((data) => ({
             name: requestId,
