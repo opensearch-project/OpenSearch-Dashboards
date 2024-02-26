@@ -14,9 +14,20 @@ const dashboard: Omit<SavedObject, 'id'> = {
   references: [],
 };
 
+interface WorkspaceAttributes {
+  id: string;
+  name?: string;
+}
+
 describe('saved_objects_wrapper_for_check_workspace_conflict integration test', () => {
   let root: ReturnType<typeof osdTestServer.createRoot>;
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
+  let createdFooWorkspace: WorkspaceAttributes = {
+    id: '',
+  };
+  let createdBarWorkspace: WorkspaceAttributes = {
+    id: '',
+  };
   beforeAll(async () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -24,6 +35,9 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         osd: {
           workspace: {
             enabled: true,
+            permission: {
+              enabled: true,
+            },
           },
         },
       },
@@ -31,6 +45,17 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
     opensearchServer = await startOpenSearch();
     const startOSDResp = await startOpenSearchDashboards();
     root = startOSDResp.root;
+    const createWorkspace = (workspaceAttribute: Omit<WorkspaceAttributes, 'id'>) =>
+      osdTestServer.request.post(root, `/api/workspaces`).send({
+        attributes: workspaceAttribute,
+      });
+
+    createdFooWorkspace = await createWorkspace({
+      name: 'foo',
+    }).then((resp) => resp.body.result);
+    createdBarWorkspace = await createWorkspace({
+      name: 'bar',
+    }).then((resp) => resp.body.result);
   }, 30000);
   afterAll(async () => {
     await root.shutdown();
@@ -69,11 +94,11 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         .post(root, `/api/saved_objects/${dashboard.type}`)
         .send({
           attributes: dashboard.attributes,
-          workspaces: ['foo'],
+          workspaces: [createdFooWorkspace.id],
         })
         .expect(200);
 
-      expect(createResult.body.workspaces).toEqual(['foo']);
+      expect(createResult.body.workspaces).toEqual([createdFooWorkspace.id]);
       await deleteItem({
         type: dashboard.type,
         id: createResult.body.id,
@@ -85,7 +110,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         .post(root, `/api/saved_objects/${dashboard.type}`)
         .send({
           attributes: dashboard.attributes,
-          workspaces: ['foo'],
+          workspaces: [createdFooWorkspace.id],
         })
         .expect(200);
 
@@ -93,7 +118,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         .post(root, `/api/saved_objects/${dashboard.type}/${createResult.body.id}?overwrite=true`)
         .send({
           attributes: dashboard.attributes,
-          workspaces: ['bar'],
+          workspaces: [createdBarWorkspace.id],
         })
         .expect(409);
 
@@ -106,7 +131,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
     it('bulk create', async () => {
       await clearFooAndBar();
       const createResultFoo = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?workspaces=foo`)
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=${createdFooWorkspace.id}`)
         .send([
           {
             ...dashboard,
@@ -116,7 +141,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         .expect(200);
 
       const createResultBar = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?workspaces=bar`)
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=${createdBarWorkspace.id}`)
         .send([
           {
             ...dashboard,
@@ -130,7 +155,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       );
       expect(
         (createResultFoo.body.saved_objects as any[]).every((item) =>
-          isEqual(item.workspaces, ['foo'])
+          isEqual(item.workspaces, [createdFooWorkspace.id])
         )
       ).toEqual(true);
       expect((createResultBar.body.saved_objects as any[]).some((item) => item.error)).toEqual(
@@ -138,7 +163,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       );
       expect(
         (createResultBar.body.saved_objects as any[]).every((item) =>
-          isEqual(item.workspaces, ['bar'])
+          isEqual(item.workspaces, [createdBarWorkspace.id])
         )
       ).toEqual(true);
       await Promise.all(
@@ -154,7 +179,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
     it('bulk create with conflict', async () => {
       await clearFooAndBar();
       const createResultFoo = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?workspaces=foo`)
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=${createdFooWorkspace.id}`)
         .send([
           {
             ...dashboard,
@@ -164,7 +189,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         .expect(200);
 
       const createResultBar = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?workspaces=bar`)
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=${createdBarWorkspace.id}`)
         .send([
           {
             ...dashboard,
@@ -177,7 +202,10 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
        * overwrite with workspaces
        */
       const overwriteWithWorkspacesResult = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?overwrite=true&workspaces=foo`)
+        .post(
+          root,
+          `/api/saved_objects/_bulk_create?overwrite=true&workspaces=${createdFooWorkspace.id}`
+        )
         .send([
           {
             ...dashboard,
@@ -195,7 +223,9 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
 
       expect(overwriteWithWorkspacesResult.body.saved_objects[0].error.statusCode).toEqual(409);
       expect(overwriteWithWorkspacesResult.body.saved_objects[1].attributes.title).toEqual('foo');
-      expect(overwriteWithWorkspacesResult.body.saved_objects[1].workspaces).toEqual(['foo']);
+      expect(overwriteWithWorkspacesResult.body.saved_objects[1].workspaces).toEqual([
+        createdFooWorkspace.id,
+      ]);
 
       await Promise.all(
         [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
@@ -210,7 +240,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
     it('checkConflicts when importing ndjson', async () => {
       await clearFooAndBar();
       const createResultFoo = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?workspaces=foo`)
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=${createdFooWorkspace.id}`)
         .send([
           {
             ...dashboard,
@@ -220,7 +250,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         .expect(200);
 
       const createResultBar = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?workspaces=bar`)
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=${createdBarWorkspace.id}`)
         .send([
           {
             ...dashboard,
@@ -251,7 +281,10 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
        * import with workspaces when conflicts
        */
       const importWithWorkspacesResult = await osdTestServer.request
-        .post(root, `/api/saved_objects/_import?workspaces=foo&overwrite=false`)
+        .post(
+          root,
+          `/api/saved_objects/_import?workspaces=${createdFooWorkspace.id}&overwrite=false`
+        )
         .attach(
           'file',
           Buffer.from(
@@ -279,7 +312,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
 
     it('find by workspaces', async () => {
       const createResultFoo = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?workspaces=foo`)
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=${createdFooWorkspace.id}`)
         .send([
           {
             ...dashboard,
@@ -289,7 +322,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         .expect(200);
 
       const createResultBar = await osdTestServer.request
-        .post(root, `/api/saved_objects/_bulk_create?workspaces=bar`)
+        .post(root, `/api/saved_objects/_bulk_create?workspaces=${createdBarWorkspace.id}`)
         .send([
           {
             ...dashboard,
@@ -299,11 +332,14 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         .expect(200);
 
       const findResult = await osdTestServer.request
-        .get(root, `/api/saved_objects/_find?workspaces=bar&type=${dashboard.type}`)
+        .get(
+          root,
+          `/api/saved_objects/_find?workspaces=${createdBarWorkspace.id}&type=${dashboard.type}`
+        )
         .expect(200);
 
       expect(findResult.body.total).toEqual(1);
-      expect(findResult.body.saved_objects[0].workspaces).toEqual(['bar']);
+      expect(findResult.body.saved_objects[0].workspaces).toEqual([createdBarWorkspace.id]);
 
       await Promise.all(
         [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
