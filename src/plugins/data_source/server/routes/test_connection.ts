@@ -10,12 +10,14 @@ import { DataSourceConnectionValidator } from './data_source_connection_validato
 import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { CustomApiSchemaRegistry } from '../schema_registry';
 
 export const registerTestConnectionRoute = async (
   router: IRouter,
   dataSourceServiceSetup: DataSourceServiceSetup,
   cryptography: CryptographyServiceSetup,
-  authRegistryPromise: Promise<IAuthenticationMethodRegistery>
+  authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
+  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
 ) => {
   const authRegistry = await authRegistryPromise;
   router.post(
@@ -66,6 +68,7 @@ export const registerTestConnectionRoute = async (
             cryptography,
             dataSourceId,
             testClientDataSourceAttr: dataSourceAttr as DataSourceAttributes,
+            customApiSchemaRegistryPromise,
             request,
             authRegistry,
           }
