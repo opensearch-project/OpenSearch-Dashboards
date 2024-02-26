@@ -1,6 +1,6 @@
 # ApplicationConfig Plugin
 
-An experimental OpenSearch Dashboards plugin for application configuration service and OpenSearch implementation.
+An OpenSearch Dashboards plugin for application configuration service and OpenSearch implementation.
 
 ---
 
