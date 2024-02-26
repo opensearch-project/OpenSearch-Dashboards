@@ -8,6 +8,28 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Deprecations
 
+### 🛡 Security
+
+### 📈 Features/Enhancements
+
+### 🐛 Bug Fixes
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+### 🛠 Maintenance
+
+### 🪛 Refactoring
+
+### 🔩 Tests
+
+## [2.12.0 - 2024-02-20](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.12.0)
+
+### 💥 Breaking Changes
+
+### Deprecations
+
 - Rename `withLongNumerals` to `withLongNumeralsSupport` in `HttpFetchOptions` [#5592](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5592)
 
 ### 🛡 Security
