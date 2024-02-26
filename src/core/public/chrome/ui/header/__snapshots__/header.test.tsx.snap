@@ -4168,6 +4168,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                         "thrownError": null,
                       }
                     }
+                    side="right"
                   />
                 </div>
               </EuiHeaderSectionItem>
@@ -9713,6 +9714,7 @@ exports[`Header renders condensed header 1`] = `
                         "thrownError": null,
                       }
                     }
+                    side="right"
                   />
                 </div>
               </EuiHeaderSectionItem>

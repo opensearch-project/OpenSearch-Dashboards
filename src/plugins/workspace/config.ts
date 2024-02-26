@@ -12,4 +12,4 @@ export const configSchema = schema.object({
   }),
 });
 
-export type WorkspacePluginConfigType = TypeOf<typeof configSchema>;
+export type ConfigSchema = TypeOf<typeof configSchema>;

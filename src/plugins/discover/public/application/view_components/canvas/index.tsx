@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiCallOut, EuiLink } from '@elastic/eui';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -18,9 +18,9 @@ import { setColumns, useDispatch, useSelector } from '../../utils/state_manageme
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { filterColumns } from '../utils/filter_columns';
-import { DEFAULT_COLUMNS_SETTING } from '../../../../common';
-
-const KEY_SHOW_NOTICE = 'discover:deprecation-notice:show';
+import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
+import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
+import './discover_canvas.scss';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
@@ -32,7 +32,8 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   const filteredColumns = filterColumns(
     columns,
     indexPattern,
-    uiSettings.get(DEFAULT_COLUMNS_SETTING)
+    uiSettings.get(DEFAULT_COLUMNS_SETTING),
+    uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
   );
   const dispatch = useDispatch();
   const prevIndexPattern = useRef(indexPattern);
@@ -43,52 +44,38 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     bucketInterval: {},
   });
 
-  const [isCallOutVisible, setIsCallOutVisible] = useState(
-    localStorage.getItem(KEY_SHOW_NOTICE) !== 'false'
+  const onQuerySubmit = useCallback(
+    (payload, isUpdate) => {
+      if (isUpdate === false) {
+        refetch$.next();
+      }
+    },
+    [refetch$]
   );
-  const closeCallOut = () => {
-    localStorage.setItem(KEY_SHOW_NOTICE, 'false');
-    setIsCallOutVisible(false);
-  };
-
-  let callOut;
-
-  if (isCallOutVisible) {
-    callOut = (
-      <EuiFlexItem grow={false}>
-        <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
-          <EuiCallOut
-            title="You're viewing Discover 2.0. The old Discover app will be retired in OpenSearch version 2.11. To switch back to the old version, turn off the New Discover toggle."
-            iconType="alert"
-            dismissible
-            onDismiss={closeCallOut}
-          >
-            <p>
-              To provide feedback,{' '}
-              <EuiLink href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues">
-                open an issue
-              </EuiLink>
-              .
-            </p>
-          </EuiCallOut>
-        </EuiPanel>
-      </EuiFlexItem>
-    );
-  }
-
-  const { status } = fetchState;
+  const [rows, setRows] = useState<OpenSearchSearchHit[] | undefined>(undefined);
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
-      if (
-        next.status !== fetchState.status ||
-        (next.hits && next.hits !== fetchState.hits) ||
-        (next.bucketInterval && next.bucketInterval !== fetchState.bucketInterval) ||
-        (next.chartData && next.chartData !== fetchState.chartData)
-      ) {
+      if (next.status === ResultStatus.LOADING) return;
+
+      let shouldUpdateState = false;
+
+      if (next.status !== fetchState.status) shouldUpdateState = true;
+      if (next.hits && next.hits !== fetchState.hits) shouldUpdateState = true;
+      if (next.bucketInterval && next.bucketInterval !== fetchState.bucketInterval)
+        shouldUpdateState = true;
+      if (next.chartData && next.chartData !== fetchState.chartData) shouldUpdateState = true;
+      if (next.rows && next.rows !== fetchState.rows) {
+        shouldUpdateState = true;
+        setRows(next.rows);
+      }
+
+      // Update the state if any condition is met.
+      if (shouldUpdateState) {
         setFetchState({ ...fetchState, ...next });
       }
     });
+
     return () => {
       subscription.unsubscribe();
     };
@@ -104,38 +91,35 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <TopNav
-          opts={{
-            setHeaderActionMenu,
-          }}
-        />
-      </EuiFlexItem>
-      {status === ResultStatus.NO_RESULTS && (
-        <EuiFlexItem>
-          <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
-        </EuiFlexItem>
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      color="transparent"
+      paddingSize="none"
+      className="dscCanvas"
+    >
+      <TopNav
+        opts={{
+          setHeaderActionMenu,
+          onQuerySubmit,
+        }}
+      />
+      {fetchState.status === ResultStatus.NO_RESULTS && (
+        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
       )}
-      {status === ResultStatus.UNINITIALIZED && (
+      {fetchState.status === ResultStatus.UNINITIALIZED && (
         <DiscoverUninitialized onRefresh={() => refetch$.next()} />
       )}
-      {status === ResultStatus.LOADING && <LoadingSpinner />}
-      {status === ResultStatus.READY && (
-        <>
-          {callOut}
-          <EuiFlexItem grow={false}>
-            <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
-              <EuiPanel>
-                <DiscoverChartContainer {...fetchState} />
-              </EuiPanel>
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <DiscoverTable history={history} />
-          </EuiFlexItem>
-        </>
+      {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
+      {fetchState.status === ResultStatus.READY && (
+        <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
+          <MemoizedDiscoverChartContainer {...fetchState} />
+          <MemoizedDiscoverTable rows={rows} />
+        </EuiPanel>
       )}
-    </EuiFlexGroup>
+    </EuiPanel>
   );
 }
+
+const MemoizedDiscoverTable = React.memo(DiscoverTable);
+const MemoizedDiscoverChartContainer = React.memo(DiscoverChartContainer);

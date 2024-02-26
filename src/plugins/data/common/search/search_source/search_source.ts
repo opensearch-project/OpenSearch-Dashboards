@@ -81,6 +81,7 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
+import { stringify } from '@osd/std';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
@@ -561,7 +562,7 @@ export class SearchSource {
    * @public */
   public serialize() {
     const [searchSourceFields, references] = extractReferences(this.getSerializedFields());
-    return { searchSourceJSON: JSON.stringify(searchSourceFields), references };
+    return { searchSourceJSON: stringify(searchSourceFields), references };
   }
 
   private getFilters(filterField: SearchSourceFields['filter']): Filter[] {

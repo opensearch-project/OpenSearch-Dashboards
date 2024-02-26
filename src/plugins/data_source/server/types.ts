@@ -7,11 +7,19 @@ import {
   LegacyCallAPIOptions,
   OpenSearchClient,
   SavedObjectsClientContract,
+  OpenSearchDashboardsRequest,
 } from 'src/core/server';
-import { DataSourceAttributes } from '../common/data_sources';
+import {
+  DataSourceAttributes,
+  AuthType,
+  UsernamePasswordTypedContent,
+  SigV4Content,
+} from '../common/data_sources';
 
 import { CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceError } from './lib/error';
+import { IAuthenticationMethodRegistery } from './auth_registry';
+import { CustomApiSchemaRegistry } from './schema_registry';
 
 export interface LegacyClientCallAPIParams {
   endpoint: string;
@@ -27,6 +35,24 @@ export interface DataSourceClientParams {
   dataSourceId?: string;
   // required when creating test client
   testClientDataSourceAttr?: DataSourceAttributes;
+  // custom API schema registry promise, required for getting registered custom API schema
+  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>;
+}
+
+export interface DataSourceCredentialsProviderOptions {
+  dataSourceAttr: DataSourceAttributes;
+  request?: OpenSearchDashboardsRequest;
+  cryptography?: CryptographyServiceSetup;
+}
+
+export type DataSourceCredentialsProvider = (
+  options: DataSourceCredentialsProviderOptions
+) => Promise<UsernamePasswordTypedContent | SigV4Content>;
+
+export interface AuthenticationMethod {
+  name: string;
+  authType: AuthType;
+  credentialProvider: DataSourceCredentialsProvider;
 }
 
 export interface DataSourcePluginRequestContext {
@@ -53,6 +79,11 @@ declare module 'src/core/server' {
 
 export interface DataSourcePluginSetup {
   createDataSourceError: (err: any) => DataSourceError;
+  registerCredentialProvider: (method: AuthenticationMethod) => void;
+  registerCustomApiSchema: (schema: any) => void;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataSourcePluginStart {}
+
+export interface DataSourcePluginStart {
+  getAuthenticationMethodRegistery: () => IAuthenticationMethodRegistery;
+  getCustomApiSchemaRegistry: () => CustomApiSchemaRegistry;
+}

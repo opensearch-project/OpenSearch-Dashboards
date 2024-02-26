@@ -32,8 +32,8 @@ export {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeService,
-  ChromeStart,
   ChromeSetup,
+  ChromeStart,
   InternalChromeStart,
   ChromeHelpExtension,
 } from './chrome_service';

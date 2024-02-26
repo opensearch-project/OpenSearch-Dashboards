@@ -12,7 +12,7 @@ import {
   Logger,
   SavedObjectsClient,
 } from '../../../core/server';
-import { IWorkspaceDBImpl } from './types';
+import { IWorkspaceClientImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { registerRoutes } from './routes';
@@ -22,14 +22,14 @@ import {
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
 import { registerPermissionCheckRoutes } from './permission_control/routes';
-import { WorkspacePluginConfigType } from '../config';
+import { ConfigSchema } from '../config';
 import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
-  private client?: IWorkspaceDBImpl;
+  private client?: IWorkspaceClientImpl;
   private permissionControl?: SavedObjectsPermissionControlContract;
-  private readonly config$: Observable<WorkspacePluginConfigType>;
+  private readonly config$: Observable<ConfigSchema>;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -48,13 +48,13 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   }
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-    this.config$ = initializerContext.config.create<WorkspacePluginConfigType>();
+    this.logger = initializerContext.logger.get('plugins', 'workspace');
+    this.config$ = initializerContext.config.create<ConfigSchema>();
   }
 
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
-    const config: WorkspacePluginConfigType = await this.config$.pipe(first()).toPromise();
+    const config: ConfigSchema = await this.config$.pipe(first()).toPromise();
     const isPermissionControlEnabled =
       config.permission.enabled === undefined ? true : config.permission.enabled;
 
@@ -87,11 +87,12 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     registerRoutes({
       http: core.http,
       logger: this.logger,
-      client: this.client as IWorkspaceDBImpl,
+      client: this.client as IWorkspaceClientImpl,
     });
 
-    core.savedObjects.setClientFactoryProvider((repositoryFactory) => () =>
-      new SavedObjectsClient(repositoryFactory.createInternalRepository())
+    core.savedObjects.setClientFactoryProvider(
+      (repositoryFactory) => ({ includedHiddenTypes }: { includedHiddenTypes?: string[] }) =>
+        new SavedObjectsClient(repositoryFactory.createInternalRepository(includedHiddenTypes))
     );
 
     core.capabilities.registerProvider(() => ({
@@ -112,7 +113,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.client?.setSavedObjects(core.savedObjects);
 
     return {
-      client: this.client as IWorkspaceDBImpl,
+      client: this.client as IWorkspaceClientImpl,
     };
   }
 

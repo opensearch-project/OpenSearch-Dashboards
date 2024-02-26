@@ -62,18 +62,6 @@ We recommend using [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm) t
 
 If it's the only version of node installed, it will automatically be set to the `default` alias. Otherwise, use `nvm list` to see all installed `node` versions, and `nvm use` to select the node version required by OpenSearch Dashboards.
 
-#### Install `yarn`
-
-Take a look at the [latest Yarn release](https://github.com/yarnpkg/berry/releases/latest), note the version number, and run:
-
-```bash
-$ npm i -g corepack
-
-$ corepack prepare yarn@<version> --activate
-```
-
-(See the [Yarn installation documentation](https://yarnpkg.com/getting-started/install) for more information.)
-
 ### Fork and clone OpenSearch Dashboards
 
 All local development should be done in a [forked repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
@@ -84,6 +72,20 @@ Clone your forked version of OpenSearch Dashboards to your local machine (replac
 ```bash
 $ git clone git@github.com:opensearch-project/OpenSearch-Dashboards.git
 ```
+
+#### Install `yarn`
+
+OpenSearch Dashboards is set up using yarn, which can be installed through corepack. To install yarn, run:
+
+```bash
+$ # Update corepack to the latest version
+$ npm i -g corepack
+
+$ # Install the correct version of yarn
+$ corepack install
+```
+
+(See the [corepack documentation](https://github.com/nodejs/corepack#-corepack) for more information.)
 
 ### Bootstrap OpenSearch Dashboards
 
@@ -177,6 +179,7 @@ For windows:
 $ wsl -d docker-desktop
 $ sysctl -w vm.max_map_count=262144
 ```
+
 ### Next Steps
 
 Now that you have a development environment to play with, there are a number of different paths you may take next.
@@ -233,6 +236,7 @@ $ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plu
 Note - if you add the [`security` plugin](https://github.com/opensearch-project/security), you'll also need to [configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security).
 
 ### Plugin development
+
 The osd-plugin-generator tool makes it easier to create a plugin for OpenSearch Dashboards. It sets up the basic structure of the project and provides scripts to build it. Refer to [osd-plugin-generator](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator) for more details.
 
 #### Other snapshot configuration options
@@ -250,11 +254,18 @@ Options:
       -E                Additional key=value settings to pass to OpenSearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on OpenSearch
+      --security        Installs and sets up OpenSearch Security plugin on the cluster
       --P               OpenSearch plugin artifact URL to install it on the cluster.
 
 ```bash
-$ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip
+$ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip --security
 ```
+
+#### Read Only capabilities
+
+_This feature will only work if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+
+Please follow the design described in [the docs](https://github.com/opensearch-project/OpenSearch/blob/main/docs/capabilities/read_only_mode.md#design)
 
 ### Alternative - Run OpenSearch from tarball
 
@@ -271,17 +282,26 @@ This method can also be used to develop against the [full distribution of OpenSe
 
 ### Configure OpenSearch Dashboards for security
 
-_This step is only mandatory if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+_This step is only needed if you want your dev environment to also start with security. To do so both the OpenSearch node and OpenSearch Dashboards cluster need to have the security plugin installed. Follow the steps below to get setup correctly._
 
-Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
-changes to the default [`opensearch_dashboards.yml`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/config/opensearch_dashboards.yml#L25-L72) in order to connect to OpenSearch.
+To startup the OpenSearch snapshot with security
 
-```yml
-opensearch.hosts: ["https://localhost:9200"]
-opensearch.username: "admin" # Default username on the docker image
-opensearch.password: "admin" # Default password on the docker image
-opensearch.ssl.verificationMode: none
-```
+> OpenSearch has strong password requirements and will fail to bootstrap if the password requirements are not met. e.g. myStrongPassword123!
+
+1. Run `export OPENSEARCH_INITIAL_ADMIN_PASSWORD=<initial admin password>` since it's needed by the configuration script
+2. Run `yarn opensearch snapshot --security`
+3. Wait a few seconds while the plugin is installed, configured, and OpenSearch starts up.
+
+Then within another window you can start OpenSearch Dashboards:
+
+_First make sure to clone the https://github.com/opensearch-project/security-dashboards-plugin repo into the plugins folder and build it (Using `yarn build`). You can follow the instructions here https://github.com/opensearch-project/security-dashboards-plugin/blob/main/DEVELOPER_GUIDE.md#install-opensearch-dashboards-with-security-dashboards-plugin._
+
+> You do not have to edit the `config/opensearch-dashboards.yml` file since the `yarn start:security` command sets up the default overrides automatically
+
+Then do the following:
+
+1. Run `yarn start:security`
+2. Navigate to OpenSearch Dashboards and login with the username `admin` and password `<initial admin password>`.
 
 For more detailed documentation, see [Configure TLS for OpenSearch Dashboards](https://opensearch.org/docs/latest/install-and-configure/install-dashboards/tls).
 
@@ -460,7 +480,7 @@ You can also use this service outside of React.
 
 When writing a new component, create a sibling SASS file of the same name and import directly into the **top** of the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
 
-All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & OpenSearch Dashboards invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v7light.scss).
+All SASS (.scss) files will automatically build with the [OUI](https://oui.opensearch.org/#/guidelines/sass) & OpenSearch Dashboards invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v7light.scss).
 
 While the styles for this component will only be loaded if the component exists on the page,
 the styles **will** be global and so it is recommended to use a three letter prefix on your
@@ -926,30 +946,6 @@ license.
 ### React
 
 The following developer guide rules are specific for working with the React framework.
-
-#### Prefer reactDirective over react-component
-
-When using `ngReact` to embed your react components inside Angular HTML, prefer the
-`reactDirective` service over the `react-component` directive.
-You can read more about these two ngReact methods [here](https://github.com/ngReact/ngReact#features).
-
-Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more succinct syntax.
-
-**Good:**
-
-```html
-<hello-component
-  fname="person.fname"
-  lname="person.lname"
-  watch-depth="reference"
-></hello-component>
-```
-
-**Bad:**
-
-```html
-<react-component name="HelloComponent" props="person" watch-depth="reference" />
-```
 
 #### Name action functions and prop functions appropriately
 

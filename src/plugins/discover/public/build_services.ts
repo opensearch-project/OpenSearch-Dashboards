@@ -58,6 +58,7 @@ import { OpenSearchDashboardsLegacyStart } from '../../opensearch_dashboards_leg
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataExplorerServices } from '../../data_explorer/public';
+import { Storage } from '../../opensearch_dashboards_utils/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -78,10 +79,11 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id: string) => Promise<SavedSearch>;
+  getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
+  storage: Storage;
 }
 
 export function buildServices(
@@ -97,6 +99,7 @@ export function buildServices(
     overlays: core.overlays,
   };
   const savedObjectService = createSavedSearchesLoader(services);
+  const storage = new Storage(localStorage);
 
   return {
     addBasePath: core.http.basePath.prepend,
@@ -107,7 +110,7 @@ export function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
-    getSavedSearchById: async (id: string) => savedObjectService.get(id),
+    getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
@@ -123,6 +126,7 @@ export function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     visualizations: plugins.visualizations,
+    storage,
   };
 }
 

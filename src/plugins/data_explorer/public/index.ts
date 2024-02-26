@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './index.scss';
-
 import { DataExplorerPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
@@ -14,4 +12,10 @@ export function plugin() {
 }
 export { DataExplorerPluginSetup, DataExplorerPluginStart, DataExplorerServices } from './types';
 export { ViewProps, ViewDefinition, DefaultViewState } from './services/view_service';
-export { RootState, useTypedSelector, useTypedDispatch } from './utils/state_management';
+export {
+  RootState,
+  Store,
+  useTypedSelector,
+  useTypedDispatch,
+  setIndexPattern,
+} from './utils/state_management';

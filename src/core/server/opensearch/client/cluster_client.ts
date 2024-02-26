@@ -76,6 +76,8 @@ export interface ICustomClusterClient extends IClusterClient {
 export class ClusterClient implements ICustomClusterClient {
   public readonly asInternalUser: Client;
   private readonly rootScopedClient: Client;
+  public readonly asInternalUserWithLongNumeralsSupport: Client;
+  private readonly rootScopedClientWithLongNumeralsSupport: Client;
 
   private isClosed = false;
 
@@ -86,6 +88,16 @@ export class ClusterClient implements ICustomClusterClient {
   ) {
     this.asInternalUser = configureClient(config, { logger });
     this.rootScopedClient = configureClient(config, { logger, scoped: true });
+
+    this.asInternalUserWithLongNumeralsSupport = configureClient(config, {
+      logger,
+      withLongNumeralsSupport: true,
+    });
+    this.rootScopedClientWithLongNumeralsSupport = configureClient(config, {
+      logger,
+      scoped: true,
+      withLongNumeralsSupport: true,
+    });
   }
 
   asScoped(request: ScopeableRequest) {
@@ -95,20 +107,14 @@ export class ClusterClient implements ICustomClusterClient {
       headers: scopedHeaders,
     });
 
-    const asInternalUserWithLongNumeralsSupport = this.asInternalUser.child({
-      // @ts-expect-error - Remove ignoring after https://github.com/opensearch-project/opensearch-js/pull/598 is included in a release
-      enableLongNumeralSupport: true,
+    const scopedClientWithLongNumeralsSupport = this.rootScopedClientWithLongNumeralsSupport.child({
+      headers: scopedHeaders,
     });
 
-    const scopedClientWithLongNumeralsSupport = this.rootScopedClient.child({
-      headers: scopedHeaders,
-      // @ts-expect-error - Remove ignoring after https://github.com/opensearch-project/opensearch-js/pull/598 is included in a release
-      enableLongNumeralSupport: true,
-    });
     return new ScopedClusterClient(
       this.asInternalUser,
       scopedClient,
-      asInternalUserWithLongNumeralsSupport,
+      this.asInternalUserWithLongNumeralsSupport,
       scopedClientWithLongNumeralsSupport
     );
   }
@@ -118,7 +124,12 @@ export class ClusterClient implements ICustomClusterClient {
       return;
     }
     this.isClosed = true;
-    await Promise.all([this.asInternalUser.close(noop), this.rootScopedClient.close(noop)]);
+    await Promise.all([
+      this.asInternalUser.close(noop),
+      this.rootScopedClient.close(noop),
+      this.asInternalUserWithLongNumeralsSupport.close(noop),
+      this.rootScopedClientWithLongNumeralsSupport.close(noop),
+    ]);
   }
 
   private getScopedHeaders(request: ScopeableRequest): Headers {

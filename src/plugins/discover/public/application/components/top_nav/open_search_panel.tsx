@@ -55,7 +55,7 @@ interface Props {
 export function OpenSearchPanel({ onClose, makeUrl }: Props) {
   const {
     services: {
-      core: { uiSettings, savedObjects },
+      core: { uiSettings, savedObjects, application },
       addBasePath,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
@@ -67,7 +67,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
           <h2>
             <FormattedMessage
               id="discover.topNav.openSearchPanel.openSearchTitle"
-              defaultMessage="Open search"
+              defaultMessage="OpenSearch"
             />
           </h2>
         </EuiTitle>
@@ -90,12 +90,8 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
             },
           ]}
           onChoose={(id) => {
-            setTimeout(() => {
-              window.location.assign(makeUrl(id));
-              // TODO: figure out why a history push doesn't update the app state. The page reload is a hack around it
-              window.location.reload();
-              onClose();
-            }, 0);
+            application.navigateToApp('discover', { path: `#/view/${id}` });
+            onClose();
           }}
           uiSettings={uiSettings}
           savedObjects={savedObjects}

@@ -5,8 +5,12 @@
 
 import expect from '@osd/expect';
 import { WorkspaceAttribute } from 'opensearch-dashboards/server';
-import { omit } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+const omitId = <T extends { id?: string }>(object: T): Omit<T, 'id'> => {
+  const { id, ...others } = object;
+  return others;
+};
 
 const testWorkspace: WorkspaceAttribute = {
   id: 'fake_id',
@@ -47,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       const result: any = await supertest
         .post(`/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
@@ -59,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
       const result = await supertest
         .post(`/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
@@ -71,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
       const result: any = await supertest
         .post(`/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
@@ -80,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         .put(`/api/workspaces/${result.body.result.id}`)
         .send({
           attributes: {
-            ...omit(testWorkspace, 'id'),
+            ...omitId(testWorkspace),
             name: 'updated',
           },
         })
@@ -96,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
       const result: any = await supertest
         .post(`/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
         })
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
@@ -114,7 +118,18 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post(`/api/workspaces`)
         .send({
-          attributes: omit(testWorkspace, 'id'),
+          attributes: omitId(testWorkspace),
+        })
+        .set('osd-xsrf', 'opensearch-dashboards')
+        .expect(200);
+
+      await supertest
+        .post(`/api/workspaces`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+            name: 'another test workspace',
+          },
         })
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
@@ -126,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
-      expect(listResult.body.result.total).equal(1);
+      expect(listResult.body.result.total).equal(2);
     });
-  }).tags('is:workspace');
+  });
 }

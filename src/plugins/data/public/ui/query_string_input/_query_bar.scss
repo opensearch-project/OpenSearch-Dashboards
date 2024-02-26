@@ -33,9 +33,8 @@
 
   // Unlike most inputs within layout control groups, the text area still needs a border.
   // These adjusts help it sit above the control groups shadow to line up correctly.
-  padding: $euiSizeS;
-  padding-top: $euiSizeS + 3px;
-  transform: translateY(-1px) translateX(-1px);
+  padding: ($euiSizeS + 2px) $euiSizeS $euiSizeS;
+  transform: translateY(-2px) translateX(-1px);
 
   &:not(:focus):not(:invalid) {
     @include euiYScrollWithShadows;

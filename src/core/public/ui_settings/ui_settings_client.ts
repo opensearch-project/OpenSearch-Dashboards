@@ -97,11 +97,11 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       return JSON.parse(value);
     }
 
-    if (type === 'number') {
-      return parseFloat(value);
-    }
-
-    return value;
+    return type === 'number' && typeof value !== 'bigint'
+      ? isFinite(value) && (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER)
+        ? BigInt(value)
+        : parseFloat(value)
+      : value;
   }
 
   get$<T = any>(key: string, defaultOverride?: T) {
@@ -198,7 +198,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     this.setLocally(key, newVal);
 
     try {
-      const { settings } = await this.api.batchSet(key, newVal);
+      const { settings } = (await this.api.batchSet(key, newVal)) || {};
       this.cache = defaultsDeep({}, defaults, settings);
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;

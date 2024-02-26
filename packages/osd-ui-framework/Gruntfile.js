@@ -29,7 +29,7 @@
  */
 
 const { strip } = require('comment-stripper');
-const sass = require('node-sass');
+const sass = require('sass-embedded');
 const postcss = require('postcss');
 const postcssConfig = require('@osd/optimizer/postcss.config.js');
 
@@ -70,6 +70,26 @@ module.exports = function (grunt) {
 
   grunt.registerTask('prodBuild', ['clean:target', 'copy:makeProdBuild', 'babel:prodBuild']);
 
+  const uiFrameworkCompile = async (src, dest) => {
+    try {
+      const { css: compiledCSS } = await sass.compileAsync(src);
+      const result = await postcss([postcssConfig]).process(
+        strip(compiledCSS, { language: 'css' }),
+        {
+          from: src,
+          to: dest,
+        }
+      );
+
+      grunt.file.write(dest, result.css);
+      if (result.map) {
+        grunt.file.write(`${dest}.map`, result.map);
+      }
+    } catch (ex) {
+      grunt.log.error(ex);
+    }
+  };
+
   grunt.registerTask('compileCss', function () {
     const done = this.async();
     Promise.all([
@@ -79,34 +99,4 @@ module.exports = function (grunt) {
       uiFrameworkCompile('src/kui_next_dark.scss', 'dist/kui_next_dark.css'),
     ]).then(done);
   });
-
-  function uiFrameworkCompile(src, dest) {
-    return new Promise((resolve) => {
-      sass.render(
-        {
-          file: src,
-        },
-        function (error, result) {
-          if (error) {
-            grunt.log.error(error);
-          }
-
-          postcss([postcssConfig])
-            .process(strip(result.css.toString('utf8'), { language: 'css' }), {
-              from: src,
-              to: dest,
-            })
-            .then((result) => {
-              grunt.file.write(dest, result.css);
-
-              if (result.map) {
-                grunt.file.write(`${dest}.map`, result.map);
-              }
-
-              resolve();
-            });
-        }
-      );
-    });
-  }
 };

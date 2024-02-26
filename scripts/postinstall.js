@@ -30,8 +30,61 @@ const removeUnwantedFolders = async (root, unwantedNames) => {
 
   return promises;
 };
+
+const patchFile = async (file, patch) => {
+  console.log(`Patching ${file}`);
+  const patches = Array.isArray(patch) ? patch : [patch];
+  let fileContent = await fs.readFile(file, 'utf8');
+  for (const { from, to } of patches) {
+    // The splitting by `to` is to make sure we don't patch already patched ones
+    fileContent = fileContent
+      .split(to)
+      .map((token) => token.split(from))
+      .flat()
+      .join(to);
+  }
+  await fs.writeFile(file, fileContent);
+};
+
 const run = async () => {
   const promises = await removeUnwantedFolders('node_modules', ['demo', 'example', 'examples']);
+
+  promises.push(
+    patchFile('node_modules/font-awesome/scss/_variables.scss', {
+      from: '(30em / 14)',
+      to: 'calc(30em / 14)',
+    })
+  );
+  promises.push(
+    patchFile('node_modules/@elastic/charts/dist/theme.scss', [
+      {
+        from: '$legendItemVerticalPadding / 2',
+        to: 'calc($legendItemVerticalPadding / 2)',
+      },
+      {
+        from: '$echLegendRowGap / 2',
+        to: 'calc($echLegendRowGap / 2)',
+      },
+      {
+        from: '$euiBorderRadius / 2',
+        to: 'calc($euiBorderRadius / 2)',
+      },
+    ])
+  );
+  promises.push(
+    patchFile('node_modules/rison-node/js/rison.js', [
+      {
+        from: 'return Number(s)',
+        to:
+          'return isFinite(s) && (s > Number.MAX_SAFE_INTEGER || s < Number.MIN_SAFE_INTEGER) ? BigInt(s) : Number(s)',
+      },
+      {
+        from: 's = {',
+        to: 's = {\n            bigint: x => x.toString(),',
+      },
+    ])
+  );
+
   await Promise.all(promises);
 };
 

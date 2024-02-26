@@ -3,48 +3,68 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { History } from 'history';
+import React, { useCallback, useMemo } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { useDiscoverContext } from '../context';
 import {
   addColumn,
+  moveColumn,
   removeColumn,
+  reorderColumn,
   setColumns,
   setSort,
   useDispatch,
   useSelector,
 } from '../../utils/state_management';
-import { ResultStatus, SearchData } from '../utils/use_search';
 import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../saved_searches/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { popularizeField } from '../../helpers/popularize_field';
 
 interface Props {
-  history: History;
+  rows?: OpenSearchSearchHit[];
 }
 
-export const DiscoverTable = ({ history }: Props) => {
+export const DiscoverTable = ({ rows }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
     uiSettings,
     data: {
       query: { filterManager },
     },
+    capabilities,
+    indexPatterns,
   } = services;
-  const { data$, refetch$, indexPattern } = useDiscoverContext();
-  const [fetchState, setFetchState] = useState<SearchData>({
-    status: data$.getValue().status,
-    rows: [],
-  });
 
+  const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
   const { columns, sort } = useSelector((state) => state.discover);
   const dispatch = useDispatch();
-  const onAddColumn = (col: string) => dispatch(addColumn({ column: col }));
-  const onRemoveColumn = (col: string) => dispatch(removeColumn(col));
+  const onAddColumn = (col: string) => {
+    if (indexPattern && capabilities.discover?.save) {
+      popularizeField(indexPattern, col, indexPatterns);
+    }
+
+    dispatch(addColumn({ column: col }));
+  };
+  const onRemoveColumn = (col: string) => {
+    if (indexPattern && capabilities.discover?.save) {
+      popularizeField(indexPattern, col, indexPatterns);
+    }
+
+    dispatch(removeColumn(col));
+  };
+
+  const onMoveColumn = (col: string, destination: number) => {
+    if (indexPattern && capabilities.discover?.save) {
+      popularizeField(indexPattern, col, indexPatterns);
+    }
+    dispatch(moveColumn({ columnName: col, destination }));
+  };
+
   const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
     dispatch(setSort(s));
@@ -70,20 +90,6 @@ export const DiscoverTable = ({ history }: Props) => {
     [indexPattern, uiSettings]
   );
 
-  const { rows } = fetchState || {};
-
-  useEffect(() => {
-    const subscription = data$.subscribe((next) => {
-      if (next.status === ResultStatus.LOADING) return;
-      if (next.status !== fetchState.status || (next.rows && next.rows !== fetchState.rows)) {
-        setFetchState({ ...fetchState, ...next });
-      }
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [data$, fetchState]);
-
   if (indexPattern === undefined) {
     // TODO: handle better
     return null;
@@ -100,13 +106,15 @@ export const DiscoverTable = ({ history }: Props) => {
       indexPattern={indexPattern}
       onAddColumn={onAddColumn}
       onFilter={onAddFilter as DocViewFilterFn}
+      onMoveColumn={onMoveColumn}
       onRemoveColumn={onRemoveColumn}
       onSetColumns={onSetColumns}
       onSort={onSetSort}
       sort={sort}
       rows={rows}
       displayTimeColumn={displayTimeColumn}
-      services={services}
+      title={savedSearch?.id ? savedSearch.title : ''}
+      description={savedSearch?.id ? savedSearch.description : ''}
     />
   );
 };

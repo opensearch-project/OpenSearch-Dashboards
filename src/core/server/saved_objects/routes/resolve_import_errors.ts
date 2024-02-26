@@ -61,6 +61,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
           workspaces: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
+          dataSourceId: schema.maybe(schema.string({ defaultValue: '' })),
         }),
         body: schema.object({
           file: schema.stream(),
@@ -92,6 +93,24 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
+      const dataSourceId = req.query.dataSourceId;
+
+      // get datasource from saved object service
+
+      const dataSource = dataSourceId
+        ? await context.core.savedObjects.client
+            .get('data-source', dataSourceId)
+            .then((response) => {
+              const attributes: any = response?.attributes || {};
+              return {
+                id: response.id,
+                title: attributes.title,
+              };
+            })
+        : '';
+
+      const dataSourceTitle = dataSource ? dataSource.title : '';
+
       let readStream: Readable;
       try {
         readStream = await createSavedObjectsStreamFromNdJson(file);
@@ -114,6 +133,8 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         objectLimit: maxImportExportSize,
         createNewCopies: req.query.createNewCopies,
         workspaces,
+        dataSourceId,
+        dataSourceTitle,
       });
 
       return res.ok({ body: result });

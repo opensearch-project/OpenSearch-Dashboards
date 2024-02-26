@@ -60,6 +60,8 @@ export async function resolveSavedObjectsImportErrors({
   namespace,
   createNewCopies,
   workspaces,
+  dataSourceId,
+  dataSourceTitle,
 }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
@@ -77,6 +79,7 @@ export async function resolveSavedObjectsImportErrors({
       objectLimit,
       filter,
       supportedTypes,
+      dataSourceId,
     }
   );
   errorAccumulator = [...errorAccumulator, ...collectorErrors];
@@ -117,7 +120,7 @@ export async function resolveSavedObjectsImportErrors({
   if (createNewCopies) {
     // In case any missing reference errors were resolved, ensure that we regenerate those object IDs as well
     // This is because a retry to resolve a missing reference error may not necessarily specify a destinationId
-    importIdMap = regenerateIds(objectsToResolve);
+    importIdMap = regenerateIds(objectsToResolve, dataSourceId);
   }
 
   // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
@@ -128,6 +131,7 @@ export async function resolveSavedObjectsImportErrors({
     retries,
     createNewCopies,
     workspaces,
+    dataSourceId,
   };
   const checkConflictsResult = await checkConflicts(checkConflictsParams);
   errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
@@ -160,6 +164,8 @@ export async function resolveSavedObjectsImportErrors({
       namespace,
       overwrite,
       workspaces,
+      dataSourceId,
+      dataSourceTitle,
     };
     const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
       createSavedObjectsParams

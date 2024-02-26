@@ -60,6 +60,10 @@ export const DownloadNodeBuilds: GlobalTask = {
       }),
       // ToDo [NODE14]: Remove this Node.js 14 fallback download
       ...config.getTargetPlatforms().map(async (platform) => {
+        if (platform.getBuildName() === 'darwin-arm64') {
+          log.warning(`There are no fallback Node.js versions released for darwin-arm64.`);
+          return;
+        }
         const { url, downloadPath, downloadName } = await getNodeVersionDownloadInfo(
           NODE14_FALLBACK_VERSION,
           platform.getNodeArch(),

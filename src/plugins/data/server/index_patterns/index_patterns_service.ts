@@ -59,6 +59,13 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
   public setup(core: CoreSetup) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+    core.capabilities.registerSwitcher(async (request, capabilites) => {
+      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
+        indexPatterns: {
+          save: false,
+        },
+      });
+    });
 
     registerRoutes(core.http);
   }

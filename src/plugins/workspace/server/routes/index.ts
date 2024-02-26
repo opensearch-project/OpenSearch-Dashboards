@@ -7,7 +7,7 @@ import { schema } from '@osd/config-schema';
 import { ensureRawRequest } from '../../../../core/server';
 
 import { CoreSetup, Logger, WorkspacePermissionMode } from '../../../../core/server';
-import { IWorkspaceDBImpl, WorkspacePermissionItem } from '../types';
+import { IWorkspaceClientImpl, WorkspacePermissionItem } from '../types';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -46,7 +46,7 @@ export function registerRoutes({
   logger,
   http,
 }: {
-  client: IWorkspaceDBImpl;
+  client: IWorkspaceClientImpl;
   logger: Logger;
   http: CoreSetup['http'];
 }) {
