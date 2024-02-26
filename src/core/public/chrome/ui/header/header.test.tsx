@@ -36,7 +36,7 @@ import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock, chromeServiceMock } from '../../../mocks';
 import { Header } from './header';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
-import { ISidecarConfig, SIDECAR_DOCKED_MODE } from 'src/core/public/overlays';
+import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',

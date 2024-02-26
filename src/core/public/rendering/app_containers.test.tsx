@@ -53,6 +53,7 @@ describe('AppWrapper', () => {
       <div
         class="app-wrapper"
         id="app-wrapper"
+        style="padding-right: 640px;"
       >
         app-content
       </div>
@@ -64,6 +65,7 @@ describe('AppWrapper', () => {
       <div
         class="app-wrapper hidden-chrome"
         id="app-wrapper"
+        style="padding-right: 640px;"
       >
         app-content
       </div>
@@ -75,6 +77,7 @@ describe('AppWrapper', () => {
       <div
         class="app-wrapper"
         id="app-wrapper"
+        style="padding-right: 640px;"
       >
         app-content
       </div>
