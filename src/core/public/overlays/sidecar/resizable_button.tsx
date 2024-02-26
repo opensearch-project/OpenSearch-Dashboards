@@ -5,7 +5,7 @@
 
 import React, { useCallback, useRef } from 'react';
 import classNames from 'classnames';
-import './rsizable_button.scss';
+import './resizable_button.scss';
 import { getPosition } from './helper';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from './sidecar_service';
 
