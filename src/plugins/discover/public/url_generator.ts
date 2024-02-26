@@ -122,6 +122,7 @@ export class DiscoverUrlGenerator
     url = setStateToOsdUrl<QueryState>('_g', queryState, { useHash }, url);
     url = setStateToOsdUrl('_a', appState, { useHash }, url);
 
+    // debugger;
     return url;
   };
 }
