@@ -40,12 +40,16 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       const { workspaces, id, overwrite } = options;
       let savedObjectWorkspaces = options?.workspaces;
 
-      if (id && overwrite && workspaces) {
+      /**
+       * Check if overwrite with id
+       * If so, need to reserve the workspace params
+       */
+      if (id && overwrite) {
         let currentItem;
         try {
           currentItem = await wrapperOptions.client.get(type, id);
         } catch (e) {
-          // this.get will throw an error when no items can be found
+          // If item can not be found, supress the error and create the object
         }
         if (currentItem) {
           if (
@@ -72,26 +76,37 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
       const { overwrite, namespace } = options;
-      const bulkGetDocs = objects
-        .filter((object) => !!(object.id && options.workspaces))
-        .map((object) => {
-          const { type, id } = object;
-          /**
-           * It requires a check when overwriting objects to target workspaces
-           */
-          return {
-            type,
-            id: id as string,
-            fields: ['id', 'workspaces'],
-          };
-        });
+      /**
+       * When overwrite, filter out all the objects that have ids
+       */
+      const bulkGetDocs = overwrite
+        ? objects
+            .filter((object) => !!object.id)
+            .map((object) => {
+              const { type, id } = object;
+              /**
+               * It requires a check when overwriting objects to target workspaces
+               */
+              return {
+                type,
+                id: id as string,
+                fields: ['id', 'workspaces'],
+              };
+            })
+        : [];
       const objectsConflictWithWorkspace: SavedObject[] = [];
       const objectsMapWorkspaces: Record<string, string[] | undefined> = {};
       if (bulkGetDocs.length) {
+        /**
+         * Get latest status of objects
+         */
         const bulkGetResult = await wrapperOptions.client.bulkGet(bulkGetDocs);
 
         bulkGetResult.saved_objects.forEach((object) => {
-          if (!object.error && object.id && overwrite) {
+          /**
+           * Skip the items with error, wrapperOptions.client will handle the error
+           */
+          if (!object.error && object.id) {
             /**
              * When it is about to overwrite a object into options.workspace.
              * We need to check if the options.workspaces is the subset of object.workspaces,
@@ -105,7 +120,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
             if (filteredWorkspaces.length) {
               /**
                * options.workspaces is not a subset of object.workspaces,
-               * return a conflict error.
+               * Add the item into conflict array.
                */
               objectsConflictWithWorkspace.push({
                 id,
@@ -118,13 +133,20 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
                 },
               });
             } else {
+              /**
+               * options.workspaces is a subset of object's workspaces
+               * Add the workspaces status into a objectId -> workspaces pairs for later use.
+               */
               objectsMapWorkspaces[this.getRawId({ namespace, type, id })] = object.workspaces;
             }
           }
         });
       }
 
-      const objectsFilteredByError = objects.filter(
+      /**
+       * Get all the objects that do not conflict on workspaces
+       */
+      const objectsNoWorkspaceConflictError = objects.filter(
         (item) =>
           !objectsConflictWithWorkspace.find(
             (errorItems) =>
@@ -132,29 +154,43 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
               this.getRawId({ namespace, type: item.type, id: item.id as string })
           )
       );
-      let objectsPayload = objectsFilteredByError;
-      if (overwrite) {
-        objectsPayload = objectsPayload.map((item) => {
-          if (item.id) {
-            item.workspaces =
-              objectsMapWorkspaces[
-                this.getRawId({
-                  namespace,
-                  id: item.id,
-                  type: item.type,
-                })
-              ];
-          }
 
-          return item;
-        });
-      }
+      /**
+       * Add the workspaces params back based on objects' workspaces value in index.
+       */
+      const objectsPayload = objectsNoWorkspaceConflictError.map((item) => {
+        if (item.id) {
+          const workspacesParamsInIndex =
+            objectsMapWorkspaces[
+              this.getRawId({
+                namespace,
+                id: item.id,
+                type: item.type,
+              })
+            ];
+          if (workspacesParamsInIndex) {
+            item.workspaces = workspacesParamsInIndex;
+          }
+        }
+
+        return item;
+      });
+
+      /**
+       * Bypass those objects that are not conflict on workspaces check.
+       */
       const realBulkCreateResult = await wrapperOptions.client.bulkCreate(objectsPayload, options);
-      const result: SavedObjectsBulkResponse = {
+
+      /**
+       * Merge the workspaceConflict result and real client bulkCreate result.
+       */
+      return {
         ...realBulkCreateResult,
-        saved_objects: [...objectsConflictWithWorkspace, ...realBulkCreateResult.saved_objects],
-      };
-      return result as SavedObjectsBulkResponse<T>;
+        saved_objects: [
+          ...objectsConflictWithWorkspace,
+          ...(realBulkCreateResult?.saved_objects || []),
+        ],
+      } as SavedObjectsBulkResponse<T>;
     };
 
     const checkConflictWithWorkspaceConflictCheck = async (
@@ -162,11 +198,17 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       options: SavedObjectsBaseOptions = {}
     ) => {
       const objectsConflictWithWorkspace: SavedObjectsCheckConflictsResponse['errors'] = [];
-      if (options.workspaces) {
-        if (objects.length === 0) {
-          return { errors: [] };
-        }
+      /**
+       * Fail early when no objects
+       */
+      if (objects.length === 0) {
+        return { errors: [] };
+      }
 
+      /**
+       * Workspace conflict only happens when target workspaces params present.
+       */
+      if (options.workspaces) {
         const bulkGetDocs: any[] = objects.map((object) => {
           const { type, id } = object;
 
@@ -182,16 +224,17 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
 
           bulkGetResult.saved_objects.forEach((object) => {
             const { id, type } = object;
+            /**
+             * Skip the error ones, real checkConflict in repository will handle that.
+             */
             if (!object.error) {
               let workspaceConflict = false;
-              if (options.workspaces) {
-                const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
-                  options.workspaces,
-                  object.workspaces
-                );
-                if (filteredWorkspaces.length) {
-                  workspaceConflict = true;
-                }
+              const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
+                options.workspaces,
+                object.workspaces
+              );
+              if (filteredWorkspaces.length) {
+                workspaceConflict = true;
               }
               if (workspaceConflict) {
                 objectsConflictWithWorkspace.push({
@@ -208,7 +251,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         }
       }
 
-      const objectsFilteredByError = objects.filter(
+      const objectsNoWorkspaceConflictError = objects.filter(
         (item) =>
           !objectsConflictWithWorkspace.find(
             (errorItems) =>
@@ -224,10 +267,18 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
               })
           )
       );
+
+      /**
+       * Bypass those objects that are not conflict on workspaces
+       */
       const realBulkCreateResult = await wrapperOptions.client.checkConflicts(
-        objectsFilteredByError,
+        objectsNoWorkspaceConflictError,
         options
       );
+
+      /**
+       * Merge results from two conflict check.
+       */
       const result: SavedObjectsCheckConflictsResponse = {
         ...realBulkCreateResult,
         errors: [...objectsConflictWithWorkspace, ...realBulkCreateResult.errors],
