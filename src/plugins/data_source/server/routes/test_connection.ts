@@ -15,7 +15,8 @@ export const registerTestConnectionRoute = async (
   router: IRouter,
   dataSourceServiceSetup: DataSourceServiceSetup,
   cryptography: CryptographyServiceSetup,
-  authRegistryPromise: Promise<IAuthenticationMethodRegistery>
+  authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
+  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
 ) => {
   const authRegistry = await authRegistryPromise;
   router.post(
@@ -68,6 +69,7 @@ export const registerTestConnectionRoute = async (
             testClientDataSourceAttr: dataSourceAttr as DataSourceAttributes,
             request,
             authRegistry,
+            customApiSchemaRegistryPromise,
           }
         );
 
