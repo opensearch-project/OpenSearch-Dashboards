@@ -7,10 +7,8 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@osd/utility-types';
 import { setupServer } from '../../../../../src/core/server/test_utils';
 
-import {
-  IAuthenticationMethodRegistery,
-  authenticationMethodRegisteryMock,
-} from '../auth_registry';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
 import { CustomApiSchemaRegistry } from '../schema_registry';
 import { DataSourceServiceSetup } from '../../server/data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';

@@ -7,5 +7,3 @@ export {
   IAuthenticationMethodRegistery,
   AuthenticationMethodRegistery,
 } from './authentication_methods_registry';
-
-export { authenticationMethodRegisteryMock } from './authentication_methods_registry.mock';
