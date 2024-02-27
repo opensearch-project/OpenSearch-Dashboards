@@ -27,7 +27,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { omit } from 'lodash';
+
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -543,18 +543,6 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget.mock.calls[0][0].body).toEqual({ docs });
       });
 
-      it(`should use the OpenSearch mget action before bulk action for any types, when id is defined`, async () => {
-        const objects = [obj1, obj2];
-        await bulkCreateSuccess(objects);
-        expect(client.bulk).toHaveBeenCalledTimes(1);
-        expect(client.mget).toHaveBeenCalledTimes(1);
-        const docs = [
-          expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
-          expect.objectContaining({ _id: `${obj2.type}:${obj2.id}` }),
-        ];
-        expect(client.mget.mock.calls[0][0].body).toEqual({ docs });
-      });
-
       it(`should use the OpenSearch create method if ID is undefined and overwrite=true`, async () => {
         const objects = [obj1, obj2].map((obj) => ({ ...obj, id: undefined }));
         await bulkCreateSuccess(objects, { overwrite: true });
@@ -899,74 +887,6 @@ describe('SavedObjectsRepository', () => {
         const opensearchError = { foo: 'some_other_error' };
         const expectedError = expectErrorResult(obj3, { message: JSON.stringify(opensearchError) });
         await bulkCreateError(obj3, opensearchError, expectedError);
-      });
-
-      it(`returns error when there is a conflict with an existing saved object according to workspaces`, async () => {
-        const obj = { ...obj3, workspaces: ['foo'] };
-        const response1 = {
-          status: 200,
-          docs: [
-            {
-              found: true,
-              _id: `${obj1.type}:${obj1.id}`,
-              _source: {
-                type: obj1.type,
-                workspaces: ['bar'],
-              },
-            },
-            {
-              found: true,
-              _id: `${obj.type}:${obj.id}`,
-              _source: {
-                type: obj.type,
-                workspaces: obj.workspaces,
-              },
-            },
-            {
-              found: true,
-              _id: `${obj2.type}:${obj2.id}`,
-              _source: {
-                type: obj2.type,
-              },
-            },
-          ],
-        };
-        client.mget.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(response1)
-        );
-        const response2 = getMockBulkCreateResponse([obj1, obj, obj2]);
-        client.bulk.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(response2)
-        );
-
-        const options = { overwrite: true, workspaces: ['bar'] };
-        const result = await savedObjectsRepository.bulkCreate([obj1, obj, obj2], options);
-        expect(client.bulk).toHaveBeenCalled();
-        expect(client.mget).toHaveBeenCalled();
-
-        const body1 = {
-          docs: [
-            expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
-            expect.objectContaining({ _id: `${obj.type}:${obj.id}` }),
-            expect.objectContaining({ _id: `${obj2.type}:${obj2.id}` }),
-          ],
-        };
-        expect(client.mget).toHaveBeenCalledWith(
-          expect.objectContaining({ body: body1 }),
-          expect.anything()
-        );
-        const body2 = [...expectObjArgs(obj1)];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body: body2 }),
-          expect.anything()
-        );
-        expect(result).toEqual({
-          saved_objects: [
-            expectSuccess(obj1),
-            expectErrorConflict(obj, { metadata: { isNotOverwritable: true } }),
-            expectErrorConflict(obj2, { metadata: { isNotOverwritable: true } }),
-          ],
-        });
       });
     });
 
@@ -1791,7 +1711,6 @@ describe('SavedObjectsRepository', () => {
     const obj6 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'six' };
     const obj7 = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'seven' };
     const obj8 = { type: 'dashboard', id: 'eight', workspaces: ['foo'] };
-    const obj9 = { type: 'dashboard', id: 'nine', workspaces: ['bar'] };
     const namespace = 'foo-namespace';
 
     const checkConflicts = async (objects, options) =>
@@ -1913,36 +1832,6 @@ describe('SavedObjectsRepository', () => {
           ],
         });
       });
-
-      it(`expected results with workspaces`, async () => {
-        const objects = [obj8, obj9];
-        const response = {
-          status: 200,
-          docs: [getMockGetResponse(obj8), getMockGetResponse(obj9)],
-        };
-        client.mget.mockResolvedValue(
-          opensearchClientMock.createSuccessTransportRequestPromise(response)
-        );
-
-        const result = await checkConflicts(objects, {
-          workspaces: ['foo'],
-        });
-        expect(client.mget).toHaveBeenCalledTimes(1);
-        expect(result).toEqual({
-          errors: [
-            { ...omit(obj8, 'workspaces'), error: createConflictError(obj8.type, obj8.id) },
-            {
-              ...omit(obj9, 'workspaces'),
-              error: {
-                ...createConflictError(obj9.type, obj9.id),
-                metadata: {
-                  isNotOverwritable: true,
-                },
-              },
-            },
-          ],
-        });
-      });
     });
   });
 
@@ -1991,7 +1880,6 @@ describe('SavedObjectsRepository', () => {
       it(`should use the OpenSearch index action if ID is defined and overwrite=true`, async () => {
         await createSuccess(type, attributes, { id, overwrite: true });
         expect(client.index).toHaveBeenCalled();
-        expect(client.get).toHaveBeenCalled();
       });
 
       it(`should use the OpenSearch index with version if ID and version are defined and overwrite=true`, async () => {
@@ -2166,29 +2054,6 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
       });
-
-      it(`doesn't modify workspaces when overwrite without target workspaces`, async () => {
-        const response = getMockGetResponse({ workspaces: ['foo'], id });
-        client.get.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(response)
-        );
-
-        await savedObjectsRepository.create('dashboard', attributes, {
-          id,
-          overwrite: true,
-          workspaces: [],
-        });
-
-        expect(client.index).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: `dashboard:${id}`,
-            body: expect.objectContaining({
-              workspaces: ['foo'],
-            }),
-          }),
-          expect.anything()
-        );
-      });
     });
 
     describe('errors', () => {
@@ -2246,21 +2111,6 @@ describe('SavedObjectsRepository', () => {
             namespace,
           })
         ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_TYPE, id));
-        expect(client.get).toHaveBeenCalled();
-      });
-
-      it(`throws error when there is a conflict with an existing workspaces saved object`, async () => {
-        const response = getMockGetResponse({ workspaces: ['foo'], id });
-        client.get.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(response)
-        );
-        await expect(
-          savedObjectsRepository.create('dashboard', attributes, {
-            id,
-            overwrite: true,
-            workspaces: ['bar'],
-          })
-        ).rejects.toThrowError(createConflictError('dashboard', id));
         expect(client.get).toHaveBeenCalled();
       });
 
