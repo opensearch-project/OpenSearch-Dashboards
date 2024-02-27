@@ -267,7 +267,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       });
     });
 
-    test('default auth method is NoAuth when no auth options configured', () => {
+    test('default auth type is NoAuth when no auth options registered in authenticationMethodRegistery, this should not happen in real customer scenario for MD', () => {
       const authenticationMethodRegistery = new AuthenticationMethodRegistery();
       expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(AuthType.NoAuth);
     });
