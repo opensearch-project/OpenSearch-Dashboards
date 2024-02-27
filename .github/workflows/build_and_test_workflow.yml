@@ -422,6 +422,15 @@ jobs:
       - name: Build `${{ matrix.name }}`
         run: yarn ${{ matrix.script }} --release
 
+      - name: Run `${{ matrix.name }}`
+        run: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}/bin/opensearch-dashboards &
+        shell: bash
+
+      - name: Health check 
+        run: |
+          timeout 300 bash -c 'while [[ "$(curl http://localhost:5601/api/status | jq -r '.status.overall.state')" != "green" ]]; do sleep 5; done'
+        shell: bash
+
       - uses: actions/upload-artifact@v3
         if: success()
         with:
