@@ -67,6 +67,7 @@ export class CreateDataSourceForm extends React.Component<
   public readonly context!: DataSourceManagementContextValue;
 
   authOptions: Array<EuiSuperSelectOption<string>> = [];
+  isNoAuthOptionEnabled: boolean;
 
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
@@ -74,6 +75,9 @@ export class CreateDataSourceForm extends React.Component<
     const authenticationMethodRegistery = context.services.authenticationMethodRegistery;
     const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
     const initialSelectedAuthMethod = getDefaultAuthMethod(authenticationMethodRegistery);
+
+    this.isNoAuthOptionEnabled =
+      authenticationMethodRegistery.getAuthenticationMethod(AuthType.NoAuth) !== undefined;
 
     this.authOptions = registeredAuthMethods.map((authMethod) => {
       return authMethod.credentialSourceOption;
@@ -597,13 +601,13 @@ export class CreateDataSourceForm extends React.Component<
                   id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
                   defaultMessage="Enter the authentication details to access the endpoint."
                 />
-                {this.authOptions.length > 0 && (
+                {this.isNoAuthOptionEnabled && (
                   <FormattedMessage
                     id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
                     defaultMessage=" If no authentication is required, select "
                   />
                 )}
-                {this.authOptions.length > 0 && (
+                {this.isNoAuthOptionEnabled && (
                   <b>
                     <FormattedMessage
                       id="dataSourcesManagement.createDataSource.noAuthentication"
