@@ -11,6 +11,7 @@ import {
   Plugin,
   Logger,
   SavedObjectsClient,
+  WORKSPACE_TYPE,
 } from '../../../core/server';
 import { IWorkspaceClientImpl } from './types';
 import { WorkspaceClientWithSavedObject } from './workspace_client';
@@ -30,6 +31,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private client?: IWorkspaceClientImpl;
   private permissionControl?: SavedObjectsPermissionControlContract;
   private readonly config$: Observable<ConfigSchema>;
+  private workspaceSavedObjectsClientWrapper?: WorkspaceSavedObjectsClientWrapper;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -71,14 +73,14 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
         permissionControl: this.permissionControl,
       });
 
-      const workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
+      this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
         this.permissionControl
       );
 
       core.savedObjects.addClientWrapper(
         0,
         WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-        workspaceSavedObjectsClientWrapper.wrapperFactory
+        this.workspaceSavedObjectsClientWrapper.wrapperFactory
       );
     }
 
@@ -111,6 +113,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     this.logger.debug('Starting SavedObjects service');
     this.permissionControl?.setup(core.savedObjects.getScopedClient);
     this.client?.setSavedObjects(core.savedObjects);
+    this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
 
     return {
       client: this.client as IWorkspaceClientImpl,

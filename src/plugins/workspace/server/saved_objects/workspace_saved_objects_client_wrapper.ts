@@ -28,9 +28,12 @@ import {
   WorkspacePermissionMode,
   SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsErrorHelpers,
+  SavedObjectsServiceStart,
+  SavedObjectsClientContract,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { getPrincipalsFromRequest } from '../utils';
+import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -52,6 +55,7 @@ const generateSavedObjectsPermissionError = () =>
   );
 
 export class WorkspaceSavedObjectsClientWrapper {
+  private getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
   private formatWorkspacePermissionModeToStringArray(
     permission: WorkspacePermissionMode | WorkspacePermissionMode[]
   ): string[] {
@@ -173,6 +177,17 @@ export class WorkspaceSavedObjectsClientWrapper {
       );
     }
     return hasPermission;
+  }
+
+  private getWorkspaceTypeEnabledClient(request: OpenSearchDashboardsRequest) {
+    return this.getScopedClient?.(request, {
+      includedHiddenTypes: [WORKSPACE_TYPE],
+      excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+    }) as SavedObjectsClientContract;
+  }
+
+  public setScopedClient(getScopedClient: SavedObjectsServiceStart['getScopedClient']) {
+    this.getScopedClient = getScopedClient;
   }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
@@ -398,8 +413,12 @@ export class WorkspaceSavedObjectsClientWrapper {
         ];
         options.ACLSearchParams.principals = principals;
       } else {
+        /**
+         * Workspace is a hidden type so that we need to
+         * initialize a new saved objects client with workspace enabled to retrieve all the workspaces with permission.
+         */
         const permittedWorkspaceIds = (
-          await wrapperOptions.client.find({
+          await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).find({
             type: WORKSPACE_TYPE,
             perPage: 999,
             ACLSearchParams: {
