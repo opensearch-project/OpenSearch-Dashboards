@@ -280,8 +280,8 @@ describe('Datasource Management: Create Datasource form with different authType 
         }
       );
 
-      const authOptionSelector = component.find(authTypeIdentifier).first();
-      expect(authOptionSelector).toMatchSnapshot();
+      const testConnBtn = component.find(testConnectionButtonIdentifier).last();
+      expect(testConnBtn.prop('disabled')).toBe(true);
     });
   });
 
