@@ -27,7 +27,6 @@ const usernameIdentifier = '[data-test-subj="createDataSourceFormUsernameField"]
 const passwordIdentifier = '[data-test-subj="createDataSourceFormPasswordField"]';
 const createButtonIdentifier = '[data-test-subj="createDataSourceButton"]';
 const testConnectionButtonIdentifier = '[data-test-subj="createDataSourceTestConnectionButton"]';
-const authOptionSelectorIdentifier = '[data-test-subj="createDataSourceFormAuthTypeSelect"]';
 
 describe('Datasource Management: Create Datasource form', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
@@ -247,12 +246,12 @@ describe('Datasource Management: Create Datasource form with different authType 
   /* Scenario 1: Should render the page normally with all authMethod combinations */
   test('should render normally with all authMethod combinations', () => {
     const authMethodCombinationsToBeTested = [
+      [sigV4AuthMethod],
       [noAuthCredentialAuthMethod],
       [usernamePasswordAuthMethod],
-      [sigV4AuthMethod],
-      [noAuthCredentialAuthMethod, usernamePasswordAuthMethod],
       [noAuthCredentialAuthMethod, sigV4AuthMethod],
       [usernamePasswordAuthMethod, sigV4AuthMethod],
+      [noAuthCredentialAuthMethod, usernamePasswordAuthMethod],
       [noAuthCredentialAuthMethod, usernamePasswordAuthMethod, sigV4AuthMethod],
     ];
 
@@ -281,17 +280,18 @@ describe('Datasource Management: Create Datasource form with different authType 
         }
       );
 
-      const testConnBtn = component.find(testConnectionButtonIdentifier).last();
-      expect(testConnBtn.prop('disabled')).toBe(true);
+      const authOptionSelector = component.find(authTypeIdentifier).first();
+      expect(authOptionSelector).toMatchSnapshot();
     });
   });
 
   /* Scenario 2: options selector should be disabled when only one authMethod supported */
-  test('options selector should be disabled when only one authMethod supported', () => {
+  test('options selector should be disabled when less than or equal to one authMethod supported', () => {
     const authMethodCombinationsToBeTested = [
+      [],
+      [sigV4AuthMethod],
       [noAuthCredentialAuthMethod],
       [usernamePasswordAuthMethod],
-      [sigV4AuthMethod],
     ];
 
     authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
@@ -319,7 +319,7 @@ describe('Datasource Management: Create Datasource form with different authType 
         }
       );
 
-      const authOptionSelector = component.find(authOptionSelectorIdentifier).last();
+      const authOptionSelector = component.find(authTypeIdentifier).last();
       expect(authOptionSelector.prop('disabled')).toBe(true);
     });
   });
@@ -358,7 +358,7 @@ describe('Datasource Management: Create Datasource form with different authType 
         }
       );
 
-      const authOptionSelector = component.find(authOptionSelectorIdentifier).last();
+      const authOptionSelector = component.find(authTypeIdentifier).last();
       expect(authOptionSelector.prop('disabled')).toBe(false);
     });
   });

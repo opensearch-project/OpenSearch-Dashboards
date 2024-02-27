@@ -595,14 +595,22 @@ export class CreateDataSourceForm extends React.Component<
               <EuiText>
                 <FormattedMessage
                   id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
-                  defaultMessage="Enter the authentication details to access the endpoint. If no authentication is required, select "
+                  defaultMessage="Enter the authentication details to access the endpoint."
                 />
-                <b>
+                {this.authOptions.length > 0 && (
                   <FormattedMessage
-                    id="dataSourcesManagement.createDataSource.noAuthentication"
-                    defaultMessage="No authentication"
+                    id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
+                    defaultMessage=" If no authentication is required, select "
                   />
-                </b>
+                )}
+                {this.authOptions.length > 0 && (
+                  <b>
+                    <FormattedMessage
+                      id="dataSourcesManagement.createDataSource.noAuthentication"
+                      defaultMessage="No authentication"
+                    />
+                  </b>
+                )}
               </EuiText>
             </EuiFormRow>
 
