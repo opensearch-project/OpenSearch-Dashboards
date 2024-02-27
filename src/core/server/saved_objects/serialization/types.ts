@@ -69,6 +69,7 @@ interface SavedObjectDoc<T = unknown> {
   version?: string;
   updated_at?: string;
   originId?: string;
+  workspaces?: string[];
 }
 
 interface Referencable {
