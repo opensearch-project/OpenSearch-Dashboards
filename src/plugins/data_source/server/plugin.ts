@@ -129,7 +129,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       router,
       dataSourceService,
       cryptographyServiceSetup,
-      authRegistryPromise
+      authRegistryPromise,
+      customApiSchemaRegistryPromise
     );
 
     const registerCredentialProvider = (method: AuthenticationMethod) => {
