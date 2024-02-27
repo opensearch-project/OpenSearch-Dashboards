@@ -125,7 +125,7 @@ async function fetchObjectsToExport({
       search,
       perPage: exportSizeLimit,
       namespaces: namespace ? [namespace] : undefined,
-      workspaces,
+      ...(workspaces ? { workspaces } : {}),
     });
     if (findResponse.total > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
