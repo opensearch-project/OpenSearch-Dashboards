@@ -11,12 +11,11 @@ export const decideClient = async (
   request: IOpenSearchSearchRequest,
   withLongNumeralsSupport: boolean = false
 ): Promise<OpenSearchClient> => {
-  // if data source feature is disabled, return default opensearch client of current user
-  const client =
-    request.dataSourceId && context.dataSource
-      ? await context.dataSource.opensearch.getClient(request.dataSourceId)
-      : withLongNumeralsSupport
-      ? context.core.opensearch.client.asCurrentUserWithLongNumeralsSupport
-      : context.core.opensearch.client.asCurrentUser;
-  return client;
+  const defaultOpenSearchClient = withLongNumeralsSupport
+    ? context.core.opensearch.client.asCurrentUserWithLongNumeralsSupport
+    : context.core.opensearch.client.asCurrentUser;
+
+  return request.dataSourceId && context.dataSource
+    ? await context.dataSource.opensearch.getClient(request.dataSourceId)
+    : defaultOpenSearchClient;
 };
