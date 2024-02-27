@@ -21,6 +21,7 @@ const testWorkspace: WorkspaceAttribute = {
 describe('workspace service', () => {
   let root: ReturnType<typeof osdTestServer.createRoot>;
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
+  let osd: osdTestServer.TestOpenSearchDashboardsUtils;
   beforeAll(async () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -34,8 +35,8 @@ describe('workspace service', () => {
       },
     });
     opensearchServer = await startOpenSearch();
-    const startOSDResp = await startOpenSearchDashboards();
-    root = startOSDResp.root;
+    osd = await startOpenSearchDashboards();
+    root = osd.root;
   });
   afterAll(async () => {
     await root.shutdown();
@@ -49,14 +50,17 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      await Promise.all(
-        listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
-          // this will delete reserved workspace
-          osdTestServer.request
-            .delete(root, `/api/saved_objects/${WORKSPACE_TYPE}/${item.id}`)
-            .expect(200)
+      const savedObjectsRepository = osd.coreStart.savedObjects.createInternalRepository([
+        WORKSPACE_TYPE,
+      ]);
+      await expect(
+        Promise.all(
+          listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
+            // this will delete reserved workspace
+            savedObjectsRepository.delete(WORKSPACE_TYPE, item.id)
+          )
         )
-      );
+      ).resolves.toBeInstanceOf(Array);
     });
     it('create', async () => {
       await osdTestServer.request
@@ -192,7 +196,8 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      expect(listResult.body.result.total).toEqual(2);
+      // Global and Management workspace will be created by default after workspace list API called.
+      expect(listResult.body.result.total).toEqual(4);
     });
     it('unable to perform operations on workspace by calling saved objects APIs', async () => {
       const result = await osdTestServer.request
@@ -254,7 +259,8 @@ describe('workspace service', () => {
         })
         .expect(200);
       expect(findResult.body.total).toEqual(0);
-      expect(listResult.body.result.total).toEqual(1);
+      // Global and Management workspace will be created by default after workspace list API called.
+      expect(listResult.body.result.total).toEqual(3);
     });
   });
 });
