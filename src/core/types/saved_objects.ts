@@ -113,6 +113,8 @@ export interface SavedObject<T = unknown> {
    * space.
    */
   originId?: string;
+  /** Workspace(s) that this saved object exists in. */
+  workspaces?: string[];
 }
 
 export interface SavedObjectError {
