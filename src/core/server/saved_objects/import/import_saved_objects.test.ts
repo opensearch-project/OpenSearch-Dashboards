@@ -179,9 +179,7 @@ describe('#importSavedObjectsFromStream', () => {
       expect(validateReferences).toHaveBeenCalledWith(
         collectedObjects,
         savedObjectsClient,
-        namespace,
-        undefined,
-        undefined
+        namespace
       );
     });
 
