@@ -85,6 +85,7 @@ export interface DataSourcePluginSetup {
   createDataSourceError: (err: any) => DataSourceError;
   registerCredentialProvider: (method: AuthenticationMethod) => void;
   registerCustomApiSchema: (schema: any) => void;
+  dataSourceEnabled: () => boolean;
 }
 
 export interface DataSourcePluginStart {
