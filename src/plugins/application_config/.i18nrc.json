@@ -1,7 +1,0 @@
-{
-  "prefix": "applicationConfig",
-  "paths": {
-    "applicationConfig": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}
