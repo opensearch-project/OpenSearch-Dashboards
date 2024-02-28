@@ -5,7 +5,6 @@
 
 import { SavedObject } from 'src/core/types';
 import { isEqual } from 'lodash';
-import { Readable } from 'stream';
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 
 const dashboard: Omit<SavedObject, 'id'> = {
@@ -264,15 +263,6 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         type: dashboard.type,
         id: 'bar',
       });
-
-      const readableStream = new Readable();
-      readableStream.push(
-        `Content-Disposition: form-data; name="file"; filename="tmp.ndjson"\r\n\r\n`
-      );
-      readableStream.push(
-        [JSON.stringify(getResultFoo.body), JSON.stringify(getResultBar.body)].join('\n')
-      );
-      readableStream.push(null);
 
       /**
        * import with workspaces when conflicts
