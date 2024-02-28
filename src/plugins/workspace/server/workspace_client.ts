@@ -343,8 +343,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceClientImpl {
         type: WORKSPACE_TYPE,
         ...(permissionModes ? { ACLSearchParams: { permissionModes } } : {}),
       });
-      const { saved_objects: resultSavedObjects, ...others } = resultResp;
+      const { saved_objects: resultSavedObjects, ...resultOthers } = resultResp;
       let savedObjects = resultSavedObjects;
+      let others = resultOthers;
       const scopedClientWithoutPermissionCheck = this.getScopedClientWithoutPermission(
         requestDetail
       );
@@ -397,7 +398,9 @@ export class WorkspaceClientWithSavedObject implements IWorkspaceClientImpl {
             type: WORKSPACE_TYPE,
             ...(permissionModes ? { ACLSearchParams: { permissionModes } } : {}),
           });
+          const { saved_objects: retrySavedObjects, ...retrySavedOthers } = retryFindResp;
           savedObjects = retryFindResp.saved_objects;
+          others = retrySavedOthers;
         }
       } catch (e) {
         this.logger.error(`Some error happened when initializing reserved workspace: ${e}`);

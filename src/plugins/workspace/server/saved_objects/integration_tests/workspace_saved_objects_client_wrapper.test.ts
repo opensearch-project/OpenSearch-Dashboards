@@ -11,7 +11,7 @@ import {
   TestOpenSearchDashboardsUtils,
   TestUtils,
 } from '../../../../../core/test_helpers/osd_server';
-import { SavedObjectsErrorHelpers } from '../../../../../core/server';
+import { SavedObjectsErrorHelpers, WORKSPACE_TYPE } from '../../../../../core/server';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import * as utilsExports from '../../utils';
 
@@ -74,7 +74,13 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
     opensearchServer = await servers.startOpenSearch();
     osd = await servers.startOpenSearchDashboards();
 
-    internalSavedObjectsRepository = osd.coreStart.savedObjects.createInternalRepository();
+    /**
+     * Workspace is a hidden type,
+     * and this integration_test is mainly to test the permission control function so we add workspace into includedHiddenTypes
+     */
+    internalSavedObjectsRepository = osd.coreStart.savedObjects.createInternalRepository([
+      WORKSPACE_TYPE,
+    ]);
 
     await repositoryKit.create(
       internalSavedObjectsRepository,
