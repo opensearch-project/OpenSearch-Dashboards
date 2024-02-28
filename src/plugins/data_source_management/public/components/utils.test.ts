@@ -9,6 +9,7 @@ import {
   deleteMultipleDataSources,
   getDataSourceById,
   getDataSources,
+  getDefaultAuthMethod,
   isValidUrl,
   testConnection,
   updateDataSourceById,
@@ -23,8 +24,14 @@ import {
   mockErrorResponseForSavedObjectsCalls,
   mockResponseForSavedObjectsCalls,
 } from '../mocks';
-import { AuthType } from '../types';
+import {
+  AuthType,
+  noAuthCredentialAuthMethod,
+  sigV4AuthMethod,
+  usernamePasswordAuthMethod,
+} from '../types';
 import { HttpStart } from 'opensearch-dashboards/public';
+import { AuthenticationMethodRegistery } from '../auth_registry';
 
 const { savedObjects } = coreMock.createStart();
 
@@ -218,5 +225,51 @@ describe('DataSourceManagement: Utils.ts', () => {
 
     /* True cases: port number scenario*/
     expect(isValidUrl('http://192.168.1.1:1234/')).toBeTruthy();
+  });
+
+  describe('Check default auth method', () => {
+    test('default auth method is Username & Password when Username & Password is enabled', () => {
+      const authMethodCombinationsToBeTested = [
+        [usernamePasswordAuthMethod],
+        [sigV4AuthMethod, usernamePasswordAuthMethod],
+        [noAuthCredentialAuthMethod, usernamePasswordAuthMethod],
+        [noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod],
+      ];
+
+      authMethodCombinationsToBeTested.forEach((authOptions) => {
+        const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+
+        authOptions.forEach((authMethod) => {
+          authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        });
+
+        expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(
+          AuthType.UsernamePasswordType
+        );
+      });
+    });
+
+    test('default auth method is first one in AuthList when Username & Password is not enabled', () => {
+      const authMethodCombinationsToBeTested = [
+        [sigV4AuthMethod],
+        [noAuthCredentialAuthMethod],
+        [sigV4AuthMethod, noAuthCredentialAuthMethod],
+      ];
+
+      authMethodCombinationsToBeTested.forEach((authOptions) => {
+        const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+
+        authOptions.forEach((authMethod) => {
+          authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        });
+
+        expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(authOptions[0].name);
+      });
+    });
+
+    test('default auth type is NoAuth when no auth options registered in authenticationMethodRegistery, this should not happen in real customer scenario for MD', () => {
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(AuthType.NoAuth);
+    });
   });
 });
