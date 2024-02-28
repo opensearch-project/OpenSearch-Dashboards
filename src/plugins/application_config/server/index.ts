@@ -7,8 +7,10 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/
 import { ApplicationConfigSchema, configSchema } from '../config';
 import { ApplicationConfigPlugin } from './plugin';
 
-// This exports static code and TypeScript types,
-// as well as, OpenSearch Dashboards Platform `plugin()` initializer.
+/*
+This exports static code and TypeScript types,
+as well as, OpenSearch Dashboards Platform `plugin()` initializer.
+*/
 
 export const config: PluginConfigDescriptor<ApplicationConfigSchema> = {
   schema: configSchema,
