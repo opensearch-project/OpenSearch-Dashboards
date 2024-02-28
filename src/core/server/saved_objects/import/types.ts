@@ -214,6 +214,8 @@ export interface SavedObjectsResolveImportErrorsOptions {
   createNewCopies: boolean;
   dataSourceId?: string;
   dataSourceTitle?: string;
+  /** if specified, will import in given workspaces */
+  workspaces?: string[];
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
