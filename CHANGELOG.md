@@ -70,6 +70,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Concatenate data source name with index pattern name and change delimiter to double colon ([#5907](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5907))
 - [Multiple Datasource] Refactor client and legacy client to use authentication registry ([#5881](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5881))
 - [Multiple Datasource] Improved error handling for the search API when a null value is passed for the dataSourceId ([#5882](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5882))
+- [Multiple Datasource] Add Vega support to MDS by specifying a data source id in the Vega spec ([#5975](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5975))
 
 ### 🐛 Bug Fixes
 
