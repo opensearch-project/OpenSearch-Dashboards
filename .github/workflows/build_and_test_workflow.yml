@@ -6,7 +6,7 @@ name: Build and test
 # trigger on every commit push and PR for all branches except pushes for backport branches
 on:
   push:
-    branches: ['main', '[0-9].x', '[0-9].[0=9]+'] # Run the functional test on push for only release branches
+    branches: ['**', '!backport/**'] # Run the functional test on push for only release branches
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -421,6 +421,12 @@ jobs:
 
       - name: Build `${{ matrix.name }}`
         run: yarn ${{ matrix.script }} --release
+
+      - name: Run Opensearch
+        uses: derek-ho/start-opensearch@v2
+        with:
+          opensearch-version: ${{ env.VERSION }}
+          security-enabled: false
 
       - name: Run `${{ matrix.name }}`
         run: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}/bin/opensearch-dashboards &
