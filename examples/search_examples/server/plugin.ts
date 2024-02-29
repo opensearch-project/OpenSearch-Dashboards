@@ -63,7 +63,7 @@ export class SearchExamplesPlugin
     core: CoreSetup<SearchExamplesPluginStartDeps>,
     deps: SearchExamplesPluginSetupDeps
   ) {
-    this.logger.debug('search_examples: Setup');
+    this.logger.debug('search_examples: Setup!');
     const router = core.http.createRouter();
 
     core.getStartServices().then(([_, depsStart]) => {
