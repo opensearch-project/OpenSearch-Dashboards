@@ -6,7 +6,7 @@
 import { IScopedClusterClient, Logger } from '../../../../src/core/server';
 
 import { ConfigurationClient } from './types';
-import { ERROR_FOR_EMPTY_INPUT, ERROR_MESSSAGE_FOR_EMPTY_INPUT, isEmpty } from './string_utils';
+import { validate } from './string_utils';
 
 export class OpenSearchConfigurationClient implements ConfigurationClient {
   private client: IScopedClusterClient;
@@ -24,10 +24,7 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   }
 
   async getEntityConfig(entity: string) {
-    if (isEmpty(entity)) {
-      this.logger.error(ERROR_MESSSAGE_FOR_EMPTY_INPUT);
-      throw ERROR_FOR_EMPTY_INPUT;
-    }
+    validate(entity, this.logger);
 
     try {
       const data = await this.client.asInternalUser.get({
@@ -46,10 +43,8 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   }
 
   async updateEntityConfig(entity: string, newValue: string) {
-    if (isEmpty(entity) || isEmpty(newValue)) {
-      this.logger.error(ERROR_MESSSAGE_FOR_EMPTY_INPUT);
-      throw ERROR_FOR_EMPTY_INPUT;
-    }
+    validate(entity, this.logger);
+    validate(newValue, this.logger);
 
     try {
       await this.client.asCurrentUser.index({
@@ -71,10 +66,7 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   }
 
   async deleteEntityConfig(entity: string) {
-    if (isEmpty(entity)) {
-      this.logger.error(ERROR_MESSSAGE_FOR_EMPTY_INPUT);
-      throw ERROR_FOR_EMPTY_INPUT;
-    }
+    validate(entity, this.logger);
 
     try {
       await this.client.asCurrentUser.delete({
