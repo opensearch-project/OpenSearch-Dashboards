@@ -22,6 +22,9 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     return {
       dataSourceEnabled: config.enabled,
       hideLocalCluster: config.hideLocalCluster,
+      noAuthenticationTypeEnabled: config.authTypes.NoAuthentication.enabled,
+      usernamePasswordAuthEnabled: config.authTypes.UsernamePassword.enabled,
+      awsSigV4AuthEnabled: config.authTypes.AWSSigV4.enabled,
     };
   }
 
@@ -30,6 +33,9 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     return {
       dataSourceEnabled: config.enabled,
       hideLocalCluster: config.hideLocalCluster,
+      noAuthenticationTypeEnabled: config.authTypes.NoAuthentication.enabled,
+      usernamePasswordAuthEnabled: config.authTypes.UsernamePassword.enabled,
+      awsSigV4AuthEnabled: config.authTypes.AWSSigV4.enabled,
     };
   }
 

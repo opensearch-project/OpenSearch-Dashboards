@@ -81,6 +81,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Discover] Fix missing index pattern field from breaking Discover [#5626](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5626)
 - [BUG] Remove duplicate sample data as id 90943e30-9a47-11e8-b64d-95841ca0b247 ([5668](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5668))
 - [BUG][Multiple Datasource] Fix datasource testing connection unexpectedly passed with wrong endpoint [#5663](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5663)
+- [BUG][Multiple Datasource] Fix missing customApiRegistryPromise param for test connection ([#5944](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5944))
+
 
 ### 🚞 Infrastructure
 
@@ -107,11 +109,10 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Replace `node-sass` with `sass-embedded` ([#5338](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5338))
 - Bump `chromedriver` from `107.0.3` to `119.0.1` ([#5465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5465))
 - Bump `typescript` resolution from `4.0.2` to `4.6.4` ([#5470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5470))
-- Bump `OUI` to `1.4.0` ([#5637](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5637))
+- Bump `OUI` to `1.5.1` ([#5862](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5862))
 - Add @SuZhou-Joe as a maintainer ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
 - Move @seanneumann to emeritus maintainer ([#5634](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5634))
 - Remove `ui-select` dev dependency ([#5660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5660))
-- Bump `chromedriver` dependency to `121.0.1"` ([#5926](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5926))
 
 ### 🪛 Refactoring
 

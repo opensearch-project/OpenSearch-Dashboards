@@ -20,10 +20,8 @@ import {
 } from './configure_legacy_client.test.mocks';
 import { configureLegacyClient } from './configure_legacy_client';
 import { CustomApiSchemaRegistry } from '../schema_registry';
-import {
-  IAuthenticationMethodRegistery,
-  authenticationMethodRegisteryMock,
-} from '../auth_registry';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
