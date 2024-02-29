@@ -154,6 +154,11 @@ type MockedOptions = OpenSearchDashboardsMigratorOptions & {
 };
 
 const mockOptions = (isPermissionControlEnabled?: boolean) => {
+  const rawConfig = configMock.create();
+  rawConfig.get.mockReturnValue(false);
+  if (isPermissionControlEnabled) {
+    rawConfig.get.mockReturnValue(true);
+  }
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     opensearchDashboardsVersion: '8.2.3',
@@ -193,11 +198,7 @@ const mockOptions = (isPermissionControlEnabled?: boolean) => {
       skip: false,
     },
     client: opensearchClientMock.createOpenSearchClient(),
+    opensearchDashboardsRawConfig: rawConfig,
   };
-  if (isPermissionControlEnabled) {
-    const rawConfig = configMock.create();
-    rawConfig.get.mockReturnValue(true);
-    options.opensearchDashboardsRawConfig = rawConfig;
-  }
   return options;
 };
