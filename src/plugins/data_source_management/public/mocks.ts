@@ -15,7 +15,7 @@ import {
 } from './plugin';
 import { managementPluginMock } from '../../management/public/mocks';
 import { mockManagementPlugin as indexPatternManagementPluginMock } from '../../index_pattern_management/public/mocks';
-import { AuthenticationMethod } from './auth_registry';
+import { AuthenticationMethod, AuthenticationMethodRegistery } from './auth_registry';
 
 /* Mock Types */
 
@@ -29,6 +29,8 @@ export const docLinks = {
     },
   },
 };
+
+export const authenticationMethodRegistery = new AuthenticationMethodRegistery();
 
 const createDataSourceManagementContext = () => {
   const {
@@ -51,6 +53,7 @@ const createDataSourceManagementContext = () => {
     http,
     docLinks,
     setBreadcrumbs: () => {},
+    authenticationMethodRegistery,
   };
 };
 
@@ -220,6 +223,13 @@ export const testDataSourceManagementPlugin = (
   const setup = plugin.setup(coreSetup, {
     management: managementPluginMock.createSetupContract(),
     indexPatternManagement: indexPatternManagementPluginMock.createSetupContract(),
+    dataSource: {
+      dataSourceEnabled: true,
+      hideLocalCluster: true,
+      noAuthenticationTypeEnabled: true,
+      usernamePasswordAuthEnabled: true,
+      awsSigV4AuthEnabled: true,
+    },
   });
   const doStart = () => {
     const start = plugin.start(coreStart);

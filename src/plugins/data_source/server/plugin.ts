@@ -145,6 +145,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       createDataSourceError: (e: any) => createDataSourceError(e),
       registerCredentialProvider,
       registerCustomApiSchema: (schema: any) => this.customApiSchemaRegistry.register(schema),
+      dataSourceEnabled: () => config.enabled,
     };
   }
 
