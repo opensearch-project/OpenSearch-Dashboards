@@ -4,47 +4,49 @@
  */
 
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import {
-  ScopedClusterClientMock,
-  opensearchClientMock,
-} from '../../../core/server/opensearch/client/mocks';
 import { OpenSearchConfigurationClient } from './opensearch_config_client';
 import { MockedLogger, loggerMock } from '@osd/logging/target/mocks';
 
 const INDEX_NAME = 'test_index';
 const ERROR_MESSAGE = 'Service unavailable';
+const ERROR_MESSSAGE_FOR_EMPTY_INPUT = 'Input cannot be empty!';
+const EMPTY_INPUT = '    ';
 
 describe('OpenSearch Configuration Client', () => {
-  let opensearchClient: ScopedClusterClientMock;
   let logger: MockedLogger;
 
   beforeEach(() => {
-    opensearchClient = opensearchClientMock.createScopedClusterClient();
     logger = loggerMock.create();
   });
 
   describe('getConfig', () => {
     it('returns configurations from the index', async () => {
-      opensearchClient.asInternalUser.search.mockImplementation(() => {
-        return opensearchClientMock.createSuccessTransportRequestPromise({
-          hits: {
-            hits: [
-              {
-                _id: 'config1',
-                _source: {
-                  value: 'value1',
+      const opensearchClient = {
+        asInternalUser: {
+          search: jest.fn().mockImplementation(() => {
+            return {
+              body: {
+                hits: {
+                  hits: [
+                    {
+                      _id: 'config1',
+                      _source: {
+                        value: 'value1',
+                      },
+                    },
+                    {
+                      _id: 'config2',
+                      _source: {
+                        value: 'value2',
+                      },
+                    },
+                  ],
                 },
               },
-              {
-                _id: 'config2',
-                _source: {
-                  value: 'value2',
-                },
-              },
-            ],
-          },
-        });
-      });
+            };
+          }),
+        },
+      };
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
@@ -54,12 +56,27 @@ describe('OpenSearch Configuration Client', () => {
     });
 
     it('throws error when opensearch errors happen', async () => {
-      const error = new Error(ERROR_MESSAGE);
-
-      opensearchClient.asInternalUser.search.mockImplementation(() => {
-        return opensearchClientMock.createErrorTransportRequestPromise(error);
+      const error = new ResponseError({
+        statusCode: 401,
+        body: {
+          error: {
+            type: ERROR_MESSAGE,
+          },
+        },
+        warnings: [],
+        headers: {
+          'WWW-Authenticate': 'content',
+        },
+        meta: {} as any,
       });
 
+      const opensearchClient = {
+        asInternalUser: {
+          search: jest.fn().mockImplementation(() => {
+            throw error;
+          }),
+        },
+      };
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
       await expect(client.getConfig()).rejects.toThrowError(ERROR_MESSAGE);
@@ -68,13 +85,19 @@ describe('OpenSearch Configuration Client', () => {
 
   describe('getEntityConfig', () => {
     it('return configuration value from the document in the index', async () => {
-      opensearchClient.asInternalUser.get.mockImplementation(() => {
-        return opensearchClientMock.createSuccessTransportRequestPromise({
-          _source: {
-            value: 'value1',
-          },
-        });
-      });
+      const opensearchClient = {
+        asInternalUser: {
+          get: jest.fn().mockImplementation(() => {
+            return {
+              body: {
+                _source: {
+                  value: 'value1',
+                },
+              },
+            };
+          }),
+        },
+      };
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
@@ -83,12 +106,50 @@ describe('OpenSearch Configuration Client', () => {
       expect(value).toBe('value1');
     });
 
-    it('throws error when opensearch errors happen', async () => {
-      const error = new Error(ERROR_MESSAGE);
+    it('throws error when input is empty', async () => {
+      const opensearchClient = {
+        asInternalUser: {
+          get: jest.fn().mockImplementation(() => {
+            return {
+              body: {
+                _source: {
+                  value: 'value1',
+                },
+              },
+            };
+          }),
+        },
+      };
 
-      opensearchClient.asInternalUser.get.mockImplementation(() => {
-        return opensearchClientMock.createErrorTransportRequestPromise(error);
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+
+      await expect(client.getEntityConfig(EMPTY_INPUT)).rejects.toThrowError(
+        ERROR_MESSSAGE_FOR_EMPTY_INPUT
+      );
+    });
+
+    it('throws error when opensearch errors happen', async () => {
+      const error = new ResponseError({
+        statusCode: 401,
+        body: {
+          error: {
+            type: ERROR_MESSAGE,
+          },
+        },
+        warnings: [],
+        headers: {
+          'WWW-Authenticate': 'content',
+        },
+        meta: {} as any,
       });
+
+      const opensearchClient = {
+        asInternalUser: {
+          get: jest.fn().mockImplementation(() => {
+            throw error;
+          }),
+        },
+      };
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
@@ -98,15 +159,35 @@ describe('OpenSearch Configuration Client', () => {
 
   describe('deleteEntityConfig', () => {
     it('return deleted entity when opensearch deletes successfully', async () => {
-      opensearchClient.asCurrentUser.delete.mockImplementation(() => {
-        return opensearchClientMock.createSuccessTransportRequestPromise({});
-      });
+      const opensearchClient = {
+        asCurrentUser: {
+          delete: jest.fn().mockImplementation(() => {
+            return {};
+          }),
+        },
+      };
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
       const value = await client.deleteEntityConfig('config1');
 
       expect(value).toBe('config1');
+    });
+
+    it('throws error when input entity is empty', async () => {
+      const opensearchClient = {
+        asCurrentUser: {
+          delete: jest.fn().mockImplementation(() => {
+            return {};
+          }),
+        },
+      };
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+
+      await expect(client.deleteEntityConfig(EMPTY_INPUT)).rejects.toThrowError(
+        ERROR_MESSSAGE_FOR_EMPTY_INPUT
+      );
     });
 
     it('return deleted document entity when deletion fails due to index not found', async () => {
@@ -124,9 +205,13 @@ describe('OpenSearch Configuration Client', () => {
         meta: {} as any,
       });
 
-      opensearchClient.asCurrentUser.delete.mockImplementation(() => {
-        return opensearchClientMock.createErrorTransportRequestPromise(error);
-      });
+      const opensearchClient = {
+        asCurrentUser: {
+          delete: jest.fn().mockImplementation(() => {
+            throw error;
+          }),
+        },
+      };
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
@@ -148,9 +233,13 @@ describe('OpenSearch Configuration Client', () => {
         meta: {} as any,
       });
 
-      opensearchClient.asCurrentUser.delete.mockImplementation(() => {
-        return opensearchClientMock.createErrorTransportRequestPromise(error);
-      });
+      const opensearchClient = {
+        asCurrentUser: {
+          delete: jest.fn().mockImplementation(() => {
+            throw error;
+          }),
+        },
+      };
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
@@ -160,11 +249,27 @@ describe('OpenSearch Configuration Client', () => {
     });
 
     it('throws error when opensearch throws error', async () => {
-      const error = new Error(ERROR_MESSAGE);
-
-      opensearchClient.asCurrentUser.delete.mockImplementation(() => {
-        return opensearchClientMock.createErrorTransportRequestPromise(error);
+      const error = new ResponseError({
+        statusCode: 401,
+        body: {
+          error: {
+            type: ERROR_MESSAGE,
+          },
+        },
+        warnings: [],
+        headers: {
+          'WWW-Authenticate': 'content',
+        },
+        meta: {} as any,
       });
+
+      const opensearchClient = {
+        asCurrentUser: {
+          delete: jest.fn().mockImplementation(() => {
+            throw error;
+          }),
+        },
+      };
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
@@ -174,9 +279,13 @@ describe('OpenSearch Configuration Client', () => {
 
   describe('updateEntityConfig', () => {
     it('returns updated value when opensearch updates successfully', async () => {
-      opensearchClient.asCurrentUser.index.mockImplementation(() => {
-        return opensearchClientMock.createSuccessTransportRequestPromise({});
-      });
+      const opensearchClient = {
+        asCurrentUser: {
+          index: jest.fn().mockImplementation(() => {
+            return {};
+          }),
+        },
+      };
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
@@ -185,12 +294,60 @@ describe('OpenSearch Configuration Client', () => {
       expect(value).toBe('newValue1');
     });
 
-    it('throws error when opensearch throws error', async () => {
-      const error = new Error(ERROR_MESSAGE);
+    it('throws error when entity is empty ', async () => {
+      const opensearchClient = {
+        asCurrentUser: {
+          index: jest.fn().mockImplementation(() => {
+            return {};
+          }),
+        },
+      };
 
-      opensearchClient.asCurrentUser.index.mockImplementation(() => {
-        return opensearchClientMock.createErrorTransportRequestPromise(error);
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+
+      await expect(client.updateEntityConfig(EMPTY_INPUT, 'newValue1')).rejects.toThrowError(
+        ERROR_MESSSAGE_FOR_EMPTY_INPUT
+      );
+    });
+
+    it('throws error when new value is empty ', async () => {
+      const opensearchClient = {
+        asCurrentUser: {
+          index: jest.fn().mockImplementation(() => {
+            return {};
+          }),
+        },
+      };
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+
+      await expect(client.updateEntityConfig('config1', EMPTY_INPUT)).rejects.toThrowError(
+        ERROR_MESSSAGE_FOR_EMPTY_INPUT
+      );
+    });
+
+    it('throws error when opensearch throws error', async () => {
+      const error = new ResponseError({
+        statusCode: 401,
+        body: {
+          error: {
+            type: ERROR_MESSAGE,
+          },
+        },
+        warnings: [],
+        headers: {
+          'WWW-Authenticate': 'content',
+        },
+        meta: {} as any,
       });
+
+      const opensearchClient = {
+        asCurrentUser: {
+          index: jest.fn().mockImplementation(() => {
+            throw error;
+          }),
+        },
+      };
 
       const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
 
