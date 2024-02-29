@@ -20,6 +20,11 @@ import {
 
 const errorContent = (error: Boom.Boom) => error.output.payload;
 
+const filterWorkspacesAccordingToSourceWorkspaces = (
+  targetWorkspaces?: string[],
+  baseWorkspaces?: string[]
+): string[] => targetWorkspaces?.filter((item) => !baseWorkspaces?.includes(item)) || [];
+
 export class WorkspaceConflictSavedObjectsClientWrapper {
   private _serializer?: SavedObjectsSerializer;
   public setSerializer(serializer: SavedObjectsSerializer) {
@@ -53,10 +58,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         }
         if (currentItem) {
           if (
-            SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
-              workspaces,
-              currentItem.workspaces
-            ).length
+            filterWorkspacesAccordingToSourceWorkspaces(workspaces, currentItem.workspaces).length
           ) {
             throw SavedObjectsErrorHelpers.createConflictError(type, id);
           } else {
@@ -112,7 +114,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
              * We need to check if the options.workspaces is the subset of object.workspaces,
              * Or it will be treated as a conflict
              */
-            const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
+            const filteredWorkspaces = filterWorkspacesAccordingToSourceWorkspaces(
               options.workspaces,
               object.workspaces
             );
@@ -229,7 +231,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
              */
             if (!object.error) {
               let workspaceConflict = false;
-              const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToSourceWorkspaces(
+              const filteredWorkspaces = filterWorkspacesAccordingToSourceWorkspaces(
                 options.workspaces,
                 object.workspaces
               );
