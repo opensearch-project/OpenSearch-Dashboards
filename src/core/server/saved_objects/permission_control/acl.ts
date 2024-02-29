@@ -131,7 +131,7 @@ export class ACL {
    *   .addPermission(['write', 'management'], {
    *     groups: ['group1'],
    *   })
-   *   .getPermissions();;
+   *   .getPermissions();
    *
    * @param {Array} permissionTypes the permission types
    * @param {Object} principals the users or groups
@@ -171,7 +171,7 @@ export class ACL {
    *   .removePermission(['write', 'management'], {
    *     groups: ['group1'],
    *   })
-   *   .getPermissions();;
+   *   .getPermissions();
    *
    * @param {Array} permissionTypes the permission types
    * @param {Object} principals the users or groups
