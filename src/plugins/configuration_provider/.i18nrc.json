@@ -1,9 +1,0 @@
-{
-  "prefix": "configurationProvider",
-  "paths": {
-    "configurationProvider": "."
-  },
-  "translations": [
-    "translations/ja-JP.json"
-  ]
-}
