@@ -37,6 +37,7 @@ import {
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
+import { configMock } from '../../../config/mocks';
 
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
@@ -75,6 +76,12 @@ describe('OpenSearchDashboardsMigrator', () => {
 
       const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
       expect(mappings).toMatchSnapshot();
+    });
+
+    it('permissions field exists in the mappings when the feature is enabled', () => {
+      const options = mockOptions(true);
+      const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
+      expect(mappings).toHaveProperty('properties.permissions');
     });
   });
 
@@ -146,7 +153,7 @@ type MockedOptions = OpenSearchDashboardsMigratorOptions & {
   client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
 };
 
-const mockOptions = () => {
+const mockOptions = (isPermissionControlEnabled?: boolean) => {
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     opensearchDashboardsVersion: '8.2.3',
@@ -187,5 +194,10 @@ const mockOptions = () => {
     },
     client: opensearchClientMock.createOpenSearchClient(),
   };
+  if (isPermissionControlEnabled) {
+    const rawConfig = configMock.create();
+    rawConfig.get.mockReturnValue(true);
+    options.opensearchDashboardsRawConfig = rawConfig;
+  }
   return options;
 };

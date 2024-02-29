@@ -36,6 +36,7 @@
  */
 
 import { Logger } from 'src/core/server/logging';
+import { Config } from 'packages/osd-config/target';
 import { MigrationOpenSearchClient } from './migration_opensearch_client';
 import { SavedObjectsSerializer } from '../../serialization';
 import {
@@ -65,6 +66,7 @@ export interface MigrationOpts {
    * prior to running migrations. For example: 'opensearch_dashboards_index_template*'
    */
   obsoleteIndexTemplatePattern?: string;
+  opensearchDashboardsRawConfig?: Config;
 }
 
 /**
@@ -90,10 +92,15 @@ export interface Context {
  * and various info needed to migrate the source index.
  */
 export async function migrationContext(opts: MigrationOpts): Promise<Context> {
-  const { log, client } = opts;
+  const { log, client, opensearchDashboardsRawConfig } = opts;
   const alias = opts.index;
   const source = createSourceContext(await Index.fetchInfo(client, alias), alias);
-  const dest = createDestContext(source, alias, opts.mappingProperties);
+  const dest = createDestContext(
+    source,
+    alias,
+    opts.mappingProperties,
+    opensearchDashboardsRawConfig
+  );
 
   return {
     client,
@@ -125,10 +132,11 @@ function createSourceContext(source: Index.FullIndexInfo, alias: string) {
 function createDestContext(
   source: Index.FullIndexInfo,
   alias: string,
-  typeMappingDefinitions: SavedObjectsTypeMappingDefinitions
+  typeMappingDefinitions: SavedObjectsTypeMappingDefinitions,
+  opensearchDashboardsRawConfig?: Config
 ): Index.FullIndexInfo {
   const targetMappings = disableUnknownTypeMappingFields(
-    buildActiveMappings(typeMappingDefinitions),
+    buildActiveMappings(typeMappingDefinitions, opensearchDashboardsRawConfig),
     source.mappings
   );
 
