@@ -34,6 +34,7 @@
 
 import crypto from 'crypto';
 import { cloneDeep, mapValues } from 'lodash';
+import { Config } from 'packages/osd-config/target';
 import {
   IndexMapping,
   SavedObjectsFieldMapping,
@@ -48,11 +49,36 @@ import {
  * @param typeDefinitions - the type definitions to build mapping from.
  */
 export function buildActiveMappings(
-  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
+  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties,
+  opensearchDashboardsRawConfig?: Config
 ): IndexMapping {
   const mapping = defaultMapping();
 
-  const mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
+  let mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
+  // if permission control for saved objects is enabled, the permissions field should be added to the mapping
+  if (opensearchDashboardsRawConfig?.get('savedObjects.permission.enabled')) {
+    const principals: SavedObjectsFieldMapping = {
+      properties: {
+        users: {
+          type: 'keyword',
+        },
+        groups: {
+          type: 'keyword',
+        },
+      },
+    };
+    mergedProperties = validateAndMerge(mapping.properties, {
+      permissions: {
+        properties: {
+          read: principals,
+          write: principals,
+          management: principals,
+          library_read: principals,
+          library_write: principals,
+        },
+      },
+    });
+  }
 
   return cloneDeep({
     ...mapping,
@@ -138,16 +164,6 @@ function findChangedProp(actual: any, expected: any) {
  * @returns {IndexMapping}
  */
 function defaultMapping(): IndexMapping {
-  const principals: SavedObjectsFieldMapping = {
-    properties: {
-      users: {
-        type: 'keyword',
-      },
-      groups: {
-        type: 'keyword',
-      },
-    },
-  };
   return {
     dynamic: 'strict',
     properties: {
@@ -184,15 +200,6 @@ function defaultMapping(): IndexMapping {
           id: {
             type: 'keyword',
           },
-        },
-      },
-      permissions: {
-        properties: {
-          read: principals,
-          write: principals,
-          management: principals,
-          library_read: principals,
-          library_write: principals,
         },
       },
     },
