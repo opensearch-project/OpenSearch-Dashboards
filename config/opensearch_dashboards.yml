@@ -33,6 +33,9 @@
 # This shall be a different index from opensearchDashboards.index.
 # opensearchDashboards.configIndex: ".opensearch_dashboards_config"
 
+# Set the value of this setting to true to enable plugin application config. By default it is disabled.
+# application_config.enabled: false
+
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"
 
@@ -290,6 +293,3 @@
 
 # Set the value of this setting to true to enable plugin augmentation on Dashboard
 # vis_augmenter.pluginAugmentationEnabled: true
-
-# Set the value of this setting to true to enable plugin application config. By default it is disabled.
-# application_config.enabled: false
