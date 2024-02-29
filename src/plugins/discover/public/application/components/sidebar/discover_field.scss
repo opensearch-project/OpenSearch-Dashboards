@@ -18,8 +18,4 @@
   .dscSidebarField__actionButton:focus {
     opacity: 1;
   }
-
-  @include ouiBreakpoint("xs", "s", "m") {
-    opacity: 1;
-  }
 }
