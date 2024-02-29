@@ -195,7 +195,7 @@ describe('Flyout', () => {
     await component.instance().import();
     expect(importFileMock.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
-        "createNewCopies": false,
+        "createNewCopies": true,
         "overwrite": true,
         "workspaces": Array [
           "foo",
