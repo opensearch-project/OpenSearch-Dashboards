@@ -85,7 +85,7 @@ function createManifest(
     version: 'some-version',
     configPath: ['path'],
     requiredPlugins: required,
-    requiredEnginePlugins: optional,
+    requiredEnginePlugins: {},
     optionalPlugins: optional,
     requiredBundles: [],
   };
@@ -103,6 +103,7 @@ describe('PluginsService', () => {
     ];
     mockSetupDeps = {
       application: applicationServiceMock.createInternalSetupContract(),
+      chrome: chromeServiceMock.createSetupContract(),
       context: contextServiceMock.createSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),

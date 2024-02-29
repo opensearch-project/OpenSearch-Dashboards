@@ -237,6 +237,8 @@
 
 # Set the value of this setting to true to enable multiple data source feature.
 #data_source.enabled: false
+# Set the value of this setting to true to hide local cluster in data source feature.
+#data_source.hideLocalCluster: false
 # Set the value of these settings to customize crypto materials to encryption saved credentials
 # in data sources.
 #data_source.encryption.wrappingKeyName: 'changeme'
@@ -267,6 +269,17 @@
 #    '2001:db8::/32',
 #    'ff00::/8',
 # ]
+
+# Set enabled false to hide authentication method in OpenSearch Dashboards.
+# If this setting is commented then all 3 options will be available in OpenSearch Dashboards.
+# Default value will be considered to True.
+#data_source.authTypes:
+#   NoAuthentication:
+#     enabled: true
+#   UsernamePassword:
+#     enabled: true
+#   AWSSigV4:
+#     enabled: true
 
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"

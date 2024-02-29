@@ -27,7 +27,8 @@ interface WorkspaceObservables {
 
   /**
    * The list of available workspaces. This workspace list should be set by whoever
-   * the workspace functionalities
+   * implemented the workspace functionalities, core workspace module should not be
+   * aware of how to populate the workspace list.
    */
   workspaceList$: BehaviorSubject<WorkspaceObject[]>;
 
@@ -39,7 +40,7 @@ interface WorkspaceObservables {
 }
 
 enum WORKSPACE_ERROR {
-  WORKSPACE_STALED = 'WORKSPACE_STALED',
+  WORKSPACE_IS_STALE = 'WORKSPACE_IS_STALE',
 }
 
 export type WorkspacesSetup = WorkspaceObservables;
@@ -66,13 +67,13 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
 
           if (currentWorkspaceId && !currentWorkspace?.id) {
             /**
-             * Current workspace is staled
+             * Current workspace is stale
              */
             this.currentWorkspaceId$.error({
-              reason: WORKSPACE_ERROR.WORKSPACE_STALED,
+              reason: WORKSPACE_ERROR.WORKSPACE_IS_STALE,
             });
             this.currentWorkspace$.error({
-              reason: WORKSPACE_ERROR.WORKSPACE_STALED,
+              reason: WORKSPACE_ERROR.WORKSPACE_IS_STALE,
             });
           }
         }

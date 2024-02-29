@@ -63,6 +63,44 @@ describe('Range filter builder', () => {
     });
   });
 
+  it('should return a range filter when passed a standard field of type BigInt', () => {
+    const field = getField('bytes');
+
+    const lowerBigInt = BigInt(Number.MIN_SAFE_INTEGER) - 11n;
+    const upperBigInt = BigInt(Number.MAX_SAFE_INTEGER) + 11n;
+
+    expect(
+      buildRangeFilter(field, { gte: `${lowerBigInt}`, lte: `${upperBigInt}` }, indexPattern)
+    ).toEqual({
+      meta: {
+        index: 'id',
+        params: {},
+      },
+      range: {
+        bytes: {
+          gte: lowerBigInt,
+          lte: upperBigInt,
+        },
+      },
+    });
+  });
+
+  it('should return a range filter when passed a scripted field using BigInt', () => {
+    const field = getField('script number');
+
+    const lowerBigInt = BigInt(Number.MIN_SAFE_INTEGER) - 11n;
+    const upperBigInt = BigInt(Number.MAX_SAFE_INTEGER) + 11n;
+
+    const filter = buildRangeFilter(
+      field,
+      { gte: `${lowerBigInt}`, lt: `${upperBigInt}` },
+      indexPattern
+    );
+
+    expect(filter.script!.script.params).toHaveProperty('gte', lowerBigInt);
+    expect(filter.script!.script.params).toHaveProperty('lt', upperBigInt);
+  });
+
   it('should return a script filter when passed a scripted field', () => {
     const field = getField('script number');
 

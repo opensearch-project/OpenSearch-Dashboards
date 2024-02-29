@@ -17,9 +17,10 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
-  EuiSelect,
+  EuiSuperSelect,
   EuiSpacer,
   EuiText,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -27,7 +28,6 @@ import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/co
 import { Header } from '../header';
 import {
   AuthType,
-  credentialSourceOptions,
   DataSourceAttributes,
   DataSourceManagementContextValue,
   sigV4ServiceOptions,
@@ -71,9 +71,16 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   static contextType = contextType;
   public readonly context!: DataSourceManagementContextValue;
   maskedPassword: string = '********';
+  authOptions: Array<EuiSuperSelectOption<string>> = [];
 
   constructor(props: EditDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
+
+    this.authOptions = context.services.authenticationMethodRegistery
+      .getAllAuthenticationMethods()
+      .map((authMethod) => {
+        return authMethod.credentialSourceOption;
+      });
 
     this.state = {
       formErrorsByField: { ...defaultValidation },
@@ -166,8 +173,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
-  onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const authType = e.target.value as AuthType;
+  onChangeAuthType = (authType: AuthType) => {
     this.setState(
       {
         auth: {
@@ -241,13 +247,13 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     });
   };
 
-  onChangeSigV4ServiceName = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  onChangeSigV4ServiceName = (service: SigV4ServiceName) => {
     this.setState({
       auth: {
         ...this.state.auth,
         credentials: {
           ...this.state.auth.credentials,
-          service: e.target.value as SigV4ServiceName,
+          service,
         } as SigV4Content,
       },
     });
@@ -772,10 +778,11 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             defaultMessage: 'Credential',
           })}
         >
-          <EuiSelect
-            options={credentialSourceOptions}
-            value={this.state.auth.type}
-            onChange={this.onChangeAuthType}
+          <EuiSuperSelect
+            options={this.authOptions}
+            valueOfSelected={this.state.auth.type}
+            onChange={(value) => this.onChangeAuthType(value)}
+            disabled={this.authOptions.length <= 1}
             name="Credential"
             data-test-subj="editDataSourceSelectAuthType"
           />
@@ -827,10 +834,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             defaultMessage: 'Service Name',
           })}
         >
-          <EuiSelect
+          <EuiSuperSelect
             options={sigV4ServiceOptions}
-            value={this.state.auth.credentials?.service}
-            onChange={(e) => this.onChangeSigV4ServiceName(e)}
+            valueOfSelected={this.state.auth.credentials?.service}
+            onChange={(value) => this.onChangeSigV4ServiceName(value)}
             name="ServiceName"
             data-test-subj="editDataSourceFormSigV4ServiceTypeSelect"
           />

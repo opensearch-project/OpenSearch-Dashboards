@@ -4,10 +4,9 @@
  */
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { i18n } from '@osd/i18n';
 import { debounce } from 'lodash';
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { WORKSPACE_APP_ID, PATHS, WORKSPACE_ID_QUERYSTRING_NAME } from '../common/constants';
+import { CoreSetup, Plugin } from '../../../core/public';
+import { WORKSPACE_ID_QUERYSTRING_NAME } from '../common/constants';
 import { HashURL } from './components/utils/hash_url';
 
 export class WorkspacesPlugin implements Plugin<{}, {}> {
@@ -126,12 +125,7 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
     return {};
   }
 
-  public start(core: CoreStart) {
-    core.chrome.setCustomNavLink({
-      title: i18n.translate('workspace.nav.title', { defaultMessage: 'Workspace Overview' }),
-      baseUrl: core.http.basePath.get(),
-      href: core.application.getUrlForApp(WORKSPACE_APP_ID, { path: PATHS.update }),
-    });
+  public start() {
     return {};
   }
 }

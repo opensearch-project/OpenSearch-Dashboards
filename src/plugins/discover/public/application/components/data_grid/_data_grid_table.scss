@@ -1,0 +1,32 @@
+.discoverDataGrid {
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiDataGrid__content {
+    @include ouiCodeFont;
+
+    font-size: 12px;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiDataGridRowCell {
+    font-size: inherit;
+    line-height: 1.6666em;
+
+    .source {
+      dd,
+      dl,
+      dt {
+        font-size: inherit !important;
+      }
+    }
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiDataGridHeaderCell {
+    font-size: inherit;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiDataGridRowCell__expandButton {
+    top: calc(1.6666em / 2 + 6px);
+  }
+}

@@ -10,7 +10,9 @@ import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { useDiscoverContext } from '../context';
 import {
   addColumn,
+  moveColumn,
   removeColumn,
+  reorderColumn,
   setColumns,
   setSort,
   useDispatch,
@@ -21,6 +23,7 @@ import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../saved_searches/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import { popularizeField } from '../../helpers/popularize_field';
 
 interface Props {
   rows?: OpenSearchSearchHit[];
@@ -33,13 +36,35 @@ export const DiscoverTable = ({ rows }: Props) => {
     data: {
       query: { filterManager },
     },
+    capabilities,
+    indexPatterns,
   } = services;
 
   const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
   const { columns, sort } = useSelector((state) => state.discover);
   const dispatch = useDispatch();
-  const onAddColumn = (col: string) => dispatch(addColumn({ column: col }));
-  const onRemoveColumn = (col: string) => dispatch(removeColumn(col));
+  const onAddColumn = (col: string) => {
+    if (indexPattern && capabilities.discover?.save) {
+      popularizeField(indexPattern, col, indexPatterns);
+    }
+
+    dispatch(addColumn({ column: col }));
+  };
+  const onRemoveColumn = (col: string) => {
+    if (indexPattern && capabilities.discover?.save) {
+      popularizeField(indexPattern, col, indexPatterns);
+    }
+
+    dispatch(removeColumn(col));
+  };
+
+  const onMoveColumn = (col: string, destination: number) => {
+    if (indexPattern && capabilities.discover?.save) {
+      popularizeField(indexPattern, col, indexPatterns);
+    }
+    dispatch(moveColumn({ columnName: col, destination }));
+  };
+
   const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
     dispatch(setSort(s));
@@ -81,6 +106,7 @@ export const DiscoverTable = ({ rows }: Props) => {
       indexPattern={indexPattern}
       onAddColumn={onAddColumn}
       onFilter={onAddFilter as DocViewFilterFn}
+      onMoveColumn={onMoveColumn}
       onRemoveColumn={onRemoveColumn}
       onSetColumns={onSetColumns}
       onSort={onSetSort}

@@ -15,7 +15,8 @@ import { DataSourcePluginConfigType } from '../../config';
 export function parseClientOptions(
   // TODO: will use client configs, that comes from a merge result of user config and default opensearch client config,
   config: DataSourcePluginConfigType,
-  endpoint: string
+  endpoint: string,
+  registeredSchema: any[]
 ): ClientOptions {
   const clientOptions: ClientOptions = {
     node: endpoint,
@@ -23,6 +24,7 @@ export function parseClientOptions(
       requestCert: true,
       rejectUnauthorized: true,
     },
+    plugins: registeredSchema,
   };
 
   return clientOptions;

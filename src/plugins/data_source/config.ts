@@ -13,6 +13,7 @@ const WRAPPING_KEY_SIZE: number = 32;
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  hideLocalCluster: schema.boolean({ defaultValue: false }),
   encryption: schema.object({
     wrappingKeyName: schema.string({
       minLength: KEY_NAME_MIN_LENGTH,
@@ -38,6 +39,17 @@ export const configSchema = schema.object({
     appender: fileAppenderSchema,
   }),
   endpointDeniedIPs: schema.maybe(schema.arrayOf(schema.string())),
+  authTypes: schema.object({
+    NoAuthentication: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    UsernamePassword: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+    AWSSigV4: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
 });
 
 export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;

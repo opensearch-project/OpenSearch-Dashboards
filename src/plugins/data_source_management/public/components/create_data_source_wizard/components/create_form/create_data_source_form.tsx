@@ -15,16 +15,16 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPageContent,
-  EuiSelect,
+  EuiSuperSelect,
   EuiSpacer,
   EuiText,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import {
   AuthType,
-  credentialSourceOptions,
   DataSourceAttributes,
   DataSourceManagementContextValue,
   UsernamePasswordTypedContent,
@@ -38,7 +38,7 @@ import {
   isTitleValid,
   performDataSourceFormValidation,
 } from '../../../validation';
-import { isValidUrl } from '../../../utils';
+import { getDefaultAuthMethod, isValidUrl } from '../../../utils';
 
 export interface CreateDataSourceProps {
   existingDatasourceNamesList: string[];
@@ -55,7 +55,7 @@ export interface CreateDataSourceState {
   endpoint: string;
   auth: {
     type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content;
+    credentials: UsernamePasswordTypedContent | SigV4Content | undefined;
   };
 }
 
@@ -66,8 +66,22 @@ export class CreateDataSourceForm extends React.Component<
   static contextType = contextType;
   public readonly context!: DataSourceManagementContextValue;
 
+  authOptions: Array<EuiSuperSelectOption<string>> = [];
+  isNoAuthOptionEnabled: boolean;
+
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
+
+    const authenticationMethodRegistery = context.services.authenticationMethodRegistery;
+    const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
+    const initialSelectedAuthMethod = getDefaultAuthMethod(authenticationMethodRegistery);
+
+    this.isNoAuthOptionEnabled =
+      authenticationMethodRegistery.getAuthenticationMethod(AuthType.NoAuth) !== undefined;
+
+    this.authOptions = registeredAuthMethods.map((authMethod) => {
+      return authMethod.credentialSourceOption;
+    });
 
     this.state = {
       formErrorsByField: { ...defaultValidation },
@@ -75,10 +89,9 @@ export class CreateDataSourceForm extends React.Component<
       description: '',
       endpoint: '',
       auth: {
-        type: AuthType.UsernamePasswordType,
+        type: initialSelectedAuthMethod?.name,
         credentials: {
-          username: '',
-          password: '',
+          ...initialSelectedAuthMethod?.crendentialFormField,
         },
       },
     };
@@ -124,8 +137,7 @@ export class CreateDataSourceForm extends React.Component<
     });
   };
 
-  onChangeAuthType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const authType = e.target.value as AuthType;
+  onChangeAuthType = (authType: AuthType) => {
     this.setState({
       auth: {
         ...this.state.auth,
@@ -140,13 +152,13 @@ export class CreateDataSourceForm extends React.Component<
     });
   };
 
-  onChangeSigV4ServiceName = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  onChangeSigV4ServiceName = (service: SigV4ServiceName) => {
     this.setState({
       auth: {
         ...this.state.auth,
         credentials: {
           ...this.state.auth.credentials,
-          service: e.target.value as SigV4ServiceName,
+          service,
         },
       },
     });
@@ -298,6 +310,9 @@ export class CreateDataSourceForm extends React.Component<
         service: this.state.auth.credentials.service || SigV4ServiceName.OpenSearch,
       } as SigV4Content;
     }
+    if (this.state.auth.type === AuthType.NoAuth) {
+      credentials = {};
+    }
 
     return {
       title: this.state.title,
@@ -425,10 +440,10 @@ export class CreateDataSourceForm extends React.Component<
                 defaultMessage: 'Service Name',
               })}
             >
-              <EuiSelect
+              <EuiSuperSelect
                 options={sigV4ServiceOptions}
-                value={this.state.auth.credentials.service}
-                onChange={(e) => this.onChangeSigV4ServiceName(e)}
+                valueOfSelected={this.state.auth.credentials.service}
+                onChange={(value) => this.onChangeSigV4ServiceName(value)}
                 name="ServiceName"
                 data-test-subj="createDataSourceFormSigV4ServiceTypeSelect"
               />
@@ -584,24 +599,33 @@ export class CreateDataSourceForm extends React.Component<
               <EuiText>
                 <FormattedMessage
                   id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
-                  defaultMessage="Enter the authentication details to access the endpoint. If no authentication is required, select "
+                  defaultMessage="Enter the authentication details to access the endpoint."
                 />
-                <b>
+                {this.isNoAuthOptionEnabled && (
                   <FormattedMessage
-                    id="dataSourcesManagement.createDataSource.noAuthentication"
-                    defaultMessage="No authentication"
+                    id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
+                    defaultMessage=" If no authentication is required, select "
                   />
-                </b>
+                )}
+                {this.isNoAuthOptionEnabled && (
+                  <b>
+                    <FormattedMessage
+                      id="dataSourcesManagement.createDataSource.noAuthentication"
+                      defaultMessage="No authentication"
+                    />
+                  </b>
+                )}
               </EuiText>
             </EuiFormRow>
 
             {/* Credential source */}
             <EuiSpacer size="l" />
             <EuiFormRow>
-              <EuiSelect
-                options={credentialSourceOptions}
-                value={this.state.auth.type}
-                onChange={(e) => this.onChangeAuthType(e)}
+              <EuiSuperSelect
+                options={this.authOptions}
+                valueOfSelected={this.state.auth.type}
+                onChange={(value) => this.onChangeAuthType(value)}
+                disabled={this.authOptions.length <= 1}
                 name="Credential"
                 data-test-subj="createDataSourceFormAuthTypeSelect"
               />

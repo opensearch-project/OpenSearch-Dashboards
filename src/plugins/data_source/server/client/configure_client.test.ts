@@ -13,7 +13,11 @@ import {
   SigV4Content,
 } from '../../common/data_sources/types';
 import { DataSourcePluginConfigType } from '../../config';
-import { ClientMock, parseClientOptionsMock } from './configure_client.test.mocks';
+import {
+  ClientMock,
+  parseClientOptionsMock,
+  authRegistryCredentialProviderMock,
+} from './configure_client.test.mocks';
 import { OpenSearchClientPoolSetup } from './client_pool';
 import { configureClient } from './configure_client';
 import { ClientOptions } from '@opensearch-project/opensearch';
@@ -21,7 +25,10 @@ import { ClientOptions } from '@opensearch-project/opensearch';
 import { opensearchClientMock } from '../../../../core/server/opensearch/client/mocks';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
-import { DataSourceClientParams } from '../types';
+import { DataSourceClientParams, AuthenticationMethod } from '../types';
+import { CustomApiSchemaRegistry } from '../schema_registry';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
@@ -38,12 +45,16 @@ describe('configureClient', () => {
   let dataSourceClientParams: DataSourceClientParams;
   let usernamePasswordAuthContent: UsernamePasswordTypedContent;
   let sigV4AuthContent: SigV4Content;
+  let customApiSchemaRegistry: CustomApiSchemaRegistry;
+  let authenticationMethodRegistery: jest.Mocked<IAuthenticationMethodRegistery>;
 
   beforeEach(() => {
     dsClient = opensearchClientMock.createInternalClient();
     logger = loggingSystemMock.createLogger();
     savedObjectsMock = savedObjectsClientMock.create();
     cryptographyMock = cryptographyServiceSetupMock.create();
+    customApiSchemaRegistry = new CustomApiSchemaRegistry();
+    authenticationMethodRegistery = authenticationMethodRegisteryMock.create();
 
     config = {
       enabled: true,
@@ -95,6 +106,7 @@ describe('configureClient', () => {
       dataSourceId: DATA_SOURCE_ID,
       savedObjects: savedObjectsMock,
       cryptography: cryptographyMock,
+      customApiSchemaRegistryPromise: Promise.resolve(customApiSchemaRegistry),
     };
 
     ClientMock.mockImplementation(() => dsClient);
@@ -237,5 +249,47 @@ describe('configureClient', () => {
     expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('configureClient should retunrn client from authentication registery if method present in registry', async () => {
+    const name = 'typeA';
+    const customAuthContent = {
+      region: 'us-east-1',
+      roleARN: 'test-role',
+    };
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: customAuthContent,
+        },
+      },
+      references: [],
+    });
+    const authMethod: AuthenticationMethod = {
+      name,
+      authType: AuthType.SigV4,
+      credentialProvider: jest.fn(),
+    };
+    authenticationMethodRegistery.getAuthenticationMethod.mockImplementation(() => authMethod);
+
+    authRegistryCredentialProviderMock.mockReturnValue({
+      credential: sigV4AuthContent,
+      type: AuthType.SigV4,
+    });
+
+    await configureClient(
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      clientPoolSetup,
+      config,
+      logger
+    );
+    expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
+    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
   });
 });

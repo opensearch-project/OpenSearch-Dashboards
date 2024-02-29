@@ -11,7 +11,7 @@ import { RootState, DefaultViewState } from '../../../../../data_explorer/public
 import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../saved_searches/types';
-import { PLUGIN_ID } from '../../../../common';
+import { DEFAULT_COLUMNS_SETTING, PLUGIN_ID } from '../../../../common';
 
 export interface DiscoverState {
   /**
@@ -42,7 +42,16 @@ export interface DiscoverState {
    * dirty flag to indicate if the saved search has been modified
    * since the last save
    */
-  isDirty: boolean;
+  isDirty?: boolean;
+  /**
+   * Metadata for the view
+   */
+  metadata?: {
+    /**
+     * Number of lines to display per row
+     */
+    lineCount?: number;
+  };
 }
 
 export interface DiscoverRootState extends RootState {
@@ -57,6 +66,7 @@ const initialState: DiscoverState = {
 
 export const getPreloadedState = async ({
   getSavedSearchById,
+  uiSettings: config,
 }: DiscoverServices): Promise<DefaultViewState<DiscoverState>> => {
   const preloadedState: DefaultViewState<DiscoverState> = {
     state: {
@@ -86,6 +96,8 @@ export const getPreloadedState = async ({
 
       savedSearchInstance.destroy(); // this instance is no longer needed, will create another one later
     }
+  } else if (config.get(DEFAULT_COLUMNS_SETTING)) {
+    preloadedState.state.columns = config.get(DEFAULT_COLUMNS_SETTING);
   }
 
   return preloadedState;
@@ -125,6 +137,17 @@ export const discoverSlice = createSlice({
         isDirty: true,
       };
     },
+    moveColumn(state, action: PayloadAction<{ columnName: string; destination: number }>) {
+      const columns = utils.moveColumn(
+        state.columns,
+        action.payload.columnName,
+        action.payload.destination
+      );
+      return {
+        ...state,
+        columns,
+      };
+    },
     setColumns(state, action: PayloadAction<{ columns: string[] }>) {
       return {
         ...state,
@@ -156,6 +179,15 @@ export const discoverSlice = createSlice({
         isDirty: false,
       };
     },
+    setMetadata(state, action: PayloadAction<Partial<DiscoverState['metadata']>>) {
+      return {
+        ...state,
+        metadata: {
+          ...state.metadata,
+          ...action.payload,
+        },
+      };
+    },
   },
 });
 
@@ -164,11 +196,13 @@ export const {
   addColumn,
   removeColumn,
   reorderColumn,
+  moveColumn,
   setColumns,
   setSort,
   setInterval,
   setState,
   updateState,
   setSavedSearchId,
+  setMetadata,
 } = discoverSlice.actions;
 export const { reducer } = discoverSlice;

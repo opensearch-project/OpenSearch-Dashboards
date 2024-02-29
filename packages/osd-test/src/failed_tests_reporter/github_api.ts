@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import Axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosInstance, AxiosHeaderValue } from 'axios';
 import parseLinkHeader from 'parse-link-header';
 import { ToolingLog, isAxiosResponseError, isAxiosRequestError } from '@osd/dev-utils';
 
@@ -206,7 +206,7 @@ export class GithubApi {
   ): Promise<{
     status: number;
     statusText: string;
-    headers: Record<string, string | string[] | undefined>;
+    headers: Record<string, AxiosHeaderValue | undefined>;
     data: T;
   }> {
     const executeRequest = !this.dryRun || options.safeForDryRun;
@@ -231,7 +231,7 @@ export class GithubApi {
       const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
       const errorResponseLog =
         isAxiosResponseError(error) &&
-        `[${error.config.method} ${error.config.url}] ${error.response.status} ${error.response.statusText} Error`;
+        `[${error.config?.method} ${error.config?.url}] ${error.response.status} ${error.response.statusText} Error`;
 
       if ((unableToReachGithub || githubApiFailed) && attempt < maxAttempts) {
         const waitMs = 1000 * attempt;

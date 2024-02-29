@@ -4,7 +4,13 @@
  */
 
 import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
-import { DataSourceAttributes, DataSourceTableItem } from '../types';
+import {
+  DataSourceAttributes,
+  DataSourceTableItem,
+  defaultAuthType,
+  noAuthCredentialAuthMethod,
+} from '../types';
+import { AuthenticationMethodRegistery } from '../auth_registry';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -107,4 +113,20 @@ export const isValidUrl = (endpoint: string) => {
   } catch (e) {
     return false;
   }
+};
+
+export const getDefaultAuthMethod = (
+  authenticationMethodRegistery: AuthenticationMethodRegistery
+) => {
+  const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
+
+  const defaultAuthMethod =
+    registeredAuthMethods.length > 0
+      ? authenticationMethodRegistery.getAuthenticationMethod(registeredAuthMethods[0].name)
+      : noAuthCredentialAuthMethod;
+
+  const initialSelectedAuthMethod =
+    authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
+
+  return initialSelectedAuthMethod;
 };
