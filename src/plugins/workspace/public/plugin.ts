@@ -6,15 +6,15 @@
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { debounce } from 'lodash';
 import { CoreSetup, Plugin } from '../../../core/public';
-import { WORKSPACE_ID_QUERYSTRING_NAME } from '../common/constants';
-import { HashURL } from './components/utils/hash_url';
+import { getStateFromOsdUrl } from '../../opensearch_dashboards_utils/public';
+import { formatUrlWithWorkspaceId } from './utils';
+import { WORKSPACE_ID_STATE_KEY } from '../common/constants';
 
-export class WorkspacesPlugin implements Plugin<{}, {}> {
+export class WorkspacePlugin implements Plugin<{}, {}> {
   private core?: CoreSetup;
   private URLChange$ = new BehaviorSubject('');
   private getWorkpsaceIdFromURL(): string | null {
-    const hashUrl = new HashURL(window.location.href);
-    return hashUrl.hashSearchParams.get(WORKSPACE_ID_QUERYSTRING_NAME) || null;
+    return getStateFromOsdUrl(WORKSPACE_ID_STATE_KEY);
   }
   private async getWorkpsaceId(): Promise<string> {
     if (this.getWorkpsaceIdFromURL()) {
@@ -23,47 +23,16 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
 
     return (await this.core?.workspaces.currentWorkspaceId$.getValue()) || '';
   }
-  private getPatchedUrl = (
-    url: string,
-    workspaceId: string,
-    options?: {
-      jumpable?: boolean;
-    }
-  ) => {
-    const newUrl = new HashURL(url, window.location.href);
-    /**
-     * Patch workspace id into hash
-     */
-    const currentWorkspaceId = workspaceId;
-    const searchParams = newUrl.hashSearchParams;
-    if (currentWorkspaceId) {
-      searchParams.set(WORKSPACE_ID_QUERYSTRING_NAME, currentWorkspaceId);
-    } else {
-      searchParams.delete(WORKSPACE_ID_QUERYSTRING_NAME);
-    }
-
-    if (options?.jumpable && currentWorkspaceId) {
-      /**
-       * When in hash, window.location.href won't make browser to reload
-       * append a querystring.
-       */
-      newUrl.searchParams.set(WORKSPACE_ID_QUERYSTRING_NAME, currentWorkspaceId);
-    }
-
-    newUrl.hashSearchParams = searchParams;
-
-    return newUrl.toString();
+  private getPatchedUrl = (url: string, workspaceId: string) => {
+    return formatUrlWithWorkspaceId(url, workspaceId);
   };
   private async listenToHashChange(): Promise<void> {
-    window.addEventListener(
-      'hashchange',
-      debounce(async (e) => {
-        if (this.shouldPatchUrl()) {
-          const workspaceId = await this.getWorkpsaceId();
-          this.URLChange$.next(this.getPatchedUrl(window.location.href, workspaceId));
-        }
-      }, 150)
-    );
+    window.addEventListener('hashchange', async () => {
+      if (this.shouldPatchUrl()) {
+        const workspaceId = await this.getWorkpsaceId();
+        this.URLChange$.next(this.getPatchedUrl(window.location.href, workspaceId));
+      }
+    });
   }
   private shouldPatchUrl(): boolean {
     const currentWorkspaceId = this.core?.workspaces.currentWorkspaceId$.getValue();
@@ -116,6 +85,9 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
      */
     this.listenToHashChange();
 
+    /**
+     * All the URLChange will flush in this subscriber
+     */
     this.URLChange$.subscribe(
       debounce(async (url) => {
         history.replaceState(history.state, '', url);
