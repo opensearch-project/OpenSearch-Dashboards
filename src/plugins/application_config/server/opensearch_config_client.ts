@@ -102,7 +102,7 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
     }
   }
 
-  async getConfig(): Promise<any> {
+  async getConfig(): Promise<Map<string, string>> {
     try {
       const data = await this.client.asInternalUser.search({
         index: this.configurationIndexName,
@@ -118,7 +118,7 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
     }
   }
 
-  transformIndexSearchResponse(hits) {
+  transformIndexSearchResponse(hits): Map<string, string> {
     const configurations = {};
 
     for (let i = 0; i < hits.length; i++) {
