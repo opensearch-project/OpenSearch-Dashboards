@@ -10,12 +10,18 @@ import { AuthType, DataSourceAttributes, SigV4Content } from '../../common/data_
 import { DataSourcePluginConfigType } from '../../config';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
-import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
+import { DataSourceClientParams, LegacyClientCallAPIParams, AuthenticationMethod } from '../types';
 import { OpenSearchClientPoolSetup } from '../client';
 import { ConfigOptions } from 'elasticsearch';
-import { ClientMock, parseClientOptionsMock } from './configure_legacy_client.test.mocks';
+import {
+  ClientMock,
+  parseClientOptionsMock,
+  authRegistryCredentialProviderMock,
+} from './configure_legacy_client.test.mocks';
 import { configureLegacyClient } from './configure_legacy_client';
 import { CustomApiSchemaRegistry } from '../schema_registry';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
@@ -29,6 +35,7 @@ describe('configureLegacyClient', () => {
   let configOptions: ConfigOptions;
   let dataSourceAttr: DataSourceAttributes;
   let sigV4AuthContent: SigV4Content;
+  let authenticationMethodRegistery: jest.Mocked<IAuthenticationMethodRegistery>;
 
   let mockOpenSearchClientInstance: {
     close: jest.Mock;
@@ -48,6 +55,7 @@ describe('configureLegacyClient', () => {
     logger = loggingSystemMock.createLogger();
     savedObjectsMock = savedObjectsClientMock.create();
     cryptographyMock = cryptographyServiceSetupMock.create();
+    authenticationMethodRegistery = authenticationMethodRegisteryMock.create();
     config = {
       enabled: true,
       clientPool: {
@@ -253,5 +261,48 @@ describe('configureLegacyClient', () => {
     expect(mockResult.context).toBe(mockOpenSearchClientInstance);
     expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
     expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith(mockParams);
+  });
+
+  test('configureLegacyClient should retunrn client from authentication registery if method present in registry', async () => {
+    const name = 'typeA';
+    const customAuthContent = {
+      region: 'us-east-1',
+      roleARN: 'test-role',
+    };
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: customAuthContent,
+        },
+      },
+      references: [],
+    });
+    const authMethod: AuthenticationMethod = {
+      name,
+      authType: AuthType.SigV4,
+      credentialProvider: jest.fn(),
+    };
+    authenticationMethodRegistery.getAuthenticationMethod.mockImplementation(() => authMethod);
+
+    authRegistryCredentialProviderMock.mockReturnValue({
+      credential: sigV4AuthContent,
+      type: AuthType.SigV4,
+    });
+
+    await configureLegacyClient(
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      callApiParams,
+      clientPoolSetup,
+      config,
+      logger
+    );
+    expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
+    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
   });
 });

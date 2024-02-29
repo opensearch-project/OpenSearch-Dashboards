@@ -18,12 +18,25 @@ import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { RouteComponentProps } from 'react-router-dom';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { EditDataSource } from './edit_data_source';
+import {
+  noAuthCredentialAuthMethod,
+  sigV4AuthMethod,
+  usernamePasswordAuthMethod,
+} from '../../types';
 
 const formIdentifier = 'EditDataSourceForm';
 const notFoundIdentifier = '[data-test-subj="dataSourceNotFound"]';
 
 describe('Datasource Management: Edit Datasource Wizard', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+    noAuthCredentialAuthMethod
+  );
+  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+    usernamePasswordAuthMethod
+  );
+  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(sigV4AuthMethod);
+
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
 
