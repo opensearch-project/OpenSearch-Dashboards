@@ -40,6 +40,13 @@ export class ApplicationConfigPlugin
 
   private registerConfigurationClient(configurationClient: ConfigurationClient) {
     this.logger.info('Register a configuration client.');
+
+    if (this.configurationClient) {
+      const errorMessage = 'Configuration client is already registered! Cannot register again!';
+      this.logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
     this.configurationClient = configurationClient;
   }
 
