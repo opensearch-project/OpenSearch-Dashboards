@@ -128,4 +128,6 @@ export class WorkspacesPlugin implements Plugin<{}, {}> {
   public start() {
     return {};
   }
+
+  public stop() {}
 }
