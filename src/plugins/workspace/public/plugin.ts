@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { debounce } from 'lodash';
 import { CoreSetup, Plugin } from '../../../core/public';
 import { getStateFromOsdUrl } from '../../opensearch_dashboards_utils/public';
@@ -13,6 +13,8 @@ import { WORKSPACE_ID_STATE_KEY } from '../common/constants';
 export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private core?: CoreSetup;
   private URLChange$ = new BehaviorSubject('');
+  private applicationSubscription = new Subscription();
+  private urlChangeSubscription = new Subscription();
   private getWorkpsaceIdFromURL(): string | null {
     return getStateFromOsdUrl(WORKSPACE_ID_STATE_KEY);
   }
@@ -26,13 +28,14 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private getPatchedUrl = (url: string, workspaceId: string) => {
     return formatUrlWithWorkspaceId(url, workspaceId);
   };
+  private hashChangeHandler = async () => {
+    if (this.shouldPatchUrl()) {
+      const workspaceId = await this.getWorkpsaceId();
+      this.URLChange$.next(this.getPatchedUrl(window.location.href, workspaceId));
+    }
+  };
   private async listenToHashChange(): Promise<void> {
-    window.addEventListener('hashchange', async () => {
-      if (this.shouldPatchUrl()) {
-        const workspaceId = await this.getWorkpsaceId();
-        this.URLChange$.next(this.getPatchedUrl(window.location.href, workspaceId));
-      }
-    });
+    window.addEventListener('hashchange', this.hashChangeHandler);
   }
   private shouldPatchUrl(): boolean {
     const currentWorkspaceId = this.core?.workspaces.currentWorkspaceId$.getValue();
@@ -50,7 +53,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private async listenToApplicationChange(): Promise<void> {
     const startService = await this.core?.getStartServices();
     if (startService) {
-      combineLatest([
+      this.applicationSubscription = combineLatest([
         this.core?.workspaces.currentWorkspaceId$,
         startService[0].application.currentAppId$,
       ]).subscribe(async ([]) => {
@@ -88,7 +91,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     /**
      * All the URLChange will flush in this subscriber
      */
-    this.URLChange$.subscribe(
+    this.urlChangeSubscription = this.URLChange$.subscribe(
       debounce(async (url) => {
         history.replaceState(history.state, '', url);
       }, 500)
@@ -101,5 +104,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.urlChangeSubscription.unsubscribe();
+    this.applicationSubscription.unsubscribe();
+    window.removeEventListener('hashchange', this.hashChangeHandler);
+  }
 }
