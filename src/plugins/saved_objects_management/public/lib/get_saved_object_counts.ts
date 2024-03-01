@@ -34,6 +34,7 @@ export interface SavedObjectCountOptions {
   typesToInclude: string[];
   namespacesToInclude?: string[];
   searchString?: string;
+  workspaces?: string[];
 }
 
 export async function getSavedObjectCounts(

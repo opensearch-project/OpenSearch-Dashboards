@@ -54,6 +54,8 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       client: this.client as IWorkspaceClientImpl,
     });
 
+    core.capabilities.registerProvider(() => ({ workspaces: { enabled: true } }));
+
     return {
       client: this.client,
     };

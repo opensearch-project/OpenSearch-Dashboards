@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
 import { ChromeNavLink } from 'opensearch-dashboards/public';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
@@ -139,5 +139,14 @@ describe('Workspace plugin', () => {
     coreStart.workspaces.currentWorkspace$.next(workspace);
     workspacePlugin.start(coreStart);
     expect(navLinksService.setNavLinks).toHaveBeenCalledWith(filteredNavLinksMap);
+  });
+
+  it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const coreStart = coreMock.createStart();
+    coreStart.chrome.navLinks.getAllNavLinks$.mockReturnValueOnce(new BehaviorSubject<any[]>([]));
+    workspacePlugin.start(coreStart);
+    coreStart.workspaces.currentWorkspaceId$.next('foo');
+    expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
   });
 });

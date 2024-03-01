@@ -61,6 +61,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
+  WorkspacesStart,
   HttpStart,
   OverlayStart,
   NotificationsStart,
@@ -106,6 +107,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
+  workspaces: WorkspacesStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
   notifications: NotificationsStart;
@@ -138,6 +140,8 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
+  currentWorkspaceId: string | null;
+  workspaceEnabled: boolean;
 }
 
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
@@ -168,7 +172,33 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      currentWorkspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
+      workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
     };
+  }
+
+  private get workspaceIdQuery() {
+    const { currentWorkspaceId, workspaceEnabled } = this.state;
+    // workspace is turned off
+    if (!workspaceEnabled) {
+      return undefined;
+    } else {
+      if (!currentWorkspaceId) {
+        return undefined;
+      } else {
+        return [currentWorkspaceId];
+      }
+    }
+  }
+
+  private formatWorkspaceIdParams<T extends { workspaces?: string[] }>(
+    obj: T
+  ): T | Omit<T, 'workspaces'> {
+    const { workspaces, ...others } = obj;
+    if (workspaces) {
+      return obj;
+    }
+    return others;
   }
 
   componentDidMount() {
@@ -190,10 +220,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
 
-    const filteredCountOptions: SavedObjectCountOptions = {
+    const filteredCountOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
       typesToInclude: filteredTypes,
       searchString: queryText,
-    };
+      workspaces: this.workspaceIdQuery,
+    });
 
     if (availableNamespaces.length) {
       const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
@@ -222,10 +253,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions[id] = true;
     });
 
-    const countOptions: SavedObjectCountOptions = {
+    const countOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
       typesToInclude: allowedTypes,
       searchString: queryText,
-    };
+      workspaces: this.workspaceIdQuery,
+    });
 
     if (availableNamespaces.length) {
       countOptions.namespacesToInclude = availableNamespaces;
@@ -258,13 +290,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const filteredTypes = filterQuery(allowedTypes, visibleTypes);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions: SavedObjectsFindOptions = {
+    const findOptions: SavedObjectsFindOptions = this.formatWorkspaceIdParams({
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
       fields: ['id'],
       type: filteredTypes,
-    };
+      workspaces: this.workspaceIdQuery,
+    });
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
     if (availableNamespaces.length) {
@@ -406,7 +439,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     let blob;
     try {
-      blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
+      blob = await fetchExportObjects(
+        http,
+        objectsToExport,
+        includeReferencesDeep,
+        this.formatWorkspaceIdParams({
+          workspaces: this.workspaceIdQuery,
+        })
+      );
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
@@ -440,7 +480,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         http,
         exportTypes,
         queryText ? `${queryText}*` : undefined,
-        isIncludeReferencesDeepChecked
+        isIncludeReferencesDeepChecked,
+        this.formatWorkspaceIdParams({
+          workspaces: this.workspaceIdQuery,
+        })
       );
     } catch (e) {
       notifications.toasts.addDanger({
@@ -553,6 +596,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.hideImportFlyout}
         done={this.finishImport}
         http={this.props.http}
+        workspaces={this.state.currentWorkspaceId ? [this.state.currentWorkspaceId] : undefined}
         serviceRegistry={this.props.serviceRegistry}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={newIndexPatternUrl}

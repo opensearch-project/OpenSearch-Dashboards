@@ -812,6 +812,76 @@ describe('getSortedObjectsForExport()', () => {
     `);
   });
 
+  test('exports selected objects when passed workspaces', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          attributes: {},
+          references: [
+            {
+              id: '1',
+              name: 'name',
+              type: 'index-pattern',
+            },
+          ],
+        },
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
+        },
+      ],
+    });
+    await exportSavedObjectsToStream({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      objects: [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'search',
+          id: '2',
+        },
+      ],
+      workspaces: ['foo'],
+    });
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                id: 1,
+                type: index-pattern,
+              },
+              Object {
+                id: 2,
+                type: search,
+              },
+            ],
+            Object {
+              namespace: undefined,
+              workspaces: Array [
+                foo,
+              ],
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            type: return,
+            value: Promise {},
+          },
+        ],
+      }
+    `);
+  });
+
   test('export selected objects throws error when exceeding exportSizeLimit', async () => {
     const exportOpts = {
       exportSizeLimit: 1,

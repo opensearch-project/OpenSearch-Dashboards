@@ -3,10 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { combineLatest } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { featureMatchesConfig } from './utils';
-import { AppMountParameters, AppNavLinkStatus, ChromeNavLink, CoreSetup, CoreStart, Plugin, WorkspaceObject, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import {
+  AppMountParameters,
+  AppNavLinkStatus,
+  ChromeNavLink,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  WorkspaceObject,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../core/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services } from './types';
@@ -15,6 +25,8 @@ import { WorkspaceClient } from './workspace_client';
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
+  private coreStart?: CoreStart;
+  private currentWorkspaceSubscription?: Subscription;
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
@@ -62,6 +74,16 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       }
       return item;
     });
+  }
+
+  private _changeSavedObjectCurrentWorkspace() {
+    if (this.coreStart) {
+      return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
+        if (currentWorkspaceId) {
+          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+        }
+      });
+    }
   }
 
   public async setup(core: CoreSetup) {
@@ -131,11 +153,16 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   }
 
   public start(core: CoreStart) {
+    this.coreStart = core;
+
+    this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     if (core) {
       this.filterNavLinks(core);
     }
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.currentWorkspaceSubscription?.unsubscribe();
+  }
 }
