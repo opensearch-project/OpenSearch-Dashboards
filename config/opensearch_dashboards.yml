@@ -288,5 +288,5 @@
 # vis_augmenter.pluginAugmentationEnabled: true
 
 # Set the value to true to enable permission control for saved objects
-# Permission control depends on OpenSearch Dashboards has authentication enabled, set it to false if no authentication is configured
+# Permission control depends on OpenSearch Dashboards has authentication enabled, set it to false if the security plugin is not installed
 # savedObjects.permission.enabled: true
