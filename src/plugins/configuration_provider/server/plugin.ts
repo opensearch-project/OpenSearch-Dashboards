@@ -39,7 +39,6 @@ export class ConfigurationProviderPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('ConfigurationProvider: Started');
     return {};
   }
 
