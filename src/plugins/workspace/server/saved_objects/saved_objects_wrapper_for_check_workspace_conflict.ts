@@ -12,7 +12,6 @@ import {
   SavedObjectsClientWrapperFactory,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
   SavedObjectsSerializer,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
