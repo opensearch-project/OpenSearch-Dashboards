@@ -443,7 +443,7 @@ export class SavedObjectsRepository {
       let savedObjectWorkspaces = options.workspaces;
 
       if (expectedBulkGetResult.value.method !== 'create') {
-        savedObjectWorkspaces = object.workspaces || savedObjectWorkspaces;
+        savedObjectWorkspaces = object.workspaces;
       }
 
       const expectedResult = {

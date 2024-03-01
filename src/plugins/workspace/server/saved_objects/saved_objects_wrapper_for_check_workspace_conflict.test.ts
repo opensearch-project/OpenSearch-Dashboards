@@ -33,6 +33,9 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
   };
   wrapperInstance.setSerializer(savedObjectsSerializer);
   describe('createWithWorkspaceConflictCheck', () => {
+    beforeEach(() => {
+      mockedClient.create.mockClear();
+    });
     it(`Should reserve the workspace params when overwrite with empty workspaces`, async () => {
       mockedClient.get.mockResolvedValueOnce(
         getSavedObject({
@@ -83,6 +86,40 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
           }
         )
       ).rejects.toThrowError('Saved object [dashboard/dashboard:foo] conflict');
+    });
+
+    it(`Should use options.workspaces when get throws error`, async () => {
+      mockedClient.get.mockRejectedValueOnce(
+        getSavedObject({
+          id: 'dashboard:foo',
+          workspaces: ['foo'],
+          error: {
+            statusCode: 404,
+            error: 'Not found',
+            message: 'Not found',
+          },
+        })
+      );
+
+      await wrapperClient.create(
+        'dashboard',
+        {
+          name: 'foo',
+        },
+        {
+          id: 'dashboard:foo',
+          overwrite: true,
+          workspaces: ['bar'],
+        }
+      );
+
+      expect(mockedClient.create).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          workspaces: ['bar'],
+        })
+      );
     });
   });
 
@@ -135,6 +172,10 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
           getSavedObject({
             id: 'bar',
             workspaces: ['foo', 'bar'],
+          }),
+          getSavedObject({
+            id: 'qux',
+            workspaces: ['foo'],
           }),
         ],
       });
@@ -199,6 +240,7 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
             id: 'qux',
             references: [],
             type: 'dashboard',
+            workspaces: ['foo'],
           },
         ],
         {
@@ -240,6 +282,15 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
               "workspaces": Array [
                 "foo",
                 "bar",
+              ],
+            },
+            Object {
+              "attributes": Object {},
+              "id": "qux",
+              "references": Array [],
+              "type": "dashboard",
+              "workspaces": Array [
+                "foo",
               ],
             },
           ],
