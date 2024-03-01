@@ -6,13 +6,29 @@
 import { validate } from './string_utils';
 
 describe('application config string utils', () => {
-  it('returns smoothly when input is not empty', () => {
+  it('returns input when input is not empty and no prefix or suffix whitespaces', () => {
     const logger = {
       error: jest.fn(),
     };
 
-    validate('abc', logger);
+    const input = 'abc';
 
+    const validatedInput = validate(input, logger);
+
+    expect(validatedInput).toBe(input);
+    expect(logger.error).not.toBeCalled();
+  });
+
+  it('returns trimmed input when input is not empty and prefix or suffix whitespaces', () => {
+    const logger = {
+      error: jest.fn(),
+    };
+
+    const input = ' abc ';
+
+    const validatedInput = validate(input, logger);
+
+    expect(validatedInput).toBe('abc');
     expect(logger.error).not.toBeCalled();
   });
 

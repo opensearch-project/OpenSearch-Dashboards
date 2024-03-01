@@ -24,17 +24,17 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   }
 
   async getEntityConfig(entity: string) {
-    validate(entity, this.logger);
+    const entityValidated = validate(entity, this.logger);
 
     try {
       const data = await this.client.asInternalUser.get({
         index: this.configurationIndexName,
-        id: entity,
+        id: entityValidated,
       });
 
       return data?.body?._source?.value || '';
     } catch (e) {
-      const errorMessage = `Failed to get entity ${entity} due to error ${e}`;
+      const errorMessage = `Failed to get entity ${entityValidated} due to error ${e}`;
 
       this.logger.error(errorMessage);
 
@@ -43,21 +43,21 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   }
 
   async updateEntityConfig(entity: string, newValue: string) {
-    validate(entity, this.logger);
-    validate(newValue, this.logger);
+    const entityValidated = validate(entity, this.logger);
+    const newValueValidated = validate(newValue, this.logger);
 
     try {
       await this.client.asCurrentUser.index({
         index: this.configurationIndexName,
-        id: entity,
+        id: entityValidated,
         body: {
-          value: newValue,
+          value: newValueValidated,
         },
       });
 
-      return newValue;
+      return newValueValidated;
     } catch (e) {
-      const errorMessage = `Failed to update entity ${entity} with newValue ${newValue} due to error ${e}`;
+      const errorMessage = `Failed to update entity ${entityValidated} with newValue ${newValueValidated} due to error ${e}`;
 
       this.logger.error(errorMessage);
 
@@ -66,27 +66,27 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   }
 
   async deleteEntityConfig(entity: string) {
-    validate(entity, this.logger);
+    const entityValidated = validate(entity, this.logger);
 
     try {
       await this.client.asCurrentUser.delete({
         index: this.configurationIndexName,
-        id: entity,
+        id: entityValidated,
       });
 
-      return entity;
+      return entityValidated;
     } catch (e) {
       if (e?.body?.error?.type === 'index_not_found_exception') {
         this.logger.info('Attemp to delete a not found index.');
-        return entity;
+        return entityValidated;
       }
 
       if (e?.body?.result === 'not_found') {
         this.logger.info('Attemp to delete a not found document.');
-        return entity;
+        return entityValidated;
       }
 
-      const errorMessage = `Failed to delete entity ${entity} due to error ${e}`;
+      const errorMessage = `Failed to delete entity ${entityValidated} due to error ${e}`;
 
       this.logger.error(errorMessage);
 

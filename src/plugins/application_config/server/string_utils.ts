@@ -16,9 +16,11 @@ function isEmpty(input: string): boolean {
   return !input.trim();
 }
 
-export function validate(input: string, logger: Logger) {
+export function validate(input: string, logger: Logger): string {
   if (isEmpty(input)) {
     logger.error(ERROR_MESSSAGE_FOR_EMPTY_INPUT);
     throw ERROR_FOR_EMPTY_INPUT;
   }
+
+  return input.trim();
 }
