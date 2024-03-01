@@ -4,18 +4,18 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
-import { ConfigurationProviderConfigSchema, configSchema } from '../config';
-import { ConfigurationProviderPlugin } from './plugin';
+import { CspHandlerConfigSchema, configSchema } from '../config';
+import { CspHandlerPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, OpenSearch Dashboards Platform `plugin()` initializer.
 
-export const config: PluginConfigDescriptor<ConfigurationProviderConfigSchema> = {
+export const config: PluginConfigDescriptor<CspHandlerConfigSchema> = {
   schema: configSchema,
 };
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ConfigurationProviderPlugin(initializerContext);
+  return new CspHandlerPlugin(initializerContext);
 }
 
-export { ConfigurationProviderPluginSetup, ConfigurationProviderPluginStart } from './types';
+export { CspHandlerPluginSetup, CspHandlerPluginStart } from './types';

@@ -1,4 +1,4 @@
-# ConfigurationProvider
+# CspHandler
 
 A OpenSearch Dashboards plugin
 

@@ -12,10 +12,9 @@ import {
 } from '../../../core/server';
 
 import { createCspRulesPreResponseHandler } from './csp_handlers';
-import { ConfigurationProviderPluginSetup, ConfigurationProviderPluginStart } from './types';
+import { CspHandlerPluginSetup, CspHandlerPluginStart } from './types';
 
-export class ConfigurationProviderPlugin
-  implements Plugin<ConfigurationProviderPluginSetup, ConfigurationProviderPluginStart> {
+export class CspHandlerPlugin implements Plugin<CspHandlerPluginSetup, CspHandlerPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

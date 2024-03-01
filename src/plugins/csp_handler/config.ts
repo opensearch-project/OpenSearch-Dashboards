@@ -9,4 +9,4 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
 });
 
-export type ConfigurationProviderConfigSchema = TypeOf<typeof configSchema>;
+export type CspHandlerConfigSchema = TypeOf<typeof configSchema>;
