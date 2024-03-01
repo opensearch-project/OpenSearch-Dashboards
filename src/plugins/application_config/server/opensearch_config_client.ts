@@ -14,11 +14,11 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   private readonly logger: Logger;
 
   constructor(
-    openSearchClient: IScopedClusterClient,
+    scopedClusterClient: IScopedClusterClient,
     configurationIndexName: string,
     logger: Logger
   ) {
-    this.client = openSearchClient;
+    this.client = scopedClusterClient;
     this.configurationIndexName = configurationIndexName;
     this.logger = logger;
   }

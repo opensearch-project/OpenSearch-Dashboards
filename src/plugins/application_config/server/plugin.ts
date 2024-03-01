@@ -50,13 +50,13 @@ export class ApplicationConfigPlugin
     this.configurationClient = configurationClient;
   }
 
-  private getConfigurationClient(configurationClient: IScopedClusterClient): ConfigurationClient {
+  private getConfigurationClient(scopedClusterClient: IScopedClusterClient): ConfigurationClient {
     if (this.configurationClient) {
       return this.configurationClient;
     }
 
     const openSearchConfigurationClient = new OpenSearchConfigurationClient(
-      configurationClient,
+      scopedClusterClient,
       this.configurationIndexName,
       this.logger
     );
