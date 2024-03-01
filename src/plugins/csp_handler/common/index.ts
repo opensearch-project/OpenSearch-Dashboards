@@ -3,5 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const PLUGIN_ID = 'configurationProvider';
-export const PLUGIN_NAME = 'ConfigurationProvider';
+export const PLUGIN_ID = 'cspHandler';
+export const PLUGIN_NAME = 'CspHandler';
