@@ -1,6 +1,6 @@
 {
-  "id": "configurationProvider",
-  "version": "1.0.0",
+  "id": "cspHandler",
+  "version": "opensearchDashboards",
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
   "ui": false,

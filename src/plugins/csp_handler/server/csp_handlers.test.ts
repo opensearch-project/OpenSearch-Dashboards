@@ -4,10 +4,15 @@
  */
 
 import { RouteMethod } from '../../../core/server';
+/* eslint-disable */
+
 import {
   OpenSearchDashboardsRequest,
   OpenSearchDashboardsRouteOptions,
 } from '../../../core/server/http/router/request';
+
+/* eslint-enable */
+
 import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { createCspRulesPreResponseHandler } from './csp_handlers';
 import { MockedLogger, loggerMock } from '@osd/logging/target/mocks';
