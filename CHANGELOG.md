@@ -74,6 +74,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Refactor client and legacy client to use authentication registry ([#5881](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5881))
 - [Multiple Datasource] Improved error handling for the search API when a null value is passed for the dataSourceId ([#5882](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5882))
 - [Multiple Datasource] Hide/Show authentication method in multi data source plugin based on configuration ([#5916](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5916))
+- [[Dynamic Configurations] Add support for dynamic application configurations ([#5855](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5855))
 
 ### 🐛 Bug Fixes
 
