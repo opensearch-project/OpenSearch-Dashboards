@@ -374,8 +374,8 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
   const mockCancelHandler = jest.fn();
   const mockCredentialForm = jest.fn();
 
-  /* Scenario 1: should render the page normally when only one registered Auth Type supported */
-  test('should render the page normally when only one registered Auth Type supported', () => {
+  /* Scenario 1: should call registered crendential form */
+  test('should call registered crendential form', () => {
     const authTypeToBeTested = 'Some Auth Type';
     const authMethodToBeTest = {
       name: authTypeToBeTested,
