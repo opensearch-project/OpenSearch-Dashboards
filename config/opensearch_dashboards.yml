@@ -29,6 +29,13 @@
 # dashboards. OpenSearch Dashboards creates a new index if the index doesn't already exist.
 #opensearchDashboards.index: ".opensearch_dashboards"
 
+# OpenSearch Dashboards uses an index in OpenSearch to store dynamic configurations.
+# This shall be a different index from opensearchDashboards.index.
+# opensearchDashboards.configIndex: ".opensearch_dashboards_config"
+
+# Set the value of this setting to true to enable plugin application config. By default it is disabled.
+# application_config.enabled: false
+
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"
 
