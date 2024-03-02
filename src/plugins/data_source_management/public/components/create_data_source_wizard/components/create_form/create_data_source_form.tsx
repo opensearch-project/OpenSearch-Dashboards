@@ -379,6 +379,8 @@ export class CreateDataSourceForm extends React.Component<
   /* Render create new credentials*/
   renderCreateNewCredentialsForm = (type: AuthType) => {
     switch (type) {
+      case AuthType.NoAuth:
+        return null;
       case AuthType.UsernamePasswordType:
         return (
           <>
@@ -515,7 +517,7 @@ export class CreateDataSourceForm extends React.Component<
         );
 
       default:
-        return this.getCredentialFormFromRegistry(this.state.auth.type);
+        return this.getCredentialFormFromRegistry(type);
     }
   };
 
