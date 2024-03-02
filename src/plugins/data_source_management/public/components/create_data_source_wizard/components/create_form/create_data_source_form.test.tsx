@@ -17,7 +17,10 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../../../../types';
-import { AuthenticationMethodRegistery } from 'src/plugins/data_source_management/public/auth_registry';
+import {
+  AuthenticationMethod,
+  AuthenticationMethodRegistery,
+} from 'src/plugins/data_source_management/public/auth_registry';
 
 const titleIdentifier = '[data-test-subj="createDataSourceFormTitleField"]';
 const descriptionIdentifier = `[data-test-subj="createDataSourceFormDescriptionField"]`;
@@ -361,5 +364,49 @@ describe('Datasource Management: Create Datasource form with different authType 
       const authOptionSelector = component.find(authTypeIdentifier).last();
       expect(authOptionSelector.prop('disabled')).toBe(false);
     });
+  });
+});
+
+describe('Datasource Management: Create Datasource form with registered Auth Type', () => {
+  let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  const mockSubmitHandler = jest.fn();
+  const mockTestConnectionHandler = jest.fn();
+  const mockCancelHandler = jest.fn();
+  const mockCredentialForm = jest.fn();
+
+  /* Scenario 1: should render the page normally when only one registered Auth Type supported */
+  test('should render the page normally when only one registered Auth Type supported', () => {
+    const authTypeToBeTested = 'Some Auth Type';
+    const authMethodToBeTest = {
+      name: authTypeToBeTested,
+      credentialSourceOption: {
+        value: authTypeToBeTested,
+        inputDisplay: 'some input',
+      },
+      credentialForm: mockCredentialForm,
+    } as AuthenticationMethod;
+
+    const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+    mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+    mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTest);
+
+    component = mount(
+      wrapWithIntl(
+        <CreateDataSourceForm
+          handleTestConnection={mockTestConnectionHandler}
+          handleSubmit={mockSubmitHandler}
+          handleCancel={mockCancelHandler}
+          existingDatasourceNamesList={['dup20']}
+        />
+      ),
+      {
+        wrappingComponent: OpenSearchDashboardsContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
+    );
+
+    expect(mockCredentialForm).toHaveBeenCalled();
   });
 });
