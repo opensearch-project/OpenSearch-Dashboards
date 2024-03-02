@@ -78,10 +78,10 @@ describe('OpenSearchDashboardsMigrator', () => {
       expect(mappings).toMatchSnapshot();
     });
 
-    it('permissions field exists in the mappings when the feature is enabled', () => {
+    it('workspaces field exists in the mappings when the feature is enabled', () => {
       const options = mockOptions(true);
       const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
-      expect(mappings).toHaveProperty('properties.permissions');
+      expect(mappings).toHaveProperty('properties.workspaces');
     });
   });
 
