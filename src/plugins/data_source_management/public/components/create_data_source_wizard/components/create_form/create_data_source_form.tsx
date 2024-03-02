@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { AuthenticationMethodRegistery } from 'src/plugins/data_source_management/public/auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import {
   AuthType,
@@ -68,16 +69,17 @@ export class CreateDataSourceForm extends React.Component<
 
   authOptions: Array<EuiSuperSelectOption<string>> = [];
   isNoAuthOptionEnabled: boolean;
+  authenticationMethodRegistery: AuthenticationMethodRegistery;
 
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
 
-    const authenticationMethodRegistery = context.services.authenticationMethodRegistery;
-    const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
-    const initialSelectedAuthMethod = getDefaultAuthMethod(authenticationMethodRegistery);
+    this.authenticationMethodRegistery = context.services.authenticationMethodRegistery;
+    const registeredAuthMethods = this.authenticationMethodRegistery.getAllAuthenticationMethods();
+    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistery);
 
     this.isNoAuthOptionEnabled =
-      authenticationMethodRegistery.getAuthenticationMethod(AuthType.NoAuth) !== undefined;
+      this.authenticationMethodRegistery.getAuthenticationMethod(AuthType.NoAuth) !== undefined;
 
     this.authOptions = registeredAuthMethods.map((authMethod) => {
       return authMethod.credentialSourceOption;
@@ -322,6 +324,21 @@ export class CreateDataSourceForm extends React.Component<
     };
   };
 
+  handleStateChange = (state: any) => {
+    this.setState(state);
+  };
+
+  getCredentialFormFromRegistry = (authType: string) => {
+    const registeredAuthMethod = this.authenticationMethodRegistery.getAuthenticationMethod(
+      authType
+    );
+    const authCredentialForm = registeredAuthMethod?.credentialForm;
+
+    if (authCredentialForm !== undefined) {
+      return authCredentialForm(this.state, this.handleStateChange);
+    }
+  };
+
   /* Render methods */
 
   /* Render header*/
@@ -498,7 +515,7 @@ export class CreateDataSourceForm extends React.Component<
         );
 
       default:
-        break;
+        return this.getCredentialFormFromRegistry(this.state.auth.type);
     }
   };
 
@@ -632,13 +649,7 @@ export class CreateDataSourceForm extends React.Component<
             </EuiFormRow>
 
             {/* Create New credentials */}
-            {this.state.auth.type === AuthType.UsernamePasswordType
-              ? this.renderCreateNewCredentialsForm(this.state.auth.type)
-              : null}
-
-            {this.state.auth.type === AuthType.SigV4
-              ? this.renderCreateNewCredentialsForm(this.state.auth.type)
-              : null}
+            {this.renderCreateNewCredentialsForm(this.state.auth.type)}
 
             <EuiSpacer size="xl" />
             <EuiFormRow>
