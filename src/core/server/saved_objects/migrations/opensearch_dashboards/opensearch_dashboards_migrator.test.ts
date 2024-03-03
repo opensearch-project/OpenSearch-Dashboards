@@ -153,10 +153,10 @@ type MockedOptions = OpenSearchDashboardsMigratorOptions & {
   client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
 };
 
-const mockOptions = (isPermissionControlEnabled?: boolean) => {
+const mockOptions = (isWorkspaceEnabled?: boolean) => {
   const rawConfig = configMock.create();
   rawConfig.get.mockReturnValue(false);
-  if (isPermissionControlEnabled) {
+  if (isWorkspaceEnabled) {
     rawConfig.get.mockReturnValue(true);
   }
   const options: MockedOptions = {
