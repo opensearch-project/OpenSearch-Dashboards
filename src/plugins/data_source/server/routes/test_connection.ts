@@ -10,6 +10,7 @@ import { DataSourceConnectionValidator } from './data_source_connection_validato
 import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { CustomApiSchemaRegistry } from '../schema_registry/custom_api_schema_registry';
 
 export const registerTestConnectionRoute = async (
   router: IRouter,
@@ -28,30 +29,31 @@ export const registerTestConnectionRoute = async (
           dataSourceAttr: schema.object({
             endpoint: schema.string(),
             auth: schema.maybe(
-              schema.object({
-                type: schema.oneOf([
-                  schema.literal(AuthType.UsernamePasswordType),
-                  schema.literal(AuthType.NoAuth),
-                  schema.literal(AuthType.SigV4),
-                ]),
-                credentials: schema.maybe(
-                  schema.oneOf([
-                    schema.object({
-                      username: schema.string(),
-                      password: schema.string(),
-                    }),
-                    schema.object({
-                      region: schema.string(),
-                      accessKey: schema.string(),
-                      secretKey: schema.string(),
-                      service: schema.oneOf([
-                        schema.literal(SigV4ServiceName.OpenSearch),
-                        schema.literal(SigV4ServiceName.OpenSearchServerless),
-                      ]),
-                    }),
-                  ])
-                ),
-              })
+              schema.oneOf([
+                schema.object({
+                  type: schema.literal(AuthType.NoAuth),
+                  credentials: schema.object({}),
+                }),
+                schema.object({
+                  type: schema.literal(AuthType.UsernamePasswordType),
+                  credentials: schema.object({
+                    username: schema.string(),
+                    password: schema.string(),
+                  }),
+                }),
+                schema.object({
+                  type: schema.literal(AuthType.SigV4),
+                  credentials: schema.object({
+                    region: schema.string(),
+                    accessKey: schema.string(),
+                    secretKey: schema.string(),
+                    service: schema.oneOf([
+                      schema.literal(SigV4ServiceName.OpenSearch),
+                      schema.literal(SigV4ServiceName.OpenSearchServerless),
+                    ]),
+                  }),
+                }),
+              ])
             ),
           }),
         }),

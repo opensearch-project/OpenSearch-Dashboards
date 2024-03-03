@@ -42,6 +42,64 @@ describe(`Test connection ${URL}`, () => {
     },
   };
 
+  const dataSourceAttrMissingCredentialForNoAuth = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.NoAuth,
+      credentials: {},
+    },
+  };
+
+  const dataSourceAttrMissingCredentialForBasicAuth = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.UsernamePasswordType,
+      credentials: {},
+    },
+  };
+
+  const dataSourceAttrMissingCredentialForSigV4Auth = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.SigV4,
+      credentials: {},
+    },
+  };
+
+  const dataSourceAttrPartialCredentialForSigV4Auth = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.SigV4,
+      credentials: {
+        accessKey: 'testKey',
+        service: 'service',
+      },
+    },
+  };
+
+  const dataSourceAttrPartialCredentialForBasicAuth = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.UsernamePasswordType,
+      credentials: {
+        username: 'testName',
+      },
+    },
+  };
+
+  const dataSourceAttrForSigV4Auth = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.SigV4,
+      credentials: {
+        accessKey: 'testKey',
+        service: 'es',
+        secretKey: 'testSecret',
+        region: 'testRegion',
+      },
+    },
+  };
+
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     customApiSchemaRegistryPromise = Promise.resolve(customApiSchemaRegistry);
@@ -90,5 +148,71 @@ describe(`Test connection ${URL}`, () => {
         customApiSchemaRegistryPromise,
       })
     );
+  });
+
+  it('no credential with no auth should succeed', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrMissingCredentialForNoAuth,
+      })
+      .expect(200);
+    expect(result.body).toEqual({ success: true });
+  });
+
+  it('no credential with basic auth should fail', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrMissingCredentialForBasicAuth,
+      })
+      .expect(400);
+    expect(result.body.error).toEqual('Bad Request');
+  });
+
+  it('no credential with sigv4 auth should fail', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrMissingCredentialForSigV4Auth,
+      })
+      .expect(400);
+    expect(result.body.error).toEqual('Bad Request');
+  });
+
+  it('partial credential with sigv4 auth should fail', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrPartialCredentialForSigV4Auth,
+      })
+      .expect(400);
+    expect(result.body.error).toEqual('Bad Request');
+  });
+
+  it('partial credential with basic auth should fail', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrPartialCredentialForBasicAuth,
+      })
+      .expect(400);
+    expect(result.body.error).toEqual('Bad Request');
+  });
+
+  it('full credential with sigV4 auth should success', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrForSigV4Auth,
+      })
+      .expect(200);
+    expect(result.body).toEqual({ success: true });
   });
 });
