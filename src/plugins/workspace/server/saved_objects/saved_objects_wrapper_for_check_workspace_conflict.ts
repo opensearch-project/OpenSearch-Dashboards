@@ -52,8 +52,14 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         let currentItem;
         try {
           currentItem = await wrapperOptions.client.get(type, id);
-        } catch (e) {
-          // If item can not be found, supress the error and create the object
+        } catch (e: unknown) {
+          const error = e as Boom.Boom;
+          if (error?.output?.statusCode === 404) {
+            // If item can not be found, supress the error and create the object
+          } else {
+            // Throw other error
+            throw e;
+          }
         }
         if (currentItem) {
           if (

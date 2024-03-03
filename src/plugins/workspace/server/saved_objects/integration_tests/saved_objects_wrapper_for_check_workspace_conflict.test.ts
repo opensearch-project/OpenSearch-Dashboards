@@ -104,6 +104,24 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       });
     });
 
+    it('create-with-override with unexisting object id', async () => {
+      const createResult = await osdTestServer.request
+        .post(root, `/api/saved_objects/${dashboard.type}/foo?overwrite=true`)
+        .send({
+          attributes: dashboard.attributes,
+          workspaces: [createdFooWorkspace.id],
+        })
+        .expect(200);
+
+      expect(createResult.body.id).toEqual('foo');
+      expect(createResult.body.workspaces).toEqual([createdFooWorkspace.id]);
+
+      await deleteItem({
+        type: dashboard.type,
+        id: createResult.body.id,
+      });
+    });
+
     it('create-with-override', async () => {
       const createResult = await osdTestServer.request
         .post(root, `/api/saved_objects/${dashboard.type}`)
