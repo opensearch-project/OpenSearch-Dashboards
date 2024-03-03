@@ -53,6 +53,7 @@ export const LegacyDiscoverTable = ({
   defaultSortOrder,
   showPagination,
 }: DefaultDiscoverTableProps) => {
+  const scrollableDivRef = useRef<HTMLDivElement>(null);
   const displayedColumns = getLegacyDisplayedColumns(
     columns,
     indexPattern,
@@ -113,9 +114,15 @@ export const LegacyDiscoverTable = ({
     setActivePage(pageNumber);
   };
 
+  const backToTop = () => {
+    if (scrollableDivRef.current) {
+      scrollableDivRef.current.scrollTop = 0;
+    }
+  };
+
   return (
     indexPattern && (
-      <>
+      <div ref={scrollableDivRef} className="tableWrapper">
         {showPagination ? (
           <Pagination
             pageCount={pageCount}
@@ -173,7 +180,7 @@ export const LegacyDiscoverTable = ({
               values={{ sampleSize }}
             />
 
-            <EuiButtonEmpty onClick={() => window.scrollTo(0, 0)}>
+            <EuiButtonEmpty onClick={backToTop}>
               <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
             </EuiButtonEmpty>
           </EuiCallOut>
@@ -189,7 +196,7 @@ export const LegacyDiscoverTable = ({
             sampleSize={sampleSize}
           />
         ) : null}
-      </>
+      </div>
     )
   );
 };
