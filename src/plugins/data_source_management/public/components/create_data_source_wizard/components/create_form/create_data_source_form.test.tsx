@@ -17,10 +17,7 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../../../../types';
-import {
-  AuthenticationMethod,
-  AuthenticationMethodRegistery,
-} from 'src/plugins/data_source_management/public/auth_registry';
+import { AuthenticationMethod, AuthenticationMethodRegistery } from '../../../../auth_registry';
 
 const titleIdentifier = '[data-test-subj="createDataSourceFormTitleField"]';
 const descriptionIdentifier = `[data-test-subj="createDataSourceFormDescriptionField"]`;
@@ -372,11 +369,11 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
   const mockSubmitHandler = jest.fn();
   const mockTestConnectionHandler = jest.fn();
   const mockCancelHandler = jest.fn();
-  const mockCredentialForm = jest.fn();
 
-  test('should call registered crendential form', () => {
+  test('should call registered crendential form at the first round when registered method is at the first place and username & password disabled', () => {
+    const mockCredentialForm = jest.fn();
     const authTypeToBeTested = 'Some Auth Type';
-    const authMethodToBeTest = {
+    const authMethodToBeTested = {
       name: authTypeToBeTested,
       credentialSourceOption: {
         value: authTypeToBeTested,
@@ -385,27 +382,139 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
       credentialForm: mockCredentialForm,
     } as AuthenticationMethod;
 
-    const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-    mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
-    mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTest);
+    const authMethodCombinationsToBeTested = [
+      [authMethodToBeTested],
+      [authMethodToBeTested, sigV4AuthMethod],
+      [authMethodToBeTested, noAuthCredentialAuthMethod],
+      [authMethodToBeTested, noAuthCredentialAuthMethod, sigV4AuthMethod],
+    ];
 
-    component = mount(
-      wrapWithIntl(
-        <CreateDataSourceForm
-          handleTestConnection={mockTestConnectionHandler}
-          handleSubmit={mockSubmitHandler}
-          handleCancel={mockCancelHandler}
-          existingDatasourceNamesList={['dup20']}
-        />
-      ),
-      {
-        wrappingComponent: OpenSearchDashboardsContextProvider,
-        wrappingComponentProps: {
-          services: mockedContext,
-        },
-      }
-    );
+    authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
+      const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
 
-    expect(mockCredentialForm).toHaveBeenCalled();
+      authMethodCombination.forEach((authMethod) => {
+        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+      });
+
+      component = mount(
+        wrapWithIntl(
+          <CreateDataSourceForm
+            handleTestConnection={mockTestConnectionHandler}
+            handleSubmit={mockSubmitHandler}
+            handleCancel={mockCancelHandler}
+            existingDatasourceNamesList={['dup20']}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+
+      expect(mockCredentialForm).toHaveBeenCalled();
+    });
+  });
+
+  test('should not call registered crendential form at the first round when registered method is at the first place and username & password enabled', () => {
+    const mockCredentialForm = jest.fn();
+    const authTypeToBeTested = 'Some Auth Type';
+    const authMethodToBeTested = {
+      name: authTypeToBeTested,
+      credentialSourceOption: {
+        value: authTypeToBeTested,
+        inputDisplay: 'some input',
+      },
+      credentialForm: mockCredentialForm,
+    } as AuthenticationMethod;
+
+    const authMethodCombinationsToBeTested = [
+      [authMethodToBeTested, usernamePasswordAuthMethod],
+      [authMethodToBeTested, usernamePasswordAuthMethod, sigV4AuthMethod],
+      [authMethodToBeTested, usernamePasswordAuthMethod, noAuthCredentialAuthMethod],
+      [
+        authMethodToBeTested,
+        usernamePasswordAuthMethod,
+        noAuthCredentialAuthMethod,
+        sigV4AuthMethod,
+      ],
+    ];
+
+    authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
+      const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+
+      authMethodCombination.forEach((authMethod) => {
+        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+      });
+
+      component = mount(
+        wrapWithIntl(
+          <CreateDataSourceForm
+            handleTestConnection={mockTestConnectionHandler}
+            handleSubmit={mockSubmitHandler}
+            handleCancel={mockCancelHandler}
+            existingDatasourceNamesList={['dup20']}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+
+      expect(mockCredentialForm).not.toHaveBeenCalled();
+    });
+  });
+
+  test('should not call registered crendential form at the first round when registered method is not at the first place', () => {
+    const mockCredentialForm = jest.fn();
+    const authTypeToBeTested = 'Some Auth Type';
+    const authMethodToBeTested = {
+      name: authTypeToBeTested,
+      credentialSourceOption: {
+        value: authTypeToBeTested,
+        inputDisplay: 'some input',
+      },
+      credentialForm: mockCredentialForm,
+    } as AuthenticationMethod;
+
+    const authMethodCombinationsToBeTested = [
+      [sigV4AuthMethod, authMethodToBeTested],
+      [noAuthCredentialAuthMethod, authMethodToBeTested],
+      [noAuthCredentialAuthMethod, authMethodToBeTested, sigV4AuthMethod],
+    ];
+
+    authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
+      const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+
+      authMethodCombination.forEach((authMethod) => {
+        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+      });
+
+      component = mount(
+        wrapWithIntl(
+          <CreateDataSourceForm
+            handleTestConnection={mockTestConnectionHandler}
+            handleSubmit={mockSubmitHandler}
+            handleCancel={mockCancelHandler}
+            existingDatasourceNamesList={['dup20']}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+
+      expect(mockCredentialForm).not.toHaveBeenCalled();
+    });
   });
 });
