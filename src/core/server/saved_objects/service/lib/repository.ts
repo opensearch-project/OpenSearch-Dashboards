@@ -243,6 +243,7 @@ export class SavedObjectsRepository {
       originId,
       initialNamespaces,
       version,
+      workspaces,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -289,6 +290,7 @@ export class SavedObjectsRepository {
       migrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
+      ...(Array.isArray(workspaces) && { workspaces }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -438,6 +440,12 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      let savedObjectWorkspaces = options.workspaces;
+
+      if (expectedBulkGetResult.value.method !== 'create') {
+        savedObjectWorkspaces = object.workspaces;
+      }
+
       const expectedResult = {
         opensearchRequestIndex: bulkRequestIndexCounter++,
         requestedId: object.id,
@@ -452,6 +460,7 @@ export class SavedObjectsRepository {
             updated_at: time,
             references: object.references || [],
             originId: object.originId,
+            ...(savedObjectWorkspaces && { workspaces: savedObjectWorkspaces }),
           }) as SavedObjectSanitizedDoc
         ),
       };
@@ -736,6 +745,7 @@ export class SavedObjectsRepository {
       typeToNamespacesMap,
       filter,
       preference,
+      workspaces,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -809,6 +819,7 @@ export class SavedObjectsRepository {
           typeToNamespacesMap,
           hasReference,
           kueryNode,
+          workspaces,
         }),
       },
     };
@@ -1754,7 +1765,7 @@ function getSavedObjectFromSource<T>(
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt } = doc._source;
+  const { originId, updated_at: updatedAt, workspaces } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -1769,6 +1780,7 @@ function getSavedObjectFromSource<T>(
     namespaces,
     ...(originId && { originId }),
     ...(updatedAt && { updated_at: updatedAt }),
+    ...(workspaces && { workspaces }),
     version: encodeHitVersion(doc),
     attributes: doc._source[type],
     references: doc._source.references || [],
