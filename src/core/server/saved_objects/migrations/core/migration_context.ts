@@ -36,7 +36,7 @@
  */
 
 import { Logger } from 'src/core/server/logging';
-import { Config } from 'packages/osd-config/target';
+import { Config } from '@osd/config';
 import { MigrationOpenSearchClient } from './migration_opensearch_client';
 import { SavedObjectsSerializer } from '../../serialization';
 import {

@@ -35,8 +35,7 @@
 
 import { OpenSearchDashboardsConfigType } from 'src/core/server/opensearch_dashboards_config';
 import { BehaviorSubject } from 'rxjs';
-
-import { Config } from 'packages/osd-config/target';
+import { Config } from '@osd/config';
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
