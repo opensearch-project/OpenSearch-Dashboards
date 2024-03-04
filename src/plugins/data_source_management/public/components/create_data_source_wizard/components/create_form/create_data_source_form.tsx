@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { AuthenticationMethodRegistery } from 'src/plugins/data_source_management/public/auth_registry';
+import { AuthenticationMethodRegistery } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import {
   AuthType,

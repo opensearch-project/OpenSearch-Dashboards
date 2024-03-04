@@ -21,10 +21,7 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../../../../types';
-import {
-  AuthenticationMethod,
-  AuthenticationMethodRegistery,
-} from 'src/plugins/data_source_management/public/auth_registry';
+import { AuthenticationMethod, AuthenticationMethodRegistery } from '../../../../auth_registry';
 
 const titleFieldIdentifier = 'dataSourceTitle';
 const titleFormRowIdentifier = '[data-test-subj="editDataSourceTitleFormRow"]';
