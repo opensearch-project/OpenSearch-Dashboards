@@ -537,6 +537,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     if (authCredentialForm !== undefined) {
       return authCredentialForm(this.state, this.handleStateChange);
     }
+
+    return null;
   };
 
   /* Render methods */

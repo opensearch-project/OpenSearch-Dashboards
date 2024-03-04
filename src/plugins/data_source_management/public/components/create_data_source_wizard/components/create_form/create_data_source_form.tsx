@@ -337,6 +337,8 @@ export class CreateDataSourceForm extends React.Component<
     if (authCredentialForm !== undefined) {
       return authCredentialForm(this.state, this.handleStateChange);
     }
+
+    return null;
   };
 
   /* Render methods */
