@@ -83,6 +83,51 @@ describe('AppWrapper', () => {
       </div>
     `);
   });
+
+  it('display padding left style when sidecar direction is left', () => {
+    const chromeVisible$ = new BehaviorSubject<boolean>(true);
+    const sidecarConfig$ = new BehaviorSubject<ISidecarConfig>({
+      dockedMode: SIDECAR_DOCKED_MODE.LEFT,
+      paddingSize: 640,
+    });
+
+    const component = mount(
+      <AppWrapper chromeVisible$={chromeVisible$} sidecarConfig$={sidecarConfig$}>
+        app-content
+      </AppWrapper>
+    );
+    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+      <div
+        class="app-wrapper"
+        id="app-wrapper"
+        style="padding-left: 640px;"
+      >
+        app-content
+      </div>
+    `);
+  });
+
+  it('does not display padding  style when sidecar direction is takeover', () => {
+    const chromeVisible$ = new BehaviorSubject<boolean>(true);
+    const sidecarConfig$ = new BehaviorSubject<ISidecarConfig>({
+      dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
+      paddingSize: 640,
+    });
+
+    const component = mount(
+      <AppWrapper chromeVisible$={chromeVisible$} sidecarConfig$={sidecarConfig$}>
+        app-content
+      </AppWrapper>
+    );
+    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+      <div
+        class="app-wrapper"
+        id="app-wrapper"
+      >
+        app-content
+      </div>
+    `);
+  });
 });
 
 describe('AppContainer', () => {
