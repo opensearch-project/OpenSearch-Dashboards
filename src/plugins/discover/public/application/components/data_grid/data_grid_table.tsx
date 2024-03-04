@@ -46,6 +46,7 @@ export interface DataGridTableProps {
   isContextView?: boolean;
   isLoading?: boolean;
   showPagination?: boolean;
+  scrollToTop?: () => void;
 }
 
 export const DataGridTable = ({
@@ -67,6 +68,7 @@ export const DataGridTable = ({
   isContextView = false,
   isLoading = false,
   showPagination,
+  scrollToTop,
 }: DataGridTableProps) => {
   const services = getServices();
   const [inspectedHit, setInspectedHit] = useState<OpenSearchSearchHit | undefined>();
@@ -179,6 +181,7 @@ export const DataGridTable = ({
         isShortDots={isShortDots}
         hideTimeColumn={hideTimeColumn}
         defaultSortOrder={defaultSortOrder}
+        scrollToTop={scrollToTop}
       />
     ),
     [
@@ -197,6 +200,7 @@ export const DataGridTable = ({
       defaultSortOrder,
       hideTimeColumn,
       isShortDots,
+      scrollToTop,
     ]
   );
 

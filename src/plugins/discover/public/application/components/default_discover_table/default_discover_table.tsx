@@ -33,6 +33,7 @@ export interface DefaultDiscoverTableProps {
   hideTimeColumn: boolean;
   defaultSortOrder: SortDirection;
   showPagination?: boolean;
+  scrollToTop?: () => void;
 }
 
 export const LegacyDiscoverTable = ({
@@ -52,6 +53,7 @@ export const LegacyDiscoverTable = ({
   hideTimeColumn,
   defaultSortOrder,
   showPagination,
+  scrollToTop,
 }: DefaultDiscoverTableProps) => {
   const displayedColumns = getLegacyDisplayedColumns(
     columns,
@@ -173,7 +175,7 @@ export const LegacyDiscoverTable = ({
               values={{ sampleSize }}
             />
 
-            <EuiButtonEmpty onClick={() => window.scrollTo(0, 0)}>
+            <EuiButtonEmpty onClick={scrollToTop}>
               <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
             </EuiButtonEmpty>
           </EuiCallOut>
