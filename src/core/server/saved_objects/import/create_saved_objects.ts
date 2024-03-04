@@ -42,6 +42,7 @@ interface CreateSavedObjectsParams<T> {
   overwrite?: boolean;
   dataSourceId?: string;
   dataSourceTitle?: string;
+  workspaces?: string[];
 }
 interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;
@@ -61,6 +62,7 @@ export const createSavedObjects = async <T>({
   overwrite,
   dataSourceId,
   dataSourceTitle,
+  workspaces,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
   const errorSet = accumulatedErrors.reduce(
@@ -197,6 +199,7 @@ export const createSavedObjects = async <T>({
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
       namespace,
       overwrite,
+      workspaces,
     });
     expectedResults = bulkCreateResponse.saved_objects;
   }
