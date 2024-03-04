@@ -625,6 +625,27 @@ describe('#getQueryParams', () => {
         ]);
       });
     });
+
+    describe('when using workspace search', () => {
+      it('using normal workspaces', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: ['foo'],
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  must: [{ term: { workspaces: 'foo' } }],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      });
+    });
   });
 
   describe('namespaces property', () => {
