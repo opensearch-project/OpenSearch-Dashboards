@@ -7,9 +7,10 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/
 import { CspHandlerConfigSchema, configSchema } from '../config';
 import { CspHandlerPlugin } from './plugin';
 
-// This exports static code and TypeScript types,
-// as well as, OpenSearch Dashboards Platform `plugin()` initializer.
-
+/*
+This exports static code and TypeScript types,
+as well as, OpenSearch Dashboards Platform `plugin()` initializer.
+*/
 export const config: PluginConfigDescriptor<CspHandlerConfigSchema> = {
   schema: configSchema,
 };
