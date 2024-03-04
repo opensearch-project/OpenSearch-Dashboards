@@ -46,7 +46,7 @@ describe('SidecarService', () => {
     sidecar = getServiceStart();
   });
 
-  describe('openSidecar()', () => {
+  describe('open sidecar', () => {
     it('renders a sidecar to the DOM', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
       sidecar.open(mountText('Sidecar content'), options);
@@ -102,6 +102,30 @@ describe('SidecarService', () => {
       await ref1.close();
       expect(mockReactDomUnmount).toBeCalledTimes(0);
       expect(onCloseComplete).toBeCalledTimes(0);
+    });
+  });
+
+  describe('SidecarRef#Hide()', () => {
+    it('hide the sidecar when calling hide ', () => {
+      expect(mockReactDomRender).not.toHaveBeenCalled();
+      sidecar.open(mountText('Sidecar content'), options);
+      sidecar.hide();
+      const content = mount(mockReactDomRender.mock.calls[0][0]);
+      expect(content.html()).toMatchSnapshot();
+      expect(content.hasClass('osdSidecarFlyout--hide'));
+    });
+  });
+
+  describe('SidecarRef#Show()', () => {
+    it('recover sidecar when calling show after calling hide', () => {
+      expect(mockReactDomRender).not.toHaveBeenCalled();
+      sidecar.open(mountText('Sidecar content'), options);
+      sidecar.hide();
+      expect(mount(mockReactDomRender.mock.calls[0][0]).hasClass('osdSidecarFlyout--hide'));
+      sidecar.show();
+      const content = mount(mockReactDomRender.mock.calls[0][0]);
+      expect(content.html()).toMatchSnapshot();
+      expect(content.hasClass('osdSidecarFlyout--hide')).toEqual(false);
     });
   });
 });

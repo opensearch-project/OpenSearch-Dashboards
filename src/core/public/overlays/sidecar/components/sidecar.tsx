@@ -14,7 +14,7 @@ import './sidecar.scss';
 import { ResizableButton } from './resizable_button';
 import { ISidecarConfig, OverlaySidecarOpenOptions } from '../sidecar_service';
 
-interface Props {
+export interface Props {
   sidecarConfig$: BehaviorSubject<ISidecarConfig | undefined>;
   options: OverlaySidecarOpenOptions;
   setSidecarConfig: (config: Partial<ISidecarConfig>) => void;

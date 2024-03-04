@@ -7,7 +7,7 @@
   box-shadow: initial;
   position: fixed;
   z-index: 1000;
-  background: white;
+  background: lightOrDarkTheme($euiColorGhost, $euiColorInk);
   display: flex;
 
   &.osdSidecarFlyout--dockedRight {
