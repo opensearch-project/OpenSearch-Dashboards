@@ -65,10 +65,9 @@ export const registerBulkCreateRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { overwrite } = req.query;
-      let workspaces = req.query.workspaces;
-      if (typeof workspaces === 'string') {
-        workspaces = [workspaces];
-      }
+      const workspaces = req.query.workspaces
+        ? Array<string>().concat(req.query.workspaces)
+        : undefined;
       const result = await context.core.savedObjects.client.bulkCreate(req.body, {
         overwrite,
         workspaces,

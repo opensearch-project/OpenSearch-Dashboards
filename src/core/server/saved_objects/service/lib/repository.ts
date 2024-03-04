@@ -282,29 +282,6 @@ export class SavedObjectsRepository {
       }
     }
 
-    let savedObjectWorkspaces = workspaces;
-
-    if (id && overwrite && workspaces) {
-      let currentItem;
-      try {
-        currentItem = await this.get(type, id);
-      } catch (e) {
-        // this.get will throw an error when no items can be found
-      }
-      if (currentItem) {
-        if (
-          SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
-            workspaces,
-            currentItem.workspaces
-          ).length
-        ) {
-          throw SavedObjectsErrorHelpers.createConflictError(type, id);
-        } else {
-          savedObjectWorkspaces = currentItem.workspaces;
-        }
-      }
-    }
-
     const migrated = this._migrator.migrateDocument({
       id,
       type,
@@ -315,8 +292,8 @@ export class SavedObjectsRepository {
       migrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
-      ...(Array.isArray(savedObjectWorkspaces) && { workspaces: savedObjectWorkspaces }),
       ...(permissions && { permissions }),
+      ...(Array.isArray(workspaces) && { workspaces }),
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
@@ -479,48 +456,10 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
-      let savedObjectWorkspaces: string[] | undefined = options.workspaces;
+      let savedObjectWorkspaces = options.workspaces;
 
       if (expectedBulkGetResult.value.method !== 'create') {
-        const rawId = this._serializer.generateRawId(namespace, object.type, object.id);
-        const findObject =
-          bulkGetResponse?.statusCode !== 404
-            ? bulkGetResponse?.body.docs?.find((item) => item._id === rawId)
-            : null;
-        /**
-         * When it is about to overwrite a object into options.workspace.
-         * We need to check if the options.workspaces is the subset of object.workspaces,
-         * Or it will be treated as a conflict
-         */
-        if (findObject && findObject.found) {
-          const transformedObject = this._serializer.rawToSavedObject(
-            findObject as SavedObjectsRawDoc
-          ) as SavedObject;
-          const filteredWorkspaces = SavedObjectsUtils.filterWorkspacesAccordingToBaseWorkspaces(
-            options.workspaces,
-            transformedObject.workspaces
-          );
-          if (filteredWorkspaces.length) {
-            /**
-             * options.workspaces is not a subset of object.workspaces,
-             * return a conflict error.
-             */
-            const { id, type } = object;
-            return {
-              tag: 'Left' as 'Left',
-              error: {
-                id,
-                type,
-                error: {
-                  ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-                  metadata: { isNotOverwritable: true },
-                },
-              },
-            };
-          } else {
-            savedObjectWorkspaces = transformedObject.workspaces;
-          }
-        }
+        savedObjectWorkspaces = object.workspaces;
       }
 
       const expectedResult = {
@@ -537,8 +476,8 @@ export class SavedObjectsRepository {
             updated_at: time,
             references: object.references || [],
             originId: object.originId,
-            workspaces: savedObjectWorkspaces,
             ...(object.permissions && { permissions: object.permissions }),
+            ...(savedObjectWorkspaces && { workspaces: savedObjectWorkspaces }),
           }) as SavedObjectSanitizedDoc
         ),
       };

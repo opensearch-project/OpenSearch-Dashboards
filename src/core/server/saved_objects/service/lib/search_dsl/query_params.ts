@@ -127,12 +127,19 @@ function getClauseForType(
     },
   };
 }
+
 /**
  *  Gets the clause that will filter for the workspace.
  */
 function getClauseForWorkspace(workspace: string) {
-  if (!workspace) {
-    return {};
+  if (workspace === '*') {
+    return {
+      bool: {
+        must: {
+          match_all: {},
+        },
+      },
+    };
   }
 
   return {
@@ -240,14 +247,12 @@ export function getQueryParams({
     ],
   };
 
-  if (workspaces?.filter((workspace) => workspace).length) {
+  if (workspaces) {
     bool.filter.push({
       bool: {
-        should: workspaces
-          .filter((workspace) => workspace)
-          .map((workspace) => {
-            return getClauseForWorkspace(workspace);
-          }),
+        should: workspaces.map((workspace) => {
+          return getClauseForWorkspace(workspace);
+        }),
         minimum_should_match: 1,
       },
     });

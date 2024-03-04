@@ -921,74 +921,6 @@ describe('SavedObjectsRepository', () => {
         const expectedError = expectErrorResult(obj3, { message: JSON.stringify(opensearchError) });
         await bulkCreateError(obj3, opensearchError, expectedError);
       });
-
-      it(`returns error when there is a conflict with an existing saved object according to workspaces`, async () => {
-        const obj = { ...obj3, workspaces: ['foo'] };
-        const response1 = {
-          status: 200,
-          docs: [
-            {
-              found: true,
-              _id: `${obj1.type}:${obj1.id}`,
-              _source: {
-                type: obj1.type,
-                workspaces: ['bar'],
-              },
-            },
-            {
-              found: true,
-              _id: `${obj.type}:${obj.id}`,
-              _source: {
-                type: obj.type,
-                workspaces: obj.workspaces,
-              },
-            },
-            {
-              found: true,
-              _id: `${obj2.type}:${obj2.id}`,
-              _source: {
-                type: obj2.type,
-              },
-            },
-          ],
-        };
-        client.mget.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(response1)
-        );
-        const response2 = getMockBulkCreateResponse([obj1, obj, obj2]);
-        client.bulk.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(response2)
-        );
-
-        const options = { overwrite: true, workspaces: ['bar'] };
-        const result = await savedObjectsRepository.bulkCreate([obj1, obj, obj2], options);
-        expect(client.bulk).toHaveBeenCalled();
-        expect(client.mget).toHaveBeenCalled();
-
-        const body1 = {
-          docs: [
-            expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
-            expect.objectContaining({ _id: `${obj.type}:${obj.id}` }),
-            expect.objectContaining({ _id: `${obj2.type}:${obj2.id}` }),
-          ],
-        };
-        expect(client.mget).toHaveBeenCalledWith(
-          expect.objectContaining({ body: body1 }),
-          expect.anything()
-        );
-        const body2 = [...expectObjArgs(obj1)];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body: body2 }),
-          expect.anything()
-        );
-        expect(result).toEqual({
-          saved_objects: [
-            expectSuccess(obj1),
-            expectErrorConflict(obj, { metadata: { isNotOverwritable: true } }),
-            expectErrorConflict(obj2, { metadata: { isNotOverwritable: true } }),
-          ],
-        });
-      });
     });
 
     describe('migration', () => {
@@ -2260,29 +2192,6 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it(`doesn't modify workspaces when overwrite without target workspaces`, async () => {
-        const response = getMockGetResponse({ workspaces: ['foo'], id });
-        client.get.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(response)
-        );
-
-        await savedObjectsRepository.create('dashboard', attributes, {
-          id,
-          overwrite: true,
-          workspaces: [],
-        });
-
-        expect(client.index).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: `dashboard:${id}`,
-            body: expect.objectContaining({
-              workspaces: ['foo'],
-            }),
-          }),
-          expect.anything()
-        );
-      });
-
       it(`accepts permissions property`, async () => {
         await createSuccess(type, attributes, { id, permissions });
         expect(client.create).toHaveBeenCalledWith(
@@ -2349,21 +2258,6 @@ describe('SavedObjectsRepository', () => {
             namespace,
           })
         ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_TYPE, id));
-        expect(client.get).toHaveBeenCalled();
-      });
-
-      it(`throws error when there is a conflict with an existing workspaces saved object`, async () => {
-        const response = getMockGetResponse({ workspaces: ['foo'], id });
-        client.get.mockResolvedValueOnce(
-          opensearchClientMock.createSuccessTransportRequestPromise(response)
-        );
-        await expect(
-          savedObjectsRepository.create('dashboard', attributes, {
-            id,
-            overwrite: true,
-            workspaces: ['bar'],
-          })
-        ).rejects.toThrowError(createConflictError('dashboard', id));
         expect(client.get).toHaveBeenCalled();
       });
 

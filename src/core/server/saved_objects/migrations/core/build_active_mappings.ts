@@ -34,6 +34,7 @@
 
 import crypto from 'crypto';
 import { cloneDeep, mapValues } from 'lodash';
+import { Config } from 'packages/osd-config/target';
 import {
   IndexMapping,
   SavedObjectsFieldMapping,
@@ -48,11 +49,20 @@ import {
  * @param typeDefinitions - the type definitions to build mapping from.
  */
 export function buildActiveMappings(
-  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
+  typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties,
+  opensearchDashboardsRawConfig?: Config
 ): IndexMapping {
   const mapping = defaultMapping();
 
-  const mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
+  let mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
+  // if permission control for saved objects is enabled, the permissions field should be added to the mapping
+  if (opensearchDashboardsRawConfig?.get('workspace.enabled')) {
+    mergedProperties = validateAndMerge(mapping.properties, {
+      workspaces: {
+        type: 'keyword',
+      },
+    });
+  }
 
   return cloneDeep({
     ...mapping,
@@ -185,9 +195,6 @@ function defaultMapping(): IndexMapping {
             type: 'keyword',
           },
         },
-      },
-      workspaces: {
-        type: 'keyword',
       },
       permissions: {
         properties: {

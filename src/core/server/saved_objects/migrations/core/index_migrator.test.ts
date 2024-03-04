@@ -36,6 +36,7 @@ import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { IndexMigrator } from './index_migrator';
 import { MigrationOpts } from './migration_context';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
+import { configMock } from '../../../config/mocks';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {
@@ -57,6 +58,95 @@ describe('IndexMigrator', () => {
       },
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
     };
+  });
+
+  test('creates the index when workspaces feature flag is enabled', async () => {
+    const { client } = testOpts;
+
+    testOpts.mappingProperties = { foo: { type: 'long' } as any };
+    const rawConfig = configMock.create();
+    rawConfig.get.mockReturnValue(true);
+    testOpts.opensearchDashboardsRawConfig = rawConfig;
+
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(client.indices.create).toHaveBeenCalledWith({
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '18c78c995965207ed3f6e7fc5c6e55fe',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+              workspaces: '2f4316de49999235636386fe51dc06c1',
+              permissions: '07c04cdd060494956fdddaa7ef86e8ac',
+            },
+          },
+          properties: {
+            foo: { type: 'long' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+            workspaces: { type: 'keyword' },
+            permissions: {
+              properties: {
+                library_read: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                library_write: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                management: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                read: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                write: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_1',
+    });
   });
 
   test('creates the index if it does not exist', async () => {
@@ -83,7 +173,6 @@ describe('IndexMigrator', () => {
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
-              workspaces: '2f4316de49999235636386fe51dc06c1',
             },
           },
           properties: {
@@ -94,9 +183,6 @@ describe('IndexMigrator', () => {
             originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
-            workspaces: {
-              type: 'keyword',
-            },
             permissions: {
               properties: {
                 library_read: {
@@ -239,7 +325,6 @@ describe('IndexMigrator', () => {
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
-              workspaces: '2f4316de49999235636386fe51dc06c1',
             },
           },
           properties: {
@@ -251,9 +336,6 @@ describe('IndexMigrator', () => {
             originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
-            workspaces: {
-              type: 'keyword',
-            },
             permissions: {
               properties: {
                 library_read: {
@@ -339,7 +421,6 @@ describe('IndexMigrator', () => {
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
-              workspaces: '2f4316de49999235636386fe51dc06c1',
             },
           },
           properties: {
@@ -351,9 +432,6 @@ describe('IndexMigrator', () => {
             originId: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
-            workspaces: {
-              type: 'keyword',
-            },
             permissions: {
               properties: {
                 library_read: {

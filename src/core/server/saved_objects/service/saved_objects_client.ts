@@ -71,6 +71,10 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   initialNamespaces?: string[];
   /** permission control describe by ACL object */
   permissions?: Permissions;
+  /**
+   * workspaces the new created objects belong to
+   */
+  workspaces?: string[];
 }
 
 /**
@@ -94,6 +98,10 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * Note: this can only be used for multi-namespace object types.
    */
   initialNamespaces?: string[];
+  /**
+   * workspaces the objects belong to, will only be used when overwrite is enabled.
+   */
+  workspaces?: string[];
 }
 
 /**

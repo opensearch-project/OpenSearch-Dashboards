@@ -275,3 +275,6 @@
 
 # Set the value of this setting to true to enable plugin augmentation on Dashboard
 # vis_augmenter.pluginAugmentationEnabled: true
+
+# Set the value to true to enable workspace feature
+# workspace.enabled: false
