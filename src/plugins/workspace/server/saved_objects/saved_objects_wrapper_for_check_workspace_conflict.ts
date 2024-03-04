@@ -35,6 +35,12 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       `${props.type}:${props.id}`
     );
   }
+
+  /**
+   * Workspace is a concept to manage saved objects and the `workspaces` field of each object indicates workspaces the object belongs to.
+   * When user tries to update the object,
+   * 1. Overwrite a object belonging to workspace A with parameters workspace B
+   */
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     const createWithWorkspaceConflictCheck = async <T = unknown>(
       type: string,
@@ -90,10 +96,11 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         ? objects
             .filter((object) => !!object.id)
             .map((object) => {
-              const { type, id } = object;
               /**
-               * It requires a check when overwriting objects to target workspaces
+               * If the object waiting to import has id and type,
+               * Add it to the buldGetDocs to fetch the latest metadata.
                */
+              const { type, id } = object;
               return {
                 type,
                 id: id as string,
