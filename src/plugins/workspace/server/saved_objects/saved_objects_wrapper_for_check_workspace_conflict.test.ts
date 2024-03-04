@@ -89,17 +89,11 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
     });
 
     it(`Should use options.workspaces when get throws error`, async () => {
-      mockedClient.get.mockRejectedValueOnce(
-        getSavedObject({
-          id: 'dashboard:foo',
-          workspaces: ['foo'],
-          error: {
-            statusCode: 404,
-            error: 'Not found',
-            message: 'Not found',
-          },
-        })
-      );
+      mockedClient.get.mockRejectedValueOnce({
+        output: {
+          statusCode: 404,
+        },
+      });
 
       await wrapperClient.create(
         'dashboard',
