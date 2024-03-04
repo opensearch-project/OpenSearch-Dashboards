@@ -21,6 +21,7 @@ const testWorkspace: WorkspaceAttribute = {
 describe('workspace service', () => {
   let root: ReturnType<typeof osdTestServer.createRoot>;
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
+  let osd: osdTestServer.TestOpenSearchDashboardsUtils;
   beforeAll(async () => {
     const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -34,8 +35,8 @@ describe('workspace service', () => {
       },
     });
     opensearchServer = await startOpenSearch();
-    const startOSDResp = await startOpenSearchDashboards();
-    root = startOSDResp.root;
+    osd = await startOpenSearchDashboards();
+    root = osd.root;
   });
   afterAll(async () => {
     await root.shutdown();
@@ -49,12 +50,13 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
+      const savedObjectsRepository = osd.coreStart.savedObjects.createInternalRepository([
+        WORKSPACE_TYPE,
+      ]);
       await Promise.all(
         listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
           // this will delete reserved workspace
-          osdTestServer.request
-            .delete(root, `/api/saved_objects/${WORKSPACE_TYPE}/${item.id}`)
-            .expect(200)
+          savedObjectsRepository.delete(WORKSPACE_TYPE, item.id)
         )
       );
     });
@@ -155,7 +157,7 @@ describe('workspace service', () => {
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: omit(reservedWorkspace, 'id'),
+          attributes: omitId(reservedWorkspace),
         })
         .expect(200);
 
