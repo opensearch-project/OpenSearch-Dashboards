@@ -12,7 +12,7 @@ import {
 } from '../../../core/server';
 
 import { createCspRulesPreResponseHandler } from './csp_handlers';
-import { CspHandlerPluginSetup, CspHandlerPluginStart } from './types';
+import { AppPluginSetupDependencies, CspHandlerPluginSetup, CspHandlerPluginStart } from './types';
 
 export class CspHandlerPlugin implements Plugin<CspHandlerPluginSetup, CspHandlerPluginStart> {
   private readonly logger: Logger;
@@ -21,15 +21,12 @@ export class CspHandlerPlugin implements Plugin<CspHandlerPluginSetup, CspHandle
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup) {
-    // TODO: replace this with real
-    const getConfigurationClient = {};
-
+  public async setup(core: CoreSetup, { applicationConfig }: AppPluginSetupDependencies) {
     core.http.registerOnPreResponse(
       createCspRulesPreResponseHandler(
         core,
         core.http.csp.header,
-        getConfigurationClient,
+        applicationConfig.getConfigurationClient,
         this.logger
       )
     );

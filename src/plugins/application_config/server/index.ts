@@ -20,4 +20,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new ApplicationConfigPlugin(initializerContext);
 }
 
-export { ApplicationConfigPluginSetup, ApplicationConfigPluginStart } from './types';
+export {
+  ApplicationConfigPluginSetup,
+  ApplicationConfigPluginStart,
+  ConfigurationClient,
+} from './types';

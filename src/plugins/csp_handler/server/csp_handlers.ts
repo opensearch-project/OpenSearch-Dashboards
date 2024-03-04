@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ConfigurationClient } from '../../application_config/server';
 import {
   CoreSetup,
   IScopedClusterClient,
@@ -12,7 +13,8 @@ import {
   OnPreResponseToolkit,
   OpenSearchDashboardsRequest,
 } from '../../../core/server';
-import { ConfigurationClient } from './types';
+
+const CSP_RULES_CONFIG_KEY = 'csp.rules';
 
 export function createCspRulesPreResponseHandler(
   core: CoreSetup,
@@ -38,13 +40,7 @@ export function createCspRulesPreResponseHandler(
 
       const myClient = getConfigurationClient(coreStart.opensearch.client.asScoped(request));
 
-      const existsValue = await myClient.existsCspRules();
-
-      if (!existsValue) {
-        return updateFrameAncestors(cspHeader, toolkit);
-      }
-
-      const cspRules = await myClient.getCspRules();
+      const cspRules = await myClient.getEntityConfig(CSP_RULES_CONFIG_KEY);
 
       if (!cspRules) {
         return updateFrameAncestors(cspHeader, toolkit);
