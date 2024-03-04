@@ -53,6 +53,16 @@ describe('SidecarService', () => {
       const content = mount(mockReactDomRender.mock.calls[0][0]);
       expect(content.html()).toMatchSnapshot();
     });
+
+    it('does not unmount if targetDom is null', async () => {
+      const sidecarRef = new SidecarService().start({ i18n: i18nMock, targetDomElement: null });
+      const ref = sidecarRef.open(mountText('Sidecar content'), options);
+      const content = mount(mockReactDomRender.mock.calls[0][0]);
+      expect(content.html()).toMatchSnapshot();
+      await ref.close();
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+    });
+
     describe('with a currently active sidecar', () => {
       let ref1: OverlayRef;
       beforeEach(() => {

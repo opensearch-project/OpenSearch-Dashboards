@@ -102,7 +102,7 @@ export interface OverlaySidecarOpenOptions {
 
 interface StartDeps {
   i18n: I18nStart;
-  targetDomElement: Element;
+  targetDomElement: Element | null;
 }
 
 export enum SIDECAR_DOCKED_MODE {

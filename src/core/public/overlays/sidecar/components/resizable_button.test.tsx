@@ -44,7 +44,7 @@ test('it should be vertical when docked mode is takeover', () => {
   expect(component).toMatchSnapshot();
 });
 
-test('it should emit onResize with new flyout size when drag and horizontal', () => {
+test('it should emit onResize with new flyout size when docked right and drag and horizontal', () => {
   const windowEvents = storeWindowEvents();
 
   const onResize = jest.fn();
@@ -54,6 +54,22 @@ test('it should emit onResize with new flyout size when drag and horizontal', ()
   expect(onResize).not.toHaveBeenCalled();
   resizer.simulate('mousedown', { clientX: 0, pageX: 0, pageY: 0 });
   windowEvents?.mousemove({ clientX: -1000, pageX: 0, pageY: 0 });
+  windowEvents?.mouseup();
+  const newSize = 1000 + DEFAULT_FLYOUT_SIZE;
+  expect(onResize).toHaveBeenCalledWith(newSize);
+  expect(component).toMatchSnapshot();
+});
+
+test('it should emit onResize with new flyout size when docked left and drag and horizontal', () => {
+  const windowEvents = storeWindowEvents();
+
+  const onResize = jest.fn();
+  const newProps = { ...props, onResize, dockedMode: SIDECAR_DOCKED_MODE.LEFT };
+  const component = shallow(<ResizableButton {...newProps} />);
+  const resizer = component.find(`[data-test-subj~="resizableButton"]`).first();
+  expect(onResize).not.toHaveBeenCalled();
+  resizer.simulate('mousedown', { clientX: 0, pageX: 0, pageY: 0 });
+  windowEvents?.mousemove({ clientX: 1000, pageX: 0, pageY: 0 });
   windowEvents?.mouseup();
   const newSize = 1000 + DEFAULT_FLYOUT_SIZE;
   expect(onResize).toHaveBeenCalledWith(newSize);

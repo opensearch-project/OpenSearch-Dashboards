@@ -44,7 +44,18 @@ exports[`it should emit onResize with min size when drag if new size is below th
 />
 `;
 
-exports[`it should emit onResize with new flyout size when drag and horizontal 1`] = `
+exports[`it should emit onResize with new flyout size when docked left and drag and horizontal 1`] = `
+<button
+  className="resizableButton resizableButton--horizontal"
+  data-test-subj="resizableButton"
+  onClick={[Function]}
+  onMouseDown={[Function]}
+  onTouchStart={[Function]}
+  type="button"
+/>
+`;
+
+exports[`it should emit onResize with new flyout size when docked right and drag and horizontal 1`] = `
 <button
   className="resizableButton resizableButton--horizontal"
   data-test-subj="resizableButton"
