@@ -83,7 +83,7 @@ describe('IndexMigrator', () => {
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
               originId: '2f4316de49999235636386fe51dc06c1',
-              permissions: '07c04cdd060494956fdddaa7ef86e8ac',
+              permissions: 'f3ad308fa2a0c34007eb9ad461d6294a',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
@@ -106,12 +106,6 @@ describe('IndexMigrator', () => {
                   },
                 },
                 library_write: {
-                  properties: {
-                    users: { type: 'keyword' },
-                    groups: { type: 'keyword' },
-                  },
-                },
-                management: {
                   properties: {
                     users: { type: 'keyword' },
                     groups: { type: 'keyword' },

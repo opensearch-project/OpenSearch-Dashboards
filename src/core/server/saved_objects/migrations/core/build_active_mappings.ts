@@ -72,7 +72,6 @@ export function buildActiveMappings(
         properties: {
           read: principals,
           write: principals,
-          management: principals,
           library_read: principals,
           library_write: principals,
         },

@@ -125,10 +125,10 @@ export class ACL {
    * the existing permissions object. The usage is:
    *
    * const permissionObject = new ACL()
-   *  .addPermission(['write', 'management'], {
+   *  .addPermission(['write', 'library_write'], {
    *     users: ['user2'],
    *   })
-   *   .addPermission(['write', 'management'], {
+   *   .addPermission(['write', 'library_write'], {
    *     groups: ['group1'],
    *   })
    *   .getPermissions();
@@ -165,10 +165,10 @@ export class ACL {
    * the existing permissions object. The usage is:
    *
    * const newPermissionObject = new ACL()
-   *  .removePermission(['write', 'management'], {
+   *  .removePermission(['write', 'library_write'], {
    *     users: ['user2'],
    *   })
-   *   .removePermission(['write', 'management'], {
+   *   .removePermission(['write', 'library_write'], {
    *     groups: ['group1'],
    *   })
    *   .getPermissions();

@@ -58,27 +58,27 @@ describe('acl', () => {
 
     acl.resetPermissions();
     result = acl
-      .addPermission(['write', 'management'], {
+      .addPermission(['write', 'library_write'], {
         users: ['user2'],
         groups: ['group1', 'group2'],
       })
       .getPermissions();
     expect(result?.write?.users).toEqual(['user2']);
-    expect(result?.management?.groups).toEqual(['group1', 'group2']);
+    expect(result?.library_write?.groups).toEqual(['group1', 'group2']);
 
     acl.resetPermissions();
     result = acl
-      .addPermission(['write', 'management'], {
+      .addPermission(['write', 'library_write'], {
         users: ['user2'],
       })
-      .addPermission(['write', 'management'], {
+      .addPermission(['write', 'library_write'], {
         groups: ['group1'],
       })
       .getPermissions();
     expect(result?.write?.users).toEqual(['user2']);
     expect(result?.write?.groups).toEqual(['group1']);
-    expect(result?.management?.users).toEqual(['user2']);
-    expect(result?.management?.groups).toEqual(['group1']);
+    expect(result?.library_write?.users).toEqual(['user2']);
+    expect(result?.library_write?.groups).toEqual(['group1']);
 
     acl.resetPermissions();
     const nullValue: unknown = undefined;
