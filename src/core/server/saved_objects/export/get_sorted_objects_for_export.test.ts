@@ -866,9 +866,6 @@ describe('getSortedObjectsForExport()', () => {
             ],
             Object {
               namespace: undefined,
-              workspaces: Array [
-                foo,
-              ],
             },
           ],
         ],
