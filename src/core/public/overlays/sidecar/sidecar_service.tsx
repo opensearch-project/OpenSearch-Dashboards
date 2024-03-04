@@ -11,9 +11,8 @@ import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
-import './sidecar_service.scss';
 import { OverlayRef } from '../types';
-import { Sidecar } from './sidecar';
+import { Sidecar } from './components/sidecar';
 /**
  * A SidecarRef is a reference to an opened sidecar panel. It offers methods to
  * close the sidecar panel again. If you open a sidecar panel you should make
@@ -68,7 +67,7 @@ export interface OverlaySidecarStart {
    * @param options {@link OverlaySidecarOpenOptions} - options for the sidecar
    * @return {@link SidecarRef} A reference to the opened sidecar panel.
    */
-  open(mount: MountPoint, options?: OverlaySidecarOpenOptions): SidecarRef;
+  open(mount: MountPoint, options: OverlaySidecarOpenOptions): SidecarRef;
 
   /**
    * Override the default support config
@@ -147,6 +146,7 @@ export class SidecarService {
         if (this.activeSidecar) {
           setSidecarConfig({ paddingSize: 0 });
           this.activeSidecar.close();
+          this.cleanupDom();
         }
 
         const sidecar = new SidecarRef();

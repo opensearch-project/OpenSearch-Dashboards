@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SidecarService SidecarRef#close() can be called multiple times on the same SidecarRef 1`] = `
+Array [
+  Array [
+    <div />,
+  ],
+]
+`;
+
+exports[`SidecarService openSidecar() renders a sidecar to the DOM 1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight\\" style=\\"width: 460px;\\"><button class=\\"resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content</span></div></div>"`;
+
+exports[`SidecarService openSidecar() with a currently active sidecar replaces the current sidecar with a new one 1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight\\" style=\\"width: 460px;\\"><button class=\\"resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content 2</span></div></div>"`;

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import { MouseEvent, TouchEvent } from 'react';
 import { ISidecarConfig } from './sidecar_service';
 
 function isMouseEvent(

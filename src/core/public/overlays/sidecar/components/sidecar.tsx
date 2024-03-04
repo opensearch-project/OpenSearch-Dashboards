@@ -7,12 +7,12 @@ import React, { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
-import { I18nStart } from '../../i18n';
-import { MountPoint } from '../../types';
-import { MountWrapper } from '../../utils';
-import './sidecar_service.scss';
+import { I18nStart } from '../../../i18n';
+import { MountPoint } from '../../../types';
+import { MountWrapper } from '../../../utils';
+import './sidecar.scss';
 import { ResizableButton } from './resizable_button';
-import { ISidecarConfig, OverlaySidecarOpenOptions } from './sidecar_service';
+import { ISidecarConfig, OverlaySidecarOpenOptions } from '../sidecar_service';
 
 interface Props {
   sidecarConfig$: BehaviorSubject<ISidecarConfig | undefined>;

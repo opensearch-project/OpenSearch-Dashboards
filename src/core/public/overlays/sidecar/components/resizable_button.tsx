@@ -6,8 +6,8 @@
 import React, { useCallback, useRef } from 'react';
 import classNames from 'classnames';
 import './resizable_button.scss';
-import { getPosition } from './helper';
-import { ISidecarConfig, SIDECAR_DOCKED_MODE } from './sidecar_service';
+import { getPosition } from '../helper';
+import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../sidecar_service';
 
 interface Props {
   onResize: (size: number) => void;
@@ -15,7 +15,7 @@ interface Props {
   dockedMode: ISidecarConfig['dockedMode'] | undefined;
 }
 
-const MIN_SIDECAR_SIZE = 350;
+export const MIN_SIDECAR_SIZE = 350;
 
 export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => {
   const isHorizontal = dockedMode !== SIDECAR_DOCKED_MODE.TAKEOVER;
@@ -40,7 +40,7 @@ export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => 
       };
       const onMouseMove = (e: MouseEvent | TouchEvent) => {
         let offset;
-        if (dockedMode === 'left') {
+        if (dockedMode === SIDECAR_DOCKED_MODE.LEFT) {
           offset = getPosition(e, isHorizontal) - initialMouseXorY.current;
         } else {
           offset = initialMouseXorY.current - getPosition(e, isHorizontal);
