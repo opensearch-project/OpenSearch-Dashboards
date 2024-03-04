@@ -79,9 +79,15 @@ describe('OpenSearchDashboardsMigrator', () => {
     });
 
     it('permissions field exists in the mappings when the feature is enabled', () => {
-      const options = mockOptions(true);
+      const options = mockOptions(false, true);
       const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
       expect(mappings).toHaveProperty('properties.permissions');
+    });
+
+    it('workspaces field exists in the mappings when the feature is enabled', () => {
+      const options = mockOptions(true, false);
+      const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
+      expect(mappings).toHaveProperty('properties.workspaces');
     });
   });
 
@@ -153,10 +159,10 @@ type MockedOptions = OpenSearchDashboardsMigratorOptions & {
   client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
 };
 
-const mockOptions = (isPermissionControlEnabled?: boolean) => {
+const mockOptions = (isWorkspaceEnabled?: boolean, isPermissionControlEnabled?: boolean) => {
   const rawConfig = configMock.create();
   rawConfig.get.mockReturnValue(false);
-  if (isPermissionControlEnabled) {
+  if (isWorkspaceEnabled || isPermissionControlEnabled) {
     rawConfig.get.mockReturnValue(true);
   }
   const options: MockedOptions = {

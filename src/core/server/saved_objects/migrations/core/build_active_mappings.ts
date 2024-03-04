@@ -79,6 +79,14 @@ export function buildActiveMappings(
     });
   }
 
+  if (opensearchDashboardsRawConfig?.get('workspace.enabled')) {
+    mergedProperties = validateAndMerge(mapping.properties, {
+      workspaces: {
+        type: 'keyword',
+      },
+    });
+  }
+
   return cloneDeep({
     ...mapping,
     properties: mergedProperties,

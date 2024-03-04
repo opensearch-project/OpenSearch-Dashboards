@@ -453,6 +453,7 @@ describe('SavedObjectsRepository', () => {
         groups: ['groups1'],
       },
     };
+    const workspace = 'foo-workspace';
 
     const getMockBulkCreateResponse = (objects, namespace) => {
       return {
@@ -753,6 +754,16 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
         client.bulk.mockClear();
+      });
+
+      it(`adds workspaces to request body for any types`, async () => {
+        await bulkCreateSuccess([obj1, obj2], { workspaces: [workspace] });
+        const expected = expect.objectContaining({ workspaces: [workspace] });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
     });
 
