@@ -38,8 +38,9 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
 
   /**
    * Workspace is a concept to manage saved objects and the `workspaces` field of each object indicates workspaces the object belongs to.
-   * When user tries to update the object,
-   * 1. Overwrite a object belonging to workspace A with parameters workspace B
+   * When user tries to update an existing object's attribute, workspaces field should be preserved. Below are some cases that this conflict wrapper will take effect:
+   * 1. Overwrite a object belonging to workspace A with parameter workspace B, in this case we should deny the request as it conflicts with workspaces check.
+   * 2. Overwrite a object belonging to workspace [A, B] with parameters workspace B, we need to preserved the workspaces fields to [A, B].
    */
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     const createWithWorkspaceConflictCheck = async <T = unknown>(
