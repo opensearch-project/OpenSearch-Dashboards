@@ -165,6 +165,23 @@ const mockOptions = (isWorkspaceEnabled?: boolean, isPermissionControlEnabled?: 
   if (isWorkspaceEnabled || isPermissionControlEnabled) {
     rawConfig.get.mockReturnValue(true);
   }
+  rawConfig.get.mockImplementation((path) => {
+    if (path === 'savedObjects.permission.enabled') {
+      if (isPermissionControlEnabled) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (path === 'workspace.enabled') {
+      if (isWorkspaceEnabled) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  });
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     opensearchDashboardsVersion: '8.2.3',
