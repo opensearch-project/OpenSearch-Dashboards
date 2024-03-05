@@ -34,7 +34,7 @@
 
 import crypto from 'crypto';
 import { cloneDeep, mapValues } from 'lodash';
-import { Config } from 'packages/osd-config/target';
+import { Config } from '@osd/config';
 import {
   IndexMapping,
   SavedObjectsFieldMapping,
