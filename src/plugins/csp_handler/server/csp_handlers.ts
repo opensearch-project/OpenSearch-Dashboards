@@ -55,7 +55,7 @@ export function createCspRulesPreResponseHandler(
       const cspRules = await myClient.getEntityConfig(CSP_RULES_CONFIG_KEY);
 
       if (!cspRules) {
-        return updateFrameAncestors(cspHeader, toolkit);
+        return appendFrameAncestorsWhenMissing(cspHeader, toolkit);
       }
 
       const additionalHeaders = {
