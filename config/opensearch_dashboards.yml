@@ -34,7 +34,7 @@
 # opensearchDashboards.configIndex: ".opensearch_dashboards_config"
 
 # Set the value of this setting to true to enable plugin application config. By default it is disabled.
-# application_config.enabled: true
+# application_config.enabled: false
 
 # Set the value of this setting to true to enable plugin CSP handler. By default it is disabled.
 # It requires the application config plugin as its dependency.
