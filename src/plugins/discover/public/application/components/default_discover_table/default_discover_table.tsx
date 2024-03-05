@@ -71,7 +71,7 @@ export const LegacyDiscoverTable = ({
   });
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadMoreRows = () => {
     setRenderedRowCount((prevRowCount) => prevRowCount + 50); // Load 50 more rows
   };
@@ -96,7 +96,7 @@ export const LegacyDiscoverTable = ({
         observerRef.current.unobserve(sentinel);
       }
     };
-  }, []);
+  }, [loadMoreRows]);
 
   const [activePage, setActivePage] = useState(0);
   const pageCount = Math.ceil(rows.length / pageSize);
