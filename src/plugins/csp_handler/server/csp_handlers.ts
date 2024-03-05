@@ -16,10 +16,21 @@ import {
 
 const CSP_RULES_CONFIG_KEY = 'csp.rules';
 
+/**
+ * This function creates a pre-response handler to dynamically set the CSP rules.
+ * It give precedence to the rules from application config plugin over those from YML.
+ * In case no value from application config, it will ensure a default frame-ancestors is set.
+ *
+ * @param core Context passed to the plugins `setup` method
+ * @param cspHeader The CSP header from YML
+ * @param getConfigurationClient The function provided by application config plugin to retrieve configurations
+ * @param logger The logger
+ * @returns The pre-response handler
+ */
 export function createCspRulesPreResponseHandler(
   core: CoreSetup,
   cspHeader: string,
-  getConfigurationClient: (inputOpenSearchClient: IScopedClusterClient) => ConfigurationClient,
+  getConfigurationClient: (scopedClusterClient: IScopedClusterClient) => ConfigurationClient,
   logger: Logger
 ): OnPreResponseHandler {
   return async (
