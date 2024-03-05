@@ -65,12 +65,15 @@ export function createCspRulesPreResponseHandler(
       return toolkit.next({ headers: additionalHeaders });
     } catch (e) {
       logger.error(`Failure happened in CSP rules pre response handler due to ${e}`);
-      return updateFrameAncestors(cspHeader, toolkit);
+      return appendFrameAncestorsWhenMissing(cspHeader, toolkit);
     }
   };
 }
 
-function updateFrameAncestors(cspHeader: string, toolkit: OnPreResponseToolkit) {
+/**
+ * Append frame-ancestors with default value 'self' when it is missing.
+ */
+function appendFrameAncestorsWhenMissing(cspHeader: string, toolkit: OnPreResponseToolkit) {
   if (cspHeader.includes('frame-ancestors')) {
     return toolkit.next({});
   }
