@@ -21,6 +21,7 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../../../../types';
+import { AuthenticationMethod, AuthenticationMethodRegistery } from '../../../../auth_registry';
 
 const titleFieldIdentifier = 'dataSourceTitle';
 const titleFormRowIdentifier = '[data-test-subj="editDataSourceTitleFormRow"]';
@@ -338,5 +339,47 @@ describe('Datasource Management: Edit Datasource Form', () => {
       component.update();
       expect(mockFn).toHaveBeenCalled();
     });
+  });
+});
+
+describe('With Registered Authentication', () => {
+  let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  const mockCredentialForm = jest.fn();
+
+  test('should call registered crendential form', () => {
+    const authTypeToBeTested = 'Some Auth Type';
+    const authMethodToBeTest = {
+      name: authTypeToBeTested,
+      credentialSourceOption: {
+        value: authTypeToBeTested,
+        inputDisplay: 'some input',
+      },
+      credentialForm: mockCredentialForm,
+    } as AuthenticationMethod;
+
+    const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+    mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+    mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTest);
+
+    component = mount(
+      wrapWithIntl(
+        <EditDataSourceForm
+          existingDataSource={mockDataSourceAttributesWithNoAuth}
+          existingDatasourceNamesList={existingDatasourceNamesList}
+          onDeleteDataSource={jest.fn()}
+          handleSubmit={jest.fn()}
+          handleTestConnection={jest.fn()}
+          displayToastMessage={jest.fn()}
+        />
+      ),
+      {
+        wrappingComponent: OpenSearchDashboardsContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
+    );
+
+    expect(mockCredentialForm).toHaveBeenCalled();
   });
 });
