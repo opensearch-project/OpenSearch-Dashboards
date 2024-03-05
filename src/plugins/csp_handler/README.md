@@ -10,31 +10,36 @@ By default, this plugin is disabled. Once enabled, the plugin will first use wha
 
 ## Configuration
 
-For OSD users who want to make changes to allow a new site to embed OSD pages, they can update CSP rules through CURL.
-(Note that the commands following could be first obtained from a copy as curl option from the network tab of a browser development tool and then replaced with the API names)
+The plugin can be enabled by adding this line in OSD YML.
 
 ```
-curl '{osd endpoint}/api/config/csp/update' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty' --data-raw '{"value":"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self' {new site}"}'
+csp_handler.enabled: true
+
+```
+
+Since it has a required dependency `applicationConfig`, make sure that the dependency is also enabled.
+
+```
+application_config.enabled: true
+```
+
+For OSD users who want to make changes to allow a new site to embed OSD pages, they can update CSP rules through CURL. (See the README of `applicationConfig` for more details about the APIs.)
+
+```
+curl '{osd endpoint}/api/appconfig/csp.rules' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty' --data-raw '{"newValue":"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self' {new site}"}'
 
 ```
 
 Below is the CURL command to delete CSP rules.
 
 ```
-curl '{osd endpoint}/api/config/csp/delete' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty'
-
+curl '{osd endpoint}/api/appconfig/csp.rules' -X DELETE -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty'
 ```
 
-Below is the CURL command to check if CSP rules exist in the new index.
+Below is the CURL command to get the CSP rules.
 
 ```
-curl '{osd endpoint}/api/config/csp/exists'
-```
-
-Below is the CURL command to get the CSP rules from the new index.
-
-```
-curl '{osd endpoint}/api/config/csp/get'
+curl '{osd endpoint}/api/appconfig/csp.rules'
 
 ```
 
