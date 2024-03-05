@@ -12,7 +12,7 @@ import { MountPoint } from '../../../types';
 import { MountWrapper } from '../../../utils';
 import './sidecar.scss';
 import { ResizableButton } from './resizable_button';
-import { ISidecarConfig, OverlaySidecarOpenOptions } from '../sidecar_service';
+import { ISidecarConfig, OverlaySidecarOpenOptions, SIDECAR_DOCKED_MODE } from '../sidecar_service';
 
 export interface Props {
   sidecarConfig$: BehaviorSubject<ISidecarConfig | undefined>;
@@ -28,9 +28,10 @@ export const Sidecar = ({ sidecarConfig$, options, setSidecarConfig, i18n, mount
   const classes = classNames(
     'osdSidecarFlyout',
     {
-      'osdSidecarFlyout--dockedRight': sidecarConfig?.dockedMode === 'right',
-      'osdSidecarFlyout--dockedLeft': sidecarConfig?.dockedMode === 'left',
-      'osdSidecarFlyout--dockedTakeover': sidecarConfig?.dockedMode === 'takeover',
+      'osdSidecarFlyout--dockedRight': sidecarConfig?.dockedMode === SIDECAR_DOCKED_MODE.RIGHT,
+      'osdSidecarFlyout--dockedLeft': sidecarConfig?.dockedMode === SIDECAR_DOCKED_MODE.LEFT,
+      'osdSidecarFlyout--dockedTakeover':
+        sidecarConfig?.dockedMode === SIDECAR_DOCKED_MODE.TAKEOVER,
       'osdSidecarFlyout--hide': sidecarConfig?.isHidden === true,
     },
     options.className
@@ -46,7 +47,7 @@ export const Sidecar = ({ sidecarConfig$, options, setSidecarConfig, i18n, mount
 
   const flyoutSizeStyle = useMemo(
     () =>
-      sidecarConfig?.dockedMode === 'takeover'
+      sidecarConfig?.dockedMode === SIDECAR_DOCKED_MODE.TAKEOVER
         ? {
             height: sidecarConfig?.paddingSize,
           }
