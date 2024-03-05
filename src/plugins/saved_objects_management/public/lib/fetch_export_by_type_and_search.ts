@@ -34,12 +34,10 @@ export async function fetchExportByTypeAndSearch(
   http: HttpStart,
   types: string[],
   search: string | undefined,
-  includeReferencesDeep: boolean = false,
-  body?: Record<string, unknown>
+  includeReferencesDeep: boolean = false
 ): Promise<Blob> {
   return http.post('/api/saved_objects/_export', {
     body: JSON.stringify({
-      ...body,
       type: types,
       search,
       includeReferencesDeep,

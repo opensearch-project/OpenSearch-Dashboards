@@ -89,7 +89,6 @@ const SavedObjectsTablePage = ({
       indexPatterns={dataStart.indexPatterns}
       search={dataStart.search}
       http={coreStart.http}
-      workspaces={coreStart.workspaces}
       overlays={coreStart.overlays}
       notifications={coreStart.notifications}
       applications={coreStart.application}

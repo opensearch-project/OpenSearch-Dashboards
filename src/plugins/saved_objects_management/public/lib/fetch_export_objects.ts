@@ -33,12 +33,10 @@ import { HttpStart } from 'src/core/public';
 export async function fetchExportObjects(
   http: HttpStart,
   objects: any[],
-  includeReferencesDeep: boolean = false,
-  body?: Record<string, unknown>
+  includeReferencesDeep: boolean = false
 ): Promise<Blob> {
   return http.post('/api/saved_objects/_export', {
     body: JSON.stringify({
-      ...body,
       objects,
       includeReferencesDeep,
     }),
