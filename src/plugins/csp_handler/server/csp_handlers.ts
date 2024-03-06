@@ -39,7 +39,6 @@ export function createCspRulesPreResponseHandler(
     toolkit: OnPreResponseToolkit
   ) => {
     try {
-      // Refer to this link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors
       const shouldCheckDest = ['document', 'frame', 'iframe', 'embed', 'object'];
 
       const currentDest = request.headers['sec-fetch-dest'];
