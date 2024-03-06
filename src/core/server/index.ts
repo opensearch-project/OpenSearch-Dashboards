@@ -321,6 +321,11 @@ export {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
+  ACL,
+  Principals,
+  TransformedPermission,
+  PrincipalType,
+  Permissions,
 } from './saved_objects';
 
 export {
