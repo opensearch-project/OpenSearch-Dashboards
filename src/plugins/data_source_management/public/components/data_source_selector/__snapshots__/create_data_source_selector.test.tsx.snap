@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`create cluster selector should render normally 1`] = `
+exports[`create data source selector should render normally 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -10,7 +10,7 @@ Object {
         aria-haspopup="listbox"
         aria-label="Select a data source"
         class="euiComboBox euiComboBox--compressed"
-        data-test-subj="clusterSelectorComboBox"
+        data-test-subj="dataSourceSelectorComboBox"
         role="combobox"
       >
         <div
@@ -89,7 +89,7 @@ Object {
       aria-haspopup="listbox"
       aria-label="Select a data source"
       class="euiComboBox euiComboBox--compressed"
-      data-test-subj="clusterSelectorComboBox"
+      data-test-subj="dataSourceSelectorComboBox"
       role="combobox"
     >
       <div
