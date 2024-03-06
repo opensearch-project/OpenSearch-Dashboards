@@ -121,7 +121,7 @@ export const sigV4CredentialField = {
   region: '',
   accessKey: '',
   secretKey: '',
-  service: '',
+  service: SigV4ServiceName.OpenSearch,
 };
 
 export const sigV4AuthMethod = {
