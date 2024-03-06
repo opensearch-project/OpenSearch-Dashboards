@@ -314,5 +314,71 @@ describe('DataSourceManagement: Utils.ts', () => {
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
     });
+
+    test('Should extract empty object when no credentialFormField registered ', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+      } as { [key: string]: string };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, {}));
+    });
+
+    test('Should fill in empty value when credentail state not have registered field', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        crendentialFormField: {
+          userNameRegistered: '',
+          passWordRegistered: '',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+      } as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: '',
+      };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
   });
 });
