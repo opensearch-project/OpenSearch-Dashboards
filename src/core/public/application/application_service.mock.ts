@@ -65,6 +65,7 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
     navigateToUrl: jest.fn(),
     getUrlForApp: jest.fn(),
     registerMountContext: jest.fn(),
+    history: createHistoryMock(),
   };
 };
 
