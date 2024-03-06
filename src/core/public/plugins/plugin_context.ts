@@ -156,6 +156,7 @@ export function createPluginStartContext<
       getUrlForApp: deps.application.getUrlForApp,
       registerMountContext: (contextName, provider) =>
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
+      history: deps.application.history,
     },
     docLinks: deps.docLinks,
     http: deps.http,

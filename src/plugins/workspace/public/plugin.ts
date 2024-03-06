@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 import { CoreSetup, Plugin } from '../../../core/public';
 import { getStateFromOsdUrl } from '../../opensearch_dashboards_utils/public';
@@ -15,31 +15,37 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private URLChange$ = new BehaviorSubject('');
   private applicationSubscription = new Subscription();
   private urlChangeSubscription = new Subscription();
-  private getWorkpsaceIdFromURL(): string | null {
+  private getworkspaceIdFromURL(): string | null {
     return getStateFromOsdUrl(WORKSPACE_ID_STATE_KEY);
   }
-  private async getWorkpsaceId(): Promise<string> {
-    if (this.getWorkpsaceIdFromURL()) {
-      return this.getWorkpsaceIdFromURL() || '';
+  private getworkspaceId(): string {
+    if (this.getworkspaceIdFromURL()) {
+      return this.getworkspaceIdFromURL() || '';
     }
 
-    return (await this.core?.workspaces.currentWorkspaceId$.getValue()) || '';
+    return this.core?.workspaces.currentWorkspaceId$.getValue() || '';
   }
   private getPatchedUrl = (url: string, workspaceId: string) => {
     return formatUrlWithWorkspaceId(url, workspaceId);
   };
   private hashChangeHandler = async () => {
     if (this.shouldPatchUrl()) {
-      const workspaceId = await this.getWorkpsaceId();
+      const workspaceId = await this.getworkspaceId();
       this.URLChange$.next(this.getPatchedUrl(window.location.href, workspaceId));
     }
   };
   private async listenToHashChange(): Promise<void> {
     window.addEventListener('hashchange', this.hashChangeHandler);
   }
+  /**
+   * When navigating between applications or inside application, the hash state will be overwrote,
+   * compare the workspaceId in memory and the workspaceId in hash state,
+   * If do not match, return true
+   * @returns bool
+   */
   private shouldPatchUrl(): boolean {
     const currentWorkspaceId = this.core?.workspaces.currentWorkspaceId$.getValue();
-    const workspaceIdFromURL = this.getWorkpsaceIdFromURL();
+    const workspaceIdFromURL = this.getworkspaceIdFromURL();
     if (!currentWorkspaceId && !workspaceIdFromURL) {
       return false;
     }
@@ -50,15 +56,16 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
 
     return true;
   }
-  private async listenToApplicationChange(): Promise<void> {
+  /**
+   * When navigating between applications or the subApps inside an application e.g. Dashboard management, the hash state will be overwrote,
+   * listen to history change and try to patch the workspaceId into hash state
+   */
+  private async listenToHistoryChange(): Promise<void> {
     const startService = await this.core?.getStartServices();
     if (startService) {
-      this.applicationSubscription = combineLatest([
-        this.core?.workspaces.currentWorkspaceId$,
-        startService[0].application.currentAppId$,
-      ]).subscribe(async ([]) => {
+      startService[0].application.history.listen(() => {
         if (this.shouldPatchUrl()) {
-          const currentWorkspaceId = await this.getWorkpsaceId();
+          const currentWorkspaceId = this.getworkspaceId();
           this.URLChange$.next(this.getPatchedUrl(window.location.href, currentWorkspaceId));
         }
       });
@@ -69,7 +76,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     /**
      * Retrive workspace id from url
      */
-    const workspaceId = this.getWorkpsaceIdFromURL();
+    const workspaceId = this.getworkspaceIdFromURL();
 
     if (workspaceId) {
       /**
@@ -79,9 +86,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     }
 
     /**
-     * listen to application change and patch workspace id in hash
+     * listen to history change and patch workspace id in hash
      */
-    this.listenToApplicationChange();
+    this.listenToHistoryChange();
 
     /**
      * listen to application internal hash change and patch workspace id in hash
