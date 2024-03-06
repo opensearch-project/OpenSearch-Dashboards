@@ -9,4 +9,4 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
 });
 
-export type WorkspacePluginConfigType = TypeOf<typeof configSchema>;
+export type ConfigSchema = TypeOf<typeof configSchema>;
