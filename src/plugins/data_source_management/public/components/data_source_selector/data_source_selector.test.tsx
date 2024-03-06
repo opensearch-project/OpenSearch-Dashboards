@@ -4,13 +4,13 @@
  */
 
 import { ShallowWrapper, shallow } from 'enzyme';
-import { ClusterSelector } from './cluster_selector';
+import { DataSourceSelector } from './data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { getDataSourcesResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 
-describe('ClusterSelector', () => {
+describe('DataSourceSelector', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   let client: SavedObjectsClientContract;
@@ -24,7 +24,7 @@ describe('ClusterSelector', () => {
 
   it('should render normally with local cluster not hidden', () => {
     component = shallow(
-      <ClusterSelector
+      <DataSourceSelector
         savedObjectsClient={client}
         notifications={toasts}
         onSelectedDataSource={jest.fn()}
@@ -44,7 +44,7 @@ describe('ClusterSelector', () => {
 
   it('should render normally with local cluster is hidden', () => {
     component = shallow(
-      <ClusterSelector
+      <DataSourceSelector
         savedObjectsClient={client}
         notifications={toasts}
         onSelectedDataSource={jest.fn()}
@@ -63,7 +63,7 @@ describe('ClusterSelector', () => {
   });
 });
 
-describe('ClusterSelector: check dataSource options', () => {
+describe('DataSourceSelector: check dataSource options', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
@@ -79,7 +79,7 @@ describe('ClusterSelector: check dataSource options', () => {
 
   it('should always place local cluster option as the first option when local cluster not hidden', async () => {
     component = shallow(
-      <ClusterSelector
+      <DataSourceSelector
         savedObjectsClient={client}
         notifications={toasts}
         onSelectedDataSource={jest.fn()}

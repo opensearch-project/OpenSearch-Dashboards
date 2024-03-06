@@ -44,7 +44,7 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 
-import { ClusterSelector } from '../../data_source_management/public';
+import { DataSourceSelector } from '../../data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
@@ -132,8 +132,8 @@ function DevToolsWrapper({
           </EuiToolTip>
         ))}
         {dataSourceEnabled ? (
-          <div className="devAppClusterSelector">
-            <ClusterSelector
+          <div className="devAppDataSourceSelector">
+            <DataSourceSelector
               savedObjectsClient={savedObjects.client}
               notifications={toasts}
               onSelectedDataSource={onChange}

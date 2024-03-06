@@ -9,40 +9,43 @@ import { EuiComboBox } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
 import { getDataSources } from '../utils';
 
-export const LocalCluster: ClusterOption = {
+export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {
     defaultMessage: 'Local cluster',
   }),
   id: '',
 };
 
-export interface ClusterSelectorProps {
+export interface DataSourceSelectorProps {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: ToastsStart;
-  onSelectedDataSource: (clusterOption: ClusterOption[]) => void;
+  onSelectedDataSource: (dataSourceOption: DataSourceOption[]) => void;
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
 }
 
-interface ClusterSelectorState {
-  clusterOptions: ClusterOption[];
-  selectedOption: ClusterOption[];
+interface DataSourceSelectorState {
+  dataSourceOptions: DataSourceOption[];
+  selectedOption: DataSourceOption[];
 }
 
-export interface ClusterOption {
+export interface DataSourceOption {
   label: string;
   id: string;
 }
 
-export class ClusterSelector extends React.Component<ClusterSelectorProps, ClusterSelectorState> {
+export class DataSourceSelector extends React.Component<
+  DataSourceSelectorProps,
+  DataSourceSelectorState
+> {
   private _isMounted: boolean = false;
 
-  constructor(props: ClusterSelectorProps) {
+  constructor(props: DataSourceSelectorProps) {
     super(props);
 
     this.state = {
-      clusterOptions: this.props.hideLocalCluster ? [] : [LocalCluster],
+      dataSourceOptions: this.props.hideLocalCluster ? [] : [LocalCluster],
       selectedOption: this.props.hideLocalCluster ? [] : [LocalCluster],
     };
   }
@@ -56,19 +59,19 @@ export class ClusterSelector extends React.Component<ClusterSelectorProps, Clust
     getDataSources(this.props.savedObjectsClient)
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
-          const clusterOptions = fetchedDataSources.map((dataSource) => ({
+          const dataSourceOptions = fetchedDataSources.map((dataSource) => ({
             id: dataSource.id,
             label: dataSource.title,
           }));
 
           if (!this.props.hideLocalCluster) {
-            clusterOptions.unshift(LocalCluster);
+            dataSourceOptions.unshift(LocalCluster);
           }
 
           if (!this._isMounted) return;
           this.setState({
             ...this.state,
-            clusterOptions,
+            dataSourceOptions,
           });
         }
       })
@@ -92,23 +95,23 @@ export class ClusterSelector extends React.Component<ClusterSelectorProps, Clust
   render() {
     return (
       <EuiComboBox
-        aria-label={i18n.translate('clusterSelectorComboBoxAriaLabel', {
+        aria-label={i18n.translate('dataSourceSelectorComboBoxAriaLabel', {
           defaultMessage: 'Select a data source',
         })}
-        placeholder={i18n.translate('clusterSelectorComboBoxPlaceholder', {
+        placeholder={i18n.translate('dataSourceSelectorComboBoxPlaceholder', {
           defaultMessage: 'Select a data source',
         })}
         singleSelection={{ asPlainText: true }}
-        options={this.state.clusterOptions}
+        options={this.state.dataSourceOptions}
         selectedOptions={this.state.selectedOption}
         onChange={(e) => this.onChange(e)}
-        prepend={i18n.translate('clusterSelectorComboBoxPrepend', {
+        prepend={i18n.translate('dataSourceSelectorComboBoxPrepend', {
           defaultMessage: 'Data source',
         })}
         compressed
         isDisabled={this.props.disabled}
         fullWidth={this.props.fullWidth || false}
-        data-test-subj={'clusterSelectorComboBox'}
+        data-test-subj={'dataSourceSelectorComboBox'}
       />
     );
   }
