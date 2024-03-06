@@ -105,6 +105,7 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
   WorkspaceObject,
+  WorkspaceAttribute,
 } from '../types';
 
 export {

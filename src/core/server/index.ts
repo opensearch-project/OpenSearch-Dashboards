@@ -322,6 +322,11 @@ export {
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
   SavedObjectsDeleteByWorkspaceOptions,
+  ACL,
+  Principals,
+  TransformedPermission,
+  PrincipalType,
+  Permissions,
 } from './saved_objects';
 
 export {

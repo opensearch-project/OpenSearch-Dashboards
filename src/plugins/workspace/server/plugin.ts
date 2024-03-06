@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -10,17 +12,29 @@ import {
   Logger,
   CoreStart,
 } from '../../../core/server';
+import {
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+  WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+} from '../common/constants';
 import { IWorkspaceClientImpl } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
+import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
-import { WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
+import {
+  SavedObjectsPermissionControl,
+  SavedObjectsPermissionControlContract,
+} from './permission_control/client';
+import { WorkspacePluginConfigType } from '../config';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private readonly logger: Logger;
   private client?: IWorkspaceClientImpl;
   private workspaceConflictControl?: WorkspaceConflictSavedObjectsClientWrapper;
+  private permissionControl?: SavedObjectsPermissionControlContract;
+  private readonly config$: Observable<WorkspacePluginConfigType>;
+  private workspaceSavedObjectsClientWrapper?: WorkspaceSavedObjectsClientWrapper;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -40,10 +54,14 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
+    this.config$ = initializerContext.config.create<WorkspacePluginConfigType>();
   }
 
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
+    const config: WorkspacePluginConfigType = await this.config$.pipe(first()).toPromise();
+    const isPermissionControlEnabled =
+      config.permission.enabled === undefined ? true : config.permission.enabled;
 
     this.client = new WorkspaceClient(core, this.logger);
 
@@ -58,13 +76,34 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       this.workspaceConflictControl.wrapperFactory
     );
 
+    this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
+    if (isPermissionControlEnabled) {
+      this.permissionControl = new SavedObjectsPermissionControl(this.logger);
+
+      this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
+        this.permissionControl
+      );
+
+      core.savedObjects.addClientWrapper(
+        0,
+        WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+        this.workspaceSavedObjectsClientWrapper.wrapperFactory
+      );
+    }
+
     registerRoutes({
       http: core.http,
       logger: this.logger,
       client: this.client as IWorkspaceClientImpl,
+      permissionControlClient: this.permissionControl,
     });
 
-    core.capabilities.registerProvider(() => ({ workspaces: { enabled: true } }));
+    core.capabilities.registerProvider(() => ({
+      workspaces: {
+        enabled: true,
+        permissionEnabled: isPermissionControlEnabled,
+      },
+    }));
 
     return {
       client: this.client,
@@ -73,8 +112,10 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
   public start(core: CoreStart) {
     this.logger.debug('Starting Workspace service');
+    this.permissionControl?.setup(core.savedObjects.getScopedClient, core.http.auth);
     this.client?.setSavedObjects(core.savedObjects);
     this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
+    this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
 
     return {
       client: this.client as IWorkspaceClientImpl,

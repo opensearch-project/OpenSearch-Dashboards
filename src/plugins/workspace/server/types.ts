@@ -12,6 +12,7 @@ import {
   WorkspaceAttribute,
   SavedObjectsServiceStart,
 } from '../../../core/server';
+import { WorkspacePermissionMode } from '../common/constants';
 
 export interface WorkspaceFindOptions {
   page?: number;
@@ -117,3 +118,17 @@ export type IResponse<T> =
       success: false;
       error?: string;
     };
+
+export interface AuthInfo {
+  backend_roles?: string[];
+  user_name?: string;
+}
+
+export type WorkspacePermissionItem = {
+  modes: Array<
+    | WorkspacePermissionMode.LibraryRead
+    | WorkspacePermissionMode.LibraryWrite
+    | WorkspacePermissionMode.Read
+    | WorkspacePermissionMode.Write
+  >;
+} & ({ type: 'user'; userId: string } | { type: 'group'; group: string });

@@ -9,3 +9,10 @@ export const WORKSPACE_FATAL_ERROR_APP_ID = 'workspace_fatal_error';
 export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';
+
+export enum WorkspacePermissionMode {
+  Read = 'read',
+  Write = 'write',
+  LibraryRead = 'library_read',
+  LibraryWrite = 'library_write',
+}
