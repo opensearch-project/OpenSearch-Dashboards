@@ -66,7 +66,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   }
 
   /**
-   * When navigating between applications or inside application, the hash state will be overwrote,
+   * When navigating between applications or inside application, the hash state will be overwritten,
    * compare the workspaceId in memory and the workspaceId in hash state,
    * If do not match, return true
    * @returns bool
