@@ -403,18 +403,14 @@ describe('With Registered Authentication', () => {
   test('should update the form with registered auth type on click save changes', async () => {
     const mockedCredentialForm = jest.fn();
     const mockedSubmitHandler = jest.fn();
-    const authTypeToBeTested = 'Some Auth Type';
     const authMethodToBeTest = {
-      name: authTypeToBeTested,
+      name: 'Some Auth Type',
       credentialSourceOption: {
-        value: authTypeToBeTested,
+        value: 'Some Auth Type',
         inputDisplay: 'some input',
       },
       credentialForm: mockedCredentialForm,
-      crendentialFormField: {
-        userNameRegistered: 'some filled in userName from registed auth credential form',
-        passWordRegistered: 'some filled in password from registed auth credential form',
-      },
+      crendentialFormField: {},
     } as AuthenticationMethod;
 
     const mockedContext = mockManagementPlugin.createDataSourceManagementContext();

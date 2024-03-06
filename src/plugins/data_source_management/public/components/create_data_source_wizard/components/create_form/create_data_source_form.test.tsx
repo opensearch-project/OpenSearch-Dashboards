@@ -527,11 +527,10 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
   test('should create data source with registered Auth when all fields are valid', () => {
     const mockCredentialForm = jest.fn();
-    const authTypeToBeTested = 'Some Auth Type';
     const authMethodToBeTested = {
-      name: authTypeToBeTested,
+      name: 'Some Auth Type',
       credentialSourceOption: {
-        value: authTypeToBeTested,
+        value: 'Some Auth Type',
         inputDisplay: 'some input',
       },
       credentialForm: mockCredentialForm,

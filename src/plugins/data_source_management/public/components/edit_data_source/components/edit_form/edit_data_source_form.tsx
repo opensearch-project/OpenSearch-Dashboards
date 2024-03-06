@@ -60,8 +60,12 @@ export interface EditDataSourceState {
   description: string;
   endpoint: string;
   auth: {
-    type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content;
+    type: AuthType | string;
+    credentials:
+      | UsernamePasswordTypedContent
+      | SigV4Content
+      | { [key: string]: string }
+      | undefined;
   };
   showUpdatePasswordModal: boolean;
   showUpdateAwsCredentialModal: boolean;
@@ -155,7 +159,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return performDataSourceFormValidation(
       this.state,
       this.props.existingDatasourceNamesList,
-      this.props.existingDataSource.title
+      this.props.existingDataSource.title,
+      this.authenticationMethodRegistery
     );
   };
 

@@ -175,10 +175,7 @@ export const mockDataSourceAttributesWithRegisteredAuth = {
   endpoint: 'https://test.com',
   auth: {
     type: 'Some Auth Type',
-    credentials: {
-      userNameRegistered: 'some filled in userName from registed auth credential form',
-      passWordRegistered: 'some filled in password from registed auth credential form',
-    } as { [key: string]: string },
+    credentials: {} as { [key: string]: string },
   },
 } as DataSourceAttributes;
 

@@ -59,7 +59,7 @@ export interface CreateDataSourceState {
   description: string;
   endpoint: string;
   auth: {
-    type: AuthType;
+    type: AuthType | string;
     credentials:
       | UsernamePasswordTypedContent
       | SigV4Content
@@ -110,7 +110,12 @@ export class CreateDataSourceForm extends React.Component<
   /* Validations */
 
   isFormValid = () => {
-    return performDataSourceFormValidation(this.state, this.props.existingDatasourceNamesList, '');
+    return performDataSourceFormValidation(
+      this.state,
+      this.props.existingDatasourceNamesList,
+      '',
+      this.authenticationMethodRegistery
+    );
   };
 
   /* Events */
