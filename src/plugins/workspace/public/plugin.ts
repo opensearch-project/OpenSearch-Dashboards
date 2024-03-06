@@ -20,6 +20,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private getworkspaceIdFromURL(): string | null {
     return getStateFromOsdUrl(WORKSPACE_ID_STATE_KEY);
   }
+
   /**
    * Current workspace id may come from multiple source: 1. url hash 2. memory: core.workspaces 3. localstorage
    * this methods will detect if there is any workspace id present and return that.
@@ -48,18 +49,22 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
 
     return '';
   }
+
   private getPatchedUrl = (url: string, workspaceId: string) => {
     return formatUrlWithWorkspaceId(url, workspaceId);
   };
+
   private hashChangeHandler = async () => {
     if (this.shouldPatchUrl()) {
       const workspaceId = await this.getworkspaceId();
       this.URLChange$.next(this.getPatchedUrl(window.location.href, workspaceId));
     }
   };
+
   private async listenToHashChange(): Promise<void> {
     window.addEventListener('hashchange', this.hashChangeHandler);
   }
+
   /**
    * When navigating between applications or inside application, the hash state will be overwrote,
    * compare the workspaceId in memory and the workspaceId in hash state,
@@ -79,6 +84,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
 
     return true;
   }
+
   /**
    * When navigating between applications or the subApps inside an application e.g. Dashboard management, the hash state will be overwrote,
    * listen to history change and try to patch the workspaceId into hash state
@@ -94,6 +100,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
       });
     }
   }
+
   private listenToCurrentWorkspaceChange() {
     this.currentWorkspaceIdSubscription = (this
       .core as CoreSetup).workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -103,6 +110,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
       }
     });
   }
+
   public async setup(core: CoreSetup) {
     this.core = core;
 
