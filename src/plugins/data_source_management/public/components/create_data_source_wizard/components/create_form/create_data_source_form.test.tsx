@@ -369,6 +369,13 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
   const mockSubmitHandler = jest.fn();
   const mockTestConnectionHandler = jest.fn();
   const mockCancelHandler = jest.fn();
+  const changeTextFieldValue = (testSubjId: string, value: string) => {
+    component.find(testSubjId).last().simulate('change', {
+      target: {
+        value,
+      },
+    });
+  };
 
   test('should call registered crendential form at the first round when registered method is at the first place and username & password disabled', () => {
     const mockCredentialForm = jest.fn();
@@ -516,5 +523,51 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
       expect(mockCredentialForm).not.toHaveBeenCalled();
     });
+  });
+
+  test('should create data source with registered Auth when all fields are valid', () => {
+    const mockCredentialForm = jest.fn();
+    const authTypeToBeTested = 'Some Auth Type';
+    const authMethodToBeTested = {
+      name: authTypeToBeTested,
+      credentialSourceOption: {
+        value: authTypeToBeTested,
+        inputDisplay: 'some input',
+      },
+      credentialForm: mockCredentialForm,
+      crendentialFormField: {
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: 'some filled in password from registed auth credential form',
+      },
+    } as AuthenticationMethod;
+
+    const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+    mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+    mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+    component = mount(
+      wrapWithIntl(
+        <CreateDataSourceForm
+          handleTestConnection={mockTestConnectionHandler}
+          handleSubmit={mockSubmitHandler}
+          handleCancel={mockCancelHandler}
+          existingDatasourceNamesList={['dup20']}
+        />
+      ),
+      {
+        wrappingComponent: OpenSearchDashboardsContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
+    );
+
+    changeTextFieldValue(titleIdentifier, 'test');
+    changeTextFieldValue(descriptionIdentifier, 'test');
+    changeTextFieldValue(endpointIdentifier, 'https://test.com');
+
+    findTestSubject(component, 'createDataSourceButton').simulate('click');
+
+    expect(mockSubmitHandler).toHaveBeenCalled();
   });
 });

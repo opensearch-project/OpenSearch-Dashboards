@@ -6,7 +6,7 @@
 import React from 'react';
 import { throwError } from 'rxjs';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { AuthType } from './types';
+import { AuthType, DataSourceAttributes } from './types';
 import { coreMock } from '../../../core/public/mocks';
 import {
   DataSourceManagementPlugin,
@@ -167,6 +167,21 @@ export const mockDataSourceAttributesWithNoAuth = {
     credentials: undefined,
   },
 };
+
+export const mockDataSourceAttributesWithRegisteredAuth = {
+  id: 'testRegisteredAuth',
+  title: 'create-test-ds-registered-auth',
+  description: 'jest testing',
+  endpoint: 'https://test.com',
+  auth: {
+    type: 'Some Auth Type',
+    credentials: {
+      userNameRegistered: 'some filled in userName from registed auth credential form',
+      passWordRegistered: 'some filled in password from registed auth credential form',
+    } as { [key: string]: string },
+  },
+} as DataSourceAttributes;
+
 export const getDataSourceByIdWithCredential = {
   attributes: {
     id: 'alpha-test',
