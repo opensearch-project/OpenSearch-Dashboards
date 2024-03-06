@@ -5,7 +5,7 @@
 
 import './_doc_table.scss';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
@@ -70,33 +70,34 @@ export const LegacyDiscoverTable = ({
     endRow: rows.length < pageSize ? rows.length : pageSize,
   });
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-
-  const loadMoreRows = () => {
-    setRenderedRowCount((prevRowCount) => prevRowCount + 50); // Load 50 more rows
-  };
+  const [sentinelEle, setSentinelEle] = useState<HTMLDivElement>();
+  // Need a callback ref since the element isnt set on the first render.
+  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
+    if (node !== null) {
+      setSentinelEle(node);
+    }
+  }, []);
 
   useEffect(() => {
-    const sentinel = sentinelRef.current;
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMoreRows();
-        }
-      },
-      { threshold: 1.0 }
-    );
+    if (sentinelEle) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            setRenderedRowCount((prevRowCount) => prevRowCount + 50); // Load 50 more rows
+          }
+        },
+        { threshold: 1.0 }
+      );
 
-    if (sentinelRef.current) {
-      observerRef.current.observe(sentinelRef.current);
+      observerRef.current.observe(sentinelEle);
     }
 
     return () => {
-      if (observerRef.current && sentinel) {
-        observerRef.current.unobserve(sentinel);
+      if (observerRef.current && sentinelEle) {
+        observerRef.current.unobserve(sentinelEle);
       }
     };
-  }, []);
+  }, [sentinelEle]);
 
   const [activePage, setActivePage] = useState(0);
   const pageCount = Math.ceil(rows.length / pageSize);
