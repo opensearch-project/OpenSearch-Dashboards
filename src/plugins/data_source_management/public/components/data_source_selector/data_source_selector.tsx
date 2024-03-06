@@ -114,15 +114,26 @@ export class DataSourceSelector extends React.Component<
   }
 
   render() {
-    const placeholderText = this.props.placeholderText || 'Select a data source';
+    const placeholderText =
+      this.props.placeholderText === undefined
+        ? 'Select a data source'
+        : this.props.placeholderText;
     return (
       <EuiComboBox
-        aria-label={i18n.translate('dataSourceSelectorComboBoxAriaLabel', {
-          defaultMessage: placeholderText,
-        })}
-        placeholder={i18n.translate('dataSourceSelectorComboBoxPlaceholder', {
-          defaultMessage: placeholderText,
-        })}
+        aria-label={
+          placeholderText
+            ? i18n.translate('dataSourceSelectorComboBoxAriaLabel', {
+                defaultMessage: placeholderText,
+              })
+            : 'dataSourceSelectorCombobox'
+        }
+        placeholder={
+          placeholderText
+            ? i18n.translate('dataSourceSelectorComboBoxPlaceholder', {
+                defaultMessage: placeholderText,
+              })
+            : ''
+        }
         singleSelection={{ asPlainText: true }}
         options={this.state.dataSourceOptions}
         selectedOptions={this.state.selectedOption}
