@@ -130,3 +130,19 @@ export const getDefaultAuthMethod = (
 
   return initialSelectedAuthMethod;
 };
+
+export const extractRegisteredAuthTypeCredentials = (
+  currentCredentialState: { [key: string]: string },
+  authType: string,
+  authenticationMethodRegistery: AuthenticationMethodRegistery
+) => {
+  const registeredCredentials = {} as { [key: string]: string };
+  const registeredCredentialField =
+    authenticationMethodRegistery.getAuthenticationMethod(authType)?.crendentialFormField ?? {};
+
+  Object.keys(registeredCredentialField).forEach((credentialFiled) => {
+    registeredCredentials[credentialFiled] = currentCredentialState[credentialFiled] ?? '';
+  });
+
+  return registeredCredentials;
+};

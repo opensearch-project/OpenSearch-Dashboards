@@ -44,7 +44,7 @@ import {
 } from '../../../validation';
 import { UpdatePasswordModal } from '../update_password_modal';
 import { UpdateAwsCredentialModal } from '../update_aws_credential_modal';
-import { getDefaultAuthMethod } from '../../../utils';
+import { extractRegisteredAuthTypeCredentials, getDefaultAuthMethod } from '../../../utils';
 
 export interface EditDataSourceProps {
   existingDataSource: DataSourceAttributes;
@@ -362,6 +362,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             delete formValues.auth.credentials?.password;
           break;
         default:
+          const currentCredentials = (this.state.auth.credentials ?? {}) as {
+            [key: string]: string;
+          };
+          formValues.auth.credentials = extractRegisteredAuthTypeCredentials(
+            currentCredentials,
+            this.state.auth.type,
+            this.authenticationMethodRegistery
+          );
           break;
       }
 

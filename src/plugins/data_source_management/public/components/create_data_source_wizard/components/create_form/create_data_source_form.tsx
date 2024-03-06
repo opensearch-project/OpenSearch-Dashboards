@@ -39,7 +39,11 @@ import {
   isTitleValid,
   performDataSourceFormValidation,
 } from '../../../validation';
-import { getDefaultAuthMethod, isValidUrl } from '../../../utils';
+import {
+  extractRegisteredAuthTypeCredentials,
+  getDefaultAuthMethod,
+  isValidUrl,
+} from '../../../utils';
 
 export interface CreateDataSourceProps {
   existingDatasourceNamesList: string[];
@@ -56,7 +60,11 @@ export interface CreateDataSourceState {
   endpoint: string;
   auth: {
     type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content | undefined;
+    credentials:
+      | UsernamePasswordTypedContent
+      | SigV4Content
+      | { [key: string]: string }
+      | undefined;
   };
 }
 
@@ -298,22 +306,29 @@ export class CreateDataSourceForm extends React.Component<
 
   getFormValues = (): DataSourceAttributes => {
     let credentials = this.state.auth.credentials;
-    if (this.state.auth.type === AuthType.UsernamePasswordType) {
+    const authType = this.state.auth.type;
+
+    if (authType === AuthType.NoAuth) {
+      credentials = {};
+    } else if (authType === AuthType.UsernamePasswordType) {
       credentials = {
         username: this.state.auth.credentials.username,
         password: this.state.auth.credentials.password,
       } as UsernamePasswordTypedContent;
-    }
-    if (this.state.auth.type === AuthType.SigV4) {
+    } else if (authType === AuthType.SigV4) {
       credentials = {
         region: this.state.auth.credentials.region,
         accessKey: this.state.auth.credentials.accessKey,
         secretKey: this.state.auth.credentials.secretKey,
         service: this.state.auth.credentials.service || SigV4ServiceName.OpenSearch,
       } as SigV4Content;
-    }
-    if (this.state.auth.type === AuthType.NoAuth) {
-      credentials = {};
+    } else {
+      const currentCredentials = (credentials ?? {}) as { [key: string]: string };
+      credentials = extractRegisteredAuthTypeCredentials(
+        currentCredentials,
+        authType,
+        this.authenticationMethodRegistery
+      );
     }
 
     return {
