@@ -78,8 +78,14 @@ describe('OpenSearchDashboardsMigrator', () => {
       expect(mappings).toMatchSnapshot();
     });
 
+    it('permissions field exists in the mappings when the feature is enabled', () => {
+      const options = mockOptions(false, true);
+      const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
+      expect(mappings).toHaveProperty('properties.permissions');
+    });
+
     it('workspaces field exists in the mappings when the feature is enabled', () => {
-      const options = mockOptions(true);
+      const options = mockOptions(true, false);
       const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
       expect(mappings).toHaveProperty('properties.workspaces');
     });
@@ -153,12 +159,29 @@ type MockedOptions = OpenSearchDashboardsMigratorOptions & {
   client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
 };
 
-const mockOptions = (isWorkspaceEnabled?: boolean) => {
+const mockOptions = (isWorkspaceEnabled?: boolean, isPermissionControlEnabled?: boolean) => {
   const rawConfig = configMock.create();
   rawConfig.get.mockReturnValue(false);
-  if (isWorkspaceEnabled) {
+  if (isWorkspaceEnabled || isPermissionControlEnabled) {
     rawConfig.get.mockReturnValue(true);
   }
+  rawConfig.get.mockImplementation((path) => {
+    if (path === 'savedObjects.permission.enabled') {
+      if (isPermissionControlEnabled) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (path === 'workspace.enabled') {
+      if (isWorkspaceEnabled) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  });
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     opensearchDashboardsVersion: '8.2.3',

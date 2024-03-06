@@ -16,7 +16,7 @@ export const LocalCluster: ClusterOption = {
   id: '',
 };
 
-interface ClusterSelectorProps {
+export interface ClusterSelectorProps {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: ToastsStart;
   onSelectedDataSource: (clusterOption: ClusterOption[]) => void;
