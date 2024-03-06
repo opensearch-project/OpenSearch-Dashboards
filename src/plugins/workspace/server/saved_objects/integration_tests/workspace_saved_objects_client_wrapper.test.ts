@@ -69,6 +69,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         osd: {
           workspace: {
             enabled: true,
+          },
+          savedObjects: {
             permission: {
               enabled: true,
             },

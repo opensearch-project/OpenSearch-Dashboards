@@ -323,7 +323,6 @@ export {
   resolveSavedObjectsImportErrors,
   ACL,
   Principals,
-  TransformedPermission,
   PrincipalType,
   Permissions,
 } from './saved_objects';

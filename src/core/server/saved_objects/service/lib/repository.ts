@@ -994,7 +994,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt, permissions } = body._source;
+    const { originId, updated_at: updatedAt, permissions, workspaces } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
@@ -1010,6 +1010,7 @@ export class SavedObjectsRepository {
       ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
       ...(permissions && { permissions }),
+      ...(workspaces && { workspaces }),
       version: encodeHitVersion(body),
       attributes: body._source[type],
       references: body._source.references || [],
