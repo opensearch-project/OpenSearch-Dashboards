@@ -13,7 +13,6 @@ import type {
 } from '../../../core/server';
 import {
   DEFAULT_APP_CATEGORIES,
-  MANAGEMENT_WORKSPACE_ID,
   PUBLIC_WORKSPACE_ID,
   WORKSPACE_TYPE,
   Logger,
@@ -106,24 +105,6 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       reserved: true,
     });
   }
-  private async setupManagementWorkspace(savedObjectClient?: SavedObjectsClientContract) {
-    const DSM_APP_ID = 'dataSources';
-    const DEV_TOOLS_APP_ID = 'dev_tools';
-
-    return this.checkAndCreateWorkspace(savedObjectClient, MANAGEMENT_WORKSPACE_ID, {
-      name: i18n.translate('workspaces.management.workspace.default.name', {
-        defaultMessage: 'Management',
-      }),
-      features: [
-        `@${DEFAULT_APP_CATEGORIES.management.id}`,
-        WORKSPACE_OVERVIEW_APP_ID,
-        WORKSPACE_UPDATE_APP_ID,
-        DSM_APP_ID,
-        DEV_TOOLS_APP_ID,
-      ],
-      reserved: true,
-    });
-  }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
     this.setupDep.savedObjects.registerType(workspace);
     return {
@@ -195,16 +176,6 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
 
       if (!hasPublicWorkspace) {
         tasks.push(this.setupPublicWorkspace(scopedClientWithoutPermissionCheck));
-      }
-
-      /**
-       * Setup management workspace if management workspace can not be found
-       */
-      const hasManagementWorkspace = savedObjects.some(
-        (item) => item.id === MANAGEMENT_WORKSPACE_ID
-      );
-      if (!hasManagementWorkspace) {
-        tasks.push(this.setupManagementWorkspace(scopedClientWithoutPermissionCheck));
       }
 
       try {

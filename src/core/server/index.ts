@@ -354,13 +354,7 @@ export {
 } from './metrics';
 
 export { AppCategory, WorkspaceAttribute } from '../types';
-export {
-  DEFAULT_APP_CATEGORIES,
-  PUBLIC_WORKSPACE_ID,
-  MANAGEMENT_WORKSPACE_ID,
-  WORKSPACE_TYPE,
-  PERSONAL_WORKSPACE_ID_PREFIX,
-} from '../utils';
+export { DEFAULT_APP_CATEGORIES, PUBLIC_WORKSPACE_ID, WORKSPACE_TYPE } from '../utils';
 
 export {
   SavedObject,

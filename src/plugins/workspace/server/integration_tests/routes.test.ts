@@ -266,8 +266,8 @@ describe('workspace service', () => {
           page: 1,
         })
         .expect(200);
-      // Global and Management workspace will be created by default after workspace list API called.
-      expect(listResult.body.result.total).toEqual(4);
+      // Global workspace will be created by default after workspace list API called.
+      expect(listResult.body.result.total).toEqual(3);
     });
     it('unable to perform operations on workspace by calling saved objects APIs', async () => {
       const result = await osdTestServer.request
@@ -329,8 +329,8 @@ describe('workspace service', () => {
         })
         .expect(200);
       expect(findResult.body.total).toEqual(0);
-      // Global and Management workspace will be created by default after workspace list API called.
-      expect(listResult.body.result.total).toEqual(3);
+      // Global workspace will be created by default after workspace list API called.
+      expect(listResult.body.result.total).toEqual(2);
     });
   });
 });
