@@ -25,6 +25,7 @@ import {
 } from '../../common/data_sources';
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
 import { isValidURL } from '../util/endpoint_validator';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
@@ -140,11 +141,12 @@ export class DataSourceSavedObjectsClientWrapper {
   constructor(
     private cryptography: CryptographyServiceSetup,
     private logger: Logger,
+    private authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
     private endpointBlockedIps?: string[]
   ) {}
 
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
-    this.validateAttributes(attributes);
+    await this.validateAttributes(attributes);
 
     const { endpoint, auth } = attributes;
 
@@ -170,6 +172,10 @@ export class DataSourceSavedObjectsClientWrapper {
           auth: await this.encryptSigV4Credential(auth, { endpoint }),
         };
       default:
+        const authRegistry = (await this.authRegistryPromise).getAuthenticationMethod(auth.type);
+        if (authRegistry !== undefined) {
+          return attributes;
+        }
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${auth.type}'`);
     }
   }
@@ -238,11 +244,15 @@ export class DataSourceSavedObjectsClientWrapper {
           return attributes;
         }
       default:
+        const authRegistry = (await this.authRegistryPromise).getAuthenticationMethod(auth.type);
+        if (authRegistry !== undefined) {
+          return attributes;
+        }
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid credentials type: '${type}'`);
     }
   }
 
-  private validateAttributes<T = unknown>(attributes: T) {
+  private async validateAttributes<T = unknown>(attributes: T) {
     const { title, endpoint, auth } = attributes;
     if (!title?.trim?.().length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -260,10 +270,10 @@ export class DataSourceSavedObjectsClientWrapper {
       throw SavedObjectsErrorHelpers.createBadRequestError('"auth" attribute is required');
     }
 
-    this.validateAuth(auth);
+    await this.validateAuth(auth);
   }
 
-  private validateAuth<T = unknown>(auth: T) {
+  private async validateAuth<T = unknown>(auth: T) {
     const { type, credentials } = auth;
 
     if (!type) {
@@ -328,6 +338,10 @@ export class DataSourceSavedObjectsClientWrapper {
         }
         break;
       default:
+        const authRegistry = (await this.authRegistryPromise).getAuthenticationMethod(type);
+        if (authRegistry !== undefined) {
+          break;
+        }
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${type}'`);
     }
   }
@@ -396,6 +410,10 @@ export class DataSourceSavedObjectsClientWrapper {
         encryptionContext = accessKeyEncryptionContext;
         break;
       default:
+        const authRegistry = (await this.authRegistryPromise).getAuthenticationMethod(auth.type);
+        if (authRegistry !== undefined) {
+          return attributes;
+        }
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${auth.type}'`);
     }
 
