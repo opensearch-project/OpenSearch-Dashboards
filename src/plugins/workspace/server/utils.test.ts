@@ -27,8 +27,10 @@ describe('workspace utils', () => {
     mockAuth.get.mockReturnValueOnce({
       status: AuthStatus.unknown,
       state: {
-        user_name: 'bar',
-        backend_roles: ['foo'],
+        authInfo: {
+          user_name: 'bar',
+          backend_roles: ['foo'],
+        },
       },
     });
     const result = getPrincipalsFromRequest(mockRequest, mockAuth);
@@ -40,8 +42,10 @@ describe('workspace utils', () => {
     mockAuth.get.mockReturnValueOnce({
       status: AuthStatus.authenticated,
       state: {
-        user_name: 'bar',
-        backend_roles: ['foo'],
+        authInfo: {
+          user_name: 'bar',
+          backend_roles: ['foo'],
+        },
       },
     });
     const result = getPrincipalsFromRequest(mockRequest, mockAuth);
