@@ -414,12 +414,14 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
     beforeEach(() => {
       mockedClient.update.mockClear();
     });
+
     it('should throw error when pass endpoint to update', async () => {
       const id = 'test1';
       await expect(
         wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, id, attributes())
       ).rejects.toThrowError(`Updating a dataSource endpoint is not supported`);
     });
+
     it('should update data source when auth type is present in auth registry', async () => {
       const id = 'test1';
       const mockDataSourceAttributes = attributes({
@@ -447,6 +449,93 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         expect.objectContaining({ endpoint }),
         expect.anything()
       );
+    });
+
+    it('should update throw error when auth type is not present in auth registry', async () => {
+      const id = 'test1';
+      const mockDataSourceAttributes = attributes({
+        auth: {
+          type: 'not_in_registry',
+        },
+      });
+      const { endpoint, ...newObject1 } = mockDataSourceAttributes;
+      mockedClient.get.mockResolvedValue(
+        getSavedObject({
+          id: 'test1',
+          attributes: mockDataSourceAttributes,
+        })
+      );
+      await expect(
+        wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, id, newObject1)
+      ).rejects.toThrowError(`Invalid auth type: 'not_in_registry': Bad Request`);
+    });
+  });
+
+  describe('bulkUpdateWithCredentialsEncryption', () => {
+    beforeEach(() => {
+      mockedClient.bulkUpdate.mockClear();
+    });
+
+    it('should update data sources when auth type is present in auth registry', async () => {
+      const mockDataSourceAttributes = attributes({
+        auth: {
+          type: customAuthName,
+        },
+      });
+      const { endpoint, ...bulkUpdateObject } = mockDataSourceAttributes;
+      mockedClient.get.mockResolvedValue(
+        getSavedObject({
+          id: 'test1',
+          attributes: mockDataSourceAttributes,
+        })
+      );
+      await wrapperClient.bulkUpdate(
+        [
+          {
+            id: 'test1',
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            attributes: bulkUpdateObject,
+          },
+        ],
+        {}
+      );
+      expect(mockedClient.bulkUpdate).toBeCalledWith(
+        [
+          {
+            attributes: bulkUpdateObject,
+            id: 'test1',
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          },
+        ],
+        {}
+      );
+    });
+
+    it('should bulk update throw error when auth type is not present in auth registry', async () => {
+      const mockDataSourceAttributes = attributes({
+        auth: {
+          type: 'not_in_registry',
+        },
+      });
+      const { endpoint, ...bulkUpdateObject } = mockDataSourceAttributes;
+      mockedClient.get.mockResolvedValue(
+        getSavedObject({
+          id: 'test1',
+          attributes: mockDataSourceAttributes,
+        })
+      );
+      await expect(
+        wrapperClient.bulkUpdate(
+          [
+            {
+              id: 'test1',
+              type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+              attributes: bulkUpdateObject,
+            },
+          ],
+          {}
+        )
+      ).rejects.toThrowError(`Invalid auth type: 'not_in_registry': Bad Request`);
     });
   });
 });

@@ -172,8 +172,7 @@ export class DataSourceSavedObjectsClientWrapper {
           auth: await this.encryptSigV4Credential(auth, { endpoint }),
         };
       default:
-        const authRegistry = (await this.authRegistryPromise).getAuthenticationMethod(auth.type);
-        if (authRegistry !== undefined) {
+        if (await this.isAuthTypeAvailableInRegistry(auth.type)) {
           return attributes;
         }
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${auth.type}'`);
@@ -244,8 +243,7 @@ export class DataSourceSavedObjectsClientWrapper {
           return attributes;
         }
       default:
-        const authRegistry = (await this.authRegistryPromise).getAuthenticationMethod(auth.type);
-        if (authRegistry !== undefined) {
+        if (await this.isAuthTypeAvailableInRegistry(auth.type)) {
           return attributes;
         }
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid credentials type: '${type}'`);
@@ -338,8 +336,7 @@ export class DataSourceSavedObjectsClientWrapper {
         }
         break;
       default:
-        const authRegistry = (await this.authRegistryPromise).getAuthenticationMethod(type);
-        if (authRegistry !== undefined) {
+        if (await this.isAuthTypeAvailableInRegistry(type)) {
           break;
         }
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${type}'`);
@@ -410,8 +407,7 @@ export class DataSourceSavedObjectsClientWrapper {
         encryptionContext = accessKeyEncryptionContext;
         break;
       default:
-        const authRegistry = (await this.authRegistryPromise).getAuthenticationMethod(auth.type);
-        if (authRegistry !== undefined) {
+        if (await this.isAuthTypeAvailableInRegistry(auth.type)) {
           return attributes;
         }
         throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid auth type: '${auth.type}'`);
@@ -493,5 +489,18 @@ export class DataSourceSavedObjectsClientWrapper {
         service,
       },
     };
+  }
+
+  private async getAuthenticationMethodFromRegistry(type: string) {
+    const authMethod = (await this.authRegistryPromise).getAuthenticationMethod(type);
+    return authMethod;
+  }
+
+  private async isAuthTypeAvailableInRegistry(type: string): Promise<boolean> {
+    const authMethod = await this.getAuthenticationMethodFromRegistry(type);
+    if (authMethod !== undefined) {
+      return true;
+    }
+    return false;
   }
 }
