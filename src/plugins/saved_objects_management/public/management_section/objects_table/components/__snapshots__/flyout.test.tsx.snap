@@ -595,7 +595,7 @@ exports[`Flyout should render cluster selector and import options when local clu
             }
           }
         >
-          <ClusterSelector
+          <DataSourceSelector
             disabled={false}
             fullWidth={true}
             hideLocalCluster={true}
@@ -750,7 +750,7 @@ exports[`Flyout should render cluster selector and import options when local clu
             }
           }
         >
-          <ClusterSelector
+          <DataSourceSelector
             disabled={false}
             fullWidth={true}
             hideLocalCluster={false}

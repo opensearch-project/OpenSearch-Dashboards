@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ClusterSelector should render normally with local cluster is hidden 1`] = `
+exports[`DataSourceSelector should render normally with local cluster is hidden 1`] = `
 <EuiComboBox
   aria-label="Select a data source"
   async={false}
   compressed={true}
-  data-test-subj="clusterSelectorComboBox"
+  data-test-subj="dataSourceSelectorComboBox"
   fullWidth={false}
   isClearable={true}
   isDisabled={false}
@@ -23,12 +23,12 @@ exports[`ClusterSelector should render normally with local cluster is hidden 1`]
 />
 `;
 
-exports[`ClusterSelector should render normally with local cluster not hidden 1`] = `
+exports[`DataSourceSelector should render normally with local cluster not hidden 1`] = `
 <EuiComboBox
   aria-label="Select a data source"
   async={false}
   compressed={true}
-  data-test-subj="clusterSelectorComboBox"
+  data-test-subj="dataSourceSelectorComboBox"
   fullWidth={false}
   isClearable={true}
   isDisabled={false}
@@ -60,12 +60,12 @@ exports[`ClusterSelector should render normally with local cluster not hidden 1`
 />
 `;
 
-exports[`ClusterSelector: check dataSource options should always place local cluster option as the first option when local cluster not hidden 1`] = `
+exports[`DataSourceSelector: check dataSource options should always place local cluster option as the first option when local cluster not hidden 1`] = `
 <EuiComboBox
   aria-label="Select a data source"
   async={false}
   compressed={true}
-  data-test-subj="clusterSelectorComboBox"
+  data-test-subj="dataSourceSelectorComboBox"
   fullWidth={false}
   isClearable={true}
   isDisabled={false}
