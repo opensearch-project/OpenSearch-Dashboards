@@ -105,13 +105,18 @@ export class SearchAPI {
     }
     const dataSources = await this.dataSourceFindQuery(dataSourceName);
 
-    if (dataSources.total !== 1) {
+    // In the case that data_source_name is a prefix of another name, match exact data_source_name
+    const possibleDataSourceIds = dataSources.savedObjects.filter(
+      (obj) => obj.attributes.title === dataSourceName
+    );
+
+    if (possibleDataSourceIds.length !== 1) {
       throw new Error(
-        `Expected exactly 1 result for data_source_name ${dataSourceName} but got ${dataSources.total} results`
+        `Expected exactly 1 result for data_source_name "${dataSourceName}" but got ${possibleDataSourceIds.length} results`
       );
     }
 
-    return dataSources.savedObjects.pop()?.id;
+    return possibleDataSourceIds.pop()?.id;
   }
 
   async dataSourceFindQuery(dataSourceName: string) {
@@ -120,7 +125,7 @@ export class SearchAPI {
       perPage: 10,
       search: `"${dataSourceName}"`,
       searchFields: ['title'],
-      fields: ['id'],
+      fields: ['id', 'title'],
     });
   }
 
