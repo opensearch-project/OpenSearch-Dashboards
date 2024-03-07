@@ -20,14 +20,15 @@ import {
   EuiSuperSelect,
   EuiSpacer,
   EuiText,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { AuthenticationMethodRegistery } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import { Header } from '../header';
 import {
   AuthType,
-  credentialSourceOptions,
   DataSourceAttributes,
   DataSourceManagementContextValue,
   sigV4ServiceOptions,
@@ -43,6 +44,7 @@ import {
 } from '../../../validation';
 import { UpdatePasswordModal } from '../update_password_modal';
 import { UpdateAwsCredentialModal } from '../update_aws_credential_modal';
+import { getDefaultAuthMethod } from '../../../utils';
 
 export interface EditDataSourceProps {
   existingDataSource: DataSourceAttributes;
@@ -71,9 +73,20 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   static contextType = contextType;
   public readonly context!: DataSourceManagementContextValue;
   maskedPassword: string = '********';
+  authOptions: Array<EuiSuperSelectOption<string>> = [];
+  authenticationMethodRegistery: AuthenticationMethodRegistery;
 
   constructor(props: EditDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
+
+    this.authenticationMethodRegistery = context.services.authenticationMethodRegistery;
+    this.authOptions = this.authenticationMethodRegistery
+      .getAllAuthenticationMethods()
+      .map((authMethod) => {
+        return authMethod.credentialSourceOption;
+      });
+
+    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistery);
 
     this.state = {
       formErrorsByField: { ...defaultValidation },
@@ -81,7 +94,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       description: '',
       endpoint: '',
       auth: {
-        type: AuthType.NoAuth,
+        type: initialSelectedAuthMethod?.name,
         credentials: {
           username: '',
           password: '',
@@ -511,6 +524,23 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     }
   };
 
+  handleStateChange = (state: any) => {
+    this.setState(state);
+  };
+
+  getCredentialFormFromRegistry = (authType: string) => {
+    const registeredAuthMethod = this.authenticationMethodRegistery.getAuthenticationMethod(
+      authType
+    );
+    const authCredentialForm = registeredAuthMethod?.credentialForm;
+
+    if (authCredentialForm !== undefined) {
+      return authCredentialForm(this.state, this.handleStateChange);
+    }
+
+    return null;
+  };
+
   /* Render methods */
 
   /* Render modal for new credential */
@@ -772,9 +802,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           })}
         >
           <EuiSuperSelect
-            options={credentialSourceOptions}
+            options={this.authOptions}
             valueOfSelected={this.state.auth.type}
-            onChange={this.onChangeAuthType}
+            onChange={(value) => this.onChangeAuthType(value)}
+            disabled={this.authOptions.length <= 1}
             name="Credential"
             data-test-subj="editDataSourceSelectAuthType"
           />
@@ -788,12 +819,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
   renderSelectedAuthType = (type: AuthType) => {
     switch (type) {
+      case AuthType.NoAuth:
+        return null;
       case AuthType.UsernamePasswordType:
         return this.renderUsernamePasswordFields();
       case AuthType.SigV4:
         return this.renderSigV4ContentFields();
       default:
-        return null;
+        return this.getCredentialFormFromRegistry(type);
     }
   };
 

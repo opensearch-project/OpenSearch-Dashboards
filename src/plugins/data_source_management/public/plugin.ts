@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
 import { PLUGIN_NAME } from '../common';
+import { createDataSourceSelector } from './components/data_source_selector/create_data_source_selector';
 
 import { ManagementSetup } from '../../management/public';
 import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
@@ -15,14 +17,18 @@ import {
   IAuthenticationMethodRegistery,
   AuthenticationMethodRegistery,
 } from './auth_registry';
+import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
+import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   indexPatternManagement: IndexPatternManagementSetup;
+  dataSource: DataSourcePluginSetup;
 }
 
 export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
+  getDataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
 }
 
 export interface DataSourceManagementPluginStart {
@@ -43,7 +49,7 @@ export class DataSourceManagementPlugin
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
-    { management, indexPatternManagement }: DataSourceManagementSetupDependencies
+    { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
@@ -65,7 +71,7 @@ export class DataSourceManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params);
+        return mountManagementSection(core.getStartServices, params, this.authMethodsRegistry);
       },
     });
 
@@ -78,7 +84,20 @@ export class DataSourceManagementPlugin
       this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
     };
 
-    return { registerAuthenticationMethod };
+    if (dataSource.noAuthenticationTypeEnabled) {
+      registerAuthenticationMethod(noAuthCredentialAuthMethod);
+    }
+    if (dataSource.usernamePasswordAuthEnabled) {
+      registerAuthenticationMethod(usernamePasswordAuthMethod);
+    }
+    if (dataSource.awsSigV4AuthEnabled) {
+      registerAuthenticationMethod(sigV4AuthMethod);
+    }
+
+    return {
+      registerAuthenticationMethod,
+      getDataSourceSelector: createDataSourceSelector(),
+    };
   }
 
   public start(core: CoreStart) {

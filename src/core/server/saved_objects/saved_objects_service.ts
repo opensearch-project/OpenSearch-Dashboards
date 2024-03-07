@@ -67,6 +67,7 @@ import { registerRoutes } from './routes';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationOpenSearchClient } from './migrations/core/';
+import { Config } from '../config';
 /**
  * Saved Objects is OpenSearchDashboards's data persistence mechanism allowing plugins to
  * use OpenSearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -315,6 +316,8 @@ export class SavedObjectsService
     summary: `waiting`,
   });
 
+  private opensearchDashboardsRawConfig?: Config;
+
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
   }
@@ -330,6 +333,10 @@ export class SavedObjectsService
       .toPromise();
     const savedObjectsMigrationConfig = await this.coreContext.configService
       .atPath<SavedObjectsMigrationConfigType>('migrations')
+      .pipe(first())
+      .toPromise();
+    this.opensearchDashboardsRawConfig = await this.coreContext.configService
+      .getConfig$()
       .pipe(first())
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
@@ -557,6 +564,7 @@ export class SavedObjectsService
         this.logger,
         migrationsRetryDelay
       ),
+      opensearchDashboardsRawConfig: this.opensearchDashboardsRawConfig as Config,
     });
   }
 }
