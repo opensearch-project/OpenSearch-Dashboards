@@ -103,14 +103,8 @@ describe('workspace service', () => {
           await osd.coreStart.savedObjects
             .createInternalRepository([WORKSPACE_TYPE])
             .get<{ permissions: WorkspacePermissionItem[] }>(WORKSPACE_TYPE, result.body.result.id)
-        ).attributes.permissions
-      ).toEqual([
-        {
-          modes: ['read'],
-          type: 'user',
-          userId: 'foo',
-        },
-      ]);
+        ).permissions
+      ).toEqual({ read: { users: ['foo'] } });
     });
     it('get', async () => {
       const result = await osdTestServer.request
@@ -176,14 +170,8 @@ describe('workspace service', () => {
           await osd.coreStart.savedObjects
             .createInternalRepository([WORKSPACE_TYPE])
             .get<{ permissions: WorkspacePermissionItem[] }>(WORKSPACE_TYPE, result.body.result.id)
-        ).attributes.permissions
-      ).toEqual([
-        {
-          modes: ['write'],
-          type: 'user',
-          userId: 'foo',
-        },
-      ]);
+        ).permissions
+      ).toEqual({ write: { users: ['foo'] } });
     });
     it('delete', async () => {
       const result: any = await osdTestServer.request

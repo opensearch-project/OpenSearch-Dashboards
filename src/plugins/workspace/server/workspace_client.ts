@@ -4,18 +4,87 @@
  */
 
 import { i18n } from '@osd/i18n';
-import type {
+import {
   SavedObject,
   SavedObjectsClientContract,
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
+  ACL,
+  Permissions,
 } from '../../../core/server';
 import { WORKSPACE_TYPE } from '../../../core/server';
-import { IWorkspaceClientImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
+import {
+  IWorkspaceClientImpl,
+  WorkspaceFindOptions,
+  IResponse,
+  IRequestDetail,
+  WorkspaceAttributeWithPermission,
+  WorkspacePermissionItem,
+} from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
-import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
+import {
+  WorkspacePermissionMode,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+} from '../common/constants';
+
+const convertToACL = (
+  workspacePermissions: WorkspacePermissionItem | WorkspacePermissionItem[]
+) => {
+  workspacePermissions = Array.isArray(workspacePermissions)
+    ? workspacePermissions
+    : [workspacePermissions];
+
+  const acl = new ACL();
+
+  workspacePermissions.forEach((permission) => {
+    switch (permission.type) {
+      case 'user':
+        acl.addPermission(permission.modes, { users: [permission.userId] });
+        return;
+      case 'group':
+        acl.addPermission(permission.modes, { groups: [permission.group] });
+        return;
+    }
+  });
+
+  return acl.getPermissions() || {};
+};
+
+const isValidWorkspacePermissionMode = (mode: string): mode is WorkspacePermissionMode =>
+  Object.values(WorkspacePermissionMode).some((modeValue) => modeValue === mode);
+
+const isWorkspacePermissionItem = (
+  test: WorkspacePermissionItem | null
+): test is WorkspacePermissionItem => test !== null;
+
+const convertFromACL = (permissions: Permissions) => {
+  const acl = new ACL(permissions);
+
+  return acl
+    .toFlatList()
+    .map(({ name, permissions: modes, type }) => {
+      const validModes = modes.filter(isValidWorkspacePermissionMode);
+      switch (type) {
+        case 'users':
+          return {
+            type: 'user',
+            modes: validModes,
+            userId: name,
+          } as const;
+        case 'groups':
+          return {
+            type: 'group',
+            modes: validModes,
+            group: name,
+          } as const;
+        default:
+          return null;
+      }
+    })
+    .filter(isWorkspacePermissionItem);
+};
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -67,10 +136,10 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public async create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
-      const attributes = payload;
+      const { permissions, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
@@ -88,6 +157,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         attributes,
         {
           id,
+          permissions: permissions ? convertToACL(permissions) : undefined,
         }
       );
       return {
@@ -153,9 +223,9 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): Promise<IResponse<boolean>> {
-    const attributes = payload;
+    const { permissions, ...attributes } = payload;
     try {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
@@ -172,7 +242,12 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
         }
       }
-      await client.update<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, id, attributes, {});
+      await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
+        id,
+        permissions: permissions ? convertToACL(permissions) : undefined,
+        overwrite: true,
+        version: workspaceInDB.version,
+      });
       return {
         success: true,
         result: true,

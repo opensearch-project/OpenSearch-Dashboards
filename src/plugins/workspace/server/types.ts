@@ -14,6 +14,10 @@ import {
 } from '../../../core/server';
 import { WorkspacePermissionMode } from '../common/constants';
 
+export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
+  permissions?: WorkspacePermissionItem[];
+}
+
 export interface WorkspaceFindOptions {
   page?: number;
   perPage?: number;
@@ -53,7 +57,7 @@ export interface IWorkspaceClientImpl {
    */
   create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
   /**
    * List workspaces
@@ -91,7 +95,7 @@ export interface IWorkspaceClientImpl {
   update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): Promise<IResponse<boolean>>;
   /**
    * Delete a given workspace
