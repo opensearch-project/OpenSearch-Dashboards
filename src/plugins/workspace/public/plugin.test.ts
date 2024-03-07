@@ -149,4 +149,11 @@ describe('Workspace plugin', () => {
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
   });
+
+  it('#setup register workspace dropdown menu when setup', async () => {
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock);
+    expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
+  });
 });
