@@ -36,6 +36,19 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
     );
 }
 
+export async function getDataSourcesWithFields(
+  savedObjectsClient: SavedObjectsClientContract,
+  fields: string[]
+) {
+  const response = await savedObjectsClient.find({
+    type: 'data-source',
+    fields,
+    perPage: 10000,
+  });
+
+  return response?.savedObjects;
+}
+
 export async function getDataSourceById(
   id: string,
   savedObjectsClient: SavedObjectsClientContract

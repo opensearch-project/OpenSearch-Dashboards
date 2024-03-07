@@ -4,7 +4,7 @@ exports[`DataSourceSelector should render normally with local cluster is hidden 
 <EuiComboBox
   aria-label="Select a data source"
   async={false}
-  compressed={true}
+  compressed={false}
   data-test-subj="dataSourceSelectorComboBox"
   fullWidth={false}
   isClearable={true}
@@ -27,7 +27,7 @@ exports[`DataSourceSelector should render normally with local cluster not hidden
 <EuiComboBox
   aria-label="Select a data source"
   async={false}
-  compressed={true}
+  compressed={false}
   data-test-subj="dataSourceSelectorComboBox"
   fullWidth={false}
   isClearable={true}
@@ -64,7 +64,7 @@ exports[`DataSourceSelector: check dataSource options should always place local 
 <EuiComboBox
   aria-label="Select a data source"
   async={false}
-  compressed={true}
+  compressed={false}
   data-test-subj="dataSourceSelectorComboBox"
   fullWidth={false}
   isClearable={true}
@@ -77,24 +77,162 @@ exports[`DataSourceSelector: check dataSource options should always place local 
         "label": "Local cluster",
       },
       Object {
-        "id": "test",
-        "label": "test",
+        "id": "test1",
+        "label": "test1",
       },
       Object {
         "id": "test2",
-        "label": "test",
+        "label": "test3",
       },
       Object {
-        "id": "alpha-test",
-        "label": "alpha-test",
-      },
-      Object {
-        "id": "beta-test",
-        "label": "beta-test",
+        "id": "test3",
+        "label": "test3",
       },
     ]
   }
   placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should filter options if configured 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+      Object {
+        "id": "test2",
+        "label": "test3",
+      },
+      Object {
+        "id": "test3",
+        "label": "test3",
+      },
+    ]
+  }
+  placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should hide prepend if removePrepend is true 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+      Object {
+        "id": "test1",
+        "label": "test1",
+      },
+      Object {
+        "id": "test2",
+        "label": "test3",
+      },
+      Object {
+        "id": "test3",
+        "label": "test3",
+      },
+    ]
+  }
+  placeholder="Select a data source"
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should show custom placeholder text if configured 1`] = `
+<EuiComboBox
+  aria-label="Make a selection"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+      Object {
+        "id": "test1",
+        "label": "test1",
+      },
+      Object {
+        "id": "test2",
+        "label": "test3",
+      },
+      Object {
+        "id": "test3",
+        "label": "test3",
+      },
+    ]
+  }
+  placeholder="Make a selection"
   prepend="Data source"
   selectedOptions={
     Array [
