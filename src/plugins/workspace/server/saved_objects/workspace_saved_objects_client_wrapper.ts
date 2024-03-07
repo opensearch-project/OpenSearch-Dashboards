@@ -22,7 +22,6 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsBulkUpdateOptions,
   WORKSPACE_TYPE,
-  SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
@@ -509,21 +508,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.find<T>(options);
     };
 
-    const deleteByWorkspaceWithPermissionControl = async (
-      workspace: string,
-      options: SavedObjectsDeleteByWorkspaceOptions = {}
-    ) => {
-      if (
-        !(await this.validateMultiWorkspacesPermissions([workspace], wrapperOptions.request, [
-          WorkspacePermissionMode.LibraryWrite,
-        ]))
-      ) {
-        throw generateWorkspacePermissionError();
-      }
-
-      return await wrapperOptions.client.deleteByWorkspace(workspace, options);
-    };
-
     return {
       ...wrapperOptions.client,
       get: getWithWorkspacePermissionControl,
@@ -538,7 +522,6 @@ export class WorkspaceSavedObjectsClientWrapper {
       delete: deleteWithWorkspacePermissionControl,
       update: updateWithWorkspacePermissionControl,
       bulkUpdate: bulkUpdateWithWorkspacePermissionControl,
-      deleteByWorkspace: deleteByWorkspaceWithPermissionControl,
     };
   };
 
