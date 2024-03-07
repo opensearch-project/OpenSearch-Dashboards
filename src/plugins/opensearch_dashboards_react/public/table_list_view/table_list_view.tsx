@@ -315,7 +315,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
                   listingLimitValue: this.props.listingLimit,
                   listingLimitText: <strong>listingLimit</strong>,
                   advancedSettingsLink: (
-                    <EuiLink href="#/settings">
+                    <EuiLink href="#/management/opensearch-dashboards/settings">
                       <FormattedMessage
                         id="opensearch-dashboards-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
                         defaultMessage="Advanced Settings"

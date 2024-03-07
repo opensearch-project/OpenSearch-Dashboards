@@ -13,7 +13,7 @@ const loginPage = new LoginPage(cy);
 
 describe('verify the advanced settings are saved', () => {
   beforeEach(() => {
-    miscUtils.visitPage('app/settings');
+    miscUtils.visitPage('app/management/opensearch-dashboards/settings');
     loginPage.enterUserName('admin');
     loginPage.enterPassword('admin');
     loginPage.submit();

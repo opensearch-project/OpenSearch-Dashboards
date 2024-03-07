@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }) {
     const scriptedPainlessFieldName = 'ram_pain1';
 
     it('should filter scripted fields', async function () {
+      await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickOpenSearchDashboardsIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();

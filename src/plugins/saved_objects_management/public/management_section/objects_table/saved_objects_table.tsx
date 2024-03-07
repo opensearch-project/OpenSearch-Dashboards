@@ -118,7 +118,6 @@ export interface SavedObjectsTableProps {
   dateFormat: string;
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
-  title: string;
 }
 
 export interface SavedObjectsTableState {
@@ -589,7 +588,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return null;
     }
     const { applications } = this.props;
-    const newIndexPatternUrl = applications.getUrlForApp('indexPatterns');
+    const newIndexPatternUrl = applications.getUrlForApp('management', {
+      path: 'opensearch-dashboards/indexPatterns',
+    });
 
     return (
       <Flyout
@@ -906,7 +907,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           onImport={this.showImportFlyout}
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
-          title={this.props.title}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>

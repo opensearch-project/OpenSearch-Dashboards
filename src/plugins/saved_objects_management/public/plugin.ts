@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { VisBuilderStart } from '../../vis_builder/public';
@@ -56,12 +56,6 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import {
-  MANAGE_LIBRARY_TITLE_WORDINGS,
-  SAVED_QUERIES_WORDINGS,
-  SAVED_SEARCHES_WORDINGS,
-} from './constants';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -106,70 +100,9 @@ export class SavedObjectsManagementPlugin
   private namespaceService = new SavedObjectsManagementNamespaceService();
   private serviceRegistry = new SavedObjectsManagementServiceRegistry();
 
-  private registerLibrarySubApp(
-    coreSetup: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    dataSourceEnabled: boolean,
-    hideLocalCluster: boolean
-  ) {
-    const core = coreSetup;
-    const mountWrapper = ({
-      title,
-      allowedObjectTypes,
-    }: {
-      title: string;
-      allowedObjectTypes?: string[];
-    }) => async (appMountParams: AppMountParameters) => {
-      const { mountManagementSection } = await import('./management_section');
-      return mountManagementSection({
-        core,
-        serviceRegistry: this.serviceRegistry,
-        appMountParams,
-        title,
-        allowedObjectTypes,
-        dataSourceEnabled,
-        hideLocalCluster,
-      });
-    };
-
-    /**
-     * Register saved objects overview & saved search & saved query here
-     */
-    core.application.register({
-      id: 'objects',
-      title: MANAGE_LIBRARY_TITLE_WORDINGS,
-      order: 10000,
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      mount: mountWrapper({
-        title: MANAGE_LIBRARY_TITLE_WORDINGS,
-      }),
-    });
-
-    core.application.register({
-      id: 'objects_searches',
-      title: SAVED_SEARCHES_WORDINGS,
-      order: 8000,
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      mount: mountWrapper({
-        title: SAVED_SEARCHES_WORDINGS,
-        allowedObjectTypes: ['search'],
-      }),
-    });
-
-    core.application.register({
-      id: 'objects_query',
-      title: SAVED_QUERIES_WORDINGS,
-      order: 8001,
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      mount: mountWrapper({
-        title: SAVED_QUERIES_WORDINGS,
-        allowedObjectTypes: ['query'],
-      }),
-    });
-  }
-
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, uiActions, dataSource }: SetupDependencies
+    { home, management, uiActions, dataSource }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
@@ -186,19 +119,36 @@ export class SavedObjectsManagementPlugin
             'Import, export, and manage your saved searches, visualizations, and dashboards.',
         }),
         icon: 'savedObjectsApp',
-        path: '/app/objects',
+        path: '/app/management/opensearch-dashboards/objects',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
       });
     }
+
+    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
+    opensearchDashboardsSection.registerApp({
+      id: 'objects',
+      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
+        defaultMessage: 'Saved objects',
+      }),
+      order: 1,
+      mount: async (mountParams) => {
+        const { mountManagementSection } = await import('./management_section');
+        return mountManagementSection({
+          core,
+          serviceRegistry: this.serviceRegistry,
+          mountParams,
+          dataSourceEnabled: !!dataSource,
+          hideLocalCluster: dataSource?.hideLocalCluster ?? false,
+        });
+      },
+    });
 
     // sets up the context mappings and registers any triggers/actions for the plugin
     bootstrap(uiActions);
 
     // depends on `getStartServices`, should not be awaited
     registerServices(this.serviceRegistry, core.getStartServices);
-
-    this.registerLibrarySubApp(core, !!dataSource, dataSource?.hideLocalCluster ?? false);
 
     return {
       actions: actionSetup,

@@ -92,7 +92,7 @@ export const setupUrlOverflowDetection = ({ basePath, history, toasts, uiSetting
             values={{
               storeInSessionStorageParam: <code>state:storeInSessionStorage</code>,
               advancedSettingsLink: (
-                <a href={basePath.prepend('/app/settings')}>
+                <a href={basePath.prepend('/app/management/opensearch-dashboards/settings')}>
                   <FormattedMessage
                     id="core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
                     defaultMessage="advanced settings"

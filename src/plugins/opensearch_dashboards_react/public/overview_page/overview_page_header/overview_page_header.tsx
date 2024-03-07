@@ -136,7 +136,7 @@ export const OverviewPageHeader: FC<Props> = ({
                         className="osdOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="gear"
-                        href={addBasePath('/app/settings')}
+                        href={addBasePath('/app/management')}
                       >
                         {i18n.translate(
                           'opensearch-dashboards-react.osdOverviewPageHeader.stackManagementButtonLabel',

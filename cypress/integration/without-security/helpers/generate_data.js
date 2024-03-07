@@ -12,7 +12,7 @@ describe('Generating BWC test data without security', () => {
     miscUtils.visitPage('app');
   });
   it('adds advanced settings', () => {
-    miscUtils.visitPage('app/settings');
+    miscUtils.visitPage('app/management/opensearch-dashboards/settings');
     cy.get('[data-test-subj="advancedSetting-editField-theme:darkMode"]').click();
     cy.get('[data-test-subj="advancedSetting-editField-timeline:max_buckets"]').type(
       '{selectAll}4'

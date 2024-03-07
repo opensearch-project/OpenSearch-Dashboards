@@ -73,7 +73,8 @@ export default function ({ getService }: FtrProviderContext) {
                   score: 0,
                   updated_at: '2017-09-21T18:51:23.794Z',
                   meta: {
-                    editUrl: '/objects/savedVisualizations/dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    editUrl:
+                      '/management/opensearch-dashboards/objects/savedVisualizations/dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     icon: 'visualizeApp',
                     inAppUrl: {
                       path: '/app/visualize#/edit/dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -236,7 +237,8 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'discoverApp',
               title: 'OneRecord',
-              editUrl: '/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+              editUrl:
+                '/management/opensearch-dashboards/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
@@ -254,7 +256,8 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'dashboardApp',
               title: 'Dashboard',
-              editUrl: '/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
+              editUrl:
+                '/management/opensearch-dashboards/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
@@ -272,7 +275,8 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
-              editUrl: '/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+              editUrl:
+                '/management/opensearch-dashboards/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -282,7 +286,8 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[1].meta).to.eql({
               icon: 'visualizeApp',
               title: 'Visualization',
-              editUrl: '/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+              editUrl:
+                '/management/opensearch-dashboards/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
@@ -300,9 +305,11 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'indexPatternApp',
               title: 'saved_objects*',
-              editUrl: '/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl:
+                '/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                path:
+                  '/app/management/opensearch-dashboards/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
               },
               namespaceType: 'single',

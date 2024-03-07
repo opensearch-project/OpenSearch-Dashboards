@@ -54,7 +54,7 @@ export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) =
             values={{
               storeInSessionStorageConfig: <code>state:storeInSessionStorage</code>,
               opensearchDashboardsSettingsLink: (
-                <a href={basePath.prepend('/app/settings')}>
+                <a href={basePath.prepend('/app/management/opensearch-dashboards/settings')}>
                   <FormattedMessage
                     id="core.ui.errorUrlOverflow.optionsToFixError.enableOptionText.advancedSettingsLinkText"
                     defaultMessage="Advanced Settings"

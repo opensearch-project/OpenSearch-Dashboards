@@ -171,7 +171,7 @@ exports[`GettingStarted dark mode on 1`] = `
         <RedirectAppLinks>
           <EuiButton
             fill={true}
-            href="/app/indexPatterns"
+            href="/app/management/opensearch-dashboards/indexPatterns"
             iconType="indexOpen"
           >
             <FormattedMessage
@@ -366,7 +366,7 @@ exports[`GettingStarted render 1`] = `
         <RedirectAppLinks>
           <EuiButton
             fill={true}
-            href="/app/indexPatterns"
+            href="/app/management/opensearch-dashboards/indexPatterns"
             iconType="indexOpen"
           >
             <FormattedMessage

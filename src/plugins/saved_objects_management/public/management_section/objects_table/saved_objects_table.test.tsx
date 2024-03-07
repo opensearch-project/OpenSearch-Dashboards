@@ -179,9 +179,9 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyIndexPattern*`,
             icon: 'indexPatternApp',
-            editUrl: '#/indexPatterns/patterns/1',
+            editUrl: '#/management/opensearch-dashboards/indexPatterns/patterns/1',
             inAppUrl: {
-              path: '/indexPatterns/patterns/1',
+              path: '/management/opensearch-dashboards/indexPatterns/patterns/1',
               uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
             },
           },
@@ -192,7 +192,7 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MySearch`,
             icon: 'search',
-            editUrl: '/objects/savedSearches/2',
+            editUrl: '/management/opensearch-dashboards/objects/savedSearches/2',
             inAppUrl: {
               path: '/discover/2',
               uiCapabilitiesPath: 'discover.show',
@@ -205,7 +205,7 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyDashboard`,
             icon: 'dashboardApp',
-            editUrl: '/objects/savedDashboards/3',
+            editUrl: '/management/opensearch-dashboards/objects/savedDashboards/3',
             inAppUrl: {
               path: '/dashboard/3',
               uiCapabilitiesPath: 'dashboard.show',
@@ -218,7 +218,7 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyViz`,
             icon: 'visualizeApp',
-            editUrl: '/objects/savedVisualizations/4',
+            editUrl: '/management/opensearch-dashboards/objects/savedVisualizations/4',
             inAppUrl: {
               path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
@@ -533,7 +533,7 @@ describe('SavedObjectsTable', () => {
         meta: {
           title: `MySearch`,
           icon: 'search',
-          editUrl: '/objects/savedSearches/2',
+          editUrl: '/management/opensearch-dashboards/objects/savedSearches/2',
           inAppUrl: {
             path: '/discover/2',
             uiCapabilitiesPath: 'discover.show',
@@ -548,7 +548,7 @@ describe('SavedObjectsTable', () => {
         type: 'search',
         meta: {
           title: 'MySearch',
-          editUrl: '/objects/savedSearches/2',
+          editUrl: '/management/opensearch-dashboards/objects/savedSearches/2',
           icon: 'search',
           inAppUrl: {
             path: '/discover/2',

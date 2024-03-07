@@ -51,19 +51,19 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await find.clickByDisplayedLinkText(text);
     }
     async clickOpenSearchDashboardsSettings() {
-      await PageObjects.common.navigateToApp('settings');
+      await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('managementSettingsTitle');
     }
 
     async clickOpenSearchDashboardsSavedObjects() {
-      await PageObjects.common.navigateToApp('objects');
+      await testSubjects.click('objects');
       await PageObjects.savedObjects.waitTableIsLoaded();
     }
 
     async clickOpenSearchDashboardsIndexPatterns() {
       log.debug('clickOpenSearchDashboardsIndexPatterns link');
-      await PageObjects.common.navigateToApp('indexPatterns');
+      await testSubjects.click('indexPatterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

@@ -51,9 +51,9 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/indexPatterns/patterns/1',
+        editUrl: '#/management/opensearch-dashboards/indexPatterns/patterns/1',
         inAppUrl: {
-          path: '/indexPatterns/patterns/1',
+          path: '/management/opensearch-dashboards/indexPatterns/patterns/1',
           uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
         },
       },
@@ -91,9 +91,9 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/indexPatterns/patterns/1',
+        editUrl: '#/management/opensearch-dashboards/indexPatterns/patterns/1',
         inAppUrl: {
-          path: '/indexPatterns/patterns/1',
+          path: '/management/opensearch-dashboards/indexPatterns/patterns/1',
           uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
         },
       },

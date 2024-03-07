@@ -418,7 +418,11 @@ export class IndexPatternsService {
     );
 
     if (!savedObject.version) {
-      throw new SavedObjectNotFound(savedObjectType, id, 'indexPatterns');
+      throw new SavedObjectNotFound(
+        savedObjectType,
+        id,
+        'management/opensearch-dashboards/indexPatterns'
+      );
     }
 
     const spec = this.savedObjectToSpec(savedObject);

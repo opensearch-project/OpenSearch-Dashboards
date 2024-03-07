@@ -14,7 +14,6 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectAttributes } from 'src/core/types';
 import { i18n } from '@osd/i18n';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
@@ -115,8 +114,4 @@ export interface SigV4Content extends SavedObjectAttributes {
   secretKey: string;
   region: string;
   service?: SigV4ServiceName;
-}
-
-export interface DataSourceManagementStartDependencies {
-  data: DataPublicPluginStart;
 }

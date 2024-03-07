@@ -711,7 +711,7 @@ exports[`Relationships should render augment-vis objects normally 1`] = `
             Object {
               "id": "1",
               "meta": Object {
-                "editUrl": "/objects/savedVisualizations/1",
+                "editUrl": "/management/opensearch-dashboards/objects/savedVisualizations/1",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
                   "path": "/edit/1",
@@ -845,7 +845,7 @@ exports[`Relationships should render dashboards normally 1`] = `
             Object {
               "id": "1",
               "meta": Object {
-                "editUrl": "/objects/savedVisualizations/1",
+                "editUrl": "/management/opensearch-dashboards/objects/savedVisualizations/1",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
                   "path": "/app/visualize#/edit/1",
@@ -859,7 +859,7 @@ exports[`Relationships should render dashboards normally 1`] = `
             Object {
               "id": "2",
               "meta": Object {
-                "editUrl": "/objects/savedVisualizations/2",
+                "editUrl": "/management/opensearch-dashboards/objects/savedVisualizations/2",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
                   "path": "/app/visualize#/edit/2",
@@ -1028,7 +1028,7 @@ exports[`Relationships should render index patterns normally 1`] = `
             Object {
               "id": "1",
               "meta": Object {
-                "editUrl": "/objects/savedSearches/1",
+                "editUrl": "/management/opensearch-dashboards/objects/savedSearches/1",
                 "icon": "search",
                 "inAppUrl": Object {
                   "path": "/app/discover#//1",
@@ -1042,7 +1042,7 @@ exports[`Relationships should render index patterns normally 1`] = `
             Object {
               "id": "2",
               "meta": Object {
-                "editUrl": "/objects/savedVisualizations/2",
+                "editUrl": "/management/opensearch-dashboards/objects/savedVisualizations/2",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
                   "path": "/app/visualize#/edit/2",
@@ -1181,10 +1181,10 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "id": "1",
               "meta": Object {
-                "editUrl": "/indexPatterns/patterns/1",
+                "editUrl": "/management/opensearch-dashboards/indexPatterns/patterns/1",
                 "icon": "indexPatternApp",
                 "inAppUrl": Object {
-                  "path": "/app/indexPatterns/patterns/1",
+                  "path": "/app/management/opensearch-dashboards/indexPatterns/patterns/1",
                   "uiCapabilitiesPath": "management.opensearchDashboards.indexPatterns",
                 },
                 "title": "My Index Pattern",
@@ -1195,7 +1195,7 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "id": "2",
               "meta": Object {
-                "editUrl": "/objects/savedVisualizations/2",
+                "editUrl": "/management/opensearch-dashboards/objects/savedVisualizations/2",
                 "icon": "visualizeApp",
                 "inAppUrl": Object {
                   "path": "/app/visualize#/edit/2",
@@ -1334,7 +1334,7 @@ exports[`Relationships should render visualizations normally 1`] = `
             Object {
               "id": "1",
               "meta": Object {
-                "editUrl": "/objects/savedDashboards/1",
+                "editUrl": "/management/opensearch-dashboards/objects/savedDashboards/1",
                 "icon": "dashboardApp",
                 "inAppUrl": Object {
                   "path": "/app/opensearch-dashboards#/dashboard/1",
@@ -1348,7 +1348,7 @@ exports[`Relationships should render visualizations normally 1`] = `
             Object {
               "id": "2",
               "meta": Object {
-                "editUrl": "/objects/savedDashboards/2",
+                "editUrl": "/management/opensearch-dashboards/objects/savedDashboards/2",
                 "icon": "dashboardApp",
                 "inAppUrl": Object {
                   "path": "/app/opensearch-dashboards#/dashboard/2",

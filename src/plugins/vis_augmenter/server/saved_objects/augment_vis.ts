@@ -15,7 +15,9 @@ export const augmentVisSavedObjectType: SavedObjectsType = {
       return `augment-vis-${obj?.attributes?.originPlugin}`;
     },
     getEditUrl(obj) {
-      return `/objects/savedAugmentVis/${encodeURIComponent(obj.id)}`;
+      return `/management/opensearch-dashboards/objects/savedAugmentVis/${encodeURIComponent(
+        obj.id
+      )}`;
     },
   },
   mappings: {

@@ -114,7 +114,11 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
             <EuiSpacer size="xl" />
 
             <RedirectAppLinks application={application}>
-              <EuiButton fill iconType="indexOpen" href={addBasePath('/app/indexPatterns')}>
+              <EuiButton
+                fill
+                iconType="indexOpen"
+                href={addBasePath('/app/management/opensearch-dashboards/indexPatterns')}
+              >
                 <FormattedMessage
                   defaultMessage="Add your data"
                   id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"

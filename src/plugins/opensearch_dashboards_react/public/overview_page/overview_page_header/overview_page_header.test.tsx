@@ -200,7 +200,7 @@ describe('OverviewPageHeader toolbar items - Management', () => {
 
     return component.find({
       className: 'osdOverviewPageHeader__actionButton',
-      href: '/app/settings',
+      href: '/app/management',
     });
   };
 

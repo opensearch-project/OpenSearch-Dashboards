@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }) {
     beforeEach(async function () {
       await opensearchArchiver.load('empty_opensearch_dashboards');
       await opensearchArchiver.load('discover');
+      await PageObjects.settings.navigateTo();
     });
 
     afterEach(async function () {

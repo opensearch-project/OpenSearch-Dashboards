@@ -13,7 +13,7 @@ const loginPage = new LoginPage(cy);
 
 describe('Generating BWC test data with security', () => {
   beforeEach(() => {
-    miscUtils.visitPage('app/settings');
+    miscUtils.visitPage('app/management/opensearch-dashboards/settings');
     loginPage.enterUserName('admin');
     loginPage.enterPassword('admin');
     loginPage.submit();
@@ -29,7 +29,7 @@ describe('Generating BWC test data with security', () => {
   });
 
   it('adds advanced settings', () => {
-    miscUtils.visitPage('app/settings');
+    miscUtils.visitPage('app/management/opensearch-dashboards/settings');
     cy.get('[data-test-subj="advancedSetting-editField-theme:darkMode"]').click();
     cy.get('[data-test-subj="advancedSetting-editField-timeline:max_buckets"]').type(
       '{selectAll}4'

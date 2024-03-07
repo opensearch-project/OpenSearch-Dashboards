@@ -47,7 +47,7 @@ export const uiSettingsType: SavedObjectsType = {
     importableAndExportable: true,
     getInAppUrl() {
       return {
-        path: `/app/settings`,
+        path: `/app/management/opensearch-dashboards/settings`,
         uiCapabilitiesPath: 'advancedSettings.show',
       };
     },

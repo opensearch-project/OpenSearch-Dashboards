@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with customized logo for opensearch overview header in dark mode', async () => {
-        await PageObjects.settings.navigateTo();
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('opensearch_dashboards_overview');
         await testSubjects.existOrFail('osdOverviewPageHeaderLogo');
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with customized logo in dark mode', async () => {
-        await PageObjects.settings.navigateTo();
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('home');
         await testSubjects.existOrFail('welcomeCustomLogo');
@@ -179,13 +179,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('in dark mode', async () => {
         before(async function () {
-          await PageObjects.settings.navigateTo();
+          await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
           await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
           await PageObjects.common.navigateToApp('home');
         });
 
         after(async function () {
-          await PageObjects.settings.navigateTo();
+          await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
           await PageObjects.settings.clearAdvancedSettings('theme:darkMode');
         });
 
@@ -206,7 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('with customized mark logo button that navigates to home page', async () => {
-          await PageObjects.settings.navigateTo();
+          await PageObjects.common.navigateToApp('settings');
           await globalNav.clickHomeButton();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();

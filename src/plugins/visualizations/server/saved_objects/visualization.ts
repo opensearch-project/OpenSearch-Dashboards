@@ -43,7 +43,9 @@ export const visualizationSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
+      return `/management/opensearch-dashboards/objects/savedVisualizations/${encodeURIComponent(
+        obj.id
+      )}`;
     },
     getInAppUrl(obj) {
       return {

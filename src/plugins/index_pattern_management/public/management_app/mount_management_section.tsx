@@ -34,19 +34,11 @@ import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import {
-  AppMountParameters,
-  ChromeBreadcrumb,
-  ScopedHistory,
-  StartServicesAccessor,
-} from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
-import { EuiPage, EuiPageBody } from '@elastic/eui';
-import {
-  OpenSearchDashboardsContextProvider,
-  reactRouterNavigate,
-} from '../../../opensearch_dashboards_react/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { ManagementAppMountParams } from '../../../management/public';
 import {
   IndexPatternTableWithRouter,
   EditIndexPatternContainer,
@@ -68,7 +60,7 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
-  params: AppMountParameters,
+  params: ManagementAppMountParams,
   getMlCardState: () => MlCardState,
   dataSource?: DataSourcePluginSetup
 ) {
@@ -85,17 +77,6 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
-  const setBreadcrumbsScope = (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
-    const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
-      ...item,
-      ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
-    });
-
-    chrome.setBreadcrumbs([
-      ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || params.history)),
-    ]);
-  };
-
   const deps: IndexPatternManagmentContext = {
     chrome,
     application,
@@ -107,37 +88,33 @@ export async function mountManagementSection(
     docLinks,
     data,
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
-    setBreadcrumbs: setBreadcrumbsScope,
+    setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
     dataSourceEnabled,
     hideLocalCluster,
   };
 
   ReactDOM.render(
-    <EuiPage restrictWidth="1200px">
-      <EuiPageBody component="main">
-        <OpenSearchDashboardsContextProvider services={deps}>
-          <I18nProvider>
-            <Router history={params.history}>
-              <Switch>
-                <Route path={['/create']}>
-                  <CreateIndexPatternWizardWithRouter />
-                </Route>
-                <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
-                  <CreateEditFieldContainer />
-                </Route>
-                <Route path={['/patterns/:id']}>
-                  <EditIndexPatternContainer />
-                </Route>
-                <Route path={['/']}>
-                  <IndexPatternTableWithRouter canSave={canSave} />
-                </Route>
-              </Switch>
-            </Router>
-          </I18nProvider>
-        </OpenSearchDashboardsContextProvider>
-      </EuiPageBody>
-    </EuiPage>,
+    <OpenSearchDashboardsContextProvider services={deps}>
+      <I18nProvider>
+        <Router history={params.history}>
+          <Switch>
+            <Route path={['/create']}>
+              <CreateIndexPatternWizardWithRouter />
+            </Route>
+            <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
+              <CreateEditFieldContainer />
+            </Route>
+            <Route path={['/patterns/:id']}>
+              <EditIndexPatternContainer />
+            </Route>
+            <Route path={['/']}>
+              <IndexPatternTableWithRouter canSave={canSave} />
+            </Route>
+          </Switch>
+        </Router>
+      </I18nProvider>
+    </OpenSearchDashboardsContextProvider>,
     params.element
   );
 

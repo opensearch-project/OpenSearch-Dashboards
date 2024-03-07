@@ -53,7 +53,7 @@ exports[`render 1`] = `
       >
         <EuiButton
           fill={true}
-          href="/app/objects?_a=(tab:search)"
+          href="/app/management/opensearch-dashboards/objects?_a=(tab:search)"
           onClick={[Function]}
         >
           <FormattedMessage

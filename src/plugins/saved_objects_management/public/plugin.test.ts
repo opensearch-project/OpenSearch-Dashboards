@@ -28,23 +28,12 @@
  * under the License.
  */
 
-const mountManagementSectionMock = jest.fn();
-jest.doMock('./management_section', () => ({
-  mountManagementSection: mountManagementSectionMock,
-}));
-import { waitFor } from '@testing-library/dom';
 import { coreMock } from '../../../core/public/mocks';
 import { homePluginMock } from '../../home/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
-import {
-  MANAGE_LIBRARY_TITLE_WORDINGS,
-  SAVED_QUERIES_WORDINGS,
-  SAVED_SEARCHES_WORDINGS,
-} from './constants';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 describe('SavedObjectsManagementPlugin', () => {
   let plugin: SavedObjectsManagementPlugin;
@@ -61,60 +50,18 @@ describe('SavedObjectsManagementPlugin', () => {
       const homeSetup = homePluginMock.createSetupContract();
       const managementSetup = managementPluginMock.createSetupContract();
       const uiActionsSetup = uiActionsPluginMock.createSetupContract();
-      const registerMock = jest.fn((params) => params.mount({} as any, {} as any));
 
-      await plugin.setup(
-        {
-          ...coreSetup,
-          application: {
-            ...coreSetup.application,
-            register: registerMock,
-          },
-        },
-        {
-          home: homeSetup,
-          management: managementSetup,
-          uiActions: uiActionsSetup,
-        }
-      );
+      await plugin.setup(coreSetup, {
+        home: homeSetup,
+        management: managementSetup,
+        uiActions: uiActionsSetup,
+      });
 
       expect(homeSetup.featureCatalogue.register).toHaveBeenCalledTimes(1);
       expect(homeSetup.featureCatalogue.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'saved_objects',
         })
-      );
-      expect(registerMock).toBeCalledWith(
-        expect.objectContaining({
-          id: 'objects',
-          title: MANAGE_LIBRARY_TITLE_WORDINGS,
-          order: 10000,
-          category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-        })
-      );
-      expect(registerMock).toBeCalledWith(
-        expect.objectContaining({
-          id: 'objects_searches',
-          title: SAVED_SEARCHES_WORDINGS,
-          order: 8000,
-          category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-        })
-      );
-      expect(registerMock).toBeCalledWith(
-        expect.objectContaining({
-          id: 'objects_query',
-          title: SAVED_QUERIES_WORDINGS,
-          order: 8001,
-          category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-        })
-      );
-      waitFor(
-        () => {
-          expect(mountManagementSectionMock).toBeCalledTimes(3);
-        },
-        {
-          container: document.body,
-        }
       );
     });
   });

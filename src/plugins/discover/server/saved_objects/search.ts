@@ -43,7 +43,9 @@ export const searchSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/objects/savedSearches/${encodeURIComponent(obj.id)}`;
+      return `/management/opensearch-dashboards/objects/savedSearches/${encodeURIComponent(
+        obj.id
+      )}`;
     },
     getInAppUrl(obj) {
       return {

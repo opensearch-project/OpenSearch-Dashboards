@@ -112,7 +112,8 @@ export default function ({ getService, getPageObjects }) {
 
       describe('is false', () => {
         before(async () => {
-          await PageObjects.common.navigateToApp('settings');
+          await PageObjects.header.clickStackManagement();
+          await PageObjects.settings.clickOpenSearchDashboardsSettings();
           await PageObjects.settings.toggleAdvancedSettingCheckbox(VISUALIZE_ENABLE_LABS_SETTING);
         });
 
@@ -126,7 +127,8 @@ export default function ({ getService, getPageObjects }) {
         });
 
         after(async () => {
-          await PageObjects.settings.navigateTo();
+          await PageObjects.header.clickStackManagement();
+          await PageObjects.settings.clickOpenSearchDashboardsSettings();
           await PageObjects.settings.clearAdvancedSettings(VISUALIZE_ENABLE_LABS_SETTING);
           await PageObjects.header.clickDashboard();
         });
