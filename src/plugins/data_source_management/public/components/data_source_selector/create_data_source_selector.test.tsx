@@ -2,13 +2,13 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { createClusterSelector } from './create_cluster_selector';
+import { createDataSourceSelector } from './create_data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { render } from '@testing-library/react';
 
-describe('create cluster selector', () => {
+describe('create data source selector', () => {
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
 
@@ -27,7 +27,7 @@ describe('create cluster selector', () => {
       hideLocalCluster: false,
       fullWidth: false,
     };
-    const TestComponent = createClusterSelector();
+    const TestComponent = createDataSourceSelector();
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
