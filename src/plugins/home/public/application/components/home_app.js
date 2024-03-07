@@ -41,6 +41,7 @@ import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../opensearch_dashboards_services';
 import { useMount } from 'react-use';
+import { USE_NEW_HOME_PAGE } from '../../../common/constants';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
@@ -57,7 +58,7 @@ export function HomeApp({ directories, solutions }) {
     addBasePath,
     environmentService,
     telemetry,
-    homeConfig,
+    uiSettings,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
@@ -108,7 +109,7 @@ export function HomeApp({ directories, solutions }) {
           <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
           </Route>
-          {homeConfig.preferNextHomePage ? (
+          {uiSettings.get(USE_NEW_HOME_PAGE) ? (
             <>
               <Route exact path="/legacy-home">
                 {legacyHome}
