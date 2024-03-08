@@ -57,7 +57,10 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
     const findWorkspaceConfig = plugins.find((plugin) => plugin.id === 'workspace');
     // Only try to get workspace id from url when workspace feature is enabled
     if (findWorkspaceConfig) {
-      const workspaceId = getWorkspaceIdFromUrl(window.location.href);
+      const workspaceId = getWorkspaceIdFromUrl(
+        window.location.href,
+        injectedMetadata.getBasePath()
+      );
       if (workspaceId) {
         workspaceBasePath = `${WORKSPACE_PATH_PREFIX}/${workspaceId}`;
       }

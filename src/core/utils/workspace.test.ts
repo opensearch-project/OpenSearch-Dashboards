@@ -14,6 +14,14 @@ describe('#getWorkspaceIdFromUrl', () => {
   it('return empty when there is not a match', () => {
     expect(getWorkspaceIdFromUrl('http://localhost/w2/foo')).toEqual('');
   });
+
+  it('return workspace when there is a match with basePath provided', () => {
+    expect(getWorkspaceIdFromUrl('http://localhost/basepath/w/foo', '/basepath')).toEqual('foo');
+  });
+
+  it('return empty when there is a match without basePath but basePath provided', () => {
+    expect(getWorkspaceIdFromUrl('http://localhost/w/foo', '/w')).toEqual('');
+  });
 });
 
 describe('#formatUrlWithWorkspaceId', () => {
