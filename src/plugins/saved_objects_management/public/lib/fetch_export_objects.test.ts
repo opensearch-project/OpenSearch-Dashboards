@@ -32,9 +32,9 @@ describe('fetchExportObjects', () => {
     `);
   });
 
-  it('make http call with body provided and includeReferencesDeep is true', async () => {
+  it('make http call with body provided and includeReferencesDeep is undefined', async () => {
     const httpClient = httpServiceMock.createStartContract();
-    await fetchExportObjects(httpClient, [], true, {
+    await fetchExportObjects(httpClient, [], undefined, {
       workspaces: ['foo'],
     });
     expect(httpClient.post).toMatchInlineSnapshot(`
@@ -43,7 +43,7 @@ describe('fetchExportObjects', () => {
           Array [
             "/api/saved_objects/_export",
             Object {
-              "body": "{\\"workspaces\\":[\\"foo\\"],\\"objects\\":[],\\"includeReferencesDeep\\":true}",
+              "body": "{\\"workspaces\\":[\\"foo\\"],\\"objects\\":[],\\"includeReferencesDeep\\":false}",
             },
           ],
         ],

@@ -62,6 +62,7 @@ describe('resolveImportErrors', () => {
       http: httpMock,
       getConflictResolutions,
       state: { importCount: 0, importMode: { createNewCopies: false, overwrite: false } },
+      selectedDataSourceId: '',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -91,6 +92,7 @@ describe('resolveImportErrors', () => {
         ],
         importMode: { createNewCopies: false, overwrite: false },
       },
+      selectedDataSourceId: '',
     });
     expect(httpMock.post).not.toHaveBeenCalled();
     expect(result).toMatchInlineSnapshot(`
@@ -143,6 +145,7 @@ describe('resolveImportErrors', () => {
         ],
         importMode: { createNewCopies: false, overwrite: false },
       },
+      selectedDataSourceId: '',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -209,6 +212,7 @@ describe('resolveImportErrors', () => {
         ],
         importMode: { createNewCopies: false, overwrite: false },
       },
+      selectedDataSourceId: '',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -249,6 +253,7 @@ describe('resolveImportErrors', () => {
         ],
         importMode: { createNewCopies: false, overwrite: false },
       },
+      selectedDataSourceId: '',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -334,6 +339,7 @@ describe('resolveImportErrors', () => {
         importMode: { createNewCopies: false, overwrite: false },
       },
       workspaces: ['foo'],
+      selectedDataSourceId: '',
     });
     expect(httpMock.post.mock.calls).toMatchInlineSnapshot(`
       Array [

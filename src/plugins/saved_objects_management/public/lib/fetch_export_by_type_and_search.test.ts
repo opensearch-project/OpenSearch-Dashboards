@@ -9,7 +9,7 @@ import { httpServiceMock } from '../../../../core/public/mocks';
 describe('fetchExportByTypeAndSearch', () => {
   it('make http call with body provided', async () => {
     const httpClient = httpServiceMock.createStartContract();
-    await fetchExportByTypeAndSearch(httpClient, [], undefined, true, {
+    await fetchExportByTypeAndSearch(httpClient, [], undefined, undefined, {
       workspaces: ['foo'],
     });
     expect(httpClient.post).toMatchInlineSnapshot(`
@@ -18,7 +18,7 @@ describe('fetchExportByTypeAndSearch', () => {
           Array [
             "/api/saved_objects/_export",
             Object {
-              "body": "{\\"workspaces\\":[\\"foo\\"],\\"type\\":[],\\"includeReferencesDeep\\":true}",
+              "body": "{\\"workspaces\\":[\\"foo\\"],\\"type\\":[],\\"includeReferencesDeep\\":false}",
             },
           ],
         ],
