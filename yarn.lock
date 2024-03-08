@@ -17220,7 +17220,7 @@ tar@^6.0.2, tar@^6.1.11:
     mkdirp "^1.0.3"
     yallist "^4.0.0"
 
-tcp-port-used@^1.0.2:
+tcp-port-used@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/tcp-port-used/-/tcp-port-used-1.0.2.tgz#9652b7436eb1f4cfae111c79b558a25769f6faea"
   integrity sha512-l7ar8lLUD3XS1V2lfoJlCBaeoaWo/2xfYt81hM7VlvR4RrMVFqfmzfhLVk40hAb368uitje5gPtBRL1m/DGvLA==
