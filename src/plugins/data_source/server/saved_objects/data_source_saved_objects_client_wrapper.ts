@@ -498,9 +498,6 @@ export class DataSourceSavedObjectsClientWrapper {
 
   private async isAuthTypeAvailableInRegistry(type: string): Promise<boolean> {
     const authMethod = await this.getAuthenticationMethodFromRegistry(type);
-    if (authMethod !== undefined) {
-      return true;
-    }
-    return false;
+    return authMethod !== undefined;
   }
 }
