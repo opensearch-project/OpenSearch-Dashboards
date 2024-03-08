@@ -184,16 +184,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   private get workspaceIdQuery() {
     const currentWorkspaceId = this.props.workspaces.currentWorkspaceId$.getValue();
     const workspaceEnabled = this.props.applications.capabilities.workspaces.enabled;
-    // workspace is turned off
-    if (!workspaceEnabled) {
-      return undefined;
-    } else {
-      if (!currentWorkspaceId) {
-        return undefined;
-      } else {
-        return [currentWorkspaceId];
-      }
-    }
+
+    // only return the result when workspace feature is enabled.
+    return workspaceEnabled && currentWorkspaceId ? [currentWorkspaceId] : undefined;
   }
 
   componentDidMount() {
