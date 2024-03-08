@@ -11,7 +11,6 @@ import {
   WorkspaceAttribute,
   SavedObjectsServiceStart,
   ACL,
-  Permissions,
 } from '../../../core/server';
 import { WORKSPACE_TYPE } from '../../../core/server';
 import {
@@ -24,10 +23,7 @@ import {
 } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
-import {
-  WorkspacePermissionMode,
-  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-} from '../common/constants';
+import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
 
 const convertToACL = (
   workspacePermissions: WorkspacePermissionItem | WorkspacePermissionItem[]
@@ -50,40 +46,6 @@ const convertToACL = (
   });
 
   return acl.getPermissions() || {};
-};
-
-const isValidWorkspacePermissionMode = (mode: string): mode is WorkspacePermissionMode =>
-  Object.values(WorkspacePermissionMode).some((modeValue) => modeValue === mode);
-
-const isWorkspacePermissionItem = (
-  test: WorkspacePermissionItem | null
-): test is WorkspacePermissionItem => test !== null;
-
-const convertFromACL = (permissions: Permissions) => {
-  const acl = new ACL(permissions);
-
-  return acl
-    .toFlatList()
-    .map(({ name, permissions: modes, type }) => {
-      const validModes = modes.filter(isValidWorkspacePermissionMode);
-      switch (type) {
-        case 'users':
-          return {
-            type: 'user',
-            modes: validModes,
-            userId: name,
-          } as const;
-        case 'groups':
-          return {
-            type: 'group',
-            modes: validModes,
-            group: name,
-          } as const;
-        default:
-          return null;
-      }
-    })
-    .filter(isWorkspacePermissionItem);
 };
 
 const WORKSPACE_ID_SIZE = 6;
