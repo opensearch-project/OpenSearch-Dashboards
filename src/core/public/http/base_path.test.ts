@@ -141,5 +141,13 @@ describe('BasePath', () => {
         new BasePath('/foo/bar', '/foo/bar', '/workspace').remove('/foo/bar/workspace/remove')
       ).toEqual('/remove');
     });
+
+    it('remove with workspace provided but calls without workspace', () => {
+      expect(
+        new BasePath('/foo/bar', '/foo/bar', '/workspace').remove('/foo/bar/workspace/remove', {
+          withoutWorkspace: true,
+        })
+      ).toEqual('/workspace/remove');
+    });
   });
 });
