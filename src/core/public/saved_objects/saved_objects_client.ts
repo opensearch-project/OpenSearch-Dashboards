@@ -191,6 +191,25 @@ export class SavedObjectsClient {
   private currentWorkspaceId: string | undefined;
 
   /**
+   * Check if workspaces field present in given options, if so, overwrite the current workspace id.
+   * @param options
+   * @returns
+   */
+  private formatWorkspacesParams(options: {
+    workspaces?: SavedObjectsCreateOptions['workspaces'];
+  }) {
+    const currentWorkspaceId = this.currentWorkspaceId;
+    let finalWorkspaces;
+    if (options.hasOwnProperty('workspaces')) {
+      finalWorkspaces = options.workspaces;
+    } else if (typeof currentWorkspaceId === 'string') {
+      finalWorkspaces = [currentWorkspaceId];
+    }
+
+    return finalWorkspaces;
+  }
+
+  /**
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
   private processBatchQueue = throttle(
@@ -260,13 +279,7 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
-    const currentWorkspaceId = this.currentWorkspaceId;
-    let finalWorkspaces;
-    if (options.hasOwnProperty('workspaces')) {
-      finalWorkspaces = options.workspaces;
-    } else if (typeof currentWorkspaceId === 'string') {
-      finalWorkspaces = [currentWorkspaceId];
-    }
+    const finalWorkspaces = this.formatWorkspacesParams(options);
 
     const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
@@ -295,18 +308,12 @@ export class SavedObjectsClient {
    * @returns The result of the create operation containing created saved objects.
    */
   public bulkCreate = (
-    objects: Array<Omit<SavedObjectsBulkCreateObject, 'workspaces'>> = [],
+    objects: SavedObjectsBulkCreateObject[] = [],
     options: SavedObjectsBulkCreateOptions = { overwrite: false }
   ) => {
     const path = this.getPath(['_bulk_create']);
     const query: HttpFetchOptions['query'] = { overwrite: options.overwrite };
-    const currentWorkspaceId = this.currentWorkspaceId;
-    let finalWorkspaces;
-    if (options.hasOwnProperty('workspaces')) {
-      finalWorkspaces = options.workspaces;
-    } else if (typeof currentWorkspaceId === 'string') {
-      finalWorkspaces = [currentWorkspaceId];
-    }
+    const finalWorkspaces = this.formatWorkspacesParams(options);
 
     if (finalWorkspaces) {
       query.workspaces = finalWorkspaces;
@@ -383,13 +390,7 @@ export class SavedObjectsClient {
       workspaces: 'workspaces',
     };
 
-    const currentWorkspaceId = this.currentWorkspaceId;
-    let finalWorkspaces;
-    if (options.hasOwnProperty('workspaces')) {
-      finalWorkspaces = options.workspaces;
-    } else if (typeof currentWorkspaceId === 'string') {
-      finalWorkspaces = Array.from(new Set([currentWorkspaceId]));
-    }
+    const finalWorkspaces = this.formatWorkspacesParams(options);
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
       ...options,
