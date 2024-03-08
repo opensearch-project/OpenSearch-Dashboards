@@ -186,8 +186,7 @@ export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
   /**
-   * if currentWorkspaceId is undefined, it means
-   * we should not carry out workspace info when doing any operation.
+   * The currentWorkspaceId may be undefiend when workspace plugin is not enabled.
    */
   private currentWorkspaceId: string | undefined;
 
@@ -392,17 +391,14 @@ export class SavedObjectsClient {
       finalWorkspaces = Array.from(new Set([currentWorkspaceId]));
     }
 
-    const renamedQuery = renameKeys<Omit<SavedObjectsFindOptions, 'ACLSearchParams'>, any>(
-      renameMap,
-      {
-        ...options,
-        ...(finalWorkspaces
-          ? {
-              workspaces: finalWorkspaces,
-            }
-          : {}),
-      }
-    );
+    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
+      ...options,
+      ...(finalWorkspaces
+        ? {
+            workspaces: finalWorkspaces,
+          }
+        : {}),
+    });
     const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Partial<
       Record<string, any>
     >;
