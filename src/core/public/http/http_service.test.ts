@@ -83,7 +83,38 @@ describe('#setup()', () => {
     expect(setupResult.basePath.get()).toEqual('');
   });
 
-  it('setup basePath with workspaceId provided in window.location.href', () => {
+  it('setup basePath with workspaceId provided in window.location.href and workspace feature enabled', () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
+          },
+        } as any)
+    );
+    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    injectedMetadata.getPlugins.mockReturnValueOnce([
+      {
+        id: 'workspace',
+        plugin: {
+          id: 'workspace',
+          configPath: '',
+          requiredPlugins: [],
+          optionalPlugins: [],
+          requiredEnginePlugins: {},
+          requiredBundles: [],
+        },
+      },
+    ]);
+    const fatalErrors = fatalErrorsServiceMock.createSetupContract();
+    const httpService = new HttpService();
+    const setupResult = httpService.setup({ fatalErrors, injectedMetadata });
+    expect(setupResult.basePath.get()).toEqual('/w/workspaceId');
+    windowSpy.mockRestore();
+  });
+
+  it('setup basePath with workspaceId provided in window.location.href but workspace feature disabled', () => {
     const windowSpy = jest.spyOn(window, 'window', 'get');
     windowSpy.mockImplementation(
       () =>
@@ -97,7 +128,7 @@ describe('#setup()', () => {
     const fatalErrors = fatalErrorsServiceMock.createSetupContract();
     const httpService = new HttpService();
     const setupResult = httpService.setup({ fatalErrors, injectedMetadata });
-    expect(setupResult.basePath.get()).toEqual('/w/workspaceId');
+    expect(setupResult.basePath.get()).toEqual('');
     windowSpy.mockRestore();
   });
 });
