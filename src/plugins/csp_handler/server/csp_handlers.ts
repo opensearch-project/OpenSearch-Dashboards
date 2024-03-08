@@ -49,9 +49,9 @@ export function createCspRulesPreResponseHandler(
 
       const [coreStart] = await core.getStartServices();
 
-      const myClient = getConfigurationClient(coreStart.opensearch.client.asScoped(request));
+      const client = getConfigurationClient(coreStart.opensearch.client.asScoped(request));
 
-      const cspRules = await myClient.getEntityConfig(CSP_RULES_CONFIG_KEY);
+      const cspRules = await client.getEntityConfig(CSP_RULES_CONFIG_KEY);
 
       if (!cspRules) {
         return appendFrameAncestorsWhenMissing(cspHeader, toolkit);
