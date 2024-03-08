@@ -141,6 +141,15 @@ export interface SavedObjectsTableState {
   isIncludeReferencesDeepChecked: boolean;
 }
 
+export function formatWorkspaceIdParams<T extends { workspaces?: string[] }>(
+  obj: T
+): T | Omit<T, 'workspaces'> {
+  const { workspaces, ...others } = obj;
+  if (workspaces) {
+    return obj;
+  }
+  return others;
+}
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
 
@@ -187,16 +196,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
   }
 
-  private formatWorkspaceIdParams<T extends { workspaces?: string[] }>(
-    obj: T
-  ): T | Omit<T, 'workspaces'> {
-    const { workspaces, ...others } = obj;
-    if (workspaces) {
-      return obj;
-    }
-    return others;
-  }
-
   componentDidMount() {
     this._isMounted = true;
     this.fetchSavedObjects();
@@ -216,7 +215,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
 
-    const filteredCountOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
+    const filteredCountOptions: SavedObjectCountOptions = formatWorkspaceIdParams({
       typesToInclude: filteredTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
@@ -249,7 +248,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions[id] = true;
     });
 
-    const countOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
+    const countOptions: SavedObjectCountOptions = formatWorkspaceIdParams({
       typesToInclude: allowedTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
@@ -286,7 +285,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const filteredTypes = filterQuery(allowedTypes, visibleTypes);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions: SavedObjectsFindOptions = this.formatWorkspaceIdParams({
+    const findOptions: SavedObjectsFindOptions = formatWorkspaceIdParams({
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
@@ -439,7 +438,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         http,
         objectsToExport,
         includeReferencesDeep,
-        this.formatWorkspaceIdParams({
+        formatWorkspaceIdParams({
           workspaces: this.workspaceIdQuery,
         })
       );
@@ -477,7 +476,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         exportTypes,
         queryText ? `${queryText}*` : undefined,
         isIncludeReferencesDeepChecked,
-        this.formatWorkspaceIdParams({
+        formatWorkspaceIdParams({
           workspaces: this.workspaceIdQuery,
         })
       );

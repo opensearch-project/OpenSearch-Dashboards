@@ -59,6 +59,7 @@ import {
   SavedObjectsTable,
   SavedObjectsTableProps,
   SavedObjectsTableState,
+  formatWorkspaceIdParams,
 } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
@@ -644,5 +645,25 @@ describe('SavedObjectsTable', () => {
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
     });
+  });
+});
+
+describe('formatWorkspaceIdParams', () => {
+  it('omit workspaces params when it is undefined', () => {
+    expect(
+      formatWorkspaceIdParams({
+        workspaces: undefined,
+        foo: 'bar',
+      })
+    ).toEqual({ foo: 'bar' });
+  });
+
+  it('reserve workspaces params when it is valid', () => {
+    expect(
+      formatWorkspaceIdParams({
+        workspaces: ['foo'],
+        foo: 'bar',
+      })
+    ).toEqual({ workspaces: ['foo'], foo: 'bar' });
   });
 });
