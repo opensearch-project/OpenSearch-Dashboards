@@ -25,7 +25,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Handles auth methods from auth registry in DataSource SavedObjects Client Wrapper ([#6062](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6062))
 - [Multiple Datasource] Expose a few properties for customize the appearance of the data source selector component ([#6057](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6057))
 - [Multiple Datasource] Create data source menu component able to be mount to nav bar ([#6082](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6082))
-- [Multiple Datasource] Send registered authentication credentials during the dataSource creation and editing processes ([#6049](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6049))
+- [Multiple Datasource] Handle form values(request payload) if the selected type is available in the authentication registry ([#6049](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6049))
 
 ### 🐛 Bug Fixes
 

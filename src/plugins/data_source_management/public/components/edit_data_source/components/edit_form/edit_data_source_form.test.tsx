@@ -440,7 +440,6 @@ describe('With Registered Authentication', () => {
       setTimeout(() => {
         updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
         expect(
-          // @ts-ignore
           component.find(descriptionFormRowIdentifier).first().props().isInvalid
         ).toBeUndefined();
         resolve();
@@ -451,7 +450,6 @@ describe('With Registered Authentication', () => {
         /* Updated description*/
         updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');
         expect(
-          // @ts-ignore
           component.find(descriptionFormRowIdentifier).first().props().isInvalid
         ).toBeUndefined();
 
