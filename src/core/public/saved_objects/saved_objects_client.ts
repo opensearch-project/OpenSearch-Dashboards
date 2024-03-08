@@ -254,7 +254,6 @@ export class SavedObjectsClient {
 
   public setCurrentWorkspace(workspaceId: string): boolean {
     this.currentWorkspaceId = workspaceId;
-    return true;
   }
 
   /**
