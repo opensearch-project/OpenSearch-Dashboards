@@ -31,4 +31,29 @@ describe('fetchExportObjects', () => {
       }
     `);
   });
+
+  it('make http call with body provided and includeReferencesDeep is true', async () => {
+    const httpClient = httpServiceMock.createStartContract();
+    await fetchExportObjects(httpClient, [], true, {
+      workspaces: ['foo'],
+    });
+    expect(httpClient.post).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "/api/saved_objects/_export",
+            Object {
+              "body": "{\\"workspaces\\":[\\"foo\\"],\\"objects\\":[],\\"includeReferencesDeep\\":true}",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    `);
+  });
 });

@@ -7,14 +7,19 @@ import { importFile } from './import_file';
 import { httpServiceMock } from '../../../../core/public/mocks';
 
 describe('importFile', () => {
-  it('make http call with body provided', async () => {
+  it('make http call with body provided and data source id provided', async () => {
     const httpClient = httpServiceMock.createStartContract();
     const blob = new Blob(['']);
-    await importFile(httpClient, new File([blob], 'foo.ndjson'), {
-      overwrite: true,
-      createNewCopies: false,
-      workspaces: ['foo'],
-    });
+    await importFile(
+      httpClient,
+      new File([blob], 'foo.ndjson'),
+      {
+        overwrite: true,
+        createNewCopies: false,
+        workspaces: ['foo'],
+      },
+      'foo'
+    );
     expect(httpClient.post).toMatchInlineSnapshot(`
       [MockFunction] {
         "calls": Array [
@@ -26,6 +31,7 @@ describe('importFile', () => {
                 "Content-Type": undefined,
               },
               "query": Object {
+                "dataSourceId": "foo",
                 "overwrite": true,
                 "workspaces": Array [
                   "foo",
