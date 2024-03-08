@@ -109,6 +109,47 @@ describe('PermissionControl', () => {
     expect(batchValidateResult.result).toEqual(true);
   });
 
+  it('should return false and log not permitted saved objects', async () => {
+    const logger = loggerMock.create();
+    const permissionControlClient = new SavedObjectsPermissionControl(logger);
+    const getScopedClient = jest.fn();
+    const clientMock = savedObjectsClientMock.create();
+    getScopedClient.mockImplementation((request) => {
+      return clientMock;
+    });
+    permissionControlClient.setup(getScopedClient, mockAuth);
+
+    clientMock.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'foo',
+          type: 'dashboard',
+          references: [],
+          attributes: {},
+        },
+        {
+          id: 'bar',
+          type: 'dashboard',
+          references: [],
+          attributes: {},
+          permissions: {
+            read: {
+              users: ['foo'],
+            },
+          },
+        },
+      ],
+    });
+    const batchValidateResult = await permissionControlClient.batchValidate(
+      httpServerMock.createOpenSearchDashboardsRequest(),
+      [],
+      ['read']
+    );
+    expect(batchValidateResult.success).toEqual(true);
+    expect(batchValidateResult.result).toEqual(false);
+    expect(logger.debug).toHaveBeenCalledTimes(1);
+  });
+
   describe('getPrincipalsFromRequest', () => {
     const permissionControlClient = new SavedObjectsPermissionControl(loggerMock.create());
     const getScopedClient = jest.fn();
@@ -118,6 +159,42 @@ describe('PermissionControl', () => {
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       const result = permissionControlClient.getPrincipalsFromRequest(mockRequest);
       expect(result.users).toEqual(['bar']);
+    });
+  });
+
+  describe('validateSavedObjectsACL', () => {
+    it("should return true if saved objects don't have permissions property", () => {
+      const permissionControlClient = new SavedObjectsPermissionControl(loggerMock.create());
+      expect(
+        permissionControlClient.validateSavedObjectsACL([{ type: 'workspace', id: 'foo' }], {}, [])
+      ).toBe(true);
+    });
+    it('should return true if principals permitted to saved objects', () => {
+      const permissionControlClient = new SavedObjectsPermissionControl(loggerMock.create());
+      expect(
+        permissionControlClient.validateSavedObjectsACL(
+          [{ type: 'workspace', id: 'foo', permissions: { write: { users: ['bar'] } } }],
+          { users: ['bar'] },
+          ['write']
+        )
+      ).toBe(true);
+    });
+    it('should return false and log saved objects if not permitted', () => {
+      const logger = loggerMock.create();
+      const permissionControlClient = new SavedObjectsPermissionControl(logger);
+      expect(
+        permissionControlClient.validateSavedObjectsACL(
+          [{ type: 'workspace', id: 'foo', permissions: { write: { users: ['bar'] } } }],
+          { users: ['foo'] },
+          ['write']
+        )
+      ).toBe(false);
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /Authorization failed, principals:.*has no.*permissions on the requested saved object:.*foo/
+        )
+      );
     });
   });
 });
