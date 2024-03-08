@@ -29,4 +29,4 @@
  */
 
 export { ChromeNavLink, ChromeNavLinkUpdateableFields } from './nav_link';
-export { ChromeNavLinks, NavLinksService } from './nav_links_service';
+export { ChromeNavLinks, NavLinksService, LinksUpdater } from './nav_links_service';

@@ -65,20 +65,12 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 4000,
     euiIconType: 'logoSecurity',
   },
-  openSearchFeatures: {
-    id: 'openSearchFeatures',
-    label: i18n.translate('core.ui.openSearchFeaturesNavList.label', {
-      defaultMessage: 'OpenSearch Features',
-    }),
-    order: 5000,
-    euiIconType: 'folderClosed',
-  },
   management: {
     id: 'management',
     label: i18n.translate('core.ui.managementNavList.label', {
       defaultMessage: 'Management',
     }),
-    order: 6000,
+    order: 5000,
     euiIconType: 'managementApp',
   },
 });

@@ -2,78 +2,79 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { combineLatest } from 'rxjs';
+
 import type { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { i18n } from '@osd/i18n';
 import { featureMatchesConfig } from './utils';
 import {
   AppMountParameters,
   AppNavLinkStatus,
-  ChromeNavLink,
   CoreSetup,
   CoreStart,
+  LinksUpdater,
   Plugin,
   WorkspaceObject,
-  DEFAULT_APP_CATEGORIES,
 } from '../../../core/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { renderWorkspaceMenu } from './render_workspace_menu';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
+import { NavLinkWrapper } from '../../../core/public/chrome/nav_links/nav_link';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
+  private currentWorkspaceIdSubscription?: Subscription;
   private currentWorkspaceSubscription?: Subscription;
   private getWorkspaceIdFromURL(): string | null {
     return getWorkspaceIdFromUrl(window.location.href);
   }
 
-  private filterByWorkspace(workspace: WorkspaceObject | null, allNavLinks: ChromeNavLink[]) {
-    if (!workspace) return allNavLinks;
-    const features = workspace.features ?? ['*'];
-    return allNavLinks.filter(featureMatchesConfig(features));
-  }
+  /**
+   * Filter the nav links based on the feature configuration of workspace
+   */
+  private filterByWorkspace(allNavLinks: NavLinkWrapper[], workspace: WorkspaceObject | null) {
+    if (!workspace || !workspace.features) return allNavLinks;
 
-  private filterNavLinks(core: CoreStart) {
-    const navLinksService = core.chrome.navLinks;
-    const allNavLinks$ = navLinksService.getAllNavLinks$();
-    const currentWorkspace$ = core.workspaces.currentWorkspace$;
-    combineLatest([
-      allNavLinks$.pipe(map(this.changeCategoryNameByWorkspaceFeatureFlag)),
-      currentWorkspace$,
-    ]).subscribe(([allNavLinks, currentWorkspace]) => {
-      const filteredNavLinks = this.filterByWorkspace(currentWorkspace, allNavLinks);
-      const navLinks = new Map<string, ChromeNavLink>();
-      filteredNavLinks.forEach((chromeNavLink) => {
-        navLinks.set(chromeNavLink.id, chromeNavLink);
-      });
-      navLinksService.setNavLinks(navLinks);
-    });
+    const featureFilter = featureMatchesConfig(workspace.features);
+    return allNavLinks.filter((linkWrapper) => featureFilter(linkWrapper.properties));
   }
 
   /**
-   * The category "Opensearch Dashboards" needs to be renamed as "Library"
-   * when workspace feature flag is on, we need to do it here and generate
-   * a new item without polluting the original ChromeNavLink.
+   * Filter nav links by the current workspace, once the current workspace change, the nav links(left nav bar)
+   * should also be updated according to the configured features of the current workspace
    */
-  private changeCategoryNameByWorkspaceFeatureFlag(chromeLinks: ChromeNavLink[]): ChromeNavLink[] {
-    return chromeLinks.map((item) => {
-      if (item.category?.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id) {
-        return {
-          ...item,
-          category: {
-            ...item.category,
-            label: i18n.translate('core.ui.libraryNavList.label', {
-              defaultMessage: 'Library',
-            }),
-          },
-        };
-      }
-      return item;
+  private filterNavLinks(core: CoreStart) {
+    const currentWorkspace$ = core.workspaces.currentWorkspace$;
+    let filterLinksByWorkspace: LinksUpdater;
+
+    this.currentWorkspaceSubscription?.unsubscribe();
+    this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
+      const linkUpdaters$ = core.chrome.navLinks.getLinkUpdaters$();
+      let linkUpdaters = linkUpdaters$.value;
+
+      /**
+       * It should only have one link filter exist based on the current workspace at a given time
+       * So we need to filter out previous workspace link filter before adding new one after changing workspace
+       */
+      linkUpdaters = linkUpdaters.filter((updater) => updater !== filterLinksByWorkspace);
+
+      /**
+       * Whenever workspace changed, this function will filter out those links that should not
+       * be displayed. For example, some workspace may not have Observability features configured, in such case,
+       * the nav links of Observability features should not be displayed in left nav bar
+       */
+      filterLinksByWorkspace = (navLinks) => {
+        const filteredNavLinks = this.filterByWorkspace([...navLinks.values()], currentWorkspace);
+        const newNavLinks = new Map<string, NavLinkWrapper>();
+        filteredNavLinks.forEach((chromeNavLink) => {
+          newNavLinks.set(chromeNavLink.id, chromeNavLink);
+        });
+        return newNavLinks;
+      };
+
+      linkUpdaters$.next([...linkUpdaters, filterLinksByWorkspace]);
     });
   }
 
@@ -166,14 +167,15 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   public start(core: CoreStart) {
     this.coreStart = core;
 
-    this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
-    if (core) {
-      this.filterNavLinks(core);
-    }
+    this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
+
+    // When starts, filter the nav links based on the current workspace
+    this.filterNavLinks(core);
     return {};
   }
 
   public stop() {
+    this.currentWorkspaceIdSubscription?.unsubscribe();
     this.currentWorkspaceSubscription?.unsubscribe();
   }
 }

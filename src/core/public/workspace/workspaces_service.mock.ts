@@ -5,6 +5,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@osd/utility-types';
+
 import { WorkspacesService } from './workspaces_service';
 import { WorkspaceObject } from '..';
 

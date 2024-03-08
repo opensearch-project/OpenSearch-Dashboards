@@ -93,10 +93,8 @@ export interface ChromeNavLink {
    * Disables a link from being clickable.
    *
    * @internalRemarks
-   * This is used by the ML and Graph plugins. They use this field
+   * This is only used by the ML and Graph plugins currently. They use this field
    * to disable the nav link when the license is expired.
-   * This is also used by recently visited category in left menu
-   * to disable "No recently visited items".
    */
   readonly disabled?: boolean;
 
@@ -104,11 +102,6 @@ export interface ChromeNavLink {
    * Hides a link from the navigation.
    */
   readonly hidden?: boolean;
-
-  /**
-   * Links can be navigated through url.
-   */
-  readonly externalLink?: boolean;
 }
 
 /** @public */

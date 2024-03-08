@@ -6,14 +6,15 @@
 import { AppCategory } from '../../../core/public';
 
 /**
- * Given a list of feature config, check if a feature matches config
+ * Checks if a given feature matches the provided feature configuration.
+ *
  * Rules:
- * 1. `*` matches any feature
- * 2. config starts with `@` matches category, for example, @management matches any feature of `management` category
- * 3. to match a specific feature, just use the feature id, such as `discover`
- * 4. to exclude feature or category, use `!@management` or `!discover`
- * 5. the order of featureConfig array matters, from left to right, the later config override the previous config,
- * for example, ['!@management', '*'] matches any feature because '*' overrides the previous setting: '!@management'
+ * 1. `*` matches any feature.
+ * 2. Config starts with `@` matches category, for example, @management matches any feature of `management` category,
+ * 3. To match a specific feature, use the feature id, such as `discover`,
+ * 4. To exclude a feature or category, prepend with `!`, e.g., `!discover` or `!@management`.
+ * 5. The order of featureConfig array matters. From left to right, later configs override the previous ones.
+ *    For example, ['!@management', '*'] matches any feature because '*' overrides the previous setting: '!@management'.
  */
 export const featureMatchesConfig = (featureConfigs: string[]) => ({
   id,
