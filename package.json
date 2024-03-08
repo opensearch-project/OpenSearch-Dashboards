@@ -79,8 +79,9 @@
     "spec_to_console": "scripts/use_node scripts/spec_to_console",
     "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\"",
     "cypress:run-without-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=false",
-    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500"
- 
+    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
+    "osd:ciGroup10": "echo \"dashboard_sanity_test_spec.js\"",
+    "osd:ciGroup11": "echo \"apps/vis_builder/*.js\""
   },
   "repository": {
     "type": "git",

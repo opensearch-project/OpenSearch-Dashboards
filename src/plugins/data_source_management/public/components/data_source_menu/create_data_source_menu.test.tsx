@@ -2,15 +2,16 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { createDataSourceSelector } from './create_data_source_selector';
+
+import { createDataSourceMenu } from './create_data_source_menu';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { render } from '@testing-library/react';
 
-describe('create data source selector', () => {
+describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
-  const { toasts } = notificationServiceMock.createStartContract();
+  const notifications = notificationServiceMock.createStartContract();
 
   beforeEach(() => {
     client = {
@@ -20,21 +21,23 @@ describe('create data source selector', () => {
 
   it('should render normally', () => {
     const props = {
-      savedObjectsClient: client,
-      notifications: toasts,
-      onSelectedDataSource: jest.fn(),
-      disabled: false,
-      hideLocalCluster: false,
-      fullWidth: false,
+      showDataSourceSelectable: true,
+      appName: 'myapp',
+      savedObjects: client,
+      notifications,
+      fullWidth: true,
+      hideLocalCluster: true,
+      disableDataSourceSelectable: false,
+      className: 'myclass',
     };
-    const TestComponent = createDataSourceSelector();
+    const TestComponent = createDataSourceMenu();
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type'],
+      fields: ['id', 'description', 'title'],
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(notifications.toasts.addWarning).toBeCalledTimes(0);
   });
 });

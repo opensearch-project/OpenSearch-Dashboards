@@ -9,12 +9,12 @@ Object {
         aria-expanded="false"
         aria-haspopup="listbox"
         aria-label="Select a data source"
-        class="euiComboBox euiComboBox--compressed"
+        class="euiComboBox"
         data-test-subj="dataSourceSelectorComboBox"
         role="combobox"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+          class="euiFormControlLayout euiFormControlLayout--group"
         >
           <label
             class="euiFormLabel euiFormControlLayout__prepend"
@@ -25,7 +25,7 @@ Object {
             class="euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable euiComboBox__inputWrap--inGroup"
+              class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable euiComboBox__inputWrap--inGroup"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
@@ -56,7 +56,7 @@ Object {
             >
               <button
                 aria-label="Clear input"
-                class="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
+                class="euiFormControlLayoutClearButton"
                 data-test-subj="comboBoxClearButton"
                 type="button"
               >
@@ -88,12 +88,12 @@ Object {
       aria-expanded="false"
       aria-haspopup="listbox"
       aria-label="Select a data source"
-      class="euiComboBox euiComboBox--compressed"
+      class="euiComboBox"
       data-test-subj="dataSourceSelectorComboBox"
       role="combobox"
     >
       <div
-        class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+        class="euiFormControlLayout euiFormControlLayout--group"
       >
         <label
           class="euiFormLabel euiFormControlLayout__prepend"
@@ -104,7 +104,7 @@ Object {
           class="euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable euiComboBox__inputWrap--inGroup"
+            class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable euiComboBox__inputWrap--inGroup"
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
@@ -135,7 +135,7 @@ Object {
           >
             <button
               aria-label="Clear input"
-              class="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
+              class="euiFormControlLayoutClearButton"
               data-test-subj="comboBoxClearButton"
               type="button"
             >

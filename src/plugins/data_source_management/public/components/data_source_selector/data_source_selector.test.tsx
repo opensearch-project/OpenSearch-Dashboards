@@ -8,7 +8,8 @@ import { DataSourceSelector } from './data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
-import { getDataSourcesResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
+import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
+import { AuthType } from 'src/plugins/data_source/common/data_sources';
 
 describe('DataSourceSelector', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -35,7 +36,7 @@ describe('DataSourceSelector', () => {
     );
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'description', 'title'],
+      fields: ['id', 'title', 'auth.type'],
       perPage: 10000,
       type: 'data-source',
     });
@@ -55,7 +56,7 @@ describe('DataSourceSelector', () => {
     );
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'description', 'title'],
+      fields: ['id', 'title', 'auth.type'],
       perPage: 10000,
       type: 'data-source',
     });
@@ -74,7 +75,7 @@ describe('DataSourceSelector: check dataSource options', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
 
-    mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesResponse);
+    mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
   });
 
   it('should always place local cluster option as the first option when local cluster not hidden', async () => {
@@ -86,6 +87,63 @@ describe('DataSourceSelector: check dataSource options', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+      />
+    );
+
+    component.instance().componentDidMount!();
+    await nextTick();
+    expect(component).toMatchSnapshot();
+    expect(toasts.addWarning).toBeCalledTimes(0);
+  });
+
+  it('should hide prepend if removePrepend is true', async () => {
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        removePrepend={true}
+      />
+    );
+
+    component.instance().componentDidMount!();
+    await nextTick();
+    expect(component).toMatchSnapshot();
+    expect(toasts.addWarning).toBeCalledTimes(0);
+  });
+
+  it('should show custom placeholder text if configured', async () => {
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        placeholderText={'Make a selection'}
+      />
+    );
+
+    component.instance().componentDidMount!();
+    await nextTick();
+    expect(component).toMatchSnapshot();
+    expect(toasts.addWarning).toBeCalledTimes(0);
+  });
+
+  it('should filter options if configured', async () => {
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        filterFn={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
 

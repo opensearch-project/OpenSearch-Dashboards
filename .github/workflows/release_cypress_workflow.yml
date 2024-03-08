@@ -1,5 +1,5 @@
 name: Orchestrator cypress workflow
-run-name: dashboards_cypress_workflow ${{ inputs.UNIQUE_ID != '' && inputs.UNIQUE_ID || '' }} # Unique id number appended to the workflow run-name to reference the run within the orchestrator.
+run-name: release_cypress_workflow ${{ inputs.UNIQUE_ID != '' && inputs.UNIQUE_ID || '' }} # Unique id number appended to the workflow run-name to reference the run within the orchestrator.
 # Trigger on dispatch event sent from FT repo orchestrator
 on:
   workflow_dispatch:
@@ -41,27 +41,38 @@ env:
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || github.repository }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   OSD_PATH: 'osd'
-  CYPRESS_BROWSER: 'chromium'
+  CYPRESS_BROWSER: 'electron'
   JOB_ID: ${{ inputs.UNIQUE_ID}}
   OPENSEARCH:  ${{ inputs.OS_URL != '' && inputs.OS_URL  || 'https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/$VERSION/latest/linux/x64/tar/dist/opensearch/opensearch-$VERSION-linux-x64.tar.gz' }}
   DASHBOARDS: ${{ inputs.OSD_URL != '' && inputs.OSD_URL  || 'https://ci.opensearch.org/ci/dbc/distribution-build-opensearch-dashboards/$VERSION/latest/linux/x64/tar/dist/opensearch-dashboards/opensearch-dashboards-$VERSION-linux-x64.tar.gz' }}
   OPENSEARCH_DIR: 'cypress/opensearch'
   DASHBOARDS_DIR: 'cypress/opensearch-dashboards'
   SECURITY_ENABLED: ${{ inputs.SECURITY_ENABLED != '' && inputs.SECURITY_ENABLED || 'false' }}
-  SPEC: 'cypress/integration/core_opensearch_dashboards/*'
 
 jobs:
+  Get-CI-Image-Tag:
+    uses: opensearch-project/opensearch-build/.github/workflows/get-ci-image-tag.yml@main
+    with:
+      product: opensearch-dashboards
+
   cypress-tests:
+    needs: Get-CI-Image-Tag
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        spec_group: [10, 11] # Add more spec files as needed
     container:
-      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
+      # using the same image which is used by opensearch-build team to build the OpenSearch Distribution
+      # this image tag is subject to change as more dependencies and updates will arrive over time
+      image: ${{ needs.Get-CI-Image-Tag.outputs.ci-image-version-linux }}
+      # need to switch to root so that github actions can install runner binary on container without permission issues.
+      options: --user root
     env:
       # prevents extra Cypress installation progress messages
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
       TERM: xterm
-    name: Run cypress tests ${{ inputs.UNIQUE_ID}}
+    name: Run cypress tests (osd:ciGroup${{ matrix.spec_group }}) ${{ inputs.UNIQUE_ID}} 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -82,21 +93,24 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
+      - name: Setup spec files
+        if: ${{ inputs.specs == '' }}
+        shell: bash
+        run: |
+          cd ${{ env.OSD_PATH }}
+          IFS="," read -a SPEC_ARRAY <<< $(yarn --silent osd:ciGroup${{ matrix.spec_group }})
+          FORMATTED_SPEC=''
+          for i in "${SPEC_ARRAY[@]}"; do
+            FORMATTED_SPEC+="cypress/integration/core_opensearch_dashboards/${i},"
+          done
+          SPEC=${FORMATTED_SPEC}  # Set SPEC to FORMATTED_SPEC
+          echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
+          echo "SPEC found: $SPEC"
+
       - name: Get Cypress version
         id: cypress_version
         run: |
           echo "name=cypress_version::$(cat ./${{ env.OSD_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
-    
-      - name: Cache Cypress
-        id: cache-cypress
-        uses: actions/cache@v1
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json') }}
-        env:
-          CYPRESS_INSTALL_BINARY: ${{ steps.cypress_version.outputs.cypress_version }}
-      - run: npx cypress cache list
-      - run: npx cypress cache path
 
       - name: Get package version (Linux)
         run: |
@@ -106,16 +120,18 @@ jobs:
       - name: Run bootstrap
         run: |
           cd ${{ env.OSD_PATH }}
-          yarn osd bootstrap
+          chown -R 1000:1000 `pwd`
+          su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use && node -v && yarn -v &&
+                               yarn osd bootstrap"
 
-      - name: Download and extract Opensearch artifacts
+      - name: Download and extract OpenSearch artifacts
         run: |
           CWD=$(pwd)
           mkdir -p $CWD/${{ env.OPENSEARCH_DIR }}
           source ${{ env.OSD_PATH }}/scripts/common/utils.sh
           open_artifact $CWD/${{ env.OPENSEARCH_DIR }} ${{ env.OPENSEARCH }}
       
-      - name: Download and extract Opensearch Dashboards artifacts
+      - name: Download and extract OpenSearch Dashboards artifacts
         run: |
           CWD=$(pwd)
           mkdir -p $CWD/${{ env.DASHBOARDS_DIR }}
@@ -124,20 +140,20 @@ jobs:
 
       - name: Run Cypress tests 
         run: |
-          source ${{ env.OSD_PATH }}/scripts/cypress_tests.sh
-          run_dashboards_cypress_tests  
+          chown -R 1000:1000 `pwd`
+          su `id -un 1000` -c "source ${{ env.OSD_PATH }}/scripts/cypress_tests.sh && run_dashboards_cypress_tests"
 
       # Screenshots are only captured on failures
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: osd-cypress-screenshots
+          name: release-osd-cypress-screenshots
           path: ${{ env.OSD_PATH }}/cypress/screenshots
           retention-days: 1
       
       - uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: osd-cypress-videos
+          name: release-osd-cypress-videos
           path: ${{ env.OSD_PATH }}/cypress/videos
           retention-days: 1
