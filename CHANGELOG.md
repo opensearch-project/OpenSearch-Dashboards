@@ -23,7 +23,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Optional workspaces params in repository ([#5949](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5949))
 - [Multiple Datasource] Refactoring create and edit form to use authentication registry ([#6002](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6002))
 - [Multiple Datasource] Expose a few properties for customize the appearance of the data source selector component ([#6057](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6057))
-
+- [Multiple Datasource] Create data source menu component able to be mount to nav bar ([#6082](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6082))
 
 
 ### 🐛 Bug Fixes
