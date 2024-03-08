@@ -252,7 +252,7 @@ export class SavedObjectsClient {
     this.batchQueue = [];
   }
 
-  public setCurrentWorkspace(workspaceId: string): boolean {
+  public setCurrentWorkspace(workspaceId: string) {
     this.currentWorkspaceId = workspaceId;
   }
 
