@@ -186,7 +186,7 @@ export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
   /**
-   * The currentWorkspaceId may be undefiend when workspace plugin is not enabled.
+   * The currentWorkspaceId may be undefined when workspace plugin is not enabled.
    */
   private currentWorkspaceId: string | undefined;
 
