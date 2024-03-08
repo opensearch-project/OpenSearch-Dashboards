@@ -139,8 +139,6 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
-  currentWorkspaceId: string | null;
-  workspaceEnabled: boolean;
 }
 
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
@@ -171,13 +169,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
-      currentWorkspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
-      workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
     };
   }
 
   private get workspaceIdQuery() {
-    const { currentWorkspaceId, workspaceEnabled } = this.state;
+    const currentWorkspaceId = this.props.workspaces.currentWorkspaceId$.getValue();
+    const workspaceEnabled = this.props.applications.capabilities.workspaces.enabled;
     // workspace is turned off
     if (!workspaceEnabled) {
       return undefined;
@@ -597,7 +594,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.hideImportFlyout}
         done={this.finishImport}
         http={this.props.http}
-        workspaces={this.state.currentWorkspaceId ? [this.state.currentWorkspaceId] : undefined}
+        workspaces={this.workspaceIdQuery}
         serviceRegistry={this.props.serviceRegistry}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={newIndexPatternUrl}
