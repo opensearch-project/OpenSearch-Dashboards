@@ -61,9 +61,15 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       config
     );
 
+    const authRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
+      const dataSourcePluginStart = selfStart as DataSourcePluginStart;
+      return dataSourcePluginStart.getAuthenticationMethodRegistery();
+    });
+
     const dataSourceSavedObjectsClientWrapper = new DataSourceSavedObjectsClientWrapper(
       cryptographyServiceSetup,
       this.logger.get('data-source-saved-objects-client-wrapper-factory'),
+      authRegistryPromise,
       config.endpointDeniedIPs
     );
 
@@ -100,11 +106,6 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     const auditTrailPromise = core.getStartServices().then(([coreStart]) => coreStart.auditTrail);
 
     const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(config);
-
-    const authRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
-      const dataSourcePluginStart = selfStart as DataSourcePluginStart;
-      return dataSourcePluginStart.getAuthenticationMethodRegistery();
-    });
 
     const customApiSchemaRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
       const dataSourcePluginStart = selfStart as DataSourcePluginStart;
