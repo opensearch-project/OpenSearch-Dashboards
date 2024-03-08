@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Permissions } from '../permission_control/acl';
+import { Permissions } from '../permission_control';
 import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 
 /**

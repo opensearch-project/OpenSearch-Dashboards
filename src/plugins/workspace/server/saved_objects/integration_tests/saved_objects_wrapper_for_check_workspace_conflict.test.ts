@@ -35,6 +35,11 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
           workspace: {
             enabled: true,
           },
+          savedObjects: {
+            permission: {
+              enabled: true,
+            },
+          },
           migrations: {
             skip: false,
           },

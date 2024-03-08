@@ -276,8 +276,10 @@
 # Set the value of this setting to true to enable plugin augmentation on Dashboard
 # vis_augmenter.pluginAugmentationEnabled: true
 
+# Set the value to true to enable permission control for saved objects
+# Permission control depends on OpenSearch Dashboards has authentication enabled, set it to false when the security plugin is not installed,
+# if the security plugin is not installed and this config is true, permission control takes no effect.
+# savedObjects.permission.enabled: true
+
 # Set the value to true to enable workspace feature
 # workspace.enabled: false
-# Set the value to false to disable permission check on workspace
-# Permission check depends on OpenSearch Dashboards has authentication enabled, set it to false if no authentication is configured
-# workspace.permission.enabled: true
