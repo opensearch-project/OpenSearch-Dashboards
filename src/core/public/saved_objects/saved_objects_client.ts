@@ -197,7 +197,7 @@ export class SavedObjectsClient {
    */
   private formatWorkspacesParams(options: {
     workspaces?: SavedObjectsCreateOptions['workspaces'];
-  }) {
+  }): { workspaces: string[] } | {} {
     const currentWorkspaceId = this.currentWorkspaceId;
     let finalWorkspaces;
     if (options.hasOwnProperty('workspaces')) {
@@ -206,7 +206,13 @@ export class SavedObjectsClient {
       finalWorkspaces = [currentWorkspaceId];
     }
 
-    return finalWorkspaces;
+    if (finalWorkspaces) {
+      return {
+        workspaces: finalWorkspaces,
+      };
+    }
+
+    return {};
   }
 
   /**
@@ -278,8 +284,6 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
-    const finalWorkspaces = this.formatWorkspacesParams(options);
-
     const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
       query,
@@ -287,11 +291,7 @@ export class SavedObjectsClient {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
-        ...(finalWorkspaces
-          ? {
-              workspaces: finalWorkspaces,
-            }
-          : {}),
+        ...this.formatWorkspacesParams(options),
       }),
     });
 
@@ -312,15 +312,13 @@ export class SavedObjectsClient {
   ) => {
     const path = this.getPath(['_bulk_create']);
     const query: HttpFetchOptions['query'] = { overwrite: options.overwrite };
-    const finalWorkspaces = this.formatWorkspacesParams(options);
-
-    if (finalWorkspaces) {
-      query.workspaces = finalWorkspaces;
-    }
 
     const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.savedObjectsFetch(path, {
       method: 'POST',
-      query,
+      query: {
+        ...query,
+        ...this.formatWorkspacesParams(options),
+      },
       body: JSON.stringify(objects),
     });
     return request.then((resp) => {
@@ -389,15 +387,9 @@ export class SavedObjectsClient {
       workspaces: 'workspaces',
     };
 
-    const finalWorkspaces = this.formatWorkspacesParams(options);
-
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
       ...options,
-      ...(finalWorkspaces
-        ? {
-            workspaces: finalWorkspaces,
-          }
-        : {}),
+      ...this.formatWorkspacesParams(options),
     });
     const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Partial<
       Record<string, any>
