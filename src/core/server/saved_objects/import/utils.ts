@@ -4,37 +4,34 @@
  */
 
 import { parse, stringify } from 'hjson';
+import { SavedObject } from '../types';
 
-export const appendDataSourceNameToVegaSpec = (spec: string, dataSourceName: string): string => {
+export interface UpdateDataSourceNameInVegaSpecProps {
+  spec: string;
+  newDataSourceName: string;
+  previousDataSourceName?: string;
+}
+
+export const updateDataSourceNameInVegaSpec = (
+  props: UpdateDataSourceNameInVegaSpecProps
+): string => {
+  const { spec } = props;
   let parsedSpec = parseJSONSpec(spec);
   const isJSONString = !!parsedSpec;
   if (!parsedSpec) {
     parsedSpec = parse(spec, { keepWsc: true });
   }
 
-  const data = parsedSpec.data;
+  const dataField = parsedSpec.data;
 
-  if (data instanceof Array) {
-    parsedSpec.data = data.map((urlObject) => {
-      if (
-        urlObject.hasOwnProperty('url') &&
-        urlObject.url.hasOwnProperty('index') &&
-        !urlObject.url.hasOwnProperty('data_source_name')
-      ) {
-        urlObject.url.data_source_name = dataSourceName;
-      }
-      return urlObject;
+  if (dataField instanceof Array) {
+    parsedSpec.data = dataField.map((dataObject) => {
+      return updateDataObject(dataObject, props);
     });
-  } else if (data instanceof Object) {
-    if (
-      data.hasOwnProperty('url') &&
-      data.url.hasOwnProperty('index') &&
-      !data.url.hasOwnProperty('data_source_name')
-    ) {
-      parsedSpec.data.url.data_source_name = dataSourceName;
-    }
+  } else if (dataField instanceof Object) {
+    parsedSpec.data = updateDataObject(dataField, props);
   } else {
-    throw new Error(`"data" field should be a URL object or an array of URL objects`);
+    throw new Error(`"data" field should be an object or an array of objects`);
   }
 
   return isJSONString
@@ -45,7 +42,44 @@ export const appendDataSourceNameToVegaSpec = (spec: string, dataSourceName: str
       });
 };
 
-export const parseJSONSpec = (spec: string) => {
+export const extractVegaSpecFromSavedObject = (savedObject: SavedObject) => {
+  if (isVegaVisualization(savedObject)) {
+    // @ts-expect-error
+    const visStateObject = JSON.parse(savedObject.attributes?.visState);
+    return visStateObject.params.spec;
+  }
+
+  return false;
+};
+
+const isVegaVisualization = (savedObject: SavedObject) => {
+  // @ts-expect-error
+  const visState = savedObject.attributes?.visState;
+  if (!!visState) {
+    const visStateObject = JSON.parse(visState);
+    return !!visStateObject.type && visStateObject.type === 'vega';
+  }
+  return false;
+};
+
+const updateDataObject = (dataObject: any, props: UpdateDataSourceNameInVegaSpecProps) => {
+  const { newDataSourceName, previousDataSourceName } = props;
+  if (dataObject.hasOwnProperty('url') && dataObject.url.hasOwnProperty('index')) {
+    if (
+      dataObject.url.hasOwnProperty('data_source_name') &&
+      previousDataSourceName &&
+      dataObject.url.data_source_name === previousDataSourceName
+    ) {
+      dataObject.url.data_source_name = newDataSourceName;
+    } else if (!dataObject.url.hasOwnProperty('data_source_name') && !previousDataSourceName) {
+      dataObject.url.data_source_name = newDataSourceName;
+    }
+  }
+
+  return dataObject;
+};
+
+const parseJSONSpec = (spec: string) => {
   try {
     const jsonSpec = JSON.parse(spec);
 
