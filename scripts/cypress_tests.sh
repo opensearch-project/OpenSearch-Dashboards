@@ -67,10 +67,12 @@ function check_status() {
 
 # Starts OpenSearch Dashboards and run tests in the cypress folder
 function run_dashboards_cypress_tests() {
+  run_opensearch
+  cd $CWD
   echo "[ OpenSearch Dashboards setup before it starts... ]"
   setup_dashboards >> /dev/null 2>&1 &
   sleep 100
-  cd "$DASHBOARDS_DIR"
+  cd $CWD/"$DASHBOARDS_DIR"
   if [ -x "./bin/opensearch-dashboards" ]; then
     spawn_process_and_save_PID "./bin/opensearch-dashboards &"
   else
@@ -79,11 +81,11 @@ function run_dashboards_cypress_tests() {
   fi
   check_status $DASHBOARDS_URL $DASHBOARDS_MSG
   # Run cypress tests
+  cd "$CWD"/osd
   run_cypress
 }
 
 function run_cypress() {
-  cd "$CWD"/osd
   echo "SPEC found: $SPEC"
   if [ $SECURITY_ENABLED = "true" ]; then
     echo "run security enabled tests"
