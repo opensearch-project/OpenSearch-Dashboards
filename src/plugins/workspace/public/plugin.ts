@@ -3,10 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreSetup, Plugin } from '../../../core/public';
+import type { Subscription } from 'rxjs';
+import { CoreSetup, Plugin, CoreStart } from '../../../core/public';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
+  private coreStart?: CoreStart;
+  private currentWorkspaceSubscription?: Subscription;
+  private _changeSavedObjectCurrentWorkspace() {
+    if (this.coreStart) {
+      return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
+        if (currentWorkspaceId) {
+          this.coreStart?.savedObjects.client.setCurrentWorkspace(currentWorkspaceId);
+        }
+      });
+    }
+  }
   private getWorkspaceIdFromURL(basePath?: string): string | null {
     return getWorkspaceIdFromUrl(window.location.href, basePath);
   }
@@ -19,13 +31,16 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     if (workspaceId) {
       core.workspaces.currentWorkspaceId$.next(workspaceId);
     }
+  }
 
+  public start(core: CoreStart) {
+    this.coreStart = core;
+
+    this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
     return {};
   }
 
-  public start() {
-    return {};
+  public stop() {
+    this.currentWorkspaceSubscription?.unsubscribe();
   }
-
-  public stop() {}
 }

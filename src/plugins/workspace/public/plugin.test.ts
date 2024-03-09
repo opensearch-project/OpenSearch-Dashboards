@@ -11,6 +11,15 @@ describe('Workspace plugin', () => {
     ...coreMock.createSetup(),
     chrome: chromeServiceMock.createSetupContract(),
   });
+
+  it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const coreStart = coreMock.createStart();
+    workspacePlugin.start(coreStart);
+    coreStart.workspaces.currentWorkspaceId$.next('foo');
+    expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
+  });
+
   it('#setup', async () => {
     const setupMock = getSetupMock();
     const workspacePlugin = new WorkspacePlugin();
