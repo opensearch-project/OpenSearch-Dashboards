@@ -117,6 +117,8 @@ export class WorkspaceClient {
 
     if (result?.success) {
       this.workspaces.workspaceList$.next(result.result.workspaces);
+    } else {
+      this.workspaces.workspaceList$.next([]);
     }
   }
 
