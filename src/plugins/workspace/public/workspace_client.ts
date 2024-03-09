@@ -158,7 +158,7 @@ export class WorkspaceClient {
   }
 
   /**
-   * Create an workspace
+   * Create a workspace
    *
    * @param attributes
    * @returns
