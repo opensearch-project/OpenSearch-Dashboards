@@ -4,10 +4,10 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { CoreSetup, Plugin, CoreStart } from '../../../core/public';
+import { Plugin, CoreStart, CoreSetup } from '../../../core/public';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 
-export class WorkspacePlugin implements Plugin<{}, {}> {
+export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private _changeSavedObjectCurrentWorkspace() {

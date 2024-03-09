@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { chromeServiceMock, coreMock } from '../../../core/public/mocks';
+import { coreMock, chromeServiceMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
 
 describe('Workspace plugin', () => {
