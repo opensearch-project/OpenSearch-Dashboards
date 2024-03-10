@@ -19,7 +19,7 @@ const testWorkspace: WorkspaceAttribute = {
   description: 'test_workspace_description',
 };
 
-describe('workspace service', () => {
+describe('workspace service api integration test', () => {
   let root: ReturnType<typeof osdTestServer.createRoot>;
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
   let osd: osdTestServer.TestOpenSearchDashboardsUtils;
