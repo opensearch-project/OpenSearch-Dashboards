@@ -7,7 +7,7 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiComboBox } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { getDataSources } from '../utils';
+import { getDataSourcesWithFields } from '../utils';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {
@@ -23,6 +23,11 @@ export interface DataSourceSelectorProps {
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  defaultOption?: DataSourceOption[];
+  placeholderText?: string;
+  removePrepend?: boolean;
+  filterFn?: (dataSource: any) => boolean;
+  compressed?: boolean;
 }
 
 interface DataSourceSelectorState {
@@ -33,6 +38,7 @@ interface DataSourceSelectorState {
 export interface DataSourceOption {
   label: string;
   id: string;
+  checked?: string;
 }
 
 export class DataSourceSelector extends React.Component<
@@ -45,8 +51,16 @@ export class DataSourceSelector extends React.Component<
     super(props);
 
     this.state = {
-      dataSourceOptions: this.props.hideLocalCluster ? [] : [LocalCluster],
-      selectedOption: this.props.hideLocalCluster ? [] : [LocalCluster],
+      dataSourceOptions: this.props.defaultOption
+        ? this.props.defaultOption
+        : this.props.hideLocalCluster
+        ? []
+        : [LocalCluster],
+      selectedOption: this.props.defaultOption
+        ? this.props.defaultOption
+        : this.props.hideLocalCluster
+        ? []
+        : [LocalCluster],
     };
   }
 
@@ -56,12 +70,20 @@ export class DataSourceSelector extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
-    getDataSources(this.props.savedObjectsClient)
+    getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
-          const dataSourceOptions = fetchedDataSources.map((dataSource) => ({
+          let filteredDataSources = [];
+          if (this.props.filterFn) {
+            filteredDataSources = fetchedDataSources.filter((ds) => this.props.filterFn!(ds));
+          }
+
+          if (filteredDataSources.length === 0) {
+            filteredDataSources = fetchedDataSources;
+          }
+          const dataSourceOptions = filteredDataSources.map((dataSource) => ({
             id: dataSource.id,
-            label: dataSource.title,
+            label: dataSource.attributes?.title || '',
           }));
 
           if (!this.props.hideLocalCluster) {
@@ -93,22 +115,38 @@ export class DataSourceSelector extends React.Component<
   }
 
   render() {
+    const placeholderText =
+      this.props.placeholderText === undefined
+        ? 'Select a data source'
+        : this.props.placeholderText;
     return (
       <EuiComboBox
-        aria-label={i18n.translate('dataSourceSelectorComboBoxAriaLabel', {
-          defaultMessage: 'Select a data source',
-        })}
-        placeholder={i18n.translate('dataSourceSelectorComboBoxPlaceholder', {
-          defaultMessage: 'Select a data source',
-        })}
+        aria-label={
+          placeholderText
+            ? i18n.translate('dataSourceSelectorComboBoxAriaLabel', {
+                defaultMessage: placeholderText,
+              })
+            : 'dataSourceSelectorCombobox'
+        }
+        placeholder={
+          placeholderText
+            ? i18n.translate('dataSourceSelectorComboBoxPlaceholder', {
+                defaultMessage: placeholderText,
+              })
+            : ''
+        }
         singleSelection={{ asPlainText: true }}
         options={this.state.dataSourceOptions}
         selectedOptions={this.state.selectedOption}
         onChange={(e) => this.onChange(e)}
-        prepend={i18n.translate('dataSourceSelectorComboBoxPrepend', {
-          defaultMessage: 'Data source',
-        })}
-        compressed
+        prepend={
+          this.props.removePrepend
+            ? undefined
+            : i18n.translate('dataSourceSelectorComboBoxPrepend', {
+                defaultMessage: 'Data source',
+              })
+        }
+        compressed={this.props.compressed || false}
         isDisabled={this.props.disabled}
         fullWidth={this.props.fullWidth || false}
         data-test-subj={'dataSourceSelectorComboBox'}

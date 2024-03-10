@@ -11,6 +11,7 @@ import {
   mockManagementPlugin,
   existingDatasourceNamesList,
   mockDataSourceAttributesWithNoAuth,
+  mockDataSourceAttributesWithRegisteredAuth,
 } from '../../../../mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../../opensearch_dashboards_react/public';
 import { EditDataSourceForm } from './edit_data_source_form';
@@ -344,9 +345,25 @@ describe('Datasource Management: Edit Datasource Form', () => {
 
 describe('With Registered Authentication', () => {
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-  const mockCredentialForm = jest.fn();
+  const updateInputFieldAndBlur = (
+    comp: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>,
+    fieldName: string,
+    updatedValue: string,
+    isTestSubj?: boolean
+  ) => {
+    const field = isTestSubj ? comp.find(fieldName) : comp.find({ name: fieldName });
+    act(() => {
+      field.last().simulate('change', { target: { value: updatedValue } });
+    });
+    comp.update();
+    act(() => {
+      field.last().simulate('focus').simulate('blur');
+    });
+    comp.update();
+  };
 
   test('should call registered crendential form', () => {
+    const mockedCredentialForm = jest.fn();
     const authTypeToBeTested = 'Some Auth Type';
     const authMethodToBeTest = {
       name: authTypeToBeTested,
@@ -354,7 +371,7 @@ describe('With Registered Authentication', () => {
         value: authTypeToBeTested,
         inputDisplay: 'some input',
       },
-      credentialForm: mockCredentialForm,
+      credentialForm: mockedCredentialForm,
     } as AuthenticationMethod;
 
     const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
@@ -380,6 +397,67 @@ describe('With Registered Authentication', () => {
       }
     );
 
-    expect(mockCredentialForm).toHaveBeenCalled();
+    expect(mockedCredentialForm).toHaveBeenCalled();
+  });
+
+  test('should update the form with registered auth type on click save changes', async () => {
+    const mockedCredentialForm = jest.fn();
+    const mockedSubmitHandler = jest.fn();
+    const authMethodToBeTest = {
+      name: 'Some Auth Type',
+      credentialSourceOption: {
+        value: 'Some Auth Type',
+        inputDisplay: 'some input',
+      },
+      credentialForm: mockedCredentialForm,
+      crendentialFormField: {},
+    } as AuthenticationMethod;
+
+    const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+    mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+    mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTest);
+
+    component = mount(
+      wrapWithIntl(
+        <EditDataSourceForm
+          existingDataSource={mockDataSourceAttributesWithRegisteredAuth}
+          existingDatasourceNamesList={existingDatasourceNamesList}
+          onDeleteDataSource={jest.fn()}
+          handleSubmit={mockedSubmitHandler}
+          handleTestConnection={jest.fn()}
+          displayToastMessage={jest.fn()}
+        />
+      ),
+      {
+        wrappingComponent: OpenSearchDashboardsContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
+    );
+
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
+        expect(
+          component.find(descriptionFormRowIdentifier).first().props().isInvalid
+        ).toBeUndefined();
+        resolve();
+      }, 100)
+    );
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        /* Updated description*/
+        updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');
+        expect(
+          component.find(descriptionFormRowIdentifier).first().props().isInvalid
+        ).toBeUndefined();
+
+        expect(component.find('[data-test-subj="datasource-edit-saveButton"]').exists()).toBe(true);
+        component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
+        expect(mockedSubmitHandler).toHaveBeenCalled();
+        resolve();
+      }, 100)
+    );
   });
 });

@@ -36,6 +36,19 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
     );
 }
 
+export async function getDataSourcesWithFields(
+  savedObjectsClient: SavedObjectsClientContract,
+  fields: string[]
+) {
+  const response = await savedObjectsClient.find({
+    type: 'data-source',
+    fields,
+    perPage: 10000,
+  });
+
+  return response?.savedObjects;
+}
+
 export async function getDataSourceById(
   id: string,
   savedObjectsClient: SavedObjectsClientContract
@@ -129,4 +142,20 @@ export const getDefaultAuthMethod = (
     authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
 
   return initialSelectedAuthMethod;
+};
+
+export const extractRegisteredAuthTypeCredentials = (
+  currentCredentialState: { [key: string]: string },
+  authType: string,
+  authenticationMethodRegistery: AuthenticationMethodRegistery
+) => {
+  const registeredCredentials = {} as { [key: string]: string };
+  const registeredCredentialField =
+    authenticationMethodRegistery.getAuthenticationMethod(authType)?.crendentialFormField ?? {};
+
+  Object.keys(registeredCredentialField).forEach((credentialFiled) => {
+    registeredCredentials[credentialFiled] = currentCredentialState[credentialFiled] ?? '';
+  });
+
+  return registeredCredentials;
 };

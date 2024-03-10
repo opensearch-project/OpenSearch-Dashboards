@@ -6,7 +6,7 @@
 import React from 'react';
 import { throwError } from 'rxjs';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { AuthType } from './types';
+import { AuthType, DataSourceAttributes } from './types';
 import { coreMock } from '../../../core/public/mocks';
 import {
   DataSourceManagementPlugin,
@@ -108,6 +108,43 @@ export const getDataSourcesResponse = {
   ],
 };
 
+export const getDataSourcesWithFieldsResponse = {
+  savedObjects: [
+    {
+      id: 'test1',
+      type: 'data-source',
+      attributes: {
+        title: 'test1',
+        auth: {
+          type: AuthType.NoAuth,
+        },
+      },
+    },
+    {
+      id: 'test2',
+      type: 'data-source',
+      description: 'test datasource2',
+      attributes: {
+        title: 'test3',
+        auth: {
+          type: AuthType.UsernamePasswordType,
+        },
+      },
+    },
+    {
+      id: 'test3',
+      type: 'data-source',
+      description: 'test datasource3',
+      attributes: {
+        title: 'test3',
+        auth: {
+          type: AuthType.SigV4,
+        },
+      },
+    },
+  ],
+};
+
 export const existingDatasourceNamesList = [
   'test123',
   'testTest20',
@@ -167,6 +204,18 @@ export const mockDataSourceAttributesWithNoAuth = {
     credentials: undefined,
   },
 };
+
+export const mockDataSourceAttributesWithRegisteredAuth = {
+  id: 'testRegisteredAuth',
+  title: 'create-test-ds-registered-auth',
+  description: 'jest testing',
+  endpoint: 'https://test.com',
+  auth: {
+    type: 'Some Auth Type',
+    credentials: {} as { [key: string]: string },
+  },
+} as DataSourceAttributes;
+
 export const getDataSourceByIdWithCredential = {
   attributes: {
     id: 'alpha-test',
