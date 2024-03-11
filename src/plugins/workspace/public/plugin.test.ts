@@ -19,8 +19,107 @@ describe('Workspace plugin', () => {
   it('#setup', async () => {
     const setupMock = getSetupMock();
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
+    const savedObjectManagementSetupMock = savedObjectsManagementPluginMock.createSetupContract();
+    await workspacePlugin.setup(setupMock, {
+      savedObjectsManagement: savedObjectManagementSetupMock,
+    });
+    expect(setupMock.application.register).toBeCalledTimes(2);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
+    expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
+    expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
+  });
+
+  it('#setup when workspace id is in url and enterWorkspace return error', async () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
+          },
+        } as any)
+    );
+    workspaceClientMock.enterWorkspace.mockResolvedValue({
+      success: false,
+      error: 'error',
+    });
+    const setupMock = coreMock.createSetup();
+    const applicationStartMock = applicationServiceMock.createStartContract();
+    const chromeStartMock = chromeServiceMock.createStartContract();
+    setupMock.getStartServices.mockImplementation(() => {
+      return Promise.resolve([
+        {
+          application: applicationStartMock,
+          chrome: chromeStartMock,
+        },
+        {},
+        {},
+      ]) as any;
+    });
+
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {
+      savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+    });
+    expect(setupMock.application.register).toBeCalledTimes(2);
+    expect(WorkspaceClientMock).toBeCalledTimes(1);
+    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
+    expect(setupMock.getStartServices).toBeCalledTimes(1);
+    await waitFor(
+      () => {
+        expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
+          replace: true,
+          state: {
+            error: 'error',
+          },
+        });
+      },
+      {
+        container: document.body,
+      }
+    );
+    windowSpy.mockRestore();
+  });
+
+  it('#setup when workspace id is in url and enterWorkspace return success', async () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
+          },
+        } as any)
+    );
+    workspaceClientMock.enterWorkspace.mockResolvedValue({
+      success: true,
+      error: 'error',
+    });
+    const setupMock = coreMock.createSetup();
+    const applicationStartMock = applicationServiceMock.createStartContract();
+    let currentAppIdSubscriber: Subscriber<string> | undefined;
+    setupMock.getStartServices.mockImplementation(() => {
+      return Promise.resolve([
+        {
+          application: {
+            ...applicationStartMock,
+            currentAppId$: new Observable((subscriber) => {
+              currentAppIdSubscriber = subscriber;
+            }),
+          },
+        },
+        {},
+        {},
+      ]) as any;
+    });
+
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {
+      savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+    });
+    currentAppIdSubscriber?.next(WORKSPACE_FATAL_ERROR_APP_ID);
+    expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_OVERVIEW_APP_ID);
+    windowSpy.mockRestore();
   });
 
   it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', () => {
