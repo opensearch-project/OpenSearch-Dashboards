@@ -26,6 +26,7 @@ import {
   getCredential,
   getDataSource,
   generateCacheKey,
+  getSigV4Credentials,
 } from './configure_client_utils';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
 import { authRegistryCredentialProvider } from '../util/credential_provider';
@@ -199,11 +200,12 @@ const getBasicAuthClient = (
 };
 
 const getAWSClient = (credential: SigV4Content, clientOptions: ClientOptions): Client => {
-  const { accessKey, secretKey, region, service } = credential;
+  const { accessKey, secretKey, region, service, sessionToken } = credential;
+  const sigv4Credentials = getSigV4Credentials(accessKey, secretKey, sessionToken);
 
   const credentialProvider = (): Promise<Credentials> => {
     return new Promise((resolve) => {
-      resolve(new Credentials({ accessKeyId: accessKey, secretAccessKey: secretKey }));
+      resolve(sigv4Credentials);
     });
   };
 

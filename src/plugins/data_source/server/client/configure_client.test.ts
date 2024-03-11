@@ -17,6 +17,7 @@ import {
   ClientMock,
   parseClientOptionsMock,
   authRegistryCredentialProviderMock,
+  CredentialsMock,
 } from './configure_client.test.mocks';
 import { OpenSearchClientPoolSetup } from './client_pool';
 import { configureClient } from './configure_client';
@@ -47,6 +48,17 @@ describe('configureClient', () => {
   let sigV4AuthContent: SigV4Content;
   let customApiSchemaRegistry: CustomApiSchemaRegistry;
   let authenticationMethodRegistery: jest.Mocked<IAuthenticationMethodRegistery>;
+
+  const customAuthContent = {
+    region: 'us-east-1',
+    roleARN: 'test-role',
+  };
+
+  const authMethod: AuthenticationMethod = {
+    name: 'typeA',
+    authType: AuthType.SigV4,
+    credentialProvider: jest.fn(),
+  };
 
   beforeEach(() => {
     dsClient = opensearchClientMock.createInternalClient();
@@ -110,10 +122,12 @@ describe('configureClient', () => {
     };
 
     ClientMock.mockImplementation(() => dsClient);
+    authenticationMethodRegistery.getAuthenticationMethod.mockImplementation(() => authMethod);
   });
 
   afterEach(() => {
     ClientMock.mockReset();
+    CredentialsMock.mockReset();
   });
 
   test('configure client with auth.type == no_auth, will call new Client() to create client', async () => {
@@ -251,12 +265,7 @@ describe('configureClient', () => {
     expect(decodeAndDecryptSpy).toHaveBeenCalledTimes(1);
   });
 
-  test('configureClient should retunrn client from authentication registery if method present in registry', async () => {
-    const name = 'typeA';
-    const customAuthContent = {
-      region: 'us-east-1',
-      roleARN: 'test-role',
-    };
+  test('configureClient should return client if authentication method from registry provides credentials', async () => {
     savedObjectsMock.get.mockReset().mockResolvedValueOnce({
       id: DATA_SOURCE_ID,
       type: DATA_SOURCE_SAVED_OBJECT_TYPE,
@@ -269,12 +278,6 @@ describe('configureClient', () => {
       },
       references: [],
     });
-    const authMethod: AuthenticationMethod = {
-      name,
-      authType: AuthType.SigV4,
-      credentialProvider: jest.fn(),
-    };
-    authenticationMethodRegistery.getAuthenticationMethod.mockImplementation(() => authMethod);
 
     authRegistryCredentialProviderMock.mockReturnValue({
       credential: sigV4AuthContent,
@@ -291,5 +294,46 @@ describe('configureClient', () => {
     expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(CredentialsMock).toHaveBeenCalledTimes(1);
+    expect(CredentialsMock).toBeCalledWith({
+      accessKeyId: sigV4AuthContent.accessKey,
+      secretAccessKey: sigV4AuthContent.secretKey,
+    });
+  });
+
+  test('When credential provider from auth registry returns session token, credentials should contains session token', async () => {
+    const mockCredentials = { ...sigV4AuthContent, sessionToken: 'sessionToken' };
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: customAuthContent,
+        },
+      },
+      references: [],
+    });
+
+    authRegistryCredentialProviderMock.mockReturnValue({
+      credential: mockCredentials,
+      type: AuthType.SigV4,
+    });
+
+    await configureClient(
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      clientPoolSetup,
+      config,
+      logger
+    );
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(CredentialsMock).toHaveBeenCalledTimes(1);
+    expect(CredentialsMock).toBeCalledWith({
+      accessKeyId: mockCredentials.accessKey,
+      secretAccessKey: mockCredentials.secretKey,
+      sessionToken: mockCredentials.sessionToken,
+    });
   });
 });
