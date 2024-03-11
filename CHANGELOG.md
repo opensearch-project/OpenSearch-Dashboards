@@ -30,6 +30,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Add Vega support to MDS by specifying a data source name in the Vega spec ([#5975](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5975))
 - [Workspace] Consume workspace id in saved object client ([#6014](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6014))
 
+- [Workspace] Add delete saved objects by workspace functionality([#6013](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6013))
+
 ### 🐛 Bug Fixes
 
 - [BUG][Discover] Allow saved sort from search embeddable to load in Dashboard ([#5934](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5934))
