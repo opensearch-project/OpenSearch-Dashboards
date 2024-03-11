@@ -38,4 +38,9 @@ export {
 } from './context';
 export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
 export { getWorkspaceIdFromUrl, formatUrlWithWorkspaceId, cleanWorkspaceId } from './workspace';
-export { WORKSPACE_PATH_PREFIX, PUBLIC_WORKSPACE_ID, WORKSPACE_TYPE } from './constants';
+export {
+  WORKSPACE_PATH_PREFIX,
+  PUBLIC_WORKSPACE_ID,
+  WORKSPACE_TYPE,
+  DEFAULT_WORKSPACE_ID,
+} from './constants';

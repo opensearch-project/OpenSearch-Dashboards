@@ -260,6 +260,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
+      availableWorkspaces={Array []}
       basePath={
         BasePath {
           "basePath": "",
@@ -279,6 +280,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
+      currentWorkspaceId=""
       filters={
         Array [
           Object {

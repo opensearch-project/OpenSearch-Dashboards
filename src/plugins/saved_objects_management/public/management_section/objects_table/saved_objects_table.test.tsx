@@ -40,6 +40,7 @@ import {
 
 import React from 'react';
 import { Query } from '@elastic/eui';
+import { waitFor } from '@testing-library/dom';
 import { ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import {
@@ -62,6 +63,9 @@ import {
 } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
+import { WorkspaceObject } from 'opensearch-dashboards/public';
+import { DEFAULT_WORKSPACE_ID } from '../../../../../core/public';
+import { TableProps } from './components/table';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
 
@@ -643,6 +647,196 @@ describe('SavedObjectsTable', () => {
         { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
+    });
+  });
+
+  describe('workspace filter', () => {
+    it('show workspace filter when workspace turn on and not in any workspace', async () => {
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('');
+      workspaces.currentWorkspace$.next(null);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const props = component.find('Table').props() as TableProps;
+      const filters = props.filters;
+      expect(filters.length).toBe(2);
+      expect(filters[0].field).toBe('type');
+      expect(filters[1].field).toBe('workspaces');
+      expect(filters[1].options.length).toBe(3);
+      expect(filters[1].options[0].value).toBe('foo');
+      expect(filters[1].options[1].value).toBe('bar');
+      expect(filters[1].options[2].value).toBe(DEFAULT_WORKSPACE_ID);
+    });
+
+    it('show workspace filter when workspace turn on and enter a workspace', async () => {
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('workspace1');
+      workspaces.currentWorkspace$.next(workspaceList[0]);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const props = component.find('Table').props() as TableProps;
+      const filters = props.filters;
+      const wsFilter = filters.filter((f) => f.field === 'workspaces');
+      expect(wsFilter.length).toBe(1);
+      expect(wsFilter[0].options.length).toBe(1);
+      expect(wsFilter[0].options[0].value).toBe('foo');
+    });
+
+    it('workspace exists in find options when workspace on', async () => {
+      findObjectsMock.mockClear();
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('workspace1');
+      workspaces.currentWorkspace$.next(workspaceList[0]);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await waitFor(() => {
+        expect(findObjectsMock).toBeCalledWith(
+          http,
+          expect.objectContaining({
+            workspaces: expect.arrayContaining(['workspace1']),
+          })
+        );
+      });
+    });
+
+    it('workspace exists in find options when workspace on and not in any workspace', async () => {
+      findObjectsMock.mockClear();
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await waitFor(() => {
+        expect(findObjectsMock).toBeCalledWith(
+          http,
+          expect.objectContaining({
+            workspaces: expect.arrayContaining(['workspace1', 'default']),
+            workspacesSearchOperator: expect.stringMatching('OR'),
+          })
+        );
+      });
     });
   });
 });

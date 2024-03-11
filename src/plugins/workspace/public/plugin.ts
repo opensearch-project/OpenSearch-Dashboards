@@ -4,6 +4,7 @@
  */
 
 import type { Subscription } from 'rxjs';
+import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
 import { featureMatchesConfig } from './utils';
 import {
   AppMountParameters,
@@ -19,9 +20,14 @@ import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { renderWorkspaceMenu } from './render_workspace_menu';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
+import { getWorkspaceColumn } from './components/workspace_column';
 import { NavLinkWrapper } from '../../../core/public/chrome/nav_links/nav_link';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
+
+interface WorkspacePluginSetupDeps {
+  savedObjectsManagement?: SavedObjectsManagementPluginSetup;
+}
 
 export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
@@ -88,7 +94,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     }
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
     /**
@@ -160,6 +166,11 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       }
       return renderWorkspaceMenu(this.coreStart);
     });
+
+    /**
+     * register workspace column into saved objects table
+     */
+    savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
     return {};
   }
