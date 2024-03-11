@@ -7,6 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, ScopedHistory } from '../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
+import { WorkspaceListApp } from './components/workspace_list_app';
 import { WorkspaceFatalError } from './components/workspace_fatal_error';
 import { Services } from './types';
 
@@ -16,6 +17,19 @@ export const renderFatalErrorApp = (params: AppMountParameters, services: Servic
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <WorkspaceFatalError error={history.location.state.error} />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};
+
+export const renderListApp = ({ element }: AppMountParameters, services: Services) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceListApp />
     </OpenSearchDashboardsContextProvider>,
     element
   );

@@ -15,7 +15,11 @@ import {
   Plugin,
   WorkspaceObject,
 } from '../../../core/public';
-import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import {
+  WORKSPACE_FATAL_ERROR_APP_ID,
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_LIST_APP_ID,
+} from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { renderWorkspaceMenu } from './render_workspace_menu';
 import { Services } from './types';
@@ -145,6 +149,17 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
 
       return renderApp(params, services);
     };
+
+    // list
+    core.application.register({
+      id: WORKSPACE_LIST_APP_ID,
+      title: '',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderListApp } = await import('./application');
+        return mountWorkspaceApp(params, renderListApp);
+      },
+    });
 
     // workspace fatal error
     core.application.register({
