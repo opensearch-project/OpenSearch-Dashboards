@@ -31,6 +31,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Consume workspace id in saved object client ([#6014](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6014))
 
 - [Workspace] Add delete saved objects by workspace functionality([#6013](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6013))
+- [Workspace] Import sample data to current workspace([#6105](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6105))
 
 ### 🐛 Bug Fixes
 
