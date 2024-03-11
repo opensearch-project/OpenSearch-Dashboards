@@ -25,16 +25,16 @@ describe('#getWorkspaceIdFromUrl', () => {
 });
 
 describe('#formatUrlWithWorkspaceId', () => {
-  const basePathWithoutWorkspaceBasePath = httpServiceMock.createSetupContract().basePath;
+  const basePathWithoutClientBasePath = httpServiceMock.createSetupContract().basePath;
   it('return url with workspace prefix when format with a id provided', () => {
     expect(
-      formatUrlWithWorkspaceId('/app/dashboard', 'foo', basePathWithoutWorkspaceBasePath)
+      formatUrlWithWorkspaceId('/app/dashboard', 'foo', basePathWithoutClientBasePath)
     ).toEqual('http://localhost/w/foo/app/dashboard');
   });
 
   it('return url without workspace prefix when format without a id', () => {
     expect(
-      formatUrlWithWorkspaceId('/w/foo/app/dashboard', '', basePathWithoutWorkspaceBasePath)
+      formatUrlWithWorkspaceId('/w/foo/app/dashboard', '', basePathWithoutClientBasePath)
     ).toEqual('http://localhost/app/dashboard');
   });
 });

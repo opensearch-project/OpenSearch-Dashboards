@@ -318,7 +318,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "",
-          "workspaceBasePath": "",
+          "clientBasePath": "",
         },
         "delete": [MockFunction],
         "fetch": [MockFunction],

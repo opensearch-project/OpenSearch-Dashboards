@@ -111,7 +111,7 @@ describe('BasePath', () => {
     });
   });
 
-  describe('workspaceBasePath', () => {
+  describe('clientBasePath', () => {
     it('get path with workspace', () => {
       expect(new BasePath('/foo/bar', '/foo/bar', '/workspace').get()).toEqual(
         '/foo/bar/workspace'

@@ -35,11 +35,11 @@ export class BasePath {
   constructor(
     private readonly basePath: string = '',
     public readonly serverBasePath: string = basePath,
-    private readonly workspaceBasePath: string = ''
+    private readonly clientBasePath: string = ''
   ) {}
 
   public get = () => {
-    return `${this.basePath}${this.workspaceBasePath}`;
+    return `${this.basePath}${this.clientBasePath}`;
   };
 
   public getBasePath = () => {
