@@ -100,6 +100,32 @@ describe(`Test connection ${URL}`, () => {
     },
   };
 
+  const dataSourceAttrForRegisteredAuthWithCredentials = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: 'Some Registered Type',
+      credentials: {
+        firstField: 'some value',
+        secondField: 'some value',
+      },
+    },
+  };
+
+  const dataSourceAttrForRegisteredAuthWithEmptyCredentials = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: 'Some Registered Type',
+      credentials: {},
+    },
+  };
+
+  const dataSourceAttrForRegisteredAuthWithoutCredentials = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: 'Some Registered Type',
+    },
+  };
+
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     customApiSchemaRegistryPromise = Promise.resolve(customApiSchemaRegistry);
@@ -211,6 +237,39 @@ describe(`Test connection ${URL}`, () => {
       .send({
         id: 'testId',
         dataSourceAttr: dataSourceAttrForSigV4Auth,
+      })
+      .expect(200);
+    expect(result.body).toEqual({ success: true });
+  });
+
+  it('credential with registered auth type should success', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrForRegisteredAuthWithCredentials,
+      })
+      .expect(200);
+    expect(result.body).toEqual({ success: true });
+  });
+
+  it('empty credential with registered auth type should success', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrForRegisteredAuthWithEmptyCredentials,
+      })
+      .expect(200);
+    expect(result.body).toEqual({ success: true });
+  });
+
+  it('no credential with registered auth type should success', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrForRegisteredAuthWithoutCredentials,
       })
       .expect(200);
     expect(result.body).toEqual({ success: true });
