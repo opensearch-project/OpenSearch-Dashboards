@@ -325,6 +325,7 @@ export {
   Principals,
   PrincipalType,
   Permissions,
+  SavedObjectsDeleteByWorkspaceOptions,
 } from './saved_objects';
 
 export {
