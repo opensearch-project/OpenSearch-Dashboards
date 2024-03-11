@@ -33,7 +33,7 @@ describe('workspace service api integration test', () => {
           },
           savedObjects: {
             permission: {
-              enabled: false,
+              enabled: true,
             },
           },
           migrations: { skip: false },
@@ -156,11 +156,10 @@ describe('workspace service api integration test', () => {
         .post(root, `/api/workspaces`)
         .send({
           attributes: omitId(testWorkspace),
-          permissions: [{ type: 'user', userId: 'foo', modes: ['read'] }],
         })
         .expect(200);
 
-      await osdTestServer.request
+      const updateResult = await osdTestServer.request
         .put(root, `/api/workspaces/${result.body.result.id}`)
         .send({
           attributes: {
@@ -169,6 +168,7 @@ describe('workspace service api integration test', () => {
           permissions: [{ type: 'user', userId: 'foo', modes: ['write'] }],
         })
         .expect(200);
+      expect(updateResult.body.result).toBe(true);
 
       expect(
         (
