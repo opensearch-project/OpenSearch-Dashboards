@@ -126,6 +126,32 @@ describe(`Test connection ${URL}`, () => {
     },
   };
 
+  const dataSourceAttrForRegisteredAuthWithNoAuthType = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.NoAuth,
+      credentials: {
+        field: 'some value',
+      },
+    },
+  };
+
+  const dataSourceAttrForRegisteredAuthWithBasicAuthType = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.UsernamePasswordType,
+      credentials: {},
+    },
+  };
+
+  const dataSourceAttrForRegisteredAuthWithSigV4AuthType = {
+    endpoint: 'https://test.com',
+    auth: {
+      type: AuthType.SigV4,
+      credentials: {},
+    },
+  };
+
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     customApiSchemaRegistryPromise = Promise.resolve(customApiSchemaRegistry);
@@ -229,6 +255,48 @@ describe(`Test connection ${URL}`, () => {
       })
       .expect(400);
     expect(result.body.error).toEqual('Bad Request');
+  });
+
+  it('registered Auth with NoAuthType should fail', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrForRegisteredAuthWithNoAuthType,
+      })
+      .expect(400);
+    expect(result.body.error).toEqual('Bad Request');
+    expect(result.body.message).toContain(
+      `Must not be no_auth or username_password or sigv4 for registered auth types`
+    );
+  });
+
+  it('registered Auth with Basic AuthType should fail', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrForRegisteredAuthWithBasicAuthType,
+      })
+      .expect(400);
+    expect(result.body.error).toEqual('Bad Request');
+    expect(result.body.message).toContain(
+      `Must not be no_auth or username_password or sigv4 for registered auth types`
+    );
+  });
+
+  it('registered Auth with sigV4 AuthType should fail', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: dataSourceAttrForRegisteredAuthWithSigV4AuthType,
+      })
+      .expect(400);
+    expect(result.body.error).toEqual('Bad Request');
+    expect(result.body.message).toContain(
+      `Must not be no_auth or username_password or sigv4 for registered auth types`
+    );
   });
 
   it('full credential with sigV4 auth should success', async () => {
