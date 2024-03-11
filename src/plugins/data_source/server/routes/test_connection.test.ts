@@ -32,7 +32,7 @@ describe(`Test connection ${URL}`, () => {
   let dataSourceServiceSetupMock: DataSourceServiceSetup;
   let authRegistryPromiseMock: Promise<IAuthenticationMethodRegistery>;
   const dataSourceAttr = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.UsernamePasswordType,
       credentials: {
@@ -43,7 +43,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrMissingCredentialForNoAuth = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.NoAuth,
       credentials: {},
@@ -51,7 +51,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrMissingCredentialForBasicAuth = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.UsernamePasswordType,
       credentials: {},
@@ -59,7 +59,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrMissingCredentialForSigV4Auth = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.SigV4,
       credentials: {},
@@ -67,7 +67,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrPartialCredentialForSigV4Auth = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.SigV4,
       credentials: {
@@ -78,7 +78,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrPartialCredentialForBasicAuth = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.UsernamePasswordType,
       credentials: {
@@ -88,7 +88,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrForSigV4Auth = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.SigV4,
       credentials: {
@@ -101,7 +101,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrForRegisteredAuthWithCredentials = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: 'Some Registered Type',
       credentials: {
@@ -112,7 +112,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrForRegisteredAuthWithEmptyCredentials = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: 'Some Registered Type',
       credentials: {},
@@ -120,14 +120,14 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrForRegisteredAuthWithoutCredentials = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: 'Some Registered Type',
     },
   };
 
   const dataSourceAttrForRegisteredAuthWithNoAuthType = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.NoAuth,
       credentials: {
@@ -137,7 +137,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrForRegisteredAuthWithBasicAuthType = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.UsernamePasswordType,
       credentials: {},
@@ -145,7 +145,7 @@ describe(`Test connection ${URL}`, () => {
   };
 
   const dataSourceAttrForRegisteredAuthWithSigV4AuthType = {
-    endpoint: 'https://sometesturl.com',
+    endpoint: 'https://test.com/',
     auth: {
       type: AuthType.SigV4,
       credentials: {},
