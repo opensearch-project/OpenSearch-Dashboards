@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import {
   HttpFetchError,
   HttpFetchOptions,
@@ -145,12 +146,14 @@ export class WorkspaceClient {
   /**
    * A bypass layer to get current workspace id
    */
-  public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
+  public getCurrentWorkspaceId(): IResponse<WorkspaceAttribute['id']> {
     const currentWorkspaceId = this.workspaces.currentWorkspaceId$.getValue();
     if (!currentWorkspaceId) {
       return {
         success: false,
-        error: 'You are not in any workspace yet.',
+        error: i18n.translate('workspace.error.notInWorkspace', {
+          defaultMessage: 'You are not in any workspace yet.',
+        }),
       };
     }
 
@@ -164,7 +167,7 @@ export class WorkspaceClient {
    * Do a find in the latest workspace list with current workspace id
    */
   public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttribute>> {
-    const currentWorkspaceIdResp = await this.getCurrentWorkspaceId();
+    const currentWorkspaceIdResp = this.getCurrentWorkspaceId();
     if (currentWorkspaceIdResp.success) {
       const currentWorkspaceResp = await this.get(currentWorkspaceIdResp.result);
       return currentWorkspaceResp;

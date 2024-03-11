@@ -53,7 +53,7 @@ describe('#WorkspaceClient', () => {
       success: true,
     });
     await workspaceClient.enterWorkspace('foo');
-    expect(await workspaceClient.getCurrentWorkspaceId()).toEqual({
+    expect(workspaceClient.getCurrentWorkspaceId()).toEqual({
       success: true,
       result: 'foo',
     });
