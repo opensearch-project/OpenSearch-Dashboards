@@ -6,6 +6,6 @@
   "requiredPlugins": [
     "savedObjects"
   ],
-  "optionalPlugins": [],
+  "optionalPlugins": ["savedObjectsManagement"],
   "requiredBundles": ["opensearchDashboardsReact"]
 }

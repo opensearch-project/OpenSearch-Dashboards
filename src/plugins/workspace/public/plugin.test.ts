@@ -9,6 +9,7 @@ import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.moc
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 
 describe('Workspace plugin', () => {
   const getSetupMock = () => ({
@@ -21,9 +22,13 @@ describe('Workspace plugin', () => {
   });
   it('#setup', async () => {
     const setupMock = getSetupMock();
+    const savedObjectManagementSetupMock = savedObjectsManagementPluginMock.createSetupContract();
     const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, {
+      savedObjectsManagement: savedObjectManagementSetupMock,
+    });
     expect(WorkspaceClientMock).toBeCalledTimes(1);
+    expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
   });
 
   it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', async () => {
