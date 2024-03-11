@@ -121,7 +121,7 @@ export const sigV4CredentialField = {
   region: '',
   accessKey: '',
   secretKey: '',
-  service: '',
+  service: SigV4ServiceName.OpenSearch,
 };
 
 export const sigV4AuthMethod = {
@@ -141,8 +141,12 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   description?: string;
   endpoint?: string;
   auth: {
-    type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content | undefined;
+    type: AuthType | string;
+    credentials:
+      | UsernamePasswordTypedContent
+      | SigV4Content
+      | { [key: string]: string }
+      | undefined;
   };
 }
 

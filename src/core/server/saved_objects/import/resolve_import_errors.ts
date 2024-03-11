@@ -131,6 +131,7 @@ export async function resolveSavedObjectsImportErrors({
     retries,
     createNewCopies,
     dataSourceId,
+    workspaces,
   };
   const checkConflictsResult = await checkConflicts(checkConflictsParams);
   errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];

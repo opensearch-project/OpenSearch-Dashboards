@@ -7,6 +7,7 @@ import {
   createSingleDataSource,
   deleteDataSourceById,
   deleteMultipleDataSources,
+  extractRegisteredAuthTypeCredentials,
   getDataSourceById,
   getDataSources,
   getDefaultAuthMethod,
@@ -31,7 +32,8 @@ import {
   usernamePasswordAuthMethod,
 } from '../types';
 import { HttpStart } from 'opensearch-dashboards/public';
-import { AuthenticationMethodRegistery } from '../auth_registry';
+import { AuthenticationMethod, AuthenticationMethodRegistery } from '../auth_registry';
+import { deepEqual } from 'assert';
 
 const { savedObjects } = coreMock.createStart();
 
@@ -270,6 +272,113 @@ describe('DataSourceManagement: Utils.ts', () => {
     test('default auth type is NoAuth when no auth options registered in authenticationMethodRegistery, this should not happen in real customer scenario for MD', () => {
       const authenticationMethodRegistery = new AuthenticationMethodRegistery();
       expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(AuthType.NoAuth);
+    });
+  });
+
+  describe('Check extractRegisteredAuthTypeCredentials method', () => {
+    test('Should extract credential field successfully', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        crendentialFormField: {
+          userNameRegistered: '',
+          passWordRegistered: '',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: 'some filled in password from registed auth credential form',
+      } as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: 'some filled in password from registed auth credential form',
+      };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+
+    test('Should extract empty object when no credentialFormField registered ', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+      } as { [key: string]: string };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, {}));
+    });
+
+    test('Should fill in empty value when credentail state not have registered field', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        crendentialFormField: {
+          userNameRegistered: '',
+          passWordRegistered: '',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+      } as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: '',
+      };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
     });
   });
 });

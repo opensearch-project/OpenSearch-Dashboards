@@ -44,7 +44,7 @@ import {
 } from '../../../validation';
 import { UpdatePasswordModal } from '../update_password_modal';
 import { UpdateAwsCredentialModal } from '../update_aws_credential_modal';
-import { getDefaultAuthMethod } from '../../../utils';
+import { extractRegisteredAuthTypeCredentials, getDefaultAuthMethod } from '../../../utils';
 
 export interface EditDataSourceProps {
   existingDataSource: DataSourceAttributes;
@@ -60,8 +60,12 @@ export interface EditDataSourceState {
   description: string;
   endpoint: string;
   auth: {
-    type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content;
+    type: AuthType | string;
+    credentials:
+      | UsernamePasswordTypedContent
+      | SigV4Content
+      | { [key: string]: string }
+      | undefined;
   };
   showUpdatePasswordModal: boolean;
   showUpdateAwsCredentialModal: boolean;
@@ -155,7 +159,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return performDataSourceFormValidation(
       this.state,
       this.props.existingDatasourceNamesList,
-      this.props.existingDataSource.title
+      this.props.existingDataSource.title,
+      this.authenticationMethodRegistery
     );
   };
 
@@ -362,6 +367,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             delete formValues.auth.credentials?.password;
           break;
         default:
+          const currentCredentials = (this.state.auth.credentials ?? {}) as {
+            [key: string]: string;
+          };
+          formValues.auth.credentials = extractRegisteredAuthTypeCredentials(
+            currentCredentials,
+            this.state.auth.type,
+            this.authenticationMethodRegistery
+          );
           break;
       }
 
