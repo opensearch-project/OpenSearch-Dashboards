@@ -8,11 +8,16 @@ import multipleDataSourcesJSONMds from './test_utils/vega_spec_with_multiple_url
 import openSearchQueryJSON from './test_utils/vega_spec_with_opensearch_query.json';
 import nonOpenSearchQueryJSON from './test_utils/vega_spec_without_opensearch_query.json';
 import { readFileSync } from 'fs';
-import { extractVegaSpecFromSavedObject, updateDataSourceNameInVegaSpec } from './utils';
+import {
+  extractVegaSpecFromSavedObject,
+  getDataSourceTitleFromId,
+  updateDataSourceNameInVegaSpec,
+  updateVegaSpecInSavedObject,
+} from './utils';
 import { parse } from 'hjson';
 import { isEqual } from 'lodash';
 import { join } from 'path';
-import { SavedObject } from '../types';
+import { SavedObject, SavedObjectsClientContract } from '../types';
 
 describe('updateDataSourceNameInVegaSpec()', () => {
   const loadHJSONStringFromFile = (filepath: string) => {
@@ -277,5 +282,30 @@ describe('extractVegaSpecFromSavedObject()', () => {
     } as SavedObject;
 
     expect(extractVegaSpecFromSavedObject(nonVegaSavedObject)).toBe(false);
+  });
+});
+
+describe('getDataSourceTitleFromId()', () => {
+  const savedObjectsClient = {} as SavedObjectsClientContract;
+  savedObjectsClient.get = jest.fn().mockImplementation((type, id) => {
+    if (type === 'data-source' && id === 'valid-id') {
+      return Promise.resolve({
+        attributes: {
+          title: 'some-datasource-title',
+        },
+      });
+    }
+
+    return Promise.resolve({});
+  });
+
+  test('When a valid id is passed, return the correct title', async () => {
+    expect(await getDataSourceTitleFromId('valid-id', savedObjectsClient)).toBe(
+      'some-datasource-title'
+    );
+  });
+
+  test('When a nonexistent id is passed, return nothing', async () => {
+    expect(await getDataSourceTitleFromId('nonexistent-id', savedObjectsClient)).toBe(undefined);
   });
 });

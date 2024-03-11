@@ -4,7 +4,7 @@
  */
 
 import { parse, stringify } from 'hjson';
-import { SavedObject } from '../types';
+import { SavedObject, SavedObjectsClientContract } from '../types';
 
 export interface UpdateDataSourceNameInVegaSpecProps {
   spec: string;
@@ -42,6 +42,16 @@ export const updateDataSourceNameInVegaSpec = (
       });
 };
 
+export const getDataSourceTitleFromId = async (
+  dataSourceId: string,
+  savedObjectsClient: SavedObjectsClientContract
+) => {
+  return await savedObjectsClient.get('data-source', dataSourceId).then((response) => {
+    const attributes: any = response?.attributes || {};
+    return attributes ? attributes.title : undefined;
+  });
+};
+
 export const extractVegaSpecFromSavedObject = (savedObject: SavedObject) => {
   if (isVegaVisualization(savedObject)) {
     // @ts-expect-error
@@ -65,13 +75,16 @@ const isVegaVisualization = (savedObject: SavedObject) => {
 const updateDataObject = (dataObject: any, props: UpdateDataSourceNameInVegaSpecProps) => {
   const { newDataSourceName, previousDataSourceName } = props;
   if (dataObject.hasOwnProperty('url') && dataObject.url.hasOwnProperty('index')) {
+    // Update if the object contains the old data source name
     if (
       dataObject.url.hasOwnProperty('data_source_name') &&
       previousDataSourceName &&
       dataObject.url.data_source_name === previousDataSourceName
     ) {
       dataObject.url.data_source_name = newDataSourceName;
-    } else if (!dataObject.url.hasOwnProperty('data_source_name') && !previousDataSourceName) {
+    }
+    // Update if the object fetched data from the local cluster
+    else if (!dataObject.url.hasOwnProperty('data_source_name') && !previousDataSourceName) {
       dataObject.url.data_source_name = newDataSourceName;
     }
   }
