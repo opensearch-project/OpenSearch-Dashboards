@@ -31,7 +31,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Add Vega support to MDS by specifying a data source name in the Vega spec ([#5975](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5975))
 - [Workspace] Consume workspace id in saved object client ([#6014](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6014))
 - [Multiple Datasource] Export DataSourcePluginRequestContext at top level for plugins to use ([#6108](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6108))
-
+- [Multiple Datasource] Expose filterfn in datasource menu component to allow filter data sources before rendering in navigation bar ([#6113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6113))
 - [Workspace] Add delete saved objects by workspace functionality([#6013](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6013))
 
 ### 🐛 Bug Fixes
