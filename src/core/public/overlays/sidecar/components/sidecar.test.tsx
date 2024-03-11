@@ -6,11 +6,12 @@
 import React from 'react';
 
 import { render, mount } from 'enzyme';
-import { SIDECAR_DOCKED_MODE } from '../sidecar_service';
 import { BehaviorSubject } from 'rxjs';
-import { i18nServiceMock } from '../../../i18n/i18n_service.mock';
+
+import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../sidecar_service';
 import { Sidecar, Props } from './sidecar';
-import { ISidecarConfig } from '../sidecar_service';
+import { i18nServiceMock } from '../../../i18n/i18n_service.mock';
+
 const i18nMock = i18nServiceMock.createStartContract();
 const mountText = (text: string) => (container: HTMLElement) => {
   const content = document.createElement('span');

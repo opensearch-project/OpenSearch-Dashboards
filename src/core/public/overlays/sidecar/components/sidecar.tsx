@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
 import { I18nStart } from '../../../i18n';

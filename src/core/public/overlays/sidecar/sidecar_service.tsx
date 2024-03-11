@@ -6,9 +6,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
@@ -162,15 +161,13 @@ export class SidecarService {
         this.activeSidecar = sidecar;
 
         render(
-          React.createElement(() => (
-            <Sidecar
-              sidecarConfig$={sidecarConfig$}
-              setSidecarConfig={setSidecarConfig}
-              options={options}
-              i18n={i18n}
-              mount={mount}
-            />
-          )),
+          <Sidecar
+            sidecarConfig$={sidecarConfig$}
+            setSidecarConfig={setSidecarConfig}
+            options={options}
+            i18n={i18n}
+            mount={mount}
+          />,
           this.targetDomElement
         );
 
@@ -186,11 +183,10 @@ export class SidecarService {
   }
 
   /**
-   * Using React.Render to re-render into a target DOM element will replace
-   * the content of the target but won't call unmountComponent on any
-   * components inside the target or any of their children. So we properly
-   * cleanup the DOM here to prevent subtle bugs in child components which
-   * depend on unmounting for cleanup behaviour.
+   * When using React.render to re-render content into a target DOM element, it replaces
+   * the content without invoking unmountComponentAtNode on any components within the target
+   * or their children. To avoid potential subtle bugs in child components that rely on
+   * unmounting for cleanup behavior, this function ensures proper cleanup of the DOM.
    */
   private cleanupDom(): void {
     if (this.targetDomElement != null) {

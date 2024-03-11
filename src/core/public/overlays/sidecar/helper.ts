@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ISidecarConfig } from './sidecar_service';
+import { ISidecarConfig, SIDECAR_DOCKED_MODE } from './sidecar_service';
 
 function isMouseEvent(
   event: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent
@@ -21,10 +21,14 @@ export const getPosition = (
 };
 
 export const getOsdSidecarPaddingStyle = (config: ISidecarConfig | undefined) => {
-  if (!config?.isHidden && (config?.dockedMode === 'left' || config?.dockedMode === 'right')) {
+  if (
+    !config?.isHidden &&
+    (config?.dockedMode === SIDECAR_DOCKED_MODE.LEFT ||
+      config?.dockedMode === SIDECAR_DOCKED_MODE.RIGHT)
+  ) {
     const { dockedMode, paddingSize } = config;
     return {
-      [`padding${dockedMode === 'left' ? 'Left' : 'Right'}`]: paddingSize,
+      [`padding${dockedMode === SIDECAR_DOCKED_MODE.LEFT ? 'Left' : 'Right'}`]: paddingSize,
     };
   }
   return {};
