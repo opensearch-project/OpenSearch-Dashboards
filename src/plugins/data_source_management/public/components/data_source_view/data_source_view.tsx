@@ -14,14 +14,11 @@ interface DataSourceViewProps {
 }
 
 interface DataSourceViewState {
-  dataSourceOptions: DataSourceOption[];
   selectedOption: DataSourceOption[];
   isPopoverOpen: boolean;
 }
 
 export class DataSourceView extends React.Component<DataSourceViewProps, DataSourceViewState> {
-  private _isMounted: boolean = false;
-
   constructor(props: DataSourceViewProps) {
     super(props);
 
@@ -31,20 +28,12 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     };
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
   onClick() {
     this.setState({ ...this.state, isPopoverOpen: !this.state.isPopoverOpen });
   }
 
   closePopover() {
     this.setState({ ...this.state, isPopoverOpen: false });
-  }
-
-  async componentDidMount() {
-    this._isMounted = true;
   }
 
   render() {
@@ -94,7 +83,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
             : ''}
         </EuiButtonEmpty>
         <EuiPopover
-          id={'dataSourceSViewContextMenuPopover'}
+          id={'dataSourceViewContextMenuPopover'}
           button={button}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover.bind(this)}
