@@ -112,25 +112,25 @@ describe('BasePath', () => {
   });
 
   describe('clientBasePath', () => {
-    it('get path with clientBasePath', () => {
+    it('get with clientBasePath provided when construct', () => {
       expect(new BasePath('/foo/bar', '/foo/bar', '/client_base_path').get()).toEqual(
         '/foo/bar/client_base_path'
       );
     });
 
-    it('getBasePath with clientBasePath provided', () => {
+    it('getBasePath with clientBasePath provided when construct', () => {
       expect(new BasePath('/foo/bar', '/foo/bar', '/client_base_path').getBasePath()).toEqual(
         '/foo/bar'
       );
     });
 
-    it('prepend with clientBasePath provided', () => {
+    it('prepend with clientBasePath provided when construct', () => {
       expect(new BasePath('/foo/bar', '/foo/bar', '/client_base_path').prepend('/prepend')).toEqual(
         '/foo/bar/client_base_path/prepend'
       );
     });
 
-    it('prepend with clientBasePath provided but calls withoutClientBasePath', () => {
+    it('construct with clientBasePath provided but calls prepend with withoutClientBasePath is true', () => {
       expect(
         new BasePath('/foo/bar', '/foo/bar', '/client_base_path').prepend('/prepend', {
           withoutClientBasePath: true,
@@ -138,7 +138,7 @@ describe('BasePath', () => {
       ).toEqual('/foo/bar/prepend');
     });
 
-    it('remove with clientBasePath provided', () => {
+    it('remove with clientBasePath provided when construct', () => {
       expect(
         new BasePath('/foo/bar', '/foo/bar', '/client_base_path').remove(
           '/foo/bar/client_base_path/remove'
@@ -146,7 +146,7 @@ describe('BasePath', () => {
       ).toEqual('/remove');
     });
 
-    it('remove with clientBasePath provided but calls withoutClientBasePath', () => {
+    it('construct with clientBasePath provided but calls remove with withoutClientBasePath is true', () => {
       expect(
         new BasePath('/foo/bar', '/foo/bar', '/client_base_path').remove(
           '/foo/bar/client_base_path/remove',
