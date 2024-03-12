@@ -121,3 +121,7 @@ export type IResponse<T> =
 export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;
 }
+
+export interface WorkspacePluginStart {
+  client: IWorkspaceClientImpl;
+}
