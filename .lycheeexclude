@@ -90,6 +90,8 @@ https://www.hostedgraphite.com/
 https://connectionurl.com
 http://169.254.169.254/latest/meta-data/
 http://company.net/*
+http://fakenews.co/*
+https://fakenews.co/*
 
 # External urls
 https://www.zeek.org/
