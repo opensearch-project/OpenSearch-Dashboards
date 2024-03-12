@@ -16,9 +16,9 @@ describe('importFile', () => {
       {
         overwrite: true,
         createNewCopies: false,
-        workspaces: ['foo'],
       },
-      'foo'
+      'foo',
+      ['foo']
     );
     expect(httpClient.post).toMatchInlineSnapshot(`
       [MockFunction] {

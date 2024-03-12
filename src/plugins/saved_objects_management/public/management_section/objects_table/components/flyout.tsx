@@ -196,15 +196,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
 
     // Import the file
     try {
-      const response = await importFile(
-        http,
-        file!,
-        {
-          ...importMode,
-          workspaces,
-        },
-        selectedDataSourceId
-      );
+      const response = await importFile(http, file!, importMode, selectedDataSourceId, workspaces);
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc

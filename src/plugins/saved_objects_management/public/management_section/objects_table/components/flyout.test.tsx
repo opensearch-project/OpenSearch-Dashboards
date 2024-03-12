@@ -197,9 +197,6 @@ describe('Flyout', () => {
       Object {
         "createNewCopies": true,
         "overwrite": true,
-        "workspaces": Array [
-          "foo",
-        ],
       }
     `);
 
@@ -255,6 +252,7 @@ describe('Flyout', () => {
           createNewCopies: true,
           overwrite: true,
         },
+        undefined,
         undefined
       );
       expect(component.state()).toMatchObject({

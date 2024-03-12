@@ -40,8 +40,9 @@ interface ImportResponse {
 export async function importFile(
   http: HttpStart,
   file: File,
-  { createNewCopies, overwrite, workspaces }: ImportMode,
-  selectedDataSourceId?: string
+  { createNewCopies, overwrite }: ImportMode,
+  selectedDataSourceId?: string,
+  workspaces?: string[]
 ) {
   const formData = new FormData();
   formData.append('file', file);
