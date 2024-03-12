@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import { isFunction, omitBy, union } from 'lodash';
-
+import { omitBy, union } from 'lodash';
+import  isFunction  from '../../../../opensearch_dashboards_utils/common/lodash_to_javascript/lodash_to_javascript.js'
 import { migrateAppState } from './migrate_app_state';
 import {
   createStateContainer,
