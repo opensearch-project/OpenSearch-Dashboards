@@ -34,7 +34,7 @@ describe('create data source menu', () => {
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'description', 'title'],
+      fields: ['id', 'title', 'auth.type'],
       perPage: 10000,
       type: 'data-source',
     });
