@@ -6,8 +6,7 @@
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ISourceDataSet, IndexPatternOption } from '../datasource';
-import { DataSourceType, GenericDataSource } from '../datasource_services';
+import { DataSource, SourceDataSet, IndexPatternOption } from '../datasource';
 import { DataSourceGroup, DataSourceSelectableProps } from './types';
 
 type DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS' | 's3glue' | 'spark';
@@ -26,19 +25,19 @@ const DATASOURCE_TYPE_DISPLAY_NAME_MAP: Record<DataSourceTypeKey, string> = {
   }),
 };
 
-type DataSetType = ISourceDataSet['data_sets'][number];
+type DataSetType = SourceDataSet['data_sets'][number];
 
-// Get data sets for a given datasource and returns it along with the source.
-const getDataSetWithSource = async (ds: GenericDataSource): Promise<ISourceDataSet> => {
-  const dataSet = await ds.getDataSet();
+// Get Index patterns for local cluster.
+const getDataSetWithSource = async (ds: DataSource): Promise<SourceDataSet> => {
+  const dataSet = (await ds.getDataSet()).data_sets;
   return {
     ds,
     data_sets: dataSet,
-  };
+  } as SourceDataSet;
 };
 
 // Map through all data sources and get their respective data sets.
-const getDataSets = (dataSources: GenericDataSource[]) =>
+const getDataSets = (dataSources: DataSource[]) =>
   dataSources.map((ds) => getDataSetWithSource(ds));
 
 export const isIndexPatterns = (dataSet: DataSetType): dataSet is IndexPatternOption => {
@@ -48,7 +47,7 @@ export const isIndexPatterns = (dataSet: DataSetType): dataSet is IndexPatternOp
 };
 
 // Get the option format for the combo box from the dataSource and dataSet.
-export const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetType) => {
+export const getSourceOptions = (dataSource: DataSource, dataSet: DataSetType) => {
   const optionContent = {
     type: dataSource.getType(),
     name: dataSource.getName(),
@@ -70,7 +69,7 @@ export const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetTyp
 };
 
 // Convert data sets into a structured format suitable for selector rendering.
-const getSourceList = (allDataSets: ISourceDataSet[]) => {
+const getSourceList = (allDataSets: SourceDataSet[]) => {
   const finalList = [] as DataSourceGroup[];
   allDataSets.forEach((curDataSet) => {
     const typeKey = curDataSet.ds.getType() as DataSourceTypeKey;

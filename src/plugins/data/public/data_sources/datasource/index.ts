@@ -5,13 +5,12 @@
 
 export { DataSource } from './datasource';
 export {
-  IDataSourceMetaData,
-  ISourceDataSet,
+  IDataSourceMetadata,
+  SourceDataSet,
   IDataSetParams,
   IDataSourceQueryParams,
   IDataSourceQueryResult,
   ConnectionStatus,
-  DataSourceConfig,
   IndexPatternOption,
 } from './types';
 export { DataSourceFactory } from './factory';

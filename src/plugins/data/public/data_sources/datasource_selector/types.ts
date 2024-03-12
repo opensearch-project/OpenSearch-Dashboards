@@ -8,7 +8,7 @@
  */
 
 import { EuiComboBoxProps, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
-import { GenericDataSource } from '../datasource_services';
+import { DataSource } from '../datasource/datasource';
 
 export interface DataSourceGroup {
   label: string;
@@ -19,11 +19,11 @@ export interface DataSourceOption {
   label: string;
   value: string;
   type: string;
-  ds: GenericDataSource;
+  ds: DataSource;
 }
 
 export interface DataSourceSelectableProps extends Pick<EuiComboBoxProps<unknown>, 'fullWidth'> {
-  dataSources: GenericDataSource[];
+  dataSources: DataSource[];
   onDataSourceSelect: (dataSourceOption: DataSourceOption[]) => void;
   singleSelection?: boolean | EuiComboBoxSingleSelectionShape;
   onGetDataSetError: (error: Error) => void;
