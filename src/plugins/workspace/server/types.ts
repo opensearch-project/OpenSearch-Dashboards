@@ -117,3 +117,7 @@ export type IResponse<T> =
       success: false;
       error?: string;
     };
+
+export interface WorkspacePluginSetup {
+  client: IWorkspaceClientImpl;
+}
