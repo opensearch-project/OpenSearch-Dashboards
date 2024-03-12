@@ -20,4 +20,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DataSourcePlugin(initializerContext);
 }
 
-export { DataSourcePluginSetup, DataSourcePluginStart } from './types';
+export {
+  DataSourcePluginSetup,
+  DataSourcePluginStart,
+  DataSourcePluginRequestContext,
+} from './types';
