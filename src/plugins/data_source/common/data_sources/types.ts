@@ -14,6 +14,7 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
     credentials: UsernamePasswordTypedContent | SigV4Content | undefined | AuthTypeContent;
   };
   lastUpdatedTime?: string;
+  name: AuthType | string;
 }
 
 export interface AuthTypeContent {
@@ -30,6 +31,7 @@ export interface SigV4Content extends SavedObjectAttributes {
   secretKey: string;
   region: string;
   service?: SigV4ServiceName;
+  sessionToken?: string;
 }
 
 export interface UsernamePasswordTypedContent extends SavedObjectAttributes {

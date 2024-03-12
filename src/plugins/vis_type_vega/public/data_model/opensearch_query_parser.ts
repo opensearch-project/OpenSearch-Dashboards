@@ -229,7 +229,7 @@ export class OpenSearchQueryParser {
       name: getRequestName(r, index),
     }));
 
-    const data$ = this._searchAPI.search(opensearchSearches);
+    const data$ = await this._searchAPI.search(opensearchSearches);
 
     const results = await data$.toPromise();
 

@@ -61,9 +61,15 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       config
     );
 
+    const authRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
+      const dataSourcePluginStart = selfStart as DataSourcePluginStart;
+      return dataSourcePluginStart.getAuthenticationMethodRegistery();
+    });
+
     const dataSourceSavedObjectsClientWrapper = new DataSourceSavedObjectsClientWrapper(
       cryptographyServiceSetup,
       this.logger.get('data-source-saved-objects-client-wrapper-factory'),
+      authRegistryPromise,
       config.endpointDeniedIPs
     );
 
@@ -101,11 +107,6 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     const dataSourceService: DataSourceServiceSetup = await this.dataSourceService.setup(config);
 
-    const authRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
-      const dataSourcePluginStart = selfStart as DataSourcePluginStart;
-      return dataSourcePluginStart.getAuthenticationMethodRegistery();
-    });
-
     const customApiSchemaRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
       const dataSourcePluginStart = selfStart as DataSourcePluginStart;
       return dataSourcePluginStart.getCustomApiSchemaRegistry();
@@ -129,7 +130,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       router,
       dataSourceService,
       cryptographyServiceSetup,
-      authRegistryPromise
+      authRegistryPromise,
+      customApiSchemaRegistryPromise
     );
 
     const registerCredentialProvider = (method: AuthenticationMethod) => {
@@ -144,6 +146,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       createDataSourceError: (e: any) => createDataSourceError(e),
       registerCredentialProvider,
       registerCustomApiSchema: (schema: any) => this.customApiSchemaRegistry.register(schema),
+      dataSourceEnabled: () => config.enabled,
     };
   }
 
@@ -168,7 +171,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
     customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'dataSource'> => {
-    return (context, req) => {
+    return async (context, req) => {
+      const authRegistry = await authRegistryPromise;
       return {
         opensearch: {
           getClient: (dataSourceId: string) => {
@@ -181,6 +185,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
               savedObjects: context.core.savedObjects.client,
               cryptography,
               customApiSchemaRegistryPromise,
+              request: req,
+              authRegistry,
             });
           },
           legacy: {
@@ -190,6 +196,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
                 savedObjects: context.core.savedObjects.client,
                 cryptography,
                 customApiSchemaRegistryPromise,
+                request: req,
+                authRegistry,
               });
             },
           },

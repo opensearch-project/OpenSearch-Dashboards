@@ -51,7 +51,7 @@ import {
 import { getTutorials } from '../load_tutorials';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { ClusterSelector } from '../../../../data_source_management/public';
+import { DataSourceSelector } from '../../../../data_source_management/public';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -229,8 +229,8 @@ class TutorialDirectoryUi extends React.Component {
     const { isDataSourceEnabled, isLocalClusterHidden } = this.state;
 
     return isDataSourceEnabled ? (
-      <div className="sampleDataClusterSelector">
-        <ClusterSelector
+      <div className="sampleDataSourceSelector">
+        <DataSourceSelector
           savedObjectsClient={getServices().savedObjectsClient}
           notifications={getServices().toastNotifications}
           onSelectedDataSource={this.onSelectedDataSourceChange}

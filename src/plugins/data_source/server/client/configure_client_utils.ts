@@ -5,6 +5,7 @@
 
 import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
+import { Credentials } from 'aws-sdk';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
@@ -144,4 +145,22 @@ export const generateCacheKey = (dataSourceAttr: DataSourceAttributes, dataSourc
       : endpoint;
 
   return key;
+};
+
+export const getSigV4Credentials = (
+  accessKeyId: string,
+  secretAccessKey: string,
+  sessionToken?: string
+): Credentials => {
+  let sigv4Credentials: Credentials;
+  if (sessionToken) {
+    sigv4Credentials = new Credentials({
+      accessKeyId,
+      secretAccessKey,
+      sessionToken,
+    });
+  } else {
+    sigv4Credentials = new Credentials({ accessKeyId, secretAccessKey });
+  }
+  return sigv4Credentials;
 };

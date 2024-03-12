@@ -55,7 +55,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { OverlayStart, HttpStart } from 'src/core/public';
-import { ClusterSelector } from '../../../../../data_source_management/public';
+import { DataSourceSelector } from '../../../../../data_source_management/public';
 import {
   IndexPatternsContract,
   IIndexPattern,
@@ -817,7 +817,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             ),
           }}
         >
-          <ClusterSelector
+          <DataSourceSelector
             savedObjectsClient={this.props.savedObjects}
             notifications={this.props.notifications.toasts}
             onSelectedDataSource={this.onSelectedDataSourceChange}

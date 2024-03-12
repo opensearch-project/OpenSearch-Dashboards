@@ -8,6 +8,69 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Deprecations
 
+### 🛡 Security
+- Support dynamic CSP rules to mitigate Clickjacking https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5641
+
+### 📈 Features/Enhancements
+- [MD]Change cluster selector component name to data source selector ([#6042](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6042))
+- [Multiple Datasource] Add interfaces to register add-on authentication method from plug-in module ([#5851](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5851))
+- [Multiple Datasource] Able to Hide "Local Cluster" option from datasource DropDown ([#5827](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5827))
+- [Multiple Datasource] Add api registry and allow it to be added into client config in data source plugin ([#5895](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5895))
+- [Multiple Datasource] Concatenate data source name with index pattern name and change delimiter to double colon ([#5907](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5907))
+- [Multiple Datasource] Refactor client and legacy client to use authentication registry ([#5881](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5881))
+- [Multiple Datasource] Improved error handling for the search API when a null value is passed for the dataSourceId ([#5882](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5882))
+- [Multiple Datasource] Hide/Show authentication method in multi data source plugin based on configuration ([#5916](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5916))
+- [Dynamic Configurations] Add support for dynamic application configurations ([#5855](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5855))
+- [Workspace] Optional workspaces params in repository ([#5949](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5949))
+- [Multiple Datasource] Refactoring create and edit form to use authentication registry ([#6002](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6002))
+- [Multiple Datasource] Handles auth methods from auth registry in DataSource SavedObjects Client Wrapper ([#6062](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6062))
+- [Multiple Datasource] Expose a few properties for customize the appearance of the data source selector component ([#6057](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6057))
+- [Multiple Datasource] Create data source menu component able to be mount to nav bar ([#6082](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6082))
+- [Multiple Datasource] Handle form values(request payload) if the selected type is available in the authentication registry ([#6049](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6049))
+- [Multiple Datasource] Adds a session token to AWS credentials ([#6103](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6103))
+- [Multiple Datasource] Add Vega support to MDS by specifying a data source name in the Vega spec ([#5975](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5975))
+- [Multiple Datasource] Test connection schema validation for registered auth types ([#6109](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6109))
+- [Workspace] Consume workspace id in saved object client ([#6014](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6014))
+- [Multiple Datasource] Export DataSourcePluginRequestContext at top level for plugins to use ([#6108](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6108))
+- [Workspace] Add delete saved objects by workspace functionality([#6013](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6013))
+- [Workspace] Add a workspace client in workspace plugin ([#6094](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6094))
+
+### 🐛 Bug Fixes
+
+- [BUG][Discover] Allow saved sort from search embeddable to load in Dashboard ([#5934](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5934))
+- [BUG][Discover] Add key to index pattern options for support deplicate index pattern names([#5946](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5946))
+- [Discover] Fix table cell content overflowing in Safari ([#5948](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5948))
+- [BUG][MD]Fix schema for test connection to separate validation based on auth type ([#5997](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5997))
+- [Discover] Enable 'Back to Top' Feature in Discover for scrolling to top ([#6008](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6008))
+- [Discover] Fix lazy loading of the legacy table from getting stuck ([#6041](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6041))
+- [BUG][Discover] Allow saved sort from search embeddable to load in Dashboard ([#5934](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5934))
+- [osd/std] Add additional recovery from false-positives in handling of long numerals ([#5956](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5956))
+- [BUG][Multiple Datasource] Fix missing customApiRegistryPromise param for test connection ([#5944](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5944))
+- [BUG][Multiple Datasource] Add a migration function for datasource to add migrationVersion field ([#6025](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6025))
+- [BUG][MD]Expose picker using function in data source management plugin setup([#6030](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6030))
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+- Fix link to documentation for geoHash precision ([#5967](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5967))
+
+### 🛠 Maintenance
+
+- Add @BionIT as a maintainer ([#5988](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5988))
+
+### 🪛 Refactoring
+
+### 🔩 Tests
+
+- Add functional test cypress workflow improvements and enable the workflow for in-house Dashboards tests ([#6061](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6061))
+
+## [2.12.0 - 2024-02-20](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.12.0)
+
+### 💥 Breaking Changes
+
+### Deprecations
+
 - Rename `withLongNumerals` to `withLongNumeralsSupport` in `HttpFetchOptions` [#5592](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5592)
 
 ### 🛡 Security
@@ -26,6 +89,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Replace OuiSelect component with OuiSuperSelect in data-source plugin ([#5315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5315))
 - [Workspace] Add core workspace service module to enable the implementation of workspace features within OSD plugins ([#5092](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5092))
 - [Workspace] Setup workspace skeleton and implement basic CRUD API ([#5075](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5075))
+- [Workspace] Add ACL related functions ([#5084](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5084/))
 - [Decouple] Add new cross compatibility check core service which export functionality for plugins to verify if their OpenSearch plugin counterpart is installed on the cluster or has incompatible version to configure the plugin behavior([#4710](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4710))
 - [Discover] Add long numerals support [#5592](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5592)
 - [Discover] Display inner properties in the left navigation bar [#5429](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5429)
@@ -38,9 +102,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Discover] Enhanced the data source selector with added sorting functionality ([#5609](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5609))
 - [Multiple Datasource] Add datasource picker component and use it in devtools and tutorial page when multiple datasource is enabled ([#5756](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5756))
 - [Multiple Datasource] Add datasource picker to import saved object flyout when multiple data source is enabled ([#5781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5781))
-- [Multiple Datasource] Add interfaces to register add-on authentication method from plug-in module ([#5851](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5851))
-- [Multiple Datasource] Able to Hide "Local Cluster" option from datasource DropDown ([#5827](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5827))
-- [Multiple Datasource] Add api registry and allow it to be added into client config in data source plugin ([#5895](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5895))
 
 ### 🐛 Bug Fixes
 
@@ -79,6 +140,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Chore] Add `--security` for `opensearch snapshot` and `opensearch_dashboards` to configure local setup with the security plugin ([#5451](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5451))
 - [Tests] Add Github workflow for Test Orchestrator in FT Repo to run cypress tests within Dashboards repo ([#5725](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5725))
 - [Chore] Updates default dev environment security credentials ([#5736](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5736))
+- [Tests] Baseline screenshots for area and tsvb functional tests ([#5915](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5915))
 
 ### 📝 Documentation
 
@@ -86,6 +148,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add plugin development section in DEVELOPER_GUIDE.md ([#3989](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3989))
 - Remove ftr test step from PR template ([#5217](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5217))
 - [Doc] Update EUI doc site links to point to OUI doc site ([#5293](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5293))
+- Adds Developer Docs generation using Docsify to the repository ([#5977](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5977))
 
 ### 🛠 Maintenance
 
@@ -99,6 +162,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add @SuZhou-Joe as a maintainer ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
 - Move @seanneumann to emeritus maintainer ([#5634](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5634))
 - Remove `ui-select` dev dependency ([#5660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5660))
+- Bump `chromedriver` dependency to `121.0.1"` ([#5926](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5926))
+- Add @ruanyl as a maintainer ([#5982](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5982))
 
 ### 🪛 Refactoring
 

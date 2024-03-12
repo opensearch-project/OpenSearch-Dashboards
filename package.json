@@ -75,12 +75,14 @@
     "osd:watch": "scripts/use_node scripts/opensearch_dashboards --dev --logging.json=false",
     "build:types": "scripts/use_node scripts/remove.js ./target/types && tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "scripts/use_node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
+    "docs:generateDevDocs": "scripts/use_node scripts/generate_docs_sidebar.js",
     "osd:bootstrap": "scripts/use_node scripts/build_ts_refs && scripts/use_node scripts/register_git_hook",
     "spec_to_console": "scripts/use_node scripts/spec_to_console",
     "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\"",
     "cypress:run-without-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=false",
-    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500"
- 
+    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
+    "osd:ciGroup10": "echo \"dashboard_sanity_test_spec.js\"",
+    "osd:ciGroup11": "echo \"apps/vis_builder/*.js\""
   },
   "repository": {
     "type": "git",
@@ -357,7 +359,7 @@
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "1.0.0-rc.1",
-    "chromedriver": "^119.0.1",
+    "chromedriver": "^121.0.1",
     "classnames": "2.3.1",
     "compare-versions": "3.5.1",
     "cypress": "9.5.4",
