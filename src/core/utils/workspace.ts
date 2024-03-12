@@ -35,7 +35,7 @@ export const formatUrlWithWorkspaceId = (url: string, workspaceId: string, baseP
   }
 
   newUrl.pathname = basePath.prepend(newUrl.pathname, {
-    withoutWorkspace: true,
+    withoutClientBasePath: true,
   });
 
   return newUrl.toString();

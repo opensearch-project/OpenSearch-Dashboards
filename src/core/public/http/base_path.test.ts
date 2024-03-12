@@ -128,10 +128,10 @@ describe('BasePath', () => {
       );
     });
 
-    it('prepend with workspace provided but calls without workspace', () => {
+    it('prepend with client base path provided but calls without client base path', () => {
       expect(
         new BasePath('/foo/bar', '/foo/bar', '/workspace').prepend('/prepend', {
-          withoutWorkspace: true,
+          withoutClientBasePath: true,
         })
       ).toEqual('/foo/bar/prepend');
     });
@@ -142,10 +142,10 @@ describe('BasePath', () => {
       ).toEqual('/remove');
     });
 
-    it('remove with workspace provided but calls without workspace', () => {
+    it('remove with client base path provided but calls without client base path', () => {
       expect(
         new BasePath('/foo/bar', '/foo/bar', '/workspace').remove('/foo/bar/workspace/remove', {
-          withoutWorkspace: true,
+          withoutClientBasePath: true,
         })
       ).toEqual('/workspace/remove');
     });

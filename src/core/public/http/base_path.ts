@@ -47,8 +47,8 @@ export class BasePath {
   };
 
   public prepend = (path: string, prependOptions?: PrependOptions): string => {
-    const { withoutWorkspace } = prependOptions || {};
-    const basePath = withoutWorkspace ? this.basePath : this.get();
+    const { withoutClientBasePath } = prependOptions || {};
+    const basePath = withoutClientBasePath ? this.basePath : this.get();
     if (!basePath) return path;
     return modifyUrl(path, (parts) => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
@@ -58,8 +58,8 @@ export class BasePath {
   };
 
   public remove = (path: string, prependOptions?: PrependOptions): string => {
-    const { withoutWorkspace } = prependOptions || {};
-    const basePath = withoutWorkspace ? this.basePath : this.get();
+    const { withoutClientBasePath } = prependOptions || {};
+    const basePath = withoutClientBasePath ? this.basePath : this.get();
     if (!basePath) {
       return path;
     }
