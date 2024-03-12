@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { delay } from 'bluebird';
 import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
@@ -54,6 +53,10 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
   'ElementNotInteractableError',
   'StaleElementReferenceError',
 ];
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export class WebElementWrapper {
   private By = By;
