@@ -3,49 +3,66 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DataSource } from './datasource';
+
 /**
  * @experimental These interfaces are experimental and might change in future releases.
  */
-
-import { IndexPatternsService } from '../../index_patterns';
-import { DataSourceType } from '../datasource_services';
 
 export interface IndexPatternOption {
   title: string;
   id: string;
 }
 
-export interface IDataSourceMetaData {
-  name: string;
-}
-
 export interface IDataSourceGroup {
   name: string;
 }
 
-export interface ISourceDataSet {
-  ds: DataSourceType;
-  data_sets: Array<string | IndexPatternOption>;
+export interface SourceDataSet {
+  ds: DataSource;
+  data_sets: IndexPatternOption[];
 }
 
-// to-dos: add common interfaces for datasource
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IDataSetParams {}
+export interface IDataSetParams<T = {}> {
+  query: T;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IDataSourceQueryParams {}
+export interface IDataSourceQueryParams<T = {}> {
+  query: T;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IDataSourceQueryResult {}
+export interface IDataSourceQueryResult<T = {}> {
+  data: T;
+}
 
 export interface ConnectionStatus {
-  success: boolean;
-  info: string;
+  status: string;
+  message: string;
+  error?: Error;
 }
 
-export interface DataSourceConfig {
-  name: string;
+export interface IDataSourceSettings<T extends IDataSourceMetadata = IDataSourceMetadata> {
+  id: string;
   type: string;
-  metadata: any;
-  indexPatterns: IndexPatternsService;
+  name: string;
+  metadata: T;
+}
+
+export interface IDataSourceMetadata {
+  ui: IDataSourceUISettings;
+}
+
+export interface IDataSourceUISettings {
+  label: string; // the display name of data source
+  typeLabel: string; // the display name of data source type
+  description?: string; // short description of your database
+  icon?: string; // uri of the icon
+}
+
+export interface IDataSourceDataSet<T = {}> {
+  data_sets: T;
+}
+
+export interface IDataSourceQueryResponse<T = {}> {
+  data: T;
 }
