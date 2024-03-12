@@ -11,13 +11,13 @@ import {
   AuthType,
   UsernamePasswordTypedContent,
   SigV4Content,
+  SigV4ServiceName,
 } from '../../common/data_sources/types';
 import { DataSourcePluginConfigType } from '../../config';
 import {
   ClientMock,
   parseClientOptionsMock,
   authRegistryCredentialProviderMock,
-  CredentialsMock,
 } from './configure_client.test.mocks';
 import { OpenSearchClientPoolSetup } from './client_pool';
 import { configureClient } from './configure_client';
@@ -127,7 +127,6 @@ describe('configureClient', () => {
 
   afterEach(() => {
     ClientMock.mockReset();
-    CredentialsMock.mockReset();
   });
 
   test('configure client with auth.type == no_auth, will call new Client() to create client', async () => {
@@ -212,9 +211,21 @@ describe('configureClient', () => {
       encryptionContext: { endpoint: 'http://localhost' },
     });
 
-    await configureClient(dataSourceClientParams, clientPoolSetup, config, logger);
+    const client = await configureClient(dataSourceClientParams, clientPoolSetup, config, logger);
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(client).toBe(dsClient.child.mock.results[0].value);
+    expect(dsClient.child).toBeCalledWith({
+      auth: {
+        credentials: {
+          accessKeyId: 'accessKey',
+          secretAccessKey: 'accessKey',
+          sessionToken: '',
+        },
+        region: sigV4AuthContent.region,
+        service: 'aoss',
+      },
+    });
   });
 
   test('configure test client for non-exist datasource should not call saved object api, nor decode any credential', async () => {
@@ -284,7 +295,7 @@ describe('configureClient', () => {
       type: AuthType.SigV4,
     });
 
-    await configureClient(
+    const client = await configureClient(
       { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
       clientPoolSetup,
       config,
@@ -294,10 +305,17 @@ describe('configureClient', () => {
     expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toBeCalledWith({
-      accessKeyId: sigV4AuthContent.accessKey,
-      secretAccessKey: sigV4AuthContent.secretKey,
+    expect(client).toBe(dsClient.child.mock.results[0].value);
+    expect(dsClient.child).toBeCalledWith({
+      auth: {
+        credentials: {
+          accessKeyId: sigV4AuthContent.accessKey,
+          secretAccessKey: sigV4AuthContent.secretKey,
+          sessionToken: '',
+        },
+        region: sigV4AuthContent.region,
+        service: SigV4ServiceName.OpenSearch,
+      },
     });
   });
 
@@ -321,7 +339,7 @@ describe('configureClient', () => {
       type: AuthType.SigV4,
     });
 
-    await configureClient(
+    const client = await configureClient(
       { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
       clientPoolSetup,
       config,
@@ -329,11 +347,17 @@ describe('configureClient', () => {
     );
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toBeCalledWith({
-      accessKeyId: mockCredentials.accessKey,
-      secretAccessKey: mockCredentials.secretKey,
-      sessionToken: mockCredentials.sessionToken,
+    expect(client).toBe(dsClient.child.mock.results[0].value);
+    expect(dsClient.child).toBeCalledWith({
+      auth: {
+        credentials: {
+          accessKeyId: mockCredentials.accessKey,
+          secretAccessKey: mockCredentials.secretKey,
+          sessionToken: mockCredentials.sessionToken,
+        },
+        region: mockCredentials.region,
+        service: SigV4ServiceName.OpenSearch,
+      },
     });
   });
 });

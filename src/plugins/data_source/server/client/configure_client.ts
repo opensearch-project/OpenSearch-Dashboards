@@ -5,13 +5,13 @@
 
 import { Client, ClientOptions } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
-import { Credentials } from 'aws-sdk';
 import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws';
 import { Logger, OpenSearchDashboardsRequest } from '../../../../../src/core/server';
 import {
   AuthType,
   DataSourceAttributes,
   SigV4Content,
+  SigV4ServiceName,
   UsernamePasswordTypedContent,
 } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
@@ -26,7 +26,6 @@ import {
   getCredential,
   getDataSource,
   generateCacheKey,
-  getSigV4Credentials,
 } from './configure_client_utils';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
 import { authRegistryCredentialProvider } from '../util/credential_provider';
@@ -172,10 +171,12 @@ const getQueryClient = async (
           ? await getAWSCredential(dataSourceAttr, cryptography!)
           : (dataSourceAttr.auth.credentials as SigV4Content));
 
-      const awsClient = rootClient ? rootClient : getAWSClient(credential, clientOptions);
-      addClientToPool(cacheKey, type, awsClient);
+      if (!rootClient) {
+        rootClient = getAWSClient(credential, clientOptions);
+      }
+      addClientToPool(cacheKey, type, rootClient);
 
-      return awsClient;
+      return getAWSChildClient(rootClient, credential);
 
     default:
       throw Error(`${type} is not a supported auth type for data source`);
@@ -200,21 +201,28 @@ const getBasicAuthClient = (
 };
 
 const getAWSClient = (credential: SigV4Content, clientOptions: ClientOptions): Client => {
-  const { accessKey, secretKey, region, service, sessionToken } = credential;
-  const sigv4Credentials = getSigV4Credentials(accessKey, secretKey, sessionToken);
-
-  const credentialProvider = (): Promise<Credentials> => {
-    return new Promise((resolve) => {
-      resolve(sigv4Credentials);
-    });
-  };
+  const { region } = credential;
 
   return new Client({
     ...AwsSigv4Signer({
       region,
-      getCredentials: credentialProvider,
-      service,
     }),
     ...clientOptions,
+  });
+};
+
+const getAWSChildClient = (rootClient: Client, credential: SigV4Content): Client => {
+  const { accessKey, secretKey, region, service, sessionToken } = credential;
+
+  return rootClient.child({
+    auth: {
+      credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey: secretKey,
+        sessionToken: sessionToken ?? '',
+      },
+      region,
+      service: service ?? SigV4ServiceName.OpenSearch,
+    },
   });
 };
