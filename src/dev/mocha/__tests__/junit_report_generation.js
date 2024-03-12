@@ -31,7 +31,7 @@
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 
-import { fromNode as fcb } from 'bluebird';
+import { promisify } from 'util';
 import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
@@ -62,7 +62,7 @@ describe('dev/mocha/junit report generation', () => {
 
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise((resolve) => mocha.run(resolve));
-    const report = await fcb((cb) => parseString(readFileSync(XML_PATH), cb));
+    const report = await promisify(parseString)(readFileSync(XML_PATH));
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).to.eql({
