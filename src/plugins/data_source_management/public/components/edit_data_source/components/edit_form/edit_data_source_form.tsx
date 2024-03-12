@@ -176,13 +176,18 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   onChangeAuthType = (authType: AuthType) => {
-    const credentials = this.state.auth.credentials;
+    let registeredAuthCredentials;
+    if (this.props.existingDataSource && authType === this.props.existingDataSource.auth.type) {
+      registeredAuthCredentials = this.props.existingDataSource.auth.credentials;
+    } else {
+      const credentials = this.state.auth.credentials;
 
-    const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
-      (credentials ?? {}) as { [key: string]: string },
-      authType,
-      this.authenticationMethodRegistery
-    );
+      registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
+        (credentials ?? {}) as { [key: string]: string },
+        authType,
+        this.authenticationMethodRegistery
+      );
+    }
 
     this.setState(
       {

@@ -154,7 +154,8 @@ export const extractRegisteredAuthTypeCredentials = (
     authenticationMethodRegistery.getAuthenticationMethod(authType)?.crendentialFormField ?? {};
 
   Object.keys(registeredCredentialField).forEach((credentialFiled) => {
-    registeredCredentials[credentialFiled] = currentCredentialState[credentialFiled] ?? '';
+    registeredCredentials[credentialFiled] =
+      currentCredentialState[credentialFiled] ?? registeredCredentialField[credentialFiled];
   });
 
   return registeredCredentials;
