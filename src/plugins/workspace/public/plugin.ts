@@ -4,7 +4,8 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { Plugin, CoreStart } from '../../../core/public';
+import { Plugin, CoreStart, CoreSetup } from '../../../core/public';
+import { WorkspaceClient } from './workspace_client';
 
 export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private coreStart?: CoreStart;
@@ -18,7 +19,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
       });
     }
   }
-  public async setup() {
+  public async setup(core: CoreSetup) {
+    const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
+    await workspaceClient.init();
     return {};
   }
 
