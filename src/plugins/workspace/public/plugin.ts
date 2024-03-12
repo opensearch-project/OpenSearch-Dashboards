@@ -6,6 +6,7 @@
 import type { Subscription } from 'rxjs';
 import { Plugin, CoreStart, CoreSetup } from '../../../core/public';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
+import { WorkspaceClient } from './workspace_client';
 
 export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private coreStart?: CoreStart;
@@ -23,6 +24,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     return getWorkspaceIdFromUrl(window.location.href, basePath);
   }
   public async setup(core: CoreSetup) {
+    const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
+    await workspaceClient.init();
+
     /**
      * Retrieve workspace id from url
      */
@@ -31,6 +35,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     if (workspaceId) {
       core.workspaces.currentWorkspaceId$.next(workspaceId);
     }
+
+    return {};
   }
 
   public start(core: CoreStart) {
