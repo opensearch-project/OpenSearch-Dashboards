@@ -180,6 +180,7 @@ export async function exportSavedObjectsToStream({
     exportedObjects = sortObjects(rootObjects);
   }
 
+  exportedObjects = exportedObjects.filter((obj) => obj.type !== 'data-source');
   // redact attributes that should not be exported
   const redactedObjects = exportedObjects.map<SavedObject<unknown>>(
     ({ namespaces, ...object }) => object
