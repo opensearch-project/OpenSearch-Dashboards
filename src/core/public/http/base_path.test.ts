@@ -112,42 +112,49 @@ describe('BasePath', () => {
   });
 
   describe('clientBasePath', () => {
-    it('get path with workspace', () => {
-      expect(new BasePath('/foo/bar', '/foo/bar', '/workspace').get()).toEqual(
-        '/foo/bar/workspace'
+    it('get path with clientBasePath', () => {
+      expect(new BasePath('/foo/bar', '/foo/bar', '/client_base_path').get()).toEqual(
+        '/foo/bar/client_base_path'
       );
     });
 
-    it('getBasePath with workspace provided', () => {
-      expect(new BasePath('/foo/bar', '/foo/bar', '/workspace').getBasePath()).toEqual('/foo/bar');
-    });
-
-    it('prepend with workspace provided', () => {
-      expect(new BasePath('/foo/bar', '/foo/bar', '/workspace').prepend('/prepend')).toEqual(
-        '/foo/bar/workspace/prepend'
+    it('getBasePath with clientBasePath provided', () => {
+      expect(new BasePath('/foo/bar', '/foo/bar', '/client_base_path').getBasePath()).toEqual(
+        '/foo/bar'
       );
     });
 
-    it('prepend with client base path provided but calls without client base path', () => {
+    it('prepend with clientBasePath provided', () => {
+      expect(new BasePath('/foo/bar', '/foo/bar', '/client_base_path').prepend('/prepend')).toEqual(
+        '/foo/bar/client_base_path/prepend'
+      );
+    });
+
+    it('prepend with clientBasePath provided but calls withoutClientBasePath', () => {
       expect(
-        new BasePath('/foo/bar', '/foo/bar', '/workspace').prepend('/prepend', {
+        new BasePath('/foo/bar', '/foo/bar', '/client_base_path').prepend('/prepend', {
           withoutClientBasePath: true,
         })
       ).toEqual('/foo/bar/prepend');
     });
 
-    it('remove with workspace provided', () => {
+    it('remove with clientBasePath provided', () => {
       expect(
-        new BasePath('/foo/bar', '/foo/bar', '/workspace').remove('/foo/bar/workspace/remove')
+        new BasePath('/foo/bar', '/foo/bar', '/client_base_path').remove(
+          '/foo/bar/client_base_path/remove'
+        )
       ).toEqual('/remove');
     });
 
-    it('remove with client base path provided but calls without client base path', () => {
+    it('remove with clientBasePath provided but calls withoutClientBasePath', () => {
       expect(
-        new BasePath('/foo/bar', '/foo/bar', '/workspace').remove('/foo/bar/workspace/remove', {
-          withoutClientBasePath: true,
-        })
-      ).toEqual('/workspace/remove');
+        new BasePath('/foo/bar', '/foo/bar', '/client_base_path').remove(
+          '/foo/bar/client_base_path/remove',
+          {
+            withoutClientBasePath: true,
+          }
+        )
+      ).toEqual('/client_base_path/remove');
     });
   });
 });
