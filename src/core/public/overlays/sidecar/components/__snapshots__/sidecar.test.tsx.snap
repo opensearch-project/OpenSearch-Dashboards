@@ -6,7 +6,7 @@ exports[`Sidecar component is rendered 1`] = `
   data-test-subj="sidecar-component-wrapper"
 >
   <button
-    class="resizableButton resizableButton--horizontal"
+    class="sidecar-resizableButton resizableButton--horizontal"
     data-test-subj="resizableButton"
     type="button"
   />
@@ -245,7 +245,7 @@ exports[`Sidecar component it should emit setSidecarConfig with new style when r
         onResize={[Function]}
       >
         <button
-          className="resizableButton resizableButton--horizontal"
+          className="sidecar-resizableButton resizableButton--horizontal"
           data-test-subj="resizableButton"
           onClick={[Function]}
           onMouseDown={[Function]}
@@ -675,7 +675,7 @@ exports[`Sidecar component it should have a height style when dockedDirection is
         onResize={[Function]}
       >
         <button
-          className="resizableButton resizableButton--vertical"
+          className="sidecar-resizableButton resizableButton--vertical"
           data-test-subj="resizableButton"
           onClick={[Function]}
           onMouseDown={[Function]}
@@ -1195,7 +1195,7 @@ exports[`Sidecar component it should have a height style when isHidden is true 1
         onResize={[Function]}
       >
         <button
-          className="resizableButton resizableButton--vertical"
+          className="sidecar-resizableButton resizableButton--vertical"
           data-test-subj="resizableButton"
           onClick={[Function]}
           onMouseDown={[Function]}
@@ -1572,7 +1572,7 @@ exports[`Sidecar component it should have a width style when dockedDirection is 
         onResize={[Function]}
       >
         <button
-          className="resizableButton resizableButton--horizontal"
+          className="sidecar-resizableButton resizableButton--horizontal"
           data-test-subj="resizableButton"
           onClick={[Function]}
           onMouseDown={[Function]}

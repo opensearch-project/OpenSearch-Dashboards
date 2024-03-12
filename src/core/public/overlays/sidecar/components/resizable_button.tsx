@@ -20,7 +20,7 @@ export const MIN_SIDECAR_SIZE = 350;
 export const ResizableButton = ({ dockedMode, onResize, flyoutSize }: Props) => {
   const isHorizontal = dockedMode !== SIDECAR_DOCKED_MODE.TAKEOVER;
 
-  const classes = classNames('resizableButton', {
+  const classes = classNames('sidecar-resizableButton', {
     'resizableButton--vertical': !isHorizontal,
     'resizableButton--horizontal': isHorizontal,
   });
