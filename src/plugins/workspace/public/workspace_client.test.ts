@@ -54,7 +54,7 @@ describe('#WorkspaceClient', () => {
       success: true,
     });
     await workspaceClient.enterWorkspace('foo');
-    expect(await workspaceClient.getCurrentWorkspaceId()).toEqual({
+    expect(workspaceClient.getCurrentWorkspaceId()).toEqual({
       success: true,
       result: 'foo',
     });
@@ -188,11 +188,15 @@ describe('#WorkspaceClient', () => {
   });
 
   it('#update', async () => {
-    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
     httpSetupMock.fetch.mockResolvedValue({
       success: true,
       result: {
-        workspaces: [],
+        workspaces: [
+          {
+            id: 'foo',
+          },
+        ],
       },
     });
     await workspaceClient.update('foo', {
@@ -206,6 +210,11 @@ describe('#WorkspaceClient', () => {
         },
       }),
     });
+    expect(workspaceMock.workspaceList$.getValue()).toEqual([
+      {
+        id: 'foo',
+      },
+    ]);
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
@@ -246,5 +255,26 @@ describe('#WorkspaceClient', () => {
         perPage: 999,
       }),
     });
+  });
+  it('#update with list gives error', async () => {
+    const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
+    let callTimes = 0;
+    httpSetupMock.fetch.mockImplementation(async () => {
+      callTimes++;
+      if (callTimes > 1) {
+        return {
+          success: false,
+          error: 'Something went wrong',
+        };
+      }
+
+      return {
+        success: true,
+      };
+    });
+    await workspaceClient.update('foo', {
+      name: 'foo',
+    });
+    expect(workspaceMock.workspaceList$.getValue()).toEqual([]);
   });
 });

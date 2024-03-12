@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import {
   HttpFetchError,
   HttpFetchOptions,
@@ -64,7 +65,9 @@ export class WorkspaceClient {
   }
 
   /**
-   * Initialize workspace list
+   * Initialize workspace list:
+   * 1. Retrieve the list of workspaces
+   * 2. Change the initialized flag to true
    */
   public async init() {
     await this.updateWorkspaceList();
@@ -72,7 +75,10 @@ export class WorkspaceClient {
   }
 
   /**
-   * Add a non-throw-error fetch method for internal use.
+   * Add a non-throw-error fetch method,
+   * so that consumers only need to care about
+   * if the success is false instead of wrapping the call with a try catch
+   * and judge the error both in catch clause and if(!success) cluase.
    */
   private safeFetch = async <T = any>(
     path: string,
@@ -102,10 +108,19 @@ export class WorkspaceClient {
     }
   };
 
+  /**
+   * Filter empty sub path and join all of the sub paths into a standard http path
+   *
+   * @param path
+   * @returns path
+   */
   private getPath(...path: Array<string | undefined>): string {
     return [WORKSPACES_API_BASE_URL, join(...path)].filter((item) => item).join('/');
   }
 
+  /**
+   * Fetch latest list of workspaces and update workspaceList$ to notify subscriptions
+   */
   private async updateWorkspaceList(): Promise<void> {
     const result = await this.list({
       perPage: 999,
@@ -113,9 +128,18 @@ export class WorkspaceClient {
 
     if (result?.success) {
       this.workspaces.workspaceList$.next(result.result.workspaces);
+    } else {
+      this.workspaces.workspaceList$.next([]);
     }
   }
 
+  /**
+   * This method will check if a valid workspace can be found by the given workspace id,
+   * If so, perform a side effect of updating the core.workspace.currentWorkspaceId$.
+   *
+   * @param id workspace id
+   * @returns {Promise<IResponse<null>>} result for this operation
+   */
   public async enterWorkspace(id: string): Promise<IResponse<null>> {
     const workspaceResp = await this.get(id);
     if (workspaceResp.success) {
@@ -129,12 +153,17 @@ export class WorkspaceClient {
     }
   }
 
-  public async getCurrentWorkspaceId(): Promise<IResponse<WorkspaceAttribute['id']>> {
+  /**
+   * A bypass layer to get current workspace id
+   */
+  public getCurrentWorkspaceId(): IResponse<WorkspaceAttribute['id']> {
     const currentWorkspaceId = this.workspaces.currentWorkspaceId$.getValue();
     if (!currentWorkspaceId) {
       return {
         success: false,
-        error: 'You are not in any workspace yet.',
+        error: i18n.translate('workspace.error.notInWorkspace', {
+          defaultMessage: 'You are not in any workspace yet.',
+        }),
       };
     }
 
@@ -144,8 +173,11 @@ export class WorkspaceClient {
     };
   }
 
+  /**
+   * Do a find in the latest workspace list with current workspace id
+   */
   public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttribute>> {
-    const currentWorkspaceIdResp = await this.getCurrentWorkspaceId();
+    const currentWorkspaceIdResp = this.getCurrentWorkspaceId();
     if (currentWorkspaceIdResp.success) {
       const currentWorkspaceResp = await this.get(currentWorkspaceIdResp.result);
       return currentWorkspaceResp;
@@ -155,15 +187,16 @@ export class WorkspaceClient {
   }
 
   /**
-   * Persists an workspace
+   * Create a workspace
    *
    * @param attributes
-   * @returns
+   * @param permissions
+   * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
    */
   public async create(
     attributes: Omit<WorkspaceAttribute, 'id'>,
     permissions?: WorkspacePermissionItem[]
-  ): Promise<IResponse<WorkspaceAttribute>> {
+  ): Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>> {
     const path = this.getPath();
 
     const result = await this.safeFetch<WorkspaceAttribute>(path, {
@@ -182,10 +215,10 @@ export class WorkspaceClient {
   }
 
   /**
-   * Deletes a workspace
+   * Deletes a workspace by workspace id
    *
    * @param id
-   * @returns
+   * @returns {Promise<IResponse<null>>} result for this operation
    */
   public async delete(id: string): Promise<IResponse<null>> {
     const result = await this.safeFetch<null>(this.getPath(id), { method: 'DELETE' });
@@ -227,10 +260,10 @@ export class WorkspaceClient {
   }
 
   /**
-   * Fetches a single workspace
+   * Fetches a single workspace by a workspace id
    *
    * @param {string} id
-   * @returns The workspace for the given id.
+   * @returns {Promise<IResponse<WorkspaceAttribute>>} The metadata of the workspace for the given id.
    */
   public get(id: string): Promise<IResponse<WorkspaceAttribute>> {
     const path = this.getPath(id);
@@ -244,7 +277,8 @@ export class WorkspaceClient {
    *
    * @param {string} id
    * @param {object} attributes
-   * @returns
+   * @param {WorkspacePermissionItem[]} permissions
+   * @returns {Promise<IResponse<boolean>>} result for this operation
    */
   public async update(
     id: string,
