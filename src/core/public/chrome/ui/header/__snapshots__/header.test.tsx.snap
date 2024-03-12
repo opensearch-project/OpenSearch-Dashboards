@@ -242,12 +242,12 @@ exports[`Header handles visibility and lock changes 1`] = `
   basePath={
     BasePath {
       "basePath": "/test",
+      "clientBasePath": "",
       "get": [Function],
       "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "clientBasePath": "",
     }
   }
   branding={Object {}}
@@ -5875,12 +5875,12 @@ exports[`Header handles visibility and lock changes 1`] = `
       basePath={
         BasePath {
           "basePath": "/test",
+          "clientBasePath": "",
           "get": [Function],
           "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
-          "clientBasePath": "",
         }
       }
       closeNav={[Function]}
@@ -6938,12 +6938,12 @@ exports[`Header renders condensed header 1`] = `
   basePath={
     BasePath {
       "basePath": "/test",
+      "clientBasePath": "",
       "get": [Function],
       "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
-      "clientBasePath": "",
     }
   }
   branding={
@@ -11352,12 +11352,12 @@ exports[`Header renders condensed header 1`] = `
       basePath={
         BasePath {
           "basePath": "/test",
+          "clientBasePath": "",
           "get": [Function],
           "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
-          "clientBasePath": "",
         }
       }
       closeNav={[Function]}

@@ -313,12 +313,12 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         },
         "basePath": BasePath {
           "basePath": "",
+          "clientBasePath": "",
           "get": [Function],
           "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "",
-          "clientBasePath": "",
         },
         "delete": [MockFunction],
         "fetch": [MockFunction],
