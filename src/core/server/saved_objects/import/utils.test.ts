@@ -3,16 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import multipleDataSourcesJSON from './test_utils/vega_spec_with_multiple_urls.json';
-import multipleDataSourcesJSONMds from './test_utils/vega_spec_with_multiple_urls_mds.json';
-import openSearchQueryJSON from './test_utils/vega_spec_with_opensearch_query.json';
-import nonOpenSearchQueryJSON from './test_utils/vega_spec_without_opensearch_query.json';
 import { readFileSync } from 'fs';
 import {
   extractVegaSpecFromSavedObject,
   getDataSourceTitleFromId,
   updateDataSourceNameInVegaSpec,
-  updateVegaSpecInSavedObject,
 } from './utils';
 import { parse } from 'hjson';
 import { isEqual } from 'lodash';
@@ -24,10 +19,17 @@ describe('updateDataSourceNameInVegaSpec()', () => {
     return readFileSync(join(__dirname, filepath)).toString();
   };
 
+  const loadJSONFromFile = (filepath: string) => {
+    return JSON.parse(readFileSync(join(__dirname, filepath)).toString());
+  };
+
   /*
   JSON Test cases
   */
   test('(JSON) When data has only one url body and it is an opensearch query, add data_source_name field to the spec', () => {
+    const openSearchQueryJSON = loadJSONFromFile(
+      './test_utils/vega_spec_with_opensearch_query.json'
+    );
     const jsonString = JSON.stringify(openSearchQueryJSON);
     const modifiedString = JSON.parse(
       updateDataSourceNameInVegaSpec({ spec: jsonString, newDataSourceName: 'newDataSource' })
@@ -50,6 +52,9 @@ describe('updateDataSourceNameInVegaSpec()', () => {
   });
 
   test('(JSON) When data has only one url body and it is not an opensearch query, change nothing', () => {
+    const nonOpenSearchQueryJSON = loadJSONFromFile(
+      './test_utils/vega_spec_without_opensearch_query.json'
+    );
     const jsonString = JSON.stringify(nonOpenSearchQueryJSON);
     const modifiedJSON = JSON.parse(
       updateDataSourceNameInVegaSpec({ spec: jsonString, newDataSourceName: 'noDataSource' })
@@ -58,6 +63,9 @@ describe('updateDataSourceNameInVegaSpec()', () => {
   });
 
   test('(JSON) When data has multiple url bodies, make sure only opensearch queries are updated with data_source_names', () => {
+    const multipleDataSourcesJSON = loadJSONFromFile(
+      './test_utils/vega_spec_with_multiple_urls.json'
+    );
     const jsonString = JSON.stringify(multipleDataSourcesJSON);
     const modifiedString = JSON.parse(
       updateDataSourceNameInVegaSpec({ spec: jsonString, newDataSourceName: 'newDataSource' })
@@ -90,6 +98,9 @@ describe('updateDataSourceNameInVegaSpec()', () => {
   });
 
   test('(JSON) When an MDS object does not reference local queries, return the same spec', () => {
+    const multipleDataSourcesJSONMds = loadJSONFromFile(
+      './test_utils/vega_spec_with_multiple_urls_mds.json'
+    );
     const jsonString = JSON.stringify(multipleDataSourcesJSONMds);
     const modifiedJSON = JSON.parse(
       updateDataSourceNameInVegaSpec({ spec: jsonString, newDataSourceName: 'noDataSource' })
@@ -98,6 +109,9 @@ describe('updateDataSourceNameInVegaSpec()', () => {
   });
 
   test('(JSON) When a previous datasource name is provided, the spec should update the datasource name', () => {
+    const multipleDataSourcesJSONMds = loadJSONFromFile(
+      './test_utils/vega_spec_with_multiple_urls_mds.json'
+    );
     const jsonString = JSON.stringify(multipleDataSourcesJSONMds);
     const modifiedString = JSON.parse(
       updateDataSourceNameInVegaSpec({
