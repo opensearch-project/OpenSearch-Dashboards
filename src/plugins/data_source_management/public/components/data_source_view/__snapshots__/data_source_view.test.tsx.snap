@@ -26,7 +26,7 @@ exports[`DataSourceView should render normally with local cluster not hidden 1`]
     closePopover={[Function]}
     display="inlineBlock"
     hasArrow={true}
-    id="dataSourceSViewContextMenuPopover"
+    id="dataSourceViewContextMenuPopover"
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
