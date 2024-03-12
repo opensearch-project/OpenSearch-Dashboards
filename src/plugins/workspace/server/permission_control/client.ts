@@ -30,6 +30,13 @@ export class SavedObjectsPermissionControl {
   private readonly logger: Logger;
   private _getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
   private auth?: HttpAuth;
+  /**
+   * Returns a saved objects client that is able to:
+   * 1. Read objects whose type is `workspace` because workspace is a hidden type and the permission control client will need to get the metadata of a specific workspace to do the permission check.
+   * 2. Bypass saved objects permission control wrapper because the permission control client is a dependency of the wrapper to provide the ACL validation capability. It will run into infinite loop if not bypass.
+   * @param request
+   * @returns SavedObjectsContract
+   */
   private getScopedClient(request: OpenSearchDashboardsRequest) {
     return this._getScopedClient?.(request, {
       excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
@@ -82,6 +89,15 @@ export class SavedObjectsPermissionControl {
     return getPrincipalsFromRequest(request, this.auth);
   }
 
+  /**
+   * Validates the permissions for a collection of saved objects based on their Access Control Lists (ACL).
+   * This method checks whether the provided principals have the specified permission modes for each saved object.
+   * If any saved object lacks the required permissions, the function logs details of unauthorized access.
+   *
+   * @remarks
+   * If a saved object doesn't have an ACL (e.g., config objects), it is considered as having the required permissions.
+   * The function logs detailed information when unauthorized access is detected, including the list of denied saved objects.
+   */
   public validateSavedObjectsACL(
     savedObjects: Array<Pick<SavedObject<unknown>, 'id' | 'type' | 'workspaces' | 'permissions'>>,
     principals: Principals,
@@ -100,7 +116,12 @@ export class SavedObjectsPermissionControl {
       const aclInstance = new ACL(savedObject.permissions);
       const hasPermission = aclInstance.hasPermission(permissionModes, principals);
       if (!hasPermission) {
-        notPermittedSavedObjects.push(savedObject);
+        notPermittedSavedObjects.push({
+          id: savedObject.id,
+          type: savedObject.type,
+          workspaces: savedObject.workspaces,
+          permissions: savedObject.permissions,
+        });
       }
       return hasPermission;
     });
@@ -144,38 +165,11 @@ export class SavedObjectsPermissionControl {
     }
 
     const principals = this.getPrincipalsFromRequest(request);
-    const deniedObjects: Array<
-      Pick<SavedObjectsBulkGetObject, 'id' | 'type'> & {
-        workspaces?: string[];
-        permissions?: Permissions;
-      }
-    > = [];
-    const hasPermissionToAllObjects = savedObjectsGet.every((item) => {
-      // for object that doesn't contain ACL like config, return true
-      if (!item.permissions) {
-        return true;
-      }
-      const aclInstance = new ACL(item.permissions);
-      const hasPermission = aclInstance.hasPermission(permissionModes, principals);
-      if (!hasPermission) {
-        deniedObjects.push({
-          id: item.id,
-          type: item.type,
-          workspaces: item.workspaces,
-          permissions: item.permissions,
-        });
-      }
-      return hasPermission;
-    });
-    if (!hasPermissionToAllObjects) {
-      this.logger.debug(
-        `Authorization failed, principals: ${JSON.stringify(
-          principals
-        )} has no [${permissionModes}] permissions on the requested saved object: ${JSON.stringify(
-          deniedObjects
-        )}`
-      );
-    }
+    const hasPermissionToAllObjects = this.validateSavedObjectsACL(
+      savedObjectsGet,
+      principals,
+      permissionModes
+    );
     return {
       success: true,
       result: hasPermissionToAllObjects,

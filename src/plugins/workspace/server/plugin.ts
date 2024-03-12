@@ -43,10 +43,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Workspaces service');
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
-    const isPermissionControlEnabled =
-      globalConfig.savedObjects.permission.enabled === undefined
-        ? true
-        : globalConfig.savedObjects.permission.enabled;
+    const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
 
     this.client = new WorkspaceClient(core);
 

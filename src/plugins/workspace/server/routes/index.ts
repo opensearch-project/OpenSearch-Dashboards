@@ -124,7 +124,7 @@ export function registerRoutes({
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { attributes, permissions: permissionsInRequest } = req.body;
-      const authInfo = permissionControlClient?.getPrincipalsFromRequest(req);
+      const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       let permissions: WorkspacePermissionItem[] = [];
       if (permissionsInRequest) {
         permissions = Array.isArray(permissionsInRequest)
@@ -133,10 +133,10 @@ export function registerRoutes({
       }
 
       // Assign workspace owner to current user
-      if (!!authInfo?.users?.length) {
+      if (!!principals?.users?.length) {
         permissions.push({
           type: 'user',
-          userId: authInfo.users[0],
+          userId: principals.users[0],
           modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
         });
       }
