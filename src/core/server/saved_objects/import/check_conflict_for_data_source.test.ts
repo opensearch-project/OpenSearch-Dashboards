@@ -5,7 +5,7 @@
 
 import { mockUuidv4 } from './__mocks__';
 import { SavedObjectReference, SavedObjectsImportRetry } from 'opensearch-dashboards/public';
-import { SavedObject } from '../types';
+import { SavedObject, SavedObjectsClientContract } from '../types';
 import { SavedObjectsErrorHelpers } from '..';
 import {
   checkConflictsForDataSource,
@@ -23,6 +23,42 @@ const createObject = (type: string, id: string): SavedObjectType => ({
   attributes: { title: 'some-title' },
   references: (Symbol() as unknown) as SavedObjectReference[],
 });
+
+const createVegaVisualizationObject = (id: string): SavedObjectType => {
+  const visState =
+    id.split('_').length > 1
+      ? '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: old-datasource-title\\n    }\\n  }\\n}"}}'
+      : '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n    }\\n  }\\n}"}}';
+  return {
+    type: 'visualization',
+    id,
+    attributes: { title: 'some-title', visState },
+    references: (Symbol() as unknown) as SavedObjectReference[],
+  } as SavedObjectType;
+};
+
+const getSavedObjectClient = (): SavedObjectsClientContract => {
+  const savedObject = {} as SavedObjectsClientContract;
+  savedObject.get = jest.fn().mockImplementation((type, id) => {
+    if (type === 'data-source' && id === 'old-datasource-id') {
+      return Promise.resolve({
+        attributes: {
+          title: 'old-datasource-title',
+        },
+      });
+    } else if (type === 'data-source') {
+      return Promise.resolve({
+        attributes: {
+          title: 'some-datasource-title',
+        },
+      });
+    }
+
+    return Promise.resolve({});
+  });
+
+  return savedObject;
+};
 
 const getResultMock = {
   conflict: (type: string, id: string) => {
@@ -56,6 +92,7 @@ describe('#checkConflictsForDataSource', () => {
     retries?: SavedObjectsImportRetry[];
     createNewCopies?: boolean;
     dataSourceId?: string;
+    savedObjectsClient?: SavedObjectsClientContract;
   }): ConflictsForDataSourceParams => {
     return { ...partial };
   };
@@ -139,5 +176,76 @@ describe('#checkConflictsForDataSource', () => {
       ],
       importIdMap: new Map(),
     });
+  });
+
+  /*
+  Vega test cases
+  */
+  it('will attach datasource name to Vega spec when importing from local to datasource', async () => {
+    const vegaSavedObject = createVegaVisualizationObject('some-object-id');
+    const params = setupParams({
+      objects: [vegaSavedObject],
+      ignoreRegularConflicts: true,
+      dataSourceId: 'some-datasource-id',
+      savedObjectsClient: getSavedObjectClient(),
+    });
+    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
+
+    expect(checkConflictsForDataSourceResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [
+          {
+            ...vegaSavedObject,
+            attributes: {
+              title: 'some-title',
+              visState:
+                '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: some-datasource-title\\n    }\\n  }\\n}"}}',
+            },
+            id: 'some-datasource-id_some-object-id',
+          },
+        ],
+        errors: [],
+        importIdMap: new Map([
+          [
+            `visualization:some-object-id`,
+            { id: 'some-datasource-id_some-object-id', omitOriginId: true },
+          ],
+        ]),
+      })
+    );
+  });
+
+  it('will update datasource name to Vega spec when importing from datasource to different datasource', async () => {
+    const vegaSavedObject = createVegaVisualizationObject('old-datasource-id_some-object-id');
+    const params = setupParams({
+      objects: [vegaSavedObject],
+      ignoreRegularConflicts: true,
+      dataSourceId: 'some-datasource-id',
+      savedObjectsClient: getSavedObjectClient(),
+    });
+    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
+
+    expect(checkConflictsForDataSourceResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [
+          {
+            ...vegaSavedObject,
+            attributes: {
+              title: 'some-title',
+              visState:
+                '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: some-datasource-title\\n    }\\n  }\\n}"}}',
+            },
+            id: 'some-datasource-id_some-object-id',
+          },
+        ],
+        errors: [],
+        importIdMap: new Map([
+          [
+            `visualization:some-object-id`,
+            { id: 'some-datasource-id_some-object-id', omitOriginId: true },
+          ],
+        ]),
+      })
+    );
   });
 });
