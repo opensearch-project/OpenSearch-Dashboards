@@ -77,6 +77,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       logger: this.logger,
       client: this.client as IWorkspaceClientImpl,
       permissionControlClient: this.permissionControl,
+      isPermissionControlEnabled,
     });
 
     core.capabilities.registerProvider(() => ({

@@ -46,11 +46,13 @@ export function registerRoutes({
   logger,
   http,
   permissionControlClient,
+  isPermissionControlEnabled,
 }: {
   client: IWorkspaceClientImpl;
   logger: Logger;
   http: CoreSetup['http'];
   permissionControlClient?: SavedObjectsPermissionControlContract;
+  isPermissionControlEnabled: boolean;
 }) {
   const router = http.createRouter();
   router.post(
@@ -149,7 +151,7 @@ export function registerRoutes({
         },
         {
           ...attributes,
-          ...(permissions.length ? { permissions } : {}),
+          ...(isPermissionControlEnabled && permissions.length ? { permissions } : {}),
         }
       );
       return res.ok({ body: result });
@@ -187,7 +189,9 @@ export function registerRoutes({
         id,
         {
           ...attributes,
-          ...(finalPermissions.length ? { permissions: finalPermissions } : {}),
+          ...(isPermissionControlEnabled && finalPermissions.length
+            ? { permissions: finalPermissions }
+            : {}),
         }
       );
       return res.ok({ body: result });
