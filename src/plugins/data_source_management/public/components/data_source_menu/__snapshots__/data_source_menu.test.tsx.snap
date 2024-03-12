@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DataSourceMenu should render normally with local cluster is hidden 1`] = `
+exports[`DataSourceMenu should render data source selectable only with local cluster is hidden 1`] = `
 <Fragment>
   <EuiHeaderLinks
     className="osdTopNavMenu myclass"
@@ -23,6 +23,7 @@ exports[`DataSourceMenu should render normally with local cluster is hidden 1`] 
           "remove": [MockFunction],
         }
       }
+      onSelectedDataSource={[MockFunction]}
       savedObjectsClient={
         Object {
           "find": [MockFunction],
@@ -33,7 +34,7 @@ exports[`DataSourceMenu should render normally with local cluster is hidden 1`] 
 </Fragment>
 `;
 
-exports[`DataSourceMenu should render normally with local cluster not hidden 1`] = `
+exports[`DataSourceMenu should render data source selectable only with local cluster not hidden 1`] = `
 <Fragment>
   <EuiHeaderLinks
     className="osdTopNavMenu myclass"
@@ -56,11 +57,26 @@ exports[`DataSourceMenu should render normally with local cluster not hidden 1`]
           "remove": [MockFunction],
         }
       }
+      onSelectedDataSource={[MockFunction]}
       savedObjectsClient={
         Object {
           "find": [MockFunction],
         }
       }
+    />
+  </EuiHeaderLinks>
+</Fragment>
+`;
+
+exports[`DataSourceMenu should render data source view only 1`] = `
+<Fragment>
+  <EuiHeaderLinks
+    className="osdTopNavMenu myclass"
+    data-test-subj="top-nav"
+    gutterSize="xs"
+  >
+    <DataSourceView
+      fullWidth={true}
     />
   </EuiHeaderLinks>
 </Fragment>
