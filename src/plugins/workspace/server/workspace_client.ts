@@ -186,7 +186,23 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public async delete(requestDetail: IRequestDetail, id: string): Promise<IResponse<boolean>> {
     try {
-      await this.getSavedObjectClientsFromRequestDetail(requestDetail).delete(WORKSPACE_TYPE, id);
+      const savedObjectClient = this.getSavedObjectClientsFromRequestDetail(requestDetail);
+      const workspaceInDB: SavedObject<WorkspaceAttribute> = await savedObjectClient.get(
+        WORKSPACE_TYPE,
+        id
+      );
+      if (workspaceInDB.attributes.reserved) {
+        return {
+          success: false,
+          error: i18n.translate('workspace.deleteReservedWorkspace.errorMessage', {
+            defaultMessage: 'Reserved workspace {id} is not allowed to delete.',
+            values: { id: workspaceInDB.id },
+          }),
+        };
+      }
+      await savedObjectClient.deleteByWorkspace(id);
+      // delete workspace itself at last, deleteByWorkspace depends on the workspace to do permission check
+      await savedObjectClient.delete(WORKSPACE_TYPE, id);
       return {
         success: true,
         result: true,
