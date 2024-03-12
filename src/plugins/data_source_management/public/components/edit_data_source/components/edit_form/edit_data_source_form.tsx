@@ -176,18 +176,15 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   onChangeAuthType = (authType: AuthType) => {
-    let registeredAuthCredentials;
-    if (this.props.existingDataSource && authType === this.props.existingDataSource.auth.type) {
-      registeredAuthCredentials = this.props.existingDataSource.auth.credentials;
-    } else {
-      const credentials = this.state.auth.credentials;
-
-      registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
-        (credentials ?? {}) as { [key: string]: string },
-        authType,
-        this.authenticationMethodRegistery
-      );
-    }
+    const credentials =
+      this.props.existingDataSource && authType === this.props.existingDataSource.auth.type
+        ? this.props.existingDataSource.auth.credentials
+        : this.state.auth.credentials;
+    const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
+      (credentials ?? {}) as { [key: string]: string },
+      authType,
+      this.authenticationMethodRegistery
+    );
 
     this.setState(
       {
@@ -1067,12 +1064,19 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       return false;
     }
 
+    const existingAuthCredentials = extractRegisteredAuthTypeCredentials(
+      (auth?.credentials ?? {}) as { [key: string]: string },
+      currentAuth.type,
+      this.authenticationMethodRegistery
+    );
+
     const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
       (currentAuth?.credentials ?? {}) as { [key: string]: string },
       currentAuth.type,
       this.authenticationMethodRegistery
     );
-    return !deepEqual(auth?.credentials ?? {}, registeredAuthCredentials);
+
+    return !deepEqual(existingAuthCredentials, registeredAuthCredentials);
   };
 
   renderBottomBar = () => {
