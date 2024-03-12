@@ -53,17 +53,9 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
   public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
     const opensearchDashboardsVersion = injectedMetadata.getOpenSearchDashboardsVersion();
     let clientBasePath = '';
-    const plugins = injectedMetadata.getPlugins();
-    const findWorkspaceConfig = plugins.find((plugin) => plugin.id === 'workspace');
-    // Only try to get workspace id from url when workspace feature is enabled
-    if (findWorkspaceConfig) {
-      const workspaceId = getWorkspaceIdFromUrl(
-        window.location.href,
-        injectedMetadata.getBasePath()
-      );
-      if (workspaceId) {
-        clientBasePath = `${WORKSPACE_PATH_PREFIX}/${workspaceId}`;
-      }
+    const workspaceId = getWorkspaceIdFromUrl(window.location.href);
+    if (workspaceId) {
+      clientBasePath = `${WORKSPACE_PATH_PREFIX}/${workspaceId}`;
     }
     const basePath = new BasePath(
       injectedMetadata.getBasePath(),
