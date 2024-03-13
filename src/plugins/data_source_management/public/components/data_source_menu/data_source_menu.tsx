@@ -15,11 +15,14 @@ import {
 import { MountPointPortal } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceSelectable } from './data_source_selectable';
 import { DataSourceOption } from '../data_source_selector/data_source_selector';
+import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';
 
 export interface DataSourceMenuProps {
   showDataSourceSelectable?: boolean;
   showDataSourceView?: boolean;
+  showDataSourceAggregatedView?: boolean;
+  activeDatasourceIds?: string[];
   appName: string;
   savedObjects?: SavedObjectsClientContract;
   notifications?: NotificationsStart;
@@ -31,6 +34,7 @@ export interface DataSourceMenuProps {
   selectedOption?: DataSourceOption[];
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
   filterFn?: (dataSource: any) => boolean;
+  displayAllCompatibleDataSources?: boolean;
 }
 
 export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null {
@@ -40,14 +44,17 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
     dataSourceCallBackFunc,
     showDataSourceSelectable,
     disableDataSourceSelectable,
+    showDataSourceAggregatedView,
     fullWidth,
     hideLocalCluster,
     selectedOption,
     showDataSourceView,
     filterFn,
+    activeDatasourceIds,
+    displayAllCompatibleDataSources,
   } = props;
 
-  if (!showDataSourceSelectable && !showDataSourceView) {
+  if (!showDataSourceSelectable && !showDataSourceView && !showDataSourceAggregatedView) {
     return null;
   }
 
@@ -81,6 +88,21 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
     );
   }
 
+  function renderDataSourceAggregatedView(): ReactElement | null {
+    if (!showDataSourceAggregatedView) return null;
+    return (
+      <DataSourceAggregatedView
+        fullWidth={fullWidth}
+        hideLocalCluster={hideLocalCluster || false}
+        savedObjectsClient={savedObjects!}
+        notifications={notifications!.toasts}
+        activeDatasourceIds={activeDatasourceIds}
+        filterFn={filterFn}
+        displayAllCompatibleDataSources={displayAllCompatibleDataSources || false}
+      />
+    );
+  }
+
   function renderLayout() {
     const { setMenuMountPoint } = props;
     const menuClassName = classNames('osdTopNavMenu', props.className);
@@ -88,6 +110,7 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
       return (
         <>
           <MountPointPortal setMountPoint={setMenuMountPoint}>
+            {renderDataSourceAggregatedView()}
             {renderDataSourceSelectable(menuClassName)}
             {renderDataSourceView(menuClassName)}
           </MountPointPortal>
@@ -108,6 +131,9 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
 
 DataSourceMenu.defaultProps = {
   disableDataSourceSelectable: false,
-  showDataSourceView: false,
+  showDataSourceAggregatedView: false,
   showDataSourceSelectable: false,
+  displayAllCompatibleDataSources: false,
+  showDataSourceView: false,
+  hideLocalCluster: false,
 };

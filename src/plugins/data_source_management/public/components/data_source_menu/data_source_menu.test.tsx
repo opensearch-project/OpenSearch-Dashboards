@@ -66,4 +66,18 @@ describe('DataSourceMenu', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
+  it('should render data source aggregated view', () => {
+    component = shallow(
+      <DataSourceMenu
+        showDataSourceAggregatedView={true}
+        appName={'myapp'}
+        fullWidth={true}
+        className={'myclass'}
+        savedObjects={client}
+        notifications={notifications}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
 });
