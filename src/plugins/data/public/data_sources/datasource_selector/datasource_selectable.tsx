@@ -8,11 +8,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ISourceDataSet, IndexPatternOption } from '../datasource';
 import { DataSourceType, GenericDataSource } from '../datasource_services';
-import {
-  DataSourceGroup,
-  DataSourceSelectableProps,
-  DataSourceSelectorConfigurations,
-} from './types';
+import { DataSourceGroup, DataSourceSelectableProps } from './types';
 
 type DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS' | 's3glue' | 'spark';
 
@@ -74,10 +70,7 @@ export const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetTyp
 };
 
 // Convert data sets into a structured format suitable for selector rendering.
-const getSourceList = (
-  allDataSets: ISourceDataSet[],
-  dataSourceSelectorConfigs: DataSourceSelectorConfigurations
-) => {
+const getSourceList = (allDataSets: ISourceDataSet[]) => {
   const finalList = [] as DataSourceGroup[];
   allDataSets.forEach((curDataSet) => {
     const typeKey = curDataSet.ds.getType() as DataSourceTypeKey;
@@ -90,7 +83,9 @@ const getSourceList = (
     // add '- Opens in Log Explorer' to hint user that selecting these types of data sources
     // will lead to redirection to log explorer
     if (typeKey !== 'DEFAULT_INDEX_PATTERNS') {
-      groupName = `${groupName}${dataSourceSelectorConfigs.customGroupTitleExtension || ''}`;
+      groupName = `${groupName}${i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
+        defaultMessage: ' - Opens in Log Explorer',
+      })}`;
     }
 
     const existingGroup = finalList.find((item) => item.label === groupName);
@@ -128,17 +123,16 @@ export const DataSourceSelectable = ({
   setDataSourceOptionList,
   onGetDataSetError, //   onGetDataSetError, Callback for handling get data set errors. Ensure it's memoized.
   singleSelection = { asPlainText: true },
-  dataSourceSelectorConfigs,
   ...comboBoxProps
 }: DataSourceSelectableProps) => {
   // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
     Promise.all(getDataSets(dataSources))
       .then((results) => {
-        setDataSourceOptionList(getSourceList(results, dataSourceSelectorConfigs));
+        setDataSourceOptionList(getSourceList(results));
       })
       .catch((e) => onGetDataSetError(e));
-  }, [dataSources, setDataSourceOptionList, onGetDataSetError, dataSourceSelectorConfigs]);
+  }, [dataSources, setDataSourceOptionList, onGetDataSetError]);
 
   const handleSourceChange = useCallback(
     (selectedOptions: any) => onDataSourceSelect(selectedOptions),

@@ -4,30 +4,17 @@
  */
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import {
-  EuiPageSideBar,
-  EuiSplitPanel,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiModalHeaderTitle,
-  EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPageSideBar, EuiSplitPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSourceGroup, DataSourceSelectable, DataSourceType } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import {
+  toMountPoint,
+  useOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
-
-const LOG_EXPLORER_TITLE_HINT = i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
-  defaultMessage: ' - Opens in Log Explorer',
-});
-const DATA_SOURCE_SELECTOR_CONFIGS = { customGroupTitleExtension: LOG_EXPLORER_TITLE_HINT };
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
@@ -35,13 +22,13 @@ export const Sidebar: FC = ({ children }) => {
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSourceType[]>([]);
-  const [modalContent, setModalContent] = useState<React.ReactNode | null>(null);
 
   const {
     services: {
       data: { indexPatterns, dataSources },
       notifications: { toasts },
       application,
+      overlays,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
@@ -85,60 +72,41 @@ export const Sidebar: FC = ({ children }) => {
     [application]
   );
 
-  const getRedirectModal = useCallback(
-    (dsName: string, dsType: string) => {
-      return (
-        <EuiModal onClose={() => setModalContent(null)}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <h1>
-                {i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalTitle', {
-                  defaultMessage: 'Open in Log Explorer',
-                })}
-              </h1>
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText>
-              {i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalMessage', {
-                defaultMessage:
-                  'Selecting this data source will open the Log Explorer application, where you can query \
-                data using PPL/SQL.',
-              })}
-            </EuiText>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={() => setModalContent(null)}>
-              {i18n.translate(
-                'dataExplorer.sidebar.LogExplorerRedirectionModalFooterCancelButtonTxt',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
-            </EuiButtonEmpty>
-            <EuiButton
-              onClick={() => {
-                redirectToLogExplorer(dsName, dsType);
-              }}
-              data-test-subj="dataExplorer__DSSModalOpenInExplorerBtn"
-              fill
-            >
-              {i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalFooterButtonTxt', {
-                defaultMessage: 'Open in Log Explorer ',
-              })}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      );
-    },
-    [redirectToLogExplorer]
-  );
-
   const showModal = useCallback(
-    (dsName: string, dsType: string) => {
-      setModalContent(getRedirectModal(dsName, dsType));
+    async (dsName: string, dsType: string) => {
+      const confirmed = await overlays.openConfirm(
+        toMountPoint(
+          <EuiText>
+            {i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalMessage', {
+              defaultMessage:
+                'Selecting this data source will open the Log Explorer application, where you can query \
+          data using PPL/SQL.',
+            })}
+          </EuiText>
+        ),
+        {
+          title: i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalTitle', {
+            defaultMessage: 'Open in Log Explorer',
+          }),
+          cancelButtonText: i18n.translate(
+            'dataExplorer.sidebar.LogExplorerRedirectionModalFooterCancelButtonTxt',
+            {
+              defaultMessage: 'Cancel',
+            }
+          ),
+          confirmButtonText: i18n.translate(
+            'dataExplorer.sidebar.LogExplorerRedirectionModalFooterButtonTxt',
+            {
+              defaultMessage: 'Open in Log Explorer ',
+            }
+          ),
+        }
+      );
+      if (confirmed) {
+        redirectToLogExplorer(dsName, dsType);
+      }
     },
-    [setModalContent, getRedirectModal]
+    [overlays, redirectToLogExplorer]
   );
 
   const handleSourceSelection = useCallback(
@@ -192,14 +160,12 @@ export const Sidebar: FC = ({ children }) => {
             onDataSourceSelect={handleSourceSelection}
             selectedSources={selectedSources}
             onGetDataSetError={handleGetDataSetError}
-            dataSourceSelectorConfigs={DATA_SOURCE_SELECTOR_CONFIGS}
             fullWidth
           />
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>
-        {modalContent}
       </EuiSplitPanel.Outer>
     </EuiPageSideBar>
   );

@@ -8,7 +8,7 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { Sidebar } from './index'; // Adjust the import path as necessary
 import { Provider } from 'react-redux';
 import configureMockStore from 'redux-mock-store';
-import { MockS3DataSource } from './index.test.mock';
+import { MockS3DataSource } from '../../../../discover/public/__mock__/index.test.mock';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 
@@ -20,6 +20,7 @@ const store = mockStore(initialState);
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => {
   return {
+    toMountPoint: jest.fn().mockImplementation((component) => () => component),
     useOpenSearchDashboards: jest.fn().mockReturnValue({
       services: {
         data: {
@@ -48,6 +49,9 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => {
         },
         application: {
           navigateToUrl: jest.fn(),
+        },
+        overlays: {
+          openConfirm: jest.fn(),
         },
       },
     }),
