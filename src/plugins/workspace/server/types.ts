@@ -136,3 +136,11 @@ export type WorkspacePermissionItem = {
     | WorkspacePermissionMode.Write
   >;
 } & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
+
+export interface WorkspacePluginSetup {
+  client: IWorkspaceClientImpl;
+}
+
+export interface WorkspacePluginStart {
+  client: IWorkspaceClientImpl;
+}

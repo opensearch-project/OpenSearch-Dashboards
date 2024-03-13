@@ -17,7 +17,7 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../common/constants';
-import { IWorkspaceClientImpl } from './types';
+import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
@@ -27,7 +27,7 @@ import {
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
 
-export class WorkspacePlugin implements Plugin<{}, {}> {
+export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
   private client?: IWorkspaceClientImpl;
   private workspaceConflictControl?: WorkspaceConflictSavedObjectsClientWrapper;
