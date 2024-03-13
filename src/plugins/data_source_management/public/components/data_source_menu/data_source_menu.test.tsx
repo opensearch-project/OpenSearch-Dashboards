@@ -21,7 +21,7 @@ describe('DataSourceMenu', () => {
     } as any;
   });
 
-  it('should render normally with local cluster not hidden', () => {
+  it('should render data source selectable only with local cluster not hidden', () => {
     component = shallow(
       <DataSourceMenu
         showDataSourceSelectable={true}
@@ -32,12 +32,13 @@ describe('DataSourceMenu', () => {
         hideLocalCluster={false}
         disableDataSourceSelectable={false}
         className={'myclass'}
+        dataSourceCallBackFunc={jest.fn()}
       />
     );
     expect(component).toMatchSnapshot();
   });
 
-  it('should render normally with local cluster is hidden', () => {
+  it('should render data source selectable only with local cluster is hidden', () => {
     component = shallow(
       <DataSourceMenu
         showDataSourceSelectable={true}
@@ -47,6 +48,19 @@ describe('DataSourceMenu', () => {
         fullWidth={true}
         hideLocalCluster={true}
         disableDataSourceSelectable={false}
+        className={'myclass'}
+        dataSourceCallBackFunc={jest.fn()}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render data source view only', () => {
+    component = shallow(
+      <DataSourceMenu
+        showDataSourceView={true}
+        appName={'myapp'}
+        fullWidth={true}
         className={'myclass'}
       />
     );
