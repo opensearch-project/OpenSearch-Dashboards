@@ -34,7 +34,7 @@ import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/con
 
 export const configSchema = schema.object({
   uiMetric: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.boolean({ defaultValue: false }),
     debug: schema.boolean({ defaultValue: schema.contextRef('dev') }),
   }),
   maximumWaitTimeForAllCollectorsInS: schema.number({
