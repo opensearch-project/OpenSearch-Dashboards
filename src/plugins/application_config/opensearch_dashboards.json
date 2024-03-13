@@ -1,0 +1,9 @@
+{
+  "id": "applicationConfig",
+  "version": "opensearchDashboards",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}

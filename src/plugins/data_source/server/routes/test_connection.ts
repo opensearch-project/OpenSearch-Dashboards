@@ -9,12 +9,17 @@ import { AuthType, DataSourceAttributes, SigV4ServiceName } from '../../common/d
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
 import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { CustomApiSchemaRegistry } from '../schema_registry/custom_api_schema_registry';
 
-export const registerTestConnectionRoute = (
+export const registerTestConnectionRoute = async (
   router: IRouter,
   dataSourceServiceSetup: DataSourceServiceSetup,
-  cryptography: CryptographyServiceSetup
+  cryptography: CryptographyServiceSetup,
+  authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
+  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
 ) => {
+  const authRegistry = await authRegistryPromise;
   router.post(
     {
       path: '/internal/data-source-management/validate',
@@ -24,30 +29,45 @@ export const registerTestConnectionRoute = (
           dataSourceAttr: schema.object({
             endpoint: schema.string(),
             auth: schema.maybe(
-              schema.object({
-                type: schema.oneOf([
-                  schema.literal(AuthType.UsernamePasswordType),
-                  schema.literal(AuthType.NoAuth),
-                  schema.literal(AuthType.SigV4),
-                ]),
-                credentials: schema.maybe(
-                  schema.oneOf([
-                    schema.object({
-                      username: schema.string(),
-                      password: schema.string(),
-                    }),
-                    schema.object({
-                      region: schema.string(),
-                      accessKey: schema.string(),
-                      secretKey: schema.string(),
-                      service: schema.oneOf([
-                        schema.literal(SigV4ServiceName.OpenSearch),
-                        schema.literal(SigV4ServiceName.OpenSearchServerless),
-                      ]),
-                    }),
-                  ])
-                ),
-              })
+              schema.oneOf([
+                schema.object({
+                  type: schema.literal(AuthType.NoAuth),
+                  credentials: schema.object({}),
+                }),
+                schema.object({
+                  type: schema.literal(AuthType.UsernamePasswordType),
+                  credentials: schema.object({
+                    username: schema.string(),
+                    password: schema.string(),
+                  }),
+                }),
+                schema.object({
+                  type: schema.literal(AuthType.SigV4),
+                  credentials: schema.object({
+                    region: schema.string(),
+                    accessKey: schema.string(),
+                    secretKey: schema.string(),
+                    service: schema.oneOf([
+                      schema.literal(SigV4ServiceName.OpenSearch),
+                      schema.literal(SigV4ServiceName.OpenSearchServerless),
+                    ]),
+                  }),
+                }),
+                schema.object({
+                  type: schema.string({
+                    validate: (value) => {
+                      if (
+                        value === AuthType.NoAuth ||
+                        value === AuthType.UsernamePasswordType ||
+                        value === AuthType.SigV4
+                      ) {
+                        return `Must not be no_auth or username_password or sigv4 for registered auth types`;
+                      }
+                    },
+                  }),
+                  credentials: schema.nullable(schema.any()),
+                }),
+              ])
             ),
           }),
         }),
@@ -63,6 +83,9 @@ export const registerTestConnectionRoute = (
             cryptography,
             dataSourceId,
             testClientDataSourceAttr: dataSourceAttr as DataSourceAttributes,
+            request,
+            authRegistry,
+            customApiSchemaRegistryPromise,
           }
         );
 

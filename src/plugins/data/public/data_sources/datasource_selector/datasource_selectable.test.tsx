@@ -181,4 +181,47 @@ describe('DataSourceSelectable', () => {
     ];
     expect(optionTexts).toEqual(expectedIndexPatternSortedOrder);
   });
+
+  it('should allow display and selection of duplicated index patterns based on unique key', async () => {
+    const mockDataSourceOptionListWithDuplicates = [
+      {
+        label: 'Index patterns',
+        options: [
+          { label: 'duplicate-index-pattern', key: 'unique-key-1' },
+          { label: 'unique-index-pattern-1', key: 'unique-key-2' },
+          { label: 'duplicate-index-pattern', key: 'unique-key-3' },
+          { label: 'unique-index-pattern-2', key: 'unique-key-4' },
+        ],
+      },
+    ] as any;
+
+    const handleSelect = jest.fn();
+
+    render(
+      <DataSourceSelectable
+        dataSources={[
+          ({
+            getDataSet: jest.fn().mockResolvedValue([]),
+            getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
+            getName: jest.fn().mockReturnValue('Index patterns'),
+          } as unknown) as DataSourceType,
+        ]}
+        dataSourceOptionList={mockDataSourceOptionListWithDuplicates}
+        selectedSources={selectedSourcesMock}
+        onDataSourceSelect={handleSelect}
+        setDataSourceOptionList={setDataSourceOptionListMock}
+        onGetDataSetError={onFetchDataSetErrorMock}
+      />
+    );
+
+    const button = screen.getByLabelText('Open list of options');
+    fireEvent.click(button);
+
+    const optionsToSelect = screen.getAllByText('duplicate-index-pattern');
+    fireEvent.click(optionsToSelect[1]);
+
+    expect(handleSelect).toHaveBeenCalledWith(
+      expect.objectContaining([{ key: 'unique-key-3', label: 'duplicate-index-pattern' }])
+    );
+  });
 });

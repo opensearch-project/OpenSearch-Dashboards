@@ -34,14 +34,22 @@ interface HeaderProps {
   goToNextStep: (dataSourceRef: DataSourceRef) => void;
   isNextStepDisabled: boolean;
   stepInfo: StepInfo;
+  hideLocalCluster: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
-  const { dataSourceRef, onDataSourceSelected, goToNextStep, isNextStepDisabled, stepInfo } = props;
+  const {
+    dataSourceRef,
+    onDataSourceSelected,
+    goToNextStep,
+    isNextStepDisabled,
+    stepInfo,
+    hideLocalCluster,
+  } = props;
   const { currentStepNumber, totalStepNumber } = stepInfo;
 
-  const [defaultChecked, setDefaultChecked] = useState(true);
-  const [dataSourceChecked, setDataSourceChecked] = useState(false);
+  const [defaultChecked, setDefaultChecked] = useState(!hideLocalCluster);
+  const [dataSourceChecked, setDataSourceChecked] = useState(hideLocalCluster);
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -113,34 +121,38 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
             defaultMessage="Pick a data source within which to configure index patterns."
           />
         </EuiText>
-        <EuiSpacer size="m" />
-        <EuiRadio
-          data-test-subj="createIndexPatternStepDataSourceUseDefaultRadio"
-          id={'useDefault'}
-          label={
-            <FormattedMessage
-              id="indexPatternManagement.createIndexPattern.stepDataSource.useDefaultLabel"
-              defaultMessage="Use default data source"
+        {!hideLocalCluster && (
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="m" />
+            <EuiRadio
+              data-test-subj="createIndexPatternStepDataSourceUseDefaultRadio"
+              id={'useDefault'}
+              label={
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.stepDataSource.useDefaultLabel"
+                  defaultMessage="Use default data source"
+                />
+              }
+              checked={defaultChecked}
+              onChange={(e) => onChangeDefaultChecked(e)}
+              compressed
             />
-          }
-          checked={defaultChecked}
-          onChange={(e) => onChangeDefaultChecked(e)}
-          compressed
-        />
-        <EuiSpacer size="m" />
-        <EuiRadio
-          data-test-subj="createIndexPatternStepDataSourceUseDataSourceRadio"
-          id={'useDataSource'}
-          label={
-            <FormattedMessage
-              id="indexPatternManagement.createIndexPattern.stepDataSource.useDataSourceLabel"
-              defaultMessage="Use external data source connection"
+            <EuiSpacer size="m" />
+            <EuiRadio
+              data-test-subj="createIndexPatternStepDataSourceUseDataSourceRadio"
+              id={'useDataSource'}
+              label={
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.stepDataSource.useDataSourceLabel"
+                  defaultMessage="Use external data source connection"
+                />
+              }
+              checked={dataSourceChecked}
+              onChange={(e) => onChangeDataSourceChecked(e)}
+              compressed
             />
-          }
-          checked={dataSourceChecked}
-          onChange={(e) => onChangeDataSourceChecked(e)}
-          compressed
-        />
+          </EuiFlexItem>
+        )}
         {dataSourceChecked && (
           <EuiFlexItem grow={false}>
             <EuiSpacer size="m" />

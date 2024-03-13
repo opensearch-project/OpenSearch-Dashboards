@@ -24,6 +24,7 @@ import './discover_canvas.scss';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const {
     services: { uiSettings },
@@ -89,9 +90,15 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   }, [dispatch, filteredColumns, indexPattern]);
 
   const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
+  const scrollToTop = () => {
+    if (panelRef.current) {
+      panelRef.current.scrollTop = 0;
+    }
+  };
 
   return (
     <EuiPanel
+      panelRef={panelRef}
       hasBorder={false}
       hasShadow={false}
       color="transparent"
@@ -114,7 +121,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       {fetchState.status === ResultStatus.READY && (
         <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
           <MemoizedDiscoverChartContainer {...fetchState} />
-          <MemoizedDiscoverTable rows={rows} />
+          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
         </EuiPanel>
       )}
     </EuiPanel>

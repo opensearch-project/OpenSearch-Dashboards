@@ -3,26 +3,58 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
 import { PLUGIN_NAME } from '../common';
+import { createDataSourceSelector } from './components/data_source_selector/create_data_source_selector';
 
 import { ManagementSetup } from '../../management/public';
 import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
 import { DataSourceColumn } from './components/data_source_column/data_source_column';
+import {
+  AuthenticationMethod,
+  IAuthenticationMethodRegistery,
+  AuthenticationMethodRegistery,
+} from './auth_registry';
+import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
+import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
+import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
+import { DataSourceMenuProps } from './components/data_source_menu/data_source_menu';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   indexPatternManagement: IndexPatternManagementSetup;
+  dataSource: DataSourcePluginSetup;
+}
+
+export interface DataSourceManagementPluginSetup {
+  registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
+  ui: {
+    DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
+    DataSourceMenu: React.ComponentType<DataSourceMenuProps>;
+  };
+}
+
+export interface DataSourceManagementPluginStart {
+  getAuthenticationMethodRegistery: () => IAuthenticationMethodRegistery;
 }
 
 const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
-  implements Plugin<void, void, DataSourceManagementSetupDependencies> {
+  implements
+    Plugin<
+      DataSourceManagementPluginSetup,
+      DataSourceManagementPluginStart,
+      DataSourceManagementSetupDependencies
+    > {
+  private started = false;
+  private authMethodsRegistry = new AuthenticationMethodRegistery();
+
   public setup(
-    core: CoreSetup,
-    { management, indexPatternManagement }: DataSourceManagementSetupDependencies
+    core: CoreSetup<DataSourceManagementPluginStart>,
+    { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
@@ -44,12 +76,44 @@ export class DataSourceManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params);
+        return mountManagementSection(core.getStartServices, params, this.authMethodsRegistry);
       },
     });
+
+    const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
+      if (this.started) {
+        throw new Error(
+          'cannot call `registerAuthenticationMethod` after data source management startup.'
+        );
+      }
+      this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
+    };
+
+    if (dataSource.noAuthenticationTypeEnabled) {
+      registerAuthenticationMethod(noAuthCredentialAuthMethod);
+    }
+    if (dataSource.usernamePasswordAuthEnabled) {
+      registerAuthenticationMethod(usernamePasswordAuthMethod);
+    }
+    if (dataSource.awsSigV4AuthEnabled) {
+      registerAuthenticationMethod(sigV4AuthMethod);
+    }
+
+    return {
+      registerAuthenticationMethod,
+      ui: {
+        DataSourceSelector: createDataSourceSelector(),
+        DataSourceMenu: createDataSourceMenu(),
+      },
+    };
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    this.started = true;
+    return {
+      getAuthenticationMethodRegistery: () => this.authMethodsRegistry,
+    };
+  }
 
   public stop() {}
 }

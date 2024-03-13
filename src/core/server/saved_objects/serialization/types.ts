@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { Permissions } from '../permission_control';
 import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 
 /**
@@ -52,6 +53,7 @@ export interface SavedObjectsRawDocSource {
   updated_at?: string;
   references?: SavedObjectReference[];
   originId?: string;
+  workspaces?: string[];
 
   [typeMapping: string]: any;
 }
@@ -69,6 +71,8 @@ interface SavedObjectDoc<T = unknown> {
   version?: string;
   updated_at?: string;
   originId?: string;
+  workspaces?: string[];
+  permissions?: Permissions;
 }
 
 interface Referencable {

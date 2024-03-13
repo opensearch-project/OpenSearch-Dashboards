@@ -98,6 +98,7 @@ describe('createPluginInitializerContext', () => {
     expect(configObject).toStrictEqual({
       opensearchDashboards: {
         index: '.kibana',
+        configIndex: '.opensearch_dashboards_config',
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),
       },

@@ -61,6 +61,7 @@ export async function resolveSavedObjectsImportErrors({
   createNewCopies,
   dataSourceId,
   dataSourceTitle,
+  workspaces,
 }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
@@ -130,6 +131,7 @@ export async function resolveSavedObjectsImportErrors({
     retries,
     createNewCopies,
     dataSourceId,
+    workspaces,
   };
   const checkConflictsResult = await checkConflicts(checkConflictsParams);
   errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
@@ -163,6 +165,7 @@ export async function resolveSavedObjectsImportErrors({
       overwrite,
       dataSourceId,
       dataSourceTitle,
+      workspaces,
     };
     const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
       createSavedObjectsParams

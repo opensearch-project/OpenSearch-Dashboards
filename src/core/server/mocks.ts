@@ -77,6 +77,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
     opensearchDashboards: {
       index: '.opensearch_dashboards_tests',
+      configIndex: '.opensearch_dashboards_config_tests',
       autocompleteTerminateAfter: duration(100000),
       autocompleteTimeout: duration(1000),
     },

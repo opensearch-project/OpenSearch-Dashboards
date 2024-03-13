@@ -52,6 +52,7 @@ export const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetTyp
       ...optionContent,
       label: dataSet.title,
       value: dataSet.id,
+      key: dataSet.id,
     };
   }
   return {

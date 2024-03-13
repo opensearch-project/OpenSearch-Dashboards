@@ -5,9 +5,9 @@
 
 set -e
 
-. scripts/bwc/utils.sh
-. scripts/bwc/opensearch_service.sh
-. scripts/bwc/opensearch_dashboards_service.sh
+. scripts/common/utils.sh
+. scripts/common/opensearch_service.sh
+. scripts/common/opensearch_dashboards_service.sh
 . scripts/bwc/generate_test_data.sh
 
 # For every release, add sample data and new version below:

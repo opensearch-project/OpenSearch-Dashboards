@@ -5,7 +5,7 @@
 
 import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient, ConfigOptions } from 'elasticsearch';
-import { Credentials, Config } from 'aws-sdk';
+import { Config } from 'aws-sdk';
 import { get } from 'lodash';
 import HttpAmazonESConnector from 'http-aws-es';
 import {
@@ -14,6 +14,7 @@ import {
   LegacyCallAPIOptions,
   LegacyOpenSearchErrorHelpers,
   Logger,
+  OpenSearchDashboardsRequest,
 } from '../../../../../src/core/server';
 import {
   AuthType,
@@ -33,10 +34,20 @@ import {
   getCredential,
   getDataSource,
   generateCacheKey,
+  getSigV4Credentials,
 } from '../client/configure_client_utils';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { authRegistryCredentialProvider } from '../util/credential_provider';
 
 export const configureLegacyClient = async (
-  { dataSourceId, savedObjects, cryptography }: DataSourceClientParams,
+  {
+    dataSourceId,
+    savedObjects,
+    cryptography,
+    customApiSchemaRegistryPromise,
+    request,
+    authRegistry,
+  }: DataSourceClientParams,
   callApiParams: LegacyClientCallAPIParams,
   openSearchClientPoolSetup: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
@@ -50,14 +61,19 @@ export const configureLegacyClient = async (
       dataSourceId
     ) as LegacyClient;
 
+    const registeredSchema = (await customApiSchemaRegistryPromise).getAll();
+
     return await getQueryClient(
       dataSourceAttr,
       cryptography,
       callApiParams,
       openSearchClientPoolSetup.addClientToPool,
       config,
+      registeredSchema,
       rootClient,
-      dataSourceId
+      dataSourceId,
+      request,
+      authRegistry
     );
   } catch (error: any) {
     logger.debug(
@@ -75,6 +91,7 @@ export const configureLegacyClient = async (
  * @param dataSourceAttr data source saved object attributes
  * @param cryptography cryptography service for password encryption / decryption
  * @param config data source config
+ * @param registeredSchema registered API schema
  * @param addClientToPool function to add client to client pool
  * @param dataSourceId id of data source saved Object
  * @returns child client.
@@ -85,15 +102,32 @@ const getQueryClient = async (
   { endpoint, clientParams, options }: LegacyClientCallAPIParams,
   addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void,
   config: DataSourcePluginConfigType,
+  registeredSchema: any[],
   rootClient?: LegacyClient,
-  dataSourceId?: string
+  dataSourceId?: string,
+  request?: OpenSearchDashboardsRequest,
+  authRegistry?: IAuthenticationMethodRegistery
 ) => {
-  const {
+  let credential;
+  let {
     auth: { type },
-    endpoint: nodeUrl,
+    name,
   } = dataSourceAttr;
-  const clientOptions = parseClientOptions(config, nodeUrl);
+  const { endpoint: nodeUrl } = dataSourceAttr;
+  name = name ?? type;
+  const clientOptions = parseClientOptions(config, nodeUrl, registeredSchema);
   const cacheKey = generateCacheKey(dataSourceAttr, dataSourceId);
+
+  const authenticationMethod = authRegistry?.getAuthenticationMethod(name);
+  if (authenticationMethod !== undefined) {
+    const credentialProvider = await authRegistryCredentialProvider(authenticationMethod, {
+      dataSourceAttr,
+      request,
+      cryptography,
+    });
+    credential = credentialProvider.credential;
+    type = credentialProvider.type;
+  }
 
   switch (type) {
     case AuthType.NoAuth:
@@ -107,7 +141,9 @@ const getQueryClient = async (
       );
 
     case AuthType.UsernamePasswordType:
-      const credential = await getCredential(dataSourceAttr, cryptography);
+      credential =
+        (credential as UsernamePasswordTypedContent) ??
+        (await getCredential(dataSourceAttr, cryptography));
 
       if (!rootClient) rootClient = new LegacyClient(clientOptions);
       addClientToPool(cacheKey, type, rootClient);
@@ -115,9 +151,10 @@ const getQueryClient = async (
       return getBasicAuthClient(rootClient, { endpoint, clientParams, options }, credential);
 
     case AuthType.SigV4:
-      const awsCredential = await getAWSCredential(dataSourceAttr, cryptography);
+      credential =
+        (credential as SigV4Content) ?? (await getAWSCredential(dataSourceAttr, cryptography));
 
-      const awsClient = rootClient ? rootClient : getAWSClient(awsCredential, clientOptions);
+      const awsClient = rootClient ? rootClient : getAWSClient(credential, clientOptions);
       addClientToPool(cacheKey, type, awsClient);
 
       return await (callAPI.bind(null, awsClient) as LegacyAPICaller)(
@@ -194,12 +231,13 @@ const getBasicAuthClient = async (
 };
 
 const getAWSClient = (credential: SigV4Content, clientOptions: ConfigOptions): LegacyClient => {
-  const { accessKey, secretKey, region, service } = credential;
+  const { accessKey, secretKey, region, service, sessionToken } = credential;
+  const credentials = getSigV4Credentials(accessKey, secretKey, sessionToken);
   const client = new LegacyClient({
     connectionClass: HttpAmazonESConnector,
     awsConfig: new Config({
       region,
-      credentials: new Credentials({ accessKeyId: accessKey, secretAccessKey: secretKey }),
+      credentials,
     }),
     service,
     ...clientOptions,

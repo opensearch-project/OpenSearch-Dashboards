@@ -12,7 +12,6 @@ import {
   addColumn,
   moveColumn,
   removeColumn,
-  reorderColumn,
   setColumns,
   setSort,
   useDispatch,
@@ -27,9 +26,10 @@ import { popularizeField } from '../../helpers/popularize_field';
 
 interface Props {
   rows?: OpenSearchSearchHit[];
+  scrollToTop?: () => void;
 }
 
-export const DiscoverTable = ({ rows }: Props) => {
+export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
     uiSettings,
@@ -115,6 +115,7 @@ export const DiscoverTable = ({ rows }: Props) => {
       displayTimeColumn={displayTimeColumn}
       title={savedSearch?.id ? savedSearch.title : ''}
       description={savedSearch?.id ? savedSearch.description : ''}
+      scrollToTop={scrollToTop}
     />
   );
 };

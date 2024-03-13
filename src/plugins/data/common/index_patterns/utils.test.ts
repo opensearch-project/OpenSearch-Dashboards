@@ -72,7 +72,7 @@ describe('test getIndexPatternTitle', () => {
       referencesMock,
       getDataSourceMock
     );
-    expect(res).toEqual('dataSourceMockTitle.indexPatternMockTitle');
+    expect(res).toEqual('dataSourceMockTitle::indexPatternMockTitle');
   });
 
   test('getIndexPatternTitle should return index pattern title, when index-pattern is not referenced to any datasource', async () => {
@@ -87,6 +87,6 @@ describe('test getIndexPatternTitle', () => {
       referencesMock,
       getDataSourceMock
     );
-    expect(res).toEqual('dataSourceId.indexPatternMockTitle');
+    expect(res).toEqual('dataSourceId::indexPatternMockTitle');
   });
 });

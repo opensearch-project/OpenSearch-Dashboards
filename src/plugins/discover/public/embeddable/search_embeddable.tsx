@@ -47,7 +47,6 @@ import {
 } from '../../../data/public';
 import { Container, Embeddable } from '../../../embeddable/public';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { getDefaultSort } from '../application/view_components/utils/get_default_sort';
 import { getSortForSearchSource } from '../application/view_components/utils/get_sort_for_search_source';
 import {
   getRequestInspectorStats,
@@ -215,12 +214,6 @@ export class SearchEmbeddable
     if (!indexPattern) {
       return;
     }
-
-    const sort = getDefaultSort(
-      indexPattern,
-      this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
-    );
-    this.savedSearch.sort = sort;
 
     const searchProps: SearchProps = {
       columns: this.savedSearch.columns,

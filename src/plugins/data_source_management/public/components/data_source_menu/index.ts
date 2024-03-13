@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { ClusterSelector } from './cluster_selector';
+export { DataSourceMenu } from './data_source_menu';

@@ -321,6 +321,7 @@ export {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
+  SavedObjectsDeleteByWorkspaceOptions,
 } from './saved_objects';
 
 export {

@@ -1,0 +1,11 @@
+{
+  "id": "cspHandler",
+  "version": "opensearchDashboards",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [
+    "applicationConfig"
+  ],
+  "optionalPlugins": []
+}

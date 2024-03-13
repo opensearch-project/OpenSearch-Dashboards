@@ -30,6 +30,7 @@
 
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from './../../mappings';
 import { buildActiveMappings, diffMappings } from './build_active_mappings';
+import { configMock } from '../../../config/mocks';
 
 describe('buildActiveMappings', () => {
   test('creates a strict mapping', () => {
@@ -90,6 +91,18 @@ describe('buildActiveMappings', () => {
     expect(hashes.aaa).toBeDefined();
     expect(hashes.aaa).toEqual(hashes.bbb);
     expect(hashes.aaa).not.toEqual(hashes.ccc);
+  });
+
+  test('permissions field is added when permission control flag is enabled', () => {
+    const rawConfig = configMock.create();
+    rawConfig.get.mockReturnValue(true);
+    expect(buildActiveMappings({}, rawConfig)).toHaveProperty('properties.permissions');
+  });
+
+  test('workspaces field is added when workspace feature flag is enabled', () => {
+    const rawConfig = configMock.create();
+    rawConfig.get.mockReturnValue(true);
+    expect(buildActiveMappings({}, rawConfig)).toHaveProperty('properties.workspaces');
   });
 });
 

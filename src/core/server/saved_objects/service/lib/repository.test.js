@@ -168,7 +168,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   const getMockGetResponse = (
-    { type, id, references, namespace: objectNamespace, originId },
+    { type, id, references, namespace: objectNamespace, originId, permissions },
     namespace
   ) => {
     const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
@@ -183,6 +183,7 @@ describe('SavedObjectsRepository', () => {
         ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
         ...(registry.isMultiNamespace(type) && { namespaces: [namespaceId ?? 'default'] }),
         ...(originId && { originId }),
+        ...(permissions && { permissions }),
         type,
         [type]: { title: 'Testing' },
         references,
@@ -444,24 +445,36 @@ describe('SavedObjectsRepository', () => {
       references: [{ name: 'ref_0', type: 'test', id: '2' }],
     };
     const namespace = 'foo-namespace';
+    const permissions = {
+      read: {
+        users: ['user1'],
+      },
+      write: {
+        groups: ['groups1'],
+      },
+    };
+    const workspace = 'foo-workspace';
 
     const getMockBulkCreateResponse = (objects, namespace) => {
       return {
-        items: objects.map(({ type, id, originId, attributes, references, migrationVersion }) => ({
-          create: {
-            _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
-            _source: {
-              [type]: attributes,
-              type,
-              namespace,
-              ...(originId && { originId }),
-              references,
-              ...mockTimestampFields,
-              migrationVersion: migrationVersion || { [type]: '1.1.1' },
+        items: objects.map(
+          ({ type, id, originId, attributes, references, migrationVersion, permissions }) => ({
+            create: {
+              _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
+              _source: {
+                [type]: attributes,
+                type,
+                namespace,
+                ...(originId && { originId }),
+                ...(permissions && { permissions }),
+                references,
+                ...mockTimestampFields,
+                migrationVersion: migrationVersion || { [type]: '1.1.1' },
+              },
+              ...mockVersionProps,
             },
-            ...mockVersionProps,
-          },
-        })),
+          })
+        ),
       };
     };
 
@@ -729,6 +742,28 @@ describe('SavedObjectsRepository', () => {
         ];
         await bulkCreateSuccess(objects, { namespace });
         expectClientCallArgsAction(objects, { method: 'create', getId });
+      });
+
+      it(`accepts permissions property when providing permissions info`, async () => {
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, permissions: permissions }));
+        await bulkCreateSuccess(objects);
+        const expected = expect.objectContaining({ permissions });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+        client.bulk.mockClear();
+      });
+
+      it(`adds workspaces to request body for any types`, async () => {
+        await bulkCreateSuccess([obj1, obj2], { workspaces: [workspace] });
+        const expected = expect.objectContaining({ workspaces: [workspace] });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
     });
 
@@ -1000,6 +1035,17 @@ describe('SavedObjectsRepository', () => {
         );
         expect(result.saved_objects[1].id).toEqual(obj2.id);
       });
+
+      it(`includes permissions property if present`, async () => {
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, permissions: permissions }));
+        const result = await bulkCreateSuccess(objects);
+        expect(result).toEqual({
+          saved_objects: [
+            expect.objectContaining({ permissions }),
+            expect.objectContaining({ permissions }),
+          ],
+        });
+      });
     });
   });
 
@@ -1219,6 +1265,22 @@ describe('SavedObjectsRepository', () => {
           ],
         });
       });
+
+      it(`includes permissions property if present`, async () => {
+        const permissions = {
+          read: {
+            users: ['user1'],
+          },
+          write: {
+            groups: ['groups1'],
+          },
+        };
+        const obj = { id: 'three', type: MULTI_NAMESPACE_TYPE, permissions: permissions };
+        const result = await bulkGetSuccess([obj]);
+        expect(result).toEqual({
+          saved_objects: [expect.objectContaining({ permissions: permissions })],
+        });
+      });
     });
   });
 
@@ -1236,6 +1298,14 @@ describe('SavedObjectsRepository', () => {
     const references = [{ name: 'ref_0', type: 'test', id: '1' }];
     const originId = 'some-origin-id';
     const namespace = 'foo-namespace';
+    const permissions = {
+      read: {
+        users: ['user1'],
+      },
+      write: {
+        groups: ['groups1'],
+      },
+    };
 
     const getMockBulkUpdateResponse = (objects, options, includeOriginId) => ({
       items: objects.map(({ type, id }) => ({
@@ -1496,6 +1566,20 @@ describe('SavedObjectsRepository', () => {
         await bulkUpdateSuccess([{ ..._obj2, namespace }]);
         expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides }, 2);
       });
+
+      it(`accepts permissions property when providing permissions info`, async () => {
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, permissions: permissions }));
+        await bulkUpdateSuccess(objects);
+        const doc = {
+          doc: expect.objectContaining({ permissions }),
+        };
+        const body = [expect.any(Object), doc, expect.any(Object), doc];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+        client.bulk.mockClear();
+      });
     });
 
     describe('errors', () => {
@@ -1688,6 +1772,14 @@ describe('SavedObjectsRepository', () => {
           ],
         });
       });
+
+      it(`includes permissions property if present`, async () => {
+        const obj = { type: MULTI_NAMESPACE_TYPE, id: 'three', permissions: permissions };
+        const result = await bulkUpdateSuccess([obj1, obj], {}, true);
+        expect(result).toEqual({
+          saved_objects: [expect.anything(), expect.objectContaining({ permissions })],
+        });
+      });
     });
   });
 
@@ -1843,6 +1935,14 @@ describe('SavedObjectsRepository', () => {
         id: '123',
       },
     ];
+    const permissions = {
+      read: {
+        users: ['user1'],
+      },
+      write: {
+        groups: ['groups1'],
+      },
+    };
 
     const createSuccess = async (type, attributes, options) => {
       const result = await savedObjectsRepository.create(type, attributes, options);
@@ -2040,6 +2140,16 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
       });
+
+      it(`accepts permissions property`, async () => {
+        await createSuccess(type, attributes, { id, permissions });
+        expect(client.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({ permissions }),
+          }),
+          expect.anything()
+        );
+      });
     });
 
     describe('errors', () => {
@@ -2120,6 +2230,11 @@ describe('SavedObjectsRepository', () => {
         expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith(migratedDoc);
       });
 
+      it(`adds permissions to body when providing permissions info`, async () => {
+        await createSuccess(type, attributes, { id, permissions });
+        expectMigrationArgs({ permissions });
+      });
+
       it(`adds namespace to body when providing namespace for single-namespace type`, async () => {
         await createSuccess(type, attributes, { id, namespace });
         expectMigrationArgs({ namespace });
@@ -2166,11 +2281,13 @@ describe('SavedObjectsRepository', () => {
           namespace,
           references,
           originId,
+          permissions,
         });
         expect(result).toEqual({
           type,
           id,
           originId,
+          permissions,
           ...mockTimestampFields,
           version: mockVersion,
           attributes,
@@ -2463,6 +2580,85 @@ describe('SavedObjectsRepository', () => {
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           namespaces: [namespace],
           type: allTypes.filter((type) => !registry.isNamespaceAgnostic(type)),
+        });
+      });
+    });
+  });
+
+  describe('#deleteByWorkspace', () => {
+    const workspace = 'bar-workspace';
+    const mockUpdateResults = {
+      took: 15,
+      timed_out: false,
+      total: 3,
+      updated: 2,
+      deleted: 1,
+      batches: 1,
+      version_conflicts: 0,
+      noops: 0,
+      retries: { bulk: 0, search: 0 },
+      throttled_millis: 0,
+      requests_per_second: -1.0,
+      throttled_until_millis: 0,
+      failures: [],
+    };
+
+    const deleteByWorkspaceSuccess = async (workspace, options) => {
+      client.updateByQuery.mockResolvedValueOnce(
+        opensearchClientMock.createSuccessTransportRequestPromise(mockUpdateResults)
+      );
+      const result = await savedObjectsRepository.deleteByWorkspace(workspace, options);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
+      expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    describe('client calls', () => {
+      it(`should use the OpenSearch updateByQuery action`, async () => {
+        await deleteByWorkspaceSuccess(workspace);
+        expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should use all indices for all types`, async () => {
+        await deleteByWorkspaceSuccess(workspace);
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({ index: ['.opensearch_dashboards_test', 'custom'] }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws when workspace is not a string or is '*'`, async () => {
+        const test = async (workspace) => {
+          await expect(savedObjectsRepository.deleteByWorkspace(workspace)).rejects.toThrowError(
+            `workspace is required, and must be a string that is not equal to '*'`
+          );
+          expect(client.updateByQuery).not.toHaveBeenCalled();
+        };
+        await test(undefined);
+        await test(null);
+        await test(['foo-workspace']);
+        await test(123);
+        await test(true);
+        await test(ALL_NAMESPACES_STRING);
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns the query results on success`, async () => {
+        const result = await deleteByWorkspaceSuccess(workspace);
+        expect(result).toEqual(mockUpdateResults);
+      });
+    });
+
+    describe('search dsl', () => {
+      it(`constructs a query that have workspace as search critieria`, async () => {
+        await deleteByWorkspaceSuccess(workspace);
+        const allTypes = registry.getAllTypes().map((type) => type.name);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          workspaces: [workspace],
+          type: allTypes,
         });
       });
     });
@@ -2960,7 +3156,7 @@ describe('SavedObjectsRepository', () => {
     const namespace = 'foo-namespace';
     const originId = 'some-origin-id';
 
-    const getSuccess = async (type, id, options, includeOriginId) => {
+    const getSuccess = async (type, id, options, includeOriginId, permissions) => {
       const response = getMockGetResponse(
         {
           type,
@@ -2968,6 +3164,7 @@ describe('SavedObjectsRepository', () => {
           // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
           // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
           ...(includeOriginId && { originId }),
+          ...(permissions && { permissions }),
         },
         options?.namespace
       );
@@ -3117,6 +3314,21 @@ describe('SavedObjectsRepository', () => {
       it(`includes originId property if present in cluster call response`, async () => {
         const result = await getSuccess(type, id, {}, true);
         expect(result).toMatchObject({ originId });
+      });
+
+      it(`includes permissions property if present`, async () => {
+        const permissions = {
+          read: {
+            users: ['user1'],
+          },
+          write: {
+            groups: ['groups1'],
+          },
+        };
+        const result = await getSuccess(type, id, { namespace }, undefined, permissions);
+        expect(result).toMatchObject({
+          permissions: permissions,
+        });
       });
     });
   });
@@ -3719,6 +3931,14 @@ describe('SavedObjectsRepository', () => {
       },
     ];
     const originId = 'some-origin-id';
+    const permissions = {
+      read: {
+        users: ['user1'],
+      },
+      write: {
+        groups: ['groups1'],
+      },
+    };
 
     const updateSuccess = async (type, id, attributes, options, includeOriginId) => {
       if (registry.isMultiNamespace(type)) {
@@ -3895,6 +4115,18 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
       });
+
+      it(`accepts permissions when providing permissions info`, async () => {
+        await updateSuccess(type, id, attributes, { permissions });
+        const expected = expect.objectContaining({ permissions });
+        const body = {
+          doc: expected,
+        };
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
     });
 
     describe('errors', () => {
@@ -3988,6 +4220,11 @@ describe('SavedObjectsRepository', () => {
       it(`includes originId property if present in cluster call response`, async () => {
         const result = await updateSuccess(type, id, attributes, {}, true);
         expect(result).toMatchObject({ originId });
+      });
+
+      it(`includes permissions property if present`, async () => {
+        const result = await updateSuccess(type, id, attributes, { permissions });
+        expect(result).toMatchObject({ permissions });
       });
     });
   });

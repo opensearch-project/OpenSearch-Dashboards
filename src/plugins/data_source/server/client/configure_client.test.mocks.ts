@@ -16,3 +16,17 @@ export const parseClientOptionsMock = jest.fn();
 jest.doMock('./client_config', () => ({
   parseClientOptions: parseClientOptionsMock,
 }));
+
+export const authRegistryCredentialProviderMock = jest.fn();
+jest.doMock('../util/credential_provider', () => ({
+  authRegistryCredentialProvider: authRegistryCredentialProviderMock,
+}));
+
+export const CredentialsMock = jest.fn();
+jest.doMock('aws-sdk', () => {
+  const actual = jest.requireActual('aws-sdk');
+  return {
+    ...actual,
+    Credentials: CredentialsMock,
+  };
+});

@@ -55,7 +55,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { OverlayStart, HttpStart } from 'src/core/public';
-import { ClusterSelector } from '../../../../../data_source_management/public';
+import { DataSourceSelector } from '../../../../../data_source_management/public';
 import {
   IndexPatternsContract,
   IIndexPattern,
@@ -94,6 +94,7 @@ export interface FlyoutProps {
   http: HttpStart;
   search: DataPublicPluginStart['search'];
   dataSourceEnabled: boolean;
+  hideLocalCluster: boolean;
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
 }
@@ -816,11 +817,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             ),
           }}
         >
-          <ClusterSelector
+          <DataSourceSelector
             savedObjectsClient={this.props.savedObjects}
             notifications={this.props.notifications.toasts}
             onSelectedDataSource={this.onSelectedDataSourceChange}
             disabled={!this.props.dataSourceEnabled}
+            hideLocalCluster={this.props.hideLocalCluster}
             fullWidth={true}
           />
         </EuiFormFieldset>
@@ -841,10 +843,15 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderFooter() {
-    const { isLegacyFile, status } = this.state;
+    const { isLegacyFile, status, selectedDataSourceId } = this.state;
     const { done, close } = this.props;
 
     let confirmButton;
+
+    let importButtonDisabled = false;
+    if (this.props.dataSourceEnabled && this.props.hideLocalCluster && !selectedDataSourceId) {
+      importButtonDisabled = true;
+    }
 
     if (status === 'success') {
       confirmButton = (
@@ -877,6 +884,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           size="s"
           fill
           isLoading={status === 'loading'}
+          disabled={importButtonDisabled}
           data-test-subj="importSavedObjectsImportBtn"
         >
           <FormattedMessage

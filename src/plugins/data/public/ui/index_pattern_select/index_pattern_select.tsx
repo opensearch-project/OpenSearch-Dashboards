@@ -36,6 +36,10 @@ import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 import { getTitle } from '../../../common/index_patterns/lib';
+import {
+  getDataSourceReference,
+  concatDataSourceWithIndexPattern,
+} from '../../../common/index_patterns/utils';
 
 export type IndexPatternSelectProps = Required<
   Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>,
@@ -52,6 +56,7 @@ interface IndexPatternSelectState {
   options: [];
   selectedIndexPattern: { value: string; label: string } | undefined;
   searchValue: string | undefined;
+  dataSourceIdToTitle: Map<string, string>;
 }
 
 const getIndexPatterns = async (
@@ -80,6 +85,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
 
     this.state = {
       isLoading: false,
+      dataSourceIdToTitle: new Map(),
       options: [],
       selectedIndexPattern: undefined,
       searchValue: undefined,
@@ -113,7 +119,11 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
 
     let indexPatternTitle;
     try {
-      indexPatternTitle = await getTitle(this.props.savedObjectsClient, indexPatternId);
+      indexPatternTitle = await getTitle(
+        this.props.savedObjectsClient,
+        indexPatternId,
+        this.state.dataSourceIdToTitle
+      );
     } catch (err) {
       // index pattern no longer exists
       return;
@@ -161,16 +171,66 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
     if (searchValue === this.state.searchValue) {
+      const dataSourcesToFetch: Array<{ type: string; id: string }> = [];
+      savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
+        const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
+        if (dataSourceReference && !this.state.dataSourceIdToTitle.has(dataSourceReference.id)) {
+          dataSourcesToFetch.push({ type: 'data-source', id: dataSourceReference.id });
+        }
+      });
+
+      const dataSourceIdToTitleToUpdate = new Map();
+
+      if (dataSourcesToFetch.length > 0) {
+        const resp = await savedObjectsClient.bulkGet(dataSourcesToFetch);
+        resp.savedObjects.map((dataSourceSavedObject: SimpleSavedObject<any>) => {
+          dataSourceIdToTitleToUpdate.set(
+            dataSourceSavedObject.id,
+            dataSourceSavedObject.attributes.title
+          );
+        });
+      }
+
       const options = savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
+        const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
+        if (dataSourceReference) {
+          const dataSourceTitle =
+            this.state.dataSourceIdToTitle.get(dataSourceReference.id) ||
+            dataSourceIdToTitleToUpdate.get(dataSourceReference.id) ||
+            dataSourceReference.id;
+          return {
+            label: `${concatDataSourceWithIndexPattern(
+              dataSourceTitle,
+              indexPatternSavedObject.attributes.title
+            )}`,
+            value: indexPatternSavedObject.id,
+          };
+        }
         return {
           label: indexPatternSavedObject.attributes.title,
           value: indexPatternSavedObject.id,
         };
       });
-      this.setState({
-        isLoading: false,
-        options,
-      });
+
+      if (dataSourceIdToTitleToUpdate.size > 0) {
+        const mergedDataSourceIdToTitle = new Map();
+        this.state.dataSourceIdToTitle.forEach((k, v) => {
+          mergedDataSourceIdToTitle.set(k, v);
+        });
+        dataSourceIdToTitleToUpdate.forEach((k, v) => {
+          mergedDataSourceIdToTitle.set(k, v);
+        });
+        this.setState({
+          dataSourceIdToTitle: mergedDataSourceIdToTitle,
+          isLoading: false,
+          options,
+        });
+      } else {
+        this.setState({
+          isLoading: false,
+          options,
+        });
+      }
 
       if (onNoIndexPatterns && searchValue === '' && options.length === 0) {
         onNoIndexPatterns();

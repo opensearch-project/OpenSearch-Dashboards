@@ -90,6 +90,7 @@ https://www.hostedgraphite.com/
 https://connectionurl.com
 http://169.254.169.254/latest/meta-data/
 http://company.net/*
+http://fakenews.co/opensearch-dashboards-test/v6.8.2.json
 
 # External urls
 https://www.zeek.org/

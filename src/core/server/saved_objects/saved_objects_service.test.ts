@@ -41,7 +41,7 @@ import { errors as opensearchErrors } from '@opensearch-project/opensearch';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
-import { Env } from '../config';
+import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { configServiceMock, savedObjectsRepositoryMock } from '../mocks';
 import { opensearchServiceMock } from '../opensearch/opensearch_service.mock';
 import { opensearchClientMock } from '../opensearch/client/mocks';
@@ -70,6 +70,13 @@ describe('SavedObjectsService', () => {
         maxImportExportSize: new ByteSizeValue(0),
       });
     });
+    const config$ = new BehaviorSubject<Config>(
+      new ObjectToConfigAdapter({
+        savedObjects: { permission: { enabled: true } },
+      })
+    );
+
+    configService.getConfig$.mockReturnValue(config$);
     return mockCoreContext.create({ configService, env });
   };
 

@@ -186,6 +186,7 @@ export interface UrlObject {
   [CONSTANTS.TYPE]?: string;
   name?: string;
   index?: string;
+  data_source_name?: string;
   body?: Body;
   size?: number;
   timeout?: string;

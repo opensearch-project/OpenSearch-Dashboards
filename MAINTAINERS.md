@@ -22,6 +22,8 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Sirazh Gabdullin          | [curq](https://github.com/curq)                     | External contributor |
 | Bandini Bhopi             | [bandinib-amzn](https://github.com/bandinib-amzn)   | Amazon      |
 | Su Zhou                   | [SuZhou-Joe](https://github.com/SuZhou-Joe)         | Amazon      |
+| Yulong Ruan               | [ruanyl](https://github.com/ruanyl)                 | Amazon      |
+| Lu Yu                     | [BionIT](https://github.com/BionIT)                 | Amazon      |
 
 ## Emeritus
 

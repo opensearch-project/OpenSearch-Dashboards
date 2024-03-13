@@ -36,6 +36,7 @@ import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
@@ -60,15 +61,17 @@ const readOnlyBadge = {
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
   params: ManagementAppMountParams,
-  getMlCardState: () => MlCardState
+  getMlCardState: () => MlCardState,
+  dataSource?: DataSourcePluginSetup
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data, dataSource },
+    { data },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
-  const dataSourceEnabled = !!dataSource;
+  const dataSourceEnabled = dataSource?.dataSourceEnabled ?? false;
+  const hideLocalCluster = dataSource?.hideLocalCluster ?? false;
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
@@ -88,6 +91,7 @@ export async function mountManagementSection(
     setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
     dataSourceEnabled,
+    hideLocalCluster,
   };
 
   ReactDOM.render(

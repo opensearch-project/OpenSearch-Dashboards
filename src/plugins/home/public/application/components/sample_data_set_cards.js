@@ -234,6 +234,8 @@ export class SampleDataSetCards extends React.Component {
                 onInstall={this.install}
                 onUninstall={this.uninstall}
                 dataSourceId={this.state.dataSourceId}
+                isDataSourceEnabled={this.props.isDataSourceEnabled}
+                isLocalClusterHidden={this.props.isLocalClusterHidden}
               />
             </EuiFlexItem>
           );

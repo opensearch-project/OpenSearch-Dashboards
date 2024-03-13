@@ -16,6 +16,7 @@ const workspaceAttributesSchema = schema.object({
   color: schema.maybe(schema.string()),
   icon: schema.maybe(schema.string()),
   defaultVISTheme: schema.maybe(schema.string()),
+  reserved: schema.maybe(schema.boolean()),
 });
 
 export function registerRoutes({

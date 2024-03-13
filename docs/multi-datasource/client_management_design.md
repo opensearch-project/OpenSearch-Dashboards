@@ -10,6 +10,8 @@ This design is part of the OpenSearch Dashboards multi data source project [[RFC
 2. How to expose data source clients to callers through clean interfaces?
 3. How to maintain backwards compatibility if user turn off this feature?
 4. How to manage multiple clients/connection efficiently, and not consume all the memory?
+5. Where should we implement the core logic?
+6. How to register custom API schema and add into the client during initialization?
 
 ## 2. Requirements
 
@@ -87,6 +89,20 @@ Current `opensearch service` exists in core. The module we'll implement has simi
 2. We don't mess up with OpenSearch Dashboards core, since this is an experimental feature, the potential risk of breaking existing behavior will be lowered if we use plugin. Worst case, user could just uninstall the plugin.
 3. Complexity wise, it's about the same amount of work.
 
+**6.How to register custom API schema and add into the client during initialization?**
+Currently, OpenSearch Dashboards plugins uses the following to initialize instance of Cluster client and register the custom API schema via the plugins configuration option.
+```ts
+core.opensearch.legacy.createClient(
+      'exampleName',
+      {
+        plugins: [ExamplePlugin],
+      }
+    );
+```
+The downside of this approach is the schema is defined inside the plugin and there is no centralized registry for the schema making it not easy to access. This will be resolved by implementing a centralized API schema registry, and consumers can add data source plugin as dependency and be able to consume all the registered schema, eg. `dataSource.registerCustomApiSchema(sqlPlugin)`.
+
+The schema will be added into the client configuration when multi data source client is initiated.
+
 ### 4.1 Data Source Plugin
 
 Create a data source plugin that only has server side code, to hold most core logic of data source feature. Including data service, crypto service, and client management. A plugin will have all setup, start and stop as lifecycle.
@@ -146,10 +162,18 @@ context.core.opensearch.legacy.client.callAsCurrentUser;
 context.core.opensearch.client.asCurrentUser;
 ```
 
-Since deprecating legacy client could be a bigger scope of project, multiple data source feature still need to implement a substitute for it as for now. Implementation should be done in a way that's decoupled with data source client as much as possible, for easier deprecation. Similar to [opensearch legacy service](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/src/core/server/opensearch/legacy) in core.
+Since deprecating legacy client could be a bigger scope of project, multiple data source feature still need to implement a substitute for it as for now. Implementation should be done in a way that's decoupled with data source client as much as possible, for easier deprecation. Similar to [opensearch legacy service](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/src/core/server/opensearch/legacy) in core. See how to intialize the data source client below: 
 
 ```ts
 context.dataSource.opensearch.legacy.getClient(dataSourceId);
+```
+
+If using Legacy cluster client with asScoped and callAsCurrentUser, the following is the equivalent when using data source client:
+```ts
+//legacy cluster client
+const response = client.asScoped(request).callAsCurrentUser(format, params);
+//equivalent when using data source client instead
+const response = client.callAPI(format, params);
 ```
 
 ### 4.3 Register datasource client to core context
