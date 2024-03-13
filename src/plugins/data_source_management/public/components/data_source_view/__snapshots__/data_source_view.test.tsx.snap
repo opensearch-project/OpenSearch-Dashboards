@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceView should render normally with local cluster not hidden 1`] = `
+<Fragment>
+  <EuiButtonEmpty
+    aria-label="dataSourceViewMenuButton"
+    className="euiHeaderLink"
+    data-test-subj="dataSourceViewContextMenuHeaderLink"
+    disabled={true}
+    iconSide="left"
+    iconType="database"
+    size="s"
+  >
+    test1
+  </EuiButtonEmpty>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiButtonIcon
+        aria-label="Next"
+        display="empty"
+        iconType="iInCircle"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <EuiContextMenu
+      initialPanelId={0}
+      panels={
+        Array [
+          Object {
+            "id": 0,
+            "items": Array [
+              Object {
+                "disabled": true,
+                "name": "test1",
+              },
+            ],
+            "title": "Selected data source",
+          },
+        ]
+      }
+      size="m"
+    />
+  </EuiPopover>
+</Fragment>
+`;
