@@ -176,6 +176,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   onChangeAuthType = (authType: AuthType) => {
+    /* If the selected authentication type matches, utilize the existing data source's credentials directly.*/
     const credentials =
       this.props.existingDataSource && authType === this.props.existingDataSource.auth.type
         ? this.props.existingDataSource.auth.credentials
