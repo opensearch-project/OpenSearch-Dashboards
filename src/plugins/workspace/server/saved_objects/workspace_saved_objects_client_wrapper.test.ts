@@ -73,6 +73,7 @@ const generateWorkspaceSavedObjectsClientWrapper = () => {
       };
     }),
     find: jest.fn(),
+    deleteByWorkspace: jest.fn(),
   };
   const requestMock = {};
   const wrapperOptions = {
@@ -632,6 +633,35 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             principals: { users: ['user-1'] },
           },
         });
+      });
+    });
+
+    describe('deleteByWorkspace', () => {
+      it('should call permission validate with workspace and throw workspace permission error if not permitted', async () => {
+        const {
+          wrapper,
+          requestMock,
+          permissionControlMock,
+        } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.deleteByWorkspace('not-permitted-workspace');
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid workspace permission');
+        expect(permissionControlMock.validate).toHaveBeenCalledWith(
+          requestMock,
+          { id: 'not-permitted-workspace', type: 'workspace' },
+          ['library_write']
+        );
+      });
+
+      it('should call client.deleteByWorkspace if permitted', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
+
+        await wrapper.deleteByWorkspace('workspace-1', {});
+        expect(clientMock.deleteByWorkspace).toHaveBeenCalledWith('workspace-1', {});
       });
     });
   });

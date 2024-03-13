@@ -527,4 +527,70 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
     });
   });
+
+  describe('deleteByWorkspace', () => {
+    it('should throw forbidden error when workspace not permitted', async () => {
+      let error;
+      try {
+        await notPermittedSavedObjectedClient.deleteByWorkspace('workspace-1');
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+    });
+
+    it('should be able to delete all data in permitted workspace', async () => {
+      const deleteWorkspaceId = 'workspace-to-delete';
+      await repositoryKit.create(
+        internalSavedObjectsRepository,
+        'workspace',
+        {},
+        {
+          id: deleteWorkspaceId,
+          permissions: {
+            library_read: { users: ['foo'] },
+            library_write: { users: ['foo'] },
+          },
+        }
+      );
+      const dashboardIds = [
+        'inner-delete-workspace-dashboard-1',
+        'inner-delete-workspace-dashboard-2',
+      ];
+      await Promise.all(
+        dashboardIds.map((dashboardId) =>
+          repositoryKit.create(
+            internalSavedObjectsRepository,
+            'dashboard',
+            {},
+            {
+              id: dashboardId,
+              workspaces: [deleteWorkspaceId],
+            }
+          )
+        )
+      );
+
+      expect(
+        (
+          await permittedSavedObjectedClient.find({
+            type: 'dashboard',
+            workspaces: [deleteWorkspaceId],
+          })
+        ).total
+      ).toBe(2);
+
+      await permittedSavedObjectedClient.deleteByWorkspace(deleteWorkspaceId, { refresh: true });
+
+      expect(
+        (
+          await permittedSavedObjectedClient.find({
+            type: 'dashboard',
+            workspaces: [deleteWorkspaceId],
+          })
+        ).total
+      ).toBe(0);
+    });
+  });
 });
