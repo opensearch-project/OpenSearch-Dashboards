@@ -82,7 +82,6 @@ class HttpAmazonESConnector extends HttpConnector {
 
   getAWSCredentials(reqParams) {
     if (reqParams.headers && reqParams.headers.auth) {
-      console.log(`reqParams.headers.auth found`);
       const awssigv4Cred = reqParams.headers.auth;
       const accessKeyId = awssigv4Cred.credentials.accessKeyId || null;
       const secretAccessKey = awssigv4Cred.credentials.secretAccessKey;

@@ -6,13 +6,22 @@
 import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
 import LRUCache from 'lru-cache';
-import { Logger } from 'src/core/server';
+import { Logger, OpenSearchDashboardsRequest } from 'src/core/server';
 import { AuthType } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 
 export interface OpenSearchClientPoolSetup {
-  getClientFromPool: (endpoint: string, authType: AuthType) => Client | LegacyClient | undefined;
-  addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void;
+  getClientFromPool: (
+    endpoint: string,
+    authType: AuthType,
+    request?: OpenSearchDashboardsRequest
+  ) => Client | LegacyClient | undefined;
+  addClientToPool: (
+    endpoint: string,
+    authType: AuthType,
+    client: Client | LegacyClient,
+    request?: OpenSearchDashboardsRequest
+  ) => void;
 }
 
 /**

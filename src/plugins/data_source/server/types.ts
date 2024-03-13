@@ -20,6 +20,7 @@ import { CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceError } from './lib/error';
 import { IAuthenticationMethodRegistery } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
+import { OpenSearchClientPoolSetup } from './client';
 
 export interface LegacyClientCallAPIParams {
   endpoint: string;
@@ -57,6 +58,8 @@ export interface AuthenticationMethod {
   name: string;
   authType: AuthType;
   credentialProvider: DataSourceCredentialsProvider;
+  clientPoolSetup: OpenSearchClientPoolSetup;
+  legacyClientPoolSetup: OpenSearchClientPoolSetup;
 }
 
 export interface DataSourcePluginRequestContext {

@@ -4,7 +4,6 @@
  */
 
 import { Client, ClientOptions } from '@opensearch-project/opensearch';
-import { Client as LegacyClient } from 'elasticsearch';
 import { AwsSigv4Signer } from '@opensearch-project/opensearch/aws';
 import { Logger, OpenSearchDashboardsRequest } from '../../../../../src/core/server';
 import {
@@ -20,13 +19,7 @@ import { createDataSourceError } from '../lib/error';
 import { DataSourceClientParams } from '../types';
 import { parseClientOptions } from './client_config';
 import { OpenSearchClientPoolSetup } from './client_pool';
-import {
-  getRootClient,
-  getAWSCredential,
-  getCredential,
-  getDataSource,
-  generateCacheKey,
-} from './configure_client_utils';
+import { getAWSCredential, getCredential, getDataSource } from './configure_client_utils';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
 import { authRegistryCredentialProvider } from '../util/credential_provider';
 
@@ -68,21 +61,14 @@ export const configureClient = async (
       dataSource = await getDataSource(dataSourceId!, savedObjects);
     }
 
-    const rootClient = getRootClient(
-      dataSource,
-      openSearchClientPoolSetup.getClientFromPool,
-      dataSourceId
-    ) as Client;
-
     const registeredSchema = (await customApiSchemaRegistryPromise).getAll();
 
     return await getQueryClient(
       dataSource,
-      openSearchClientPoolSetup.addClientToPool,
+      openSearchClientPoolSetup,
       config,
       registeredSchema,
       cryptography,
-      rootClient,
       dataSourceId,
       request,
       authRegistry,
@@ -114,17 +100,17 @@ export const configureClient = async (
  */
 const getQueryClient = async (
   dataSourceAttr: DataSourceAttributes,
-  addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void,
+  openSearchClientPool: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   registeredSchema: any[],
   cryptography?: CryptographyServiceSetup,
-  rootClient?: Client,
   dataSourceId?: string,
   request?: OpenSearchDashboardsRequest,
   authRegistry?: IAuthenticationMethodRegistery,
   requireDecryption: boolean = true
 ): Promise<Client> => {
   let credential;
+  let clientPool = openSearchClientPool;
   let {
     auth: { type },
     name,
@@ -132,7 +118,6 @@ const getQueryClient = async (
   const { endpoint } = dataSourceAttr;
   name = name ?? type;
   const clientOptions = parseClientOptions(config, endpoint, registeredSchema);
-  const cacheKey = generateCacheKey(dataSourceAttr, dataSourceId);
 
   const authenticationMethod = authRegistry?.getAuthenticationMethod(name);
   if (authenticationMethod !== undefined) {
@@ -143,12 +128,16 @@ const getQueryClient = async (
     });
     credential = credentialProvider.credential;
     type = credentialProvider.type;
+    clientPool = authenticationMethod.clientPoolSetup;
   }
+
+  const cacheKey = endpoint;
+  let rootClient = clientPool.getClientFromPool(cacheKey, type, request) as Client;
 
   switch (type) {
     case AuthType.NoAuth:
       if (!rootClient) rootClient = new Client(clientOptions);
-      addClientToPool(cacheKey, type, rootClient);
+      clientPool.addClientToPool(cacheKey, type, rootClient, request);
 
       return rootClient.child();
 
@@ -160,7 +149,7 @@ const getQueryClient = async (
           : (dataSourceAttr.auth.credentials as UsernamePasswordTypedContent));
 
       if (!rootClient) rootClient = new Client(clientOptions);
-      addClientToPool(cacheKey, type, rootClient);
+      clientPool.addClientToPool(cacheKey, type, rootClient, request);
 
       return getBasicAuthClient(rootClient, credential);
 
@@ -174,7 +163,7 @@ const getQueryClient = async (
       if (!rootClient) {
         rootClient = getAWSClient(credential, clientOptions);
       }
-      addClientToPool(cacheKey, type, rootClient);
+      clientPool.addClientToPool(cacheKey, type, rootClient, request);
 
       return getAWSChildClient(rootClient, credential);
 
