@@ -41,11 +41,12 @@ export async function importFile(
   http: HttpStart,
   file: File,
   { createNewCopies, overwrite }: ImportMode,
-  selectedDataSourceId?: string
+  selectedDataSourceId?: string,
+  workspaces?: string[]
 ) {
   const formData = new FormData();
   formData.append('file', file);
-  const query = createNewCopies ? { createNewCopies } : { overwrite };
+  const query = createNewCopies ? { createNewCopies, workspaces } : { overwrite, workspaces };
   if (selectedDataSourceId) {
     query.dataSourceId = selectedDataSourceId;
   }

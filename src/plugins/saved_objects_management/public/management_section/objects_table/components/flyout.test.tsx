@@ -184,6 +184,26 @@ describe('Flyout', () => {
     );
   });
 
+  it('should call importFile / resolveImportErrors with workspaces', async () => {
+    const component = shallowRender({ ...defaultProps, workspaces: ['foo'] });
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    await component.instance().import();
+    expect(importFileMock.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "createNewCopies": true,
+        "overwrite": true,
+      }
+    `);
+
+    await component.instance().resolveImportErrors();
+    expect(resolveImportErrorsMock.mock.calls[0][0].workspaces).toEqual(['foo']);
+  });
+
   describe('conflicts', () => {
     beforeEach(() => {
       importFileMock.mockImplementation(() => ({
@@ -206,6 +226,7 @@ describe('Flyout', () => {
           },
         ],
       }));
+      resolveImportErrorsMock.mockClear();
       resolveImportErrorsMock.mockImplementation(() => ({
         status: 'success',
         importCount: 1,
@@ -231,6 +252,7 @@ describe('Flyout', () => {
           createNewCopies: true,
           overwrite: true,
         },
+        undefined,
         undefined
       );
       expect(component.state()).toMatchObject({

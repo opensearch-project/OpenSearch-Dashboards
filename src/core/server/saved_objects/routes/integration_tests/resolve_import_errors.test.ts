@@ -403,4 +403,85 @@ describe(`POST ${URL}`, () => {
       );
     });
   });
+
+  describe('workspace enabled', () => {
+    it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs, objects should have workspaces fields', async () => {
+      mockUuidv4.mockReturnValue('new-id-1');
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
+      const obj1 = {
+        type: 'visualization',
+        id: 'new-id-1',
+        attributes: { title: 'Look at my visualization' },
+        references: [],
+      };
+      const obj2 = {
+        type: 'dashboard',
+        id: 'new-id-2',
+        attributes: { title: 'Look at my dashboard' },
+        references: [],
+      };
+      savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
+
+      const result = await supertest(httpSetup.server.listener)
+        .post(`${URL}?createNewCopies=true&workspaces=foo`)
+        .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
+        .send(
+          [
+            '--EXAMPLE',
+            'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+            'Content-Type: application/ndjson',
+            '',
+            '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern"}]}',
+            '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}',
+            '--EXAMPLE',
+            'Content-Disposition: form-data; name="retries"',
+            '',
+            '[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern","to":"existing"}]},{"type":"dashboard","id":"my-dashboard","destinationId":"new-id-2"}]',
+            '--EXAMPLE--',
+          ].join('\r\n')
+        )
+        .expect(200);
+
+      expect(result.body).toEqual({
+        success: true,
+        successCount: 2,
+        successResults: [
+          {
+            type: obj1.type,
+            id: 'my-vis',
+            meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
+            destinationId: obj1.id,
+          },
+          {
+            type: obj2.type,
+            id: 'my-dashboard',
+            meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
+            destinationId: obj2.id,
+          },
+        ],
+      });
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            type: 'visualization',
+            id: 'new-id-1',
+            references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
+            originId: undefined,
+          }),
+          expect.objectContaining({
+            type: 'dashboard',
+            id: 'new-id-2',
+            references: [{ name: 'ref_0', type: 'visualization', id: 'new-id-1' }],
+            originId: undefined,
+          }),
+        ],
+        {
+          namespace: undefined,
+          overwrite: undefined,
+          workspaces: ['foo'],
+        }
+      );
+    });
+  });
 });

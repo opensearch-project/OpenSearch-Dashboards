@@ -246,6 +246,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             },
           ],
         },
+        "workspaces": undefined,
       },
     ],
   ],

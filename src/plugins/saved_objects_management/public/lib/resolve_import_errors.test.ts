@@ -62,6 +62,7 @@ describe('resolveImportErrors', () => {
       http: httpMock,
       getConflictResolutions,
       state: { importCount: 0, importMode: { createNewCopies: false, overwrite: false } },
+      selectedDataSourceId: '',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -91,6 +92,7 @@ describe('resolveImportErrors', () => {
         ],
         importMode: { createNewCopies: false, overwrite: false },
       },
+      selectedDataSourceId: '',
     });
     expect(httpMock.post).not.toHaveBeenCalled();
     expect(result).toMatchInlineSnapshot(`
@@ -143,6 +145,7 @@ describe('resolveImportErrors', () => {
         ],
         importMode: { createNewCopies: false, overwrite: false },
       },
+      selectedDataSourceId: '',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -209,6 +212,7 @@ describe('resolveImportErrors', () => {
         ],
         importMode: { createNewCopies: false, overwrite: false },
       },
+      selectedDataSourceId: '',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -249,6 +253,7 @@ describe('resolveImportErrors', () => {
         ],
         importMode: { createNewCopies: false, overwrite: false },
       },
+      selectedDataSourceId: '',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -301,6 +306,72 @@ describe('resolveImportErrors', () => {
           },
         ],
       }
+    `);
+  });
+
+  test('make http calls with workspaces', async () => {
+    httpMock.post.mockResolvedValueOnce({
+      success: false,
+      successCount: 0,
+      errors: [{ type: 'a', id: '1', error: { type: 'conflict' } }],
+    });
+    httpMock.post.mockResolvedValueOnce({
+      success: true,
+      successCount: 1,
+      successResults: [{ type: 'a', id: '1' }],
+    });
+    getConflictResolutions.mockResolvedValueOnce({});
+    getConflictResolutions.mockResolvedValueOnce({
+      'a:1': { retry: true, options: { overwrite: true } },
+    });
+    await resolveImportErrors({
+      http: httpMock,
+      getConflictResolutions,
+      state: {
+        importCount: 0,
+        unmatchedReferences: [{ existingIndexPatternId: '2', newIndexPatternId: '3', list: [] }],
+        failedImports: [
+          {
+            obj: { type: 'a', id: '1', meta: {} },
+            error: { type: 'missing_references', references: [{ type: 'index-pattern', id: '2' }] },
+          },
+        ],
+        importMode: { createNewCopies: false, overwrite: false },
+      },
+      workspaces: ['foo'],
+      selectedDataSourceId: '',
+    });
+    expect(httpMock.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/saved_objects/_resolve_import_errors",
+          Object {
+            "body": FormData {},
+            "headers": Object {
+              "Content-Type": undefined,
+            },
+            "query": Object {
+              "workspaces": Array [
+                "foo",
+              ],
+            },
+          },
+        ],
+        Array [
+          "/api/saved_objects/_resolve_import_errors",
+          Object {
+            "body": FormData {},
+            "headers": Object {
+              "Content-Type": undefined,
+            },
+            "query": Object {
+              "workspaces": Array [
+                "foo",
+              ],
+            },
+          },
+        ],
+      ]
     `);
   });
 });

@@ -48,6 +48,7 @@ import {
   notificationServiceMock,
   savedObjectsServiceMock,
   applicationServiceMock,
+  workspacesServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { serviceRegistryMock } from '../../services/service_registry.mock';
@@ -58,6 +59,7 @@ import {
   SavedObjectsTable,
   SavedObjectsTableProps,
   SavedObjectsTableState,
+  formatWorkspaceIdParams,
 } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
@@ -102,6 +104,7 @@ describe('SavedObjectsTable', () => {
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
   let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
+  let workspaces: ReturnType<typeof workspacesServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
     return (shallowWithI18nProvider(
@@ -121,6 +124,7 @@ describe('SavedObjectsTable', () => {
     notifications = notificationServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
     search = dataPluginMock.createStartContract().search;
+    workspaces = workspacesServiceMock.createStartContract();
 
     const applications = applicationServiceMock.createStartContract();
     applications.capabilities = {
@@ -131,6 +135,9 @@ describe('SavedObjectsTable', () => {
         read: true,
         edit: false,
         delete: false,
+      },
+      workspaces: {
+        enabled: false,
       },
     };
 
@@ -154,6 +161,7 @@ describe('SavedObjectsTable', () => {
       savedObjectsClient: savedObjects.client,
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       http,
+      workspaces,
       overlays,
       notifications,
       applications,
@@ -279,7 +287,7 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExport(true);
 
-      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true, {});
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
       });
@@ -322,7 +330,7 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExport(true);
 
-      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true, {});
       expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
         title:
           'Your file is downloading in the background. ' +
@@ -363,7 +371,8 @@ describe('SavedObjectsTable', () => {
         http,
         allowedTypes,
         undefined,
-        true
+        true,
+        {}
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -393,12 +402,77 @@ describe('SavedObjectsTable', () => {
         http,
         allowedTypes,
         'test*',
-        true
+        true,
+        {}
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
       });
+    });
+
+    it('should make modules call with workspace', async () => {
+      getSavedObjectCountsMock.mockClear();
+      findObjectsMock.mockClear();
+      // @ts-expect-error
+      defaultProps.applications.capabilities.workspaces.enabled = true;
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' },
+      ] as SavedObjectWithMetadata[];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
+        _id: obj.id,
+        _type: obj.type,
+        _source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+      };
+
+      const workspacesStart = workspacesServiceMock.createStartContract();
+      workspacesStart.currentWorkspaceId$.next('foo');
+
+      const component = shallowRender({
+        savedObjectsClient: mockSavedObjectsClient,
+        workspaces: workspacesStart,
+      });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().onExport(true);
+      await component.instance().onExportAll();
+
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true, {
+        workspaces: ['foo'],
+      });
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+        http,
+        ['index-pattern', 'visualization', 'dashboard', 'search'],
+        undefined,
+        true,
+        {
+          workspaces: ['foo'],
+        }
+      );
+      expect(
+        getSavedObjectCountsMock.mock.calls.every((item) => item[1].workspaces[0] === 'foo')
+      ).toEqual(true);
+      expect(findObjectsMock.mock.calls.every((item) => item[1].workspaces[0] === 'foo')).toEqual(
+        true
+      );
+      // @ts-expect-error
+      defaultProps.applications.capabilities.workspaces.enabled = false;
     });
   });
 
@@ -571,5 +645,25 @@ describe('SavedObjectsTable', () => {
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
     });
+  });
+});
+
+describe('formatWorkspaceIdParams', () => {
+  it('omit workspaces params when it is undefined', () => {
+    expect(
+      formatWorkspaceIdParams({
+        workspaces: undefined,
+        foo: 'bar',
+      })
+    ).toEqual({ foo: 'bar' });
+  });
+
+  it('reserve workspaces params when it is valid', () => {
+    expect(
+      formatWorkspaceIdParams({
+        workspaces: ['foo'],
+        foo: 'bar',
+      })
+    ).toEqual({ workspaces: ['foo'], foo: 'bar' });
   });
 });
