@@ -14,10 +14,7 @@ import { DataSourceClientParams, LegacyClientCallAPIParams, AuthenticationMethod
 import { OpenSearchClientPoolSetup } from '../client';
 import { ConfigOptions } from 'elasticsearch';
 import { ClientMock, parseClientOptionsMock } from './configure_legacy_client.test.mocks';
-import {
-  authRegistryCredentialProviderMock,
-  CredentialsMock,
-} from '../client/./configure_client.test.mocks';
+import { authRegistryCredentialProviderMock } from '../client/configure_client.test.mocks';
 import { configureLegacyClient } from './configure_legacy_client';
 import { CustomApiSchemaRegistry } from '../schema_registry';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
@@ -136,7 +133,6 @@ describe('configureLegacyClient', () => {
 
   afterEach(() => {
     ClientMock.mockReset();
-    CredentialsMock.mockReset();
     jest.resetAllMocks();
   });
 
@@ -220,7 +216,6 @@ describe('configureLegacyClient', () => {
 
     expect(parseClientOptionsMock).toHaveBeenCalled();
     expect(ClientMock).toHaveBeenCalledTimes(1);
-    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining({ service: 'aoss' }));
 
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
   });
@@ -307,11 +302,6 @@ describe('configureLegacyClient', () => {
     expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toBeCalledWith({
-      accessKeyId: sigV4AuthContent.accessKey,
-      secretAccessKey: sigV4AuthContent.secretKey,
-    });
   });
 
   test('When credential provider from auth registry returns session token, credentials should contains session token', async () => {
@@ -345,11 +335,5 @@ describe('configureLegacyClient', () => {
     expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toBeCalledWith({
-      accessKeyId: mockCredentials.accessKey,
-      secretAccessKey: mockCredentials.secretKey,
-      sessionToken: mockCredentials.sessionToken,
-    });
   });
 });

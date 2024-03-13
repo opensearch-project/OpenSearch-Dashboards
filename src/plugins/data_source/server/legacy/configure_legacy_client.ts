@@ -7,7 +7,7 @@ import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient, ConfigOptions } from 'elasticsearch';
 import { Config } from 'aws-sdk';
 import { get } from 'lodash';
-import HttpAmazonESConnector from 'http-aws-es';
+import HttpAmazonESConnector from './http_aws_es/connector';
 import {
   Headers,
   LegacyAPICaller,
@@ -21,6 +21,7 @@ import {
   DataSourceAttributes,
   SigV4Content,
   UsernamePasswordTypedContent,
+  SigV4ServiceName,
 } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyServiceSetup } from '../cryptography_service';
@@ -34,7 +35,6 @@ import {
   getCredential,
   getDataSource,
   generateCacheKey,
-  getSigV4Credentials,
 } from '../client/configure_client_utils';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
 import { authRegistryCredentialProvider } from '../util/credential_provider';
@@ -154,14 +154,12 @@ const getQueryClient = async (
       credential =
         (credential as SigV4Content) ?? (await getAWSCredential(dataSourceAttr, cryptography));
 
-      const awsClient = rootClient ? rootClient : getAWSClient(credential, clientOptions);
-      addClientToPool(cacheKey, type, awsClient);
+      if (!rootClient) {
+        rootClient = getAWSClient(credential, clientOptions);
+      }
+      addClientToPool(cacheKey, type, rootClient);
 
-      return await (callAPI.bind(null, awsClient) as LegacyAPICaller)(
-        endpoint,
-        clientParams,
-        options
-      );
+      return await getAWSChildClient(rootClient, { endpoint, clientParams, options }, credential);
 
     default:
       throw Error(`${type} is not a supported auth type for data source`);
@@ -231,16 +229,35 @@ const getBasicAuthClient = async (
 };
 
 const getAWSClient = (credential: SigV4Content, clientOptions: ConfigOptions): LegacyClient => {
-  const { accessKey, secretKey, region, service, sessionToken } = credential;
-  const credentials = getSigV4Credentials(accessKey, secretKey, sessionToken);
+  const { region, service } = credential;
   const client = new LegacyClient({
     connectionClass: HttpAmazonESConnector,
     awsConfig: new Config({
       region,
-      credentials,
     }),
-    service,
+    // service,
     ...clientOptions,
   });
   return client;
+};
+
+const getAWSChildClient = async (
+  rootClient: LegacyClient,
+  { endpoint, clientParams = {}, options }: LegacyClientCallAPIParams,
+  credential: SigV4Content
+): Promise<LegacyClient> => {
+  const { accessKey, secretKey, region, service, sessionToken } = credential;
+  const authHeaders = {
+    auth: {
+      credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey: secretKey,
+        sessionToken: sessionToken ?? '',
+      },
+      region,
+      service: service ?? SigV4ServiceName.OpenSearch,
+    },
+  };
+  clientParams.headers = Object.assign({}, clientParams.headers, authHeaders);
+  return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(endpoint, clientParams, options);
 };
