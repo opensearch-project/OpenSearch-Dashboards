@@ -6,7 +6,12 @@
 import { SavedObjectsClientContract } from '../../../../core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/server/mocks';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
-import { AuthType, DataSourceAttributes, SigV4Content } from '../../common/data_sources';
+import {
+  AuthType,
+  DataSourceAttributes,
+  SigV4Content,
+  SigV4ServiceName,
+} from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
@@ -28,7 +33,6 @@ describe('configureLegacyClient', () => {
   let config: DataSourcePluginConfigType;
   let savedObjectsMock: jest.Mocked<SavedObjectsClientContract>;
   let cryptographyMock: jest.Mocked<CryptographyServiceSetup>;
-  let clientPoolSetup: OpenSearchClientPoolSetup;
   let configOptions: ConfigOptions;
   let dataSourceAttr: DataSourceAttributes;
   let sigV4AuthContent: SigV4Content;
@@ -49,10 +53,17 @@ describe('configureLegacyClient', () => {
     roleARN: 'test-role',
   };
 
+  const clientPoolSetup: OpenSearchClientPoolSetup = {
+    getClientFromPool: jest.fn(),
+    addClientToPool: jest.fn(),
+  };
+
   const authMethod: AuthenticationMethod = {
     name: 'typeA',
     authType: AuthType.SigV4,
     credentialProvider: jest.fn(),
+    clientPoolSetup,
+    legacyClientPoolSetup: clientPoolSetup,
   };
 
   beforeEach(() => {
@@ -94,11 +105,6 @@ describe('configureLegacyClient', () => {
       region: 'us-east-1',
       accessKey: 'accessKey',
       secretKey: 'secretKey',
-    };
-
-    clientPoolSetup = {
-      getClientFromPool: jest.fn(),
-      addClientToPool: jest.fn(),
     };
 
     callApiParams = {
@@ -218,6 +224,19 @@ describe('configureLegacyClient', () => {
     expect(ClientMock).toHaveBeenCalledTimes(1);
 
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+      headers: {
+        auth: {
+          credentials: {
+            accessKeyId: 'accessKey',
+            secretAccessKey: 'accessKey',
+            sessionToken: '',
+          },
+          region: sigV4AuthContent.region,
+          service: 'aoss',
+        },
+      },
+    });
   });
 
   test('configure client with auth.type == username_password and password contaminated', async () => {
@@ -302,6 +321,20 @@ describe('configureLegacyClient', () => {
     expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+      headers: {
+        auth: {
+          credentials: {
+            accessKeyId: sigV4AuthContent.accessKey,
+            secretAccessKey: sigV4AuthContent.secretKey,
+            sessionToken: '',
+          },
+          region: sigV4AuthContent.region,
+          service: SigV4ServiceName.OpenSearch,
+        },
+      },
+    });
   });
 
   test('When credential provider from auth registry returns session token, credentials should contains session token', async () => {
@@ -335,5 +368,19 @@ describe('configureLegacyClient', () => {
     expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+      headers: {
+        auth: {
+          credentials: {
+            accessKeyId: mockCredentials.accessKey,
+            secretAccessKey: mockCredentials.secretKey,
+            sessionToken: mockCredentials.sessionToken,
+          },
+          region: mockCredentials.region,
+          service: SigV4ServiceName.OpenSearch,
+        },
+      },
+    });
   });
 });

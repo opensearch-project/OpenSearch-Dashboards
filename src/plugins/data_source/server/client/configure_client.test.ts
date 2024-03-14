@@ -39,7 +39,6 @@ describe('configureClient', () => {
   let config: DataSourcePluginConfigType;
   let savedObjectsMock: jest.Mocked<SavedObjectsClientContract>;
   let cryptographyMock: jest.Mocked<CryptographyServiceSetup>;
-  let clientPoolSetup: OpenSearchClientPoolSetup;
   let clientOptions: ClientOptions;
   let dataSourceAttr: DataSourceAttributes;
   let dsClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
@@ -54,10 +53,17 @@ describe('configureClient', () => {
     roleARN: 'test-role',
   };
 
+  const clientPoolSetup: OpenSearchClientPoolSetup = {
+    getClientFromPool: jest.fn(),
+    addClientToPool: jest.fn(),
+  };
+
   const authMethod: AuthenticationMethod = {
     name: 'typeA',
     authType: AuthType.SigV4,
     credentialProvider: jest.fn(),
+    clientPoolSetup,
+    legacyClientPoolSetup: clientPoolSetup,
   };
 
   beforeEach(() => {
@@ -101,11 +107,6 @@ describe('configureClient', () => {
         credentials: usernamePasswordAuthContent,
       },
     } as DataSourceAttributes;
-
-    clientPoolSetup = {
-      getClientFromPool: jest.fn(),
-      addClientToPool: jest.fn(),
-    };
 
     savedObjectsMock.get.mockResolvedValueOnce({
       id: DATA_SOURCE_ID,
