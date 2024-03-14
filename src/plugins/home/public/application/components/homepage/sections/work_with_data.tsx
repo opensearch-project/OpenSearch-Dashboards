@@ -11,6 +11,7 @@ import {
   EuiImage,
   EuiButton,
   EuiButtonProps,
+  OuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { Section } from '../../../../services/section_type/section_type';
@@ -63,30 +64,26 @@ const Card: FC<{
 
 const render = renderFn(() => {
   const services = getServices();
-  const getUrl = services.application.getUrlForApp;
+  const navigateToApp = services.application.navigateToApp;
   const darkMode = services.injectedMetadata.getBranding().darkMode;
 
   return (
     <EuiFlexGroup wrap direction="row" alignItems="stretch">
-      <Card
-        imgSrc={`/plugins/home/assets/sample_data_resources/ecommerce/${
-          darkMode ? 'dashboard_dark_new.png' : 'dashboard_new.png'
-        }`}
-        imgAlt={i18n.translate('home.sections.workWithData.sampleData.alt', {
-          defaultMessage: 'Sample data image',
-        })}
-        title={i18n.translate('home.sections.workWithData.sampleData.title', {
-          defaultMessage: 'Start with sample data',
-        })}
-        description={i18n.translate('home.sections.workWithData.sampleData.description', {
-          defaultMessage:
-            'These sample data sets allow you to explore dashboards, visualizations and features without needing to ingest your own data.',
-        })}
-        footerUrl={getUrl('home', { path: '#/tutorial_directory' })}
-        footerText={i18n.translate('home.sections.workWithData.sampleData.button', {
-          defaultMessage: 'Manage sample data',
-        })}
-      />
+      <OuiFlexItem>
+        <EuiCard
+          title={i18n.translate('home.sections.workWithData.sampleData.title', {
+            defaultMessage: 'Start with a sample data set',
+          })}
+          description={i18n.translate('home.sections.workWithData.sampleData.description', {
+            defaultMessage: 'with Sample Data Sets',
+          })}
+          onClick={() => navigateToApp('home', { path: '#/tutorial_directory' })}
+          image={`/plugins/home/assets/sample_data_resources/ecommerce/${
+            darkMode ? 'dashboard_dark_new.png' : 'dashboard_new.png'
+          }`}
+        />
+      </OuiFlexItem>
+
       <Card
         imgSrc="/plugins/home/assets/ingestion.png"
         imgAlt={i18n.translate('home.sections.workWithData.ingest.alt', {
@@ -132,7 +129,7 @@ const render = renderFn(() => {
 export const workWithDataSection: Section = {
   id: 'home:workWithData',
   title: i18n.translate('home.sections.workWithData.title', {
-    defaultMessage: 'Work with data',
+    defaultMessage: 'Start working with data',
   }),
   description: i18n.translate('home.sections.workWithData.description', {
     defaultMessage:

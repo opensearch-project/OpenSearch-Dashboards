@@ -38,7 +38,7 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
   const memoizedContent = useMemo(
     () => (
       <EuiFlexGroup direction="row" data-test-subj="homepageSectionContent">
-        {hasDescriptionSection && (
+        {/* {hasDescriptionSection && (
           <EuiFlexItem grow={1}>
             <EuiText>{description}</EuiText>
             {hasDescriptionSpacer && <EuiSpacer />}
@@ -49,13 +49,14 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
                 </EuiLink>
               ))}
           </EuiFlexItem>
-        )}
+        )} */}
         <EuiFlexItem grow={3}>
           <LazyRender render={render} />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [description, hasDescriptionSection, hasDescriptionSpacer, hasLinks, links, render]
+    //[description, hasDescriptionSection, hasDescriptionSpacer, hasLinks, links, render]
+    [render]
   );
 
   return (
@@ -66,6 +67,11 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
       data-test-subj="homepageSection"
     >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow>
+          <EuiTitle size="m">
+            <h2>{title}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
@@ -79,11 +85,6 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
                 : i18n.translate('home.section.expand', { defaultMessage: 'Expand section' })
             }
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiTitle size="m">
-            <h2>{title}</h2>
-          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       {isExpanded && memoizedContent}
