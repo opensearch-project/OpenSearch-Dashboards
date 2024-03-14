@@ -410,7 +410,7 @@ describe('With Registered Authentication', () => {
         inputDisplay: 'some input',
       },
       credentialForm: mockedCredentialForm,
-      crendentialFormField: {},
+      credentialFormField: {},
     } as AuthenticationMethod;
 
     const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
