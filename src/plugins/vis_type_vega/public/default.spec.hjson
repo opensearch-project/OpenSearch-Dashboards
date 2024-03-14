@@ -29,6 +29,10 @@
 
       // Which index to search
       index: _all
+
+      // If "data_source.enabled: true", optionally set the data source name to query from (omit field if querying from local cluster)
+      // data_source_name: Example US Cluster
+
       // Aggregate data by the time field into time buckets, counting the number of documents in each bucket.
       body: {
         aggs: {

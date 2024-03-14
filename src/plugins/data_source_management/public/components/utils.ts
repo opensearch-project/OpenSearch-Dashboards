@@ -4,7 +4,13 @@
  */
 
 import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
-import { DataSourceAttributes, DataSourceTableItem } from '../types';
+import {
+  DataSourceAttributes,
+  DataSourceTableItem,
+  defaultAuthType,
+  noAuthCredentialAuthMethod,
+} from '../types';
+import { AuthenticationMethodRegistery } from '../auth_registry';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -28,6 +34,19 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
           };
         }) || []
     );
+}
+
+export async function getDataSourcesWithFields(
+  savedObjectsClient: SavedObjectsClientContract,
+  fields: string[]
+) {
+  const response = await savedObjectsClient.find({
+    type: 'data-source',
+    fields,
+    perPage: 10000,
+  });
+
+  return response?.savedObjects;
 }
 
 export async function getDataSourceById(
@@ -107,4 +126,37 @@ export const isValidUrl = (endpoint: string) => {
   } catch (e) {
     return false;
   }
+};
+
+export const getDefaultAuthMethod = (
+  authenticationMethodRegistery: AuthenticationMethodRegistery
+) => {
+  const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
+
+  const defaultAuthMethod =
+    registeredAuthMethods.length > 0
+      ? authenticationMethodRegistery.getAuthenticationMethod(registeredAuthMethods[0].name)
+      : noAuthCredentialAuthMethod;
+
+  const initialSelectedAuthMethod =
+    authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
+
+  return initialSelectedAuthMethod;
+};
+
+export const extractRegisteredAuthTypeCredentials = (
+  currentCredentialState: { [key: string]: string },
+  authType: string,
+  authenticationMethodRegistery: AuthenticationMethodRegistery
+) => {
+  const registeredCredentials = {} as { [key: string]: string };
+  const registeredCredentialField =
+    authenticationMethodRegistery.getAuthenticationMethod(authType)?.credentialFormField ?? {};
+
+  Object.keys(registeredCredentialField).forEach((credentialFiled) => {
+    registeredCredentials[credentialFiled] =
+      currentCredentialState[credentialFiled] ?? registeredCredentialField[credentialFiled];
+  });
+
+  return registeredCredentials;
 };

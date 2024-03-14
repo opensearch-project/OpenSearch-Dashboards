@@ -11,3 +11,6 @@ export function plugin() {
   return new DataSourceManagementPlugin();
 }
 export { DataSourceManagementPluginStart } from './types';
+export { DataSourceSelector } from './components/data_source_selector';
+export { DataSourceMenu } from './components/data_source_menu';
+export { DataSourceManagementPlugin, DataSourceManagementPluginSetup } from './plugin';

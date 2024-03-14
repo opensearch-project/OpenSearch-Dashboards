@@ -306,6 +306,14 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
       type: TooltipType.VerticalCursor,
     };
 
+    // These styles override the chartsTheme so that the correct base chart colors are used
+    delete chartsTheme.axes?.gridLine?.horizontal?.stroke;
+    delete chartsTheme.axes?.gridLine?.vertical?.stroke;
+    delete chartsTheme.axes?.axisLine;
+    chartsTheme.axes!.axisTitle = {
+      fill: euiThemeVars.euiTextColor,
+    };
+
     return (
       <Chart size="100%">
         <Settings

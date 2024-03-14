@@ -47,7 +47,6 @@ import {
 } from '../../../data/public';
 import { Container, Embeddable } from '../../../embeddable/public';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { getDefaultSort } from '../application/view_components/utils/get_default_sort';
 import { getSortForSearchSource } from '../application/view_components/utils/get_sort_for_search_source';
 import {
   getRequestInspectorStats,
@@ -80,10 +79,11 @@ export interface SearchProps {
   onRemoveColumn?: (column: string) => void;
   onAddColumn?: (column: string) => void;
   onMoveColumn?: (column: string, index: number) => void;
+  onReorderColumn?: (col: string, source: number, destination: number) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   rows?: any[];
   indexPattern?: IndexPattern;
-  totalHitCount?: number;
+  hits?: number;
   isLoading?: boolean;
   displayTimeColumn?: boolean;
   services: DiscoverServices;
@@ -214,12 +214,6 @@ export class SearchEmbeddable
     if (!indexPattern) {
       return;
     }
-
-    const sort = getDefaultSort(
-      indexPattern,
-      this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
-    );
-    this.savedSearch.sort = sort;
 
     const searchProps: SearchProps = {
       columns: this.savedSearch.columns,
@@ -359,7 +353,7 @@ export class SearchEmbeddable
       inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
 
       this.searchProps!.rows = resp.hits.hits;
-      this.searchProps!.totalHitCount = resp.hits.total;
+      this.searchProps!.hits = resp.hits.total;
       this.searchProps!.isLoading = false;
     } catch (error) {
       this.updateOutput({ loading: false, error });

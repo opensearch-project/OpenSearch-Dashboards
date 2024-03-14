@@ -31,6 +31,8 @@
 import { combineLatest } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { CoreStart, IUiSettingsClient } from 'opensearch-dashboards/public';
+import { SavedObjectsClientContract } from 'src/core/public';
+import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
@@ -45,6 +47,8 @@ export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
   injectedMetadata: CoreStart['injectedMetadata'];
   search: DataPublicPluginStart['search'];
+  dataSourceEnabled: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export class SearchAPI {
@@ -54,31 +58,75 @@ export class SearchAPI {
     public readonly inspectorAdapters?: VegaInspectorAdapters
   ) {}
 
-  search(searchRequests: SearchRequest[]) {
+  async search(searchRequests: SearchRequest[]) {
     const { search } = this.dependencies.search;
     const requestResponders: any = {};
 
     return combineLatest(
-      searchRequests.map((request) => {
-        const requestId = request.name;
-        const params = getSearchParamsFromRequest(request, {
-          getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
-        });
+      await Promise.all(
+        searchRequests.map(async (request) => {
+          const requestId = request.name;
+          const dataSourceId = !!request.data_source_name
+            ? await this.findDataSourceIdbyName(request.data_source_name)
+            : undefined;
 
-        if (this.inspectorAdapters) {
-          requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, request);
-          requestResponders[requestId].json(params.body);
-        }
+          const params = getSearchParamsFromRequest(request, {
+            getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
+          });
 
-        return search({ params }, { abortSignal: this.abortSignal }).pipe(
-          tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
-          map((data) => ({
-            name: requestId,
-            rawResponse: data.rawResponse,
-          }))
-        );
-      })
+          if (this.inspectorAdapters) {
+            requestResponders[requestId] = this.inspectorAdapters.requests.start(
+              requestId,
+              request
+            );
+            requestResponders[requestId].json(params.body);
+          }
+
+          const searchApiParams =
+            dataSourceId && this.dependencies.dataSourceEnabled
+              ? { params, dataSourceId }
+              : { params };
+
+          return search(searchApiParams, { abortSignal: this.abortSignal }).pipe(
+            tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
+            map((data) => ({
+              name: requestId,
+              rawResponse: data.rawResponse,
+            }))
+          );
+        })
+      )
     );
+  }
+
+  async findDataSourceIdbyName(dataSourceName: string) {
+    if (!this.dependencies.dataSourceEnabled) {
+      throw new Error('data_source_name cannot be used because data_source.enabled is false');
+    }
+    const dataSources = await this.dataSourceFindQuery(dataSourceName);
+
+    // In the case that data_source_name is a prefix of another name, match exact data_source_name
+    const possibleDataSourceIds = dataSources.savedObjects.filter(
+      (obj) => obj.attributes.title === dataSourceName
+    );
+
+    if (possibleDataSourceIds.length !== 1) {
+      throw new Error(
+        `Expected exactly 1 result for data_source_name "${dataSourceName}" but got ${possibleDataSourceIds.length} results`
+      );
+    }
+
+    return possibleDataSourceIds.pop()?.id;
+  }
+
+  async dataSourceFindQuery(dataSourceName: string) {
+    return await this.dependencies.savedObjectsClient.find<DataSourceAttributes>({
+      type: 'data-source',
+      perPage: 10,
+      search: `"${dataSourceName}"`,
+      searchFields: ['title'],
+      fields: ['id', 'title'],
+    });
   }
 
   public resetSearchStats() {

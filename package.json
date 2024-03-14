@@ -75,10 +75,15 @@
     "osd:watch": "scripts/use_node scripts/opensearch_dashboards --dev --logging.json=false",
     "build:types": "scripts/use_node scripts/remove.js ./target/types && tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "scripts/use_node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
+    "docs:generateDevDocs": "scripts/use_node scripts/generate_docs_sidebar.js",
     "osd:bootstrap": "scripts/use_node scripts/build_ts_refs && scripts/use_node scripts/register_git_hook",
     "spec_to_console": "scripts/use_node scripts/spec_to_console",
     "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\"",
-    "release_note:generate": "scripts/use_node scripts/generate_release_note"
+    "release_note:generate": "scripts/use_node scripts/generate_release_note",
+    "cypress:run-without-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=false",
+    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
+    "osd:ciGroup10": "echo \"dashboard_sanity_test_spec.js\"",
+    "osd:ciGroup11": "echo \"apps/vis_builder/*.js\""
   },
   "repository": {
     "type": "git",
@@ -107,7 +112,8 @@
     "**/set-value": "^4.1.0",
     "**/xml2js": "^0.5.0",
     "**/yaml": "^2.2.2",
-    "**/@babel/traverse": "^7.23.2"
+    "**/@babel/traverse": "^7.23.2",
+    "**/es5-ext": "^0.10.63"
   },
   "workspaces": {
     "packages": [
@@ -129,7 +135,7 @@
   "dependencies": {
     "@aws-crypto/client-node": "^3.1.1",
     "@elastic/datemath": "5.0.3",
-    "@elastic/eui": "npm:@opensearch-project/oui@1.4.0",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.5.1",
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/numeral": "npm:@amoo-miki/numeral@2.6.0",
     "@elastic/request-crypto": "2.0.0",
@@ -227,7 +233,9 @@
     "type-detect": "^4.0.8",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "@opensearch-dashboards-test/opensearch-dashboards-test-library": "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz"
+
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",
@@ -352,10 +360,11 @@
     "brace": "0.11.1",
     "chai": "3.5.0",
     "chance": "1.0.18",
-    "cheerio": "0.22.0",
-    "chromedriver": "^119.0.1",
+    "cheerio": "1.0.0-rc.1",
+    "chromedriver": "^121.0.1",
     "classnames": "2.3.1",
     "compare-versions": "3.5.1",
+    "cypress": "9.5.4",
     "d3": "3.5.17",
     "d3-cloud": "1.2.5",
     "dedent": "^0.7.0",

@@ -18,4 +18,4 @@ export const config: PluginConfigDescriptor = {
   schema: configSchema,
 };
 
-export { WorkspaceFindOptions } from './types';
+export { WorkspaceFindOptions, WorkspacePluginSetup, WorkspacePluginStart } from './types';

@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceMenu should render data source selectable only with local cluster is hidden 1`] = `
+<Fragment>
+  <EuiHeaderLinks
+    className="osdTopNavMenu myclass"
+    data-test-subj="top-nav"
+    gutterSize="xs"
+  >
+    <DataSourceSelectable
+      disabled={false}
+      fullWidth={true}
+      hideLocalCluster={true}
+      notifications={
+        Object {
+          "add": [MockFunction],
+          "addDanger": [MockFunction],
+          "addError": [MockFunction],
+          "addInfo": [MockFunction],
+          "addSuccess": [MockFunction],
+          "addWarning": [MockFunction],
+          "get$": [MockFunction],
+          "remove": [MockFunction],
+        }
+      }
+      onSelectedDataSource={[MockFunction]}
+      savedObjectsClient={
+        Object {
+          "find": [MockFunction],
+        }
+      }
+    />
+  </EuiHeaderLinks>
+</Fragment>
+`;
+
+exports[`DataSourceMenu should render data source selectable only with local cluster not hidden 1`] = `
+<Fragment>
+  <EuiHeaderLinks
+    className="osdTopNavMenu myclass"
+    data-test-subj="top-nav"
+    gutterSize="xs"
+  >
+    <DataSourceSelectable
+      disabled={false}
+      fullWidth={true}
+      hideLocalCluster={false}
+      notifications={
+        Object {
+          "add": [MockFunction],
+          "addDanger": [MockFunction],
+          "addError": [MockFunction],
+          "addInfo": [MockFunction],
+          "addSuccess": [MockFunction],
+          "addWarning": [MockFunction],
+          "get$": [MockFunction],
+          "remove": [MockFunction],
+        }
+      }
+      onSelectedDataSource={[MockFunction]}
+      savedObjectsClient={
+        Object {
+          "find": [MockFunction],
+        }
+      }
+    />
+  </EuiHeaderLinks>
+</Fragment>
+`;
+
+exports[`DataSourceMenu should render data source view only 1`] = `
+<Fragment>
+  <EuiHeaderLinks
+    className="osdTopNavMenu myclass"
+    data-test-subj="top-nav"
+    gutterSize="xs"
+  >
+    <DataSourceView
+      fullWidth={true}
+    />
+  </EuiHeaderLinks>
+</Fragment>
+`;

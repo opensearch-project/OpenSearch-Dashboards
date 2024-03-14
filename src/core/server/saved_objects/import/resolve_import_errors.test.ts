@@ -242,7 +242,8 @@ describe('#importSavedObjectsFromStream', () => {
     test('checks conflicts', async () => {
       const createNewCopies = (Symbol() as unknown) as boolean;
       const retries = [createRetry()];
-      const options = setupOptions(retries, createNewCopies);
+      const workspaces = ['foo'];
+      const options = { ...setupOptions(retries, createNewCopies), workspaces };
       const collectedObjects = [createObject()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
@@ -257,6 +258,7 @@ describe('#importSavedObjectsFromStream', () => {
         namespace,
         retries,
         createNewCopies,
+        workspaces,
       };
       expect(checkConflicts).toHaveBeenCalledWith(checkConflictsParams);
     });
@@ -369,7 +371,7 @@ describe('#importSavedObjectsFromStream', () => {
         });
 
         await resolveSavedObjectsImportErrors(options);
-        expect(regenerateIds).toHaveBeenCalledWith(collectedObjects);
+        expect(regenerateIds).toHaveBeenCalledWith(collectedObjects, undefined);
       });
 
       test('creates saved objects', async () => {

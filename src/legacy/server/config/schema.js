@@ -227,6 +227,7 @@ export default () =>
     opensearchDashboards: Joi.object({
       enabled: Joi.boolean().default(true),
       index: Joi.string().default('.kibana'),
+      configIndex: Joi.string().default('.opensearch_dashboards_config'),
       autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
       // TODO Also allow units here like in opensearch config once this is moved to the new platform
       autocompleteTimeout: Joi.number().integer().min(1).default(1000),

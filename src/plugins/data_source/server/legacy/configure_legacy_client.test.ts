@@ -10,11 +10,18 @@ import { AuthType, DataSourceAttributes, SigV4Content } from '../../common/data_
 import { DataSourcePluginConfigType } from '../../config';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
-import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
+import { DataSourceClientParams, LegacyClientCallAPIParams, AuthenticationMethod } from '../types';
 import { OpenSearchClientPoolSetup } from '../client';
 import { ConfigOptions } from 'elasticsearch';
 import { ClientMock, parseClientOptionsMock } from './configure_legacy_client.test.mocks';
+import {
+  authRegistryCredentialProviderMock,
+  CredentialsMock,
+} from '../client/./configure_client.test.mocks';
 import { configureLegacyClient } from './configure_legacy_client';
+import { CustomApiSchemaRegistry } from '../schema_registry';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
@@ -28,6 +35,7 @@ describe('configureLegacyClient', () => {
   let configOptions: ConfigOptions;
   let dataSourceAttr: DataSourceAttributes;
   let sigV4AuthContent: SigV4Content;
+  let authenticationMethodRegistery: jest.Mocked<IAuthenticationMethodRegistery>;
 
   let mockOpenSearchClientInstance: {
     close: jest.Mock;
@@ -35,8 +43,20 @@ describe('configureLegacyClient', () => {
   };
   let dataSourceClientParams: DataSourceClientParams;
   let callApiParams: LegacyClientCallAPIParams;
+  const customApiSchemaRegistry = new CustomApiSchemaRegistry();
 
   const mockResponse = { data: 'ping' };
+
+  const customAuthContent = {
+    region: 'us-east-1',
+    roleARN: 'test-role',
+  };
+
+  const authMethod: AuthenticationMethod = {
+    name: 'typeA',
+    authType: AuthType.SigV4,
+    credentialProvider: jest.fn(),
+  };
 
   beforeEach(() => {
     mockOpenSearchClientInstance = {
@@ -46,6 +66,7 @@ describe('configureLegacyClient', () => {
     logger = loggingSystemMock.createLogger();
     savedObjectsMock = savedObjectsClientMock.create();
     cryptographyMock = cryptographyServiceSetupMock.create();
+    authenticationMethodRegistery = authenticationMethodRegisteryMock.create();
     config = {
       enabled: true,
       clientPool: {
@@ -98,6 +119,7 @@ describe('configureLegacyClient', () => {
       dataSourceId: DATA_SOURCE_ID,
       savedObjects: savedObjectsMock,
       cryptography: cryptographyMock,
+      customApiSchemaRegistryPromise: Promise.resolve(customApiSchemaRegistry),
     };
 
     ClientMock.mockImplementation(() => mockOpenSearchClientInstance);
@@ -108,10 +130,13 @@ describe('configureLegacyClient', () => {
         response: mockResponse,
       });
     });
+
+    authenticationMethodRegistery.getAuthenticationMethod.mockImplementation(() => authMethod);
   });
 
   afterEach(() => {
     ClientMock.mockReset();
+    CredentialsMock.mockReset();
     jest.resetAllMocks();
   });
 
@@ -250,5 +275,81 @@ describe('configureLegacyClient', () => {
     expect(mockResult.context).toBe(mockOpenSearchClientInstance);
     expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
     expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith(mockParams);
+  });
+
+  test('configureLegacyClient should return client if authentication method from registry provides credentials', async () => {
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: customAuthContent,
+        },
+      },
+      references: [],
+    });
+
+    authRegistryCredentialProviderMock.mockReturnValue({
+      credential: sigV4AuthContent,
+      type: AuthType.SigV4,
+    });
+
+    await configureLegacyClient(
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      callApiParams,
+      clientPoolSetup,
+      config,
+      logger
+    );
+    expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
+    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(CredentialsMock).toHaveBeenCalledTimes(1);
+    expect(CredentialsMock).toBeCalledWith({
+      accessKeyId: sigV4AuthContent.accessKey,
+      secretAccessKey: sigV4AuthContent.secretKey,
+    });
+  });
+
+  test('When credential provider from auth registry returns session token, credentials should contains session token', async () => {
+    const mockCredentials = { ...sigV4AuthContent, sessionToken: 'sessionToken' };
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: customAuthContent,
+        },
+      },
+      references: [],
+    });
+
+    authRegistryCredentialProviderMock.mockReturnValue({
+      credential: mockCredentials,
+      type: AuthType.SigV4,
+    });
+
+    await configureLegacyClient(
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      callApiParams,
+      clientPoolSetup,
+      config,
+      logger
+    );
+    expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
+    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(CredentialsMock).toHaveBeenCalledTimes(1);
+    expect(CredentialsMock).toBeCalledWith({
+      accessKeyId: mockCredentials.accessKey,
+      secretAccessKey: mockCredentials.secretKey,
+      sessionToken: mockCredentials.sessionToken,
+    });
   });
 });

@@ -9,6 +9,7 @@ function setup_opensearch() {
   cd "$OPENSEARCH_DIR"
   echo "network.host: 0.0.0.0" >> config/opensearch.yml
   echo "discovery.type: single-node" >> config/opensearch.yml
+  echo "cluster.routing.allocation.disk.threshold_enabled: false" >> config/opensearch.yml
   [ $SECURITY_ENABLED == "false" ] && [ -d "plugins/opensearch-security" ] && echo "plugins.security.disabled: true" >> config/opensearch.yml
   # Required for IM
   [ -d "plugins/opensearch-index-management" ] && echo "path.repo: [/tmp]" >> config/opensearch.yml

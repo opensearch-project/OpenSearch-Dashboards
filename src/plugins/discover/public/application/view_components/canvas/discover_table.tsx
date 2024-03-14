@@ -10,6 +10,7 @@ import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { useDiscoverContext } from '../context';
 import {
   addColumn,
+  moveColumn,
   removeColumn,
   setColumns,
   setSort,
@@ -25,9 +26,10 @@ import { popularizeField } from '../../helpers/popularize_field';
 
 interface Props {
   rows?: OpenSearchSearchHit[];
+  scrollToTop?: () => void;
 }
 
-export const DiscoverTable = ({ rows }: Props) => {
+export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
     uiSettings,
@@ -55,6 +57,14 @@ export const DiscoverTable = ({ rows }: Props) => {
 
     dispatch(removeColumn(col));
   };
+
+  const onMoveColumn = (col: string, destination: number) => {
+    if (indexPattern && capabilities.discover?.save) {
+      popularizeField(indexPattern, col, indexPatterns);
+    }
+    dispatch(moveColumn({ columnName: col, destination }));
+  };
+
   const onSetColumns = (cols: string[]) => dispatch(setColumns({ columns: cols }));
   const onSetSort = (s: SortOrder[]) => {
     dispatch(setSort(s));
@@ -96,6 +106,7 @@ export const DiscoverTable = ({ rows }: Props) => {
       indexPattern={indexPattern}
       onAddColumn={onAddColumn}
       onFilter={onAddFilter as DocViewFilterFn}
+      onMoveColumn={onMoveColumn}
       onRemoveColumn={onRemoveColumn}
       onSetColumns={onSetColumns}
       onSort={onSetSort}
@@ -104,6 +115,7 @@ export const DiscoverTable = ({ rows }: Props) => {
       displayTimeColumn={displayTimeColumn}
       title={savedSearch?.id ? savedSearch.title : ''}
       description={savedSearch?.id ? savedSearch.description : ''}
+      scrollToTop={scrollToTop}
     />
   );
 };

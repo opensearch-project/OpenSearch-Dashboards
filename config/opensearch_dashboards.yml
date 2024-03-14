@@ -29,6 +29,17 @@
 # dashboards. OpenSearch Dashboards creates a new index if the index doesn't already exist.
 #opensearchDashboards.index: ".opensearch_dashboards"
 
+# OpenSearch Dashboards uses an index in OpenSearch to store dynamic configurations.
+# This shall be a different index from opensearchDashboards.index.
+# opensearchDashboards.configIndex: ".opensearch_dashboards_config"
+
+# Set the value of this setting to true to enable plugin application config. By default it is disabled.
+# application_config.enabled: false
+
+# Set the value of this setting to true to enable plugin CSP handler. By default it is disabled.
+# It requires the application config plugin as its dependency.
+# csp_handler.enabled: false
+
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"
 
@@ -237,6 +248,8 @@
 
 # Set the value of this setting to true to enable multiple data source feature.
 #data_source.enabled: false
+# Set the value of this setting to true to hide local cluster in data source feature.
+#data_source.hideLocalCluster: false
 # Set the value of these settings to customize crypto materials to encryption saved credentials
 # in data sources.
 #data_source.encryption.wrappingKeyName: 'changeme'
@@ -268,8 +281,27 @@
 #    'ff00::/8',
 # ]
 
+# Set enabled false to hide authentication method in OpenSearch Dashboards.
+# If this setting is commented then all 3 options will be available in OpenSearch Dashboards.
+# Default value will be considered to True.
+#data_source.authTypes:
+#   NoAuthentication:
+#     enabled: true
+#   UsernamePassword:
+#     enabled: true
+#   AWSSigV4:
+#     enabled: true
+
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"
 
 # Set the value of this setting to true to enable plugin augmentation on Dashboard
 # vis_augmenter.pluginAugmentationEnabled: true
+
+# Set the value to true to enable permission control for saved objects
+# Permission control depends on OpenSearch Dashboards has authentication enabled, set it to false when the security plugin is not installed,
+# if the security plugin is not installed and this config is true, permission control takes no effect.
+# savedObjects.permission.enabled: true
+
+# Set the value to true to enable workspace feature
+# workspace.enabled: false
