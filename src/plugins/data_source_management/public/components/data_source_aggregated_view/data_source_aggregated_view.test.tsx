@@ -9,6 +9,7 @@ import { DataSourceAggregatedView } from './data_source_aggregated_view';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
+import { render } from '@testing-library/react';
 
 describe('DataSourceAggregatedView', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -68,7 +69,7 @@ describe('DataSourceAggregatedView', () => {
         savedObjectsClient={client}
         notifications={toasts}
         displayAllCompatibleDataSources={false}
-        activeDatasourceIds={['test1']}
+        activeDataSourceIds={['test1']}
       />
     );
     expect(component).toMatchSnapshot();
@@ -78,5 +79,41 @@ describe('DataSourceAggregatedView', () => {
       type: 'data-source',
     });
     expect(toasts.addWarning).toBeCalledTimes(0);
+  });
+
+  it('should render normally with data source filter', () => {
+    component = shallow(
+      <DataSourceAggregatedView
+        fullWidth={false}
+        hideLocalCluster={false}
+        savedObjectsClient={client}
+        notifications={toasts}
+        displayAllCompatibleDataSources={false}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== 'no_auth'}
+      />
+    );
+    expect(component).toMatchSnapshot();
+    expect(client.find).toBeCalledWith({
+      fields: ['id', 'title', 'auth.type'],
+      perPage: 10000,
+      type: 'data-source',
+    });
+    expect(toasts.addWarning).toBeCalledTimes(0);
+  });
+
+  it('should render popup when clicking on info icon', async () => {
+    const container = render(
+      <DataSourceAggregatedView
+        fullWidth={false}
+        hideLocalCluster={false}
+        savedObjectsClient={client}
+        notifications={toasts}
+        displayAllCompatibleDataSources={false}
+        activeDataSourceIds={['test1']}
+      />
+    );
+    const infoIcon = await container.findByTestId('dataSourceAggregatedViewInfoButton');
+    infoIcon.click();
+    expect(container).toMatchSnapshot();
   });
 });

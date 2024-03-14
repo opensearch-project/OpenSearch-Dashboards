@@ -13,24 +13,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { DataSourceOption } from '../data_source_selector/data_source_selector';
 import { getDataSourcesWithFields } from '../utils';
+import { SavedObject } from '../../../../../core/public';
+import { DataSourceAttributes } from '../../types';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: ToastsStart;
   hideLocalCluster: boolean;
   fullWidth: boolean;
-  activeDatasourceIds?: string[];
-  filterFn?: (dataSource: any) => boolean;
+  activeDataSourceIds?: string[];
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources: boolean;
 }
 
 interface DataSourceAggregatedViewState {
-  dataSourceOptions: DataSourceOption[];
-  selectedOption: DataSourceOption[];
   isPopoverOpen: boolean;
-  allDataSourcesIdMap: Map<string, any>;
+  allDataSourcesIdToTitleMap: Map<string, any>;
 }
 
 export class DataSourceAggregatedView extends React.Component<
@@ -44,7 +43,7 @@ export class DataSourceAggregatedView extends React.Component<
 
     this.state = {
       isPopoverOpen: false,
-      allDataSourcesIdMap: new Map(),
+      allDataSourcesIdToTitleMap: new Map(),
     };
   }
 
@@ -66,24 +65,26 @@ export class DataSourceAggregatedView extends React.Component<
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
           let filteredDataSources = fetchedDataSources;
-          if (this.props.filterFn) {
-            filteredDataSources = fetchedDataSources.filter((ds) => this.props.filterFn!(ds));
+          if (this.props.dataSourceFilter) {
+            filteredDataSources = fetchedDataSources.filter((ds) =>
+              this.props.dataSourceFilter!(ds)
+            );
           }
 
-          const allDataSourcesIdMap = new Map();
+          const allDataSourcesIdToTitleMap = new Map();
 
           filteredDataSources.forEach((ds) => {
-            allDataSourcesIdMap.set(ds.id, ds.attributes!.title || '');
+            allDataSourcesIdToTitleMap.set(ds.id, ds.attributes!.title || '');
           });
 
           if (!this.props.hideLocalCluster) {
-            allDataSourcesIdMap.set('', 'Local cluster');
+            allDataSourcesIdToTitleMap.set('', 'Local cluster');
           }
 
           if (!this._isMounted) return;
           this.setState({
             ...this.state,
-            allDataSourcesIdMap,
+            allDataSourcesIdToTitleMap,
           });
         }
       })
@@ -99,9 +100,10 @@ export class DataSourceAggregatedView extends React.Component<
   render() {
     const button = (
       <EuiButtonIcon
+        data-test-subj="dataSourceAggregatedViewInfoButton"
         iconType="iInCircle"
         display="empty"
-        aria-label="Next"
+        aria-label="show data sources"
         onClick={this.onClick.bind(this)}
       />
     );
@@ -109,24 +111,24 @@ export class DataSourceAggregatedView extends React.Component<
     let items = [];
 
     // only display active data sources
-    if (this.props.activeDatasourceIds && this.props.activeDatasourceIds.length > 0) {
-      items = this.props.activeDatasourceIds.map((id) => {
+    if (this.props.activeDataSourceIds && this.props.activeDataSourceIds.length > 0) {
+      items = this.props.activeDataSourceIds.map((id) => {
         return {
-          name: this.state.allDataSourcesIdMap.get(id),
+          name: this.state.allDataSourcesIdToTitleMap.get(id),
           disabled: true,
         };
       });
     } else {
-      items = [...this.state.allDataSourcesIdMap.values()].map((v) => {
+      items = [...this.state.allDataSourcesIdToTitleMap.values()].map((title) => {
         return {
-          name: v,
+          name: title,
           disabled: true,
         };
       });
     }
 
     const title = this.props.displayAllCompatibleDataSources
-      ? `Data sources (${this.state.allDataSourcesIdMap.size})`
+      ? `Data sources (${this.state.allDataSourcesIdToTitleMap.size})`
       : 'Selected data sources';
 
     const panels = [
@@ -153,7 +155,7 @@ export class DataSourceAggregatedView extends React.Component<
           {'Data sources'}
         </EuiButtonEmpty>
         <EuiNotificationBadge color={'subdued'}>
-          {this.props.activeDatasourceIds?.length || 'All'}
+          {this.props.activeDataSourceIds?.length || 'All'}
         </EuiNotificationBadge>
         <EuiPopover
           id={'dataSourceSViewContextMenuPopover'}

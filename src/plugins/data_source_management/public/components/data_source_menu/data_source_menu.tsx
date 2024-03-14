@@ -11,18 +11,20 @@ import {
   MountPoint,
   NotificationsStart,
   SavedObjectsClientContract,
+  SavedObject,
 } from '../../../../../core/public';
 import { MountPointPortal } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceSelectable } from './data_source_selectable';
 import { DataSourceOption } from '../data_source_selector/data_source_selector';
 import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';
+import { DataSourceAttributes } from '../../types';
 
 export interface DataSourceMenuProps {
   showDataSourceSelectable?: boolean;
   showDataSourceView?: boolean;
   showDataSourceAggregatedView?: boolean;
-  activeDatasourceIds?: string[];
+  activeDataSourceIds?: string[];
   appName: string;
   savedObjects?: SavedObjectsClientContract;
   notifications?: NotificationsStart;
@@ -33,7 +35,7 @@ export interface DataSourceMenuProps {
   className?: string;
   selectedOption?: DataSourceOption[];
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-  filterFn?: (dataSource: any) => boolean;
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources?: boolean;
 }
 
@@ -49,8 +51,8 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
     hideLocalCluster,
     selectedOption,
     showDataSourceView,
-    filterFn,
-    activeDatasourceIds,
+    dataSourceFilter,
+    activeDataSourceIds,
     displayAllCompatibleDataSources,
   } = props;
 
@@ -82,7 +84,7 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
           onSelectedDataSource={dataSourceCallBackFunc!}
           disabled={disableDataSourceSelectable || false}
           selectedOption={selectedOption && selectedOption.length > 0 ? selectedOption : undefined}
-          filterFn={filterFn}
+          dataSourceFilter={dataSourceFilter}
         />
       </EuiHeaderLinks>
     );
@@ -96,8 +98,8 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
         hideLocalCluster={hideLocalCluster || false}
         savedObjectsClient={savedObjects!}
         notifications={notifications!.toasts}
-        activeDatasourceIds={activeDatasourceIds}
-        filterFn={filterFn}
+        activeDataSourceIds={activeDataSourceIds}
+        dataSourceFilter={dataSourceFilter}
         displayAllCompatibleDataSources={displayAllCompatibleDataSources || false}
       />
     );

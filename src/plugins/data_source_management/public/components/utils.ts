@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
+import { HttpStart, SavedObjectsClientContract, SavedObject } from 'src/core/public';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -39,7 +39,7 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
 export async function getDataSourcesWithFields(
   savedObjectsClient: SavedObjectsClientContract,
   fields: string[]
-) {
+): Promise<Array<SavedObject<DataSourceAttributes>>> {
   const response = await savedObjectsClient.find({
     type: 'data-source',
     fields,

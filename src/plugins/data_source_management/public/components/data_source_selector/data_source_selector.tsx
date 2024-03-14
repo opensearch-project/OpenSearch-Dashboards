@@ -26,7 +26,7 @@ export interface DataSourceSelectorProps {
   defaultOption?: DataSourceOption[];
   placeholderText?: string;
   removePrepend?: boolean;
-  filterFn?: (dataSource: any) => boolean;
+  dataSourceFilter?: (dataSource: any) => boolean;
   compressed?: boolean;
 }
 
@@ -74,8 +74,10 @@ export class DataSourceSelector extends React.Component<
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
           let filteredDataSources = [];
-          if (this.props.filterFn) {
-            filteredDataSources = fetchedDataSources.filter((ds) => this.props.filterFn!(ds));
+          if (this.props.dataSourceFilter) {
+            filteredDataSources = fetchedDataSources.filter((ds) =>
+              this.props.dataSourceFilter!(ds)
+            );
           }
 
           if (filteredDataSources.length === 0) {
