@@ -3,15 +3,50 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientContract } from '../../../../../src/core/server';
+import { Client } from '@opensearch-project/opensearch';
+import { Client as LegacyClient } from 'elasticsearch';
+import {
+  OpenSearchDashboardsRequest,
+  SavedObjectsClientContract,
+} from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
   DataSourceAttributes,
   UsernamePasswordTypedContent,
   SigV4Content,
+  AuthType,
 } from '../../common/data_sources';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { createDataSourceError } from '../lib/error';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { AuthenticationMethod } from '../types';
+
+/**
+ * Get the root client of datasource from
+ * client cache. If there's a cache miss, return undefined.
+ *
+ * @param dataSourceAttr data source saved objects attributes
+ * @param dataSourceId id of data source saved Object
+ * @param addClientToPool function to get client from client pool
+ * @returns cached OpenSearch client, or undefined if cache miss
+ */
+export const getRootClient = (
+  dataSourceAttr: DataSourceAttributes,
+  getClientFromPool: (
+    endpoint: string,
+    authType: AuthType,
+    request?: OpenSearchDashboardsRequest
+  ) => Client | LegacyClient | undefined,
+  request?: OpenSearchDashboardsRequest
+): Client | LegacyClient | undefined => {
+  const {
+    auth: { type },
+    endpoint,
+  } = dataSourceAttr;
+  const cacheKey = endpoint;
+
+  return getClientFromPool(cacheKey, type, request);
+};
 
 export const getDataSource = async (
   dataSourceId: string,
@@ -92,4 +127,12 @@ export const getAWSCredential = async (
   };
 
   return credential;
+};
+
+export const getAuthenticationMethod = (
+  dataSourceAttr: DataSourceAttributes,
+  authRegistry?: IAuthenticationMethodRegistery
+): AuthenticationMethod => {
+  const name = dataSourceAttr.name ?? dataSourceAttr.auth.type;
+  return authRegistry?.getAuthenticationMethod(name) as AuthenticationMethod;
 };

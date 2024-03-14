@@ -19,7 +19,7 @@ import {
   parseClientOptionsMock,
   authRegistryCredentialProviderMock,
 } from './configure_client.test.mocks';
-import { OpenSearchClientPoolSetup } from './client_pool';
+import { OpenSearchClientPool, OpenSearchClientPoolSetup } from './client_pool';
 import { configureClient } from './configure_client';
 import { ClientOptions } from '@opensearch-project/opensearch';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
@@ -359,6 +359,282 @@ describe('configureClient', () => {
         region: mockCredentials.region,
         service: SigV4ServiceName.OpenSearch,
       },
+    });
+  });
+
+  test('configure client with auth method from registry, service == aoss, should successfully call new Client()', async () => {
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: { ...customAuthContent, service: 'aoss' },
+        },
+      },
+      references: [],
+    });
+
+    authRegistryCredentialProviderMock.mockReturnValue({
+      credential: sigV4AuthContent,
+      type: AuthType.SigV4,
+    });
+
+    const client = await configureClient(
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      clientPoolSetup,
+      config,
+      logger
+    );
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(client).toBe(dsClient.child.mock.results[0].value);
+    expect(dsClient.child).toBeCalledWith({
+      auth: {
+        credentials: {
+          accessKeyId: sigV4AuthContent.accessKey,
+          secretAccessKey: sigV4AuthContent.secretKey,
+          sessionToken: '',
+        },
+        region: sigV4AuthContent.region,
+        service: 'aoss',
+      },
+    });
+  });
+
+  describe('Client Pool', () => {
+    let opensearchClientPoolSetup: OpenSearchClientPoolSetup;
+    let openSearchClientPool: OpenSearchClientPool;
+    beforeEach(() => {
+      openSearchClientPool = new OpenSearchClientPool(logger);
+      opensearchClientPoolSetup = openSearchClientPool.setup(config);
+    });
+
+    describe('NoAuth', () => {
+      beforeEach(() => {
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...dataSourceAttr,
+            auth: {
+              type: AuthType.NoAuth,
+            },
+          },
+          references: [],
+        });
+      });
+
+      test('For same endpoint only one client object should be created', async () => {
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+
+        expect(ClientMock).toHaveBeenCalledTimes(1);
+      });
+
+      test('For different endpoints multiple client objects should be created', async () => {
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+
+        const mockDataSourceAttr = { ...dataSourceAttr, endpoint: 'http://test.com' };
+
+        savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...mockDataSourceAttr,
+            auth: {
+              type: AuthType.NoAuth,
+            },
+          },
+          references: [],
+        });
+
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+
+        expect(ClientMock).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('UserNamePassword', () => {
+      beforeEach(() => {
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: dataSourceAttr,
+          references: [],
+        });
+        jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+          decryptedText: 'password',
+          encryptionContext: { endpoint: 'http://localhost' },
+        });
+      });
+
+      test('For same endpoint only one client object should be created', async () => {
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+
+        expect(ClientMock).toHaveBeenCalledTimes(1);
+      });
+
+      test('For different endpoints multiple client objects should be created', async () => {
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+
+        const mockDataSourceAttr = { ...dataSourceAttr, endpoint: 'http://test.com' };
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: mockDataSourceAttr,
+          references: [],
+        });
+        jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+          decryptedText: 'password',
+          encryptionContext: { endpoint: 'http://test.com' },
+        });
+
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+
+        expect(ClientMock).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('AWSSigV4', () => {
+      beforeEach(() => {
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...dataSourceAttr,
+            auth: {
+              type: AuthType.SigV4,
+              credentials: sigV4AuthContent,
+            },
+          },
+          references: [],
+        });
+
+        jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+          decryptedText: 'accessKey',
+          encryptionContext: { endpoint: 'http://localhost' },
+        });
+      });
+      test('For same endpoint only one client object should be created', async () => {
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+
+        expect(ClientMock).toHaveBeenCalledTimes(1);
+      });
+
+      test('For different endpoints multiple client objects should be created', async () => {
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+
+        const mockDataSourceAttr = { ...dataSourceAttr, endpoint: 'http://test.com' };
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...mockDataSourceAttr,
+            auth: {
+              type: AuthType.SigV4,
+              credentials: sigV4AuthContent,
+            },
+          },
+          references: [],
+        });
+
+        jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+          decryptedText: 'accessKey',
+          encryptionContext: { endpoint: 'http://test.com' },
+        });
+        await configureClient(dataSourceClientParams, opensearchClientPoolSetup, config, logger);
+
+        expect(ClientMock).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('Auth Method from Registry', () => {
+      beforeEach(() => {
+        const authMethodWithClientPool: AuthenticationMethod = {
+          name: 'clientPoolTest',
+          authType: AuthType.SigV4,
+          credentialProvider: jest.fn(),
+          clientPoolSetup: opensearchClientPoolSetup,
+          legacyClientPoolSetup: clientPoolSetup,
+        };
+        authenticationMethodRegistery.getAuthenticationMethod
+          .mockReset()
+          .mockImplementation(() => authMethodWithClientPool);
+        const mockDataSourceAttr = { ...dataSourceAttr, name: 'custom_auth' };
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...mockDataSourceAttr,
+            auth: {
+              type: AuthType.SigV4,
+              credentials: customAuthContent,
+            },
+          },
+          references: [],
+        });
+        authRegistryCredentialProviderMock.mockReturnValue({
+          credential: sigV4AuthContent,
+          type: AuthType.SigV4,
+        });
+      });
+      test('Auth Method from Registry: If endpoint is same for multiple requests client pool size should be 1', async () => {
+        await configureClient(
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          clientPoolSetup,
+          config,
+          logger
+        );
+
+        await configureClient(
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          clientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(1);
+      });
+
+      test('Auth Method from Registry: If endpoint is different for two requests client pool size should be 2', async () => {
+        await configureClient(
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          clientPoolSetup,
+          config,
+          logger
+        );
+
+        const mockDataSourceAttr = {
+          ...dataSourceAttr,
+          endpoint: 'http://test.com',
+          name: 'custom_auth',
+        };
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...mockDataSourceAttr,
+            auth: {
+              type: AuthType.SigV4,
+              credentials: customAuthContent,
+            },
+          },
+          references: [],
+        });
+
+        await configureClient(
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          clientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(2);
+      });
     });
   });
 });

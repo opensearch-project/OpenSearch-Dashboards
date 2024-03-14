@@ -6,6 +6,12 @@
 import { AuthenticationMethodRegistery } from './authentication_methods_registry';
 import { AuthenticationMethod } from '../../server/types';
 import { AuthType } from '../../common/data_sources';
+import { OpenSearchClientPoolSetup } from '../client';
+
+const clientPoolSetup: OpenSearchClientPoolSetup = {
+  getClientFromPool: jest.fn(),
+  addClientToPool: jest.fn(),
+};
 
 const createAuthenticationMethod = (
   authMethod: Partial<AuthenticationMethod>
@@ -13,6 +19,8 @@ const createAuthenticationMethod = (
   name: 'unknown',
   authType: AuthType.NoAuth,
   credentialProvider: jest.fn(),
+  clientPoolSetup,
+  legacyClientPoolSetup: clientPoolSetup,
   ...authMethod,
 });
 

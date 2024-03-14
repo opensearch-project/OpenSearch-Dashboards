@@ -24,12 +24,17 @@ import {
 } from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyServiceSetup } from '../cryptography_service';
-import { DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
+import { AuthenticationMethod, DataSourceClientParams, LegacyClientCallAPIParams } from '../types';
 import { OpenSearchClientPoolSetup } from '../client';
 import { parseClientOptions } from './client_config';
 import { createDataSourceError } from '../lib/error';
-import { getAWSCredential, getCredential, getDataSource } from '../client/configure_client_utils';
-import { IAuthenticationMethodRegistery } from '../auth_registry';
+import {
+  getRootClient,
+  getAWSCredential,
+  getCredential,
+  getDataSource,
+  getAuthenticationMethod,
+} from '../client/configure_client_utils';
 import { authRegistryCredentialProvider } from '../util/credential_provider';
 
 export const configureLegacyClient = async (
@@ -49,18 +54,30 @@ export const configureLegacyClient = async (
   try {
     const dataSourceAttr = await getDataSource(dataSourceId!, savedObjects);
 
+    let clientPool = openSearchClientPoolSetup;
+    const authenticationMethod = getAuthenticationMethod(dataSourceAttr, authRegistry);
+    if (authenticationMethod !== undefined) {
+      clientPool = authenticationMethod.legacyClientPoolSetup;
+    }
+    const rootClient = getRootClient(
+      dataSourceAttr,
+      clientPool.getClientFromPool,
+      request
+    ) as LegacyClient;
+
     const registeredSchema = (await customApiSchemaRegistryPromise).getAll();
 
     return await getQueryClient(
       dataSourceAttr,
       cryptography,
       callApiParams,
-      openSearchClientPoolSetup,
+      clientPool,
       config,
       registeredSchema,
+      rootClient,
       dataSourceId,
       request,
-      authRegistry
+      authenticationMethod
     );
   } catch (error: any) {
     logger.debug(
@@ -87,24 +104,21 @@ const getQueryClient = async (
   dataSourceAttr: DataSourceAttributes,
   cryptography: CryptographyServiceSetup,
   { endpoint, clientParams, options }: LegacyClientCallAPIParams,
-  openSearchClientPool: OpenSearchClientPoolSetup,
+  clientPool: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   registeredSchema: any[],
+  rootClient?: LegacyClient,
   dataSourceId?: string,
   request?: OpenSearchDashboardsRequest,
-  authRegistry?: IAuthenticationMethodRegistery
+  authenticationMethod?: AuthenticationMethod
 ) => {
   let credential;
-  let clientPool = openSearchClientPool;
   let {
     auth: { type },
-    name,
   } = dataSourceAttr;
   const { endpoint: nodeUrl } = dataSourceAttr;
-  name = name ?? type;
   const clientOptions = parseClientOptions(config, nodeUrl, registeredSchema);
 
-  const authenticationMethod = authRegistry?.getAuthenticationMethod(name);
   if (authenticationMethod !== undefined) {
     const credentialProvider = await authRegistryCredentialProvider(authenticationMethod, {
       dataSourceAttr,
@@ -113,16 +127,18 @@ const getQueryClient = async (
     });
     credential = credentialProvider.credential;
     type = credentialProvider.type;
-    clientPool = authenticationMethod.legacyClientPoolSetup;
+
+    if (credential.service === undefined) {
+      credential = { ...credential, service: dataSourceAttr.auth.credentials?.service };
+    }
   }
 
-  const cacheKey = endpoint;
-  let rootClient = clientPool.getClientFromPool(cacheKey, type, request) as LegacyClient;
+  const cacheKey = nodeUrl;
 
   switch (type) {
     case AuthType.NoAuth:
       if (!rootClient) rootClient = new LegacyClient(clientOptions);
-      clientPool.addClientToPool(cacheKey, type, rootClient);
+      clientPool.addClientToPool(cacheKey, type, rootClient, request);
 
       return await (callAPI.bind(null, rootClient) as LegacyAPICaller)(
         endpoint,
@@ -136,7 +152,7 @@ const getQueryClient = async (
         (await getCredential(dataSourceAttr, cryptography));
 
       if (!rootClient) rootClient = new LegacyClient(clientOptions);
-      clientPool.addClientToPool(cacheKey, type, rootClient);
+      clientPool.addClientToPool(cacheKey, type, rootClient, request);
 
       return getBasicAuthClient(rootClient, { endpoint, clientParams, options }, credential);
 
@@ -147,7 +163,7 @@ const getQueryClient = async (
       if (!rootClient) {
         rootClient = getAWSClient(credential, clientOptions);
       }
-      clientPool.addClientToPool(cacheKey, type, rootClient);
+      clientPool.addClientToPool(cacheKey, type, rootClient, request);
 
       return await getAWSChildClient(rootClient, { endpoint, clientParams, options }, credential);
 

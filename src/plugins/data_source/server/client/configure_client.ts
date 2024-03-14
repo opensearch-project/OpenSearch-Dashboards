@@ -16,11 +16,16 @@ import {
 import { DataSourcePluginConfigType } from '../../config';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { createDataSourceError } from '../lib/error';
-import { DataSourceClientParams } from '../types';
+import { AuthenticationMethod, DataSourceClientParams } from '../types';
 import { parseClientOptions } from './client_config';
 import { OpenSearchClientPoolSetup } from './client_pool';
-import { getAWSCredential, getCredential, getDataSource } from './configure_client_utils';
-import { IAuthenticationMethodRegistery } from '../auth_registry';
+import {
+  getRootClient,
+  getAWSCredential,
+  getCredential,
+  getDataSource,
+  getAuthenticationMethod,
+} from './configure_client_utils';
 import { authRegistryCredentialProvider } from '../util/credential_provider';
 
 export const configureClient = async (
@@ -61,17 +66,25 @@ export const configureClient = async (
       dataSource = await getDataSource(dataSourceId!, savedObjects);
     }
 
+    let clientPool = openSearchClientPoolSetup;
+    const authenticationMethod = getAuthenticationMethod(dataSource, authRegistry);
+    if (authenticationMethod !== undefined) {
+      clientPool = authenticationMethod.clientPoolSetup;
+    }
+    const rootClient = getRootClient(dataSource, clientPool.getClientFromPool, request) as Client;
+
     const registeredSchema = (await customApiSchemaRegistryPromise).getAll();
 
     return await getQueryClient(
       dataSource,
-      openSearchClientPoolSetup,
+      clientPool,
       config,
       registeredSchema,
       cryptography,
+      rootClient,
       dataSourceId,
       request,
-      authRegistry,
+      authenticationMethod,
       requireDecryption
     );
   } catch (error: any) {
@@ -100,26 +113,23 @@ export const configureClient = async (
  */
 const getQueryClient = async (
   dataSourceAttr: DataSourceAttributes,
-  openSearchClientPool: OpenSearchClientPoolSetup,
+  clientPool: OpenSearchClientPoolSetup,
   config: DataSourcePluginConfigType,
   registeredSchema: any[],
   cryptography?: CryptographyServiceSetup,
+  rootClient?: Client,
   dataSourceId?: string,
   request?: OpenSearchDashboardsRequest,
-  authRegistry?: IAuthenticationMethodRegistery,
+  authenticationMethod?: AuthenticationMethod,
   requireDecryption: boolean = true
 ): Promise<Client> => {
   let credential;
-  let clientPool = openSearchClientPool;
   let {
     auth: { type },
-    name,
   } = dataSourceAttr;
   const { endpoint } = dataSourceAttr;
-  name = name ?? type;
   const clientOptions = parseClientOptions(config, endpoint, registeredSchema);
 
-  const authenticationMethod = authRegistry?.getAuthenticationMethod(name);
   if (authenticationMethod !== undefined) {
     const credentialProvider = await authRegistryCredentialProvider(authenticationMethod, {
       dataSourceAttr,
@@ -128,11 +138,13 @@ const getQueryClient = async (
     });
     credential = credentialProvider.credential;
     type = credentialProvider.type;
-    clientPool = authenticationMethod.clientPoolSetup;
+
+    if (credential.service === undefined) {
+      credential = { ...credential, service: dataSourceAttr.auth.credentials?.service };
+    }
   }
 
   const cacheKey = endpoint;
-  let rootClient = clientPool.getClientFromPool(cacheKey, type, request) as Client;
 
   switch (type) {
     case AuthType.NoAuth:

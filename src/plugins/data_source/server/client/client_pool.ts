@@ -82,7 +82,11 @@ export class OpenSearchClientPool {
     });
     this.logger.info(`Created data source aws client pool of size ${size}`);
 
-    const getClientFromPool = (key: string, authType: AuthType) => {
+    const getClientFromPool = (
+      key: string,
+      authType: AuthType,
+      request?: OpenSearchDashboardsRequest
+    ) => {
       const selectedCache = authType === AuthType.SigV4 ? this.awsClientCache : this.clientCache;
 
       return selectedCache!.get(key);
