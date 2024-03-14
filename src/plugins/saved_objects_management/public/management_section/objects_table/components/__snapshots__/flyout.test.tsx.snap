@@ -168,7 +168,9 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           },
           "basePath": BasePath {
             "basePath": "",
+            "clientBasePath": "",
             "get": [Function],
+            "getBasePath": [Function],
             "prepend": [Function],
             "remove": [Function],
             "serverBasePath": "",
