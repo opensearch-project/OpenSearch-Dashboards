@@ -285,7 +285,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           value: authTypeToBeTested,
           inputDisplay: 'some input',
         },
-        crendentialFormField: {
+        credentialFormField: {
           userNameRegistered: '',
           passWordRegistered: '',
         },
@@ -352,7 +352,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           value: authTypeToBeTested,
           inputDisplay: 'some input',
         },
-        crendentialFormField: {
+        credentialFormField: {
           userNameRegistered: '',
           passWordRegistered: '',
         },
@@ -390,7 +390,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           value: authTypeToBeTested,
           inputDisplay: 'some input',
         },
-        crendentialFormField: {
+        credentialFormField: {
           registeredField: 'some value',
         },
       } as AuthenticationMethod;
@@ -422,7 +422,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           value: authTypeToBeTested,
           inputDisplay: 'some input',
         },
-        crendentialFormField: {
+        credentialFormField: {
           registeredField: 'Some value',
         },
       } as AuthenticationMethod;

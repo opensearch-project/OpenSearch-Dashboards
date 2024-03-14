@@ -101,7 +101,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       auth: {
         type: initialSelectedAuthMethod?.name,
         credentials: {
-          ...initialSelectedAuthMethod?.crendentialFormField,
+          ...initialSelectedAuthMethod?.credentialFormField,
         },
       },
       showUpdatePasswordModal: false,

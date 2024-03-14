@@ -101,7 +101,7 @@ export class CreateDataSourceForm extends React.Component<
       auth: {
         type: initialSelectedAuthMethod?.name,
         credentials: {
-          ...initialSelectedAuthMethod?.crendentialFormField,
+          ...initialSelectedAuthMethod?.credentialFormField,
         },
       },
     };
