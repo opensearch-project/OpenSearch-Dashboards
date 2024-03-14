@@ -20,5 +20,5 @@ jobs:
         uses: BigSamu/OpenSearch_Changelog_Workflow@feat/manual-changesets
         with:
           token: ${{secrets.GITHUB_TOKEN}}
-          changelog_pr_bridge_url_domain: ${{secrets.CHANGELOG_PR_BRIDGE_URL_DOMAIN}}
-          changelog_pr_bridge_api_key: ${{secrets.CHANGELOG_PR_BRIDGE_API_KEY}}
+          CHANGELOG_PR_BRIDGE_URL_DOMAIN: ${{secrets.CHANGELOG_PR_BRIDGE_URL_DOMAIN}}
+          CHANGELOG_PR_BRIDGE_API_KEY: ${{secrets.CHANGELOG_PR_BRIDGE_API_KEY}}
