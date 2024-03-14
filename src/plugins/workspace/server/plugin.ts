@@ -17,6 +17,7 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../common/constants';
+import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
@@ -34,6 +35,22 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   private permissionControl?: SavedObjectsPermissionControlContract;
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private workspaceSavedObjectsClientWrapper?: WorkspaceSavedObjectsClientWrapper;
+
+  private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
+    /**
+     * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
+     */
+    setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
+      const workspaceId = getWorkspaceIdFromUrl(request.url.toString());
+
+      if (workspaceId) {
+        const requestUrl = new URL(request.url.toString());
+        requestUrl.pathname = cleanWorkspaceId(requestUrl.pathname);
+        return toolkit.rewriteUrl(requestUrl.toString());
+      }
+      return toolkit.next();
+    });
+  }
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
@@ -56,6 +73,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
       this.workspaceConflictControl.wrapperFactory
     );
+    this.proxyWorkspaceTrafficToRealHandler(core);
 
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
     if (isPermissionControlEnabled) {
