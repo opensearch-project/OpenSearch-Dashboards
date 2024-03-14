@@ -10,6 +10,7 @@ import {
   SavedObjectsImportRetry,
 } from '../types';
 import {
+  bulkGetDataSourceTitleFromId,
   extractVegaSpecFromSavedObject,
   getDataSourceTitleFromId,
   updateDataSourceNameInVegaSpec,
@@ -61,7 +62,17 @@ export async function checkConflictsForDataSource({
       ? await getDataSourceTitleFromId(dataSourceId, savedObjectsClient)
       : undefined;
 
-  for await (const object of objects) {
+  const vegaSavedObjectIds = objects
+    .filter((object) => {
+      return !!extractVegaSpecFromSavedObject(object) && object.id.split('_').length > 1;
+    })
+    .map((object) => object.id.split('_')[0]);
+  const previousDataSourceTitlesMap =
+    !!savedObjectsClient && vegaSavedObjectIds.length > 0
+      ? await bulkGetDataSourceTitleFromId(vegaSavedObjectIds, savedObjectsClient)
+      : undefined;
+
+  objects.forEach((object) => {
     const {
       type,
       id,
@@ -99,14 +110,17 @@ export async function checkConflictsForDataSource({
 
           if (!!vegaSpec) {
             const previousDataSourceTitle =
-              previoudDataSourceId && savedObjectsClient
-                ? await getDataSourceTitleFromId(previoudDataSourceId, savedObjectsClient)
+              previoudDataSourceId && savedObjectsClient && previousDataSourceTitlesMap
+                ? previousDataSourceTitlesMap.get(previoudDataSourceId)
                 : undefined;
-            const updatedVegaSpec = updateDataSourceNameInVegaSpec({
-              spec: vegaSpec,
-              newDataSourceName: dataSourceTitle,
-              previousDataSourceName: previousDataSourceTitle,
-            });
+            let updatedVegaSpec = vegaSpec;
+            if (!!previousDataSourceTitle === !!previoudDataSourceId) {
+              updatedVegaSpec = updateDataSourceNameInVegaSpec({
+                spec: vegaSpec,
+                newDataSourceName: dataSourceTitle,
+                previousDataSourceName: previousDataSourceTitle,
+              });
+            }
 
             // @ts-expect-error
             const visStateObject = JSON.parse(object.attributes?.visState);
@@ -122,7 +136,7 @@ export async function checkConflictsForDataSource({
         filteredObjects.push({ ...object, id: `${dataSourceId}_${rawId}` });
       }
     }
-  }
+  });
 
   return { filteredObjects, errors, importIdMap };
 }

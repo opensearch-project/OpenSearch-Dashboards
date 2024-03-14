@@ -5,6 +5,7 @@
 
 import { readFileSync } from 'fs';
 import {
+  bulkGetDataSourceTitleFromId,
   extractVegaSpecFromSavedObject,
   getDataSourceTitleFromId,
   updateDataSourceNameInVegaSpec,
@@ -22,6 +23,13 @@ describe('updateDataSourceNameInVegaSpec()', () => {
   const loadJSONFromFile = (filepath: string) => {
     return JSON.parse(readFileSync(join(__dirname, filepath)).toString());
   };
+
+  test('When a new data_source_name is not provided, do not update the spec', () => {
+    // @ts-expect-error
+    expect(
+      updateDataSourceNameInVegaSpec({ spec: 'some-spec', newDataSourceName: undefined })
+    ).toBe('some-spec');
+  });
 
   /*
   JSON Test cases
@@ -321,5 +329,52 @@ describe('getDataSourceTitleFromId()', () => {
 
   test('When a nonexistent id is passed, return nothing', async () => {
     expect(await getDataSourceTitleFromId('nonexistent-id', savedObjectsClient)).toBe(undefined);
+  });
+});
+
+describe('bulkGetDataSourceTitleFromId()', () => {
+  const savedObjectsClient = {} as SavedObjectsClientContract;
+  savedObjectsClient.bulkGet = jest
+    .fn()
+    .mockImplementation((dataSourceIds: Array<{ id: string; type: string }>) => {
+      return Promise.resolve({
+        saved_objects: dataSourceIds.map((request) => {
+          if (request.type === 'data-source' && request.id === 'valid-id') {
+            return {
+              id: 'valid-id',
+              attributes: {
+                title: 'some-datasource-title',
+              },
+            };
+          } else if (request.type === 'data-source' && request.id === 'other-valid-id') {
+            return {
+              id: 'other-valid-id',
+              attributes: {
+                title: 'some-other-datasource-title',
+              },
+            };
+          }
+
+          return {
+            id: request.id,
+            attributes: undefined,
+          };
+        }),
+      });
+    });
+
+  test('bulkGetDataSourceTitleFromId should return correct map of ids to titles', async () => {
+    const expectedDataSourceNameMap = new Map([
+      ['valid-id', 'some-datasource-title'],
+      ['other-valid-id', 'some-other-datasource-title'],
+      ['invalid-id', undefined],
+    ]);
+
+    expect(
+      await bulkGetDataSourceTitleFromId(
+        ['invalid-id', 'valid-id', 'other-valid-id'],
+        savedObjectsClient
+      )
+    ).toMatchObject(expectedDataSourceNameMap);
   });
 });

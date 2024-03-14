@@ -526,17 +526,27 @@ describe('#createSavedObjects', () => {
     dataSourceTitle?: string;
   }) => {
     const savedObjectsCustomClient = savedObjectsClientMock.create();
-    savedObjectsCustomClient.get = jest.fn().mockImplementation((type, id) => {
-      if (type === 'data-source' && id === params.previousDataSourceId) {
+    savedObjectsCustomClient.bulkGet = jest
+      .fn()
+      .mockImplementation((dataSourceIds: Array<{ id: string; type: string }>) => {
         return Promise.resolve({
-          attributes: {
-            title: 'old-datasource-title',
-          },
-        });
-      }
+          saved_objects: dataSourceIds.map((request) => {
+            if (request.type === 'data-source' && request.id === params.previousDataSourceId) {
+              return {
+                id: params.previousDataSourceId,
+                attributes: {
+                  title: 'old-datasource-title',
+                },
+              };
+            }
 
-      return Promise.resolve({});
-    });
+            return {
+              id: request.id,
+              attributes: undefined,
+            };
+          }),
+        });
+      });
 
     const options = setupParams({
       ...params,
@@ -656,6 +666,26 @@ describe('#createSavedObjects', () => {
               '{"title":"some-other-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: dataSourceName\\n    }\\n  }\\n}"}}',
           },
           id: 'old-datasource-id_some-vega-id',
+        },
+      ];
+      await testVegaVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        previousDataSourceId: 'old-datasource-id',
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+
+    test('will not update the Vega spec if the previous data source name cannot be found', async () => {
+      const objects = [getVegaMDSVisualizationObj('some-vega-id', 'non-existent-id')];
+      const expectedObject = getVegaMDSVisualizationObj('some-vega-id', 'non-existent-id');
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-other-title_dataSourceName',
+          },
         },
       ];
       await testVegaVisualizationsWithDataSources({

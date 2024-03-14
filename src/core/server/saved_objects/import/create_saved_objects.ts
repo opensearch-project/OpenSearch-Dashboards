@@ -32,8 +32,8 @@ import { SavedObject, SavedObjectsClientContract, SavedObjectsImportError } from
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from './types';
 import {
+  bulkGetDataSourceTitleFromId,
   extractVegaSpecFromSavedObject,
-  getDataSourceTitleFromId,
   updateDataSourceNameInVegaSpec,
 } from './utils';
 
@@ -86,10 +86,20 @@ export const createSavedObjects = async <T>({
     new Map<string, SavedObject<T>>()
   );
 
+  const vegaSavedObjectIds = filteredObjects
+    .filter((object) => {
+      return !!extractVegaSpecFromSavedObject(object) && object.id.split('_').length > 1;
+    })
+    .map((object) => object.id.split('_')[0]);
+  const previousDataSourceTitlesMap =
+    !!savedObjectsClient && vegaSavedObjectIds.length > 0
+      ? await bulkGetDataSourceTitleFromId(vegaSavedObjectIds, savedObjectsClient)
+      : undefined;
+
   // filter out the 'version' field of each object, if it exists
 
   const objectsToCreate = await Promise.all(
-    filteredObjects.map(async ({ version, ...object }) => {
+    filteredObjects.map(({ version, ...object }) => {
       if (dataSourceId) {
         // @ts-expect-error
         if (dataSourceTitle && object.attributes.title) {
@@ -110,14 +120,19 @@ export const createSavedObjects = async <T>({
           if (!!vegaSpec && !!dataSourceTitle) {
             const idComponents = object.id.split('_');
             const previousDataSourceId = idComponents.length > 1 ? idComponents[0] : undefined;
-            const previousDataSourceTitle = previousDataSourceId
-              ? await getDataSourceTitleFromId(previousDataSourceId, savedObjectsClient)
-              : undefined;
-            const updatedVegaSpec = updateDataSourceNameInVegaSpec({
-              spec: vegaSpec,
-              newDataSourceName: dataSourceTitle,
-              previousDataSourceName: previousDataSourceTitle,
-            });
+            const previousDataSourceTitle =
+              previousDataSourceId && previousDataSourceTitlesMap
+                ? previousDataSourceTitlesMap?.get(previousDataSourceId)
+                : undefined;
+
+            let updatedVegaSpec = vegaSpec;
+            if (!!previousDataSourceId === !!previousDataSourceTitle) {
+              updatedVegaSpec = updateDataSourceNameInVegaSpec({
+                spec: vegaSpec,
+                newDataSourceName: dataSourceTitle,
+                previousDataSourceName: previousDataSourceTitle,
+              });
+            }
 
             // @ts-expect-error
             const visStateObject = JSON.parse(object.attributes?.visState);

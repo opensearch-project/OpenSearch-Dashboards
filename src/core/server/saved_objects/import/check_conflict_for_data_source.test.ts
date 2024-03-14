@@ -39,6 +39,34 @@ const createVegaVisualizationObject = (id: string): SavedObjectType => {
 
 const getSavedObjectClient = (): SavedObjectsClientContract => {
   const savedObject = {} as SavedObjectsClientContract;
+  savedObject.bulkGet = jest
+    .fn()
+    .mockImplementation((dataSourceIds: Array<{ id: string; type: string }>) => {
+      return Promise.resolve({
+        saved_objects: dataSourceIds.map((request) => {
+          if (request.type === 'data-source' && request.id === 'old-datasource-id') {
+            return {
+              id: 'old-datasource-id',
+              attributes: {
+                title: 'old-datasource-title',
+              },
+            };
+          } else if (request.type === 'data-source' && request.id === 'some-datasource-id') {
+            return {
+              id: 'some-datasource-id',
+              attributes: {
+                title: 'some-datasource-title',
+              },
+            };
+          }
+
+          return {
+            id: request.id,
+            attributes: undefined,
+          };
+        }),
+      });
+    });
   savedObject.get = jest.fn().mockImplementation((type, id) => {
     if (type === 'data-source' && id === 'old-datasource-id') {
       return Promise.resolve({
@@ -54,7 +82,7 @@ const getSavedObjectClient = (): SavedObjectsClientContract => {
       });
     }
 
-    return Promise.resolve({});
+    return Promise.resolve(undefined);
   });
 
   return savedObject;
@@ -235,6 +263,37 @@ describe('#checkConflictsForDataSource', () => {
               visState:
                 '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: some-datasource-title\\n    }\\n  }\\n}"}}',
             },
+            id: 'some-datasource-id_some-object-id',
+          },
+        ],
+        errors: [],
+        importIdMap: new Map([
+          [
+            `visualization:some-object-id`,
+            { id: 'some-datasource-id_some-object-id', omitOriginId: true },
+          ],
+        ]),
+      })
+    );
+  });
+
+  it('will not update Vega spec if the datasource name cannot be found from the previous datasource id', async () => {
+    const vegaSavedObject = createVegaVisualizationObject(
+      'non-existent-datasource-id_some-object-id'
+    );
+    const params = setupParams({
+      objects: [vegaSavedObject],
+      ignoreRegularConflicts: true,
+      dataSourceId: 'some-datasource-id',
+      savedObjectsClient: getSavedObjectClient(),
+    });
+    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
+
+    expect(checkConflictsForDataSourceResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [
+          {
+            ...vegaSavedObject,
             id: 'some-datasource-id_some-object-id',
           },
         ],

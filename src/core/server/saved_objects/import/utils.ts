@@ -15,6 +15,11 @@ export interface UpdateDataSourceNameInVegaSpecProps {
 export const updateDataSourceNameInVegaSpec = (
   props: UpdateDataSourceNameInVegaSpecProps
 ): string => {
+  // Exit early if import data cannot determine new datasource name
+  if (!!props.newDataSourceName === false) {
+    return props.spec;
+  }
+
   const { spec } = props;
   let parsedSpec = parseJSONSpec(spec);
   const isJSONString = !!parsedSpec;
@@ -47,9 +52,31 @@ export const getDataSourceTitleFromId = async (
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   return await savedObjectsClient.get('data-source', dataSourceId).then((response) => {
-    const attributes: any = response?.attributes || {};
+    const attributes: any = response?.attributes || undefined;
     return attributes ? attributes.title : undefined;
   });
+};
+
+export const bulkGetDataSourceTitleFromId = async (
+  dataSourceIds: string[],
+  savedObjectsClient: SavedObjectsClientContract
+) => {
+  const bulkGetResults = await savedObjectsClient.bulkGet(
+    dataSourceIds.map((id) => {
+      return { id, type: 'data-source' };
+    })
+  );
+  const dataSourceTitlesMap = new Map();
+  bulkGetResults.saved_objects.forEach((object) => {
+    const attributes: any = object?.attributes || undefined;
+    if (!!attributes) {
+      dataSourceTitlesMap.set(object.id, attributes.title);
+    } else {
+      dataSourceTitlesMap.set(object.id, undefined);
+    }
+  });
+
+  return dataSourceTitlesMap;
 };
 
 export const extractVegaSpecFromSavedObject = (savedObject: SavedObject) => {
