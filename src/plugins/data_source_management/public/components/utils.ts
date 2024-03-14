@@ -151,10 +151,11 @@ export const extractRegisteredAuthTypeCredentials = (
 ) => {
   const registeredCredentials = {} as { [key: string]: string };
   const registeredCredentialField =
-    authenticationMethodRegistery.getAuthenticationMethod(authType)?.crendentialFormField ?? {};
+    authenticationMethodRegistery.getAuthenticationMethod(authType)?.credentialFormField ?? {};
 
   Object.keys(registeredCredentialField).forEach((credentialFiled) => {
-    registeredCredentials[credentialFiled] = currentCredentialState[credentialFiled] ?? '';
+    registeredCredentials[credentialFiled] =
+      currentCredentialState[credentialFiled] ?? registeredCredentialField[credentialFiled];
   });
 
   return registeredCredentials;
