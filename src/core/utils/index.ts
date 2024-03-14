@@ -37,4 +37,5 @@ export {
   IContextProvider,
 } from './context';
 export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
-export { WORKSPACE_TYPE } from './constants';
+export { WORKSPACE_PATH_PREFIX, WORKSPACE_TYPE } from './constants';
+export { getWorkspaceIdFromUrl, formatUrlWithWorkspaceId, cleanWorkspaceId } from './workspace';
