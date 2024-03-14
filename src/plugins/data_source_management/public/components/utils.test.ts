@@ -381,7 +381,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
     });
 
-    test('Should inherit value from registered field when credentail state not have registered field', () => {
+    test('Should inherit value from registered field when credential state not have registered field', () => {
       const authTypeToBeTested = 'Some Auth Type';
 
       const authMethodToBeTested = {
