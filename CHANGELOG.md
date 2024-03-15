@@ -40,6 +40,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add a workspace client in workspace plugin ([#6094](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6094))
 - [Multiple Datasource] Add component to show single selected data source in read only mode ([#6125](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6125))
 - [Workspace] Add workspace id in basePath ([#6060](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6060))
+- Add sidecar service ([#5920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5920))
 
 ### 🐛 Bug Fixes
 
