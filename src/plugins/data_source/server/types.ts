@@ -51,11 +51,17 @@ export interface DataSourceCredentialsProviderOptions {
 
 export type DataSourceCredentialsProvider = (
   options: DataSourceCredentialsProviderOptions
-) => Promise<UsernamePasswordTypedContent | SigV4Content>;
+) => Promise<ClientParameters>;
+
+export interface ClientParameters {
+  authType: AuthType;
+  endpoint: string;
+  cacheKeySuffix: string;
+  credentials: UsernamePasswordTypedContent | SigV4Content;
+}
 
 export interface AuthenticationMethod {
   name: string;
-  authType: AuthType;
   credentialProvider: DataSourceCredentialsProvider;
 }
 
