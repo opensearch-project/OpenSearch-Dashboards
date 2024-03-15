@@ -31,7 +31,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { SolutionTitle } from './solution_title';
-import { getLogosMock } from '../../../../../../core/common/mocks';
+import { getLogosMock } from '../../../../../../../core/common/mocks';
 
 const solutionEntry = {
   id: 'opensearchDashboards',
