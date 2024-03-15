@@ -52,15 +52,15 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
 
   public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
     const opensearchDashboardsVersion = injectedMetadata.getOpenSearchDashboardsVersion();
-    let workspaceBasePath = '';
+    let clientBasePath = '';
     const workspaceId = getWorkspaceIdFromUrl(window.location.href);
     if (workspaceId) {
-      workspaceBasePath = `${WORKSPACE_PATH_PREFIX}/${workspaceId}`;
+      clientBasePath = `${WORKSPACE_PATH_PREFIX}/${workspaceId}`;
     }
     const basePath = new BasePath(
       injectedMetadata.getBasePath(),
       injectedMetadata.getServerBasePath(),
-      workspaceBasePath
+      clientBasePath
     );
     const fetchService = new Fetch({ basePath, opensearchDashboardsVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });

@@ -61,7 +61,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
             absolute: false,
           });
           const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
-            withoutWorkspace: true,
+            withoutClientBasePath: true,
           });
           await application.navigateToUrl(targetUrl);
         }

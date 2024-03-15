@@ -90,11 +90,14 @@ export type HttpStart = HttpSetup;
 /**
  * prepend options
  *
- * withoutWorkspace option will prepend a relative url with only basePath
- * workspaceId will rewrite the /w/{workspaceId} part, if workspace id is an empty string, prepend will remove the workspaceId part
+ * withoutClientBasePath option will prepend a relative url with serverBasePath only.
+ * For now, clientBasePath is consist of:
+ * workspacePath, which has the pattern of /w/{workspaceId}.
+ *
+ * In the future, clientBasePath may have other parts but keep `withoutClientBasePath` for now to not over-design the interface,
  */
 export interface PrependOptions {
-  withoutWorkspace?: boolean;
+  withoutClientBasePath?: boolean;
 }
 
 /**
@@ -103,22 +106,22 @@ export interface PrependOptions {
  */
 export interface IBasePath {
   /**
-   * Gets the `basePath + workspace` string.
+   * Gets the `basePath + clientBasePath` string.
    */
   get: () => string;
 
   /**
-   * Gets the `basePath
+   * Gets the `basePath` string
    */
   getBasePath: () => string;
 
   /**
-   * Prepends `path` with the basePath + workspace.
+   * Prepends `path` with the basePath + clientBasePath.
    */
   prepend: (url: string, prependOptions?: PrependOptions) => string;
 
   /**
-   * Removes the prepended basePath + workspace from the `path`.
+   * Removes the prepended basePath + clientBasePath from the `path`.
    */
   remove: (url: string, prependOptions?: PrependOptions) => string;
 
