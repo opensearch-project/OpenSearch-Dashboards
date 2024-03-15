@@ -34,12 +34,12 @@ export const getPrincipalsFromRequest = (
   }
 
   if (authInfoResp?.status === AuthStatus.authenticated) {
-    const authInfo = authInfoResp?.state as AuthInfo | null;
-    if (authInfo?.backend_roles) {
-      payload[PrincipalType.Groups] = authInfo.backend_roles;
+    const authInfo = authInfoResp?.state as { authInfo: AuthInfo } | null;
+    if (authInfo?.authInfo?.backend_roles) {
+      payload[PrincipalType.Groups] = authInfo.authInfo.backend_roles;
     }
-    if (authInfo?.user_name) {
-      payload[PrincipalType.Users] = [authInfo.user_name];
+    if (authInfo?.authInfo?.user_name) {
+      payload[PrincipalType.Users] = [authInfo.authInfo.user_name];
     }
     return payload;
   }
