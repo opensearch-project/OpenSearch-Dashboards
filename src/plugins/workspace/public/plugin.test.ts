@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable, Subscriber } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
-import { Observable, Subscriber } from 'rxjs';
 
 describe('Workspace plugin', () => {
   const getSetupMock = () => ({
