@@ -9,11 +9,13 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Deprecations
 
 ### 🛡 Security
-- Support dynamic CSP rules to mitigate Clickjacking https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5641
 
+- Support dynamic CSP rules to mitigate Clickjacking https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5641
+- [CVE-2020-36604] Employ a patched version of hoek `6.1.3` ([#6148](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6148))
 - [CVE-2024-27088] Bump es5-ext from `0.10.59` to `0.10.64` ([#6021](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6021))
 
 ### 📈 Features/Enhancements
+
 - [MD]Change cluster selector component name to data source selector ([#6042](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6042))
 - [Multiple Datasource] Add interfaces to register add-on authentication method from plug-in module ([#5851](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5851))
 - [Multiple Datasource] Able to Hide "Local Cluster" option from datasource DropDown ([#5827](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5827))
@@ -32,6 +34,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Adds a session token to AWS credentials ([#6103](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6103))
 - [Multiple Datasource] Add Vega support to MDS by specifying a data source name in the Vega spec ([#5975](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5975))
 - [Multiple Datasource] Test connection schema validation for registered auth types ([#6109](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6109))
+- [Multiple DataSource] DataSource creation and edition page improvement to better support registered auth types ([#6122](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6122))
 - [Workspace] Consume workspace id in saved object client ([#6014](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6014))
 - [Multiple Datasource] Export DataSourcePluginRequestContext at top level for plugins to use ([#6108](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6108))
 - [Multiple Datasource] Expose filterfn in datasource menu component to allow filter data sources before rendering in navigation bar ([#6113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6113))
@@ -40,6 +43,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Add component to show single selected data source in read only mode ([#6125](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6125))
 - [Workspace] Add workspace id in basePath ([#6060](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6060))
 - Implement new home page ([#6065](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6065))
+- Add sidecar service ([#5920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5920))
 
 ### 🐛 Bug Fixes
 
@@ -54,6 +58,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource] Fix missing customApiRegistryPromise param for test connection ([#5944](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5944))
 - [BUG][Multiple Datasource] Add a migration function for datasource to add migrationVersion field ([#6025](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6025))
 - [BUG][MD]Expose picker using function in data source management plugin setup([#6030](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6030))
+- [BUG][Multiple Datasource] Fix data source filter bug and add tests ([#6152](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6152))
 
 ### 🚞 Infrastructure
 

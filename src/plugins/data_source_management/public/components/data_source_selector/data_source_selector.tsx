@@ -6,8 +6,9 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiComboBox } from '@elastic/eui';
-import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
+import { SavedObjectsClientContract, ToastsStart, SavedObject } from 'opensearch-dashboards/public';
 import { getDataSourcesWithFields } from '../utils';
+import { DataSourceAttributes } from '../../types';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {
@@ -26,7 +27,7 @@ export interface DataSourceSelectorProps {
   defaultOption?: DataSourceOption[];
   placeholderText?: string;
   removePrepend?: boolean;
-  filterFn?: (dataSource: any) => boolean;
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   compressed?: boolean;
 }
 
@@ -73,14 +74,13 @@ export class DataSourceSelector extends React.Component<
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
-          let filteredDataSources = [];
-          if (this.props.filterFn) {
-            filteredDataSources = fetchedDataSources.filter((ds) => this.props.filterFn!(ds));
+          let filteredDataSources = fetchedDataSources;
+          if (this.props.dataSourceFilter) {
+            filteredDataSources = fetchedDataSources.filter((ds) =>
+              this.props.dataSourceFilter!(ds)
+            );
           }
 
-          if (filteredDataSources.length === 0) {
-            filteredDataSources = fetchedDataSources;
-          }
           const dataSourceOptions = filteredDataSources.map((dataSource) => ({
             id: dataSource.id,
             label: dataSource.attributes?.title || '',

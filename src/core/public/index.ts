@@ -182,7 +182,13 @@ export {
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
+export {
+  OverlayStart,
+  OverlayBannersStart,
+  OverlayRef,
+  ISidecarConfig,
+  SIDECAR_DOCKED_MODE,
+} from './overlays';
 
 export {
   Toast,
