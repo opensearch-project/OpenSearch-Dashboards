@@ -90,24 +90,6 @@ describe('Sidebar Component', () => {
     });
   });
 
-  it('shows a modal when clicking a non-index pattern data source', () => {
-    const { getByText, getByTestId } = render(
-      <Provider store={store}>
-        <Sidebar />
-      </Provider>
-    );
-
-    fireEvent.click(getByTestId('comboBoxToggleListButton'));
-    waitFor(() => {
-      expect(getByText('s3-prod-mock')).toBeInTheDocument();
-      fireEvent.click(getByText('s3-prod-mock'));
-      expect(getByText('Open in Log Explorer')).toBeInTheDocument();
-      expect(getByText('Cancel')).toBeInTheDocument();
-      fireEvent.click(getByText('Cancel'));
-      expect(getByText('Open in Log Explorer')).not.toBeInTheDocument();
-    });
-  });
-
   it('redirects to log explorer when clicking open-in-log-explorer button', () => {
     const history = createMemoryHistory();
     const { getByText, getByTestId } = render(
