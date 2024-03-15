@@ -39,7 +39,7 @@ import {
   EuiIcon,
   IconType,
 } from '@elastic/eui';
-import { HomePluginBranding } from '../../../plugin';
+import { HomePluginBranding } from '../../../../plugin';
 
 interface Props {
   /**

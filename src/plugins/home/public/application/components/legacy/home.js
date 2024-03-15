@@ -36,15 +36,15 @@ import { i18n } from '@osd/i18n';
 import {
   OverviewPageFooter,
   OverviewPageHeader,
-} from '../../../../../../src/plugins/opensearch_dashboards_react/public';
-import { HOME_APP_BASE_PATH } from '../../../common/constants';
-import { FeatureCatalogueCategory } from '../../services';
-import { getServices } from '../opensearch_dashboards_services';
+} from '../../../../../../../src/plugins/opensearch_dashboards_react/public';
+import { HOME_APP_BASE_PATH } from '../../../../common/constants';
+import { FeatureCatalogueCategory } from '../../../services';
+import { getServices } from '../../opensearch_dashboards_services';
 import { AddData } from './add_data';
 import { ManageData } from './manage_data';
-import { NewThemeModal } from './new_theme_modal';
+import { NewThemeModal } from '../new_theme_modal';
 import { SolutionsSection } from './solutions_section';
-import { Welcome } from './welcome';
+import { Welcome } from '../welcome';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 const KEY_ENABLE_NEW_THEME_MODAL = 'home:newThemeModal:show';
