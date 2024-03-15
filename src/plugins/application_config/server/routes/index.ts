@@ -26,7 +26,7 @@ export function defineRoutes(
     async (context, request, response) => {
       const client = getConfigurationClient(context.core.opensearch.client);
 
-      return await handleGetConfig(client, response, logger);
+      return await handleGetConfig(client, request, response, logger);
     }
   );
   router.get(
@@ -86,7 +86,7 @@ export async function handleGetEntityConfig(
   logger: Logger
 ) {
   try {
-    const result = await client.getEntityConfig(request.params.entity);
+    const result = await client.getEntityConfig(request.params.entity, { request });
     return response.ok({
       body: {
         value: result,
@@ -105,7 +105,9 @@ export async function handleUpdateEntityConfig(
   logger: Logger
 ) {
   try {
-    const result = await client.updateEntityConfig(request.params.entity, request.body.newValue);
+    const result = await client.updateEntityConfig(request.params.entity, request.body.newValue, {
+      request,
+    });
     return response.ok({
       body: {
         newValue: result,
@@ -124,7 +126,7 @@ export async function handleDeleteEntityConfig(
   logger: Logger
 ) {
   try {
-    const result = await client.deleteEntityConfig(request.params.entity);
+    const result = await client.deleteEntityConfig(request.params.entity, { request });
     return response.ok({
       body: {
         deletedEntity: result,
@@ -138,11 +140,12 @@ export async function handleDeleteEntityConfig(
 
 export async function handleGetConfig(
   client: ConfigurationClient,
+  request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
   try {
-    const result = await client.getConfig();
+    const result = await client.getConfig({ request });
     return response.ok({
       body: {
         value: result,

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient, OpenSearchDashboardsRequest } from 'src/core/server';
 
 export interface ApplicationConfigPluginSetup {
   getConfigurationClient: (inputOpenSearchClient: IScopedClusterClient) => ConfigurationClient;
@@ -11,6 +11,10 @@ export interface ApplicationConfigPluginSetup {
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ApplicationConfigPluginStart {}
+
+export interface ConfigurationClientOptions {
+  request: OpenSearchDashboardsRequest;
+}
 
 /**
  * The interface defines the operations against the application configurations at both entity level and whole level.
@@ -23,7 +27,7 @@ export interface ConfigurationClient {
    * @param {array} array of connections
    * @returns {ConnectionPool}
    */
-  getConfig(): Promise<Map<string, string>>;
+  getConfig(options?: ConfigurationClientOptions): Promise<Map<string, string>>;
 
   /**
    * Get the value for the input entity.
@@ -31,7 +35,7 @@ export interface ConfigurationClient {
    * @param {entity} name of the entity
    * @returns {string} value of the entity
    */
-  getEntityConfig(entity: string): Promise<string>;
+  getEntityConfig(entity: string, options?: ConfigurationClientOptions): Promise<string>;
 
   /**
    * Update the input entity with a new value.
@@ -40,7 +44,11 @@ export interface ConfigurationClient {
    * @param {newValue} new configuration value of the entity
    * @returns {string} updated configuration value of the entity
    */
-  updateEntityConfig(entity: string, newValue: string): Promise<string>;
+  updateEntityConfig(
+    entity: string,
+    newValue: string,
+    options?: ConfigurationClientOptions
+  ): Promise<string>;
 
   /**
    * Delete the input entity from configurations.
@@ -48,5 +56,5 @@ export interface ConfigurationClient {
    * @param {entity} name of the entity
    * @returns {string} name of the deleted entity
    */
-  deleteEntityConfig(entity: string): Promise<string>;
+  deleteEntityConfig(entity: string, options?: ConfigurationClientOptions): Promise<string>;
 }
