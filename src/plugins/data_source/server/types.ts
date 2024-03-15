@@ -20,7 +20,6 @@ import { CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceError } from './lib/error';
 import { IAuthenticationMethodRegistery } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
-import { OpenSearchClientPoolSetup } from './client';
 
 export interface LegacyClientCallAPIParams {
   endpoint: string;
@@ -52,14 +51,18 @@ export interface DataSourceCredentialsProviderOptions {
 
 export type DataSourceCredentialsProvider = (
   options: DataSourceCredentialsProviderOptions
-) => Promise<UsernamePasswordTypedContent | SigV4Content>;
+) => Promise<ClientParameters>;
+
+export interface ClientParameters {
+  authType: AuthType;
+  endpoint: string;
+  cacheKeySuffix: string;
+  credentials: UsernamePasswordTypedContent | SigV4Content;
+}
 
 export interface AuthenticationMethod {
   name: string;
-  authType: AuthType;
   credentialProvider: DataSourceCredentialsProvider;
-  clientPoolSetup: OpenSearchClientPoolSetup;
-  legacyClientPoolSetup: OpenSearchClientPoolSetup;
 }
 
 export interface DataSourcePluginRequestContext {

@@ -5,22 +5,12 @@
 
 import { AuthenticationMethodRegistery } from './authentication_methods_registry';
 import { AuthenticationMethod } from '../../server/types';
-import { AuthType } from '../../common/data_sources';
-import { OpenSearchClientPoolSetup } from '../client';
-
-const clientPoolSetup: OpenSearchClientPoolSetup = {
-  getClientFromPool: jest.fn(),
-  addClientToPool: jest.fn(),
-};
 
 const createAuthenticationMethod = (
   authMethod: Partial<AuthenticationMethod>
 ): AuthenticationMethod => ({
   name: 'unknown',
-  authType: AuthType.NoAuth,
   credentialProvider: jest.fn(),
-  clientPoolSetup,
-  legacyClientPoolSetup: clientPoolSetup,
   ...authMethod,
 });
 
@@ -69,14 +59,14 @@ describe('AuthenticationMethodRegistery', () => {
       registry.registerAuthenticationMethod(
         createAuthenticationMethod({
           name: 'typeA',
-          authType: AuthType.NoAuth,
+          credentialProvider: jest.fn(),
         })
       );
 
       const typeA = registry.getAuthenticationMethod('typeA')!;
 
       expect(() => {
-        typeA.authType = AuthType.SigV4;
+        typeA.credentialProvider = jest.fn();
       }).toThrow();
       expect(() => {
         typeA.name = 'foo';

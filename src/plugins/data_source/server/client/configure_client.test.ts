@@ -26,7 +26,7 @@ import { ClientOptions } from '@opensearch-project/opensearch';
 import { opensearchClientMock } from '../../../../core/server/opensearch/client/mocks';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
-import { DataSourceClientParams, AuthenticationMethod } from '../types';
+import { DataSourceClientParams, AuthenticationMethod, ClientParameters } from '../types';
 import { CustomApiSchemaRegistry } from '../schema_registry';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
 import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
@@ -47,6 +47,7 @@ describe('configureClient', () => {
   let sigV4AuthContent: SigV4Content;
   let customApiSchemaRegistry: CustomApiSchemaRegistry;
   let authenticationMethodRegistery: jest.Mocked<IAuthenticationMethodRegistery>;
+  let clientParameters: ClientParameters;
 
   const customAuthContent = {
     region: 'us-east-1',
@@ -60,10 +61,7 @@ describe('configureClient', () => {
 
   const authMethod: AuthenticationMethod = {
     name: 'typeA',
-    authType: AuthType.SigV4,
     credentialProvider: jest.fn(),
-    clientPoolSetup,
-    legacyClientPoolSetup: clientPoolSetup,
   };
 
   beforeEach(() => {
@@ -122,12 +120,21 @@ describe('configureClient', () => {
       customApiSchemaRegistryPromise: Promise.resolve(customApiSchemaRegistry),
     };
 
+    clientParameters = {
+      authType: AuthType.SigV4,
+      endpoint: dataSourceAttr.endpoint,
+      cacheKeySuffix: '',
+      credentials: sigV4AuthContent,
+    };
+
     ClientMock.mockImplementation(() => dsClient);
     authenticationMethodRegistery.getAuthenticationMethod.mockImplementation(() => authMethod);
+    authRegistryCredentialProviderMock.mockReturnValue(clientParameters);
   });
 
   afterEach(() => {
     ClientMock.mockReset();
+    authRegistryCredentialProviderMock.mockReset();
   });
 
   test('configure client with auth.type == no_auth, will call new Client() to create client', async () => {
@@ -291,11 +298,6 @@ describe('configureClient', () => {
       references: [],
     });
 
-    authRegistryCredentialProviderMock.mockReturnValue({
-      credential: sigV4AuthContent,
-      type: AuthType.SigV4,
-    });
-
     const client = await configureClient(
       { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
       clientPoolSetup,
@@ -336,8 +338,8 @@ describe('configureClient', () => {
     });
 
     authRegistryCredentialProviderMock.mockReturnValue({
-      credential: mockCredentials,
-      type: AuthType.SigV4,
+      ...clientParameters,
+      credentials: mockCredentials,
     });
 
     const client = await configureClient(
@@ -374,11 +376,6 @@ describe('configureClient', () => {
         },
       },
       references: [],
-    });
-
-    authRegistryCredentialProviderMock.mockReturnValue({
-      credential: sigV4AuthContent,
-      type: AuthType.SigV4,
     });
 
     const client = await configureClient(
@@ -556,10 +553,7 @@ describe('configureClient', () => {
       beforeEach(() => {
         const authMethodWithClientPool: AuthenticationMethod = {
           name: 'clientPoolTest',
-          authType: AuthType.SigV4,
           credentialProvider: jest.fn(),
-          clientPoolSetup: opensearchClientPoolSetup,
-          legacyClientPoolSetup: clientPoolSetup,
         };
         authenticationMethodRegistery.getAuthenticationMethod
           .mockReset()
@@ -577,22 +571,18 @@ describe('configureClient', () => {
           },
           references: [],
         });
-        authRegistryCredentialProviderMock.mockReturnValue({
-          credential: sigV4AuthContent,
-          type: AuthType.SigV4,
-        });
       });
-      test('Auth Method from Registry: If endpoint is same for multiple requests client pool size should be 1', async () => {
+      test('If endpoint is same for multiple requests client pool size should be 1', async () => {
         await configureClient(
           { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
-          clientPoolSetup,
+          opensearchClientPoolSetup,
           config,
           logger
         );
 
         await configureClient(
           { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
-          clientPoolSetup,
+          opensearchClientPoolSetup,
           config,
           logger
         );
@@ -600,10 +590,10 @@ describe('configureClient', () => {
         expect(ClientMock).toHaveBeenCalledTimes(1);
       });
 
-      test('Auth Method from Registry: If endpoint is different for two requests client pool size should be 2', async () => {
+      test('If endpoint is different for two requests client pool size should be 2', async () => {
         await configureClient(
           { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
-          clientPoolSetup,
+          opensearchClientPoolSetup,
           config,
           logger
         );
@@ -625,10 +615,15 @@ describe('configureClient', () => {
           },
           references: [],
         });
+        authRegistryCredentialProviderMock.mockReturnValue({
+          ...clientParameters,
+          endpoint: 'http://test.com',
+          cacheKeySuffix: 'test',
+        });
 
         await configureClient(
           { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
-          clientPoolSetup,
+          opensearchClientPoolSetup,
           config,
           logger
         );

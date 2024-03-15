@@ -19,7 +19,7 @@ import {
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { createDataSourceError } from '../lib/error';
 import { IAuthenticationMethodRegistery } from '../auth_registry';
-import { AuthenticationMethod } from '../types';
+import { AuthenticationMethod, ClientParameters } from '../types';
 
 /**
  * Get the root client of datasource from
@@ -32,20 +32,24 @@ import { AuthenticationMethod } from '../types';
  */
 export const getRootClient = (
   dataSourceAttr: DataSourceAttributes,
-  getClientFromPool: (
-    endpoint: string,
-    authType: AuthType,
-    request?: OpenSearchDashboardsRequest
-  ) => Client | LegacyClient | undefined,
-  request?: OpenSearchDashboardsRequest
+  getClientFromPool: (endpoint: string, authType: AuthType) => Client | LegacyClient | undefined,
+  clientParams?: ClientParameters
 ): Client | LegacyClient | undefined => {
-  const {
+  let cacheKeySuffix;
+  let {
     auth: { type },
     endpoint,
   } = dataSourceAttr;
-  const cacheKey = endpoint;
 
-  return getClientFromPool(cacheKey, type, request);
+  if (clientParams !== undefined) {
+    endpoint = clientParams.endpoint;
+    cacheKeySuffix = clientParams.cacheKeySuffix;
+    type = clientParams.authType;
+  }
+
+  const cacheKey = generateCacheKey(endpoint, cacheKeySuffix);
+
+  return getClientFromPool(cacheKey, type);
 };
 
 export const getDataSource = async (
@@ -127,6 +131,13 @@ export const getAWSCredential = async (
   };
 
   return credential;
+};
+
+export const generateCacheKey = (endpoint: string, cacheKeySuffix?: string) => {
+  const CACHE_KEY_DELIMITER = ',';
+  let key = endpoint;
+  if (cacheKeySuffix) key += CACHE_KEY_DELIMITER + cacheKeySuffix;
+  return key;
 };
 
 export const getAuthenticationMethod = (
