@@ -12,6 +12,8 @@ import {
   CoreSetup,
   AppMountParameters,
   AppNavLinkStatus,
+  LinksUpdater,
+  WorkspaceAttribute,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -22,6 +24,8 @@ import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
+import { NavLinkWrapper } from '../../../core/public/chrome/nav_links/nav_link';
+import { featureMatchesConfig } from './utils';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
@@ -36,6 +40,53 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
         }
       });
     }
+  }
+
+  /**
+   * Filter the nav links based on the feature configuration of workspace
+   */
+  private filterByWorkspace(allNavLinks: NavLinkWrapper[], workspace: WorkspaceAttribute | null) {
+    if (!workspace || !workspace.features) return allNavLinks;
+
+    const featureFilter = featureMatchesConfig(workspace.features);
+    return allNavLinks.filter((linkWrapper) => featureFilter(linkWrapper.properties));
+  }
+
+  /**
+   * Filter nav links by the current workspace, once the current workspace change, the nav links(left nav bar)
+   * should also be updated according to the configured features of the current workspace
+   */
+  private filterNavLinks(core: CoreStart) {
+    const currentWorkspace$ = core.workspaces.currentWorkspace$;
+    let filterLinksByWorkspace: LinksUpdater;
+
+    this.currentWorkspaceSubscription?.unsubscribe();
+    this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
+      const linkUpdaters$ = core.chrome.navLinks.getLinkUpdaters$();
+      let linkUpdaters = linkUpdaters$.value;
+
+      /**
+       * It should only have one link filter exist based on the current workspace at a given time
+       * So we need to filter out previous workspace link filter before adding new one after changing workspace
+       */
+      linkUpdaters = linkUpdaters.filter((updater) => updater !== filterLinksByWorkspace);
+
+      /**
+       * Whenever workspace changed, this function will filter out those links that should not
+       * be displayed. For example, some workspace may not have Observability features configured, in such case,
+       * the nav links of Observability features should not be displayed in left nav bar
+       */
+      filterLinksByWorkspace = (navLinks) => {
+        const filteredNavLinks = this.filterByWorkspace([...navLinks.values()], currentWorkspace);
+        const newNavLinks = new Map<string, NavLinkWrapper>();
+        filteredNavLinks.forEach((chromeNavLink) => {
+          newNavLinks.set(chromeNavLink.id, chromeNavLink);
+        });
+        return newNavLinks;
+      };
+
+      linkUpdaters$.next([...linkUpdaters, filterLinksByWorkspace]);
+    });
   }
 
   public async setup(core: CoreSetup) {
@@ -135,6 +186,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     this.coreStart = core;
 
     this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
+
+    // When starts, filter the nav links based on the current workspace
+    this.filterNavLinks(core);
+
     return {};
   }
 

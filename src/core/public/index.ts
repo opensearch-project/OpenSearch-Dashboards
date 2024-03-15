@@ -67,6 +67,7 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  LinksUpdater,
   NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
@@ -329,6 +330,7 @@ export {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
+  LinksUpdater,
   IContextContainer,
   HandlerFunction,
   HandlerContextType,
