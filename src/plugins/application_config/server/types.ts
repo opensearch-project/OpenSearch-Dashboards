@@ -24,8 +24,8 @@ export interface ConfigurationClient {
   /**
    * Get all the configurations.
    *
-   * @param {array} array of connections
-   * @returns {ConnectionPool}
+   * @param {options} options, an optional parameter
+   * @returns {Map<string, string>} all the configurations
    */
   getConfig(options?: ConfigurationClientOptions): Promise<Map<string, string>>;
 
@@ -33,6 +33,7 @@ export interface ConfigurationClient {
    * Get the value for the input entity.
    *
    * @param {entity} name of the entity
+   * @param {options} options, an optional parameter
    * @returns {string} value of the entity
    */
   getEntityConfig(entity: string, options?: ConfigurationClientOptions): Promise<string>;
@@ -42,6 +43,7 @@ export interface ConfigurationClient {
    *
    * @param {entity} name of the entity
    * @param {newValue} new configuration value of the entity
+   * @param {options} options, an optional parameter
    * @returns {string} updated configuration value of the entity
    */
   updateEntityConfig(
@@ -54,6 +56,7 @@ export interface ConfigurationClient {
    * Delete the input entity from configurations.
    *
    * @param {entity} name of the entity
+   * @param {options} options, an optional parameter
    * @returns {string} name of the deleted entity
    */
   deleteEntityConfig(entity: string, options?: ConfigurationClientOptions): Promise<string>;
