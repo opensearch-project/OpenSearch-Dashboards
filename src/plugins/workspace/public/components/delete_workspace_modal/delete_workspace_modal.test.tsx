@@ -6,7 +6,7 @@
 import React from 'react';
 import { DeleteWorkspaceModal, DeleteWorkspaceModalProps } from './delete_workspace_modal';
 import { coreMock } from '../../../../../core/public/mocks';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { workspaceClientMock } from '../../../public/workspace_client.mock';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
 
@@ -34,11 +34,11 @@ describe('DeleteWorkspaceModal', () => {
     jest.clearAllMocks();
   });
 
-  it('should render normally', () => {
+  it('should render normally', async () => {
     const { getByText, baseElement, getByTestId } = render(
       getWrapWorkspaceDeleteModalInContext(defaultProps)
     );
-
+    await screen.findByTestId('delete-workspace-modal-header');
     expect(getByText('Delete workspace')).toBeInTheDocument();
     expect(getByTestId('delete-workspace-modal-header')).toBeInTheDocument();
     expect(getByTestId('delete-workspace-modal-body')).toBeInTheDocument();

@@ -16,6 +16,14 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/open
 
 jest.mock('../utils/workspace');
 
+jest.mock('../delete_workspace_modal', () => ({
+  DeleteWorkspaceModal: ({ onClose }: { onClose: () => void }) => (
+    <div aria-label="mock delete workspace modal">
+      <button onClick={onClose} aria-label="mock delete workspace modal button" />
+    </div>
+  ),
+}));
+
 function getWrapWorkspaceListInContext(
   workspaceList = [
     { id: 'id1', name: 'name1' },
@@ -92,11 +100,10 @@ describe('WorkspaceList', () => {
     const { getAllByTestId } = render(getWrapWorkspaceListInContext());
     const deleteIcon = getAllByTestId('workspace-list-delete-icon')[0];
     fireEvent.click(deleteIcon);
-    await screen.findByTestId('delete-workspace-modal-header');
-    expect(screen.getByTestId('delete-workspace-modal-header')).toBeInTheDocument();
-    const cancelButton = screen.getByTestId('delete-workspace-modal-cancel-button');
-    fireEvent.click(cancelButton);
-    expect(screen.queryByTestId('delete-workspace-modal-header')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('mock delete workspace modal')).toBeInTheDocument();
+    const modalCancelButton = screen.getByLabelText('mock delete workspace modal button');
+    fireEvent.click(modalCancelButton);
+    expect(screen.queryByLabelText('mock delete workspace modal')).not.toBeInTheDocument();
   });
 
   it('should be able to pagination when clicking pagination button', async () => {
