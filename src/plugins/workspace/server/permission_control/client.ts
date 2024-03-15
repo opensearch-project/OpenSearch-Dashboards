@@ -37,6 +37,13 @@ export class SavedObjectsPermissionControl {
    * @param request
    * @returns SavedObjectsContract
    */
+  /**
+   * Returns a saved objects client that is able to:
+   * 1. Read objects whose type is `workspace` because workspace is a hidden type and the permission control client will need to get the metadata of a specific workspace to do the permission check.
+   * 2. Bypass saved objects permission control wrapper because the permission control client is a dependency of the wrapper to provide the ACL validation capability. It will run into infinite loop if not bypass.
+   * @param request 
+   * @returns SavedObjectsContract
+   */
   private getScopedClient(request: OpenSearchDashboardsRequest) {
     return this._getScopedClient?.(request, {
       excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
