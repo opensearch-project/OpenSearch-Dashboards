@@ -32,7 +32,7 @@ interface Props {
 }
 
 /**
- * Show maximum five workspaces in the dropdown list, the current selected workspace
+ * Return maximum five workspaces, the current selected workspace
  * will be on the top of the list.
  */
 function getFilteredWorkspaceList(
