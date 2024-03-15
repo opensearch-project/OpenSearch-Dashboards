@@ -82,7 +82,7 @@ describe('DataSourceManagement: Form Validation', () => {
           inputDisplay: 'some input',
         },
         credentialForm: jest.fn(),
-        crendentialFormField: {
+        credentialFormField: {
           userNameRegistered: 'some filled in userName from registed auth credential form',
           passWordRegistered: 'some filled in password from registed auth credential form',
         },
