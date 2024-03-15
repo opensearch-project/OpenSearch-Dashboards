@@ -14,13 +14,17 @@ Overview
 - [Misc](#misc)
 
 # General information
-OpenSearch Dashboards uses [Jest](https://jestjs.io/) for unit and integration tests, [Selenium](https://www.selenium.dev/) for functional tests, and [Cypress](https://www.cypress.io/) for backwards compatibility tests.
+OpenSearch Dashboards uses [Jest](https://jestjs.io/) for unit and integration tests, [Cypress](https://www.cypress.io/) for backwards compatibility tests and functional tests and [Selenium](https://www.selenium.dev/) for some legacy functional tests (Tests should no longer be written in Selenium).
 
 In general, we recommend four tiers of tests:
 * Unit tests: Unit tests: small and modular tests that utilize mocks for external dependencies.
 * Integration tests: higher-level tests that verify interactions between systems (eg. HTTP APIs, OpenSearch API calls, calling other plugin).
 * End-to-end tests (e2e): functional tests that verify behavior in a web browser.
-* Backwards Compatibility tests: cypress tests that verify any changes are backwards compatible with previous versions.
+* Backwards Compatibility tests: tests that verify any changes are backwards compatible with previous versions.
+
+> Contributors submitting pull requests (PRs) to the codebase are required to ensure that their code changes include appropriate testing coverage. This includes, but is not limited to, unit tests, integration tests, functional tests, and backwards compatibility tests where applicable.
+> It is the responsibility of the contributor to verify that their code changes do not introduce regressions or break existing functionality. PRs lacking sufficient testing coverage may be subject to delays in review or rejection until adequate tests are provided.
+
 
 # Requirements
 * Install the latest NodeJS, [NPM](https://www.npmjs.com/get-npm) and [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable)
