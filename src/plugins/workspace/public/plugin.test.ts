@@ -26,11 +26,11 @@ describe('Workspace plugin', () => {
     expect(WorkspaceClientMock).toBeCalledTimes(1);
   });
 
-  it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', () => {
+  it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();
     const coreStart = coreMock.createStart();
-    workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock);
     workspacePlugin.start(coreStart);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
