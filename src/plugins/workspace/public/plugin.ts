@@ -4,6 +4,7 @@
  */
 
 import type { Subscription } from 'rxjs';
+import { i18n } from '@osd/i18n';
 import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
 import { featureMatchesConfig } from './utils';
 import {
@@ -19,6 +20,7 @@ import {
   WORKSPACE_FATAL_ERROR_APP_ID,
   WORKSPACE_OVERVIEW_APP_ID,
   WORKSPACE_LIST_APP_ID,
+  WORKSPACE_CREATE_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { renderWorkspaceMenu } from './render_workspace_menu';
@@ -158,6 +160,19 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
+      },
+    });
+
+    // create
+    core.application.register({
+      id: WORKSPACE_CREATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceCreate', {
+        defaultMessage: 'Create Workspace',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderCreatorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderCreatorApp);
       },
     });
 

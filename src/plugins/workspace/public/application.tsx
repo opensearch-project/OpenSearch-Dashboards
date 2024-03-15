@@ -9,7 +9,21 @@ import { AppMountParameters, ScopedHistory } from '../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 import { WorkspaceListApp } from './components/workspace_list_app';
 import { WorkspaceFatalError } from './components/workspace_fatal_error';
+import { WorkspaceCreatorApp } from './components/workspace_creator_app';
 import { Services } from './types';
+
+export const renderCreatorApp = ({ element }: AppMountParameters, services: Services) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceCreatorApp />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};
 
 export const renderFatalErrorApp = (params: AppMountParameters, services: Services) => {
   const { element } = params;
