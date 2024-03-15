@@ -4,14 +4,11 @@
  */
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { EuiPageSideBar, EuiSplitPanel, EuiText } from '@elastic/eui';
+import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSourceGroup, DataSourceSelectable, DataSourceType } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
-import {
-  toMountPoint,
-  useOpenSearchDashboards,
-} from '../../../../opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
@@ -28,7 +25,6 @@ export const Sidebar: FC = ({ children }) => {
       data: { indexPatterns, dataSources },
       notifications: { toasts },
       application,
-      overlays,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
@@ -72,43 +68,6 @@ export const Sidebar: FC = ({ children }) => {
     [application]
   );
 
-  const showModal = useCallback(
-    async (dsName: string, dsType: string) => {
-      const confirmed = await overlays.openConfirm(
-        toMountPoint(
-          <EuiText>
-            {i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalMessage', {
-              defaultMessage:
-                'Selecting this data source will open the Log Explorer application, where you can query \
-          data using PPL/SQL.',
-            })}
-          </EuiText>
-        ),
-        {
-          title: i18n.translate('dataExplorer.sidebar.LogExplorerRedirectionModalTitle', {
-            defaultMessage: 'Open in Log Explorer',
-          }),
-          cancelButtonText: i18n.translate(
-            'dataExplorer.sidebar.LogExplorerRedirectionModalFooterCancelButtonTxt',
-            {
-              defaultMessage: 'Cancel',
-            }
-          ),
-          confirmButtonText: i18n.translate(
-            'dataExplorer.sidebar.LogExplorerRedirectionModalFooterButtonTxt',
-            {
-              defaultMessage: 'Open in Log Explorer ',
-            }
-          ),
-        }
-      );
-      if (confirmed) {
-        redirectToLogExplorer(dsName, dsType);
-      }
-    },
-    [overlays, redirectToLogExplorer]
-  );
-
   const handleSourceSelection = useCallback(
     (selectedDataSources: DataSourceOption[]) => {
       if (selectedDataSources.length === 0) {
@@ -118,13 +77,13 @@ export const Sidebar: FC = ({ children }) => {
       // Temporary redirection solution for 2.11, where clicking non-index-pattern data sources
       // will prompt users with modal explaining they are being redirected to Observability log explorer
       if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-        showModal(selectedDataSources[0].label, selectedDataSources[0].type);
+        redirectToLogExplorer(selectedDataSources[0].label, selectedDataSources[0].type);
         return;
       }
       setSelectedSources(selectedDataSources);
       dispatch(setIndexPattern(selectedDataSources[0].value));
     },
-    [dispatch, showModal, setSelectedSources]
+    [dispatch, redirectToLogExplorer, setSelectedSources]
   );
 
   const handleGetDataSetError = useCallback(
