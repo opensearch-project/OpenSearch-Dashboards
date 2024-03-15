@@ -41,6 +41,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Add component to show single selected data source in read only mode ([#6125](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6125))
 - [Multiple Datasource] Add data source aggregated view to show all compatible data sources or only show used data sources ([#6129](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6129))
 - [Workspace] Add workspace id in basePath ([#6060](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6060))
+- Add sidecar service ([#5920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5920))
 
 
 ### 🐛 Bug Fixes
@@ -56,6 +57,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource] Fix missing customApiRegistryPromise param for test connection ([#5944](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5944))
 - [BUG][Multiple Datasource] Add a migration function for datasource to add migrationVersion field ([#6025](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6025))
 - [BUG][MD]Expose picker using function in data source management plugin setup([#6030](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6030))
+- [BUG][Multiple Datasource] Fix data source filter bug and add tests ([#6152](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6152))
 
 ### 🚞 Infrastructure
 

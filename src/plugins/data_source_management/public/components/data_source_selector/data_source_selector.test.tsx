@@ -152,4 +152,22 @@ describe('DataSourceSelector: check dataSource options', () => {
     expect(component).toMatchSnapshot();
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
+
+  it('should return empty options if filter out all options and hide local cluster', async () => {
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        dataSourceFilter={(ds) => ds.attributes.auth.type === 'random'}
+      />
+    );
+    component.instance().componentDidMount!();
+    await nextTick();
+    expect(component).toMatchSnapshot();
+    expect(toasts.addWarning).toBeCalledTimes(0);
+  });
 });

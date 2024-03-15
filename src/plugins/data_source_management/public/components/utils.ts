@@ -40,7 +40,7 @@ export async function getDataSourcesWithFields(
   savedObjectsClient: SavedObjectsClientContract,
   fields: string[]
 ): Promise<Array<SavedObject<DataSourceAttributes>>> {
-  const response = await savedObjectsClient.find({
+  const response = await savedObjectsClient.find<DataSourceAttributes>({
     type: 'data-source',
     fields,
     perPage: 10000,
