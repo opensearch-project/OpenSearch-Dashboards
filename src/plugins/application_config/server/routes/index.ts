@@ -85,6 +85,8 @@ export async function handleGetEntityConfig(
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
+  logger.info(`Received a request to get entity config for ${request.params.entity}.`);
+
   try {
     const result = await client.getEntityConfig(request.params.entity, {
       headers: request.headers,
@@ -106,6 +108,10 @@ export async function handleUpdateEntityConfig(
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
+  logger.info(
+    `Received a request to update entity ${request.params.entity} with new value ${request.body.newValue}.`
+  );
+
   try {
     const result = await client.updateEntityConfig(request.params.entity, request.body.newValue, {
       headers: request.headers,
@@ -127,6 +133,8 @@ export async function handleDeleteEntityConfig(
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
+  logger.info(`Received a request to delete entity ${request.params.entity}.`);
+
   try {
     const result = await client.deleteEntityConfig(request.params.entity, {
       headers: request.headers,
@@ -148,6 +156,8 @@ export async function handleGetConfig(
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
+  logger.info('Received a request to get all configurations.');
+
   try {
     const result = await client.getConfig({ headers: request.headers });
     return response.ok({
