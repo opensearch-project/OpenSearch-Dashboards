@@ -61,13 +61,13 @@ Let's call this plugin `MyConfigurationClientPlugin`.
 First, this plugin will need to implement a class `MyConfigurationClient` based on interface `ConfigurationClient` defined in the `types.ts` under directory `src/plugins/application_config/server/types.ts`. Below are the functions inside the interface.
 
 ```
-  getConfig(): Promise<Map<string, string>>;
+  getConfig(options?: ConfigurationClientOptions): Promise<Map<string, string>>;
 
-  getEntityConfig(entity: string): Promise<string>;
+  getEntityConfig(entity: string, options?: ConfigurationClientOptions): Promise<string>;
 
-  updateEntityConfig(entity: string, newValue: string): Promise<string>;
+  updateEntityConfig(entity: string, newValue: string, options?: ConfigurationClientOptions): Promise<string>;
 
-  deleteEntityConfig(entity: string): Promise<string>;
+  deleteEntityConfig(entity: string, options?: ConfigurationClientOptions): Promise<string>;
 ```
 
 Second, this plugin needs to declare `applicationConfig` as its dependency by adding it to `requiredPlugins` in its own `opensearch_dashboards.json`.
