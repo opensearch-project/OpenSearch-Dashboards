@@ -86,7 +86,9 @@ export async function handleGetEntityConfig(
   logger: Logger
 ) {
   try {
-    const result = await client.getEntityConfig(request.params.entity, { request });
+    const result = await client.getEntityConfig(request.params.entity, {
+      headers: request.headers,
+    });
     return response.ok({
       body: {
         value: result,
@@ -106,7 +108,7 @@ export async function handleUpdateEntityConfig(
 ) {
   try {
     const result = await client.updateEntityConfig(request.params.entity, request.body.newValue, {
-      request,
+      headers: request.headers,
     });
     return response.ok({
       body: {
@@ -126,7 +128,9 @@ export async function handleDeleteEntityConfig(
   logger: Logger
 ) {
   try {
-    const result = await client.deleteEntityConfig(request.params.entity, { request });
+    const result = await client.deleteEntityConfig(request.params.entity, {
+      headers: request.headers,
+    });
     return response.ok({
       body: {
         deletedEntity: result,
@@ -145,7 +149,7 @@ export async function handleGetConfig(
   logger: Logger
 ) {
   try {
-    const result = await client.getConfig({ request });
+    const result = await client.getConfig({ headers: request.headers });
     return response.ok({
       body: {
         value: result,

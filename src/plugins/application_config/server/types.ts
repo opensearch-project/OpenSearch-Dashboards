@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IScopedClusterClient, OpenSearchDashboardsRequest } from 'src/core/server';
+import { IScopedClusterClient, Headers } from 'src/core/server';
 
 export interface ApplicationConfigPluginSetup {
   getConfigurationClient: (inputOpenSearchClient: IScopedClusterClient) => ConfigurationClient;
@@ -13,7 +13,7 @@ export interface ApplicationConfigPluginSetup {
 export interface ApplicationConfigPluginStart {}
 
 export interface ConfigurationClientOptions {
-  request: OpenSearchDashboardsRequest;
+  headers: Headers;
 }
 
 /**
