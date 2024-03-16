@@ -24,8 +24,8 @@ describe('updateDataSourceNameInVegaSpec()', () => {
   };
 
   test('When a new data_source_name is not provided, do not update the spec', () => {
-    // @ts-expect-error
     expect(
+      // @ts-expect-error
       updateDataSourceNameInVegaSpec({ spec: 'some-spec', newDataSourceName: undefined })
     ).toBe('some-spec');
   });

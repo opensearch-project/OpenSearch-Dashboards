@@ -227,14 +227,6 @@ describe('#checkConflictsForDataSource', () => {
 
   it('will not change Vega spec when importing from datasource to different datasource', async () => {
     const vegaSavedObject = createVegaVisualizationObject('old-datasource-id_some-object-id');
-    const newReferences = [
-      ...vegaSavedObject.references,
-      {
-        id: 'some-datasource-id',
-        name: 'dataSource',
-        type: 'data-source',
-      },
-    ];
     const params = setupParams({
       objects: [vegaSavedObject],
       ignoreRegularConflicts: true,
