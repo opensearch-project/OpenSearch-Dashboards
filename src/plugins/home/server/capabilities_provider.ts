@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { PLUGIN_ID } from '../common/constants';
+
 export const capabilitiesProvider = () => ({
   catalogue: {
     discover: true,
@@ -36,5 +38,8 @@ export const capabilitiesProvider = () => ({
     console: true,
     advanced_settings: true,
     indexPatterns: true,
+  },
+  [PLUGIN_ID]: {
+    show: true,
   },
 });

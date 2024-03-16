@@ -31,7 +31,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { SolutionsSection } from './solutions_section';
-import { FeatureCatalogueCategory } from '../../../services';
+import { FeatureCatalogueCategory } from '../../../../services';
 
 const solutionEntry1 = {
   id: 'opensearchDashboards',

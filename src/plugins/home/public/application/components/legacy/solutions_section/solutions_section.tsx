@@ -34,8 +34,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiScreenReaderOnly } fro
 import { FormattedMessage } from '@osd/i18n/react';
 import { Logos } from 'opensearch-dashboards/public';
 import { SolutionPanel } from './solution_panel';
-import { HomePluginBranding } from '../../../plugin';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
+import { HomePluginBranding } from '../../../../plugin';
+import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../../';
 
 const sortByOrder = (
   { order: orderA = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry,

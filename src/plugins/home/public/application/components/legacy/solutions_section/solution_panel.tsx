@@ -31,10 +31,10 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { Logos } from 'opensearch-dashboards/public';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
-import { createAppNavigationHandler } from '../app_navigation_handler';
+import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../../';
+import { createAppNavigationHandler } from '../../app_navigation_handler';
 import { SolutionTitle } from './solution_title';
-import { HomePluginBranding } from '../../../plugin';
+import { HomePluginBranding } from '../../../../plugin';
 
 const getDescriptionText = (description: string): JSX.Element => (
   <EuiText size="s" key={`${description}`}>
