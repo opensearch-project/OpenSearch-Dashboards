@@ -102,7 +102,12 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   const DiscoverOptions = () => (
     <EuiPopover
       button={
-        <EuiButtonIcon size="s" iconType="gear" onClick={() => setOptionsOpen(!isOptionsOpen)} />
+        <EuiButtonIcon
+          data-test-subj="discoverOptionsButton"
+          size="s"
+          iconType="gear"
+          onClick={() => setOptionsOpen(!isOptionsOpen)}
+        />
       }
       closePopover={() => setOptionsOpen(false)}
       isOpen={isOptionsOpen}
@@ -126,6 +131,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
                 <EuiSwitch
                   label="Enabled"
                   checked={useLegacy}
+                  data-test-subj="discoverOptionsLegacySwitch"
                   onChange={(e) => {
                     setUseLegacy(e.target.checked);
                     setNewDiscoverSetting(false, storage);
