@@ -4,6 +4,7 @@
  */
 
 import { ClientOptions } from '@opensearch-project/opensearch';
+import { readFileSync } from 'fs';
 import { DataSourcePluginConfigType } from '../../config';
 
 /**
@@ -18,14 +19,66 @@ export function parseClientOptions(
   endpoint: string,
   registeredSchema: any[]
 ): ClientOptions {
+  const verificationMode = config.ssl.verificationMode;
+  const sslConfig: any = {
+    requestCert: true,
+  };
+  switch (verificationMode) {
+    case 'none':
+      sslConfig.rejectUnauthorized = false;
+      break;
+    case 'certificate':
+      sslConfig.rejectUnauthorized = true;
+
+      // by default, NodeJS is checking the server identify
+      sslConfig.checkServerIdentity = () => undefined;
+      break;
+    case 'full':
+      sslConfig.rejectUnauthorized = true;
+      break;
+    default:
+      throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
+  }
+
+  const { certificateAuthorities } = readCertificateAuthorities(config);
+
+  sslConfig.ca = certificateAuthorities || [];
+
   const clientOptions: ClientOptions = {
     node: endpoint,
-    ssl: {
-      requestCert: true,
-      rejectUnauthorized: true,
-    },
+    ssl: sslConfig,
     plugins: registeredSchema,
   };
 
   return clientOptions;
 }
+
+const readCertificateAuthorities = (rawConfig: any) => {
+  let certificateAuthorities: string[] | undefined;
+
+  const addCAs = (ca: string[] | undefined) => {
+    if (ca && ca.length) {
+      certificateAuthorities = [...(certificateAuthorities || []), ...ca];
+    }
+  };
+
+  const ca = rawConfig.ssl.certificateAuthorities;
+  if (ca) {
+    const parsed: string[] = [];
+    const paths = Array.isArray(ca) ? ca : [ca];
+    if (paths.length > 0) {
+      for (const path of paths) {
+        parsed.push(readFile(path));
+      }
+      addCAs(parsed);
+    }
+  }
+
+  return {
+    certificateAuthorities,
+  };
+};
+
+const readFile = (file: string) => {
+  return readFileSync(file, 'utf8');
+};
