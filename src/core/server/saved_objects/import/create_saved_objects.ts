@@ -31,11 +31,7 @@
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportError } from '../types';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from './types';
-import {
-  bulkGetDataSourceTitleFromId,
-  extractVegaSpecFromSavedObject,
-  updateDataSourceNameInVegaSpec,
-} from './utils';
+import { extractVegaSpecFromSavedObject, updateDataSourceNameInVegaSpec } from './utils';
 
 interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;
@@ -86,18 +82,7 @@ export const createSavedObjects = async <T>({
     new Map<string, SavedObject<T>>()
   );
 
-  const vegaSavedObjectIds = filteredObjects
-    .filter((object) => {
-      return !!extractVegaSpecFromSavedObject(object) && object.id.split('_').length > 1;
-    })
-    .map((object) => object.id.split('_')[0]);
-  const previousDataSourceTitlesMap =
-    !!savedObjectsClient && vegaSavedObjectIds.length > 0
-      ? await bulkGetDataSourceTitleFromId(vegaSavedObjectIds, savedObjectsClient)
-      : undefined;
-
   // filter out the 'version' field of each object, if it exists
-
   const objectsToCreate = await Promise.all(
     filteredObjects.map(({ version, ...object }) => {
       if (dataSourceId) {
@@ -118,21 +103,10 @@ export const createSavedObjects = async <T>({
           const vegaSpec = extractVegaSpecFromSavedObject(object);
 
           if (!!vegaSpec && !!dataSourceTitle) {
-            const idComponents = object.id.split('_');
-            const previousDataSourceId = idComponents.length > 1 ? idComponents[0] : undefined;
-            const previousDataSourceTitle =
-              previousDataSourceId && previousDataSourceTitlesMap
-                ? previousDataSourceTitlesMap?.get(previousDataSourceId)
-                : undefined;
-
-            let updatedVegaSpec = vegaSpec;
-            if (!!previousDataSourceId === !!previousDataSourceTitle) {
-              updatedVegaSpec = updateDataSourceNameInVegaSpec({
-                spec: vegaSpec,
-                newDataSourceName: dataSourceTitle,
-                previousDataSourceName: previousDataSourceTitle,
-              });
-            }
+            const updatedVegaSpec = updateDataSourceNameInVegaSpec({
+              spec: vegaSpec,
+              newDataSourceName: dataSourceTitle,
+            });
 
             // @ts-expect-error
             const visStateObject = JSON.parse(object.attributes?.visState);
@@ -140,6 +114,11 @@ export const createSavedObjects = async <T>({
 
             // @ts-expect-error
             object.attributes.visState = JSON.stringify(visStateObject);
+            object.references.push({
+              id: `${dataSourceId}`,
+              type: 'data-source',
+              name: 'dataSource',
+            });
           }
         }
 

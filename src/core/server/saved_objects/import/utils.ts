@@ -9,7 +9,6 @@ import { SavedObject, SavedObjectsClientContract } from '../types';
 export interface UpdateDataSourceNameInVegaSpecProps {
   spec: string;
   newDataSourceName: string;
-  previousDataSourceName?: string;
 }
 
 export const updateDataSourceNameInVegaSpec = (
@@ -57,28 +56,6 @@ export const getDataSourceTitleFromId = async (
   });
 };
 
-export const bulkGetDataSourceTitleFromId = async (
-  dataSourceIds: string[],
-  savedObjectsClient: SavedObjectsClientContract
-) => {
-  const bulkGetResults = await savedObjectsClient.bulkGet(
-    dataSourceIds.map((id) => {
-      return { id, type: 'data-source' };
-    })
-  );
-  const dataSourceTitlesMap = new Map();
-  bulkGetResults.saved_objects.forEach((object) => {
-    const attributes: any = object?.attributes || undefined;
-    if (!!attributes) {
-      dataSourceTitlesMap.set(object.id, attributes.title);
-    } else {
-      dataSourceTitlesMap.set(object.id, undefined);
-    }
-  });
-
-  return dataSourceTitlesMap;
-};
-
 export const extractVegaSpecFromSavedObject = (savedObject: SavedObject) => {
   if (isVegaVisualization(savedObject)) {
     // @ts-expect-error
@@ -86,7 +63,7 @@ export const extractVegaSpecFromSavedObject = (savedObject: SavedObject) => {
     return visStateObject.params.spec;
   }
 
-  return false;
+  return undefined;
 };
 
 const isVegaVisualization = (savedObject: SavedObject) => {
@@ -100,20 +77,13 @@ const isVegaVisualization = (savedObject: SavedObject) => {
 };
 
 const updateDataObject = (dataObject: any, props: UpdateDataSourceNameInVegaSpecProps) => {
-  const { newDataSourceName, previousDataSourceName } = props;
-  if (dataObject.hasOwnProperty('url') && dataObject.url.hasOwnProperty('index')) {
-    // Update if the object contains the old data source name
-    if (
-      dataObject.url.hasOwnProperty('data_source_name') &&
-      previousDataSourceName &&
-      dataObject.url.data_source_name === previousDataSourceName
-    ) {
-      dataObject.url.data_source_name = newDataSourceName;
-    }
-    // Update if the object fetched data from the local cluster
-    else if (!dataObject.url.hasOwnProperty('data_source_name') && !previousDataSourceName) {
-      dataObject.url.data_source_name = newDataSourceName;
-    }
+  const { newDataSourceName } = props;
+  if (
+    dataObject.hasOwnProperty('url') &&
+    dataObject.url.hasOwnProperty('index') &&
+    !dataObject.url.hasOwnProperty('data_source_name')
+  ) {
+    dataObject.url.data_source_name = newDataSourceName;
   }
 
   return dataObject;
@@ -127,8 +97,8 @@ const parseJSONSpec = (spec: string) => {
       return jsonSpec;
     }
   } catch (e) {
-    return false;
+    return undefined;
   }
 
-  return false;
+  return undefined;
 };

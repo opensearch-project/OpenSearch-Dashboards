@@ -130,7 +130,7 @@ const getVegaVisualizationObj = (id: string) => ({
   updated_at: 'some-date',
 });
 
-const getVegaMDSVisualizationObj = (id: string, dataSourceId?: string) => ({
+const getVegaMDSVisualizationObj = (id: string, dataSourceId: string) => ({
   type: 'visualization',
   id: dataSourceId ? `${dataSourceId}_${id}` : id,
   attributes: {
@@ -138,7 +138,13 @@ const getVegaMDSVisualizationObj = (id: string, dataSourceId?: string) => ({
     visState:
       '{"title":"some-other-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: old-datasource-title\\n    }\\n  }\\n}"}}',
   },
-  references: [],
+  references: [
+    {
+      id: dataSourceId,
+      name: 'dataSource',
+      type: 'data-source',
+    },
+  ],
 });
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
@@ -521,32 +527,10 @@ describe('#createSavedObjects', () => {
   const testVegaVisualizationsWithDataSources = async (params: {
     objects: SavedObject[];
     expectedFilteredObjects: Array<Record<string, unknown>>;
-    previousDataSourceId: string;
     dataSourceId?: string;
     dataSourceTitle?: string;
   }) => {
     const savedObjectsCustomClient = savedObjectsClientMock.create();
-    savedObjectsCustomClient.bulkGet = jest
-      .fn()
-      .mockImplementation((dataSourceIds: Array<{ id: string; type: string }>) => {
-        return Promise.resolve({
-          saved_objects: dataSourceIds.map((request) => {
-            if (request.type === 'data-source' && request.id === params.previousDataSourceId) {
-              return {
-                id: params.previousDataSourceId,
-                attributes: {
-                  title: 'old-datasource-title',
-                },
-              };
-            }
-
-            return {
-              id: request.id,
-              attributes: undefined,
-            };
-          }),
-        });
-      });
 
     const options = setupParams({
       ...params,
@@ -621,7 +605,7 @@ describe('#createSavedObjects', () => {
   });
 
   describe('with a data source for Vega saved objects', () => {
-    test('can attach a data source name to the Vega spec', async () => {
+    test('can attach a data source name to the Vega spec if there is a local query', async () => {
       const objects = [getVegaVisualizationObj('some-vega-id')];
       const expectedObject = getVegaVisualizationObj('some-vega-id');
       const expectedFilteredObjects = [
@@ -633,65 +617,44 @@ describe('#createSavedObjects', () => {
               '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: dataSourceName\\n    }\\n  }\\n}"}}',
           },
           id: 'some-vega-id',
+          references: [
+            {
+              id: 'some-datasource-id',
+              type: 'data-source',
+              name: 'dataSource',
+            },
+          ],
         },
       ];
       await testVegaVisualizationsWithDataSources({
         objects,
         expectedFilteredObjects,
-        previousDataSourceId: 'non-existent-id',
         dataSourceId: 'some-datasource-id',
         dataSourceTitle: 'dataSourceName',
       });
     });
 
-    test('will not update Vega spec', async () => {
-      const objects = [getVegaVisualizationObj('some-vega-id')];
-      const expectedFilteredObjects = [getVegaVisualizationObj('some-vega-id')];
-      await testVegaVisualizationsWithDataSources({
-        objects,
-        expectedFilteredObjects,
-        previousDataSourceId: 'non-existent-id',
-      });
-    });
-
-    test('will update the data source name in the Vega spec', async () => {
+    test('will not update the data source name in the Vega spec if no local cluster queries', async () => {
       const objects = [getVegaMDSVisualizationObj('some-vega-id', 'old-datasource-id')];
       const expectedObject = getVegaMDSVisualizationObj('some-vega-id', 'old-datasource-id');
+      expectedObject.references.push({
+        id: 'some-datasource-id',
+        name: 'dataSource',
+        type: 'data-source',
+      });
       const expectedFilteredObjects = [
         {
           ...expectedObject,
           attributes: {
             title: 'some-other-title_dataSourceName',
             visState:
-              '{"title":"some-other-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: dataSourceName\\n    }\\n  }\\n}"}}',
-          },
-          id: 'old-datasource-id_some-vega-id',
-        },
-      ];
-      await testVegaVisualizationsWithDataSources({
-        objects,
-        expectedFilteredObjects,
-        previousDataSourceId: 'old-datasource-id',
-        dataSourceId: 'some-datasource-id',
-        dataSourceTitle: 'dataSourceName',
-      });
-    });
-
-    test('will not update the Vega spec if the previous data source name cannot be found', async () => {
-      const objects = [getVegaMDSVisualizationObj('some-vega-id', 'non-existent-id')];
-      const expectedObject = getVegaMDSVisualizationObj('some-vega-id', 'non-existent-id');
-      const expectedFilteredObjects = [
-        {
-          ...expectedObject,
-          attributes: {
-            title: 'some-other-title_dataSourceName',
+              '{"title":"some-other-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: old-datasource-title\\n    }\\n  }\\n}"}}',
           },
         },
       ];
       await testVegaVisualizationsWithDataSources({
         objects,
         expectedFilteredObjects,
-        previousDataSourceId: 'old-datasource-id',
         dataSourceId: 'some-datasource-id',
         dataSourceTitle: 'dataSourceName',
       });

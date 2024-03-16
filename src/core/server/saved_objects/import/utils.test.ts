@@ -5,7 +5,6 @@
 
 import { readFileSync } from 'fs';
 import {
-  bulkGetDataSourceTitleFromId,
   extractVegaSpecFromSavedObject,
   getDataSourceTitleFromId,
   updateDataSourceNameInVegaSpec,
@@ -116,45 +115,6 @@ describe('updateDataSourceNameInVegaSpec()', () => {
     expect(isEqual(modifiedJSON, multipleDataSourcesJSONMds)).toBe(true);
   });
 
-  test('(JSON) When a previous datasource name is provided, the spec should update the datasource name', () => {
-    const multipleDataSourcesJSONMds = loadJSONFromFile(
-      './test_utils/vega_spec_with_multiple_urls_mds.json'
-    );
-    const jsonString = JSON.stringify(multipleDataSourcesJSONMds);
-    const modifiedString = JSON.parse(
-      updateDataSourceNameInVegaSpec({
-        spec: jsonString,
-        newDataSourceName: 'newDataSource',
-        previousDataSourceName: 'some datasource name',
-      })
-    );
-
-    expect(modifiedString.data.length).toBe(multipleDataSourcesJSONMds.data.length);
-    for (let i = 0; i < modifiedString.data.length; i++) {
-      const originalUrlBody = multipleDataSourcesJSONMds.data[i];
-      const urlBody = modifiedString.data[i];
-
-      if (urlBody.name !== 'exampleIndexSource') {
-        expect(isEqual(originalUrlBody, urlBody)).toBe(true);
-      } else {
-        expect(urlBody.url.hasOwnProperty('data_source_name')).toBe(true);
-        expect(urlBody.url.data_source_name).toBe('newDataSource');
-      }
-    }
-
-    // These fields should be unchanged
-    Object.keys(multipleDataSourcesJSONMds).forEach((field) => {
-      if (field !== 'data') {
-        expect(
-          isEqual(
-            modifiedString[field as keyof typeof multipleDataSourcesJSONMds],
-            multipleDataSourcesJSONMds[field as keyof typeof multipleDataSourcesJSONMds]
-          )
-        ).toBe(true);
-      }
-    });
-  });
-
   /*
   HJSON Test cases
   */
@@ -243,45 +203,6 @@ describe('updateDataSourceNameInVegaSpec()', () => {
 
     expect(isEqual(originalHJSONParse, hjsonParse)).toBe(true);
   });
-
-  test('(HJSON) When a previous datasource name is provided, the spec should update the datasource name', () => {
-    const hjsonString = loadHJSONStringFromFile(
-      '/test_utils/vega_spec_with_multiple_urls_mds.hjson'
-    );
-    const originalHJSONParse = parse(hjsonString, { keepWsc: true });
-    const hjsonParse = parse(
-      updateDataSourceNameInVegaSpec({
-        spec: hjsonString,
-        newDataSourceName: 'newDataSource',
-        previousDataSourceName: 'some datasource name',
-      })
-    );
-
-    expect(hjsonParse.data.length).toBe(originalHJSONParse.data.length);
-    for (let i = 0; i < hjsonParse.data.length; i++) {
-      const originalUrlBody = originalHJSONParse.data[i];
-      const urlBody = hjsonParse.data[i];
-
-      if (urlBody.name !== 'exampleIndexSource') {
-        expect(isEqual(originalUrlBody, urlBody)).toBe(true);
-      } else {
-        expect(urlBody.url.hasOwnProperty('data_source_name')).toBe(true);
-        expect(urlBody.url.data_source_name).toBe('newDataSource');
-      }
-    }
-
-    // These fields should be unchanged
-    Object.keys(originalHJSONParse).forEach((field) => {
-      if (field !== 'data') {
-        expect(
-          isEqual(
-            originalHJSONParse[field as keyof typeof originalHJSONParse],
-            hjsonParse[field as keyof typeof originalHJSONParse]
-          )
-        ).toBe(true);
-      }
-    });
-  });
 });
 
 describe('extractVegaSpecFromSavedObject()', () => {
@@ -296,14 +217,14 @@ describe('extractVegaSpecFromSavedObject()', () => {
     expect(extractVegaSpecFromSavedObject(vegaSavedObject)).toBe(spec);
   });
 
-  test('For another saved object type, return false', () => {
+  test('For another saved object type, return undefined', () => {
     const nonVegaSavedObject = {
       attributes: {
         visState: `{"type": "area", "params": {"spec": "some-spec"}}`,
       },
     } as SavedObject;
 
-    expect(extractVegaSpecFromSavedObject(nonVegaSavedObject)).toBe(false);
+    expect(extractVegaSpecFromSavedObject(nonVegaSavedObject)).toBe(undefined);
   });
 });
 
@@ -329,52 +250,5 @@ describe('getDataSourceTitleFromId()', () => {
 
   test('When a nonexistent id is passed, return nothing', async () => {
     expect(await getDataSourceTitleFromId('nonexistent-id', savedObjectsClient)).toBe(undefined);
-  });
-});
-
-describe('bulkGetDataSourceTitleFromId()', () => {
-  const savedObjectsClient = {} as SavedObjectsClientContract;
-  savedObjectsClient.bulkGet = jest
-    .fn()
-    .mockImplementation((dataSourceIds: Array<{ id: string; type: string }>) => {
-      return Promise.resolve({
-        saved_objects: dataSourceIds.map((request) => {
-          if (request.type === 'data-source' && request.id === 'valid-id') {
-            return {
-              id: 'valid-id',
-              attributes: {
-                title: 'some-datasource-title',
-              },
-            };
-          } else if (request.type === 'data-source' && request.id === 'other-valid-id') {
-            return {
-              id: 'other-valid-id',
-              attributes: {
-                title: 'some-other-datasource-title',
-              },
-            };
-          }
-
-          return {
-            id: request.id,
-            attributes: undefined,
-          };
-        }),
-      });
-    });
-
-  test('bulkGetDataSourceTitleFromId should return correct map of ids to titles', async () => {
-    const expectedDataSourceNameMap = new Map([
-      ['valid-id', 'some-datasource-title'],
-      ['other-valid-id', 'some-other-datasource-title'],
-      ['invalid-id', undefined],
-    ]);
-
-    expect(
-      await bulkGetDataSourceTitleFromId(
-        ['invalid-id', 'valid-id', 'other-valid-id'],
-        savedObjectsClient
-      )
-    ).toMatchObject(expectedDataSourceNameMap);
   });
 });

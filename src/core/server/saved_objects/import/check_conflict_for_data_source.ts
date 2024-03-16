@@ -10,7 +10,6 @@ import {
   SavedObjectsImportRetry,
 } from '../types';
 import {
-  bulkGetDataSourceTitleFromId,
   extractVegaSpecFromSavedObject,
   getDataSourceTitleFromId,
   updateDataSourceNameInVegaSpec,
@@ -62,16 +61,6 @@ export async function checkConflictsForDataSource({
       ? await getDataSourceTitleFromId(dataSourceId, savedObjectsClient)
       : undefined;
 
-  const vegaSavedObjectIds = objects
-    .filter((object) => {
-      return !!extractVegaSpecFromSavedObject(object) && object.id.split('_').length > 1;
-    })
-    .map((object) => object.id.split('_')[0]);
-  const previousDataSourceTitlesMap =
-    !!savedObjectsClient && vegaSavedObjectIds.length > 0
-      ? await bulkGetDataSourceTitleFromId(vegaSavedObjectIds, savedObjectsClient)
-      : undefined;
-
   objects.forEach((object) => {
     const {
       type,
@@ -109,18 +98,10 @@ export async function checkConflictsForDataSource({
           const vegaSpec = extractVegaSpecFromSavedObject(object);
 
           if (!!vegaSpec) {
-            const previousDataSourceTitle =
-              previoudDataSourceId && savedObjectsClient && previousDataSourceTitlesMap
-                ? previousDataSourceTitlesMap.get(previoudDataSourceId)
-                : undefined;
-            let updatedVegaSpec = vegaSpec;
-            if (!!previousDataSourceTitle === !!previoudDataSourceId) {
-              updatedVegaSpec = updateDataSourceNameInVegaSpec({
-                spec: vegaSpec,
-                newDataSourceName: dataSourceTitle,
-                previousDataSourceName: previousDataSourceTitle,
-              });
-            }
+            const updatedVegaSpec = updateDataSourceNameInVegaSpec({
+              spec: vegaSpec,
+              newDataSourceName: dataSourceTitle,
+            });
 
             // @ts-expect-error
             const visStateObject = JSON.parse(object.attributes?.visState);
@@ -128,6 +109,13 @@ export async function checkConflictsForDataSource({
 
             // @ts-expect-error
             object.attributes.visState = JSON.stringify(visStateObject);
+            if (!!dataSourceId) {
+              object.references.push({
+                id: dataSourceId,
+                name: 'dataSource',
+                type: 'data-source',
+              });
+            }
           }
         }
 

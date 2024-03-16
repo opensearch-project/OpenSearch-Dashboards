@@ -33,40 +33,15 @@ const createVegaVisualizationObject = (id: string): SavedObjectType => {
     type: 'visualization',
     id,
     attributes: { title: 'some-title', visState },
-    references: (Symbol() as unknown) as SavedObjectReference[],
+    references:
+      id.split('_').length > 1
+        ? [{ id: id.split('_')[0], type: 'data-source', name: 'dataSource' }]
+        : [],
   } as SavedObjectType;
 };
 
 const getSavedObjectClient = (): SavedObjectsClientContract => {
   const savedObject = {} as SavedObjectsClientContract;
-  savedObject.bulkGet = jest
-    .fn()
-    .mockImplementation((dataSourceIds: Array<{ id: string; type: string }>) => {
-      return Promise.resolve({
-        saved_objects: dataSourceIds.map((request) => {
-          if (request.type === 'data-source' && request.id === 'old-datasource-id') {
-            return {
-              id: 'old-datasource-id',
-              attributes: {
-                title: 'old-datasource-title',
-              },
-            };
-          } else if (request.type === 'data-source' && request.id === 'some-datasource-id') {
-            return {
-              id: 'some-datasource-id',
-              attributes: {
-                title: 'some-datasource-title',
-              },
-            };
-          }
-
-          return {
-            id: request.id,
-            attributes: undefined,
-          };
-        }),
-      });
-    });
   savedObject.get = jest.fn().mockImplementation((type, id) => {
     if (type === 'data-source' && id === 'old-datasource-id') {
       return Promise.resolve({
@@ -230,6 +205,13 @@ describe('#checkConflictsForDataSource', () => {
                 '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: some-datasource-title\\n    }\\n  }\\n}"}}',
             },
             id: 'some-datasource-id_some-object-id',
+            references: [
+              {
+                id: 'some-datasource-id',
+                type: 'data-source',
+                name: 'dataSource',
+              },
+            ],
           },
         ],
         errors: [],
@@ -243,8 +225,16 @@ describe('#checkConflictsForDataSource', () => {
     );
   });
 
-  it('will update datasource name to Vega spec when importing from datasource to different datasource', async () => {
+  it('will not change Vega spec when importing from datasource to different datasource', async () => {
     const vegaSavedObject = createVegaVisualizationObject('old-datasource-id_some-object-id');
+    const newReferences = [
+      ...vegaSavedObject.references,
+      {
+        id: 'some-datasource-id',
+        name: 'dataSource',
+        type: 'data-source',
+      },
+    ];
     const params = setupParams({
       objects: [vegaSavedObject],
       ignoreRegularConflicts: true,
@@ -261,39 +251,8 @@ describe('#checkConflictsForDataSource', () => {
             attributes: {
               title: 'some-title',
               visState:
-                '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: some-datasource-title\\n    }\\n  }\\n}"}}',
+                '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: old-datasource-title\\n    }\\n  }\\n}"}}',
             },
-            id: 'some-datasource-id_some-object-id',
-          },
-        ],
-        errors: [],
-        importIdMap: new Map([
-          [
-            `visualization:some-object-id`,
-            { id: 'some-datasource-id_some-object-id', omitOriginId: true },
-          ],
-        ]),
-      })
-    );
-  });
-
-  it('will not update Vega spec if the datasource name cannot be found from the previous datasource id', async () => {
-    const vegaSavedObject = createVegaVisualizationObject(
-      'non-existent-datasource-id_some-object-id'
-    );
-    const params = setupParams({
-      objects: [vegaSavedObject],
-      ignoreRegularConflicts: true,
-      dataSourceId: 'some-datasource-id',
-      savedObjectsClient: getSavedObjectClient(),
-    });
-    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
-
-    expect(checkConflictsForDataSourceResult).toEqual(
-      expect.objectContaining({
-        filteredObjects: [
-          {
-            ...vegaSavedObject,
             id: 'some-datasource-id_some-object-id',
           },
         ],
