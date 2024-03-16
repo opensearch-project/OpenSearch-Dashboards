@@ -123,7 +123,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
             content: (
               <EuiPanel>
                 <EuiSwitch
-                  label="Enable legacy discover"
+                  label="Enable legacy Discover"
                   checked={useLegacy}
                   data-test-subj="discoverOptionsLegacySwitch"
                   onChange={(e) => {
