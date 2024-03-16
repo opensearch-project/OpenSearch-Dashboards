@@ -234,61 +234,7 @@ export const getTopNavLinks = (
     },
   };
 
-  const newDiscoverButtonLabel = i18n.translate('discover.localMenu.discoverButton.label.new', {
-    defaultMessage: 'Try new Discover',
-  });
-  const oldDiscoverButtonLabel = i18n.translate('discover.localMenu.discoverButton.label.old', {
-    defaultMessage: 'Use legacy Discover',
-  });
-  const isNewDiscover = getNewDiscoverSetting(storage);
-  const newTable: TopNavMenuData = {
-    id: 'table-datagrid',
-    label: isNewDiscover ? oldDiscoverButtonLabel : newDiscoverButtonLabel,
-    description: i18n.translate('discover.localMenu.newTableDescription', {
-      defaultMessage: 'New Discover toggle Experience',
-    }),
-    testId: 'datagridTableButton',
-    run: async () => {
-      // Read the current state from localStorage
-      const newDiscoverEnabled = getNewDiscoverSetting(storage);
-      if (newDiscoverEnabled) {
-        const confirmed = await services.overlays.openConfirm(
-          toMountPoint(
-            <EuiText>
-              <p>
-                Help drive future improvements by{' '}
-                <a href="https://survey.opensearch.org" target="_blank" rel="noopener noreferrer">
-                  providing feedback
-                </a>{' '}
-                about your experience.
-              </p>
-            </EuiText>
-          ),
-          {
-            title: i18n.translate('discover.localMenu.newTableConfirmModalTitle', {
-              defaultMessage: 'Share your thoughts on the latest Discover features',
-            }),
-            cancelButtonText: 'Cancel',
-            confirmButtonText: 'Turn off new features',
-            defaultFocusedButton: 'confirm',
-          }
-        );
-
-        if (confirmed) {
-          setNewDiscoverSetting(false, storage);
-          window.location.reload();
-        }
-      } else {
-        // Save the new setting to localStorage
-        setNewDiscoverSetting(true, storage);
-        window.location.reload();
-      }
-    },
-    iconType: isNewDiscover ? 'editorUndo' : 'cheer',
-  };
-
   return [
-    newTable,
     newSearch,
     ...(capabilities.discover?.save ? [saveSearch] : []),
     openSearch,
