@@ -120,21 +120,16 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
           {
             id: 0,
             title: 'Options',
-            items: [{ name: 'Legacy Discover', panel: 1 }],
-          },
-          {
-            id: 1,
-            title: 'Legacy Discover',
-            initialFocusedItemIndex: 1,
             content: (
               <EuiPanel>
                 <EuiSwitch
-                  label="Enabled"
+                  label="Enable legacy discover"
                   checked={useLegacy}
                   data-test-subj="discoverOptionsLegacySwitch"
                   onChange={(e) => {
-                    setUseLegacy(e.target.checked);
-                    setNewDiscoverSetting(false, storage);
+                    const checked = e.target.checked;
+                    setUseLegacy(checked);
+                    setNewDiscoverSetting(!checked, storage);
                     window.location.reload();
                   }}
                 />
