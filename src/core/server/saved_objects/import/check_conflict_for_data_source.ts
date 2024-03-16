@@ -97,7 +97,7 @@ export async function checkConflictsForDataSource({
         if (object.type === 'visualization') {
           const vegaSpec = extractVegaSpecFromSavedObject(object);
 
-          if (!!vegaSpec) {
+          if (!!vegaSpec && !!dataSourceTitle) {
             const updatedVegaSpec = updateDataSourceNameInVegaSpec({
               spec: vegaSpec,
               newDataSourceName: dataSourceTitle,
