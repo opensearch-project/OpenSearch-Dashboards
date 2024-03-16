@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import deepEqual from 'fast-deep-equal';
 import { AuthenticationMethodRegistery } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import { Header } from '../header';
@@ -100,11 +101,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       auth: {
         type: initialSelectedAuthMethod?.name,
         credentials: {
-          username: '',
-          password: '',
-          region: '',
-          accessKey: '',
-          secretKey: '',
+          ...initialSelectedAuthMethod?.credentialFormField,
         },
       },
       showUpdatePasswordModal: false,
@@ -127,10 +124,11 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     if (this.props.existingDataSource) {
       const { title, description, endpoint, auth } = this.props.existingDataSource;
 
-      const authTypeCheckResults = {
-        isUserNamePassword: auth.type === AuthType.UsernamePasswordType,
-        isSigV4: auth.type === AuthType.SigV4,
-      };
+      const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
+        (auth.credentials ?? {}) as { [key: string]: string },
+        auth.type,
+        this.authenticationMethodRegistery
+      );
 
       this.setState({
         title,
@@ -139,14 +137,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         auth: {
           type: auth.type,
           credentials: {
-            username: authTypeCheckResults.isUserNamePassword ? auth.credentials?.username : '',
-            password: authTypeCheckResults.isUserNamePassword ? this.maskedPassword : '',
-            service: authTypeCheckResults.isSigV4
-              ? auth.credentials?.service || SigV4ServiceName.OpenSearch
-              : '',
-            region: authTypeCheckResults.isSigV4 ? auth.credentials!.region : '',
-            accessKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
-            secretKey: authTypeCheckResults.isSigV4 ? this.maskedPassword : '',
+            ...registeredAuthCredentials,
           },
         },
       });
@@ -185,16 +176,24 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   onChangeAuthType = (authType: AuthType) => {
+    /* If the selected authentication type matches, utilize the existing data source's credentials directly.*/
+    const credentials =
+      this.props.existingDataSource && authType === this.props.existingDataSource.auth.type
+        ? this.props.existingDataSource.auth.credentials
+        : this.state.auth.credentials;
+    const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
+      (credentials ?? {}) as { [key: string]: string },
+      authType,
+      this.authenticationMethodRegistery
+    );
+
     this.setState(
       {
         auth: {
           ...this.state.auth,
           type: authType,
           credentials: {
-            ...this.state.auth.credentials,
-            service:
-              (this.state.auth.credentials?.service as SigV4ServiceName) ||
-              SigV4ServiceName.OpenSearch,
+            ...registeredAuthCredentials,
           },
         },
       },
@@ -427,6 +426,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         break;
 
       default:
+        const currentCredentials = (this.state.auth.credentials ?? {}) as {
+          [key: string]: string;
+        };
+        credentials = extractRegisteredAuthTypeCredentials(
+          currentCredentials,
+          this.state.auth.type,
+          this.authenticationMethodRegistery
+        );
         break;
     }
 
@@ -1029,6 +1036,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     const isServiceNameChanged =
       isAuthTypeSigV4Unchanged &&
       formValues.auth.credentials?.service !== auth.credentials?.service;
+    const isRegisteredAuthCredentialChanged = this.isRegisteredAuthCredentialUpdated();
 
     if (
       formValues.title !== title ||
@@ -1036,12 +1044,40 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       formValues.auth.type !== auth.type ||
       isUsernameChanged ||
       isRegionChanged ||
-      isServiceNameChanged
+      isServiceNameChanged ||
+      isRegisteredAuthCredentialChanged
     ) {
       this.setState({ showUpdateOptions: true });
     } else {
       this.setState({ showUpdateOptions: false });
     }
+  };
+
+  isRegisteredAuthCredentialUpdated = () => {
+    const { auth } = this.props.existingDataSource;
+    const currentAuth = this.state.auth;
+
+    if (
+      currentAuth.type === AuthType.NoAuth ||
+      currentAuth.type === AuthType.UsernamePasswordType ||
+      currentAuth.type === AuthType.SigV4
+    ) {
+      return false;
+    }
+
+    const existingAuthCredentials = extractRegisteredAuthTypeCredentials(
+      (auth?.credentials ?? {}) as { [key: string]: string },
+      currentAuth.type,
+      this.authenticationMethodRegistery
+    );
+
+    const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
+      (currentAuth?.credentials ?? {}) as { [key: string]: string },
+      currentAuth.type,
+      this.authenticationMethodRegistery
+    );
+
+    return !deepEqual(existingAuthCredentials, registeredAuthCredentials);
   };
 
   renderBottomBar = () => {

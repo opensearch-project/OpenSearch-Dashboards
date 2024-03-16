@@ -45,7 +45,6 @@ export const configureClient = (
   }: { logger: Logger; scoped?: boolean; withLongNumeralsSupport?: boolean }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
-  // @ts-expect-error - ToDo: Remove ignoring after https://github.com/opensearch-project/opensearch-js/pull/598 is included in a release
   if (withLongNumeralsSupport) clientOptions.enableLongNumeralSupport = true;
 
   const client = new Client(clientOptions);

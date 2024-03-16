@@ -74,7 +74,7 @@ export const noAuthCredentialField = {};
 export const noAuthCredentialAuthMethod = {
   name: AuthType.NoAuth,
   credentialSourceOption: noAuthCredentialOption,
-  crendentialFormField: noAuthCredentialField,
+  credentialFormField: noAuthCredentialField,
 };
 
 export const usernamePasswordCredentialOption = {
@@ -92,7 +92,7 @@ export const usernamePasswordCredentialField = {
 export const usernamePasswordAuthMethod = {
   name: AuthType.UsernamePasswordType,
   credentialSourceOption: usernamePasswordCredentialOption,
-  crendentialFormField: usernamePasswordCredentialField,
+  credentialFormField: usernamePasswordCredentialField,
 };
 
 export const sigV4CredentialOption = {
@@ -127,7 +127,7 @@ export const sigV4CredentialField = {
 export const sigV4AuthMethod = {
   name: AuthType.SigV4,
   credentialSourceOption: sigV4CredentialOption,
-  crendentialFormField: sigV4CredentialField,
+  credentialFormField: sigV4CredentialField,
 };
 
 export const credentialSourceOptions = [
