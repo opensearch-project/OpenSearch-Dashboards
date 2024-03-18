@@ -20,6 +20,7 @@ describe('Workspace plugin', () => {
     const setupMock = getSetupMock();
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(setupMock);
+    expect(setupMock.application.register).toBeCalledTimes(1);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
   });
 
@@ -45,6 +46,7 @@ describe('Workspace plugin', () => {
 
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(setupMock);
+    expect(setupMock.application.register).toBeCalledTimes(1);
     expect(setupMock.workspaces.currentWorkspaceId$.getValue()).toEqual('workspaceId');
     windowSpy.mockRestore();
   });

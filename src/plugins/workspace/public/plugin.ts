@@ -4,9 +4,20 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { Plugin, CoreStart, CoreSetup } from '../../../core/public';
+import { i18n } from '@osd/i18n';
+import {
+  AppMountParameters,
+  AppNavLinkStatus,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../core/public';
+import { WORKSPACE_CREATE_APP_ID } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { WorkspaceClient } from './workspace_client';
+import { Services } from './types';
+
+type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
 export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private coreStart?: CoreStart;
@@ -35,6 +46,29 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     if (workspaceId) {
       core.workspaces.currentWorkspaceId$.next(workspaceId);
     }
+
+    const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
+      const [coreStart] = await core.getStartServices();
+      const services = {
+        ...coreStart,
+        workspaceClient,
+      };
+
+      return renderApp(params, services);
+    };
+
+    // create
+    core.application.register({
+      id: WORKSPACE_CREATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceCreate', {
+        defaultMessage: 'Create Workspace',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderCreatorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderCreatorApp);
+      },
+    });
 
     return {};
   }
