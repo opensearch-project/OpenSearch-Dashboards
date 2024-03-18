@@ -135,6 +135,22 @@ describe('canViewInApp', () => {
     expect(canViewInApp(uiCapabilities, 'dashboards')).toEqual(false);
   });
 
+  it('should handle homepages', () => {
+    let uiCapabilities = createCapabilities({
+      home: {
+        show: true,
+      },
+    });
+    expect(canViewInApp(uiCapabilities, 'homepage')).toEqual(true);
+
+    uiCapabilities = createCapabilities({
+      home: {
+        show: false,
+      },
+    });
+    expect(canViewInApp(uiCapabilities, 'homepage')).toEqual(false);
+  });
+
   it('should have a default case', () => {
     let uiCapabilities = createCapabilities({
       foo: {

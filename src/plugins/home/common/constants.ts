@@ -30,3 +30,4 @@
 
 export const PLUGIN_ID = 'home';
 export const HOME_APP_BASE_PATH = `/app/${PLUGIN_ID}`;
+export const USE_NEW_HOME_PAGE = 'home:useNewHomePage';
