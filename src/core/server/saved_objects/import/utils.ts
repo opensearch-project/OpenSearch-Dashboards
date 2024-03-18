@@ -9,12 +9,14 @@ import { SavedObject, SavedObjectsClientContract } from '../types';
 export interface UpdateDataSourceNameInVegaSpecProps {
   spec: string;
   newDataSourceName: string;
+  spacing?: number;
 }
 
 export const updateDataSourceNameInVegaSpec = (
   props: UpdateDataSourceNameInVegaSpecProps
 ): string => {
-  const { spec } = props;
+  const { spec, spacing } = props;
+  const stringifiedSpacing = !!spacing ? spacing : 2;
 
   let parsedSpec = parseJSONSpec(spec);
   const isJSONString = !!parsedSpec;
@@ -39,6 +41,7 @@ export const updateDataSourceNameInVegaSpec = (
     : stringify(parsedSpec, {
         bracesSameLine: true,
         keepWsc: true,
+        space: stringifiedSpacing,
       });
 };
 
