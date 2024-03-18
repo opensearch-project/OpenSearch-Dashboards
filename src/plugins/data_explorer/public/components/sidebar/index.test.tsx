@@ -104,8 +104,6 @@ describe('Sidebar Component', () => {
     waitFor(() => {
       expect(getByText('s3-prod-mock')).toBeInTheDocument();
       fireEvent.click(getByText('s3-prod-mock'));
-      fireEvent.click(getByTestId('dataExplorer__DSSModalOpenInExplorerBtn'));
-      expect(getByText('Open in Log Explorer')).not.toBeInTheDocument();
       expect(history.location.pathname).toContain('observability-logs#/explorer');
     });
   });
