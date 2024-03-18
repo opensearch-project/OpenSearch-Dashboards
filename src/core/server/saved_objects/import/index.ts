@@ -43,3 +43,4 @@ export {
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportRetry,
 } from './types';
+export { updateDataSourceNameInVegaSpec, extractVegaSpecFromSavedObject } from './utils';
