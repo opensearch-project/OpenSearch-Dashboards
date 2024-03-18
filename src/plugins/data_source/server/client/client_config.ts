@@ -5,7 +5,16 @@
 
 import { ClientOptions } from '@opensearch-project/opensearch';
 import { readFileSync } from 'fs';
+import { checkServerIdentity } from 'tls';
 import { DataSourcePluginConfigType } from '../../config';
+
+/** @internal */
+type DataSourceSSLConfigOptions = Partial<{
+  requestCert: boolean;
+  rejectUnauthorized: boolean;
+  checkServerIdentity: typeof checkServerIdentity;
+  ca: string[];
+}>;
 
 /**
  * Parse the client options from given data source config and endpoint
@@ -19,30 +28,34 @@ export function parseClientOptions(
   endpoint: string,
   registeredSchema: any[]
 ): ClientOptions {
-  const verificationMode = config.ssl.verificationMode;
-  const sslConfig: any = {
+  const sslConfig: DataSourceSSLConfigOptions = {
     requestCert: true,
+    rejectUnauthorized: true,
   };
-  switch (verificationMode) {
-    case 'none':
-      sslConfig.rejectUnauthorized = false;
-      break;
-    case 'certificate':
-      sslConfig.rejectUnauthorized = true;
 
-      // by default, NodeJS is checking the server identify
-      sslConfig.checkServerIdentity = () => undefined;
-      break;
-    case 'full':
-      sslConfig.rejectUnauthorized = true;
-      break;
-    default:
-      throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
+  if (config.ssl) {
+    const verificationMode = config.ssl.verificationMode;
+    switch (verificationMode) {
+      case 'none':
+        sslConfig.rejectUnauthorized = false;
+        break;
+      case 'certificate':
+        sslConfig.rejectUnauthorized = true;
+
+        // by default, NodeJS is checking the server identify
+        sslConfig.checkServerIdentity = () => undefined;
+        break;
+      case 'full':
+        sslConfig.rejectUnauthorized = true;
+        break;
+      default:
+        throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
+    }
+
+    const { certificateAuthorities } = readCertificateAuthorities(config);
+
+    sslConfig.ca = certificateAuthorities || [];
   }
-
-  const { certificateAuthorities } = readCertificateAuthorities(config);
-
-  sslConfig.ca = certificateAuthorities || [];
 
   const clientOptions: ClientOptions = {
     node: endpoint,
