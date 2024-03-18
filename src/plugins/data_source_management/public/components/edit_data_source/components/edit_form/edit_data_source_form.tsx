@@ -406,11 +406,11 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     if (this.props.onSetDefaultDataSource) {
       await this.props.onSetDefaultDataSource();
     }
-  }
+  };
 
-  isDefault =  () => {
+  isDefault = () => {
     return this.props.isDefault;
-  }
+  };
 
   onClickTestConnection = async () => {
     this.setState({ isLoading: true });

@@ -50,7 +50,7 @@ export const Header = ({
   const setDefaultAriaLabel = i18n.translate(
     'dataSourcesManagement.editDataSource.setDefaultDataSource',
     {
-      defaultMessage: 'Set as default Data Source.',
+      defaultMessage: 'Set as a default Data Source.',
     }
   );
 
@@ -174,7 +174,7 @@ export const Header = ({
       {/* Right side buttons */}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-          {/* Test defaultn button */}
+          {/* Test default button */}
           <EuiFlexItem grow={false}>{renderDefaultIcon()}</EuiFlexItem>
           {/* Test connection button */}
           <EuiFlexItem grow={false}>{renderTestConnectionButton()}</EuiFlexItem>
