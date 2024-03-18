@@ -408,10 +408,6 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     }
   };
 
-  isDefault = () => {
-    return this.props.isDefault;
-  };
-
   onClickTestConnection = async () => {
     this.setState({ isLoading: true });
     const isNewCredential = !!(this.state.auth.type !== this.props.existingDataSource.auth.type);
@@ -647,7 +643,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         dataSourceName={this.props.existingDataSource.title}
         onClickTestConnection={this.onClickTestConnection}
         onClickSetDefault={this.setDefaultDataSource}
-        isDefault={this.isDefault()}
+        isDefault={this.props.isDefault}
       />
     );
   };

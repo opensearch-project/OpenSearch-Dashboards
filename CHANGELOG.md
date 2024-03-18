@@ -54,6 +54,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Chrome] Introduce registerCollapsibleNavHeader to allow plugins to customize the rendering of nav menu header ([#5244](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5244))
 - [Dynamic Configurations] Pass request headers when making application config calls ([#6164](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6164))
 - [Discover] Options button to configure legacy mode and remove the top navigation option ([#6170](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6170))
+- [Multiple Datasource] Add default functionality for customer to choose default datasource ([#6058](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/6058))
 
 
 ### 🐛 Bug Fixes
@@ -141,7 +142,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Discover] Enhanced the data source selector with added sorting functionality ([#5719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5719))
 - [Multiple Datasource] Add datasource picker component and use it in devtools and tutorial page when multiple datasource is enabled ([#5756](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5756))
 - [Multiple Datasource] Add datasource picker to import saved object flyout when multiple data source is enabled ([#5781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5781))
-- [Multiple Datasource] Add default functionality for customer to choose default datasource ([#6058](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/6058))
 
 ### 🐛 Bug Fixes
 
