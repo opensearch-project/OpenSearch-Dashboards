@@ -70,6 +70,8 @@ First, this plugin will need to implement a class `MyConfigurationClient` based 
   deleteEntityConfig(entity: string, options?: ConfigurationClientOptions): Promise<string>;
 ```
 
+`ConfigurationClientOptions` wraps some additional parameters including request headers.
+
 Second, this plugin needs to declare `applicationConfig` as its dependency by adding it to `requiredPlugins` in its own `opensearch_dashboards.json`.
 
 Third, the plugin will define a new type called `AppPluginSetupDependencies` as follows in its own `types.ts`.
