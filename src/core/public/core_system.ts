@@ -233,6 +233,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
+        overlays,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });

@@ -52,6 +52,7 @@ import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 import { Branding } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
+import { OverlayStart } from '../overlays';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -97,6 +98,7 @@ interface StartDeps {
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
+  overlays: OverlayStart;
 }
 
 /** @internal */
@@ -150,6 +152,7 @@ export class ChromeService {
     injectedMetadata,
     notifications,
     uiSettings,
+    overlays,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -161,6 +164,7 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
+    const sidecarConfig$ = overlays.sidecar.getSidecarConfig$();
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
@@ -263,6 +267,7 @@ export class ChromeService {
           branding={injectedMetadata.getBranding()}
           logos={logos}
           survey={injectedMetadata.getSurvey()}
+          sidecarConfig$={sidecarConfig$}
         />
       ),
 
