@@ -14,12 +14,8 @@ export interface UpdateDataSourceNameInVegaSpecProps {
 export const updateDataSourceNameInVegaSpec = (
   props: UpdateDataSourceNameInVegaSpecProps
 ): string => {
-  // Exit early if import data cannot determine new datasource name
-  if (!!props.newDataSourceName === false) {
-    return props.spec;
-  }
-
   const { spec } = props;
+
   let parsedSpec = parseJSONSpec(spec);
   const isJSONString = !!parsedSpec;
   if (!parsedSpec) {
@@ -30,10 +26,10 @@ export const updateDataSourceNameInVegaSpec = (
 
   if (dataField instanceof Array) {
     parsedSpec.data = dataField.map((dataObject) => {
-      return updateDataObject(dataObject, props);
+      return updateDataSourceNameForDataObject(dataObject, props);
     });
   } else if (dataField instanceof Object) {
-    parsedSpec.data = updateDataObject(dataField, props);
+    parsedSpec.data = updateDataSourceNameForDataObject(dataField, props);
   } else {
     throw new Error(`"data" field should be an object or an array of objects`);
   }
@@ -51,8 +47,8 @@ export const getDataSourceTitleFromId = async (
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   return await savedObjectsClient.get('data-source', dataSourceId).then((response) => {
-    const attributes: any = response?.attributes || undefined;
-    return attributes ? attributes.title : undefined;
+    // @ts-expect-error
+    return response?.attributes?.title ?? undefined;
   });
 };
 
@@ -76,7 +72,10 @@ const isVegaVisualization = (savedObject: SavedObject) => {
   return false;
 };
 
-const updateDataObject = (dataObject: any, props: UpdateDataSourceNameInVegaSpecProps) => {
+const updateDataSourceNameForDataObject = (
+  dataObject: any,
+  props: UpdateDataSourceNameInVegaSpecProps
+) => {
   const { newDataSourceName } = props;
   if (
     dataObject.hasOwnProperty('url') &&

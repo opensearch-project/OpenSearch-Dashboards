@@ -17,17 +17,17 @@ export const findDataSourceIdbyName = async (props: FindDataSourceByTitleQueryPr
   const dataSources = await dataSourceFindQuery(props);
 
   // In the case that data_source_name is a prefix of another name, match exact data_source_name
-  const possibleDataSourceIds = dataSources.saved_objects.filter(
+  const possibleDataSourceObjects = dataSources.saved_objects.filter(
     (obj) => obj.attributes.title === dataSourceName
   );
 
-  if (possibleDataSourceIds.length !== 1) {
+  if (possibleDataSourceObjects.length !== 1) {
     throw new Error(
-      `Expected exactly 1 result for data_source_name "${dataSourceName}" but got ${possibleDataSourceIds.length} results`
+      `Expected exactly 1 result for data_source_name "${dataSourceName}" but got ${possibleDataSourceObjects.length} results`
     );
   }
 
-  return possibleDataSourceIds.pop()?.id;
+  return possibleDataSourceObjects.pop()?.id;
 };
 
 export const extractVegaSpecFromAttributes = (attributes: unknown) => {

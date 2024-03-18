@@ -32,7 +32,7 @@ export const vegaVisualizationClientWrapper: SavedObjectsClientWrapperFactory = 
     }
     const dataSourceNamesSet = extractDataSourceNamesInVegaSpec(vegaSpec);
 
-    const existingDataSourceIds = options?.references
+    const existingDataSourceReferences = options?.references
       ?.filter((reference) => reference.type === 'data-source')
       .map((dataSourceReference) => {
         return {
@@ -41,14 +41,14 @@ export const vegaVisualizationClientWrapper: SavedObjectsClientWrapperFactory = 
         };
       });
 
-    const existingDataSourceNamesMap = new Map();
-    if (!!existingDataSourceIds && existingDataSourceIds.length > 0) {
-      (await wrapperOptions.client.bulkGet(existingDataSourceIds)).saved_objects.forEach(
+    const existingDataSourceIdToNameMap = new Map();
+    if (!!existingDataSourceReferences && existingDataSourceReferences.length > 0) {
+      (await wrapperOptions.client.bulkGet(existingDataSourceReferences)).saved_objects.forEach(
         (object) => {
           // @ts-expect-error
           if (!!object.attributes && !!object.attributes.title) {
             // @ts-expect-error
-            existingDataSourceNamesMap.set(object.id, object.attributes.title);
+            existingDataSourceIdToNameMap.set(object.id, object.attributes.title);
           }
         }
       );
@@ -59,7 +59,7 @@ export const vegaVisualizationClientWrapper: SavedObjectsClientWrapperFactory = 
       if (reference.type !== 'data-source') {
         return true;
       }
-      const dataSourceName = existingDataSourceNamesMap.get(reference.id);
+      const dataSourceName = existingDataSourceIdToNameMap.get(reference.id);
       if (dataSourceNamesSet.has(dataSourceName)) {
         dataSourceNamesSet.delete(dataSourceName);
         return true;

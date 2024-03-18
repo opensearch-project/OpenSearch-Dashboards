@@ -23,13 +23,6 @@ describe('updateDataSourceNameInVegaSpec()', () => {
     return JSON.parse(readFileSync(join(__dirname, filepath)).toString());
   };
 
-  test('When a new data_source_name is not provided, do not update the spec', () => {
-    expect(
-      // @ts-expect-error
-      updateDataSourceNameInVegaSpec({ spec: 'some-spec', newDataSourceName: undefined })
-    ).toBe('some-spec');
-  });
-
   /*
   JSON Test cases
   */
