@@ -66,7 +66,7 @@ export function parseClientOptions(
   return clientOptions;
 }
 
-const readCertificateAuthorities = (rawConfig: any) => {
+export const readCertificateAuthorities = (rawConfig: any) => {
   let certificateAuthorities: string[] | undefined;
 
   const addCAs = (ca: string[] | undefined) => {
