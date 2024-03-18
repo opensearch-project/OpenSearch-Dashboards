@@ -87,6 +87,7 @@ https://opensearch.org/redirect
 http://www.opensearch.org/painlessDocs
 https://www.hostedgraphite.com/
 http://company.net/*
+http://fakenews.co/opensearch-dashboards-test/v6.8.2.json
 
 # External urls
 https://www.zeek.org/
