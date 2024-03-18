@@ -46,6 +46,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add workspace id in basePath ([#6060](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6060))
 - Implement new home page ([#6065](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6065))
 - Add sidecar service ([#5920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5920))
+- [Multiple Datasource] Use data source filter function before rendering ([#6175](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6175))
 
 
 ### 🐛 Bug Fixes
