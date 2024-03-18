@@ -53,6 +53,20 @@ export const registerFetchDataSourceVersionRoute = async (
                     ]),
                   }),
                 }),
+                schema.object({
+                  type: schema.string({
+                    validate: (value) => {
+                      if (
+                        value === AuthType.NoAuth ||
+                        value === AuthType.UsernamePasswordType ||
+                        value === AuthType.SigV4
+                      ) {
+                        return `Must not be no_auth or username_password or sigv4 for registered auth types`;
+                      }
+                    },
+                  }),
+                  credentials: schema.nullable(schema.any()),
+                }),
               ])
             ),
           }),
