@@ -37,7 +37,6 @@ const createInternalClientMock = (withLongNumeralsSupport = false): DeeplyMocked
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
   const client = new Client({
     node: 'http://localhost',
-    // @ts-expect-error - ToDo: Remove ignoring after https://github.com/opensearch-project/opensearch-js/pull/598 is included in a release
     enableLongNumeralSupport: withLongNumeralsSupport,
   }) as any;
 

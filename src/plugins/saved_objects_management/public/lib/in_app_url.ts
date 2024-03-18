@@ -47,6 +47,8 @@ export function canViewInApp(uiCapabilities: Capabilities, type: string): boolea
     case 'dashboard':
     case 'dashboards':
       return uiCapabilities.dashboard.show as boolean;
+    case 'homepage':
+      return uiCapabilities.home.show as boolean;
     default:
       return uiCapabilities[type].show as boolean;
   }
