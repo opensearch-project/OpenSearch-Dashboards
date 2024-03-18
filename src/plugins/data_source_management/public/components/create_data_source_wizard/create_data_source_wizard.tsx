@@ -74,7 +74,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     setIsLoading(true);
     try {
       const version = await fetchDataSourceVersion(http, attributes);
-      attributes.version = version.dataSourceVersion;
+      attributes.dataSourceVersion = version.dataSourceVersion;
       await createSingleDataSource(savedObjects.client, attributes);
       props.history.push('');
     } catch (e) {
