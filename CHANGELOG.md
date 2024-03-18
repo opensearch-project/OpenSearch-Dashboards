@@ -53,6 +53,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add sidecar service ([#5920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5920))
 - [Chrome] Introduce registerCollapsibleNavHeader to allow plugins to customize the rendering of nav menu header ([#5244](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5244))
 - [Dynamic Configurations] Pass request headers when making application config calls ([#6164](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6164))
+- [Discover] Options button to configure legacy mode and remove the top navigation option ([#6170](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6170))
 
 
 ### 🐛 Bug Fixes
