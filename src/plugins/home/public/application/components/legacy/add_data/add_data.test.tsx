@@ -29,10 +29,10 @@
  */
 
 import React from 'react';
-import { ManageData } from './manage_data';
+import { AddData } from './add_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('../app_navigation_handler', () => {
+jest.mock('../../app_navigation_handler', () => {
   return {
     createAppNavigationHandler: jest.fn(() => () => {}),
   };
@@ -46,58 +46,42 @@ const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
 const mockFeatures = [
   {
-    category: 'admin',
-    description: 'Control who has access and what tasks they can perform.',
-    icon: 'securityApp',
-    id: 'security',
-    order: 600,
-    path: 'path-to-security-roles',
-    title: 'Protect your data',
+    category: 'data',
+    description: 'Get started with sample data, visualizations, and dashboards.',
     showOnHomePage: true,
+    icon: 'indexOpen',
+    id: 'home_tutorial_directory',
+    order: 500,
+    path: '/app/home#/tutorial_directory',
+    title: 'Ingest data',
   },
   {
     category: 'admin',
-    description: 'Track the real-time health and performance of your deployment.',
-    icon: 'monitoringApp',
-    id: 'monitoring',
-    order: 610,
-    path: 'path-to-monitoring',
-    title: 'Monitor the stack',
+    description: 'Add and manage your fleet of OpenSearch Agents and integrations.',
     showOnHomePage: true,
+    icon: 'indexManagementApp',
+    id: 'ingestManager',
+    order: 510,
+    path: '/app/ingestManager',
+    title: 'Add OpenSearch Agent',
   },
   {
-    category: 'admin',
-    description:
-      'Save snapshots to a backup repository, and restore to recover index and cluster state.',
-    icon: 'storage',
-    id: 'snapshot_restore',
-    order: 630,
-    path: 'path-to-snapshot-restore',
-    title: 'Store & recover backups',
+    category: 'data',
+    description: 'Import your own CSV, NDJSON, or log file',
     showOnHomePage: true,
-  },
-  {
-    category: 'admin',
-    description: 'Define lifecycle policies to automatically perform operations as an index ages.',
-    icon: 'indexSettings',
-    id: 'index_lifecycle_management',
-    order: 640,
-    path: 'path-to-index-lifecycle-management',
-    title: 'Manage index lifecycles',
-    showOnHomePage: true,
+    icon: 'document',
+    id: 'ml_file_data_visualizer',
+    order: 520,
+    path: '/app/ml#/filedatavisualizer',
+    title: 'Upload a file',
   },
 ];
 
-describe('ManageData', () => {
+describe('AddData', () => {
   test('render', () => {
     const component = shallowWithIntl(
-      <ManageData addBasePath={addBasePathMock} features={mockFeatures} />
+      <AddData addBasePath={addBasePathMock} features={mockFeatures} />
     );
-    expect(component).toMatchSnapshot();
-  });
-
-  test('render empty without any features', () => {
-    const component = shallowWithIntl(<ManageData addBasePath={addBasePathMock} features={[]} />);
     expect(component).toMatchSnapshot();
   });
 });

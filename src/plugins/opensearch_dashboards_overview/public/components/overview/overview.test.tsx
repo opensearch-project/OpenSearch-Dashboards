@@ -43,6 +43,7 @@ jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', ()
       uiSettings: { get: jest.fn() },
     },
   }),
+  withOpenSearchDashboards: jest.fn((component: React.Component) => component),
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   OverviewPageHeader: jest.fn().mockReturnValue(<></>),
