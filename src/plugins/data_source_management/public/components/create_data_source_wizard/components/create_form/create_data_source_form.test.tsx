@@ -534,7 +534,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
         inputDisplay: 'some input',
       },
       credentialForm: mockCredentialForm,
-      crendentialFormField: {
+      credentialFormField: {
         userNameRegistered: 'some filled in userName from registed auth credential form',
         passWordRegistered: 'some filled in password from registed auth credential form',
       },

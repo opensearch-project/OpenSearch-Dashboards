@@ -260,7 +260,9 @@ exports[`SavedObjectsTable should render normally 1`] = `
       basePath={
         BasePath {
           "basePath": "",
+          "clientBasePath": "",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "",

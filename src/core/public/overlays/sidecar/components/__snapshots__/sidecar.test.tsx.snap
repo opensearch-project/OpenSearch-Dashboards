@@ -1,0 +1,1594 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sidecar component is rendered 1`] = `
+<div
+  class="osdSidecarFlyout"
+  data-test-subj="sidecar-component-wrapper"
+>
+  <button
+    class="sidecar-resizableButton resizableButton--horizontal"
+    data-test-subj="resizableButton"
+    type="button"
+  />
+  <div
+    class="osdSidecarMountWrapper"
+  />
+</div>
+`;
+
+exports[`Sidecar component it should emit setSidecarConfig with new style when resize 1`] = `
+<Sidecar
+  i18n={
+    Object {
+      "Context": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+            Object {
+              "enqueueForceUpdate": [Function],
+              "enqueueReplaceState": [Function],
+              "enqueueSetState": [Function],
+              "isMounted": [Function],
+            },
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="right"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+        ],
+      },
+    }
+  }
+  mount={[Function]}
+  options={
+    Object {
+      "data-test-subj": "sidecar-component-wrapper",
+    }
+  }
+  setSidecarConfig={[MockFunction]}
+  sidecarConfig$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "dockedMode": "right",
+        "isHidden": false,
+        "paddingSize": 460,
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+>
+  <mockConstructor>
+    <div
+      className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+      data-test-subj="sidecar-component-wrapper"
+      style={
+        Object {
+          "width": 460,
+        }
+      }
+    >
+      <ResizableButton
+        dockedMode="right"
+        flyoutSize={460}
+        onResize={[Function]}
+      >
+        <button
+          className="sidecar-resizableButton resizableButton--horizontal"
+          data-test-subj="resizableButton"
+          onClick={[Function]}
+          onMouseDown={[Function]}
+          onTouchStart={[Function]}
+          type="button"
+        />
+      </ResizableButton>
+      <MountWrapper
+        className="osdSidecarMountWrapper"
+        mount={[Function]}
+      >
+        <div
+          className="osdSidecarMountWrapper"
+        />
+      </MountWrapper>
+    </div>
+  </mockConstructor>
+</Sidecar>
+`;
+
+exports[`Sidecar component it should have a height style when dockedDirection is takeover 1`] = `
+<Sidecar
+  i18n={
+    Object {
+      "Context": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+            Object {
+              "enqueueForceUpdate": [Function],
+              "enqueueReplaceState": [Function],
+              "enqueueSetState": [Function],
+              "isMounted": [Function],
+            },
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "height": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="takeover"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="right"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="right"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "height": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="takeover"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+        ],
+      },
+    }
+  }
+  mount={[Function]}
+  options={
+    Object {
+      "data-test-subj": "sidecar-component-wrapper",
+    }
+  }
+  setSidecarConfig={[MockFunction]}
+  sidecarConfig$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "dockedMode": "takeover",
+        "isHidden": false,
+        "paddingSize": 460,
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+>
+  <mockConstructor>
+    <div
+      className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
+      data-test-subj="sidecar-component-wrapper"
+      style={
+        Object {
+          "height": 460,
+        }
+      }
+    >
+      <ResizableButton
+        dockedMode="takeover"
+        flyoutSize={460}
+        onResize={[Function]}
+      >
+        <button
+          className="sidecar-resizableButton resizableButton--vertical"
+          data-test-subj="resizableButton"
+          onClick={[Function]}
+          onMouseDown={[Function]}
+          onTouchStart={[Function]}
+          type="button"
+        />
+      </ResizableButton>
+      <MountWrapper
+        className="osdSidecarMountWrapper"
+        mount={[Function]}
+      >
+        <div
+          className="osdSidecarMountWrapper"
+        />
+      </MountWrapper>
+    </div>
+  </mockConstructor>
+</Sidecar>
+`;
+
+exports[`Sidecar component it should have a height style when isHidden is true 1`] = `
+<Sidecar
+  i18n={
+    Object {
+      "Context": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+            Object {
+              "enqueueForceUpdate": [Function],
+              "enqueueReplaceState": [Function],
+              "enqueueSetState": [Function],
+              "isMounted": [Function],
+            },
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "height": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="takeover"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover osdSidecarFlyout--hide"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "height": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="takeover"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="right"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="right"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "height": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="takeover"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover osdSidecarFlyout--hide"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "height": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="takeover"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+        ],
+      },
+    }
+  }
+  mount={[Function]}
+  options={
+    Object {
+      "data-test-subj": "sidecar-component-wrapper",
+    }
+  }
+  setSidecarConfig={[MockFunction]}
+  sidecarConfig$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "dockedMode": "takeover",
+        "isHidden": true,
+        "paddingSize": 460,
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+>
+  <mockConstructor>
+    <div
+      className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover osdSidecarFlyout--hide"
+      data-test-subj="sidecar-component-wrapper"
+      style={
+        Object {
+          "height": 460,
+        }
+      }
+    >
+      <ResizableButton
+        dockedMode="takeover"
+        flyoutSize={460}
+        onResize={[Function]}
+      >
+        <button
+          className="sidecar-resizableButton resizableButton--vertical"
+          data-test-subj="resizableButton"
+          onClick={[Function]}
+          onMouseDown={[Function]}
+          onTouchStart={[Function]}
+          type="button"
+        />
+      </ResizableButton>
+      <MountWrapper
+        className="osdSidecarMountWrapper"
+        mount={[Function]}
+      >
+        <div
+          className="osdSidecarMountWrapper"
+        />
+      </MountWrapper>
+    </div>
+  </mockConstructor>
+</Sidecar>
+`;
+
+exports[`Sidecar component it should have a width style when dockedDirection is right 1`] = `
+<Sidecar
+  i18n={
+    Object {
+      "Context": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+            Object {
+              "enqueueForceUpdate": [Function],
+              "enqueueReplaceState": [Function],
+              "enqueueSetState": [Function],
+              "isMounted": [Function],
+            },
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "children": <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>,
+            },
+            Object {},
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="right"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <ResizableButton
+                flyoutSize={0}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+          Object {
+            "type": "return",
+            "value": <div
+              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+              data-test-subj="sidecar-component-wrapper"
+              style={
+                Object {
+                  "width": 460,
+                }
+              }
+            >
+              <ResizableButton
+                dockedMode="right"
+                flyoutSize={460}
+                onResize={[Function]}
+              />
+              <MountWrapper
+                className="osdSidecarMountWrapper"
+                mount={[Function]}
+              />
+            </div>,
+          },
+        ],
+      },
+    }
+  }
+  mount={[Function]}
+  options={
+    Object {
+      "data-test-subj": "sidecar-component-wrapper",
+    }
+  }
+  setSidecarConfig={[MockFunction]}
+  sidecarConfig$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "dockedMode": "right",
+        "isHidden": false,
+        "paddingSize": 460,
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+>
+  <mockConstructor>
+    <div
+      className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+      data-test-subj="sidecar-component-wrapper"
+      style={
+        Object {
+          "width": 460,
+        }
+      }
+    >
+      <ResizableButton
+        dockedMode="right"
+        flyoutSize={460}
+        onResize={[Function]}
+      >
+        <button
+          className="sidecar-resizableButton resizableButton--horizontal"
+          data-test-subj="resizableButton"
+          onClick={[Function]}
+          onMouseDown={[Function]}
+          onTouchStart={[Function]}
+          type="button"
+        />
+      </ResizableButton>
+      <MountWrapper
+        className="osdSidecarMountWrapper"
+        mount={[Function]}
+      >
+        <div
+          className="osdSidecarMountWrapper"
+        />
+      </MountWrapper>
+    </div>
+  </mockConstructor>
+</Sidecar>
+`;

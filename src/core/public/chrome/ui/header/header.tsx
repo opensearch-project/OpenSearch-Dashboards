@@ -41,7 +41,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
-import React, { createRef, useState } from 'react';
+import React, { createRef, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
@@ -65,7 +65,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
 import type { Logos } from '../../../../common/types';
-
+import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
@@ -94,6 +94,7 @@ export interface HeaderProps {
   branding: ChromeBranding;
   logos: Logos;
   survey: string | undefined;
+  sidecarConfig$: Observable<ISidecarConfig | undefined>;
 }
 
 export function Header({
@@ -112,6 +113,11 @@ export function Header({
   const isVisible = useObservable(observables.isVisible$, false);
   const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
+
+  const sidecarPaddingStyle = useMemo(() => {
+    return getOsdSidecarPaddingStyle(sidecarConfig);
+  }, [sidecarConfig]);
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
@@ -132,6 +138,7 @@ export function Header({
             <EuiHeader
               className="expandedHeader"
               theme={expandedHeaderColorScheme}
+              style={sidecarPaddingStyle}
               position="fixed"
               sections={[
                 {
@@ -170,7 +177,7 @@ export function Header({
             />
           )}
 
-          <EuiHeader position="fixed" className="primaryHeader">
+          <EuiHeader position="fixed" className="primaryHeader" style={sidecarPaddingStyle}>
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
                 <EuiHeaderSectionItemButton
