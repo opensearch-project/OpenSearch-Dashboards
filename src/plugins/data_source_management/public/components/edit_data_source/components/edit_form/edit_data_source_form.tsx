@@ -50,9 +50,11 @@ import { extractRegisteredAuthTypeCredentials, getDefaultAuthMethod } from '../.
 export interface EditDataSourceProps {
   existingDataSource: DataSourceAttributes;
   existingDatasourceNamesList: string[];
+  isDefault: boolean;
   handleSubmit: (formValues: DataSourceAttributes) => Promise<void>;
   handleTestConnection: (formValues: DataSourceAttributes) => Promise<void>;
   onDeleteDataSource?: () => Promise<void>;
+  onSetDefaultDataSource: () => Promise<void>;
   displayToastMessage: (info: ToastMessageItem) => void;
 }
 export interface EditDataSourceState {
@@ -400,6 +402,16 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     }
   };
 
+  setDefaultDataSource = async () => {
+    if (this.props.onSetDefaultDataSource) {
+      await this.props.onSetDefaultDataSource();
+    }
+  }
+
+  isDefault =  () => {
+    return this.props.isDefault;
+  }
+
   onClickTestConnection = async () => {
     this.setState({ isLoading: true });
     const isNewCredential = !!(this.state.auth.type !== this.props.existingDataSource.auth.type);
@@ -634,6 +646,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         onClickDeleteIcon={this.onClickDeleteDataSource}
         dataSourceName={this.props.existingDataSource.title}
         onClickTestConnection={this.onClickTestConnection}
+        onClickSetDefault={this.setDefaultDataSource}
+        isDefault={this.isDefault()}
       />
     );
   };

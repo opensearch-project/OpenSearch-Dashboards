@@ -38,6 +38,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 ) => {
   /* Initialization */
   const {
+    uiSettings,
     savedObjects,
     setBreadcrumbs,
     http,
@@ -82,6 +83,12 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
       setIsLoading(false);
     }
   };
+
+  const handleSetDefault = async () => {
+    await uiSettings.set('defaultDataSource', dataSourceID);
+  }
+
+  const isDefaultDataSource = uiSettings.get('defaultDataSource', null) === dataSourceID;
 
   /* Handle submit - create data source*/
   const handleSubmit = async (attributes: DataSourceAttributes) => {
@@ -128,7 +135,9 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
           <EditDataSourceForm
             existingDataSource={dataSource}
             existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={isDefaultDataSource}
             onDeleteDataSource={handleDelete}
+            onSetDefaultDataSource={handleSetDefault}
             handleSubmit={handleSubmit}
             displayToastMessage={handleDisplayToastMessage}
             handleTestConnection={handleTestConnection}
