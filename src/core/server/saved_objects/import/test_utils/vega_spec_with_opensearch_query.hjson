@@ -1,0 +1,61 @@
+{
+  $schema: https://vega.github.io/schema/vega-lite/v5.json
+  data: {
+    url: {
+      %context%: true
+      %timefield%: @timestamp
+      index: opensearch_dashboards_sample_data_logs
+      body: {
+        aggs: {
+          1: {
+            terms: {
+              field: geo.dest
+              order: {
+                _count: desc
+              }
+              size: 5
+            }
+          }
+        }
+      }
+    }
+    format: {
+      property: aggregations.1.buckets
+    }
+  }
+  transform: [
+    {
+      calculate: datum.key
+      as: dest
+    }
+    {
+      calculate: datum.doc_count
+      as: count
+    }
+  ]
+  layer: [
+    {
+      mark: {
+        type: bar
+        tooltip: true
+      }
+    }
+  ]
+  encoding: {
+    x: {
+      field: count
+      type: quantitative
+      axis: {
+        title: Count
+      }
+    }
+    y: {
+      field: dest
+      type: nominal
+      axis: {
+        title: Dest
+      }
+      sort: -x
+    }
+  }
+}
