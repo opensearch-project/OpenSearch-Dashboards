@@ -76,8 +76,10 @@ describe('Datasource Management: Edit Datasource Form', () => {
           <EditDataSourceForm
             existingDataSource={mockDataSourceAttributesWithAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={false}
             onDeleteDataSource={mockFn}
             handleSubmit={mockFn}
+            onSetDefaultDataSource={mockFn}
             handleTestConnection={mockFn}
             displayToastMessage={mockFn}
           />
@@ -245,7 +247,9 @@ describe('Datasource Management: Edit Datasource Form', () => {
           <EditDataSourceForm
             existingDataSource={mockDataSourceAttributesWithNoAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={false}
             onDeleteDataSource={mockFn}
+            onSetDefaultDataSource={mockFn}
             handleSubmit={mockFn}
             handleTestConnection={mockFn}
             displayToastMessage={mockFn}
@@ -389,8 +393,10 @@ describe('With Registered Authentication', () => {
         <EditDataSourceForm
           existingDataSource={mockDataSourceAttributesWithNoAuth}
           existingDatasourceNamesList={existingDatasourceNamesList}
+          isDefault={false}
           onDeleteDataSource={jest.fn()}
           handleSubmit={jest.fn()}
+          onSetDefaultDataSource={jest.fn()}
           handleTestConnection={jest.fn()}
           displayToastMessage={jest.fn()}
         />
@@ -428,8 +434,10 @@ describe('With Registered Authentication', () => {
         <EditDataSourceForm
           existingDataSource={mockDataSourceAttributesWithRegisteredAuth}
           existingDatasourceNamesList={existingDatasourceNamesList}
+          isDefault={false}
           onDeleteDataSource={jest.fn()}
           handleSubmit={mockedSubmitHandler}
+          onSetDefaultDataSource={jest.fn()}
           handleTestConnection={jest.fn()}
           displayToastMessage={jest.fn()}
         />
