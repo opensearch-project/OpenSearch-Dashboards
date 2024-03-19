@@ -19,13 +19,12 @@ jobs:
             let isCollaborator = false;
             try {
               // Attempt to fetch user's permission level
-              const a = await github.rest.repos.getCollaboratorPermissionLevel({
+              await github.rest.repos.getCollaboratorPermissionLevel({
                 owner: repoOwner,
                 repo: repoName,
                 username: issueAuthor,
               });
 
-              console.log(a)
               // If no error is thrown, the user is a collaborator
               isCollaborator = true;
             } catch (error) {
