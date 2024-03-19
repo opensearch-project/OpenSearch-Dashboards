@@ -64,7 +64,7 @@ export const Header = ({
         disabled={isDefaultDataSourceState}
         iconType={isDefaultDataSourceState ? 'starFilled' : 'starEmpty'}
         aria-label={setDefaultAriaLabel}
-        data-test-subj="datasource-edit-setDefaultDataSource"
+        data-test-subj="editSetDefaultDataSource"
       >
         {isDefaultDataSourceState ? 'Default' : 'Set as default'}
       </EuiButtonEmpty>

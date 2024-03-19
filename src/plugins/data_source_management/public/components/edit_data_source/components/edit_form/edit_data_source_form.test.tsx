@@ -301,6 +301,12 @@ describe('Datasource Management: Edit Datasource Form', () => {
       expect(mockFn).toHaveBeenCalled();
     });
 
+    test('should set as default datasource confirmation from header', () => {
+      // @ts-ignore
+      component.find('Header').prop('onClickSetDefault')();
+      expect(mockFn).toHaveBeenCalled();
+    });
+
     /* Save Changes */
     test('should update the form with NoAuth on click save changes', async () => {
       await new Promise((resolve) =>
