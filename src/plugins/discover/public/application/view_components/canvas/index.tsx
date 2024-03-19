@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiSwitch } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -21,13 +21,14 @@ import { filterColumns } from '../utils/filter_columns';
 import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
 import './discover_canvas.scss';
+import { getNewDiscoverSetting, setNewDiscoverSetting } from '../../components/utils/local_storage';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const {
-    services: { uiSettings },
+    services: { uiSettings, storage },
   } = useOpenSearchDashboards<DiscoverViewServices>();
   const { columns } = useSelector((state) => state.discover);
   const filteredColumns = filterColumns(
@@ -96,6 +97,50 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     }
   };
 
+  const [isOptionsOpen, setOptionsOpen] = useState(false);
+  const [useLegacy, setUseLegacy] = useState(!getNewDiscoverSetting(storage));
+  const DiscoverOptions = () => (
+    <EuiPopover
+      button={
+        <EuiButtonIcon
+          data-test-subj="discoverOptionsButton"
+          size="s"
+          iconType="gear"
+          onClick={() => setOptionsOpen(!isOptionsOpen)}
+        />
+      }
+      closePopover={() => setOptionsOpen(false)}
+      isOpen={isOptionsOpen}
+      panelPaddingSize="none"
+      className="dscCanvas_options"
+    >
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: 'Options',
+            content: (
+              <EuiPanel>
+                <EuiSwitch
+                  label="Enable legacy Discover"
+                  checked={useLegacy}
+                  data-test-subj="discoverOptionsLegacySwitch"
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setUseLegacy(checked);
+                    setNewDiscoverSetting(!checked, storage);
+                    window.location.reload();
+                  }}
+                />
+              </EuiPanel>
+            ),
+          },
+        ]}
+      />
+    </EuiPopover>
+  );
+
   return (
     <EuiPanel
       panelRef={panelRef}
@@ -122,6 +167,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
         <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
           <MemoizedDiscoverChartContainer {...fetchState} />
           <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+          <DiscoverOptions />
         </EuiPanel>
       )}
     </EuiPanel>
