@@ -305,7 +305,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
       expect(mockFn).toHaveBeenCalled();
     });
 
-    test('should set as default datasource confirmation from header', () => {
+    test('should set as the default datasource from header', () => {
       // @ts-ignore
       component.find('Header').prop('onClickSetDefault')();
       expect(mockFn).toHaveBeenCalled();

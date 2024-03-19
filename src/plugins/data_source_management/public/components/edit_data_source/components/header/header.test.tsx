@@ -130,7 +130,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
     test('should render normally', () => {
       expect(component.find(setDefaultButtonIdentifier).exists()).toBe(true);
     });
-    test('default button shoould show as "Set as default" and should be clickable', () => {
+    test('default button should show as "Set as default" and should be clickable', () => {
       expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
       expect(component.find(setDefaultButtonIdentifier).first().prop('disabled')).toBe(false);
       expect(component.find(setDefaultButtonIdentifier).first().prop('iconType')).toBe('starEmpty');
@@ -138,7 +138,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
       expect(onClickSetDefault).toHaveBeenCalled();
     });
   });
-  describe('should render default icon as "Set as default" when isDefaultDataSourceState is true', () => {
+  describe('should render default icon as "Default" when isDefaultDataSourceState is true', () => {
     const onClickSetDefault = jest.fn();
     const isDefaultDataSourceState = true;
     beforeEach(() => {
@@ -166,7 +166,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
     test('should render normally', () => {
       expect(component.find(setDefaultButtonIdentifier).exists()).toBe(true);
     });
-    test('default button shoould show as "Set as default" and should be clickable', () => {
+    test('default button should show as "Default" and should be disabled.', () => {
       expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Default');
       expect(component.find(setDefaultButtonIdentifier).first().prop('disabled')).toBe(true);
       expect(component.find(setDefaultButtonIdentifier).first().prop('iconType')).toBe(
