@@ -16,7 +16,12 @@ import {
 } from '../../types';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CreateDataSourceForm } from './components/create_form';
-import { createSingleDataSource, getDataSources, testConnection } from '../utils';
+import {
+  createSingleDataSource,
+  getDataSources,
+  testConnection,
+  fetchDataSourceVersion,
+} from '../utils';
 import { LoadingMask } from '../loading_mask';
 
 type CreateDataSourceWizardProps = RouteComponentProps;
@@ -68,6 +73,8 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   const handleSubmit = async (attributes: DataSourceAttributes) => {
     setIsLoading(true);
     try {
+      const version = await fetchDataSourceVersion(http, attributes);
+      attributes.dataSourceVersion = version.dataSourceVersion;
       await createSingleDataSource(savedObjects.client, attributes);
       props.history.push('');
     } catch (e) {

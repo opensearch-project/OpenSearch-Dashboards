@@ -30,6 +30,7 @@ import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
 import { createDataSourceError } from './lib/error';
 import { registerTestConnectionRoute } from './routes/test_connection';
+import { registerFetchDataSourceVersionRoute } from './routes/fetch_data_source_version';
 import { AuthenticationMethodRegistery, IAuthenticationMethodRegistery } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
 
@@ -127,6 +128,13 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     const router = core.http.createRouter();
     registerTestConnectionRoute(
+      router,
+      dataSourceService,
+      cryptographyServiceSetup,
+      authRegistryPromise,
+      customApiSchemaRegistryPromise
+    );
+    registerFetchDataSourceVersionRoute(
       router,
       dataSourceService,
       cryptographyServiceSetup,
