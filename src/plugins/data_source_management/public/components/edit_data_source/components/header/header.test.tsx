@@ -134,7 +134,6 @@ describe('Datasource Management: Edit Datasource Header', () => {
       expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
       expect(component.find(setDefaultButtonIdentifier).first().prop('disabled')).toBe(false);
       expect(component.find(setDefaultButtonIdentifier).first().prop('iconType')).toBe('starEmpty');
-    
       component.find(setDefaultButtonIdentifier).first().simulate('click');
       expect(onClickSetDefault).toHaveBeenCalled();
     });
@@ -170,8 +169,9 @@ describe('Datasource Management: Edit Datasource Header', () => {
     test('default button shoould show as "Set as default" and should be clickable', () => {
       expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Default');
       expect(component.find(setDefaultButtonIdentifier).first().prop('disabled')).toBe(true);
-      expect(component.find(setDefaultButtonIdentifier).first().prop('iconType')).toBe('starFilled');
+      expect(component.find(setDefaultButtonIdentifier).first().prop('iconType')).toBe(
+        'starFilled'
+      );
     });
   });
-}); 
-
+});
