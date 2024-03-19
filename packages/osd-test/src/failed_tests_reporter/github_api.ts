@@ -233,6 +233,7 @@ export class GithubApi {
       const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
       const errorResponseLog =
         isAxiosResponseError(error) &&
+        error.config &&
         `[${error.config.method} ${error.config.url}] ${error.response.status} ${error.response.statusText} Error`;
 
       if ((unableToReachGithub || githubApiFailed) && attempt < maxAttempts) {

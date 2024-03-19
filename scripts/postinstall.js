@@ -85,6 +85,14 @@ const run = async () => {
     ])
   );
 
+  //Axios's type definition is far too advanced for OSD
+  promises.push(
+    patchFile('node_modules/axios/index.d.ts', {
+      from: '[Key in Method as Lowercase<Key>]: AxiosHeaders;',
+      to: '[Key in Method]: AxiosHeaders;',
+    })
+  );
+
   await Promise.all(promises);
 };
 
