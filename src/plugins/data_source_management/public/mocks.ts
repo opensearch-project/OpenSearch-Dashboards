@@ -180,6 +180,10 @@ export const getMappedDataSources = [
   },
 ];
 
+export const fetchDataSourceVersion = {
+  dataSourceVersion: '2.11.0',
+};
+
 export const mockDataSourceAttributesWithAuth = {
   id: 'test',
   title: 'create-test-ds',
