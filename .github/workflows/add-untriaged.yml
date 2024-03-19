@@ -5,29 +5,43 @@ on:
     types: [opened, reopened, transferred]
 
 jobs:
-  apply-label:
+  apply-label-if-not-collaborator:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v6
+      - name: Check if issue author is a collaborator
+        id: check-collaborator
+        uses: actions/github-script@v6
         with:
           script: |
-            const codeowners = await github.repos.listCodeowners({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-
-            console.log(codeowners)
-
             const issueAuthor = context.payload.issue.user.login;
-            const isCodeowner = codeowners.data.some(codeowner => codeowner.login === issueAuthor);
-
-            console.log(isCodeOwner)
-
-            if (!isCodeowner) {
-              github.rest.issues.addLabels({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: ['untriaged']
+            const repoOwner = context.repo.owner;
+            const repoName = context.repo.repo;
+            let isCollaborator = false;
+            try {
+              // Attempt to fetch user's permission level
+              const a = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: repoOwner,
+                repo: repoName,
+                username: issueAuthor,
               });
+
+              console.log(a)
+              // If no error is thrown, the user is a collaborator
+              isCollaborator = true;
+            } catch (error) {
+              // Error thrown indicates the user is not a collaborator,
+              // or does not have explicit permission set.
+              console.log(`${issueAuthor} is not a collaborator.`);
             }
+            core.setOutput('is_collaborator', isCollaborator.toString());
+      - name: Apply label if not a collaborator
+        if: steps.check-collaborator.outputs.is_collaborator == 'false'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['untriaged']
+            })
