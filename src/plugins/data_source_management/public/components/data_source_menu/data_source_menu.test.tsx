@@ -33,7 +33,7 @@ describe('DataSourceMenu', () => {
         hideLocalCluster={false}
         disableDataSourceSelectable={false}
         className={'myclass'}
-        dataSourceCallBackFunc={jest.fn()}
+        onDataSourcesSelectionChange={jest.fn()}
       />
     );
     expect(component).toMatchSnapshot();
@@ -50,7 +50,7 @@ describe('DataSourceMenu', () => {
         hideLocalCluster={true}
         disableDataSourceSelectable={false}
         className={'myclass'}
-        dataSourceCallBackFunc={jest.fn()}
+        onDataSourcesSelectionChange={jest.fn()}
       />
     );
     expect(component).toMatchSnapshot();

@@ -23,7 +23,7 @@ import { DataSourceAttributes } from '../../types';
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: ToastsStart;
-  onSelectedDataSource: (dataSource: DataSourceOption) => void;
+  onSelectedDataSource: (dataSources: DataSourceOption[]) => void;
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
@@ -119,7 +119,7 @@ export class DataSourceSelectable extends React.Component<
     this.setState({
       selectedOption: [selectedDataSource],
     });
-    this.props.onSelectedDataSource({ ...selectedDataSource });
+    this.props.onSelectedDataSource([...selectedDataSource]);
   }
 
   render() {
