@@ -194,6 +194,10 @@ describe('#checkConflictsForDataSource', () => {
     });
     const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
 
+    expect(params.savedObjectsClient?.get).toHaveBeenCalledWith(
+      'data-source',
+      'some-datasource-id'
+    );
     expect(checkConflictsForDataSourceResult).toEqual(
       expect.objectContaining({
         filteredObjects: [
@@ -235,6 +239,10 @@ describe('#checkConflictsForDataSource', () => {
     });
     const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
 
+    expect(params.savedObjectsClient?.get).toHaveBeenCalledWith(
+      'data-source',
+      'some-datasource-id'
+    );
     expect(checkConflictsForDataSourceResult).toEqual(
       expect.objectContaining({
         filteredObjects: [
@@ -253,6 +261,39 @@ describe('#checkConflictsForDataSource', () => {
           [
             `visualization:some-object-id`,
             { id: 'some-datasource-id_some-object-id', omitOriginId: true },
+          ],
+        ]),
+      })
+    );
+  });
+
+  it('will not change Vega spec when dataSourceTitle is undefined', async () => {
+    const vegaSavedObject = createVegaVisualizationObject('old-datasource-id_some-object-id');
+    const params = setupParams({
+      objects: [vegaSavedObject],
+      ignoreRegularConflicts: true,
+      dataSourceId: 'nonexistent-datasource-title-id',
+      savedObjectsClient: getSavedObjectClient(),
+    });
+    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
+
+    expect(params.savedObjectsClient?.get).toHaveBeenCalledWith(
+      'data-source',
+      'nonexistent-datasource-title-id'
+    );
+    expect(checkConflictsForDataSourceResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [
+          {
+            ...vegaSavedObject,
+            id: 'nonexistent-datasource-title-id_some-object-id',
+          },
+        ],
+        errors: [],
+        importIdMap: new Map([
+          [
+            `visualization:some-object-id`,
+            { id: 'nonexistent-datasource-title-id_some-object-id', omitOriginId: true },
           ],
         ]),
       })
