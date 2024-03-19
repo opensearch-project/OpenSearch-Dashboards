@@ -11,9 +11,23 @@ jobs:
       - uses: actions/github-script@v6
         with:
           script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
+            const codeowners = await github.repos.listCodeowners({
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ['untriaged']
-            })
+              repo: context.repo.repo
+            });
+
+            console.log(codeowners)
+
+            const issueAuthor = context.payload.issue.user.login;
+            const isCodeowner = codeowners.data.some(codeowner => codeowner.login === issueAuthor);
+
+            console.log(isCodeOwner)
+
+            if (!isCodeowner) {
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['untriaged']
+              });
+            }
