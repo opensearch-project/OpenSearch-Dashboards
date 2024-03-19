@@ -20,6 +20,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { filterColumns } from '../utils/filter_columns';
 import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
+import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 
 // eslint-disable-next-line import/no-default-export
@@ -27,9 +28,16 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const {
-    services: { uiSettings },
+    services: { uiSettings, capabilities },
   } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { columns } = useSelector((state) => state.discover);
+  const { columns } = useSelector((state) => {
+    const stateColumns = state.discover.columns;
+
+    // check if stateColumns is not undefined, otherwise use buildColumns
+    return {
+      columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
+    };
+  });
   const filteredColumns = filterColumns(
     columns,
     indexPattern,
@@ -95,6 +103,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       panelRef.current.scrollTop = 0;
     }
   };
+  const showSaveQuery = !!capabilities.discover?.saveQuery;
 
   return (
     <EuiPanel
@@ -110,6 +119,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
           setHeaderActionMenu,
           onQuerySubmit,
         }}
+        showSaveQuery={showSaveQuery}
       />
       {fetchState.status === ResultStatus.NO_RESULTS && (
         <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />

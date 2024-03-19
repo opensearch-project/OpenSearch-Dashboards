@@ -78,6 +78,10 @@ export interface DiscoverUrlGeneratorState {
    * whether to hash the data in the url to avoid url length issues.
    */
   useHash?: boolean;
+  /**
+   * Saved query Id
+   */
+  savedQuery?: string;
 }
 
 interface Params {
@@ -99,12 +103,14 @@ export class DiscoverUrlGenerator
     savedSearchId,
     timeRange,
     useHash = this.params.useHash,
+    savedQuery,
   }: DiscoverUrlGeneratorState): Promise<string> => {
     const savedSearchPath = savedSearchId ? encodeURIComponent(savedSearchId) : '';
     const appState: {
       query?: Query;
       filters?: Filter[];
       index?: string;
+      savedQuery?: string;
     } = {};
     const queryState: QueryState = {};
 
@@ -117,6 +123,7 @@ export class DiscoverUrlGenerator
     if (filters && filters.length)
       queryState.filters = filters?.filter((f) => opensearchFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
+    if (savedQuery) appState.savedQuery = savedQuery;
 
     let url = `${this.params.appBasePath}#/${savedSearchPath}`;
     url = setStateToOsdUrl<QueryState>('_g', queryState, { useHash }, url);

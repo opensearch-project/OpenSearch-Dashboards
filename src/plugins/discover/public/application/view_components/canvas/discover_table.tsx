@@ -23,6 +23,7 @@ import { SortOrder } from '../../../saved_searches/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { popularizeField } from '../../helpers/popularize_field';
+import { buildColumns } from '../../utils/columns';
 
 interface Props {
   rows?: OpenSearchSearchHit[];
@@ -41,7 +42,20 @@ export const DiscoverTable = ({ rows, scrollToTop }: Props) => {
   } = services;
 
   const { refetch$, indexPattern, savedSearch } = useDiscoverContext();
-  const { columns, sort } = useSelector((state) => state.discover);
+  const { columns } = useSelector((state) => {
+    const stateColumns = state.discover.columns;
+    // check if state columns is not undefined, otherwise use buildColumns
+    return {
+      columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
+    };
+  });
+  const { sort } = useSelector((state) => {
+    const stateSort = state.discover.sort;
+    // check if state sort is not undefined, otherwise assign an empty array
+    return {
+      sort: stateSort !== undefined ? stateSort : [],
+    };
+  });
   const dispatch = useDispatch();
   const onAddColumn = (col: string) => {
     if (indexPattern && capabilities.discover?.save) {

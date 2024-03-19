@@ -159,6 +159,7 @@ export class VisBuilderPlugin
           embeddable: pluginsStart.embeddable,
           dashboard: pluginsStart.dashboard,
           uiActions: pluginsStart.uiActions,
+          capabilities: coreStart.application.capabilities,
         };
 
         // Instantiate the store

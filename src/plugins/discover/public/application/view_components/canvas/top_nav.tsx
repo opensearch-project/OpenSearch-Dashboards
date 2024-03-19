@@ -14,18 +14,22 @@ import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDiscoverContext } from '../context';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { opensearchFilters, connectStorageToQueryState } from '../../../../../data/public';
+import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_management';
 
 export interface TopNavProps {
   opts: {
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   };
+  showSaveQuery: boolean;
 }
 
-export const TopNav = ({ opts }: TopNavProps) => {
+export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
+  const state = useSelector((s) => s.discover);
+  const dispatch = useDispatch();
 
   const {
     navigation: {
@@ -36,7 +40,6 @@ export const TopNav = ({ opts }: TopNavProps) => {
     },
     data,
     chrome,
-    osdUrlStateStorage,
   } = services;
 
   const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
@@ -79,17 +82,23 @@ export const TopNav = ({ opts }: TopNavProps) => {
     indexPattern,
   ]);
 
+  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
+    dispatch(setSavedQuery(newSavedQueryId));
+  };
+
   return (
     <TopNavMenu
       appName={PLUGIN_ID}
       config={topNavLinks}
       showSearchBar
       showDatePicker={showDatePicker}
-      showSaveQuery
+      showSaveQuery={showSaveQuery}
       useDefaultBehaviors
       setMenuMountPoint={opts.setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
       onQuerySubmit={opts.onQuerySubmit}
+      savedQueryId={state.savedQuery}
+      onSavedQueryIdChange={updateSavedQueryId}
     />
   );
 };

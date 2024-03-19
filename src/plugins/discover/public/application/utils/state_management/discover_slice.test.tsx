@@ -4,6 +4,7 @@
  */
 
 import { discoverSlice, DiscoverState } from './discover_slice';
+import { SortOrder } from '../../../saved_searches/types';
 
 describe('discoverSlice', () => {
   let initialState: DiscoverState;
@@ -133,5 +134,41 @@ describe('discoverSlice', () => {
     };
     const result = discoverSlice.reducer(initialState, action);
     expect(result.columns).toEqual(['column1', 'column2', 'column3']);
+  });
+
+  it('should set the savedQuery when a valid string is provided', () => {
+    const savedQueryId = 'some-query-id';
+    const action = { type: 'discover/setSavedQuery', payload: savedQueryId };
+    const result = discoverSlice.reducer(initialState, action);
+    expect(result.savedQuery).toEqual(savedQueryId);
+  });
+
+  it('should remove the savedQuery from state when payload is undefined', () => {
+    // pre-set the savedQuery in the initialState
+    const initialStateWithSavedQuery = {
+      ...initialState,
+      savedQuery: 'existing-query-id',
+    };
+
+    const action = { type: 'discover/setSavedQuery', payload: undefined };
+    const result = discoverSlice.reducer(initialStateWithSavedQuery, action);
+
+    // Check that savedQuery is not in the resulting state
+    expect(result.savedQuery).toBeUndefined();
+  });
+
+  it('should not affect other state properties when setting savedQuery', () => {
+    const initialStateWithOtherProperties = {
+      ...initialState,
+      columns: ['column1', 'column2'],
+      sort: [['field1', 'asc']] as SortOrder[],
+    };
+    const savedQueryId = 'new-query-id';
+    const action = { type: 'discover/setSavedQuery', payload: savedQueryId };
+    const result = discoverSlice.reducer(initialStateWithOtherProperties, action);
+    // check that other properties remain unchanged
+    expect(result.columns).toEqual(['column1', 'column2']);
+    expect(result.sort).toEqual([['field1', 'asc']] as SortOrder[]);
+    expect(result.savedQuery).toEqual(savedQueryId);
   });
 });
