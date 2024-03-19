@@ -254,7 +254,7 @@ export const Homepage = () => {
 
   return (
     <EuiPageTemplate
-      restrictWidth={1400}
+      restrictWidth={1680}
       pageHeader={{
         pageTitle: <span data-test-subj="dashboardCustomTitle">{title}</span>,
         rightSideItems: sideItems,
