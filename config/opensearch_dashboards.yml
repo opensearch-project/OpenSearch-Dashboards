@@ -286,6 +286,7 @@
 #data_source.ssl.certificateAuthorities: [ "/path/to/your/CA.pem" ]
 
 # To disregard the validity of SSL certificates for connected data sources, change this setting's value to 'none'.
+# Possible values include full, certificate and none
 #data_source.ssl.verificationMode: full
 
 # Set enabled false to hide authentication method in OpenSearch Dashboards.

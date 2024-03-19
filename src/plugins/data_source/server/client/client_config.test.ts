@@ -52,6 +52,36 @@ describe('parseClientOptions', () => {
     );
   });
 
+  test('test ssl config with verification mode set to certificate', () => {
+    const config = {
+      enabled: true,
+      ssl: {
+        verificationMode: 'certificate',
+        certificateAuthorities: ['some-path'],
+      },
+      clientPool: {
+        size: 5,
+      },
+    } as DataSourcePluginConfigType;
+    mockReadFileSync.mockReset();
+    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+    mockReadFileSync.mockClear();
+    expect(parsedConfig).toEqual(
+      expect.objectContaining({
+        node: TEST_DATA_SOURCE_ENDPOINT,
+        ssl: {
+          requestCert: true,
+          rejectUnauthorized: true,
+          checkServerIdentity: expect.any(Function),
+          ca: ['content-of-some-path'],
+        },
+      })
+    );
+    expect(parsedConfig.ssl?.checkServerIdentity()).toBeUndefined();
+  });
+
   test('test ssl config with verification mode set to full', () => {
     const config = {
       enabled: true,
