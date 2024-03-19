@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
+import { HttpStart, SavedObjectsClientContract, SavedObject } from 'src/core/public';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -39,8 +39,8 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
 export async function getDataSourcesWithFields(
   savedObjectsClient: SavedObjectsClientContract,
   fields: string[]
-) {
-  const response = await savedObjectsClient.find({
+): Promise<Array<SavedObject<DataSourceAttributes>>> {
+  const response = await savedObjectsClient.find<DataSourceAttributes>({
     type: 'data-source',
     fields,
     perPage: 10000,
@@ -151,10 +151,11 @@ export const extractRegisteredAuthTypeCredentials = (
 ) => {
   const registeredCredentials = {} as { [key: string]: string };
   const registeredCredentialField =
-    authenticationMethodRegistery.getAuthenticationMethod(authType)?.crendentialFormField ?? {};
+    authenticationMethodRegistery.getAuthenticationMethod(authType)?.credentialFormField ?? {};
 
   Object.keys(registeredCredentialField).forEach((credentialFiled) => {
-    registeredCredentials[credentialFiled] = currentCredentialState[credentialFiled] ?? '';
+    registeredCredentials[credentialFiled] =
+      currentCredentialState[credentialFiled] ?? registeredCredentialField[credentialFiled];
   });
 
   return registeredCredentials;

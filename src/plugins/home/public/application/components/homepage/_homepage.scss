@@ -1,0 +1,9 @@
+.home-homepage-pageBody {
+  // This is needed to make sure the page body is not wider than the page.
+  // This is otherwise not possible with the props on EuiPageTemplate.
+  padding: 0 $euiSizeL;
+}
+
+.home-homepage-body--fill {
+  min-height: $euiSize * 50;
+}

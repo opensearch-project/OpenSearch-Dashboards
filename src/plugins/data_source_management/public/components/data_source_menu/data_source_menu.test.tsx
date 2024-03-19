@@ -8,6 +8,7 @@ import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { DataSourceMenu } from './data_source_menu';
+import { render } from '@testing-library/react';
 
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -65,5 +66,19 @@ describe('DataSourceMenu', () => {
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  it('should render data source aggregated view', () => {
+    const container = render(
+      <DataSourceMenu
+        showDataSourceAggregatedView={true}
+        appName={'myapp'}
+        fullWidth={true}
+        className={'myclass'}
+        savedObjects={client}
+        notifications={notifications}
+      />
+    );
+    expect(container).toMatchSnapshot();
   });
 });

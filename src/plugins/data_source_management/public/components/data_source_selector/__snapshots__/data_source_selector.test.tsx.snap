@@ -202,6 +202,29 @@ exports[`DataSourceSelector: check dataSource options should hide prepend if rem
 />
 `;
 
+exports[`DataSourceSelector: check dataSource options should return empty options if filter out all options and hide local cluster 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={Array []}
+  placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={Array []}
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
 exports[`DataSourceSelector: check dataSource options should show custom placeholder text if configured 1`] = `
 <EuiComboBox
   aria-label="Make a selection"

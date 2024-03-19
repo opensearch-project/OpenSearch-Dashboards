@@ -28,17 +28,29 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
+import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../overlays';
 
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;
-}> = ({ chromeVisible$, children }) => {
+  sidecarConfig$: Observable<ISidecarConfig | undefined>;
+}> = ({ chromeVisible$, sidecarConfig$, children }) => {
   const visible = useObservable(chromeVisible$);
+  const sidecarConfig = useObservable(sidecarConfig$, undefined);
+
+  const sidecarPaddingStyle = useMemo(() => {
+    return getOsdSidecarPaddingStyle(sidecarConfig);
+  }, [sidecarConfig]);
+
   return (
-    <div id="app-wrapper" className={classNames('app-wrapper', { 'hidden-chrome': !visible })}>
+    <div
+      id="app-wrapper"
+      className={classNames('app-wrapper', { 'hidden-chrome': !visible })}
+      style={sidecarPaddingStyle}
+    >
       {children}
     </div>
   );

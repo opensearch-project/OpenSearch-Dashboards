@@ -1927,6 +1927,58 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  sidecarConfig$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "dockedMode": "right",
+        "paddingSize": 640,
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   survey="/"
 >
   <header
@@ -2418,10 +2470,20 @@ exports[`Header handles visibility and lock changes 1`] = `
             },
           ]
         }
+        style={
+          Object {
+            "paddingRight": 640,
+          }
+        }
         theme="dark"
       >
         <div
           className="euiHeader euiHeader--dark euiHeader--fixed expandedHeader"
+          style={
+            Object {
+              "paddingRight": 640,
+            }
+          }
         >
           <EuiHeaderSection
             key="items-0"
@@ -2913,9 +2975,19 @@ exports[`Header handles visibility and lock changes 1`] = `
       <EuiHeader
         className="primaryHeader"
         position="fixed"
+        style={
+          Object {
+            "paddingRight": 640,
+          }
+        }
       >
         <div
           className="euiHeader euiHeader--default euiHeader--fixed primaryHeader"
+          style={
+            Object {
+              "paddingRight": 640,
+            }
+          }
         >
           <EuiHeaderSection
             grow={false}
@@ -8455,6 +8527,58 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  sidecarConfig$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "dockedMode": "right",
+        "paddingSize": 640,
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   survey="/"
 >
   <header
@@ -8467,9 +8591,19 @@ exports[`Header renders condensed header 1`] = `
       <EuiHeader
         className="primaryHeader"
         position="fixed"
+        style={
+          Object {
+            "paddingRight": 640,
+          }
+        }
       >
         <div
           className="euiHeader euiHeader--default euiHeader--fixed primaryHeader"
+          style={
+            Object {
+              "paddingRight": 640,
+            }
+          }
         >
           <EuiHeaderSection
             grow={false}

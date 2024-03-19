@@ -31,7 +31,8 @@
 import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import PropTypes from 'prop-types';
-import { Home } from './home';
+import { Home } from './legacy/home';
+import { Homepage } from './homepage';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
@@ -40,6 +41,7 @@ import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../opensearch_dashboards_services';
 import { useMount } from 'react-use';
+import { USE_NEW_HOME_PAGE } from '../../../common/constants';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
@@ -56,6 +58,7 @@ export function HomeApp({ directories, solutions }) {
     addBasePath,
     environmentService,
     telemetry,
+    uiSettings,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
@@ -83,6 +86,20 @@ export function HomeApp({ directories, solutions }) {
     );
   };
 
+  const legacyHome = (
+    <Home
+      addBasePath={addBasePath}
+      directories={directories}
+      solutions={solutions}
+      find={savedObjectsClient.find}
+      localStorage={localStorage}
+      urlBasePath={getBasePath()}
+      telemetry={telemetry}
+    />
+  );
+
+  const homepage = <Homepage />;
+
   return (
     <I18nProvider>
       <Router>
@@ -92,17 +109,25 @@ export function HomeApp({ directories, solutions }) {
           <Route exact path="/feature_directory">
             <FeatureDirectory addBasePath={addBasePath} directories={directories} />
           </Route>
-          <Route exact path="/">
-            <Home
-              addBasePath={addBasePath}
-              directories={directories}
-              solutions={solutions}
-              find={savedObjectsClient.find}
-              localStorage={localStorage}
-              urlBasePath={getBasePath()}
-              telemetry={telemetry}
-            />
-          </Route>
+          {uiSettings.get(USE_NEW_HOME_PAGE) ? (
+            <>
+              <Route exact path="/legacy-home">
+                {legacyHome}
+              </Route>
+              <Route exact path="/">
+                {homepage}
+              </Route>
+            </>
+          ) : (
+            <>
+              <Route exact path="/next-home">
+                {homepage}
+              </Route>
+              <Route exact path="/">
+                {legacyHome}
+              </Route>
+            </>
+          )}
           <Route path="*" exact={true} component={RedirectToDefaultApp} />
         </Switch>
       </Router>
