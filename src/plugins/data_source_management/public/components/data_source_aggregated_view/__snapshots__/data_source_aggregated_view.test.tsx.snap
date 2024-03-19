@@ -1,5 +1,59 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`DataSourceAggregatedView should render normally with data source filter 1`] = `
+<Fragment>
+  <EuiButtonEmpty
+    aria-label="dataSourceAggregatedViewMenuButton"
+    className="euiHeaderLink"
+    data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+    disabled={true}
+    iconSide="left"
+    iconType="database"
+    size="s"
+  >
+    Data sources
+  </EuiButtonEmpty>
+  <EuiNotificationBadge
+    color="subdued"
+  >
+    All
+  </EuiNotificationBadge>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiButtonIcon
+        aria-label="show data sources"
+        data-test-subj="dataSourceAggregatedViewInfoButton"
+        display="empty"
+        iconType="iInCircle"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <EuiContextMenu
+      initialPanelId={0}
+      panels={
+        Array [
+          Object {
+            "id": 0,
+            "items": Array [],
+            "title": "Selected data sources",
+          },
+        ]
+      }
+      size="m"
+    />
+  </EuiPopover>
+</Fragment>
+`;
+
 exports[`DataSourceAggregatedView should render normally with local cluster and actice selections 1`] = `
 <Fragment>
   <EuiButtonEmpty
@@ -59,7 +113,7 @@ exports[`DataSourceAggregatedView should render normally with local cluster and 
 </Fragment>
 `;
 
-exports[`DataSourceAggregatedView should render normally with local cluster and actice selections 2`] = `
+exports[`DataSourceAggregatedView should render normally with local cluster hidden and all options 1`] = `
 <Fragment>
   <EuiButtonEmpty
     aria-label="dataSourceAggregatedViewMenuButton"
@@ -103,7 +157,7 @@ exports[`DataSourceAggregatedView should render normally with local cluster and 
           Object {
             "id": 0,
             "items": Array [],
-            "title": "Selected data sources",
+            "title": "Data sources (0)",
           },
         ]
       }
@@ -113,7 +167,61 @@ exports[`DataSourceAggregatedView should render normally with local cluster and 
 </Fragment>
 `;
 
-exports[`DataSourceAggregatedView should render normally with local cluster and actice selections 3`] = `
+exports[`DataSourceAggregatedView should render normally with local cluster not hidden and all options 1`] = `
+<Fragment>
+  <EuiButtonEmpty
+    aria-label="dataSourceAggregatedViewMenuButton"
+    className="euiHeaderLink"
+    data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+    disabled={true}
+    iconSide="left"
+    iconType="database"
+    size="s"
+  >
+    Data sources
+  </EuiButtonEmpty>
+  <EuiNotificationBadge
+    color="subdued"
+  >
+    All
+  </EuiNotificationBadge>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiButtonIcon
+        aria-label="show data sources"
+        data-test-subj="dataSourceAggregatedViewInfoButton"
+        display="empty"
+        iconType="iInCircle"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <EuiContextMenu
+      initialPanelId={0}
+      panels={
+        Array [
+          Object {
+            "id": 0,
+            "items": Array [],
+            "title": "Data sources (0)",
+          },
+        ]
+      }
+      size="m"
+    />
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView should render popup when clicking on info icon 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -338,112 +446,4 @@ Object {
   "rerender": [Function],
   "unmount": [Function],
 }
-`;
-
-exports[`DataSourceAggregatedView should render normally with local cluster hidden and all options 1`] = `
-<Fragment>
-  <EuiButtonEmpty
-    aria-label="dataSourceAggregatedViewMenuButton"
-    className="euiHeaderLink"
-    data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-    disabled={true}
-    iconSide="left"
-    iconType="database"
-    size="s"
-  >
-    Data sources
-  </EuiButtonEmpty>
-  <EuiNotificationBadge
-    color="subdued"
-  >
-    All
-  </EuiNotificationBadge>
-  <EuiPopover
-    anchorPosition="downLeft"
-    button={
-      <EuiButtonIcon
-        aria-label="show data sources"
-        data-test-subj="dataSourceAggregatedViewInfoButton"
-        display="empty"
-        iconType="iInCircle"
-        onClick={[Function]}
-      />
-    }
-    closePopover={[Function]}
-    display="inlineBlock"
-    hasArrow={true}
-    id="dataSourceSViewContextMenuPopover"
-    isOpen={false}
-    ownFocus={true}
-    panelPaddingSize="none"
-  >
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={
-        Array [
-          Object {
-            "id": 0,
-            "items": Array [],
-            "title": "Data sources (0)",
-          },
-        ]
-      }
-      size="m"
-    />
-  </EuiPopover>
-</Fragment>
-`;
-
-exports[`DataSourceAggregatedView should render normally with local cluster not hidden and all options 1`] = `
-<Fragment>
-  <EuiButtonEmpty
-    aria-label="dataSourceAggregatedViewMenuButton"
-    className="euiHeaderLink"
-    data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-    disabled={true}
-    iconSide="left"
-    iconType="database"
-    size="s"
-  >
-    Data sources
-  </EuiButtonEmpty>
-  <EuiNotificationBadge
-    color="subdued"
-  >
-    All
-  </EuiNotificationBadge>
-  <EuiPopover
-    anchorPosition="downLeft"
-    button={
-      <EuiButtonIcon
-        aria-label="show data sources"
-        data-test-subj="dataSourceAggregatedViewInfoButton"
-        display="empty"
-        iconType="iInCircle"
-        onClick={[Function]}
-      />
-    }
-    closePopover={[Function]}
-    display="inlineBlock"
-    hasArrow={true}
-    id="dataSourceSViewContextMenuPopover"
-    isOpen={false}
-    ownFocus={true}
-    panelPaddingSize="none"
-  >
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={
-        Array [
-          Object {
-            "id": 0,
-            "items": Array [],
-            "title": "Data sources (0)",
-          },
-        ]
-      }
-      size="m"
-    />
-  </EuiPopover>
-</Fragment>
 `;
