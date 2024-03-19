@@ -182,7 +182,13 @@ export {
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
+export {
+  OverlayStart,
+  OverlayBannersStart,
+  OverlayRef,
+  ISidecarConfig,
+  SIDECAR_DOCKED_MODE,
+} from './overlays';
 
 export {
   Toast,
@@ -351,4 +357,6 @@ export {
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspacesStart, WorkspacesSetup } from './workspace';
+export { WorkspacesStart, WorkspacesSetup, WorkspacesService } from './workspace';
+
+export { WORKSPACE_TYPE } from '../utils';

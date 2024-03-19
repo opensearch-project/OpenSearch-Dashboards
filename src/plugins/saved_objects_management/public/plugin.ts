@@ -38,7 +38,11 @@ import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
 import { DiscoverStart } from '../../discover/public';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
+import {
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+  FeatureCatalogueCategory,
+} from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisAugmenterStart } from '../../vis_augmenter/public';
 import {
@@ -78,6 +82,7 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
+  home?: HomePublicPluginStart;
   data: DataPublicPluginStart;
   dashboard?: DashboardStart;
   visualizations?: VisualizationsStart;

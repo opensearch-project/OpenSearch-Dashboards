@@ -15,8 +15,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { getDataSources } from '../utils';
+import { getDataSourcesWithFields } from '../utils';
 import { DataSourceOption, LocalCluster } from '../data_source_selector/data_source_selector';
+import { SavedObject } from '../../../../../core/public';
+import { DataSourceAttributes } from '../../types';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -26,6 +28,7 @@ interface DataSourceSelectableProps {
   hideLocalCluster: boolean;
   fullWidth: boolean;
   selectedOption?: DataSourceOption[];
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
 }
 
 interface DataSourceSelectableState {
@@ -69,18 +72,26 @@ export class DataSourceSelectable extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
-    getDataSources(this.props.savedObjectsClient)
+    getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
-          let dataSourceOptions = fetchedDataSources.map((dataSource) => ({
-            id: dataSource.id,
-            label: dataSource.title,
-          }));
+          let filteredDataSources = [];
+          if (this.props.dataSourceFilter) {
+            filteredDataSources = fetchedDataSources.filter((ds) =>
+              this.props.dataSourceFilter!(ds)
+            );
+          }
 
-          dataSourceOptions = dataSourceOptions.sort((a, b) =>
-            a.label.toLowerCase().localeCompare(b.label.toLowerCase())
-          );
+          if (filteredDataSources.length === 0) {
+            filteredDataSources = fetchedDataSources;
+          }
 
+          const dataSourceOptions = filteredDataSources
+            .map((dataSource) => ({
+              id: dataSource.id,
+              label: dataSource.attributes?.title || '',
+            }))
+            .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
           if (!this.props.hideLocalCluster) {
             dataSourceOptions.unshift(LocalCluster);
           }

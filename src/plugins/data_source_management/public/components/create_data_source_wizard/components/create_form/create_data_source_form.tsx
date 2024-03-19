@@ -101,7 +101,7 @@ export class CreateDataSourceForm extends React.Component<
       auth: {
         type: initialSelectedAuthMethod?.name,
         credentials: {
-          ...initialSelectedAuthMethod?.crendentialFormField,
+          ...initialSelectedAuthMethod?.credentialFormField,
         },
       },
     };
@@ -153,15 +153,20 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   onChangeAuthType = (authType: AuthType) => {
+    const credentials = this.state.auth.credentials;
+
+    const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
+      (credentials ?? {}) as { [key: string]: string },
+      authType,
+      this.authenticationMethodRegistery
+    );
+
     this.setState({
       auth: {
         ...this.state.auth,
         type: authType,
         credentials: {
-          ...this.state.auth.credentials,
-          service:
-            (this.state.auth.credentials.service as SigV4ServiceName) ||
-            SigV4ServiceName.OpenSearch,
+          ...registeredAuthCredentials,
         },
       },
     });

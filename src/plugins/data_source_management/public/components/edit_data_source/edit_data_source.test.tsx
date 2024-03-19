@@ -29,6 +29,7 @@ const notFoundIdentifier = '[data-test-subj="dataSourceNotFound"]';
 
 describe('Datasource Management: Edit Datasource Wizard', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const uiSettings = mockedContext.uiSettings;
   mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
     noAuthCredentialAuthMethod
   );
@@ -124,6 +125,16 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       });
       component.update();
       expect(utils.updateDataSourceById).toHaveBeenCalled();
+    });
+    test('should set default data source', async () => {
+      spyOn(uiSettings, 'set').and.returnValue({});
+      await act(async () => {
+        // @ts-ignore
+        await component.find(formIdentifier).first().prop('onSetDefaultDataSource')(
+          mockDataSourceAttributesWithAuth
+        );
+      });
+      expect(uiSettings.set).toHaveBeenCalled();
     });
     test('should delete datasource successfully', async () => {
       spyOn(utils, 'deleteDataSourceById').and.returnValue({});
