@@ -35,4 +35,27 @@ export class DataSourceConnectionValidator {
       throw createDataSourceError(e);
     }
   }
+
+  async fetchDataSourceVersion() {
+    let dataSourceVersion = '';
+    try {
+      // OpenSearch Serverless does not have version concept
+      if (
+        this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
+      ) {
+        return dataSourceVersion;
+      }
+      await this.callDataCluster
+        .info()
+        .then((response) => response.body)
+        .then((body) => {
+          dataSourceVersion = body.version.number;
+        });
+
+      return dataSourceVersion;
+    } catch (e) {
+      // return empty dataSoyrce version instead of throwing exception in case info() api call fails
+      return dataSourceVersion;
+    }
+  }
 }

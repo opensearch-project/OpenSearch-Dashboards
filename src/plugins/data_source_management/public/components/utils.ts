@@ -119,6 +119,27 @@ export async function testConnection(
   });
 }
 
+export async function fetchDataSourceVersion(
+  http: HttpStart,
+  { endpoint, auth: { type, credentials } }: DataSourceAttributes,
+  dataSourceID?: string
+) {
+  const query: any = {
+    id: dataSourceID,
+    dataSourceAttr: {
+      endpoint,
+      auth: {
+        type,
+        credentials,
+      },
+    },
+  };
+
+  return await http.post(`/internal/data-source-management/fetchDataSourceVersion`, {
+    body: JSON.stringify(query),
+  });
+}
+
 export const isValidUrl = (endpoint: string) => {
   try {
     const url = new URL(endpoint);
