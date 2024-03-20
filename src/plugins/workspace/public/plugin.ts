@@ -25,7 +25,7 @@ interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
-export class WorkspacePlugin implements Plugin<{}, {}> {
+export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private _changeSavedObjectCurrentWorkspace() {
