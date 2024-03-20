@@ -103,6 +103,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Add @ruanyl as a maintainer ([#5982](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5982))
 - Add @BionIT as a maintainer ([#5988](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5988))
 - Move @kristenTian to emeritus maintainer ([#6136](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6136))
+- Add @xinruiba as a maintainer ([#6217](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6217))
 
 ### 🪛 Refactoring
 
