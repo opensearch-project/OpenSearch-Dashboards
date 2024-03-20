@@ -15,7 +15,7 @@ export const renderFatalErrorApp = (params: AppMountParameters, services: Servic
   const history = params.history as ScopedHistory<{ error?: string }>;
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceFatalError error={history.location.state.error} />
+      <WorkspaceFatalError error={history.location.state?.error} />
     </OpenSearchDashboardsContextProvider>,
     element
   );

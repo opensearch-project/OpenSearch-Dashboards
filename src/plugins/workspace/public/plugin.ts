@@ -55,7 +55,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
           application.navigateToApp(WORKSPACE_FATAL_ERROR_APP_ID, {
             replace: true,
             state: {
-              error: result.error,
+              error: result?.error,
             },
           });
         })();
