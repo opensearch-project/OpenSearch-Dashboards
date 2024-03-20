@@ -51,7 +51,9 @@ export function parseClientOptions(
         throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
     }
 
-    const { certificateAuthorities } = readCertificateAuthorities(config);
+    const { certificateAuthorities } = readCertificateAuthorities(
+      config.ssl?.certificateAuthorities
+    );
 
     sslConfig.ca = certificateAuthorities || [];
   }

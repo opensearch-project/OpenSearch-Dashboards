@@ -52,7 +52,9 @@ export function parseClientOptions(
         throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
     }
 
-    const { certificateAuthorities } = readCertificateAuthorities(config);
+    const { certificateAuthorities } = readCertificateAuthorities(
+      config.ssl?.certificateAuthorities
+    );
 
     sslConfig.ca = certificateAuthorities || [];
   }
@@ -66,25 +68,25 @@ export function parseClientOptions(
   return clientOptions;
 }
 
-export const readCertificateAuthorities = (rawConfig: any) => {
+export const readCertificateAuthorities = (
+  listOfCertificateAuthorities: string | string[] | undefined
+) => {
   let certificateAuthorities: string[] | undefined;
 
-  const addCAs = (ca: string[] | undefined) => {
+  const addCertificateAuthorities = (ca: string[]) => {
     if (ca && ca.length) {
       certificateAuthorities = [...(certificateAuthorities || []), ...ca];
     }
   };
 
-  const ca = rawConfig.ssl.certificateAuthorities;
+  const ca = listOfCertificateAuthorities;
   if (ca) {
     const parsed: string[] = [];
     const paths = Array.isArray(ca) ? ca : [ca];
-    if (paths.length > 0) {
-      for (const path of paths) {
-        parsed.push(readFile(path));
-      }
-      addCAs(parsed);
+    for (const path of paths) {
+      parsed.push(readFile(path));
     }
+    addCertificateAuthorities(parsed);
   }
 
   return {
