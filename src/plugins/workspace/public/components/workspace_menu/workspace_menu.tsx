@@ -177,7 +177,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
 
   return (
     <EuiPopover
-      id="contextMenuExample"
+      id="workspaceDropdownMenu"
       display="block"
       button={currentWorkspaceButton}
       isOpen={isPopoverOpen}
