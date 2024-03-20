@@ -14,6 +14,7 @@ import { act } from 'react-dom/test-utils';
 const headerTitleIdentifier = '[data-test-subj="editDataSourceTitle"]';
 const deleteIconIdentifier = '[data-test-subj="editDatasourceDeleteIcon"]';
 const confirmModalIdentifier = '[data-test-subj="editDatasourceDeleteConfirmModal"]';
+const setDefaultButtonIdentifier = '[data-test-subj="editSetDefaultDataSource"]';
 
 describe('Datasource Management: Edit Datasource Header', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
@@ -31,6 +32,8 @@ describe('Datasource Management: Edit Datasource Header', () => {
             onClickDeleteIcon={mockFn}
             onClickTestConnection={mockFn}
             dataSourceName={dataSourceName}
+            onClickSetDefault={mockFn}
+            isDefault={false}
           />
         ),
         {
@@ -82,6 +85,8 @@ describe('Datasource Management: Edit Datasource Header', () => {
             onClickDeleteIcon={mockFn}
             onClickTestConnection={mockFn}
             dataSourceName={dataSourceName}
+            onClickSetDefault={mockFn}
+            isDefault={false}
           />
         ),
         {
@@ -95,6 +100,78 @@ describe('Datasource Management: Edit Datasource Header', () => {
     test('should render normally', () => {
       expect(component.find(headerTitleIdentifier).last().text()).toBe(dataSourceName);
       expect(component.find(deleteIconIdentifier).exists()).toBe(false);
+    });
+  });
+  describe('should render default icon as "Set as default" when isDefaultDataSourceState is false', () => {
+    const onClickSetDefault = jest.fn();
+    const isDefaultDataSourceState = false;
+    beforeEach(() => {
+      component = mount(
+        wrapWithIntl(
+          <Header
+            isFormValid={true}
+            showDeleteIcon={true}
+            onClickDeleteIcon={mockFn}
+            onClickTestConnection={mockFn}
+            dataSourceName={dataSourceName}
+            onClickSetDefault={onClickSetDefault}
+            isDefault={isDefaultDataSourceState}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+    });
+
+    test('should render normally', () => {
+      expect(component.find(setDefaultButtonIdentifier).exists()).toBe(true);
+    });
+    test('default button should show as "Set as default" and should be clickable', () => {
+      expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Set as default');
+      expect(component.find(setDefaultButtonIdentifier).first().prop('disabled')).toBe(false);
+      expect(component.find(setDefaultButtonIdentifier).first().prop('iconType')).toBe('starEmpty');
+      component.find(setDefaultButtonIdentifier).first().simulate('click');
+      expect(onClickSetDefault).toHaveBeenCalled();
+    });
+  });
+  describe('should render default icon as "Default" when isDefaultDataSourceState is true', () => {
+    const onClickSetDefault = jest.fn();
+    const isDefaultDataSourceState = true;
+    beforeEach(() => {
+      component = mount(
+        wrapWithIntl(
+          <Header
+            isFormValid={true}
+            showDeleteIcon={true}
+            onClickDeleteIcon={mockFn}
+            onClickTestConnection={mockFn}
+            dataSourceName={dataSourceName}
+            onClickSetDefault={onClickSetDefault}
+            isDefault={isDefaultDataSourceState}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+    });
+
+    test('should render normally', () => {
+      expect(component.find(setDefaultButtonIdentifier).exists()).toBe(true);
+    });
+    test('default button should show as "Default" and should be disabled.', () => {
+      expect(component.find(setDefaultButtonIdentifier).first().text()).toBe('Default');
+      expect(component.find(setDefaultButtonIdentifier).first().prop('disabled')).toBe(true);
+      expect(component.find(setDefaultButtonIdentifier).first().prop('iconType')).toBe(
+        'starFilled'
+      );
     });
   });
 });
