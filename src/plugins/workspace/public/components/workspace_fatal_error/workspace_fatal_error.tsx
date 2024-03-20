@@ -47,7 +47,7 @@ export function WorkspaceFatalError(props: { error?: string }) {
               <p>
                 <FormattedMessage
                   id="core.fatalErrors.tryGoBackToDefaultWorkspaceDescription"
-                  defaultMessage="The workspace you want to go can not be found, try go back to home."
+                  defaultMessage="The workspace you are trying to access cannot be found. Please return to the homepage and try again."
                 />
               </p>
             }
@@ -55,7 +55,7 @@ export function WorkspaceFatalError(props: { error?: string }) {
               <EuiButton color="primary" fill onClick={goBackToHome}>
                 <FormattedMessage
                   id="core.fatalErrors.goBackToHome"
-                  defaultMessage="Go back to home"
+                  defaultMessage="Go back to homepage"
                 />
               </EuiButton>,
             ]}
