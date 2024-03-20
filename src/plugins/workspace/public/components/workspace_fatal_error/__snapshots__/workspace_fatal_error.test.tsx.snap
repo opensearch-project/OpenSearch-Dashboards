@@ -41,7 +41,7 @@ exports[`<WorkspaceFatalError /> render error with callout 1`] = `
             >
               <p>
                 <span>
-                  The workspace you want to go can not be found, try go back to home.
+                  The workspace you are trying to access cannot be found. Please return to the homepage and try again.
                 </span>
               </p>
             </div>
@@ -66,7 +66,7 @@ exports[`<WorkspaceFatalError /> render error with callout 1`] = `
                     class="euiButton__text"
                   >
                     <span>
-                      Go back to home
+                      Go back to homepage
                     </span>
                   </span>
                 </span>
@@ -140,7 +140,7 @@ exports[`<WorkspaceFatalError /> render normally 1`] = `
             >
               <p>
                 <span>
-                  The workspace you want to go can not be found, try go back to home.
+                  The workspace you are trying to access cannot be found. Please return to the homepage and try again.
                 </span>
               </p>
             </div>
@@ -165,7 +165,7 @@ exports[`<WorkspaceFatalError /> render normally 1`] = `
                     class="euiButton__text"
                   >
                     <span>
-                      Go back to home
+                      Go back to homepage
                     </span>
                   </span>
                 </span>

@@ -31,7 +31,7 @@ describe('<WorkspaceFatalError />', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('click go back to home', async () => {
+  it('click go back to homepage', async () => {
     const { location } = window;
     const setHrefSpy = jest.fn((href) => href);
     if (window.location) {
@@ -57,7 +57,7 @@ describe('<WorkspaceFatalError />', () => {
         </context.Provider>
       </IntlProvider>
     );
-    fireEvent.click(getByText('Go back to home'));
+    fireEvent.click(getByText('Go back to homepage'));
     await waitFor(
       () => {
         expect(setHrefSpy).toBeCalledTimes(1);
