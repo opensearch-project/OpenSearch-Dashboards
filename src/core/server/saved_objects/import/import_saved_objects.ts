@@ -117,6 +117,7 @@ export async function importSavedObjectsFromStream({
         objects: checkConflictsResult.filteredObjects,
         ignoreRegularConflicts: overwrite,
         dataSourceId,
+        savedObjectsClient,
       });
       checkOriginConflictsParams.objects = checkConflictsForDataSourceResult.filteredObjects;
     }
