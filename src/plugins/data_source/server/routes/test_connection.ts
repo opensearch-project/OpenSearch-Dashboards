@@ -9,14 +9,14 @@ import { AuthType, DataSourceAttributes, SigV4ServiceName } from '../../common/d
 import { DataSourceConnectionValidator } from './data_source_connection_validator';
 import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
-import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { IAuthenticationMethodRegistry } from '../auth_registry';
 import { CustomApiSchemaRegistry } from '../schema_registry/custom_api_schema_registry';
 
 export const registerTestConnectionRoute = async (
   router: IRouter,
   dataSourceServiceSetup: DataSourceServiceSetup,
   cryptography: CryptographyServiceSetup,
-  authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
+  authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
   customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
 ) => {
   const authRegistry = await authRegistryPromise;
