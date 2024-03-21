@@ -19,11 +19,13 @@ const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
 const tableIdentifier = 'EuiInMemoryTable';
 const confirmModalIdentifier = 'EuiConfirmModal';
 const tableColumnHeaderIdentifier = 'EuiTableHeaderCell';
+const badgeIcon = 'EuiBadge';
 const tableColumnHeaderButtonIdentifier = 'EuiTableHeaderCell .euiTableHeaderButton';
 const emptyStateIdentifier = '[data-test-subj="datasourceTableEmptyState"]';
 
 describe('DataSourceTable', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
   describe('should get datasources failed', () => {
@@ -57,6 +59,7 @@ describe('DataSourceTable', () => {
   describe('should get datasources successful', () => {
     beforeEach(async () => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
+      spyOn(uiSettings, 'get').and.returnValue('test');
       await act(async () => {
         component = await mount(
           wrapWithIntl(
@@ -83,6 +86,7 @@ describe('DataSourceTable', () => {
     });
 
     it('should sort datasources based on description', () => {
+      expect(component.find(badgeIcon).exists()).toBe(true);
       expect(component.find(tableIdentifier).exists()).toBe(true);
       act(() => {
         component.find(tableColumnHeaderButtonIdentifier).last().simulate('click');
@@ -90,6 +94,7 @@ describe('DataSourceTable', () => {
       component.update();
       // @ts-ignore
       expect(component.find(tableColumnHeaderIdentifier).last().props().isSorted).toBe(true);
+      expect(uiSettings.get).toHaveBeenCalled();
     });
 
     it('should enable delete button when select datasources', () => {
