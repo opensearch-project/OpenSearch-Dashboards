@@ -128,7 +128,12 @@ export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
       panelPaddingSize="none"
     >
       <EuiPopoverTitle paddingSize="s">
-        <EuiFieldSearch compressed onSearch={search} isClearable={true} />
+        <EuiFieldSearch
+          compressed
+          onSearch={search}
+          isClearable={true}
+          data-test-subj="dataSourceMultiSelectFieldSearch"
+        />
       </EuiPopoverTitle>
       <div className="ouiFilterSelect__items" style={{ maxHeight: 400, overflow: 'scroll' }}>
         {selectedOptions.map((item, index) => {
