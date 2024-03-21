@@ -22,7 +22,6 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const [color, setColor] = useState(defaultValues?.color);
 
   const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.FeatureVisibility);
-  const [numberOfErrors, setNumberOfErrors] = useState(0);
   // The matched feature id list based on original feature config,
   // the feature category will be expanded to list of feature ids
   const defaultFeatures = useMemo(() => {
@@ -39,6 +38,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   );
 
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
+  const numberOfErrors = useMemo(() => getNumberOfErrors(formErrors), [formErrors]);
   const formIdRef = useRef<string>();
   const getFormData = () => ({
     name,
@@ -66,7 +66,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
           }),
         };
       }
-      if (!isValidNameOrDescription(formData.name)) {
+      if (formData.name && !isValidNameOrDescription(formData.name)) {
         currentFormErrors = {
           ...currentFormErrors,
           name: i18n.translate('workspace.form.detail.name.invalid', {
@@ -74,7 +74,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
           }),
         };
       }
-      if (!isValidNameOrDescription(formData.description)) {
+      if (formData.description && !isValidNameOrDescription(formData.description)) {
         currentFormErrors = {
           ...currentFormErrors,
           description: i18n.translate('workspace.form.detail.description.invalid', {
@@ -82,10 +82,8 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
           }),
         };
       }
-      const currentNumberOfErrors = getNumberOfErrors(currentFormErrors);
       setFormErrors(currentFormErrors);
-      setNumberOfErrors(currentNumberOfErrors);
-      if (currentNumberOfErrors > 0) {
+      if (getNumberOfErrors(currentFormErrors) > 0) {
         return;
       }
 

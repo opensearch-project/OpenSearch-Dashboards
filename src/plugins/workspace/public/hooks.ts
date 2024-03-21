@@ -7,8 +7,8 @@ import { ApplicationStart, PublicAppInfo } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { useMemo } from 'react';
 
-export function useApplications(application: ApplicationStart) {
-  const applications = useObservable(application.applications$);
+export function useApplications(applicationInstance: ApplicationStart) {
+  const applications = useObservable(applicationInstance.applications$);
   return useMemo(() => {
     const apps: PublicAppInfo[] = [];
     applications?.forEach((app) => {

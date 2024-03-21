@@ -87,13 +87,13 @@ describe('WorkspaceCreator', () => {
     window.location = location;
   });
 
-  it('cannot create workspace when name empty', async () => {
+  it('should not create workspace when name is empty', async () => {
     const { getByTestId } = render(<WorkspaceCreator />);
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).not.toHaveBeenCalled();
   });
 
-  it('cannot create workspace with invalid name', async () => {
+  it('should not create workspace with invalid name', async () => {
     const { getByTestId } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
@@ -102,7 +102,7 @@ describe('WorkspaceCreator', () => {
     expect(workspaceClientCreate).not.toHaveBeenCalled();
   });
 
-  it('cannot create workspace with invalid description', async () => {
+  it('should not create workspace with invalid description', async () => {
     const { getByTestId } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
@@ -176,6 +176,23 @@ describe('WorkspaceCreator', () => {
 
   it('should show danger toasts after create workspace failed', async () => {
     workspaceClientCreate.mockReturnValue({ result: { id: 'failResult' }, success: false });
+    const { getByTestId } = render(<WorkspaceCreator />);
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(notificationToastsAddDanger).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
+  });
+
+  it('should show danger toasts after call create workspace API failed', async () => {
+    workspaceClientCreate.mockImplementation(async () => {
+      throw new Error();
+    });
     const { getByTestId } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {

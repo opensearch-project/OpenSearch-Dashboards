@@ -32,10 +32,10 @@ export const WorkspaceCancelModal = ({
       })}
       onCancel={closeCancelModal}
       onConfirm={() => application?.navigateToApp(WORKSPACE_LIST_APP_ID)}
-      cancelButtonText={i18n.translate('workspace.form.cancelButtonText.', {
+      cancelButtonText={i18n.translate('workspace.form.cancelButtonText', {
         defaultMessage: 'Continue editing',
       })}
-      confirmButtonText={i18n.translate('workspace.form.confirmButtonText.', {
+      confirmButtonText={i18n.translate('workspace.form.confirmButtonText', {
         defaultMessage: 'Discard changes',
       })}
       buttonColor="danger"

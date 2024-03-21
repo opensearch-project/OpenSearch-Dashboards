@@ -23,7 +23,7 @@ import {
 } from '../../../../../core/public';
 
 import { WorkspaceFeature, WorkspaceFeatureGroup } from './types';
-import { isDefaultCheckedFeatureId, isWorkspaceFeatureGroup } from './utils';
+import { isDefaultSelectedFeatureId, isWorkspaceFeatureGroup } from './utils';
 
 const libraryCategoryLabel = i18n.translate('core.ui.libraryNavList.label', {
   defaultMessage: 'Library',
@@ -40,7 +40,7 @@ export const WorkspaceFeatureSelector = ({
   selectedFeatures,
   onChange,
 }: WorkspaceFeatureSelectorProps) => {
-  const featureOrGroups = useMemo(() => {
+  const featuresOrGroups = useMemo(() => {
     const transformedApplications = applications.map((app) => {
       if (app.category?.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id) {
         return {
@@ -105,7 +105,7 @@ export const WorkspaceFeatureSelector = ({
 
   const handleFeatureGroupChange = useCallback<EuiCheckboxProps['onChange']>(
     (e) => {
-      const featureOrGroup = featureOrGroups.find(
+      const featureOrGroup = featuresOrGroups.find(
         (item) => isWorkspaceFeatureGroup(item) && item.name === e.target.id
       );
       if (!featureOrGroup || !isWorkspaceFeatureGroup(featureOrGroup)) {
@@ -122,12 +122,12 @@ export const WorkspaceFeatureSelector = ({
       // Need to un-check these features, if all features in group has been selected
       onChange(selectedFeatures.filter((featureId) => !groupFeatureIds.includes(featureId)));
     },
-    [featureOrGroups, selectedFeatures, onChange]
+    [featuresOrGroups, selectedFeatures, onChange]
   );
 
   return (
     <>
-      {featureOrGroups.map((featureOrGroup) => {
+      {featuresOrGroups.map((featureOrGroup) => {
         const features = isWorkspaceFeatureGroup(featureOrGroup) ? featureOrGroup.features : [];
         const selectedIds = selectedFeatures.filter((id) =>
           (isWorkspaceFeatureGroup(featureOrGroup)
@@ -175,7 +175,7 @@ export const WorkspaceFeatureSelector = ({
                 checked={selectedIds.length > 0}
                 disabled={
                   !isWorkspaceFeatureGroup(featureOrGroup) &&
-                  isDefaultCheckedFeatureId(featureOrGroup.id)
+                  isDefaultSelectedFeatureId(featureOrGroup.id)
                 }
                 indeterminate={
                   isWorkspaceFeatureGroup(featureOrGroup) &&
@@ -189,7 +189,7 @@ export const WorkspaceFeatureSelector = ({
                   options={featureOrGroup.features.map((item) => ({
                     id: item.id,
                     label: item.name,
-                    disabled: isDefaultCheckedFeatureId(item.id),
+                    disabled: isDefaultSelectedFeatureId(item.id),
                   }))}
                   idToSelectedMap={selectedIds.reduce(
                     (previousValue, currentValue) => ({
