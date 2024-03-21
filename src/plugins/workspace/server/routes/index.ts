@@ -125,9 +125,10 @@ export function registerRoutes({
       const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> = attributes;
 
       if (isPermissionControlEnabled) {
-        const acl = new ACL(permissions);
+        createPayload.permissions = permissions;
         // Assign workspace owner to current user
         if (!!principals?.users?.length) {
+          const acl = new ACL(permissions);
           const currentUserId = principals.users[0];
           [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite].forEach(
             (permissionMode) => {
@@ -136,8 +137,8 @@ export function registerRoutes({
               }
             }
           );
+          createPayload.permissions = acl.getPermissions();
         }
-        createPayload.permissions = acl.getPermissions();
       }
 
       const result = await client.create(
