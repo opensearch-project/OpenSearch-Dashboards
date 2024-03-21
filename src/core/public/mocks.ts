@@ -74,6 +74,7 @@ function createCoreSetupMock({
 } = {}) {
   const mock = {
     application: applicationServiceMock.createSetupContract(),
+    chrome: chromeServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
