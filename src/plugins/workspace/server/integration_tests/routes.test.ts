@@ -5,8 +5,7 @@
 
 import { WorkspaceAttribute } from 'src/core/types';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
-import { WORKSPACE_TYPE } from '../../../../core/server';
-import { WorkspacePermissionItem } from '../types';
+import { WORKSPACE_TYPE, Permissions } from '../../../../core/server';
 
 const omitId = <T extends { id?: string }>(object: T): Omit<T, 'id'> => {
   const { id, ...others } = object;
@@ -337,7 +336,7 @@ describe('workspace service api integration test when savedObjects.permission.en
         (
           await osd.coreStart.savedObjects
             .createInternalRepository([WORKSPACE_TYPE])
-            .get<{ permissions: WorkspacePermissionItem[] }>(WORKSPACE_TYPE, result.body.result.id)
+            .get<{ permissions: Permissions }>(WORKSPACE_TYPE, result.body.result.id)
         ).permissions
       ).toEqual({ read: { users: ['foo'] } });
     });
@@ -364,7 +363,7 @@ describe('workspace service api integration test when savedObjects.permission.en
         (
           await osd.coreStart.savedObjects
             .createInternalRepository([WORKSPACE_TYPE])
-            .get<{ permissions: WorkspacePermissionItem[] }>(WORKSPACE_TYPE, result.body.result.id)
+            .get<{ permissions: Permissions }>(WORKSPACE_TYPE, result.body.result.id)
         ).permissions
       ).toEqual({ write: { users: ['foo'] } });
     });

@@ -4,9 +4,9 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { CoreSetup, Logger } from '../../../../core/server';
+import { CoreSetup, Logger, PrincipalType, ACL } from '../../../../core/server';
 import { WorkspacePermissionMode } from '../../common/constants';
-import { IWorkspaceClientImpl, WorkspacePermissionItem } from '../types';
+import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
@@ -18,18 +18,15 @@ const workspacePermissionMode = schema.oneOf([
   schema.literal(WorkspacePermissionMode.LibraryWrite),
 ]);
 
-const workspacePermission = schema.oneOf([
-  schema.object({
-    type: schema.literal('user'),
-    userId: schema.string(),
-    modes: schema.arrayOf(workspacePermissionMode),
-  }),
-  schema.object({
-    type: schema.literal('group'),
-    group: schema.string(),
-    modes: schema.arrayOf(workspacePermissionMode),
-  }),
+const principalType = schema.oneOf([
+  schema.literal(PrincipalType.Users),
+  schema.literal(PrincipalType.Groups),
 ]);
+
+const workspacePermissions = schema.recordOf(
+  workspacePermissionMode,
+  schema.recordOf(principalType, schema.arrayOf(schema.string()), {})
+);
 
 const workspaceAttributesSchema = schema.object({
   description: schema.maybe(schema.string()),
@@ -118,29 +115,29 @@ export function registerRoutes({
       validate: {
         body: schema.object({
           attributes: workspaceAttributesSchema,
-          permissions: schema.maybe(
-            schema.oneOf([workspacePermission, schema.arrayOf(workspacePermission)])
-          ),
+          permissions: schema.maybe(workspacePermissions),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { attributes, permissions: permissionsInRequest } = req.body;
+      const { attributes, permissions } = req.body;
       const principals = permissionControlClient?.getPrincipalsFromRequest(req);
-      let permissions: WorkspacePermissionItem[] = [];
-      if (permissionsInRequest) {
-        permissions = Array.isArray(permissionsInRequest)
-          ? permissionsInRequest
-          : [permissionsInRequest];
-      }
+      const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> = attributes;
 
-      // Assign workspace owner to current user
-      if (!!principals?.users?.length) {
-        permissions.push({
-          type: 'user',
-          userId: principals.users[0],
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-        });
+      if (isPermissionControlEnabled) {
+        const acl = new ACL(permissions);
+        // Assign workspace owner to current user
+        if (!!principals?.users?.length) {
+          const currentUserId = principals.users[0];
+          [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite].forEach(
+            (permissionMode) => {
+              if (!acl.hasPermission([permissionMode], { users: [currentUserId] })) {
+                acl.addPermission([permissionMode], { users: [currentUserId] });
+              }
+            }
+          );
+        }
+        createPayload.permissions = acl.getPermissions();
       }
 
       const result = await client.create(
@@ -149,10 +146,7 @@ export function registerRoutes({
           request: req,
           logger,
         },
-        {
-          ...attributes,
-          ...(isPermissionControlEnabled && permissions.length ? { permissions } : {}),
-        }
+        createPayload
       );
       return res.ok({ body: result });
     })
@@ -166,19 +160,13 @@ export function registerRoutes({
         }),
         body: schema.object({
           attributes: workspaceAttributesSchema,
-          permissions: schema.maybe(
-            schema.oneOf([workspacePermission, schema.arrayOf(workspacePermission)])
-          ),
+          permissions: schema.maybe(workspacePermissions),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { id } = req.params;
       const { attributes, permissions } = req.body;
-      let finalPermissions: WorkspacePermissionItem[] = [];
-      if (permissions) {
-        finalPermissions = Array.isArray(permissions) ? permissions : [permissions];
-      }
 
       const result = await client.update(
         {
@@ -189,9 +177,7 @@ export function registerRoutes({
         id,
         {
           ...attributes,
-          ...(isPermissionControlEnabled && finalPermissions.length
-            ? { permissions: finalPermissions }
-            : {}),
+          ...(isPermissionControlEnabled ? { permissions } : {}),
         }
       );
       return res.ok({ body: result });

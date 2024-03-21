@@ -11,11 +11,11 @@ import {
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
+  Permissions,
 } from '../../../core/server';
-import { WorkspacePermissionMode } from '../common/constants';
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
-  permissions?: WorkspacePermissionItem[];
+  permissions?: Permissions;
 }
 
 export interface WorkspaceFindOptions {
@@ -127,15 +127,6 @@ export interface AuthInfo {
   backend_roles?: string[];
   user_name?: string;
 }
-
-export type WorkspacePermissionItem = {
-  modes: Array<
-    | WorkspacePermissionMode.LibraryRead
-    | WorkspacePermissionMode.LibraryWrite
-    | WorkspacePermissionMode.Read
-    | WorkspacePermissionMode.Write
-  >;
-} & ({ type: 'user'; userId: string } | { type: 'group'; group: string });
 
 export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;

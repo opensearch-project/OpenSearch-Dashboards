@@ -10,7 +10,6 @@ import {
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
-  ACL,
 } from '../../../core/server';
 import { WORKSPACE_TYPE } from '../../../core/server';
 import {
@@ -19,34 +18,10 @@ import {
   IResponse,
   IRequestDetail,
   WorkspaceAttributeWithPermission,
-  WorkspacePermissionItem,
 } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
-
-const convertToACL = (
-  workspacePermissions: WorkspacePermissionItem | WorkspacePermissionItem[]
-) => {
-  workspacePermissions = Array.isArray(workspacePermissions)
-    ? workspacePermissions
-    : [workspacePermissions];
-
-  const acl = new ACL();
-
-  workspacePermissions.forEach((permission) => {
-    switch (permission.type) {
-      case 'user':
-        acl.addPermission(permission.modes, { users: [permission.userId] });
-        return;
-      case 'group':
-        acl.addPermission(permission.modes, { groups: [permission.group] });
-        return;
-    }
-  });
-
-  return acl.getPermissions() || {};
-};
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -119,7 +94,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         attributes,
         {
           id,
-          permissions: permissions ? convertToACL(permissions) : undefined,
+          permissions,
         }
       );
       return {
@@ -206,7 +181,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       }
       await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
         id,
-        permissions: permissions ? convertToACL(permissions) : undefined,
+        permissions,
         overwrite: true,
         version: workspaceInDB.version,
       });
