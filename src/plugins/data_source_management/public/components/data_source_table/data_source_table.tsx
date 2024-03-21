@@ -4,6 +4,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
@@ -50,6 +51,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     setBreadcrumbs,
     savedObjects,
     notifications: { toasts },
+    uiSettings,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* Component state variables */
@@ -147,6 +149,11 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)}>
             {name}
           </EuiButtonEmpty>
+          {index.id === uiSettings.get('defaultDataSource', null) ? (
+            <EuiBadge iconType="starFilled" iconSide="left">
+              Default
+            </EuiBadge>
+          ) : null}
         </>
       ),
       dataType: 'string' as const,
