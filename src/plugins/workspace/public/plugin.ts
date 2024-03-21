@@ -32,8 +32,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
       });
     }
   }
-
-  private getWorkspaceIdFromURL(basePath?: string): string | null {
+  private getWorkspaceIdFromURL(basePath: string): string | null {
     return getWorkspaceIdFromUrl(window.location.href, basePath);
   }
 
