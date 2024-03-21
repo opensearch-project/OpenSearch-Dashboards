@@ -18,6 +18,7 @@ import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
+import { getWorkspaceColumn } from './components/workspace_column';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
