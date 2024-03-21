@@ -21,6 +21,7 @@ import {
   WORKSPACE_OVERVIEW_APP_ID,
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_CREATE_APP_ID,
+  WORKSPACE_UPDATE_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { renderWorkspaceMenu } from './render_workspace_menu';
@@ -173,6 +174,19 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       async mount(params: AppMountParameters) {
         const { renderCreatorApp } = await import('./application');
         return mountWorkspaceApp(params, renderCreatorApp);
+      },
+    });
+
+    // update
+    core.application.register({
+      id: WORKSPACE_UPDATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceUpdate', {
+        defaultMessage: 'Update Workspace',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderUpdaterApp } = await import('./application');
+        return mountWorkspaceApp(params, renderUpdaterApp);
       },
     });
 

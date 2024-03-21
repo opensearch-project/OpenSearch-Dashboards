@@ -23,7 +23,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(setupMock, {
       savedObjectsManagement: savedObjectManagementSetupMock,
     });
-    expect(setupMock.application.register).toBeCalledTimes(3);
+    expect(setupMock.application.register).toBeCalledTimes(4);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
     expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
@@ -61,7 +61,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(setupMock, {
       savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(3);
+    expect(setupMock.application.register).toBeCalledTimes(4);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
     expect(setupMock.getStartServices).toBeCalledTimes(1);
