@@ -30,6 +30,7 @@ type WorkspaceAppType = (params: AppMountParameters, services: Services) => () =
 export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
+  private currentWorkspaceIdSubscription?: Subscription;
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -183,7 +184,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
   public start(core: CoreStart) {
     this.coreStart = core;
 
-    this.currentWorkspaceSubscription = this._changeSavedObjectCurrentWorkspace();
+    this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 
     // When starts, filter the nav links based on the current workspace
     this.filterNavLinks(core);
@@ -193,5 +194,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
 
   public stop() {
     this.currentWorkspaceSubscription?.unsubscribe();
+    this.currentWorkspaceIdSubscription?.unsubscribe();
   }
 }
