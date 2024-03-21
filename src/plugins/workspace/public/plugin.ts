@@ -13,7 +13,6 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
   LinksUpdater,
-  WorkspaceAttribute,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -24,7 +23,6 @@ import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
-import { NavLinkWrapper } from '../../../core/public/chrome/nav_links/nav_link';
 import { featureMatchesConfig } from './utils';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
@@ -40,16 +38,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
         }
       });
     }
-  }
-
-  /**
-   * Filter the nav links based on the feature configuration of workspace
-   */
-  private filterByWorkspace(allNavLinks: NavLinkWrapper[], workspace: WorkspaceAttribute | null) {
-    if (!workspace || !workspace.features) return allNavLinks;
-
-    const featureFilter = featureMatchesConfig(workspace.features);
-    return allNavLinks.filter((linkWrapper) => featureFilter(linkWrapper.properties));
   }
 
   /**
@@ -77,8 +65,18 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
        * the nav links of Observability features should not be displayed in left nav bar
        */
       filterLinksByWorkspace = (navLinks) => {
-        const filteredNavLinks = this.filterByWorkspace([...navLinks.values()], currentWorkspace);
-        const newNavLinks = new Map<string, NavLinkWrapper>();
+        /**
+         * Do not filter the nav links when currently not in a workspace, or the current workspace
+         * has no feature configured
+         */
+        if (!currentWorkspace || !currentWorkspace.features) return navLinks;
+
+        const featureFilter = featureMatchesConfig(currentWorkspace.features);
+        const filteredNavLinks = [...navLinks.values()].filter((linkWrapper) =>
+          featureFilter(linkWrapper.properties)
+        );
+
+        const newNavLinks = new Map();
         filteredNavLinks.forEach((chromeNavLink) => {
           newNavLinks.set(chromeNavLink.id, chromeNavLink);
         });
