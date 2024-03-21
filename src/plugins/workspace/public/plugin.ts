@@ -4,18 +4,24 @@
  */
 
 import type { Subscription } from 'rxjs';
+import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
+  Plugin,
+  CoreStart,
+  CoreSetup,
   AppMountParameters,
   AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  Plugin,
 } from '../../../core/public';
-import { WORKSPACE_CREATE_APP_ID } from '../common/constants';
+import {
+  WORKSPACE_FATAL_ERROR_APP_ID,
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_CREATE_APP_ID,
+} from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import { WorkspaceClient } from './workspace_client';
 import { Services } from './types';
+import { WorkspaceClient } from './workspace_client';
+import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
@@ -31,9 +37,11 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
       });
     }
   }
+
   private getWorkspaceIdFromURL(basePath?: string): string | null {
     return getWorkspaceIdFromUrl(window.location.href, basePath);
   }
+
   public async setup(core: CoreSetup) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
@@ -44,7 +52,37 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     const workspaceId = this.getWorkspaceIdFromURL(core.http.basePath.getBasePath());
 
     if (workspaceId) {
-      core.workspaces.currentWorkspaceId$.next(workspaceId);
+      const result = await workspaceClient.enterWorkspace(workspaceId);
+      if (!result.success) {
+        /**
+         * Fatal error service does not support customized actions
+         * So we have to use a self-hosted page to show the errors and redirect.
+         */
+        (async () => {
+          const [{ application, chrome }] = await core.getStartServices();
+          chrome.setIsVisible(false);
+          application.navigateToApp(WORKSPACE_FATAL_ERROR_APP_ID, {
+            replace: true,
+            state: {
+              error: result?.error,
+            },
+          });
+        })();
+      } else {
+        /**
+         * If the workspace id is valid and user is currently on workspace_fatal_error page,
+         * we should redirect user to overview page of workspace.
+         */
+        (async () => {
+          const [{ application }] = await core.getStartServices();
+          const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
+            if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
+              application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+            }
+            currentAppIdSubscription.unsubscribe();
+          });
+        })();
+      }
     }
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
@@ -68,6 +106,27 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
         const { renderCreatorApp } = await import('./application');
         return mountWorkspaceApp(params, renderCreatorApp);
       },
+    });
+
+    // workspace fatal error
+    core.application.register({
+      id: WORKSPACE_FATAL_ERROR_APP_ID,
+      title: '',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderFatalErrorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderFatalErrorApp);
+      },
+    });
+
+    /**
+     * Register workspace dropdown selector on the top of left navigation menu
+     */
+    core.chrome.registerCollapsibleNavHeader(() => {
+      if (!this.coreStart) {
+        return null;
+      }
+      return React.createElement(WorkspaceMenu, { coreStart: this.coreStart });
     });
 
     return {};
