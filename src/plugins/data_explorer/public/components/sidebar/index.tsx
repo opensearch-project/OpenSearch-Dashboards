@@ -68,9 +68,13 @@ export const Sidebar: FC = ({ children }) => {
       // Temporary redirection solution for 2.11, where clicking non-index-pattern datasource
       // will redirect user to Observability event explorer
       if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-        return application.navigateToUrl(
-          `../observability-logs#/explorer?datasourceName=${selectedDataSources[0].label}&datasourceType=${selectedDataSources[0].type}`
-        );
+        return application.navigateToApp('observability-logs', {
+          path: `#/explorer`,
+          state: {
+            datasourceName: selectedDataSources[0].label,
+            datasourceType: selectedDataSources[0].type,
+          },
+        });
       }
       setSelectedSources(selectedDataSources);
       dispatch(setIndexPattern(selectedDataSources[0].value));
