@@ -4,9 +4,9 @@
  */
 
 import { ClientOptions } from '@opensearch-project/opensearch';
-import { readFileSync } from 'fs';
 import { checkServerIdentity } from 'tls';
 import { DataSourcePluginConfigType } from '../../config';
+import { readCertificateAuthorities } from '../util/tls_settings_provider';
 
 /** @internal */
 type DataSourceSSLConfigOptions = Partial<{
@@ -67,33 +67,3 @@ export function parseClientOptions(
 
   return clientOptions;
 }
-
-export const readCertificateAuthorities = (
-  listOfCertificateAuthorities: string | string[] | undefined
-) => {
-  let certificateAuthorities: string[] | undefined;
-
-  const addCertificateAuthorities = (ca: string[]) => {
-    if (ca && ca.length) {
-      certificateAuthorities = [...(certificateAuthorities || []), ...ca];
-    }
-  };
-
-  const ca = listOfCertificateAuthorities;
-  if (ca) {
-    const parsed: string[] = [];
-    const paths = Array.isArray(ca) ? ca : [ca];
-    for (const path of paths) {
-      parsed.push(readFile(path));
-    }
-    addCertificateAuthorities(parsed);
-  }
-
-  return {
-    certificateAuthorities,
-  };
-};
-
-const readFile = (file: string) => {
-  return readFileSync(file, 'utf8');
-};

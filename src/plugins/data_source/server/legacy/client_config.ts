@@ -6,7 +6,7 @@
 import { ConfigOptions } from 'elasticsearch';
 import { checkServerIdentity } from 'tls';
 import { DataSourcePluginConfigType } from '../../config';
-import { readCertificateAuthorities } from '../client/client_config';
+import { readCertificateAuthorities } from '../util/tls_settings_provider';
 
 /** @internal */
 type LegacyDataSourceSSLConfigOptions = Partial<{
