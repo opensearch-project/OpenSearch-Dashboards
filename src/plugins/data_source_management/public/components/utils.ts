@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpStart, SavedObjectsClientContract, SavedObject } from 'src/core/public';
+import {
+  HttpStart,
+  SavedObjectsClientContract,
+  SavedObject,
+  IUiSettingsClient,
+} from 'src/core/public';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -47,6 +52,29 @@ export async function getDataSourcesWithFields(
   });
 
   return response?.savedObjects;
+}
+
+export async function handleSetDefaultDatasourceAfterDeletion(
+  savedObjectsClient: SavedObjectsClientContract,
+  uiSettings: IUiSettingsClient
+) {
+  uiSettings.remove('defaultDataSource');
+  const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
+  if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
+    const datasourceId = listOfDataSources[0].id;
+    await uiSettings.set('defaultDataSource', datasourceId);
+  }
+}
+
+export async function handleSetDefaultDatasourceDuringCreation(
+  savedObjectsClient: SavedObjectsClientContract,
+  uiSettings: IUiSettingsClient
+) {
+  const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
+  if (Array.isArray(listOfDataSources) && listOfDataSources.length === 1) {
+    const datasourceId = listOfDataSources[0].id;
+    await uiSettings.set('defaultDataSource', datasourceId);
+  }
 }
 
 export async function getDataSourceById(

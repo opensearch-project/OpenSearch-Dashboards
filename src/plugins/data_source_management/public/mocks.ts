@@ -6,6 +6,7 @@
 import React from 'react';
 import { throwError } from 'rxjs';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { AuthType, DataSourceAttributes } from './types';
 import { coreMock } from '../../../core/public/mocks';
 import {
@@ -60,6 +61,21 @@ const createDataSourceManagementContext = () => {
 export const mockManagementPlugin = {
   createDataSourceManagementContext,
   docLinks,
+};
+
+export const getSingleDataSourceResponse = {
+  savedObjects: [
+    {
+      id: 'test',
+      type: 'data-source',
+      description: 'test datasource',
+      title: 'test',
+      get(field: string) {
+        const me: any = this || {};
+        return me[field];
+      },
+    },
+  ],
 };
 
 /* Mock data responses - JSON*/
@@ -261,6 +277,14 @@ export const mockErrorResponseForSavedObjectsCalls = (
   (savedObjectsClient[savedObjectsMethodName] as jest.Mock).mockRejectedValue(
     throwError(new Error('Error while fetching data sources'))
   );
+};
+
+export const mockUiSettingsCalls = (
+  uiSettings: IUiSettingsClient,
+  uiSettingsMethodName: 'get' | 'set',
+  response: any
+) => {
+  (uiSettings[uiSettingsMethodName] as jest.Mock).mockReturnValue(response);
 };
 
 export interface TestPluginReturn {
