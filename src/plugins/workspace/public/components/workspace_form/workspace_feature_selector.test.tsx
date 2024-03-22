@@ -60,6 +60,15 @@ describe('WorkspaceFeatureSelector', () => {
     fireEvent.click(renderResult.getByText('App 1'));
     expect(onChangeMock).toHaveBeenCalledWith(['app-1']);
   });
+  it('should call onChange with empty array after selected feature clicked', () => {
+    const { renderResult, onChangeMock } = setup({
+      selectedFeatures: ['app-2'],
+    });
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+    fireEvent.click(renderResult.getByText('App 2'));
+    expect(onChangeMock).toHaveBeenCalledWith([]);
+  });
   it('should call onChange with features under clicked group', () => {
     const { renderResult, onChangeMock } = setup();
 
