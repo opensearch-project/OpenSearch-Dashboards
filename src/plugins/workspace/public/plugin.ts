@@ -39,10 +39,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     }
   }
 
-  private getWorkspaceIdFromURL(basePath?: string): string | null {
-    return getWorkspaceIdFromUrl(window.location.href, basePath);
-  }
-
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
@@ -50,7 +46,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     /**
      * Retrieve workspace id from url
      */
-    const workspaceId = this.getWorkspaceIdFromURL(core.http.basePath.getBasePath());
+    const workspaceId = getWorkspaceIdFromUrl(
+      window.location.href,
+      core.http.basePath.getBasePath()
+    );
 
     if (workspaceId) {
       const result = await workspaceClient.enterWorkspace(workspaceId);
