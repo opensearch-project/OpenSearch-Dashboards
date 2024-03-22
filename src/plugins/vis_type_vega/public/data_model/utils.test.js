@@ -59,9 +59,7 @@ describe('Utils.handleInvalidQuery', () => {
   test('should return null if input object has function as property', async () => {
     const input = {
       key1: 'value1',
-      key2: () => {
-        alert('Hello!');
-      },
+      key2: () => jest.fn(),
     };
 
     expect(Utils.handleInvalidQuery(input)).toBe(null);
@@ -71,9 +69,7 @@ describe('Utils.handleInvalidQuery', () => {
     const input = {
       key1: 'value1',
       key2: {
-        func: () => {
-          alert('Hello!');
-        },
+        func: () => jest.fn(),
       },
     };
     expect(Utils.handleInvalidQuery(input)).toBe(null);
@@ -95,17 +91,13 @@ describe('Utils.handleInvalidQuery', () => {
   test('should identify object contains function properties', async () => {
     const input1 = {
       key1: 'value1',
-      key2: () => {
-        alert('Hello!');
-      },
+      key2: () => jest.fn(),
     };
 
     expect(Utils.checkForFunctionProperty(input1)).toBe(true);
 
     const input2 = {
-      key2: () => {
-        alert('Hello!');
-      },
+      key2: () => jest.fn(),
       key1: 'value1',
     };
 
@@ -114,9 +106,7 @@ describe('Utils.handleInvalidQuery', () => {
     const nestedInput = {
       key1: {
         nestedKey1: 'nestedValue1',
-        nestedKey2: () => {
-          alert('Hello!');
-        },
+        nestedKey2: () => jest.fn(),
       },
       key2: 'value1',
     };
