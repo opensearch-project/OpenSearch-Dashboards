@@ -41,7 +41,10 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
      * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
      */
     setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
-      const workspaceId = getWorkspaceIdFromUrl(request.url.toString());
+      const workspaceId = getWorkspaceIdFromUrl(
+        request.url.toString(),
+        '' // No need to pass basePath here because the request.url will be rewrite by registerOnPreRouting method in `src/core/server/http/http_server.ts`
+      );
 
       if (workspaceId) {
         const requestUrl = new URL(request.url.toString());

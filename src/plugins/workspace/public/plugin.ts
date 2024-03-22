@@ -40,9 +40,6 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
   private coreStart?: CoreStart;
   private currentWorkspaceIdSubscription?: Subscription;
   private currentWorkspaceSubscription?: Subscription;
-  private getWorkspaceIdFromURL(): string | null {
-    return getWorkspaceIdFromUrl(window.location.href);
-  }
 
   /**
    * Filter the nav links based on the feature configuration of workspace
@@ -107,7 +104,10 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
     /**
      * Retrieve workspace id from url
      */
-    const workspaceId = this.getWorkspaceIdFromURL();
+    const workspaceId = getWorkspaceIdFromUrl(
+      window.location.href,
+      core.http.basePath.getBasePath()
+    );
 
     if (workspaceId) {
       const result = await workspaceClient.enterWorkspace(workspaceId);
