@@ -10,20 +10,14 @@ import { ApplicationStart } from 'opensearch-dashboards/public';
 import { WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 
 interface WorkspaceCancelModalProps {
-  visible: boolean;
   application: ApplicationStart;
   closeCancelModal: () => void;
 }
 
 export const WorkspaceCancelModal = ({
   application,
-  visible,
   closeCancelModal,
 }: WorkspaceCancelModalProps) => {
-  if (!visible) {
-    return null;
-  }
-
   return (
     <EuiConfirmModal
       data-test-subj="workspaceForm-cancelModal"

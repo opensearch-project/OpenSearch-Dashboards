@@ -75,7 +75,7 @@ export const WorkspaceCreator = () => {
           hasShadow={false}
           /**
            * Since above EuiPageHeader has a maxWidth: 1000 style,
-           * add maxWidth: 100 below to align with the above page header
+           * add maxWidth: 1000 below to align with the above page header
            **/
           style={{ width: '100%', maxWidth: 1000 }}
         >

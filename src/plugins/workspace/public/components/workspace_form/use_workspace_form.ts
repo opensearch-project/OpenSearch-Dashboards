@@ -11,7 +11,7 @@ import { featureMatchesConfig } from '../../utils';
 
 import { WorkspaceFormTabs } from './constants';
 import { WorkspaceFormProps, WorkspaceFormErrors } from './types';
-import { appendDefaultFeatureIds, getNumberOfErrors, isValidNameOrDescription } from './utils';
+import { appendDefaultFeatureIds, getNumberOfErrors, isValidFormTextInput } from './utils';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
@@ -66,7 +66,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
           }),
         };
       }
-      if (formData.name && !isValidNameOrDescription(formData.name)) {
+      if (formData.name && !isValidFormTextInput(formData.name)) {
         currentFormErrors = {
           ...currentFormErrors,
           name: i18n.translate('workspace.form.detail.name.invalid', {
@@ -74,7 +74,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
           }),
         };
       }
-      if (formData.description && !isValidNameOrDescription(formData.description)) {
+      if (formData.description && !isValidFormTextInput(formData.description)) {
         currentFormErrors = {
           ...currentFormErrors,
           description: i18n.translate('workspace.form.detail.description.invalid', {

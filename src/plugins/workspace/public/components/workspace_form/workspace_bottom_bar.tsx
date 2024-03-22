@@ -102,11 +102,9 @@ export const WorkspaceBottomBar = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
-      <WorkspaceCancelModal
-        application={application}
-        visible={isCancelModalVisible}
-        closeCancelModal={closeCancelModal}
-      />
+      {isCancelModalVisible && (
+        <WorkspaceCancelModal application={application} closeCancelModal={closeCancelModal} />
+      )}
     </div>
   );
 };

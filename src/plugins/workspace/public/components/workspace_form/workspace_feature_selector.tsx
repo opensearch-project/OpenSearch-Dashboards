@@ -13,24 +13,15 @@ import {
   EuiCheckboxGroupProps,
   EuiCheckboxProps,
 } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
-import { groupBy } from 'lodash';
 
-import {
-  AppNavLinkStatus,
-  DEFAULT_APP_CATEGORIES,
-  PublicAppInfo,
-} from '../../../../../core/public';
+import { PublicAppInfo } from '../../../../../core/public';
 
-import { WorkspaceFeature, WorkspaceFeatureGroup } from './types';
-import { isDefaultSelectedFeatureId, isWorkspaceFeatureGroup } from './utils';
+import { isWorkspaceFeatureGroup, convertApplicationsToFeaturesOrGroups } from './utils';
 
-const libraryCategoryLabel = i18n.translate('core.ui.libraryNavList.label', {
-  defaultMessage: 'Library',
-});
-
-interface WorkspaceFeatureSelectorProps {
-  applications: PublicAppInfo[];
+export interface WorkspaceFeatureSelectorProps {
+  applications: Array<
+    Pick<PublicAppInfo, 'id' | 'title' | 'category' | 'chromeless' | 'navLinkStatus'>
+  >;
   selectedFeatures: string[];
   onChange: (newFeatures: string[]) => void;
 }
@@ -40,50 +31,9 @@ export const WorkspaceFeatureSelector = ({
   selectedFeatures,
   onChange,
 }: WorkspaceFeatureSelectorProps) => {
-  const featuresOrGroups = useMemo(() => {
-    const transformedApplications = applications.map((app) => {
-      if (app.category?.id === DEFAULT_APP_CATEGORIES.opensearchDashboards.id) {
-        return {
-          ...app,
-          category: {
-            ...app.category,
-            label: libraryCategoryLabel,
-          },
-        };
-      }
-      return app;
-    });
-    const category2Applications = groupBy(transformedApplications, 'category.label');
-    return Object.keys(category2Applications).reduce<
-      Array<WorkspaceFeature | WorkspaceFeatureGroup>
-    >((previousValue, currentKey) => {
-      const apps = category2Applications[currentKey];
-      const features = apps
-        .filter(
-          ({ navLinkStatus, chromeless, category }) =>
-            navLinkStatus !== AppNavLinkStatus.hidden &&
-            !chromeless &&
-            category?.id !== DEFAULT_APP_CATEGORIES.management.id
-        )
-        .map(({ id, title }) => ({
-          id,
-          name: title,
-        }));
-      if (features.length === 0) {
-        return previousValue;
-      }
-      if (currentKey === 'undefined') {
-        return [...previousValue, ...features];
-      }
-      return [
-        ...previousValue,
-        {
-          name: apps[0].category?.label || '',
-          features,
-        },
-      ];
-    }, []);
-  }, [applications]);
+  const featuresOrGroups = useMemo(() => convertApplicationsToFeaturesOrGroups(applications), [
+    applications,
+  ]);
 
   const handleFeatureChange = useCallback<EuiCheckboxGroupProps['onChange']>(
     (featureId) => {
@@ -112,7 +62,6 @@ export const WorkspaceFeatureSelector = ({
         return;
       }
       const groupFeatureIds = featureOrGroup.features.map((feature) => feature.id);
-      // setSelectedFeatureIds((previousData) => {
       const notExistsIds = groupFeatureIds.filter((id) => !selectedFeatures.includes(id));
       // Check all not selected features if not been selected in current group.
       if (notExistsIds.length > 0) {
@@ -139,15 +88,6 @@ export const WorkspaceFeatureSelector = ({
           ? featureOrGroup.name
           : featureOrGroup.id;
 
-        const categoryToDescription: { [key: string]: string } = {
-          [libraryCategoryLabel]: i18n.translate(
-            'workspace.form.featureVisibility.libraryCategory.Description',
-            {
-              defaultMessage: 'Workspace-owned library items',
-            }
-          ),
-        };
-
         return (
           <EuiFlexGroup key={featureOrGroup.name}>
             <EuiFlexItem>
@@ -155,10 +95,6 @@ export const WorkspaceFeatureSelector = ({
                 <EuiText>
                   <strong>{featureOrGroup.name}</strong>
                 </EuiText>
-                {isWorkspaceFeatureGroup(featureOrGroup) &&
-                  categoryToDescription[featureOrGroup.name] && (
-                    <EuiText>{categoryToDescription[featureOrGroup.name]}</EuiText>
-                  )}
               </div>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -173,10 +109,6 @@ export const WorkspaceFeatureSelector = ({
                   features.length > 0 ? ` (${selectedIds.length}/${features.length})` : ''
                 }`}
                 checked={selectedIds.length > 0}
-                disabled={
-                  !isWorkspaceFeatureGroup(featureOrGroup) &&
-                  isDefaultSelectedFeatureId(featureOrGroup.id)
-                }
                 indeterminate={
                   isWorkspaceFeatureGroup(featureOrGroup) &&
                   selectedIds.length > 0 &&
@@ -189,7 +121,6 @@ export const WorkspaceFeatureSelector = ({
                   options={featureOrGroup.features.map((item) => ({
                     id: item.id,
                     label: item.name,
-                    disabled: isDefaultSelectedFeatureId(item.id),
                   }))}
                   idToSelectedMap={selectedIds.reduce(
                     (previousValue, currentValue) => ({

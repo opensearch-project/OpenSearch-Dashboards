@@ -35,7 +35,7 @@ const WorkspaceCreator = (props: any) => {
       application: {
         ...mockCoreStart.application,
         navigateToApp,
-        getUrlForApp: jest.fn(),
+        getUrlForApp: jest.fn(() => '/app/workspace_overview'),
         applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
       notifications: {
@@ -78,7 +78,7 @@ describe('WorkspaceCreator', () => {
     }
     window.location = {} as Location;
     Object.defineProperty(window.location, 'href', {
-      get: () => 'http://localhost/',
+      get: () => 'http://localhost/w/workspace/app/workspace_create',
       set: setHrefSpy,
     });
   });
@@ -154,6 +154,7 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with customized features', async () => {
+    setHrefSpy.mockReset();
     const { getByTestId } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
@@ -161,6 +162,7 @@ describe('WorkspaceCreator', () => {
     });
     fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-app1'));
     fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-category1'));
+    expect(setHrefSpy).not.toHaveBeenCalled();
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -172,6 +174,9 @@ describe('WorkspaceCreator', () => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringMatching(/workspace_overview$/));
+    });
   });
 
   it('should show danger toasts after create workspace failed', async () => {
