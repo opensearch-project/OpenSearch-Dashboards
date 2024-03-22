@@ -24,14 +24,14 @@ import { WorkspaceClient } from '../../workspace_client';
 export interface DeleteWorkspaceModalProps {
   onClose: () => void;
   selectedWorkspace?: WorkspaceAttribute | null;
-  returnToHome: boolean;
+  onDeleteSuccess?: () => void;
 }
 
 export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
   const [value, setValue] = useState('');
-  const { onClose, selectedWorkspace, returnToHome } = props;
+  const { onClose, selectedWorkspace, onDeleteSuccess } = props;
   const {
-    services: { application, notifications, http, workspaceClient },
+    services: { notifications, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
   const deleteWorkspace = async () => {
@@ -55,15 +55,8 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           }),
         });
         onClose();
-        if (http && application && returnToHome) {
-          const homeUrl = application.getUrlForApp('home', {
-            path: '/',
-            absolute: false,
-          });
-          const targetUrl = http.basePath.prepend(http.basePath.remove(homeUrl), {
-            withoutWorkspace: true,
-          });
-          await application.navigateToUrl(targetUrl);
+        if (onDeleteSuccess) {
+          onDeleteSuccess();
         }
       } else {
         notifications?.toasts.addDanger({

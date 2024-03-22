@@ -13,7 +13,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/open
 const defaultProps: DeleteWorkspaceModalProps = {
   onClose: jest.fn(),
   selectedWorkspace: null,
-  returnToHome: true,
+  onDeleteSuccess: jest.fn(),
 };
 
 const coreStartMock = coreMock.createStart();
@@ -58,8 +58,9 @@ describe('DeleteWorkspaceModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('should be able to delete workspace and navigate successfully', async () => {
+  it('should be able to delete workspace and emit onDeleteSuccess', async () => {
     const onCloseFn = jest.fn();
+    const onDeleteSuccessFn = jest.fn();
     const newProps = {
       ...defaultProps,
       selectedWorkspace: {
@@ -67,6 +68,7 @@ describe('DeleteWorkspaceModal', () => {
         name: 'test',
       },
       onClose: onCloseFn,
+      onDeleteSuccess: onDeleteSuccessFn,
     };
     const deleteFn = jest.fn().mockReturnValue({
       success: true,
@@ -93,43 +95,7 @@ describe('DeleteWorkspaceModal', () => {
     await waitFor(() => {
       expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalled();
       expect(onCloseFn).toHaveBeenCalled();
-      expect(coreStartMock.application.navigateToUrl).toHaveBeenCalled();
-    });
-  });
-
-  it('should not navigate when successfully if returnToHome is false', async () => {
-    const newProps = {
-      ...defaultProps,
-      selectedWorkspace: {
-        id: 'test',
-        name: 'test',
-      },
-      returnToHome: false,
-    };
-    const deleteFn = jest.fn().mockReturnValue({
-      success: true,
-    });
-    const newServices = {
-      ...coreStartMock,
-      workspaceClient: {
-        ...workspaceClientMock,
-        delete: deleteFn,
-      },
-    };
-    const { getByTestId, findByTestId } = render(
-      getWrapWorkspaceDeleteModalInContext(newProps, newServices)
-    );
-    await findByTestId('delete-workspace-modal-input');
-    const input = getByTestId('delete-workspace-modal-input');
-    fireEvent.change(input, {
-      target: { value: 'delete' },
-    });
-    const confirmButton = getByTestId('delete-workspace-modal-confirm');
-    fireEvent.click(confirmButton);
-    expect(deleteFn).toHaveBeenCalledWith('test');
-    await waitFor(() => {
-      expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalled();
-      expect(coreStartMock.application.navigateToUrl).not.toHaveBeenCalled();
+      expect(onDeleteSuccessFn).toHaveBeenCalled();
     });
   });
 

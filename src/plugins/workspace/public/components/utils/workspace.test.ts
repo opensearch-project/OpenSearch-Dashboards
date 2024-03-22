@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { switchWorkspace, updateWorkspace } from './workspace';
+import { switchWorkspace, navigateToWorkspaceUpdatePage } from './workspace';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 jest.mock('../../../../../core/public/utils');
 
@@ -48,7 +48,7 @@ describe('workspace utils', () => {
     });
   });
 
-  describe('updateWorkspace', () => {
+  describe('navigateToWorkspaceUpdatePage', () => {
     it('should redirect if newUrl is returned', () => {
       Object.defineProperty(window, 'location', {
         value: {
@@ -58,7 +58,10 @@ describe('workspace utils', () => {
       });
       // @ts-ignore
       formatUrlWithWorkspaceId.mockImplementation(() => 'new_url');
-      updateWorkspace({ application: coreStartMock.application, http: coreStartMock.http }, '');
+      navigateToWorkspaceUpdatePage(
+        { application: coreStartMock.application, http: coreStartMock.http },
+        ''
+      );
       expect(mockNavigateToUrl).toHaveBeenCalledWith('new_url');
     });
 
@@ -71,7 +74,10 @@ describe('workspace utils', () => {
       });
       // @ts-ignore
       formatUrlWithWorkspaceId.mockImplementation(() => '');
-      updateWorkspace({ application: coreStartMock.application, http: coreStartMock.http }, '');
+      navigateToWorkspaceUpdatePage(
+        { application: coreStartMock.application, http: coreStartMock.http },
+        ''
+      );
       expect(mockNavigateToUrl).not.toBeCalled();
     });
   });

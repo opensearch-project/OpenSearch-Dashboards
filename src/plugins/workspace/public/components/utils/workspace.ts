@@ -22,7 +22,7 @@ export const switchWorkspace = ({ application, http }: Core, id: string) => {
   }
 };
 
-export const updateWorkspace = ({ application, http }: Core, id: string) => {
+export const navigateToWorkspaceUpdatePage = ({ application, http }: Core, id: string) => {
   const newUrl = formatUrlWithWorkspaceId(
     application.getUrlForApp(WORKSPACE_UPDATE_APP_ID, {
       absolute: true,

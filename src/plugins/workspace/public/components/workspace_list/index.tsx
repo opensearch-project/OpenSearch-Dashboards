@@ -20,7 +20,7 @@ import { i18n } from '@osd/i18n';
 import { debounce } from '../../../../../core/public';
 import { WorkspaceAttribute } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
-import { switchWorkspace, updateWorkspace } from '../utils/workspace';
+import { switchWorkspace, navigateToWorkspaceUpdatePage } from '../utils/workspace';
 
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
@@ -60,7 +60,7 @@ export const WorkspaceList = () => {
   const handleUpdateWorkspace = useCallback(
     (id: string) => {
       if (application && http) {
-        updateWorkspace({ application, http }, id);
+        navigateToWorkspaceUpdatePage({ application, http }, id);
       }
     },
     [application, http]
@@ -213,7 +213,6 @@ export const WorkspaceList = () => {
         <DeleteWorkspaceModal
           selectedWorkspace={deletedWorkspace}
           onClose={() => setDeletedWorkspace(null)}
-          returnToHome={false}
         />
       )}
     </EuiPage>
