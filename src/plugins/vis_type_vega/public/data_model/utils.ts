@@ -30,7 +30,6 @@
 
 import compactStringify from 'json-stringify-pretty-compact';
 import { validateObject } from '@osd/std';
-import { inspect } from 'util';
 
 export class Utils {
   /**
