@@ -25,6 +25,11 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
 }) => {
   let matched = false;
 
+  /**
+   * Iterate through each feature configuration to determine if the given feature matches any of them.
+   * Note: The loop will not break prematurely because the order of featureConfigs array matters.
+   * Later configurations may override previous ones, so each configuration must be evaluated in sequence.
+   */
   for (const featureConfig of featureConfigs) {
     // '*' matches any feature
     if (featureConfig === '*') {
