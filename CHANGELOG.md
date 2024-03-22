@@ -63,6 +63,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Validate if workspace exists when setup inside a workspace ([#6154](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6154))
 - [Workspace] Register a workspace dropdown menu at the top of left nav bar ([#6150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6150))
 - [Multiple Datasource] Add icon in datasource table page to show the default datasource ([#6231](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6231))
+- [Multiple Datasource] Add TLS configuration for multiple data sources ([#6171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6171))
 
 ### 🐛 Bug Fixes
 
