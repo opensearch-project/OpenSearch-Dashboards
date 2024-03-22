@@ -63,6 +63,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Register a workspace dropdown menu at the top of left nav bar ([#6150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6150))
 - [Multiple Datasource] Add icon in datasource table page to show the default datasource ([#6231](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6231))
 - [Multiple Datasource] Add TLS configuration for multiple data sources ([#6171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6171))
+- [Multiple Datasource] Append `data_source_name` to the Vega spec and add datasource reference when installing sample data ([#6218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6218))
 
 ### 🐛 Bug Fixes
 
