@@ -6,8 +6,6 @@
 import React from 'react';
 import { DataSourceMenu, DataSourceMenuProps } from './data_source_menu';
 
-export function createDataSourceMenu() {
-  return (props: DataSourceMenuProps) => {
-    return <DataSourceMenu {...props} />;
-  };
+export function createDataSourceMenu<T>(props: DataSourceMenuProps<T>) {
+  return <DataSourceMenu {...props} />;
 }

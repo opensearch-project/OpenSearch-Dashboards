@@ -32,7 +32,9 @@ export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
-    DataSourceMenu: React.ComponentType<DataSourceMenuProps>;
+    getDataSourceMenu: <T>(
+      props: DataSourceMenuProps<T>
+    ) => React.ComponentType<DataSourceMenuProps<T>>;
   };
 }
 
@@ -103,7 +105,7 @@ export class DataSourceManagementPlugin
       registerAuthenticationMethod,
       ui: {
         DataSourceSelector: createDataSourceSelector(),
-        DataSourceMenu: createDataSourceMenu(),
+        getDataSourceMenu: <T>(props: DataSourceMenuProps<T>) => createDataSourceMenu(props),
       },
     };
   }

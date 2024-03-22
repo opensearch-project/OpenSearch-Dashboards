@@ -16,9 +16,10 @@ import {
 } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
 import { getDataSourcesWithFields } from '../utils';
-import { DataSourceOption, LocalCluster } from '../data_source_selector/data_source_selector';
+import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
+import { DataSourceOption } from './data_source_config';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -71,6 +72,7 @@ export class DataSourceSelectable extends React.Component<
   }
 
   async componentDidMount() {
+    console.log('mounted');
     this._isMounted = true;
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
