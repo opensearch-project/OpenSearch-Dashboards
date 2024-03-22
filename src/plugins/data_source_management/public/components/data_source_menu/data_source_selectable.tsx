@@ -125,7 +125,6 @@ export class DataSourceSelectable extends React.Component<
   render() {
     const button = (
       <>
-        <EuiIcon type="database" />
         <EuiButtonEmpty
           className="euiHeaderLink"
           onClick={this.onClick.bind(this)}
@@ -133,8 +132,8 @@ export class DataSourceSelectable extends React.Component<
           aria-label={i18n.translate('dataSourceSelectable.dataSourceOptionsButtonAriaLabel', {
             defaultMessage: 'dataSourceMenuButton',
           })}
-          iconType="arrowDown"
-          iconSide="right"
+          iconType="database"
+          iconSide="left"
           size="s"
           disabled={this.props.disabled || false}
         >
