@@ -30,6 +30,7 @@
 
 import compactStringify from 'json-stringify-pretty-compact';
 import { validateObject } from '@osd/std';
+import { inspect } from 'util';
 
 export class Utils {
   /**
@@ -79,14 +80,14 @@ export class Utils {
   }
 
   static checkForFunctionProperty(object: object): boolean {
-    let result = false;
-    Object.values(object).forEach((value) => {
-      result =
-        typeof value === 'function'
-          ? true
-          : Utils.isObject(value) && Utils.checkForFunctionProperty(value);
-    });
-    return result;
+    for (const value of Object.values(object)) {
+      if (typeof value === 'function') {
+        return true;
+      } else if (Utils.isObject(value) && Utils.checkForFunctionProperty(value)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static handleInvalidDate(date: unknown): number | string | Date | null {

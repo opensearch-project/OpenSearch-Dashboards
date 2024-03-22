@@ -91,4 +91,36 @@ describe('Utils.handleInvalidQuery', () => {
       }).toThrowError();
     });
   });
+
+  test('should identify object contains function properties', async () => {
+    const input1 = {
+      key1: 'value1',
+      key2: () => {
+        alert('Hello!');
+      },
+    };
+
+    expect(Utils.checkForFunctionProperty(input1)).toBe(true);
+
+    const input2 = {
+      key2: () => {
+        alert('Hello!');
+      },
+      key1: 'value1',
+    };
+
+    expect(Utils.checkForFunctionProperty(input2)).toBe(true);
+
+    const nestedInput = {
+      key1: {
+        nestedKey1: 'nestedValue1',
+        nestedKey2: () => {
+          alert('Hello!');
+        },
+      },
+      key2: 'value1',
+    };
+
+    expect(Utils.checkForFunctionProperty(nestedInput)).toBe(true);
+  });
 });
