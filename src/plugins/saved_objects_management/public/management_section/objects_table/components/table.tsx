@@ -243,8 +243,8 @@ export class Table extends PureComponent<TableProps, TableState> {
             if (currentWorkspaceId) {
               inAppUrl = formatUrlWithWorkspaceId(path, currentWorkspaceId, basePath);
             } else {
-              // first workspace user have permission
-              const [workspaceId] = object.workspaces.filter((wsId) => visibleWsIds.includes(wsId));
+              // find first workspace user have permission
+              const workspaceId = object.workspaces.find((wsId) => visibleWsIds.includes(wsId));
               if (workspaceId) {
                 inAppUrl = formatUrlWithWorkspaceId(path, workspaceId, basePath);
               }
