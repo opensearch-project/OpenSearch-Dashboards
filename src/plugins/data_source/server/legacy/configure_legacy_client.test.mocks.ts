@@ -16,8 +16,3 @@ export const parseClientOptionsMock = jest.fn();
 jest.doMock('./client_config', () => ({
   parseClientOptions: parseClientOptionsMock,
 }));
-
-export const authRegistryCredentialProviderMock = jest.fn();
-jest.doMock('../util/credential_provider', () => ({
-  authRegistryCredentialProvider: authRegistryCredentialProviderMock,
-}));

@@ -76,8 +76,10 @@ describe('Datasource Management: Edit Datasource Form', () => {
           <EditDataSourceForm
             existingDataSource={mockDataSourceAttributesWithAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={false}
             onDeleteDataSource={mockFn}
             handleSubmit={mockFn}
+            onSetDefaultDataSource={mockFn}
             handleTestConnection={mockFn}
             displayToastMessage={mockFn}
           />
@@ -245,7 +247,9 @@ describe('Datasource Management: Edit Datasource Form', () => {
           <EditDataSourceForm
             existingDataSource={mockDataSourceAttributesWithNoAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={false}
             onDeleteDataSource={mockFn}
+            onSetDefaultDataSource={mockFn}
             handleSubmit={mockFn}
             handleTestConnection={mockFn}
             displayToastMessage={mockFn}
@@ -298,6 +302,12 @@ describe('Datasource Management: Edit Datasource Form', () => {
     test('should delete datasource on confirmation from header', () => {
       // @ts-ignore
       component.find('Header').prop('onClickDeleteIcon')();
+      expect(mockFn).toHaveBeenCalled();
+    });
+
+    test('should set as the default datasource from header', () => {
+      // @ts-ignore
+      component.find('Header').prop('onClickSetDefault')();
       expect(mockFn).toHaveBeenCalled();
     });
 
@@ -383,8 +393,10 @@ describe('With Registered Authentication', () => {
         <EditDataSourceForm
           existingDataSource={mockDataSourceAttributesWithNoAuth}
           existingDatasourceNamesList={existingDatasourceNamesList}
+          isDefault={false}
           onDeleteDataSource={jest.fn()}
           handleSubmit={jest.fn()}
+          onSetDefaultDataSource={jest.fn()}
           handleTestConnection={jest.fn()}
           displayToastMessage={jest.fn()}
         />
@@ -410,7 +422,7 @@ describe('With Registered Authentication', () => {
         inputDisplay: 'some input',
       },
       credentialForm: mockedCredentialForm,
-      crendentialFormField: {},
+      credentialFormField: {},
     } as AuthenticationMethod;
 
     const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
@@ -422,8 +434,10 @@ describe('With Registered Authentication', () => {
         <EditDataSourceForm
           existingDataSource={mockDataSourceAttributesWithRegisteredAuth}
           existingDatasourceNamesList={existingDatasourceNamesList}
+          isDefault={false}
           onDeleteDataSource={jest.fn()}
           handleSubmit={mockedSubmitHandler}
+          onSetDefaultDataSource={jest.fn()}
           handleTestConnection={jest.fn()}
           displayToastMessage={jest.fn()}
         />

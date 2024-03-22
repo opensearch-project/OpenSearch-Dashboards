@@ -29,6 +29,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { HomeServerPluginSetup } from '../../home/server';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 
@@ -45,6 +46,7 @@ export interface VegaSavedObjectAttributes {
 export interface VisTypeVegaPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

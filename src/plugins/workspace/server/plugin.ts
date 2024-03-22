@@ -10,16 +10,36 @@ import {
   Logger,
   CoreStart,
 } from '../../../core/server';
-import { IWorkspaceClientImpl } from './types';
+import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
 import { WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
+import { cleanWorkspaceId, getWorkspaceIdFromUrl } from '../../../core/server/utils';
 
-export class WorkspacePlugin implements Plugin<{}, {}> {
+export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
   private client?: IWorkspaceClientImpl;
   private workspaceConflictControl?: WorkspaceConflictSavedObjectsClientWrapper;
+
+  private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
+    /**
+     * Proxy all {basePath}/w/{workspaceId}{osdPath*} paths to {basePath}{osdPath*}
+     */
+    setupDeps.http.registerOnPreRouting(async (request, response, toolkit) => {
+      const workspaceId = getWorkspaceIdFromUrl(
+        request.url.toString(),
+        '' // No need to pass basePath here because the request.url will be rewrite by registerOnPreRouting method in `src/core/server/http/http_server.ts`
+      );
+
+      if (workspaceId) {
+        const requestUrl = new URL(request.url.toString());
+        requestUrl.pathname = cleanWorkspaceId(requestUrl.pathname);
+        return toolkit.rewriteUrl(requestUrl.toString());
+      }
+      return toolkit.next();
+    });
+  }
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
@@ -39,6 +59,7 @@ export class WorkspacePlugin implements Plugin<{}, {}> {
       WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
       this.workspaceConflictControl.wrapperFactory
     );
+    this.proxyWorkspaceTrafficToRealHandler(core);
 
     registerRoutes({
       http: core.http,

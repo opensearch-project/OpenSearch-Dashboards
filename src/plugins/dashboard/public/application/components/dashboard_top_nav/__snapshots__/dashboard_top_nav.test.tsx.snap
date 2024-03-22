@@ -748,7 +748,9 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -800,6 +802,13 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -1706,7 +1715,9 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -1758,6 +1769,13 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -2664,7 +2682,9 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -2716,6 +2736,13 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -3622,7 +3649,9 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -3674,6 +3703,13 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -4580,7 +4616,9 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -4632,6 +4670,13 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -5538,7 +5583,9 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -5590,6 +5637,13 @@ exports[`Dashboard top nav render with all components 1`] = `
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {

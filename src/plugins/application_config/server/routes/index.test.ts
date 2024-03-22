@@ -79,6 +79,8 @@ describe('application config routes', () => {
         getConfig: jest.fn().mockReturnValue(configurations),
       };
 
+      const request = {};
+
       const okResponse = {
         statusCode: 200,
       };
@@ -89,7 +91,7 @@ describe('application config routes', () => {
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleGetConfig(client, response, logger);
+      const returnedResponse = await handleGetConfig(client, request, response, logger);
 
       expect(returnedResponse).toBe(okResponse);
 
@@ -109,13 +111,15 @@ describe('application config routes', () => {
         }),
       };
 
+      const request = {};
+
       const response = {
         customError: jest.fn().mockReturnValue(ERROR_RESPONSE),
       };
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleGetConfig(client, response, logger);
+      const returnedResponse = await handleGetConfig(client, request, response, logger);
 
       expect(returnedResponse).toBe(ERROR_RESPONSE);
 

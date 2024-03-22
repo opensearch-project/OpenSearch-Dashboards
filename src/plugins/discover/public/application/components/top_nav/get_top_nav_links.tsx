@@ -5,7 +5,6 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { EuiText } from '@elastic/eui';
 import { DiscoverViewServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { Adapters } from '../../../../../inspector/public';
@@ -25,7 +24,6 @@ import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
-import { getNewDiscoverSetting, setNewDiscoverSetting } from '../utils/local_storage';
 import { OpenSearchPanel } from './open_search_panel';
 
 export const getTopNavLinks = (
@@ -44,7 +42,6 @@ export const getTopNavLinks = (
     store,
     data: { query },
     osdUrlStateStorage,
-    storage,
   } = services;
 
   const newSearch = {
@@ -234,61 +231,7 @@ export const getTopNavLinks = (
     },
   };
 
-  const newDiscoverButtonLabel = i18n.translate('discover.localMenu.discoverButton.label.new', {
-    defaultMessage: 'Try new Discover',
-  });
-  const oldDiscoverButtonLabel = i18n.translate('discover.localMenu.discoverButton.label.old', {
-    defaultMessage: 'Use legacy Discover',
-  });
-  const isNewDiscover = getNewDiscoverSetting(storage);
-  const newTable: TopNavMenuData = {
-    id: 'table-datagrid',
-    label: isNewDiscover ? oldDiscoverButtonLabel : newDiscoverButtonLabel,
-    description: i18n.translate('discover.localMenu.newTableDescription', {
-      defaultMessage: 'New Discover toggle Experience',
-    }),
-    testId: 'datagridTableButton',
-    run: async () => {
-      // Read the current state from localStorage
-      const newDiscoverEnabled = getNewDiscoverSetting(storage);
-      if (newDiscoverEnabled) {
-        const confirmed = await services.overlays.openConfirm(
-          toMountPoint(
-            <EuiText>
-              <p>
-                Help drive future improvements by{' '}
-                <a href="https://survey.opensearch.org" target="_blank" rel="noopener noreferrer">
-                  providing feedback
-                </a>{' '}
-                about your experience.
-              </p>
-            </EuiText>
-          ),
-          {
-            title: i18n.translate('discover.localMenu.newTableConfirmModalTitle', {
-              defaultMessage: 'Share your thoughts on the latest Discover features',
-            }),
-            cancelButtonText: 'Cancel',
-            confirmButtonText: 'Turn off new features',
-            defaultFocusedButton: 'confirm',
-          }
-        );
-
-        if (confirmed) {
-          setNewDiscoverSetting(false, storage);
-          window.location.reload();
-        }
-      } else {
-        // Save the new setting to localStorage
-        setNewDiscoverSetting(true, storage);
-        window.location.reload();
-      }
-    },
-    iconType: isNewDiscover ? 'editorUndo' : 'cheer',
-  };
-
   return [
-    newTable,
     newSearch,
     ...(capabilities.discover?.save ? [saveSearch] : []),
     openSearch,

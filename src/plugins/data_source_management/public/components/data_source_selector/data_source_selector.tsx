@@ -6,8 +6,9 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiComboBox } from '@elastic/eui';
-import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
+import { SavedObjectsClientContract, ToastsStart, SavedObject } from 'opensearch-dashboards/public';
 import { getDataSourcesWithFields } from '../utils';
+import { DataSourceAttributes } from '../../types';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {
@@ -26,13 +27,13 @@ export interface DataSourceSelectorProps {
   defaultOption?: DataSourceOption[];
   placeholderText?: string;
   removePrepend?: boolean;
-  filterFn?: (dataSource: any) => boolean;
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   compressed?: boolean;
 }
 
 interface DataSourceSelectorState {
-  dataSourceOptions: DataSourceOption[];
   selectedOption: DataSourceOption[];
+  allDataSources: Array<SavedObject<DataSourceAttributes>>;
 }
 
 export interface DataSourceOption {
@@ -51,11 +52,7 @@ export class DataSourceSelector extends React.Component<
     super(props);
 
     this.state = {
-      dataSourceOptions: this.props.defaultOption
-        ? this.props.defaultOption
-        : this.props.hideLocalCluster
-        ? []
-        : [LocalCluster],
+      allDataSources: [],
       selectedOption: this.props.defaultOption
         ? this.props.defaultOption
         : this.props.hideLocalCluster
@@ -73,27 +70,10 @@ export class DataSourceSelector extends React.Component<
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
-          let filteredDataSources = [];
-          if (this.props.filterFn) {
-            filteredDataSources = fetchedDataSources.filter((ds) => this.props.filterFn!(ds));
-          }
-
-          if (filteredDataSources.length === 0) {
-            filteredDataSources = fetchedDataSources;
-          }
-          const dataSourceOptions = filteredDataSources.map((dataSource) => ({
-            id: dataSource.id,
-            label: dataSource.attributes?.title || '',
-          }));
-
-          if (!this.props.hideLocalCluster) {
-            dataSourceOptions.unshift(LocalCluster);
-          }
-
           if (!this._isMounted) return;
           this.setState({
             ...this.state,
-            dataSourceOptions,
+            allDataSources: fetchedDataSources,
           });
         }
       })
@@ -119,6 +99,16 @@ export class DataSourceSelector extends React.Component<
       this.props.placeholderText === undefined
         ? 'Select a data source'
         : this.props.placeholderText;
+
+    const dataSources = this.props.dataSourceFilter
+      ? this.state.allDataSources.filter((ds) => this.props.dataSourceFilter!(ds))
+      : this.state.allDataSources;
+
+    const options = dataSources.map((ds) => ({ id: ds.id, label: ds.attributes?.title || '' }));
+    if (!this.props.hideLocalCluster) {
+      options.unshift(LocalCluster);
+    }
+
     return (
       <EuiComboBox
         aria-label={
@@ -136,7 +126,7 @@ export class DataSourceSelector extends React.Component<
             : ''
         }
         singleSelection={{ asPlainText: true }}
-        options={this.state.dataSourceOptions}
+        options={options}
         selectedOptions={this.state.selectedOption}
         onChange={(e) => this.onChange(e)}
         prepend={
