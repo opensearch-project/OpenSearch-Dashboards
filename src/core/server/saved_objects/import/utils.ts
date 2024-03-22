@@ -16,7 +16,7 @@ export const updateDataSourceNameInVegaSpec = (
   props: UpdateDataSourceNameInVegaSpecProps
 ): string => {
   const { spec, spacing } = props;
-  const stringifiedSpacing = !!spacing ? spacing : 2;
+  const stringifiedSpacing = spacing || 2;
 
   let parsedSpec = parseJSONSpec(spec);
   const isJSONString = !!parsedSpec;
