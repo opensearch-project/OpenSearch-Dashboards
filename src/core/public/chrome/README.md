@@ -50,6 +50,10 @@ Get an observable for a sorted list of navlinks :-
 
 `getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>`
 
+Get an observable for the current link updaters. Link updater is used to modify the nav links, for example, filter the nav links or update a specific nav link's properties.
+
+`getLinkUpdaters$(): BehaviorSubject<LinksUpdater[]>`
+
 Get the state of a navlink at this point in time :-
 
 `get(id: string): ChromeNavLink | undefined`
