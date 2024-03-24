@@ -97,8 +97,8 @@ describe('Utils.handleInvalidQuery', () => {
     expect(Utils.checkForFunctionProperty(input1)).toBe(true);
 
     const input2 = {
-      key2: () => jest.fn(),
-      key1: 'value1',
+      key1: () => jest.fn(),
+      key2: 'value1',
     };
 
     expect(Utils.checkForFunctionProperty(input2)).toBe(true);
@@ -112,5 +112,22 @@ describe('Utils.handleInvalidQuery', () => {
     };
 
     expect(Utils.checkForFunctionProperty(nestedInput)).toBe(true);
+
+    const inputWithoutFn = {
+      key1: 'value1',
+      key2: 'value2',
+    };
+
+    expect(Utils.checkForFunctionProperty(inputWithoutFn)).toBe(false);
+
+    const nestedInputWithoutFn = {
+      key1: {
+        nestedKey1: 'nestedValue1',
+        nestedKey2: 'nestedValue2',
+      },
+      key2: 'value2',
+    };
+
+    expect(Utils.checkForFunctionProperty(nestedInputWithoutFn)).toBe(false);
   });
 });
