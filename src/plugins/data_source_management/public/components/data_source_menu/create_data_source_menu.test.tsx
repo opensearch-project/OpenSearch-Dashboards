@@ -8,6 +8,7 @@ import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { render } from '@testing-library/react';
+import { DataSourceComponentType, DataSourceSelectableConfig } from './types';
 
 describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
@@ -19,18 +20,18 @@ describe('create data source menu', () => {
     } as any;
   });
 
-  it('should render normally', () => {
+  it('should render data source selectable normally', () => {
     const props = {
-      showDataSourceSelectable: true,
-      appName: 'myapp',
       savedObjects: client,
       notifications,
-      fullWidth: true,
-      hideLocalCluster: true,
-      disableDataSourceSelectable: false,
-      className: 'myclass',
+      componentType: DataSourceComponentType.DataSourceSelectable,
+      componentConfig: {
+        fullWidth: true,
+        hideLocalCluster: true,
+        onSelectedDataSources: jest.fn(),
+      },
     };
-    const TestComponent = createDataSourceMenu();
+    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({

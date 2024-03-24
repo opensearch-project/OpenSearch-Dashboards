@@ -1,95 +1,75 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`create data source menu should render normally 1`] = `
+exports[`create data source menu should render data source selectable normally 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <nav
-        aria-label="App menu"
-        class="euiHeaderLinks osdTopNavMenu myclass"
-        data-test-subj="top-nav"
+      <div
+        class="euiPopover euiPopover--anchorDownLeft"
+        id="dataSourceSelectableContextMenuPopover"
       >
         <div
-          class="euiHeaderLinks__list euiHeaderLinks__list--gutterXS"
+          class="euiPopover__anchor"
         >
-          <div
-            class="euiPopover euiPopover--anchorDownLeft"
-            id="dataSourceSelectableContextMenuPopover"
+          <span
+            data-euiicon-type="database"
+          />
+          <button
+            aria-label="dataSourceMenuButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+            data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+            type="button"
           >
-            <div
-              class="euiPopover__anchor"
+            <span
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
             >
               <span
-                data-euiicon-type="database"
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="arrowDown"
               />
-              <button
-                aria-label="dataSourceMenuButton"
-                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-                data-test-subj="dataSourceSelectableContextMenuHeaderLink"
-                type="button"
-              >
-                <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                >
-                  <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
-                  />
-                </span>
-              </button>
-            </div>
-          </div>
+              <span
+                class="euiButtonEmpty__text"
+              />
+            </span>
+          </button>
         </div>
-      </nav>
+      </div>
     </div>
   </body>,
   "container": <div>
-    <nav
-      aria-label="App menu"
-      class="euiHeaderLinks osdTopNavMenu myclass"
-      data-test-subj="top-nav"
+    <div
+      class="euiPopover euiPopover--anchorDownLeft"
+      id="dataSourceSelectableContextMenuPopover"
     >
       <div
-        class="euiHeaderLinks__list euiHeaderLinks__list--gutterXS"
+        class="euiPopover__anchor"
       >
-        <div
-          class="euiPopover euiPopover--anchorDownLeft"
-          id="dataSourceSelectableContextMenuPopover"
+        <span
+          data-euiicon-type="database"
+        />
+        <button
+          aria-label="dataSourceMenuButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+          data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+          type="button"
         >
-          <div
-            class="euiPopover__anchor"
+          <span
+            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
           >
             <span
-              data-euiicon-type="database"
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="arrowDown"
             />
-            <button
-              aria-label="dataSourceMenuButton"
-              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-              data-test-subj="dataSourceSelectableContextMenuHeaderLink"
-              type="button"
-            >
-              <span
-                class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-              >
-                <span
-                  class="euiButtonContent__icon"
-                  color="inherit"
-                  data-euiicon-type="arrowDown"
-                />
-                <span
-                  class="euiButtonEmpty__text"
-                />
-              </span>
-            </button>
-          </div>
-        </div>
+            <span
+              class="euiButtonEmpty__text"
+            />
+          </span>
+        </button>
       </div>
-    </nav>
+    </div>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],

@@ -19,12 +19,12 @@ import { getDataSourcesWithFields } from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
-import { DataSourceOption } from './data_source_config';
+import { DataSourceOption } from './types';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: ToastsStart;
-  onSelectedDataSource: (dataSource: DataSourceOption) => void;
+  onSelectedDataSources: (dataSources: DataSourceOption[]) => void;
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
@@ -72,7 +72,6 @@ export class DataSourceSelectable extends React.Component<
   }
 
   async componentDidMount() {
-    console.log('mounted');
     this._isMounted = true;
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
@@ -121,7 +120,7 @@ export class DataSourceSelectable extends React.Component<
     this.setState({
       selectedOption: [selectedDataSource],
     });
-    this.props.onSelectedDataSource({ ...selectedDataSource });
+    this.props.onSelectedDataSources([selectedDataSource]);
   }
 
   render() {

@@ -4,4 +4,10 @@
  */
 
 export { DataSourceMenu } from './data_source_menu';
-export { DataSourceSelectableConfig, DataSourceType } from './data_source_config';
+export {
+  DataSourceSelectableConfig,
+  DataSourceAggregatedViewConfig,
+  DataSourceComponentType,
+  DataSourceViewConfig,
+  DataSourceMenuProps,
+} from './types';
