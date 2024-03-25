@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { getDataSources } from '../utils';
+import { getDataSourcesWithFields } from '../utils';
 import { DataSourceOption, LocalCluster } from '../data_source_selector/data_source_selector';
 
 interface DataSourceSelectableProps {
@@ -26,6 +26,7 @@ interface DataSourceSelectableProps {
   hideLocalCluster: boolean;
   fullWidth: boolean;
   selectedOption?: DataSourceOption[];
+  filterFn?: (dataSource: any) => boolean;
 }
 
 interface DataSourceSelectableState {
@@ -69,18 +70,24 @@ export class DataSourceSelectable extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
-    getDataSources(this.props.savedObjectsClient)
+    getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
-          let dataSourceOptions = fetchedDataSources.map((dataSource) => ({
-            id: dataSource.id,
-            label: dataSource.title,
-          }));
+          let filteredDataSources = [];
+          if (this.props.filterFn) {
+            filteredDataSources = fetchedDataSources.filter((ds) => this.props.filterFn!(ds));
+          }
 
-          dataSourceOptions = dataSourceOptions.sort((a, b) =>
-            a.label.toLowerCase().localeCompare(b.label.toLowerCase())
-          );
+          if (filteredDataSources.length === 0) {
+            filteredDataSources = fetchedDataSources;
+          }
 
+          const dataSourceOptions = filteredDataSources
+            .map((dataSource) => ({
+              id: dataSource.id,
+              label: dataSource.attributes?.title || '',
+            }))
+            .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
           if (!this.props.hideLocalCluster) {
             dataSourceOptions.unshift(LocalCluster);
           }
