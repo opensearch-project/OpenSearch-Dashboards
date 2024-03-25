@@ -28,6 +28,7 @@ export interface DataSourceMenuProps {
   className?: string;
   selectedOption?: DataSourceOption[];
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+  filterFn?: (dataSource: any) => boolean;
 }
 
 export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null {
@@ -40,6 +41,7 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
     fullWidth,
     hideLocalCluster,
     selectedOption,
+    filterFn,
   } = props;
 
   if (!showDataSourceSelectable) {
@@ -66,6 +68,7 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
         onSelectedDataSource={dataSourceCallBackFunc}
         disabled={disableDataSourceSelectable || false}
         selectedOption={selectedOption && selectedOption.length > 0 ? selectedOption : undefined}
+        filterFn={filterFn}
       />
     );
   }
