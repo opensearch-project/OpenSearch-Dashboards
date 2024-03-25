@@ -23,10 +23,10 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
     credentialProvider: jest.fn(),
   };
   jest.mock('../auth_registry');
-  const { AuthenticationMethodRegistery: authenticationMethodRegistery } = jest.requireActual(
+  const { AuthenticationMethodRegistry: authenticationMethodRegistry } = jest.requireActual(
     '../auth_registry'
   );
-  const authRegistry = new authenticationMethodRegistery();
+  const authRegistry = new authenticationMethodRegistry();
   authRegistry.registerAuthenticationMethod(customAuthMethod);
 
   const requestHandlerContext = coreMock.createRequestHandlerContext();

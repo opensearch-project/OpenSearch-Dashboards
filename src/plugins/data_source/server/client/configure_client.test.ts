@@ -28,8 +28,8 @@ import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { DataSourceClientParams, AuthenticationMethod, ClientParameters } from '../types';
 import { CustomApiSchemaRegistry } from '../schema_registry';
-import { IAuthenticationMethodRegistery } from '../auth_registry';
-import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
+import { IAuthenticationMethodRegistry } from '../auth_registry';
+import { authenticationMethodRegistryMock } from '../auth_registry/authentication_methods_registry.mock';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
@@ -46,7 +46,7 @@ describe('configureClient', () => {
   let usernamePasswordAuthContent: UsernamePasswordTypedContent;
   let sigV4AuthContent: SigV4Content;
   let customApiSchemaRegistry: CustomApiSchemaRegistry;
-  let authenticationMethodRegistery: jest.Mocked<IAuthenticationMethodRegistery>;
+  let authenticationMethodRegistry: jest.Mocked<IAuthenticationMethodRegistry>;
   let clientParameters: ClientParameters;
 
   const customAuthContent = {
@@ -70,7 +70,7 @@ describe('configureClient', () => {
     savedObjectsMock = savedObjectsClientMock.create();
     cryptographyMock = cryptographyServiceSetupMock.create();
     customApiSchemaRegistry = new CustomApiSchemaRegistry();
-    authenticationMethodRegistery = authenticationMethodRegisteryMock.create();
+    authenticationMethodRegistry = authenticationMethodRegistryMock.create();
 
     config = {
       enabled: true,
@@ -128,7 +128,7 @@ describe('configureClient', () => {
     };
 
     ClientMock.mockImplementation(() => dsClient);
-    authenticationMethodRegistery.getAuthenticationMethod.mockImplementation(() => authMethod);
+    authenticationMethodRegistry.getAuthenticationMethod.mockImplementation(() => authMethod);
     authRegistryCredentialProviderMock.mockReturnValue(clientParameters);
   });
 
@@ -299,13 +299,13 @@ describe('configureClient', () => {
     });
 
     const client = await configureClient(
-      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
       clientPoolSetup,
       config,
       logger
     );
     expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
-    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(authenticationMethodRegistry.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
@@ -343,7 +343,7 @@ describe('configureClient', () => {
     });
 
     const client = await configureClient(
-      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
       clientPoolSetup,
       config,
       logger
@@ -379,7 +379,7 @@ describe('configureClient', () => {
     });
 
     const client = await configureClient(
-      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
       clientPoolSetup,
       config,
       logger
@@ -555,7 +555,7 @@ describe('configureClient', () => {
           name: 'clientPoolTest',
           credentialProvider: jest.fn(),
         };
-        authenticationMethodRegistery.getAuthenticationMethod
+        authenticationMethodRegistry.getAuthenticationMethod
           .mockReset()
           .mockImplementation(() => authMethodWithClientPool);
         const mockDataSourceAttr = { ...dataSourceAttr, name: 'custom_auth' };
@@ -574,14 +574,14 @@ describe('configureClient', () => {
       });
       test('If endpoint is same for multiple requests client pool size should be 1', async () => {
         await configureClient(
-          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
           opensearchClientPoolSetup,
           config,
           logger
         );
 
         await configureClient(
-          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
           opensearchClientPoolSetup,
           config,
           logger
@@ -592,7 +592,7 @@ describe('configureClient', () => {
 
       test('If endpoint is different for two requests client pool size should be 2', async () => {
         await configureClient(
-          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
           opensearchClientPoolSetup,
           config,
           logger
@@ -622,7 +622,7 @@ describe('configureClient', () => {
         });
 
         await configureClient(
-          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
           opensearchClientPoolSetup,
           config,
           logger

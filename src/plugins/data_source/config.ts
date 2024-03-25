@@ -31,6 +31,15 @@ export const configSchema = schema.object({
       defaultValue: new Array(32).fill(0),
     }),
   }),
+  ssl: schema.object({
+    verificationMode: schema.oneOf(
+      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+      { defaultValue: 'full' }
+    ),
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+    ),
+  }),
   clientPool: schema.object({
     size: schema.number({ defaultValue: 5 }),
   }),
