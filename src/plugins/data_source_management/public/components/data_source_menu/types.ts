@@ -11,8 +11,8 @@ import {
 import { DataSourceAttributes } from '../../types';
 
 export interface DataSourceOption {
-  label?: string;
   id: string;
+  label?: string;
 }
 
 export interface DataSourceBaseConfig {
@@ -22,8 +22,8 @@ export interface DataSourceBaseConfig {
 
 export interface DataSourceMenuProps<T = any> {
   componentType: DataSourceComponentType;
-  setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
   componentConfig: T;
+  setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
 }
 
 export const DataSourceComponentType = {
@@ -41,19 +41,19 @@ export interface DataSourceViewConfig extends DataSourceBaseConfig {
 }
 
 export interface DataSourceAggregatedViewConfig extends DataSourceBaseConfig {
+  savedObjects: SavedObjectsClientContract;
+  notifications: NotificationsStart;
   activeDataSourceIds?: string[];
   hideLocalCluster?: boolean;
   displayAllCompatibleDataSources?: boolean;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
-  savedObjects: SavedObjectsClientContract;
-  notifications: NotificationsStart;
 }
 
 export interface DataSourceSelectableConfig extends DataSourceBaseConfig {
-  activeOption?: DataSourceOption[];
-  hideLocalCluster?: boolean;
   onSelectedDataSources: (dataSources: DataSourceOption[]) => void;
-  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
+  activeOption?: DataSourceOption[];
+  hideLocalCluster?: boolean;
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
 }
