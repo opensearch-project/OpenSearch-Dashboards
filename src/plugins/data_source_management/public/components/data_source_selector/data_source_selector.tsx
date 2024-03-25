@@ -39,6 +39,7 @@ interface DataSourceSelectorState {
 export interface DataSourceOption {
   label: string;
   id: string;
+  checked?: string;
 }
 
 export class DataSourceSelector extends React.Component<
