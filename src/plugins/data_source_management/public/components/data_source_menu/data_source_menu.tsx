@@ -17,7 +17,7 @@ import {
 } from './types';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
-  const { savedObjects, notifications, dataSourceFilter, componentType, componentConfig } = props;
+  const { componentType, componentConfig } = props;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
     const { activeOption, fullWidth } = config;
@@ -30,7 +30,16 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
   }
 
   function renderDataSourceSelectable(config: DataSourceSelectableConfig): ReactElement | null {
-    const { onSelectedDataSources, disabled, activeOption, hideLocalCluster, fullWidth } = config;
+    const {
+      onSelectedDataSources,
+      disabled,
+      activeOption,
+      hideLocalCluster,
+      fullWidth,
+      savedObjects,
+      notifications,
+      dataSourceFilter,
+    } = config;
     return (
       <DataSourceSelectable
         savedObjectsClient={savedObjects!}
@@ -53,6 +62,9 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
       hideLocalCluster,
       activeDataSourceIds,
       displayAllCompatibleDataSources,
+      savedObjects,
+      notifications,
+      dataSourceFilter,
     } = config;
     return (
       <DataSourceAggregatedView

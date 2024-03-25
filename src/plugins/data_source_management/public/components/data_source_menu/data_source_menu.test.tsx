@@ -27,12 +27,12 @@ describe('DataSourceMenu', () => {
     component = shallow(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceSelectable}
-        savedObjects={client}
-        notifications={notifications}
         componentConfig={{
           fullWidth: true,
           hideLocalCluster: false,
           onSelectedDataSources: jest.fn(),
+          savedObjects: client,
+          notifications,
         }}
       />
     );
@@ -43,12 +43,12 @@ describe('DataSourceMenu', () => {
     component = shallow(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceSelectable}
-        savedObjects={client}
-        notifications={notifications}
         componentConfig={{
           fullWidth: true,
           hideLocalCluster: true,
           onSelectedDataSources: jest.fn(),
+          savedObjects: client,
+          notifications,
         }}
       />
     );
@@ -69,9 +69,27 @@ describe('DataSourceMenu', () => {
     const container = render(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceAggregatedView}
-        savedObjects={client}
-        notifications={notifications}
-        componentConfig={{ fullWidth: true, hideLocalCluster: true }}
+        componentConfig={{
+          fullWidth: true,
+          hideLocalCluster: true,
+          savedObjects: client,
+          notifications,
+        }}
+      />
+    );
+    expect(container).toMatchSnapshot();
+  });
+
+  it('should render nothing', () => {
+    const container = render(
+      <DataSourceMenu
+        componentType={''}
+        componentConfig={{
+          fullWidth: true,
+          hideLocalCluster: true,
+          savedObjects: client,
+          notifications,
+        }}
       />
     );
     expect(container).toMatchSnapshot();
