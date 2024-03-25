@@ -19,6 +19,8 @@ import {
 } from './auth_registry';
 import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
+import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
+import { DataSourceMenuProps } from './components/data_source_menu/data_source_menu';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -28,7 +30,10 @@ export interface DataSourceManagementSetupDependencies {
 
 export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
-  getDataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
+  ui: {
+    DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
+    DataSourceMenu: React.ComponentType<DataSourceMenuProps>;
+  };
 }
 
 export interface DataSourceManagementPluginStart {
@@ -96,7 +101,10 @@ export class DataSourceManagementPlugin
 
     return {
       registerAuthenticationMethod,
-      getDataSourceSelector: createDataSourceSelector(),
+      ui: {
+        DataSourceSelector: createDataSourceSelector(),
+        DataSourceMenu: createDataSourceMenu(),
+      },
     };
   }
 
