@@ -152,7 +152,8 @@ const parseStringWithLongNumerals = (
       /* There are two types of exception objects that can be raised:
        *  1) a textual message with the position that we need to parse
        *     i. Unexpected [token|string ...] at position ...
-       *    ii. expected ',' or '}' after property value in object at line ... column ...
+       *    ii. Expected ',' or ... after ... in JSON at position ...
+       *   iii. expected ',' or ... after ... in object at line ... column ...
        *  2) a proper object with lineNumber and columnNumber which we can use
        *    Note: this might refer to the part of the code that threw the exception but
        *          we will try it anyway; the regex is specific enough to not produce
@@ -161,23 +162,24 @@ const parseStringWithLongNumerals = (
       let { lineNumber, columnNumber } = e;
 
       if (typeof e?.message === 'string') {
-        /* Check for 1-i (seen in Node)
+        /* Check for 1-i and 1-ii
          * Finding "..."෴1111"..." inside a string value, the extra quotes throw a syntax error
          * and the position points to " that is assumed to be the begining of a value.
          */
-        let match = e.message.match(/^Unexpected .*at position (\d+)(\s|$)/);
+        let match = e.message.match(/^(?:Une|E)xpected .*at position (\d+)(\D|$)/i);
         if (match) {
           lineNumber = 1;
           // Add 1 to reach the marker
           columnNumber = parseInt(match[1], 10) + 1;
         } else {
-          /* Check for 1-ii (seen in browsers)
+          /* Check for 1-iii
            * Finding "...,"෴1111"..." inside a string value, the extra quotes throw a syntax error
            * and the column number points to the marker after the " that is assumed to be terminating the
            * value.
+           * PS: There are different versions of this error across browsers and platforms.
            */
           // ToDo: Add functional tests for this path
-          match = e.message.match(/expected .*at line (\d+) column (\d+)(\s|$)/);
+          match = e.message.match(/expected .*line (\d+) column (\d+)(\D|$)/i);
           if (match) {
             lineNumber = parseInt(match[1], 10);
             columnNumber = parseInt(match[2], 10);

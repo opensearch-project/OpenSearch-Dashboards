@@ -62,6 +62,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Validate if workspace exists when setup inside a workspace ([#6154](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6154))
 - [Workspace] Register a workspace dropdown menu at the top of left nav bar ([#6150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6150))
 - [Multiple Datasource] Add icon in datasource table page to show the default datasource ([#6231](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6231))
+- [Multiple Datasource] Add TLS configuration for multiple data sources ([#6171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6171))
 - [Multiple Datasource] Add multi selectable data source component ([#6211](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6211))
 
 ### 🐛 Bug Fixes
@@ -75,12 +76,13 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Discover] Enable 'Back to Top' Feature in Discover for scrolling to top ([#6008](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6008))
 - [Discover] Fix lazy loading of the legacy table from getting stuck ([#6041](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6041))
 - [BUG][Discover] Allow saved sort from search embeddable to load in Dashboard ([#5934](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5934))
-- [osd/std] Add additional recovery from false-positives in handling of long numerals ([#5956](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5956))
+- [osd/std] Add additional recovery from false-positives in handling of long numerals ([#5956](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5956), [#6245](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6245))
 - [BUG][Multiple Datasource] Fix missing customApiRegistryPromise param for test connection ([#5944](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5944))
 - [BUG][Multiple Datasource] Add a migration function for datasource to add migrationVersion field ([#6025](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6025))
 - [BUG][MD]Expose picker using function in data source management plugin setup([#6030](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6030))
 - [BUG][Multiple Datasource] Fix data source filter bug and add tests ([#6152](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6152))
 - [BUG][Multiple Datasource] Fix obsolete snapshots for test within data source management plugin ([#6185](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6185))
+- [Workspace] Add base path when parse url in http service ([#6233](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6233))
 
 ### 🚞 Infrastructure
 
