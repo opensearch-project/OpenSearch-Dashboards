@@ -19,7 +19,7 @@ describe('#dataSourceManagement', () => {
     const typeA = createAuthenticationMethod({ name: 'typeA' });
     setup.registerAuthenticationMethod(createAuthenticationMethod(typeA));
     const start = doStart();
-    const registry = start.getAuthenticationMethodRegistery();
+    const registry = start.getAuthenticationMethodRegistry();
     expect(registry.getAuthenticationMethod('typeA')).toEqual(typeA);
   });
 });
