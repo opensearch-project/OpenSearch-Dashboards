@@ -15,7 +15,7 @@ import {
 } from './plugin';
 import { managementPluginMock } from '../../management/public/mocks';
 import { mockManagementPlugin as indexPatternManagementPluginMock } from '../../index_pattern_management/public/mocks';
-import { AuthenticationMethod, AuthenticationMethodRegistery } from './auth_registry';
+import { AuthenticationMethod, AuthenticationMethodRegistry } from './auth_registry';
 
 /* Mock Types */
 
@@ -30,7 +30,7 @@ export const docLinks = {
   },
 };
 
-export const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+export const authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
 const createDataSourceManagementContext = () => {
   const {
@@ -53,7 +53,7 @@ const createDataSourceManagementContext = () => {
     http,
     docLinks,
     setBreadcrumbs: () => {},
-    authenticationMethodRegistery,
+    authenticationMethodRegistry,
   };
 };
 

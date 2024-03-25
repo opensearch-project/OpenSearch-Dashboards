@@ -14,8 +14,8 @@ import { IndexPatternManagementSetup } from '../../index_pattern_management/publ
 import { DataSourceColumn } from './components/data_source_column/data_source_column';
 import {
   AuthenticationMethod,
-  IAuthenticationMethodRegistery,
-  AuthenticationMethodRegistery,
+  IAuthenticationMethodRegistry,
+  AuthenticationMethodRegistry,
 } from './auth_registry';
 import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
@@ -37,7 +37,7 @@ export interface DataSourceManagementPluginSetup {
 }
 
 export interface DataSourceManagementPluginStart {
-  getAuthenticationMethodRegistery: () => IAuthenticationMethodRegistery;
+  getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
 }
 
 const DSM_APP_ID = 'dataSources';
@@ -50,7 +50,7 @@ export class DataSourceManagementPlugin
       DataSourceManagementSetupDependencies
     > {
   private started = false;
-  private authMethodsRegistry = new AuthenticationMethodRegistery();
+  private authMethodsRegistry = new AuthenticationMethodRegistry();
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
@@ -111,7 +111,7 @@ export class DataSourceManagementPlugin
   public start(core: CoreStart) {
     this.started = true;
     return {
-      getAuthenticationMethodRegistery: () => this.authMethodsRegistry,
+      getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
     };
   }
 

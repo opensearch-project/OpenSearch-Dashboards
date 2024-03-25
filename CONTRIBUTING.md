@@ -23,7 +23,7 @@ OpenSearch is a community project that is built and maintained by people just li
 
 ### Join the Discussion
 
-See the [communication guide](COMMUNICATION.md)for information on how to join our slack workspace, forum, or developer office hours.
+See the [communication guide](COMMUNICATIONS.md)for information on how to join our slack workspace, forum, or developer office hours.
 
 ### Bug Reports
 

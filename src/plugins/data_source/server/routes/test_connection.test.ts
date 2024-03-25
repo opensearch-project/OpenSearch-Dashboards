@@ -7,8 +7,8 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@osd/utility-types';
 import { setupServer } from '../../../../../src/core/server/test_utils';
 
-import { IAuthenticationMethodRegistery } from '../auth_registry';
-import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
+import { IAuthenticationMethodRegistry } from '../auth_registry';
+import { authenticationMethodRegistryMock } from '../auth_registry/authentication_methods_registry.mock';
 import { CustomApiSchemaRegistry } from '../schema_registry';
 import { DataSourceServiceSetup } from '../../server/data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
@@ -30,7 +30,7 @@ describe(`Test connection ${URL}`, () => {
   let customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>;
   let dataSourceClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
   let dataSourceServiceSetupMock: DataSourceServiceSetup;
-  let authRegistryPromiseMock: Promise<IAuthenticationMethodRegistery>;
+  let authRegistryPromiseMock: Promise<IAuthenticationMethodRegistry>;
   const dataSourceAttr = {
     endpoint: 'https://test.com',
     auth: {
@@ -155,7 +155,7 @@ describe(`Test connection ${URL}`, () => {
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     customApiSchemaRegistryPromise = Promise.resolve(customApiSchemaRegistry);
-    authRegistryPromiseMock = Promise.resolve(authenticationMethodRegisteryMock.create());
+    authRegistryPromiseMock = Promise.resolve(authenticationMethodRegistryMock.create());
     dataSourceClient = opensearchClientMock.createInternalClient();
 
     dataSourceServiceSetupMock = {
