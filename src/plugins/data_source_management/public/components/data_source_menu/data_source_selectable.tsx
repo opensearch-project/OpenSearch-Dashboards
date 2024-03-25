@@ -17,6 +17,8 @@ import {
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
 import { getDataSourcesWithFields } from '../utils';
 import { DataSourceOption, LocalCluster } from '../data_source_selector/data_source_selector';
+import { SavedObject } from '../../../../../core/public';
+import { DataSourceAttributes } from '../../types';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -26,7 +28,7 @@ interface DataSourceSelectableProps {
   hideLocalCluster: boolean;
   fullWidth: boolean;
   selectedOption?: DataSourceOption[];
-  filterFn?: (dataSource: any) => boolean;
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
 }
 
 interface DataSourceSelectableState {
@@ -74,8 +76,10 @@ export class DataSourceSelectable extends React.Component<
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
           let filteredDataSources = [];
-          if (this.props.filterFn) {
-            filteredDataSources = fetchedDataSources.filter((ds) => this.props.filterFn!(ds));
+          if (this.props.dataSourceFilter) {
+            filteredDataSources = fetchedDataSources.filter((ds) =>
+              this.props.dataSourceFilter!(ds)
+            );
           }
 
           if (filteredDataSources.length === 0) {

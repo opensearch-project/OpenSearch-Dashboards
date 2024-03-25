@@ -11,15 +11,20 @@ import {
   MountPoint,
   NotificationsStart,
   SavedObjectsClientContract,
+  SavedObject,
 } from '../../../../../core/public';
 import { MountPointPortal } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceSelectable } from './data_source_selectable';
 import { DataSourceOption } from '../data_source_selector/data_source_selector';
+import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';
+import { DataSourceAttributes } from '../../types';
 
 export interface DataSourceMenuProps {
   showDataSourceSelectable?: boolean;
   showDataSourceView?: boolean;
+  showDataSourceAggregatedView?: boolean;
+  activeDataSourceIds?: string[];
   appName: string;
   savedObjects?: SavedObjectsClientContract;
   notifications?: NotificationsStart;
@@ -30,7 +35,8 @@ export interface DataSourceMenuProps {
   className?: string;
   selectedOption?: DataSourceOption[];
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-  filterFn?: (dataSource: any) => boolean;
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
+  displayAllCompatibleDataSources?: boolean;
 }
 
 export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null {
@@ -40,14 +46,17 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
     dataSourceCallBackFunc,
     showDataSourceSelectable,
     disableDataSourceSelectable,
+    showDataSourceAggregatedView,
     fullWidth,
     hideLocalCluster,
     selectedOption,
     showDataSourceView,
-    filterFn,
+    dataSourceFilter,
+    activeDataSourceIds,
+    displayAllCompatibleDataSources,
   } = props;
 
-  if (!showDataSourceSelectable && !showDataSourceView) {
+  if (!showDataSourceSelectable && !showDataSourceView && !showDataSourceAggregatedView) {
     return null;
   }
 
@@ -75,9 +84,24 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
           onSelectedDataSource={dataSourceCallBackFunc!}
           disabled={disableDataSourceSelectable || false}
           selectedOption={selectedOption && selectedOption.length > 0 ? selectedOption : undefined}
-          filterFn={filterFn}
+          dataSourceFilter={dataSourceFilter}
         />
       </EuiHeaderLinks>
+    );
+  }
+
+  function renderDataSourceAggregatedView(): ReactElement | null {
+    if (!showDataSourceAggregatedView) return null;
+    return (
+      <DataSourceAggregatedView
+        fullWidth={fullWidth}
+        hideLocalCluster={hideLocalCluster || false}
+        savedObjectsClient={savedObjects!}
+        notifications={notifications!.toasts}
+        activeDataSourceIds={activeDataSourceIds}
+        dataSourceFilter={dataSourceFilter}
+        displayAllCompatibleDataSources={displayAllCompatibleDataSources || false}
+      />
     );
   }
 
@@ -88,6 +112,7 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
       return (
         <>
           <MountPointPortal setMountPoint={setMenuMountPoint}>
+            {renderDataSourceAggregatedView()}
             {renderDataSourceSelectable(menuClassName)}
             {renderDataSourceView(menuClassName)}
           </MountPointPortal>
@@ -108,6 +133,9 @@ export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null 
 
 DataSourceMenu.defaultProps = {
   disableDataSourceSelectable: false,
-  showDataSourceView: false,
+  showDataSourceAggregatedView: false,
   showDataSourceSelectable: false,
+  displayAllCompatibleDataSources: false,
+  showDataSourceView: false,
+  hideLocalCluster: false,
 };

@@ -74,7 +74,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
-        filterFn={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
     component.instance().componentDidMount!();
