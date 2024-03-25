@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IAuthenticationMethodRegistery } from './authentication_methods_registry';
+import { IAuthenticationMethodRegistry } from './authentication_methods_registry';
 
 const create = () =>
   (({
     getAllAuthenticationMethods: jest.fn(),
     getAuthenticationMethod: jest.fn(),
-  } as unknown) as jest.Mocked<IAuthenticationMethodRegistery>);
+  } as unknown) as jest.Mocked<IAuthenticationMethodRegistry>);
 
-export const authenticationMethodRegisteryMock = { create };
+export const authenticationMethodRegistryMock = { create };

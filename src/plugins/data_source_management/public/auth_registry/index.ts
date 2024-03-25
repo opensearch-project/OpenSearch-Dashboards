@@ -4,7 +4,7 @@
  */
 
 export {
-  IAuthenticationMethodRegistery,
+  IAuthenticationMethodRegistry,
   AuthenticationMethod,
-  AuthenticationMethodRegistery,
+  AuthenticationMethodRegistry,
 } from './authentication_methods_registry';
