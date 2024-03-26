@@ -30,13 +30,13 @@ const notFoundIdentifier = '[data-test-subj="dataSourceNotFound"]';
 describe('Datasource Management: Edit Datasource Wizard', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
-  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
     noAuthCredentialAuthMethod
   );
-  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
     usernamePasswordAuthMethod
   );
-  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(sigV4AuthMethod);
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(sigV4AuthMethod);
 
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;

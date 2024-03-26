@@ -5,6 +5,7 @@
 
 import type { Subscription } from 'rxjs';
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import {
   Plugin,
   CoreStart,
@@ -12,7 +13,11 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
 } from '../../../core/public';
-import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import {
+  WORKSPACE_FATAL_ERROR_APP_ID,
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_CREATE_APP_ID,
+} from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -33,10 +38,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     }
   }
 
-  private getWorkspaceIdFromURL(basePath?: string): string | null {
-    return getWorkspaceIdFromUrl(window.location.href, basePath);
-  }
-
   public async setup(core: CoreSetup) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
@@ -44,7 +45,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     /**
      * Retrieve workspace id from url
      */
-    const workspaceId = this.getWorkspaceIdFromURL(core.http.basePath.getBasePath());
+    const workspaceId = getWorkspaceIdFromUrl(
+      window.location.href,
+      core.http.basePath.getBasePath()
+    );
 
     if (workspaceId) {
       const result = await workspaceClient.enterWorkspace(workspaceId);
@@ -89,6 +93,19 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
 
       return renderApp(params, services);
     };
+
+    // create
+    core.application.register({
+      id: WORKSPACE_CREATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceCreate', {
+        defaultMessage: 'Create Workspace',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderCreatorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderCreatorApp);
+      },
+    });
 
     // workspace fatal error
     core.application.register({
