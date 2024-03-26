@@ -30,6 +30,7 @@ export const DataSourceComponentType = {
   DataSourceSelectable: 'DataSourceSelectable',
   DataSourceView: 'DataSourceView',
   DataSourceAggregatedView: 'DataSourceAggregatedView',
+  DataSourceMultiSelectable: 'DataSourceMultiSelectable',
 } as const;
 
 export type DataSourceComponentType = typeof DataSourceComponentType[keyof typeof DataSourceComponentType];

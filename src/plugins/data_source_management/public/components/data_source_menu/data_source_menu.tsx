@@ -9,11 +9,11 @@ import { DataSourceSelectable } from './data_source_selectable';
 import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';
 import { DataSourceMultiSelectable } from '../data_source_multi_selectable/data_source_multi_selectable';
-import { DataSourceAttributes } from '../../types';
 import {
   DataSourceAggregatedViewConfig,
   DataSourceComponentType,
   DataSourceMenuProps,
+  DataSourceMultiSelectableConfig,
   DataSourceSelectableConfig,
   DataSourceViewConfig,
 } from './types';
@@ -31,20 +31,26 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     );
   }
 
-  function renderDataSourceMultiSelectable(config: string): ReactElement | null {
+  function renderDataSourceMultiSelectable(
+    config: DataSourceMultiSelectableConfig
+  ): ReactElement | null {
+    const {
+      fullWidth,
+      hideLocalCluster,
+      savedObjects,
+      notifications,
+      onSelectedDataSources,
+    } = config;
     return (
-      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
-        <DataSourceMultiSelectable
-          fullWidth={fullWidth}
-          hideLocalCluster={hideLocalCluster || false}
-          savedObjectsClient={savedObjects!}
-          notifications={notifications!.toasts}
-          onSelectedDataSources={onDataSourcesSelectionChange!}
-        />
-      </EuiHeaderLinks>
+      <DataSourceMultiSelectable
+        fullWidth={fullWidth}
+        hideLocalCluster={hideLocalCluster || false}
+        savedObjectsClient={savedObjects!}
+        notifications={notifications!.toasts}
+        onSelectedDataSources={onSelectedDataSources!}
+      />
     );
   }
-
 
   function renderDataSourceSelectable(config: DataSourceSelectableConfig): ReactElement | null {
     const {
@@ -96,7 +102,6 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     );
   }
 
-
   function renderLayout(): ReactElement | null {
     switch (componentType) {
       case DataSourceComponentType.DataSourceAggregatedView:
@@ -105,6 +110,8 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         return renderDataSourceSelectable(componentConfig as DataSourceSelectableConfig);
       case DataSourceComponentType.DataSourceView:
         return renderDataSourceView(componentConfig as DataSourceViewConfig);
+      case DataSourceComponentType.DataSourceMultiSelectable:
+        return renderDataSourceMultiSelectable(componentConfig as DataSourceMultiSelectableConfig);
       default:
         return null;
     }
