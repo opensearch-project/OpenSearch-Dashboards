@@ -28,9 +28,13 @@
  * under the License.
  */
 
-import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
+
+const goToHomePage = () => {
+  window.location.href = '/';
+};
 
 export const AppNotFound = () => (
   <EuiPage style={{ minHeight: '100%' }} data-test-subj="appNotFoundPageContent">
@@ -48,12 +52,24 @@ export const AppNotFound = () => (
             </h2>
           }
           body={
-            <p>
-              <FormattedMessage
-                id="core.application.appNotFound.pageDescription"
-                defaultMessage="No application was found at this URL. Try going back or choosing an app from the menu."
+            <>
+              <p>
+                <FormattedMessage
+                  id="core.application.appNotFound.pageDescription"
+                  defaultMessage="No application was found at this URL. Try going back or choosing an app from the menu."
+                />
+              </p>
+              <EuiEmptyPrompt
+                actions={
+                  <EuiButton onClick={goToHomePage} fill data-test-subj="noAppDefaultPageButton">
+                    <FormattedMessage
+                      id="core.application.listing.appNotFound.defaultPageButton"
+                      defaultMessage="Go to Default Page"
+                    />
+                  </EuiButton>
+                }
               />
-            </p>
+            </>
           }
         />
       </EuiPageContent>
