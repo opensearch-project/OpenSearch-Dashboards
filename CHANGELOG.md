@@ -69,6 +69,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Refactor data source menu and interface to allow cleaner selection of component and related configurations ([#6256](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6256))
 - [Multiple Datasource] Allow top nav menu to mount data source menu for use case when both menus are mounted ([#6268](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6268))
 - [Workspace] Add create workspace page ([#6179](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6179))
+- [Workspace] Filter left nav menu items according to the current workspace ([#6234](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6234))
 
 
 ### 🐛 Bug Fixes
