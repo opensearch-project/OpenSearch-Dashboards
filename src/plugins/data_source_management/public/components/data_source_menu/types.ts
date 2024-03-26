@@ -58,3 +58,10 @@ export interface DataSourceSelectableConfig extends DataSourceBaseConfig {
   hideLocalCluster?: boolean;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
 }
+
+export interface DataSourceMultiSelectableConfig extends DataSourceBaseConfig {
+  onSelectedDataSources: (dataSources: DataSourceOption[]) => void;
+  savedObjects: SavedObjectsClientContract;
+  notifications: NotificationsStart;
+  hideLocalCluster?: boolean;
+}
