@@ -98,4 +98,35 @@ describe('sample data uninstall route', () => {
     expect(mockClient).toBeCalled();
     expect(mockSOClient.delete).toBeCalled();
   });
+
+  it('handler calls expected api with the given request with workspace', async () => {
+    const mockWorkspaceId = 'workspace';
+    const mockContext = {
+      core: {
+        opensearch: {
+          legacy: {
+            client: { callAsCurrentUser: mockClient },
+          },
+        },
+        savedObjects: { client: mockSOClient },
+      },
+    };
+    const mockBody = { id: 'flights' };
+    const mockQuery = { workspace_id: mockWorkspaceId };
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+      params: mockBody,
+      query: mockQuery,
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    createUninstallRoute(mockCoreSetup.http.createRouter(), sampleDatasets, mockUsageTracker);
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.delete.mock.calls[0][1];
+
+    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+
+    expect(mockClient).toBeCalled();
+    expect(mockSOClient.delete).toBeCalled();
+  });
 });

@@ -39,6 +39,10 @@ import {
 } from '../lib/translate_timestamp';
 import { loadData } from '../lib/load_data';
 import { SampleDataUsageTracker } from '../usage/usage';
+import {
+  getDataSourceIntegratedSavedObjects,
+  getWorkspaceIntegratedSavedObjects,
+} from '../data_sets/util';
 
 const insertDataIntoIndex = (
   dataIndexConfig: any,
@@ -113,12 +117,14 @@ export function createInstallRoute(
         query: schema.object({
           now: schema.maybe(schema.string()),
           data_source_id: schema.maybe(schema.string()),
+          workspace_id: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, req, res) => {
       const { params, query } = req;
       const dataSourceId = query.data_source_id;
+      const workspaceId = query.workspace_id;
 
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {
@@ -198,14 +204,22 @@ export function createInstallRoute(
       }
 
       let createResults;
-      const savedObjectsList = dataSourceId
-        ? sampleDataset.getDataSourceIntegratedSavedObjects(dataSourceId, dataSourceTitle)
-        : sampleDataset.savedObjects;
+      let savedObjectsList = sampleDataset.savedObjects;
+      if (workspaceId) {
+        savedObjectsList = getWorkspaceIntegratedSavedObjects(savedObjectsList, workspaceId);
+      }
+      if (dataSourceId) {
+        savedObjectsList = getDataSourceIntegratedSavedObjects(
+          savedObjectsList,
+          dataSourceId,
+          dataSourceTitle
+        );
+      }
 
       try {
         createResults = await context.core.savedObjects.client.bulkCreate(
           savedObjectsList.map(({ version, ...savedObject }) => savedObject),
-          { overwrite: true }
+          { overwrite: true, workspaces: workspaceId ? [workspaceId] : undefined }
         );
       } catch (err) {
         const errMsg = `bulkCreate failed, error: ${err.message}`;
