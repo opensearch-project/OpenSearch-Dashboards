@@ -41,7 +41,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
-import { DataSourcePicker } from './data_source_picker';
+import { DataSourcePicker, createDataSourcePickerHandler } from './data_source_picker';
 import {
   getSavedObjectsClient,
   getNotifications,
@@ -121,6 +121,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
 
   const dataSourceManagementEnabled =
     !!getDataSourceManagementSetup().dataSourceManagement || false;
+  const handleDataSourceSelectChange = createDataSourcePickerHandler(onChange);
 
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
@@ -181,7 +182,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 toasts={getNotifications().toasts}
                 model={model}
                 dataSourceManagement={getDataSourceManagementSetup().dataSourceManagement}
-                onChange={onChange}
+                handleChange={handleDataSourceSelectChange}
               />
             </EuiFormRow>
           </EuiFlexItem>

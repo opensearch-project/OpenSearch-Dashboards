@@ -31,6 +31,7 @@
 import { handleAnnotationResponse } from './response_processors/annotations';
 import { getAnnotationRequestParams } from './annotations/get_request_params';
 import { getLastSeriesTimestamp } from './helpers/timestamp';
+import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 function validAnnotation(annotation) {
   return (
@@ -54,6 +55,7 @@ export async function getAnnotations({
   const annotations = panel.annotations.filter(validAnnotation);
   const lastSeriesTimestamp = getLastSeriesTimestamp(series);
   const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
+  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY] || undefined;
 
   const bodiesPromises = annotations.map((annotation) =>
     getAnnotationRequestParams(req, panel, annotation, opensearchQueryConfig, capabilities)
@@ -67,7 +69,7 @@ export async function getAnnotations({
   if (!searches.length) return { responses: [] };
 
   try {
-    const data = await searchStrategy.search(req, searches);
+    const data = await searchStrategy.search(req, searches, {}, panelDataSourceId);
 
     return annotations.reduce((acc, annotation, index) => {
       acc[annotation.id] = handleAnnotationResponseBy(data[index].rawResponse, annotation);

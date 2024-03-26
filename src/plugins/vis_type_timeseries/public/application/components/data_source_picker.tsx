@@ -15,17 +15,16 @@ export interface DataSourcePickerProps {
   savedObjectsClient: SavedObjectsClientContract;
   dataSourceManagement: DataSourceManagementPluginSetup;
   toasts: ToastsStart;
-  onChange: () => void;
+  handleChange: (e: Array<{}>) => void;
 }
 
 export const DataSourcePicker = (props: DataSourcePickerProps) => {
-  const { savedObjectsClient, model } = props;
-  const [defaultOption, setDefaultOption] = useState<DataSourceOption[]>();
-  const handleSelectChange = createDataSourcePickerHandler(props.onChange);
+  const { savedObjectsClient, model, handleChange } = props;
+  const [defaultOption, setDefaultOption] = useState<Array<{ id: string; label: string }>>();
   const DataSourceSelector = props.dataSourceManagement.ui.DataSourceSelector;
 
-  const onDataSourceSelectChange = (dataSourceOption: DataSourceOption[]) => {
-    handleSelectChange(dataSourceOption);
+  const onDataSourceSelectChange = (dataSourceOption: Array<{ id: string; label: string }>) => {
+    handleChange(dataSourceOption);
   };
 
   useEffect(() => {
@@ -41,7 +40,7 @@ export const DataSourcePicker = (props: DataSourcePickerProps) => {
         ]);
       }
     })();
-  });
+  }, [model, savedObjectsClient]);
 
   return (
     <DataSourceSelector
@@ -58,8 +57,8 @@ export const DataSourcePicker = (props: DataSourcePickerProps) => {
   );
 };
 
-const createDataSourcePickerHandler = (handleChange: any) => {
-  return (selectedOptions: DataSourceOption[]): void => {
+export const createDataSourcePickerHandler = (handleChange: any) => {
+  return (selectedOptions: []): void => {
     return handleChange?.({
       [DATA_SOURCE_ID_KEY]: _.get(selectedOptions, '[0].id', null),
     });
