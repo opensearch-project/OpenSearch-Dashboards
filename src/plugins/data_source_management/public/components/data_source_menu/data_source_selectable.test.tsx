@@ -31,7 +31,7 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={jest.fn()}
+        onSelectedDataSources={jest.fn()}
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
@@ -51,7 +51,7 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={jest.fn()}
+        onSelectedDataSources={jest.fn()}
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
@@ -71,7 +71,7 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={jest.fn()}
+        onSelectedDataSources={jest.fn()}
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}

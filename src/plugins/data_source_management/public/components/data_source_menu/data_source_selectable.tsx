@@ -16,14 +16,15 @@ import {
 } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
 import { getDataSourcesWithFields } from '../utils';
-import { DataSourceOption, LocalCluster } from '../data_source_selector/data_source_selector';
+import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
+import { DataSourceOption } from './types';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: ToastsStart;
-  onSelectedDataSource: (dataSources: DataSourceOption[]) => void;
+  onSelectedDataSources: (dataSources: DataSourceOption[]) => void;
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
@@ -119,7 +120,8 @@ export class DataSourceSelectable extends React.Component<
     this.setState({
       selectedOption: [selectedDataSource],
     });
-    this.props.onSelectedDataSource([...selectedDataSource]);
+
+    this.props.onSelectedDataSources([selectedDataSource]);
   }
 
   render() {

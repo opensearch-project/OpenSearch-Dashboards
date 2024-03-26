@@ -10,7 +10,7 @@ import {
   defaultAuthType,
   noAuthCredentialAuthMethod,
 } from '../types';
-import { AuthenticationMethodRegistery } from '../auth_registry';
+import { AuthenticationMethodRegistry } from '../auth_registry';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -150,17 +150,17 @@ export const isValidUrl = (endpoint: string) => {
 };
 
 export const getDefaultAuthMethod = (
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
-  const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
+  const registeredAuthMethods = authenticationMethodRegistry.getAllAuthenticationMethods();
 
   const defaultAuthMethod =
     registeredAuthMethods.length > 0
-      ? authenticationMethodRegistery.getAuthenticationMethod(registeredAuthMethods[0].name)
+      ? authenticationMethodRegistry.getAuthenticationMethod(registeredAuthMethods[0].name)
       : noAuthCredentialAuthMethod;
 
   const initialSelectedAuthMethod =
-    authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
+    authenticationMethodRegistry.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
 
   return initialSelectedAuthMethod;
 };
@@ -168,15 +168,15 @@ export const getDefaultAuthMethod = (
 export const extractRegisteredAuthTypeCredentials = (
   currentCredentialState: { [key: string]: string },
   authType: string,
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
   const registeredCredentials = {} as { [key: string]: string };
   const registeredCredentialField =
-    authenticationMethodRegistery.getAuthenticationMethod(authType)?.credentialFormField ?? {};
+    authenticationMethodRegistry.getAuthenticationMethod(authType)?.credentialFormField ?? {};
 
-  Object.keys(registeredCredentialField).forEach((credentialFiled) => {
-    registeredCredentials[credentialFiled] =
-      currentCredentialState[credentialFiled] ?? registeredCredentialField[credentialFiled];
+  Object.keys(registeredCredentialField).forEach((credentialField) => {
+    registeredCredentials[credentialField] =
+      currentCredentialState[credentialField] ?? registeredCredentialField[credentialField];
   });
 
   return registeredCredentials;
