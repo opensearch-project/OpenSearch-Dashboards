@@ -3,16 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ShallowWrapper, shallow } from 'enzyme';
-import { SavedObjectsClientContract } from '../../../../../core/public';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
-import React from 'react';
-import { DataSourceSelectable } from './data_source_selectable';
-import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
-import { render } from '@testing-library/react';
+import { ShallowWrapper, shallow } from 'enzyme';
+import { DataSourceMultiSelectable } from './data_source_multi_selectable';
+import React from 'react';
+import { render, fireEvent, screen } from '@testing-library/react';
 
-describe('DataSourceSelectable', () => {
+describe('DataSourceMultiSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   let client: SavedObjectsClientContract;
@@ -28,11 +27,10 @@ describe('DataSourceSelectable', () => {
 
   it('should render normally with local cluster not hidden', () => {
     component = shallow(
-      <DataSourceSelectable
+      <DataSourceMultiSelectable
         savedObjectsClient={client}
         notifications={toasts}
         onSelectedDataSources={jest.fn()}
-        disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
       />
@@ -46,13 +44,12 @@ describe('DataSourceSelectable', () => {
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
 
-  it('should render normally with local cluster is hidden', () => {
+  it('should render normally with local cluster hidden', () => {
     component = shallow(
-      <DataSourceSelectable
+      <DataSourceMultiSelectable
         savedObjectsClient={client}
         notifications={toasts}
         onSelectedDataSources={jest.fn()}
-        disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
       />
@@ -66,39 +63,43 @@ describe('DataSourceSelectable', () => {
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
 
-  it('should filter options if configured', async () => {
+  it('should show toasts when exception happens', async () => {
+    const errorClient = {
+      find: () => {
+        return new Promise((resolve, reject) => {
+          reject('error');
+        });
+      },
+    } as any;
+
     component = shallow(
-      <DataSourceSelectable
-        savedObjectsClient={client}
+      <DataSourceMultiSelectable
+        savedObjectsClient={errorClient}
         notifications={toasts}
         onSelectedDataSources={jest.fn()}
-        disabled={false}
-        hideLocalCluster={false}
+        hideLocalCluster={true}
         fullWidth={false}
-        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
-    component.instance().componentDidMount!();
     await nextTick();
-    expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toBeCalledTimes(1);
   });
 
-  it('should show popover when click on button', async () => {
-    const onSelectedDataSource = jest.fn();
+  it('should callback when onChange happens', async () => {
+    const callbackMock = jest.fn();
     const container = render(
-      <DataSourceSelectable
+      <DataSourceMultiSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={onSelectedDataSource}
-        disabled={false}
-        hideLocalCluster={false}
+        onSelectedDataSources={callbackMock}
+        hideLocalCluster={true}
         fullWidth={false}
-        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceFilterGroupButton');
     button.click();
-    expect(container).toMatchSnapshot();
+    fireEvent.click(screen.getByText('Deselect all'));
+
+    expect(callbackMock).toBeCalledWith([]);
   });
 });
