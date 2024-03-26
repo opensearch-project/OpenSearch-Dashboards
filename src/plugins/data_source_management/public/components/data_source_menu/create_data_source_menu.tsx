@@ -4,10 +4,22 @@
  */
 
 import React from 'react';
-import { DataSourceMenu, DataSourceMenuProps } from './data_source_menu';
+import { EuiHeaderLinks } from '@elastic/eui';
+import { DataSourceMenu } from './data_source_menu';
+import { DataSourceMenuProps } from './types';
+import { MountPointPortal } from '../../../../opensearch_dashboards_react/public';
 
-export function createDataSourceMenu() {
-  return (props: DataSourceMenuProps) => {
+export function createDataSourceMenu<T>() {
+  return (props: DataSourceMenuProps<T>) => {
+    if (props.setMenuMountPoint) {
+      return (
+        <MountPointPortal setMountPoint={props.setMenuMountPoint}>
+          <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs">
+            <DataSourceMenu {...props} />
+          </EuiHeaderLinks>
+        </MountPointPortal>
+      );
+    }
     return <DataSourceMenu {...props} />;
   };
 }
