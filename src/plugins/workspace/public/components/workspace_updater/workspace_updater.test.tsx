@@ -58,7 +58,7 @@ const WorkspaceUpdater = (props: any) => {
           ...mockCoreStart.application.capabilities,
         },
         navigateToApp,
-        getUrlForApp: jest.fn(),
+        getUrlForApp: jest.fn(() => '/app/workspace_overview'),
         applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
       workspaces: workspacesService,
@@ -183,6 +183,9 @@ describe('WorkspaceUpdater', () => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringMatching(/workspace_overview$/));
+    });
   });
 
   it('should show danger toasts after update workspace failed', async () => {
