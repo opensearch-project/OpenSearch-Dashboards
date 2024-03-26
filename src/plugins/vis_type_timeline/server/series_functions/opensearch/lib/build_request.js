@@ -50,7 +50,30 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
 
   // Use the opensearchDashboards and kibana filter bar filters
   if (config.opensearchDashboards && config.kibana) {
-    bool.filter = _.get(tlConfig, 'request.body.extended.es.filter');
+    const ignoreFilterIfFieldNotInIndex = _.get(
+      tlConfig,
+      'request.body.extended.es.ignoreFilterIfFieldNotInIndex'
+    );
+
+    // If filters should be ignored for inapplicable indexes,
+    // they should be provided for each index in the expression
+    if (ignoreFilterIfFieldNotInIndex) {
+      if (config.index) {
+        const filter = _.get(tlConfig, [
+          'request',
+          'body',
+          'extended',
+          'es',
+          'filterByIndex',
+          config.index.trim(),
+        ]);
+        if (filter) {
+          bool.filter = filter;
+        }
+      }
+    } else {
+      bool.filter = _.get(tlConfig, 'request.body.extended.es.filter');
+    }
   }
 
   const aggs = {

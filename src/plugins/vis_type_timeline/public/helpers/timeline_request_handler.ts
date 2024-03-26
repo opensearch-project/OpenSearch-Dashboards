@@ -29,11 +29,13 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { flatten, uniqBy } from 'lodash';
 import { OPENSEARCH_DASHBOARDS_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { TimeRange, Filter, opensearchQuery, Query } from '../../../data/public';
 import { TimelineVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelineVisParams } from '../timeline_vis_fn';
+import { getIndexPatterns } from './plugin_services';
 
 interface Stats {
   cacheCount: number;
@@ -72,6 +74,8 @@ export interface TimelineSuccessResponse {
   type: OPENSEARCH_DASHBOARDS_CONTEXT_NAME;
 }
 
+const indexRegEx = /index=['"]?([\sA-z0-9_\-\*]*?)[^\sA-z0-9_\-\*]/g;
+
 export function getTimelineRequestHandler({
   uiSettings,
   http,
@@ -101,8 +105,48 @@ export function getTimelineRequestHandler({
     }
 
     const opensearchQueryConfigs = opensearchQuery.getOpenSearchQueryConfig(uiSettings);
+    const { ignoreFilterIfFieldNotInIndex } = opensearchQueryConfigs;
+    let filterByIndex: { [indexTitle: string]: unknown } = {};
 
-    // parse the time range client side to make sure it behaves like other charts
+    // If filters should be ignored for inapplicable indexes,
+    // they must be built for each index in the expression
+    if (ignoreFilterIfFieldNotInIndex) {
+      // Get a unique list of index titles used in the expression
+      const parsedIndexTitles: string[] = [];
+      let match = indexRegEx.exec(expression);
+      while (match) {
+        const index = match[1].replace(/['"]/g, '').trim();
+        if (index && parsedIndexTitles.indexOf(index) < 0) {
+          parsedIndexTitles.push(index);
+        }
+        match = indexRegEx.exec(expression);
+      }
+
+      // Find index objects based on parsed titles
+      const indexPatterns = getIndexPatterns();
+      const parsedIndexPatterns = uniqBy(
+        flatten(await Promise.all(parsedIndexTitles.map((title) => indexPatterns.find(title)))),
+        'title'
+      );
+
+      // Determine which filters apply to which indexes
+      filterByIndex = parsedIndexPatterns.reduce((acc, index) => {
+        if (index.title) {
+          return {
+            [index.title]: opensearchQuery.buildOpenSearchQuery(
+              index,
+              query,
+              filters,
+              opensearchQueryConfigs
+            ),
+            ...acc,
+          };
+        }
+        return acc;
+      }, {} as typeof filterByIndex);
+    }
+
+    // Parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
 
     try {
@@ -117,6 +161,8 @@ export function getTimelineRequestHandler({
                 filters,
                 opensearchQueryConfigs
               ),
+              ignoreFilterIfFieldNotInIndex,
+              filterByIndex,
             },
           },
           time: {
