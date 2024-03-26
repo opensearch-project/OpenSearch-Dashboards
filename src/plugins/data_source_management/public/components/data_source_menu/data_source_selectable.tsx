@@ -120,6 +120,7 @@ export class DataSourceSelectable extends React.Component<
     this.setState({
       selectedOption: [selectedDataSource],
     });
+
     this.props.onSelectedDataSources([selectedDataSource]);
   }
 
@@ -168,6 +169,7 @@ export class DataSourceSelectable extends React.Component<
               options={this.state.dataSourceOptions}
               onChange={(newOptions) => this.onChange(newOptions)}
               singleSelection={true}
+              data-test-subj={'dataSourceSelectable'}
             >
               {(list, search) => (
                 <>

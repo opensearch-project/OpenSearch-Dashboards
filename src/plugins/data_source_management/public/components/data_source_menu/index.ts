@@ -10,4 +10,5 @@ export {
   DataSourceComponentType,
   DataSourceViewConfig,
   DataSourceMenuProps,
+  DataSourceMultiSelectableConfig,
 } from './types';
