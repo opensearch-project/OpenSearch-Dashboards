@@ -63,7 +63,7 @@ describe('DataSourceFilterGroup', () => {
     ]);
 
     const input = screen.getByTestId('dataSourceMultiSelectFieldSearch');
-    fireEvent.change(input, { target: { value: 'randome input' } });
+    fireEvent.change(input, { target: { value: 'random input' } });
     fireEvent.keyDown(input, { key: 'enter', keyCode: 13 });
 
     expect(mockCallBack).toBeCalledWith([
