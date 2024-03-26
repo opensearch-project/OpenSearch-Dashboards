@@ -47,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-          group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
