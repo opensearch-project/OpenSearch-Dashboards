@@ -34,6 +34,7 @@ import { handleErrorResponse } from './handle_error_response';
 import { getAnnotations } from './get_annotations';
 import { getOpenSearchQueryConfig } from './helpers/get_opensearch_query_uisettings';
 import { getActiveSeries } from './helpers/get_active_series';
+import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 export async function getSeriesData(req, panel) {
   const {
@@ -41,6 +42,7 @@ export async function getSeriesData(req, panel) {
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategyForPanel(req, panel);
   const opensearchQueryConfig = await getOpenSearchQueryConfig(req);
+  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY] || undefined;
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
@@ -56,7 +58,7 @@ export async function getSeriesData(req, panel) {
       []
     );
 
-    const data = await searchStrategy.search(req, searches);
+    const data = await searchStrategy.search(req, searches, {}, panelDataSourceId);
 
     const handleResponseBodyFn = handleResponseBody(panel);
 

@@ -41,6 +41,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
+import { DataSourcePicker } from './data_source_picker';
+import {
+  getSavedObjectsClient,
+  getNotifications,
+  getDataSourceManagementSetup,
+} from '../../services';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
@@ -112,6 +118,10 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
   };
 
   const model = { ...defaults, ..._model };
+
+  const dataSourceManagementEnabled =
+    !!getDataSourceManagementSetup().dataSourceManagement || false;
+
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
@@ -154,6 +164,26 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 "Last value" will match only the documents for the specified interval from the end of the timerange.`,
               })}
             </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {!!dataSourceManagementEnabled && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('dataSource')}
+              label={i18n.translate('visTypeTimeseries.indexPattern.dataSourceLabel', {
+                defaultMessage: 'Data source',
+              })}
+            >
+              <DataSourcePicker
+                savedObjectsClient={getSavedObjectsClient().client}
+                toasts={getNotifications().toasts}
+                model={model}
+                dataSourceManagement={getDataSourceManagementSetup().dataSourceManagement}
+                onChange={onChange}
+              />
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

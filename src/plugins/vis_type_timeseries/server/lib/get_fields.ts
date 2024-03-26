@@ -44,21 +44,24 @@ export async function getFields(
   requestContext: RequestHandlerContext,
   request: OpenSearchDashboardsRequest,
   framework: Framework,
-  indexPattern: string
+  indexPattern: string,
+  dataSourceId: string | null
 ) {
   // NOTE / TODO: This facade has been put in place to make migrating to the New Platform easier. It
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
+  const client =
+    !!dataSourceId && !!requestContext.dataSource
+      ? requestContext.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
+      : requestContext.core.opensearch.legacy.client.callAsCurrentUser;
   const reqFacade: ReqFacade = {
     requestContext,
     ...request,
     framework,
     payload: {},
     pre: {
-      indexPatternsService: new IndexPatternsFetcher(
-        requestContext.core.opensearch.legacy.client.callAsCurrentUser
-      ),
+      indexPatternsService: new IndexPatternsFetcher(client),
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,

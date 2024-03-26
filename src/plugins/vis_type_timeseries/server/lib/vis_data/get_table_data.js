@@ -34,9 +34,11 @@ import { get } from 'lodash';
 import { processBucket } from './table/process_bucket';
 import { getOpenSearchQueryConfig } from './helpers/get_opensearch_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
+import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
+  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY] || undefined;
 
   const {
     searchStrategy,
@@ -58,12 +60,17 @@ export async function getTableData(req, panel) {
       indexPatternObject,
       capabilities
     );
-    const [resp] = await searchStrategy.search(req, [
-      {
-        body,
-        index: panelIndexPattern,
-      },
-    ]);
+    const [resp] = await searchStrategy.search(
+      req,
+      [
+        {
+          body,
+          index: panelIndexPattern,
+        },
+      ],
+      {},
+      panelDataSourceId
+    );
 
     const buckets = get(
       resp.rawResponse ? resp.rawResponse : resp,
