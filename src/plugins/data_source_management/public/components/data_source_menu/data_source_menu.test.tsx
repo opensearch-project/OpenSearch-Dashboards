@@ -94,4 +94,18 @@ describe('DataSourceMenu', () => {
     );
     expect(container).toMatchSnapshot();
   });
+
+  it('should render data source multi select component', () => {
+    const container = render(
+      <DataSourceMenu
+        showDataSourceMultiSelectable={true}
+        appName={'myapp'}
+        fullWidth={true}
+        className={'myclass'}
+        savedObjects={client}
+        notifications={notifications}
+      />
+    );
+    expect(container).toMatchSnapshot();
+  });
 });
