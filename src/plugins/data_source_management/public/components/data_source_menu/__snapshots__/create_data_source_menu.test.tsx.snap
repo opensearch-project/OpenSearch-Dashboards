@@ -12,9 +12,6 @@ Object {
         <div
           class="euiPopover__anchor"
         >
-          <span
-            data-euiicon-type="database"
-          />
           <button
             aria-label="dataSourceMenuButton"
             class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
@@ -22,12 +19,12 @@ Object {
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+              class="euiButtonContent euiButtonEmpty__content"
             >
               <span
                 class="euiButtonContent__icon"
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="database"
               />
               <span
                 class="euiButtonEmpty__text"
@@ -46,9 +43,6 @@ Object {
       <div
         class="euiPopover__anchor"
       >
-        <span
-          data-euiicon-type="database"
-        />
         <button
           aria-label="dataSourceMenuButton"
           class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
@@ -56,12 +50,12 @@ Object {
           type="button"
         >
           <span
-            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+            class="euiButtonContent euiButtonEmpty__content"
           >
             <span
               class="euiButtonContent__icon"
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="database"
             />
             <span
               class="euiButtonEmpty__text"
@@ -171,46 +165,7 @@ Object {
     </div>
     <div />
   </body>,
-  "container": <div>
-    <nav
-      aria-label="App menu"
-      class="euiHeaderLinks osdTopNavMenu myclass"
-      data-test-subj="top-nav"
-    >
-      <div
-        class="euiHeaderLinks__list euiHeaderLinks__list--gutterXS"
-      >
-        <div
-          class="euiPopover euiPopover--anchorDownLeft"
-          id="dataSourceSelectableContextMenuPopover"
-        >
-          <div
-            class="euiPopover__anchor"
-          >
-            <button
-              aria-label="dataSourceMenuButton"
-              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-              data-test-subj="dataSourceSelectableContextMenuHeaderLink"
-              type="button"
-            >
-              <span
-                class="euiButtonContent euiButtonEmpty__content"
-              >
-                <span
-                  class="euiButtonContent__icon"
-                  color="inherit"
-                  data-euiicon-type="database"
-                />
-                <span
-                  class="euiButtonEmpty__text"
-                />
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-  </div>,
+  "container": <div />,
   "debug": [Function],
   "findAllByAltText": [Function],
   "findAllByDisplayValue": [Function],
