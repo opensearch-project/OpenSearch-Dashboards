@@ -12,9 +12,6 @@ Object {
         <div
           class="euiPopover__anchor"
         >
-          <span
-            data-euiicon-type="database"
-          />
           <button
             aria-label="dataSourceMenuButton"
             class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
@@ -22,12 +19,12 @@ Object {
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+              class="euiButtonContent euiButtonEmpty__content"
             >
               <span
                 class="euiButtonContent__icon"
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="database"
               />
               <span
                 class="euiButtonEmpty__text"
@@ -46,9 +43,6 @@ Object {
       <div
         class="euiPopover__anchor"
       >
-        <span
-          data-euiicon-type="database"
-        />
         <button
           aria-label="dataSourceMenuButton"
           class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
@@ -56,12 +50,12 @@ Object {
           type="button"
         >
           <span
-            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+            class="euiButtonContent euiButtonEmpty__content"
           >
             <span
               class="euiButtonContent__icon"
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="database"
             />
             <span
               class="euiButtonEmpty__text"
@@ -145,9 +139,6 @@ Object {
             <div
               class="euiPopover__anchor"
             >
-              <span
-                data-euiicon-type="database"
-              />
               <button
                 aria-label="dataSourceMenuButton"
                 class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
@@ -155,12 +146,12 @@ Object {
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="euiButtonContent euiButtonEmpty__content"
                 >
                   <span
                     class="euiButtonContent__icon"
                     color="inherit"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="database"
                   />
                   <span
                     class="euiButtonEmpty__text"
