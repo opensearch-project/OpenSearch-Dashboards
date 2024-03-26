@@ -14,13 +14,13 @@ import { IndexPatternManagementSetup } from '../../index_pattern_management/publ
 import { DataSourceColumn } from './components/data_source_column/data_source_column';
 import {
   AuthenticationMethod,
-  IAuthenticationMethodRegistery,
-  AuthenticationMethodRegistery,
+  IAuthenticationMethodRegistry,
+  AuthenticationMethodRegistry,
 } from './auth_registry';
 import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
-import { DataSourceMenuProps } from './components/data_source_menu/data_source_menu';
+import { DataSourceMenuProps } from './components/data_source_menu';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -32,12 +32,12 @@ export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
-    DataSourceMenu: React.ComponentType<DataSourceMenuProps>;
+    getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
   };
 }
 
 export interface DataSourceManagementPluginStart {
-  getAuthenticationMethodRegistery: () => IAuthenticationMethodRegistery;
+  getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
 }
 
 const DSM_APP_ID = 'dataSources';
@@ -50,7 +50,7 @@ export class DataSourceManagementPlugin
       DataSourceManagementSetupDependencies
     > {
   private started = false;
-  private authMethodsRegistry = new AuthenticationMethodRegistery();
+  private authMethodsRegistry = new AuthenticationMethodRegistry();
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
@@ -103,7 +103,7 @@ export class DataSourceManagementPlugin
       registerAuthenticationMethod,
       ui: {
         DataSourceSelector: createDataSourceSelector(),
-        DataSourceMenu: createDataSourceMenu(),
+        getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
     };
   }
@@ -111,7 +111,7 @@ export class DataSourceManagementPlugin
   public start(core: CoreStart) {
     this.started = true;
     return {
-      getAuthenticationMethodRegistery: () => this.authMethodsRegistry,
+      getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
     };
   }
 
