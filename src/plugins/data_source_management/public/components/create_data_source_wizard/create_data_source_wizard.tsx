@@ -21,7 +21,7 @@ import {
   getDataSources,
   testConnection,
   fetchDataSourceVersion,
-  handleSetDefaultDatasourceDuringCreation,
+  handleSetDefaultDatasource,
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
 
@@ -79,7 +79,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
       attributes.dataSourceVersion = version.dataSourceVersion;
       await createSingleDataSource(savedObjects.client, attributes);
       // Set the first create data source as default data source.
-      await handleSetDefaultDatasourceDuringCreation(savedObjects.client, uiSettings);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
       props.history.push('');
     } catch (e) {
       setIsLoading(false);

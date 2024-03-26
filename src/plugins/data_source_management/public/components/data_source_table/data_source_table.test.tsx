@@ -128,7 +128,7 @@ describe('DataSourceTable', () => {
 
     it('should delete confirm modal confirm button work normally', async () => {
       spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.resolve({}));
-      spyOn(utils, 'handleSetDefaultDatasourceAfterDeletion').and.returnValue({});
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -143,12 +143,12 @@ describe('DataSourceTable', () => {
       });
       component.update();
       expect(component.find(confirmModalIdentifier).exists()).toBe(false);
-      expect(utils.handleSetDefaultDatasourceAfterDeletion).toHaveBeenCalled();
+      expect(utils.setFirstDataSourceAsDefault).toHaveBeenCalled();
     });
 
     it('should delete datasources & fail', async () => {
       spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.reject({}));
-      spyOn(utils, 'handleSetDefaultDatasourceAfterDeletion').and.returnValue({});
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -164,7 +164,7 @@ describe('DataSourceTable', () => {
       });
       component.update();
       expect(utils.deleteMultipleDataSources).toHaveBeenCalled();
-      expect(utils.handleSetDefaultDatasourceAfterDeletion).not.toHaveBeenCalled();
+      expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
       // @ts-ignore
       expect(component.find(confirmModalIdentifier).exists()).toBe(false);
     });

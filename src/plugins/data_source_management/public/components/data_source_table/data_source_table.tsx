@@ -29,11 +29,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
 import { CreateButton } from '../create_button';
-import {
-  deleteMultipleDataSources,
-  getDataSources,
-  handleSetDefaultDatasourceAfterDeletion,
-} from '../utils';
+import { deleteMultipleDataSources, getDataSources, setFirstDataSourceAsDefault } from '../utils';
 import { LoadingMask } from '../loading_mask';
 
 /* Table config */
@@ -256,7 +252,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     try {
       for (const dataSource of selectedDataSources) {
         if (uiSettings.get('defaultDataSource') === dataSource.id) {
-          await handleSetDefaultDatasourceAfterDeletion(savedObjects.client, uiSettings);
+          await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
         }
       }
     } catch (e) {

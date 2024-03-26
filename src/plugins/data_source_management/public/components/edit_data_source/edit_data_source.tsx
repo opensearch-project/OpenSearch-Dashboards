@@ -17,7 +17,7 @@ import {
   getDataSources,
   testConnection,
   updateDataSourceById,
-  handleSetDefaultDatasourceAfterDeletion,
+  setFirstDataSourceAsDefault,
 } from '../utils';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
@@ -127,15 +127,14 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const setDefaultDataSource = async () => {
     try {
       if (uiSettings.get('defaultDataSource') === dataSourceID) {
-        await handleSetDefaultDatasourceAfterDeletion(savedObjects.client, uiSettings);
+        await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
       }
     } catch (e) {
+      setIsLoading(false);
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.editDataSource.setDefaultDataSourceFailMsg',
         defaultMessage: 'Unable to find a default datasource. Please set a new default datasource.',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 

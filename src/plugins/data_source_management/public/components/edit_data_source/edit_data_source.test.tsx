@@ -138,7 +138,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
     });
     test('should delete datasource successfully', async () => {
       spyOn(utils, 'deleteDataSourceById').and.returnValue({});
-      spyOn(utils, 'handleSetDefaultDatasourceAfterDeletion').and.returnValue({});
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       spyOn(uiSettings, 'get').and.returnValue('test1');
       await act(async () => {
         // @ts-ignore
@@ -148,11 +148,11 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       });
       expect(utils.deleteDataSourceById).toHaveBeenCalled();
       expect(history.push).toBeCalledWith('');
-      expect(utils.handleSetDefaultDatasourceAfterDeletion).toHaveBeenCalled();
+      expect(utils.setFirstDataSourceAsDefault).toHaveBeenCalled();
     });
     test('should fail to delete datasource', async () => {
       spyOn(utils, 'deleteDataSourceById').and.throwError('error');
-      spyOn(utils, 'handleSetDefaultDatasourceAfterDeletion').and.returnValue({});
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       spyOn(uiSettings, 'get').and.returnValue('test1');
       await act(async () => {
         // @ts-ignore
@@ -162,7 +162,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       });
       component.update();
       expect(utils.deleteDataSourceById).toHaveBeenCalled();
-      expect(utils.handleSetDefaultDatasourceAfterDeletion).not.toHaveBeenCalled();
+      expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
     });
     test('should test connection', () => {
       spyOn(utils, 'testConnection');

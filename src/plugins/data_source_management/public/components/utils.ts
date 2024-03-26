@@ -54,26 +54,27 @@ export async function getDataSourcesWithFields(
   return response?.savedObjects;
 }
 
-export async function handleSetDefaultDatasourceAfterDeletion(
+export async function handleSetDefaultDatasource(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient
 ) {
-  uiSettings.remove('defaultDataSource');
-  const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
-  if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
-    const datasourceId = listOfDataSources[0].id;
-    await uiSettings.set('defaultDataSource', datasourceId);
+  if (uiSettings.get('defaultDataSource', null) === null) {
+    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
   }
 }
 
-export async function handleSetDefaultDatasourceDuringCreation(
+export async function setFirstDataSourceAsDefault(
   savedObjectsClient: SavedObjectsClientContract,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  exists: boolean
 ) {
+  if (exists) {
+    uiSettings.remove('defaultDataSource');
+  }
   const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
-  if (Array.isArray(listOfDataSources) && listOfDataSources.length === 1) {
+  if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
     const datasourceId = listOfDataSources[0].id;
-    await uiSettings.set('defaultDataSource', datasourceId);
+    return await uiSettings.set('defaultDataSource', datasourceId);
   }
 }
 
