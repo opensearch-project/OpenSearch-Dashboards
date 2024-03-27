@@ -61,6 +61,12 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
           const { title, state } = getStateFromSavedObject(savedVisBuilderVis);
           chrome.setBreadcrumbs(getEditBreadcrumbs(title, navigateToApp));
           chrome.docTitle.change(title);
+          chrome.recentlyAccessed.add(
+            savedVisBuilderVis.getFullPath(),
+            title,
+            savedVisBuilderVis.id,
+            savedVisBuilderVis.getOpenSearchType()
+          );
 
           dispatch(setUIStateState(state.ui));
           dispatch(setStyleState(state.style));

@@ -30,9 +30,23 @@ const render = renderFn(() => {
 
   return (
     <div>
-      {recentAccessed.map((recentAccessItem: ChromeRecentlyAccessedHistoryItem) => {
-        return <p>{recentAccessItem.label}</p>;
-      })}
+      <EuiFlexGroup>
+        {recentAccessed.map(
+          (recentAccessItem: ChromeRecentlyAccessedHistoryItem, index: number) => {
+            return (
+              <EuiFlexItem>
+                <EuiCard
+                  layout="horizontal"
+                  title={recentAccessItem.label}
+                  titleSize="xs"
+                  description={recentAccessItem.type || ' '}
+                  onClick={() => navigateToUrl(services.addBasePath(recentAccessItem.link))}
+                />
+              </EuiFlexItem>
+            );
+          }
+        )}
+      </EuiFlexGroup>
     </div>
   );
 
