@@ -3,27 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiCard } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiCard,
+  EuiTitle,
+  EuiButtonIcon,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { Section } from '../../../../services/section_type/section_type';
 import { renderFn } from './utils';
 import { getServices } from '../../../opensearch_dashboards_services';
 
+import '../_homepage.scss';
+
 const render = renderFn(() => {
+  const [isExpanded, setExpanded] = useState(true);
+  const toggleExpanded = () => setExpanded((expanded) => !expanded);
   const services = getServices();
   const navigateToUrl = services.application.navigateToUrl;
 
-  return (
+  const content = (
     <div>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiCard
             layout="horizontal"
             icon={<EuiIcon size="xl" type="document" />}
-            title={i18n.translate('home.sections.learnBasics.quickstart.title', {
-              defaultMessage: 'Quickstart guide',
-            })}
+            title={
+              <p>
+                Quickstart guide
+                <EuiIcon size="l" type="popout" className="learn-basics-title-icon" />
+              </p>
+            }
             titleSize="xs"
             description={i18n.translate('home.sections.learnBasics.quickstart.description', {
               defaultMessage: 'Get started in minutes with OpenSearch Dashboards.',
@@ -125,6 +140,46 @@ const render = renderFn(() => {
       </EuiFlexGroup>
     </div>
   );
+
+  return (
+    <>
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow>
+          <EuiTitle size="m">
+            <h2>
+              {i18n.translate('home.sections.learnBasics.title', {
+                defaultMessage: 'Learn OpenSearch basics',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            href="https://opensearch.org/docs/latest/"
+            target="_blank"
+            className="learn-basics-links"
+          >
+            See all documentation
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            onClick={toggleExpanded}
+            size="s"
+            iconSize="m"
+            color="text"
+            aria-label={
+              isExpanded
+                ? i18n.translate('home.section.collapse', { defaultMessage: 'Collapse section' })
+                : i18n.translate('home.section.expand', { defaultMessage: 'Expand section' })
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isExpanded && content}
+    </>
+  );
 });
 
 export const learnBasicsSection: Section = {
@@ -132,17 +187,5 @@ export const learnBasicsSection: Section = {
   title: i18n.translate('home.sections.learnBasics.title', {
     defaultMessage: 'Learn OpenSearch basics',
   }),
-  links: [
-    {
-      label: i18n.translate('home.sections.learnBasics.documentation', {
-        defaultMessage: 'Documentation',
-      }),
-      url: 'https://opensearch.org/docs/latest/',
-      props: {
-        external: true,
-        target: '_blank',
-      },
-    },
-  ],
   render,
 };
