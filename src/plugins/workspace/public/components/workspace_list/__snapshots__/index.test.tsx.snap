@@ -1,0 +1,301 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkspaceList should render title and table normally 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--grow"
+  >
+    <div
+      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--hasShadow euiPageBody euiPageBody--borderRadiusNone euiPageBody--paddingLarge"
+    >
+      <header
+        class="euiPageHeader euiPageHeader--responsive euiPage--restrictWidth-default euiPageHeader--center"
+        style="padding-bottom: 0px; border-bottom: 0;"
+      >
+        <div
+          class="euiPageHeaderContent"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <h1
+                class="euiTitle euiTitle--large"
+              >
+                Workspaces
+              </h1>
+              <div
+                class="euiSpacer euiSpacer--l"
+              />
+              <div
+                class="euiText euiText--medium euiText--constrainedWidth"
+              >
+                <p>
+                  Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div
+        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+        role="main"
+        style="width: 100%; max-width: 1000px;"
+      >
+        <div>
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+          >
+            <div
+              class="euiFlexItem euiSearchBar__searchHolder"
+            >
+              <div
+                class="euiFormControlLayout euiFormControlLayout--fullWidth"
+              >
+                <div
+                  class="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                    class="euiFieldSearch euiFieldSearch--fullWidth"
+                    placeholder="Search..."
+                    type="search"
+                    value=""
+                  />
+                  <div
+                    class="euiFormControlLayoutIcons"
+                  >
+                    <span
+                      class="euiFormControlLayoutCustomIcon"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="search"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <button
+                class="euiButton euiButton--primary"
+                data-test-subj="workspaceList-create-workspace"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    Create workspace
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiBasicTable"
+          >
+            <div>
+              <div
+                class="euiTableHeaderMobile"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  />
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiTableSortMobile"
+                    >
+                      <div
+                        class="euiPopover euiPopover--anchorDownRight"
+                      >
+                        <div
+                          class="euiPopover__anchor"
+                        >
+                          <button
+                            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                            type="button"
+                          >
+                            <span
+                              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                            >
+                              <span
+                                class="euiButtonContent__icon"
+                                color="inherit"
+                                data-euiicon-type="arrowDown"
+                              />
+                              <span
+                                class="euiButtonEmpty__text"
+                              >
+                                Sorting
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <table
+                class="euiTable euiTable--responsive"
+                id="__table_generated-id"
+                tabindex="-1"
+              >
+                <caption
+                  class="euiScreenReaderOnly euiTableCaption"
+                />
+                <thead>
+                  <tr>
+                    <th
+                      aria-live="polite"
+                      aria-sort="ascending"
+                      class="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_name_0"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <button
+                        class="euiTableHeaderButton euiTableHeaderButton-isSorted"
+                        data-test-subj="tableHeaderSortButton"
+                        type="button"
+                      >
+                        <span
+                          class="euiTableCellContent"
+                        >
+                          <span
+                            class="euiTableCellContent__text"
+                            title="Name"
+                          >
+                            Name
+                          </span>
+                          <span
+                            class="euiTableSortIcon"
+                            data-euiicon-type="sortUp"
+                          />
+                        </span>
+                      </button>
+                    </th>
+                    <th
+                      aria-live="polite"
+                      aria-sort="none"
+                      class="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_id_1"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <button
+                        class="euiTableHeaderButton"
+                        data-test-subj="tableHeaderSortButton"
+                        type="button"
+                      >
+                        <span
+                          class="euiTableCellContent"
+                        >
+                          <span
+                            class="euiTableCellContent__text"
+                            title="ID"
+                          >
+                            ID
+                          </span>
+                        </span>
+                      </button>
+                    </th>
+                    <th
+                      class="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_description_2"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <span
+                        class="euiTableCellContent"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                          title="Description"
+                        >
+                          Description
+                        </span>
+                      </span>
+                    </th>
+                    <th
+                      class="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_features_3"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <span
+                        class="euiTableCellContent"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                          title="Features"
+                        >
+                          Features
+                        </span>
+                      </span>
+                    </th>
+                    <th
+                      class="euiTableHeaderCell"
+                      role="columnheader"
+                      scope="col"
+                    >
+                      <span
+                        class="euiTableCellContent euiTableCellContent--alignRight"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                          title="Actions"
+                        >
+                          Actions
+                        </span>
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    class="euiTableRow"
+                  >
+                    <td
+                      class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                      colspan="5"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignCenter"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                        >
+                          No items found
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
