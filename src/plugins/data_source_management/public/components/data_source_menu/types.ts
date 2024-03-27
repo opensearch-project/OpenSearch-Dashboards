@@ -30,6 +30,7 @@ export const DataSourceComponentType = {
   DataSourceSelectable: 'DataSourceSelectable',
   DataSourceView: 'DataSourceView',
   DataSourceAggregatedView: 'DataSourceAggregatedView',
+  DataSourceMultiSelectable: 'DataSourceMultiSelectable',
 } as const;
 
 export type DataSourceComponentType = typeof DataSourceComponentType[keyof typeof DataSourceComponentType];
@@ -56,4 +57,11 @@ export interface DataSourceSelectableConfig extends DataSourceBaseConfig {
   activeOption?: DataSourceOption[];
   hideLocalCluster?: boolean;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
+}
+
+export interface DataSourceMultiSelectableConfig extends DataSourceBaseConfig {
+  onSelectedDataSources: (dataSources: DataSourceOption[]) => void;
+  savedObjects: SavedObjectsClientContract;
+  notifications: NotificationsStart;
+  hideLocalCluster?: boolean;
 }
