@@ -4,6 +4,10 @@
  */
 
 import { SavedObject } from 'opensearch-dashboards/server';
+import {
+  extractVegaSpecFromSavedObject,
+  updateDataSourceNameInVegaSpec,
+} from '../../../../../../core/server';
 
 export const appendDataSourceId = (id: string) => {
   return (dataSourceId?: string) => (dataSourceId ? `${dataSourceId}_` + id : id);
@@ -73,6 +77,31 @@ export const getSavedObjectsWithDataSource = (
           saveObject.type === 'search'
         ) {
           saveObject.attributes.title = saveObject.attributes.title + `_${dataSourceTitle}`;
+        }
+
+        if (saveObject.type === 'visualization') {
+          const vegaSpec = extractVegaSpecFromSavedObject(saveObject);
+
+          if (!!vegaSpec) {
+            const updatedVegaSpec = updateDataSourceNameInVegaSpec({
+              spec: vegaSpec,
+              newDataSourceName: dataSourceTitle,
+              // Spacing of 1 prevents the Sankey visualization in logs data from exceeding the default url length and breaking
+              spacing: 1,
+            });
+
+            // @ts-expect-error
+            const visStateObject = JSON.parse(saveObject.attributes?.visState);
+            visStateObject.params.spec = updatedVegaSpec;
+
+            // @ts-expect-error
+            saveObject.attributes.visState = JSON.stringify(visStateObject);
+            saveObject.references.push({
+              id: `${dataSourceId}`,
+              type: 'data-source',
+              name: 'dataSource',
+            });
+          }
         }
       }
 
