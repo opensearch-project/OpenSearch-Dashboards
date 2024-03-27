@@ -11,15 +11,15 @@ import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_managem
 import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 export interface DataSourcePickerProps {
-  model: any;
   savedObjectsClient: SavedObjectsClientContract;
   dataSourceManagement: DataSourceManagementPluginSetup;
   toasts: ToastsStart;
+  defaultDataSourceId?: string;
   handleChange: (e: Array<{}>) => void;
 }
 
 export const DataSourcePicker = (props: DataSourcePickerProps) => {
-  const { savedObjectsClient, model, handleChange } = props;
+  const { savedObjectsClient, defaultDataSourceId, handleChange } = props;
   const [defaultOption, setDefaultOption] = useState<Array<{ id: string; label: string }>>();
   const DataSourceSelector = props.dataSourceManagement.ui.DataSourceSelector;
 
@@ -29,25 +29,26 @@ export const DataSourcePicker = (props: DataSourcePickerProps) => {
   };
 
   useEffect(() => {
-    const id = model[DATA_SOURCE_ID_KEY] || undefined;
-    if (!id || id === '') {
+    if (!defaultDataSourceId || defaultDataSourceId === '') {
+      // @ts-expect-error
       setDefaultOption(null);
       return;
     }
 
-    getDataSourceTitleFromId(id, savedObjectsClient).then((label) => {
+    getDataSourceTitleFromId(defaultDataSourceId, savedObjectsClient).then((label) => {
       if (!!label) {
         setDefaultOption([
           {
-            id,
+            id: defaultDataSourceId,
             label,
           },
         ]);
         return;
       }
+      // @ts-expect-error
       setDefaultOption(null);
     });
-  }, [model, savedObjectsClient]);
+  }, [defaultDataSourceId, savedObjectsClient]);
 
   if (defaultOption === undefined) {
     return <div>Loading...</div>;

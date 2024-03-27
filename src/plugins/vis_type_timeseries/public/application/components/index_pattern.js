@@ -63,6 +63,7 @@ import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/time
 import { PANEL_TYPES } from '../../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
+import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 const RESTRICT_FIELDS = [OSD_FIELD_TYPES.DATE];
 
@@ -180,7 +181,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               <DataSourcePicker
                 savedObjectsClient={getSavedObjectsClient().client}
                 toasts={getNotifications().toasts}
-                model={model}
+                defaultDataSourceId={model[DATA_SOURCE_ID_KEY] || undefined}
                 dataSourceManagement={getDataSourceManagementSetup().dataSourceManagement}
                 handleChange={handleDataSourceSelectChange}
               />
