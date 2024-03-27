@@ -6,6 +6,13 @@
 import { parse, stringify } from 'hjson';
 import { SavedObject, SavedObjectsClientContract } from '../types';
 
+/**
+ * Given a Vega spec, the new datasource (by name), and spacing,
+ *
+ * @param {string} spec - the stringified Vega spec (HJSON or JSON)
+ * @param {string} newDataSourceName - the datasource name to append
+ * @param {number} [spacing=2] - how large the indenting should be after updating the spec (should be set to > 0 for a readable spec)
+ */
 export interface UpdateDataSourceNameInVegaSpecProps {
   spec: string;
   newDataSourceName: string;
