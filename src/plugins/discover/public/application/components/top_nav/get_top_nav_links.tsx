@@ -89,6 +89,7 @@ export const getTopNavLinks = (
 
         savedSearch.columns = state.columns;
         savedSearch.sort = state.sort;
+        savedSearch.columnWidths = state.columnWidths;
 
         try {
           const id = await savedSearch.save(saveOptions);

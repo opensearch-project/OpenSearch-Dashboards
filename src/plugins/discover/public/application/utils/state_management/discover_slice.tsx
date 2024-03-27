@@ -12,6 +12,7 @@ import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../saved_searches/types';
 import { DEFAULT_COLUMNS_SETTING, PLUGIN_ID } from '../../../../common';
+import { ColumnWidths } from '../../components/data_grid/data_grid_table_columns';
 
 export interface DiscoverState {
   /**
@@ -52,6 +53,7 @@ export interface DiscoverState {
      */
     lineCount?: number;
   };
+  columnWidths?: ColumnWidths;
 }
 
 export interface DiscoverRootState extends RootState {
@@ -86,6 +88,7 @@ export const getPreloadedState = async ({
       preloadedState.state.columns = savedSearchInstance.columns;
       preloadedState.state.sort = savedSearchInstance.sort;
       preloadedState.state.savedSearch = savedSearchInstance.id;
+      preloadedState.state.columnWidths = savedSearchInstance.columnWidths;
       const indexPatternId = savedSearchInstance.searchSource.getField('index')?.id;
       preloadedState.root = {
         metadata: {
@@ -166,6 +169,11 @@ export const discoverSlice = createSlice({
         interval: action.payload,
       };
     },
+    setColumnWidths(state, action: PayloadAction<{ columnName: string; width: number }>) {
+      const { columnName, width } = action.payload;
+      if (!state.columnWidths) state.columnWidths = {};
+      state.columnWidths[columnName] = { width };
+    },
     updateState(state, action: PayloadAction<Partial<DiscoverState>>) {
       return {
         ...state,
@@ -200,6 +208,7 @@ export const {
   setColumns,
   setSort,
   setInterval,
+  setColumnWidths,
   setState,
   updateState,
   setSavedSearchId,

@@ -29,6 +29,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
   const services = getServices();
   const discoverEmbeddableProps = {
     columns: searchProps.columns,
+    columnWidths: searchProps.columnWidths,
     indexPattern: searchProps.indexPattern,
     onAddColumn: searchProps.onAddColumn,
     onFilter: searchProps.onFilter,
@@ -36,6 +37,7 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
     onRemoveColumn: searchProps.onRemoveColumn,
     onReorderColumn: searchProps.onReorderColumn,
     onSort: searchProps.onSort,
+    onColumnResize: searchProps.onColumnResize,
     rows: searchProps.rows,
     onSetColumns: searchProps.onSetColumns,
     sort: searchProps.sort,

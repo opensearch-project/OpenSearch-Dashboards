@@ -65,6 +65,7 @@ export const searchSavedObjectType: SavedObjectsType = {
         },
       },
       sort: { type: 'keyword', index: false, doc_values: false },
+      columnWidths: { type: 'object', enabled: false },
       title: { type: 'text' },
       version: { type: 'integer' },
     },

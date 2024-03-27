@@ -6,7 +6,7 @@
 import './_data_grid_table.scss';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { EuiDataGrid, EuiDataGridSorting, EuiPanel } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridSorting, EuiPanel, EuiDataGridProps } from '@elastic/eui';
 import { IndexPattern, getServices } from '../../../opensearch_dashboards_services';
 import { fetchTableDataCell } from './data_grid_table_cell_value';
 import { buildDataGridColumns, computeVisibleColumns } from './data_grid_table_columns';
@@ -26,9 +26,11 @@ import { LegacyDiscoverTable } from '../default_discover_table/default_discover_
 import { getNewDiscoverSetting } from '../utils/local_storage';
 import { SortDirection, SortOrder } from '../../../saved_searches/types';
 import { useToolbarOptions } from './data_grid_toolbar';
+import { ColumnWidths } from './data_grid_table_columns';
 
 export interface DataGridTableProps {
   columns: string[];
+  columnWidths?: ColumnWidths;
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
@@ -38,6 +40,7 @@ export interface DataGridTableProps {
   onSort: (s: SortOrder[]) => void;
   rows: OpenSearchSearchHit[];
   onSetColumns: (columns: string[]) => void;
+  onColumnResize: ({ columnId, width }: { columnId: string; width: number }) => void;
   sort: SortOrder[];
   displayTimeColumn: boolean;
   title?: string;
@@ -51,6 +54,7 @@ export interface DataGridTableProps {
 
 export const DataGridTable = ({
   columns,
+  columnWidths,
   indexPattern,
   onAddColumn,
   onFilter,
@@ -58,6 +62,7 @@ export const DataGridTable = ({
   onRemoveColumn,
   onSetColumns,
   onSort,
+  onColumnResize,
   sort,
   hits,
   rows,
@@ -125,9 +130,17 @@ export const DataGridTable = ({
         indexPattern,
         displayTimeColumn,
         includeSourceInColumns,
-        isContextView
+        isContextView,
+        columnWidths
       ),
-    [adjustedColumns, indexPattern, displayTimeColumn, includeSourceInColumns, isContextView]
+    [
+      adjustedColumns,
+      indexPattern,
+      displayTimeColumn,
+      includeSourceInColumns,
+      isContextView,
+      columnWidths,
+    ]
   );
 
   const dataGridTableColumnsVisibility = useMemo(
@@ -218,6 +231,7 @@ export const DataGridTable = ({
         sorting={sorting}
         toolbarVisibility={isToolbarVisible ? toolbarOptions : false}
         rowHeightsOptions={rowHeightsOptions}
+        onColumnResize={onColumnResize}
         className="discoverDataGrid"
       />
     ),
@@ -232,6 +246,7 @@ export const DataGridTable = ({
       isToolbarVisible,
       toolbarOptions,
       rowHeightsOptions,
+      onColumnResize,
     ]
   );
 

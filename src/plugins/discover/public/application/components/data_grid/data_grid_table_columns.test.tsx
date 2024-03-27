@@ -49,7 +49,13 @@ const customizedIndexPatternMockWithTimeField = getMockedIndexPatternWithTimeFie
 
 describe('Testing buildDataGridColumns function ', () => {
   it('should return correct columns without time column when displayTimeColumn is false', () => {
-    const columns = buildDataGridColumns(['name', 'currency'], customizedIndexPatternMock, false);
+    const columns = buildDataGridColumns(
+      ['name', 'currency'],
+      customizedIndexPatternMock,
+      false,
+      false,
+      false
+    );
     expect(columns).toHaveLength(2);
     expect(columns[0].id).toEqual('name');
     expect(columns[1].id).toEqual('currency');
@@ -93,7 +99,9 @@ describe('Testing buildDataGridColumns function ', () => {
     const columns = buildDataGridColumns(
       ['name', 'currency', '_source'],
       customizedIndexPatternMockWithTimeField,
-      true
+      true,
+      false,
+      false
     );
     expect(columns).toHaveLength(4);
     expect(columns[0].id).toEqual('order_date');
@@ -165,7 +173,9 @@ describe('Testing buildDataGridColumns function ', () => {
     const columns = buildDataGridColumns(
       ['name', 'currency', 'order_date'],
       customizedIndexPatternMockWithTimeField,
-      true
+      true,
+      false,
+      false
     );
     expect(columns).toHaveLength(3);
     expect(columns[2].id).toEqual('order_date');
@@ -217,6 +227,32 @@ describe('Testing buildDataGridColumns function ', () => {
         },
       ]
     `);
+  });
+
+  it('should respect column widths when provided', () => {
+    const columnWidths = { name: { width: 100 }, currency: { width: 150 } };
+    const columns = buildDataGridColumns(
+      ['name', 'currency'],
+      customizedIndexPatternMock,
+      false,
+      false,
+      false,
+      columnWidths
+    );
+    expect(columns[0].initialWidth).toEqual(100);
+    expect(columns[1].initialWidth).toEqual(150);
+  });
+
+  it('should set default column width when not specified', () => {
+    const columns = buildDataGridColumns(
+      ['name', 'currency'],
+      customizedIndexPatternMock,
+      false,
+      false,
+      false
+    );
+    expect(columns[0].initialWidth).toBeUndefined();
+    expect(columns[1].initialWidth).toBeUndefined();
   });
 });
 
