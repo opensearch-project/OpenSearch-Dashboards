@@ -61,6 +61,7 @@ import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
+import { recentWorkSection } from './application/components/homepage/sections/recent_work';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -158,6 +159,7 @@ export class HomePublicPlugin
     const sectionTypes = { ...this.sectionTypeService.setup() };
 
     sectionTypes.registerSection(workWithDataSection);
+    sectionTypes.registerSection(recentWorkSection);
     sectionTypes.registerSection(learnBasicsSection);
 
     return {

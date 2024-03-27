@@ -51,6 +51,7 @@ export function createSavedVisBuilderVisClass(services: SavedObjectOpenSearchDas
       });
       this.showInRecentlyAccessed = true;
       this.getFullPath = () => `/app/${PLUGIN_ID}${EDIT_PATH}/${this.id}`;
+      this.getOpenSearchType = () => VISBUILDER_SAVED_OBJECT;
     }
   }
 

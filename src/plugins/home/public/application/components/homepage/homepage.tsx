@@ -196,10 +196,12 @@ const Content = () => {
   return (
     <>
       {hero && <HeroSection render={hero.render} />}
-      {sections?.map(({ render, title, description, links }, i) => (
-        <Section key={i} title={title} description={description} links={links} render={render} />
+      {sections?.map(({ render, title }, i) => (
+        <>
+          <Section key={i} title={title} render={render} />
+          <EuiHorizontalRule />
+        </>
       ))}
-      <EuiHorizontalRule />
       <Footer />
     </>
   );
@@ -252,7 +254,7 @@ export const Homepage = () => {
 
   return (
     <EuiPageTemplate
-      restrictWidth={1400}
+      restrictWidth={1680}
       pageHeader={{
         pageTitle: <span data-test-subj="dashboardCustomTitle">{title}</span>,
         rightSideItems: sideItems,

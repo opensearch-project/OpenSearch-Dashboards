@@ -129,7 +129,8 @@ export const useSavedDashboardInstance = ({
             chrome.recentlyAccessed.add(
               savedDashboard.getFullPath(),
               savedDashboard.title,
-              dashboardIdFromUrl
+              dashboardIdFromUrl,
+              savedDashboard.getOpenSearchType()
             );
             setSavedDashboardInstance(dashboardInstance);
           } catch (error: any) {
