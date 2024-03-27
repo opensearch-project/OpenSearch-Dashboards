@@ -295,7 +295,7 @@ export const SharedGlobalConfigKeys = {
   ] as const,
   opensearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
-  savedObjects: ['maxImportPayloadBytes'] as const,
+  savedObjects: ['maxImportPayloadBytes', 'permission'] as const,
 };
 
 /**

@@ -4,3 +4,4 @@
  */
 
 export { workspace } from './workspace';
+export { WorkspaceSavedObjectsClientWrapper } from './workspace_saved_objects_client_wrapper';

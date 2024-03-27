@@ -108,7 +108,12 @@ describe('createPluginInitializerContext', () => {
         pingTimeout: duration(30, 's'),
       },
       path: { data: fromRoot('data') },
-      savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
+      savedObjects: {
+        maxImportPayloadBytes: new ByteSizeValue(26214400),
+        permission: {
+          enabled: false,
+        },
+      },
     });
   });
 
