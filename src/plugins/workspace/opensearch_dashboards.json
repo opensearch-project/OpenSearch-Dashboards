@@ -4,7 +4,8 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
-    "savedObjects"
+    "savedObjects",
+    "opensearchDashboardsReact"
   ],
   "optionalPlugins": ["savedObjectsManagement"],
   "requiredBundles": ["opensearchDashboardsReact"]

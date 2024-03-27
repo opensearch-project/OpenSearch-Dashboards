@@ -29,7 +29,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
 import { CreateButton } from '../create_button';
-import { deleteMultipleDataSources, getDataSources } from '../utils';
+import { deleteMultipleDataSources, getDataSources, setFirstDataSourceAsDefault } from '../utils';
 import { LoadingMask } from '../loading_mask';
 
 /* Table config */
@@ -232,6 +232,9 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         // Fetch data sources
         fetchDataSources();
         setConfirmDeleteVisible(false);
+        // Check if default data source is deleted or not.
+        // if yes, then set the first existing datasource as default datasource.
+        setDefaultDataSource();
       })
       .catch(() => {
         handleDisplayToastMessage({
@@ -243,6 +246,23 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       .finally(() => {
         setIsDeleting(false);
       });
+  };
+
+  const setDefaultDataSource = async () => {
+    try {
+      for (const dataSource of selectedDataSources) {
+        if (uiSettings.get('defaultDataSource') === dataSource.id) {
+          await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+        }
+      }
+    } catch (e) {
+      handleDisplayToastMessage({
+        id: 'dataSourcesManagement.editDataSource.setDefaultDataSourceFailMsg',
+        defaultMessage: 'Unable to find a default datasource. Please set a new default datasource.',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   /* Table selection handlers */
