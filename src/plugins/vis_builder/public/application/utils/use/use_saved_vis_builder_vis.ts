@@ -23,6 +23,7 @@ import {
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setEditorState } from '../state_management/metadata_slice';
 import { getStateFromSavedObject } from '../../../saved_visualizations/transforms';
+import { SavedObjectsClient } from '../../../../../../core/server';
 
 // This function can be used when instantiating a saved vis or creating a new one
 // using url parameters, embedding and destroying it in DOM

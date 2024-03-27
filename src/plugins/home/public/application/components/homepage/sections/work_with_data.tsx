@@ -11,6 +11,7 @@ import {
   EuiImage,
   EuiTitle,
   EuiButtonIcon,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { Section } from '../../../../services/section_type/section_type';
@@ -24,6 +25,16 @@ const render = renderFn(() => {
   const navigateToApp = services.application.navigateToApp;
   const navigateToUrl = services.application.navigateToUrl;
   const darkMode = services.injectedMetadata.getBranding().darkMode;
+
+  let displayObservabilityCard;
+  services.application?.applications$.subscribe((applications) => {
+    applications.forEach((applicationEntry) => {
+      if (applicationEntry.id === 'observability-dashboards') {
+        displayObservabilityCard = true;
+        return;
+      }
+    });
+  });
 
   const content = (
     <EuiFlexGroup wrap direction="row" alignItems="stretch">
@@ -52,9 +63,12 @@ const render = renderFn(() => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiCard
-          title={i18n.translate('home.sections.workWithData.ingest.title', {
-            defaultMessage: 'Prepare and ingest data',
-          })}
+          title={
+            <p>
+              Prepare and ingest data
+              <EuiIcon size="m" type="popout" className="popover-title-icon" />
+            </p>
+          }
           titleSize="xs"
           textAlign="left"
           description={i18n.translate('home.sections.workWithData.ingest.description', {
@@ -69,6 +83,21 @@ const render = renderFn(() => {
           }
         />
       </EuiFlexItem>
+      {displayObservabilityCard && (
+        <EuiFlexItem>
+          <EuiCard
+            title={i18n.translate('home.sections.workWithData.dashboards.title', {
+              defaultMessage: 'Set up pre-built dashboards',
+            })}
+            titleSize="xs"
+            textAlign="left"
+            description={i18n.translate('home.sections.workWithData.integration.description', {
+              defaultMessage: 'with integrations',
+            })}
+            onClick={() => navigateToApp('integrations')}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiCard
           title={i18n.translate('home.sections.workWithData.discover.title', {

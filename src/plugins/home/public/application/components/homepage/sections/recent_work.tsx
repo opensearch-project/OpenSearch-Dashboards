@@ -13,6 +13,8 @@ import { renderFn } from './utils';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { RecentWorkFilter } from './recent_work_filter';
 
+import '../_homepage.scss';
+
 const render = renderFn(() => {
   const [isExpanded, setExpanded] = useState(true);
   const toggleExpanded = () => setExpanded((expanded) => !expanded);
@@ -30,9 +32,9 @@ const render = renderFn(() => {
   );
 
   const content = !recentAccessed.length ? (
-    <div>
+    <div className="empty-recent-work">
       <h2>No recent work</h2>
-      <p>Recent work will appear here.</p>
+      <h3>Recent work will appear here.</h3>
     </div>
   ) : (
     <div>
@@ -40,13 +42,14 @@ const render = renderFn(() => {
         {filteredRecentAccessed
           .slice(0, 4)
           .map((recentAccessItem: ChromeRecentlyAccessedHistoryItem) => {
+            console.log(recentAccessItem);
             return (
               <EuiFlexItem>
                 <EuiCard
                   layout="horizontal"
                   title={recentAccessItem.label}
                   titleSize="xs"
-                  description={recentAccessItem.type || ' '}
+                  description={recentAccessItem.type || ' ' + recentAccessItem.updatedAt}
                   onClick={() => navigateToUrl(services.addBasePath(recentAccessItem.link))}
                 />
               </EuiFlexItem>
