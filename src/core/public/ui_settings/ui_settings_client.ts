@@ -56,7 +56,12 @@ export class UiSettingsClient implements IUiSettingsClient {
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
-    this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
+    this.cache = defaultsDeep(
+      {},
+      this.defaults,
+      cloneDeep(params.initialSettings),
+      this.getBrowserStoredSettings()
+    );
 
     params.done$.subscribe({
       complete: () => {
@@ -173,6 +178,28 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.updateErrors$.asObservable();
   }
 
+  private getBrowserStoredSettings() {
+    const uiSettingsJSON = window.localStorage.getItem('uiSettings') || '{}';
+    try {
+      return JSON.parse(uiSettingsJSON);
+    } catch (error) {
+      this.updateErrors$.next(error);
+    }
+    return {};
+  }
+
+  private setBrowserStoredSettings(key: string, newVal: any) {
+    const oldSettings = this.getBrowserStoredSettings();
+    const newSettings = cloneDeep(oldSettings);
+    if (newVal === null) {
+      delete newSettings[key];
+    } else {
+      newSettings[key] = { userValue: newVal };
+    }
+    window.localStorage.setItem(`uiSettings`, JSON.stringify(newSettings));
+    return { settings: newSettings };
+  }
+
   private assertUpdateAllowed(key: string) {
     if (this.isOverridden(key)) {
       throw new Error(
@@ -198,8 +225,10 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     this.setLocally(key, newVal);
 
     try {
-      const { settings } = (await this.api.batchSet(key, newVal)) || {};
-      this.cache = defaultsDeep({}, defaults, settings);
+      const { settings } = this.cache[key]?.preferBrowserSetting
+        ? this.setBrowserStoredSettings(key, newVal)
+        : (await this.api.batchSet(key, newVal)) || {};
+      this.cache = defaultsDeep({}, defaults, this.getBrowserStoredSettings(), settings);
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
     } catch (error) {
