@@ -44,7 +44,7 @@ describe('parseClientOptions', () => {
         host: TEST_DATA_SOURCE_ENDPOINT,
         ssl: {
           rejectUnauthorized: false,
-          ca: [],
+          ca: undefined,
         },
       })
     );
@@ -101,6 +101,32 @@ describe('parseClientOptions', () => {
         ssl: {
           rejectUnauthorized: true,
           ca: ['content-of-some-path'],
+        },
+      })
+    );
+  });
+
+  test('test ssl config with verification mode set to full with no ca list', () => {
+    const config = {
+      enabled: true,
+      ssl: {
+        verificationMode: 'full',
+      },
+      clientPool: {
+        size: 5,
+      },
+    } as DataSourcePluginConfigType;
+    mockReadFileSync.mockReset();
+    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(0);
+    mockReadFileSync.mockClear();
+    expect(parsedConfig).toEqual(
+      expect.objectContaining({
+        host: TEST_DATA_SOURCE_ENDPOINT,
+        ssl: {
+          rejectUnauthorized: true,
+          ca: undefined,
         },
       })
     );
