@@ -100,6 +100,14 @@ export const useSavedVisInstance = (
           savedVisInstance = await getVisualizationInstance(services, searchParams);
         } else {
           savedVisInstance = await getVisualizationInstance(services, visualizationIdFromUrl);
+          if (visualizationIdFromUrl) {
+            chrome.recentlyAccessed.add(
+              savedVisInstance.savedVis.getFullPath(),
+              savedVisInstance.savedVis.title,
+              visualizationIdFromUrl,
+              savedVisInstance.savedVis.getOpenSearchType()
+            );
+          }
         }
 
         const { embeddableHandler, savedVis, vis } = savedVisInstance;

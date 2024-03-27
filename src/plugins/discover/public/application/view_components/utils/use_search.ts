@@ -308,7 +308,8 @@ export const useSearch = (services: DiscoverViewServices) => {
         chrome.recentlyAccessed.add(
           savedSearchInstance.getFullPath(),
           savedSearchInstance.title,
-          savedSearchInstance.id
+          savedSearchInstance.id,
+          savedSearchInstance.getOpenSearchType()
         );
       }
     })();

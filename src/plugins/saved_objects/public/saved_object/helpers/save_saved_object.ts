@@ -37,6 +37,7 @@ import {
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { createSource } from './create_source';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import { type } from '../../../../../core/target/types/common/types';
 
 /**
  * @param error {Error} the error
@@ -123,7 +124,8 @@ export async function saveSavedObject(
       chrome.recentlyAccessed.add(
         savedObject.getFullPath(),
         savedObject.title,
-        String(savedObject.id)
+        String(savedObject.id),
+        savedObject.getOpenSearchType()
       );
     }
     savedObject.isSaving = false;
