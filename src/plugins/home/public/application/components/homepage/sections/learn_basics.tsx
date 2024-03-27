@@ -36,7 +36,7 @@ const render = renderFn(() => {
             title={
               <p>
                 Quickstart guide
-                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
               </p>
             }
             titleSize="xs"
@@ -55,7 +55,7 @@ const render = renderFn(() => {
             title={
               <p>
                 Building data visualizations
-                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
               </p>
             }
             titleSize="xs"
@@ -77,7 +77,7 @@ const render = renderFn(() => {
             title={
               <p>
                 Creating dashboards
-                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
               </p>
             }
             titleSize="xs"
@@ -96,7 +96,7 @@ const render = renderFn(() => {
             title={
               <p>
                 Get familiar with Discover
-                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
               </p>
             }
             titleSize="xs"
@@ -119,7 +119,7 @@ const render = renderFn(() => {
             title={
               <p>
                 Running queries in Dev Tools console
-                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
               </p>
             }
             titleSize="xs"
@@ -139,7 +139,7 @@ const render = renderFn(() => {
             title={
               <p>
                 Working with indexes
-                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
               </p>
             }
             titleSize="xs"
