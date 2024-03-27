@@ -55,7 +55,7 @@ export class DashboardsSamplePlugin implements Plugin<DashboardsSamplePluginSetu
             if (!mustHavePlugin.isCompatible) {
                 // use capabilities provider API to register plugin's capability to enable/disbale plugin
                 this.capabilitiesService.registerProvider(capabilitiesProvider);
-              }
+            }
             else { // feature to enable when plugin has compatible version installed }
         });
         ......
