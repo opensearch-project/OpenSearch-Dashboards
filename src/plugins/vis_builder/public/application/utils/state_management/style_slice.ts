@@ -4,24 +4,25 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { VisBuilderServices } from '../../../types';
 import { setActiveVisualization } from './shared_actions';
+import { DefaultViewState } from '../../../../../data_explorer/public';
+import { SliceProps } from './index';
 
 export type StyleState<T = any> = T;
 
 const initialState = {} as StyleState;
 
 export const getPreloadedState = async ({
-  types,
-  data,
-}: VisBuilderServices): Promise<StyleState> => {
-  let preloadedState = initialState;
-
+  services,
+  savedVisBuilderState,
+}: SliceProps): Promise<DefaultViewState<StyleState>> => {
+  const { types } = services;
   const defaultVisualization = types.all()[0];
   const defaultState = defaultVisualization.ui.containerConfig.style.defaults;
-  if (defaultState) {
-    preloadedState = defaultState;
-  }
+
+  const preloadedState: DefaultViewState<StyleState> = {
+    state: savedVisBuilderState?.style || defaultState || initialState,
+  };
 
   return preloadedState;
 };

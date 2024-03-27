@@ -6,30 +6,27 @@
 import { cloneDeep } from 'lodash';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { VisBuilderServices } from '../../../types';
-import { useTypedSelector, useTypedDispatch } from '../state_management';
-import { useIndexPatterns } from './use_index_pattern';
+import { VisBuilderViewServices } from '../../../types';
+import { useTypedDispatch } from '../state_management';
+import { useVisBuilderContext } from '../../view_components/context';
 
 /**
  * Returns common agg parameters from the store and app context
  * @returns { indexPattern, aggConfigs, aggs, timeRange }
  */
 export const useAggs = () => {
+  const { services } = useOpenSearchDashboards<VisBuilderViewServices>();
   const {
-    services: {
-      data: {
-        search: { aggs: aggService },
-        query: {
-          timefilter: { timefilter },
-        },
+    data: {
+      search: { aggs: aggService },
+      query: {
+        timefilter: { timefilter },
       },
     },
-  } = useOpenSearchDashboards<VisBuilderServices>();
-  const indexPattern = useIndexPatterns().selected;
+  } = services;
   const [timeRange, setTimeRange] = useState(timefilter.getTime());
-  const aggConfigParams = useTypedSelector(
-    (state) => state.visualization.activeVisualization?.aggConfigParams
-  );
+  const { indexPattern, rootState } = useVisBuilderContext();
+  const aggConfigParams = rootState.visualization.activeVisualization?.aggConfigParams;
   const dispatch = useTypedDispatch();
 
   const aggConfigs = useMemo(() => {
@@ -49,7 +46,6 @@ export const useAggs = () => {
   }, [dispatch, timefilter]);
 
   return {
-    indexPattern,
     aggConfigs,
     aggs: aggConfigs?.aggs ?? [],
     timeRange,

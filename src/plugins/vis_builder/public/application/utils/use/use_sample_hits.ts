@@ -7,8 +7,8 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 import { SortDirection } from '../../../../../data/public';
 import { IExpressionLoaderParams } from '../../../../../expressions/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { VisBuilderServices } from '../../../types';
-import { useIndexPatterns } from './use_index_pattern';
+import { VisBuilderViewServices } from '../../../types';
+import { useVisBuilderContext } from '../../view_components/context';
 
 export const useSampleHits = () => {
   const {
@@ -24,8 +24,8 @@ export const useSampleHits = () => {
       },
       uiSettings: config,
     },
-  } = useOpenSearchDashboards<VisBuilderServices>();
-  const indexPattern = useIndexPatterns().selected;
+  } = useOpenSearchDashboards<VisBuilderViewServices>();
+  const { indexPattern } = useVisBuilderContext();
   const [hits, setHits] = useState<Array<Record<string, any>>>([]);
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: queryString.getQuery(),

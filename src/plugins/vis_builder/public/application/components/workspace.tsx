@@ -8,11 +8,12 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@e
 import React, { useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
-import { VisBuilderServices } from '../../types';
+import { VisBuilderViewServices } from '../../types';
 import { validateSchemaState, validateAggregations } from '../utils/validations';
-import { useTypedDispatch, useTypedSelector, setUIStateState } from '../utils/state_management';
+import { useTypedDispatch, setUIStateState } from '../utils/state_management';
 import { useAggs, useVisualizationType } from '../utils/use';
 import { PersistedState } from '../../../../visualizations/public';
+import { useVisBuilderContext } from '../view_components/context';
 
 import hand_field from '../../assets/hand_field.svg';
 import fields_bg from '../../assets/fields_bg.svg';
@@ -22,42 +23,42 @@ import { ExperimentalInfo } from './experimental_info';
 import { handleVisEvent } from '../utils/handle_vis_event';
 
 export const WorkspaceUI = () => {
+  const { services } = useOpenSearchDashboards<VisBuilderViewServices>();
   const {
-    services: {
-      expressions: { ReactExpressionRenderer },
-      notifications: { toasts },
-      data,
-      uiActions,
-    },
-  } = useOpenSearchDashboards<VisBuilderServices>();
+    expressions: { ReactExpressionRenderer },
+    notifications: { toasts },
+    data,
+    uiActions,
+  } = services;
   const { toExpression, ui } = useVisualizationType();
-  const { aggConfigs, indexPattern } = useAggs();
+  const { aggConfigs } = useAggs();
   const [expression, setExpression] = useState<string>();
   const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
     query: data.query.queryString.getQuery(),
     filters: data.query.filterManager.getFilters(),
     timeRange: data.query.timefilter.timefilter.getTime(),
   });
-  const rootState = useTypedSelector((state) => state);
+  const { indexPattern, rootState } = useVisBuilderContext();
   const dispatch = useTypedDispatch();
   // Visualizations require the uiState object to persist even when the expression changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const uiState = useMemo(() => new PersistedState(rootState.ui), []);
+  const persistedUiState = useMemo(() => new PersistedState(rootState.ui), []);
+  const indexId = rootState.metadata.indexPattern ? rootState.metadata.indexPattern : '';
 
   useEffect(() => {
-    if (rootState.metadata.editor.state === 'loaded') {
-      uiState.setSilent(rootState.ui);
+    if (rootState.editor.status === 'loaded') {
+      persistedUiState.setSilent(rootState.ui);
     }
     // To update uiState once saved object data is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rootState.metadata.editor.state, uiState]);
+  }, [rootState.editor.status, persistedUiState]);
 
   useEffect(() => {
-    uiState.on('change', (args) => {
+    persistedUiState.on('change', (args) => {
       // Store changes to UI state
-      dispatch(setUIStateState(uiState.toJSON()));
+      dispatch(setUIStateState(persistedUiState.toJSON()));
     });
-  }, [dispatch, uiState]);
+  }, [dispatch, persistedUiState]);
 
   useEffect(() => {
     async function loadExpression() {
@@ -81,13 +82,20 @@ export const WorkspaceUI = () => {
 
         return;
       }
-
-      const exp = await toExpression(rootState, searchContext);
+      const exp = await toExpression(rootState, indexId, searchContext);
       setExpression(exp);
     }
 
     loadExpression();
-  }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas, searchContext, aggConfigs]);
+  }, [
+    rootState,
+    toExpression,
+    toasts,
+    ui.containerConfig.data.schemas,
+    searchContext,
+    aggConfigs,
+    indexId,
+  ]);
 
   useLayoutEffect(() => {
     const subscription = data.query.state$.subscribe(({ state }) => {
@@ -115,7 +123,7 @@ export const WorkspaceUI = () => {
           <ReactExpressionRenderer
             expression={expression}
             searchContext={searchContext}
-            uiState={uiState}
+            uiState={persistedUiState}
             onEvent={(event) => handleVisEvent(event, uiActions, indexPattern?.timeFieldName)}
           />
         ) : (

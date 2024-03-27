@@ -18,7 +18,8 @@ export class VisualizationType implements IVisualizationType {
   public readonly ui: IVisualizationType['ui'];
   public readonly toExpression: (
     state: RenderState,
-    searchContext: IExpressionLoaderParams['searchContext']
+    indexPattern: string,
+    searchContext?: IExpressionLoaderParams['searchContext']
   ) => Promise<string | undefined>;
 
   constructor(options: VisualizationTypeOptions) {
