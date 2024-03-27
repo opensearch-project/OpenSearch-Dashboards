@@ -10,6 +10,15 @@ import { SavedObjectsClientContract, ToastsStart } from 'src/core/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
+/**
+ * Provide only the necessary plugin setup/start and dataSourceId and this component will render a DataSourceSelector with a default selection
+ *
+ * @property {SavedObjectsClientContract} savedObjectsClient
+ * @property {DataSourceManagementPluginSetup} dataSourceManagement
+ * @property {ToastsStart} toasts
+ * @property {string} [defaultDataSourceId] - the datasource id as the default option when the component first renders
+ * @property {(e: Array<{}>) => void} handleChange - the function that will update the model when a datasource is selected
+ */
 export interface DataSourcePickerProps {
   savedObjectsClient: SavedObjectsClientContract;
   dataSourceManagement: DataSourceManagementPluginSetup;
@@ -18,6 +27,12 @@ export interface DataSourcePickerProps {
   handleChange: (e: Array<{}>) => void;
 }
 
+/**
+ * Provides a wrapper around the DataSourceSelector component exposed by core
+ *
+ * @param {DataSourcePickerProps} props
+ * @returns the DataSourceSelector
+ */
 export const DataSourcePicker = (props: DataSourcePickerProps) => {
   const { savedObjectsClient, defaultDataSourceId, handleChange } = props;
   const [defaultOption, setDefaultOption] = useState<Array<{ id: string; label: string }>>();
