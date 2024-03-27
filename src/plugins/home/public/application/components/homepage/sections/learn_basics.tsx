@@ -36,7 +36,7 @@ const render = renderFn(() => {
             title={
               <p>
                 Quickstart guide
-                <EuiIcon size="l" type="popout" className="learn-basics-title-icon" />
+                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
               </p>
             }
             titleSize="xs"
@@ -52,9 +52,12 @@ const render = renderFn(() => {
           <EuiCard
             layout="horizontal"
             icon={<EuiIcon size="xl" type="document" />}
-            title={i18n.translate('home.sections.learnBasics.visualization.title', {
-              defaultMessage: 'Building data visualizations',
-            })}
+            title={
+              <p>
+                Building data visualizations
+                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+              </p>
+            }
             titleSize="xs"
             description={i18n.translate('home.sections.learnBasics.visualization.description', {
               defaultMessage:
@@ -71,9 +74,12 @@ const render = renderFn(() => {
           <EuiCard
             layout="horizontal"
             icon={<EuiIcon size="xl" type="document" />}
-            title={i18n.translate('home.sections.learnBasics.dashboard.title', {
-              defaultMessage: 'Creating dashboards',
-            })}
+            title={
+              <p>
+                Creating dashboards
+                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+              </p>
+            }
             titleSize="xs"
             description={i18n.translate('home.sections.learnBasics.dashboard.description', {
               defaultMessage: 'Build interactive dashboards to explore and analyze your data.',
@@ -87,9 +93,12 @@ const render = renderFn(() => {
           <EuiCard
             layout="horizontal"
             icon={<EuiIcon size="xl" type="document" />}
-            title={i18n.translate('home.sections.learnBasics.discover.title', {
-              defaultMessage: 'Get familiar with Discover',
-            })}
+            title={
+              <p>
+                Get familiar with Discover
+                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+              </p>
+            }
             titleSize="xs"
             description={i18n.translate('home.sections.learnBasics.discover.description', {
               defaultMessage: 'Transform raw data into actionable insights.',
@@ -107,9 +116,12 @@ const render = renderFn(() => {
           <EuiCard
             layout="horizontal"
             icon={<EuiIcon size="xl" type="document" />}
-            title={i18n.translate('home.sections.learnBasics.devtool.title', {
-              defaultMessage: 'Running queries in Dev Tools console',
-            })}
+            title={
+              <p>
+                Running queries in Dev Tools console
+                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+              </p>
+            }
             titleSize="xs"
             description={i18n.translate('home.sections.learnBasics.devtool.description', {
               defaultMessage:
@@ -124,9 +136,12 @@ const render = renderFn(() => {
           <EuiCard
             layout="horizontal"
             icon={<EuiIcon size="xl" type="document" />}
-            title={i18n.translate('home.sections.learnBasics.index.title', {
-              defaultMessage: 'Working with indexes',
-            })}
+            title={
+              <p>
+                Working with indexes
+                <EuiIcon size="m" type="popout" className="learn-basics-title-icon" />
+              </p>
+            }
             titleSize="xs"
             description={i18n.translate('home.sections.learnBasics.index.description', {
               defaultMessage:
