@@ -86,6 +86,7 @@ export const getSavedObjectsWithDataSource = (
             const updatedVegaSpec = updateDataSourceNameInVegaSpec({
               spec: vegaSpec,
               newDataSourceName: dataSourceTitle,
+              // Spacing of 1 prevents the Sankey visualization in logs data from exceeding the default url length and breaking
               spacing: 1,
             });
 
