@@ -117,6 +117,46 @@ describe('TopNavMenu', () => {
     expect(component.find('.myCoolClass').length).toBeTruthy();
   });
 
+  it('mounts the data source menu if showDataSourceMenu is true', async () => {
+    const component = shallowWithIntl(
+      <TopNavMenu
+        appName={'test'}
+        showDataSourceMenu={true}
+        dataSourceMenuConfig={{
+          componentType: 'DataSourceView',
+          componentConfig: {
+            hideLocalCluster: true,
+            fullWidth: true,
+            activeOption: [{ label: 'what', id: '1' }],
+          },
+        }}
+      />
+    );
+
+    expect(component.find('DataSourceMenu').length).toBe(1);
+  });
+
+  it('mounts the data source menu as well as top nav menu', async () => {
+    const component = shallowWithIntl(
+      <TopNavMenu
+        appName={'test'}
+        showDataSourceMenu={true}
+        config={menuItems}
+        dataSourceMenuConfig={{
+          componentType: 'DataSourceView',
+          componentConfig: {
+            hideLocalCluster: true,
+            fullWidth: true,
+            activeOption: [{ label: 'what', id: '1' }],
+          },
+        }}
+      />
+    );
+
+    expect(component.find('DataSourceMenu').length).toBe(1);
+    expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
+  });
+
   describe('when setMenuMountPoint is provided', () => {
     let portalTarget: HTMLElement;
     let mountPoint: MountPoint;
