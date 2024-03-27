@@ -14,6 +14,8 @@ import {
   isValidUrl,
   testConnection,
   updateDataSourceById,
+  handleSetDefaultDatasource,
+  setFirstDataSourceAsDefault,
 } from './utils';
 import { coreMock } from '../../../../core/public/mocks';
 import {
@@ -24,6 +26,8 @@ import {
   mockDataSourceAttributesWithAuth,
   mockErrorResponseForSavedObjectsCalls,
   mockResponseForSavedObjectsCalls,
+  mockUiSettingsCalls,
+  getSingleDataSourceResponse,
 } from '../mocks';
 import {
   AuthType,
@@ -36,6 +40,7 @@ import { AuthenticationMethod, AuthenticationMethodRegistry } from '../auth_regi
 import { deepEqual } from 'assert';
 
 const { savedObjects } = coreMock.createStart();
+const { uiSettings } = coreMock.createStart();
 
 describe('DataSourceManagement: Utils.ts', () => {
   describe('Get data source', () => {
@@ -274,7 +279,50 @@ describe('DataSourceManagement: Utils.ts', () => {
       expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(AuthType.NoAuth);
     });
   });
-
+  describe('handle set default datasource', () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Reset all mock calls before each test
+    });
+    test('should set default datasource when it does not have default datasource ', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should not set default datasource when it has default datasouce', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'test');
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+  });
+  describe('set first aataSource as default', () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Reset all mock calls before each test
+    });
+    test('should set defaultDataSource if more than one data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should set defaultDataSource if only one data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getSingleDataSourceResponse);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should not set defaultDataSource if no data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.remove).toHaveBeenCalled();
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+    test('should not set defaultDataSource if no data source exists and no default datasouce', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, false);
+      expect(uiSettings.remove).not.toHaveBeenCalled();
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+  });
   describe('Check extractRegisteredAuthTypeCredentials method', () => {
     test('Should extract credential field successfully', () => {
       const authTypeToBeTested = 'Some Auth Type';
