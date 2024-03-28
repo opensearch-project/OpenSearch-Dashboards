@@ -90,7 +90,7 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={onSelectedDataSource}
+        onSelectedDataSources={onSelectedDataSource}
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}

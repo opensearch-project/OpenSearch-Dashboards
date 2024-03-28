@@ -51,7 +51,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
             },
             Object {
               "id": "test2",
-              "label": "test3",
+              "label": "test2",
             },
             Object {
               "id": "test3",
