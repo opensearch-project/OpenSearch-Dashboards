@@ -219,4 +219,21 @@ describe('WorkspaceUpdater', () => {
     });
     expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
   });
+
+  it('should show danger toasts when currentWorkspace is missing after click update button', async () => {
+    const mockedWorkspacesService = workspacesServiceMock.createSetupContract();
+    const { getByTestId } = render(<WorkspaceUpdater workspaceService={mockedWorkspacesService} />);
+
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-updateButton'));
+    mockedWorkspacesService.currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
+    expect(workspaceClientUpdate).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(notificationToastsAddDanger).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
+  });
 });
