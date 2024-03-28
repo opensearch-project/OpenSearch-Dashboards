@@ -40,7 +40,7 @@ describe('readCertificateAuthorities', () => {
     expect(mockReadFileSync).toHaveBeenCalledTimes(0);
     mockReadFileSync.mockClear();
     expect(certificateAuthorities).toEqual({
-      certificateAuthorities: [],
+      certificateAuthorities: undefined,
     });
   });
 
@@ -52,7 +52,7 @@ describe('readCertificateAuthorities', () => {
     expect(mockReadFileSync).toHaveBeenCalledTimes(0);
     mockReadFileSync.mockClear();
     expect(certificateAuthorities).toEqual({
-      certificateAuthorities: [],
+      certificateAuthorities: undefined,
     });
   });
 });
