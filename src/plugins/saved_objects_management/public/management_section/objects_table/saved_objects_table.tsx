@@ -65,7 +65,10 @@ import {
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
+  WorkspacesStart,
+  WorkspaceAttribute,
 } from 'src/core/public';
+import { Subscription } from 'rxjs';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -110,6 +113,7 @@ export interface SavedObjectsTableProps {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   applications: ApplicationStart;
+  workspaces: WorkspacesStart;
   perPageConfig: number;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
@@ -137,10 +141,13 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
+  currentWorkspaceId?: string;
+  availableWorkspaces?: WorkspaceAttribute[];
 }
-
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
+  private currentWorkspaceIdSubscription?: Subscription;
+  private workspacesSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -172,6 +179,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   componentDidMount() {
     this._isMounted = true;
+    this.subscribeWorkspace();
     this.fetchSavedObjects();
     this.fetchCounts();
   }
@@ -179,6 +187,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   componentWillUnmount() {
     this._isMounted = false;
     this.debouncedFetchObjects.cancel();
+    this.unSubscribeWorkspace();
   }
 
   fetchCounts = async () => {
@@ -244,6 +253,24 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   fetchSavedObjects = () => {
     this.setState({ isSearching: true }, this.debouncedFetchObjects);
+  };
+
+  subscribeWorkspace = () => {
+    const workspace = this.props.workspaces;
+    this.currentWorkspaceIdSubscription = workspace.currentWorkspaceId$.subscribe((workspaceId) =>
+      this.setState({
+        currentWorkspaceId: workspaceId,
+      })
+    );
+
+    this.workspacesSubscription = workspace.workspaceList$.subscribe((workspaceList) => {
+      this.setState({ availableWorkspaces: workspaceList });
+    });
+  };
+
+  unSubscribeWorkspace = () => {
+    this.currentWorkspaceIdSubscription?.unsubscribe();
+    this.workspacesSubscription?.unsubscribe();
   };
 
   fetchSavedObject = (type: string, id: string) => {
@@ -802,6 +829,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       filteredItemCount,
       isSearching,
       savedObjectCounts,
+      availableWorkspaces,
+      currentWorkspaceId,
     } = this.state;
     const { http, allowedTypes, applications, namespaceRegistry } = this.props;
 
@@ -889,6 +918,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onShowRelationships={this.onShowRelationships}
             canGoInApp={this.props.canGoInApp}
             dateFormat={this.props.dateFormat}
+            availableWorkspaces={availableWorkspaces}
+            currentWorkspaceId={currentWorkspaceId}
           />
         </RedirectAppLinks>
       </EuiPageContent>
