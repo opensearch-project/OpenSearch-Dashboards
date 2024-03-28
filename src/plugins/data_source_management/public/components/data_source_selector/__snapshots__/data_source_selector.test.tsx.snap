@@ -82,7 +82,7 @@ exports[`DataSourceSelector: check dataSource options should always place local 
       },
       Object {
         "id": "test2",
-        "label": "test3",
+        "label": "test2",
       },
       Object {
         "id": "test3",
@@ -127,7 +127,7 @@ exports[`DataSourceSelector: check dataSource options should filter options if c
       },
       Object {
         "id": "test2",
-        "label": "test3",
+        "label": "test2",
       },
       Object {
         "id": "test3",
@@ -176,7 +176,7 @@ exports[`DataSourceSelector: check dataSource options should hide prepend if rem
       },
       Object {
         "id": "test2",
-        "label": "test3",
+        "label": "test2",
       },
       Object {
         "id": "test3",
@@ -247,7 +247,7 @@ exports[`DataSourceSelector: check dataSource options should show custom placeho
       },
       Object {
         "id": "test2",
-        "label": "test3",
+        "label": "test2",
       },
       Object {
         "id": "test3",
