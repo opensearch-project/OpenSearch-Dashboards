@@ -142,7 +142,9 @@ describe('Table', () => {
     let component = shallowWithI18nProvider(<Table {...props} />);
 
     let table = component.find('EuiBasicTable');
-    let columns = table.prop('columns') as any[];
+    let columns = table.prop<
+      Array<{ render: (id: string, record: unknown) => React.ReactElement }>
+    >('columns');
     let content = columns[1].render('My-Dashboard-test', item);
     expect(content.props.href).toEqual('http://localhost/w/ws-1/app/dashboards#/view/dashboard-1');
 

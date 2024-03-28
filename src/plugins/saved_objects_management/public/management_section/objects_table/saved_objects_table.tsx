@@ -179,8 +179,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   componentDidMount() {
     this._isMounted = true;
-
-    this.subscribleWorkspace();
+    this.subscribeWorkspace();
     this.fetchSavedObjects();
     this.fetchCounts();
   }
@@ -188,8 +187,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   componentWillUnmount() {
     this._isMounted = false;
     this.debouncedFetchObjects.cancel();
-    this.currentWorkspaceIdSubscription?.unsubscribe();
-    this.workspacesSubscription?.unsubscribe();
+    this.unSubscribeWorkspace();
   }
 
   fetchCounts = async () => {
@@ -257,7 +255,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.setState({ isSearching: true }, this.debouncedFetchObjects);
   };
 
-  subscribleWorkspace = () => {
+  subscribeWorkspace = () => {
     const workspace = this.props.workspaces;
     this.currentWorkspaceIdSubscription = workspace.currentWorkspaceId$.subscribe((workspaceId) =>
       this.setState({
@@ -268,6 +266,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.workspacesSubscription = workspace.workspaceList$.subscribe((workspaceList) => {
       this.setState({ availableWorkspaces: workspaceList });
     });
+  };
+
+  unSubscribeWorkspace = () => {
+    this.currentWorkspaceIdSubscription?.unsubscribe();
+    this.workspacesSubscription?.unsubscribe();
   };
 
   fetchSavedObject = (type: string, id: string) => {
