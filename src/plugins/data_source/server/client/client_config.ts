@@ -13,7 +13,7 @@ type DataSourceSSLConfigOptions = Partial<{
   requestCert: boolean;
   rejectUnauthorized: boolean;
   checkServerIdentity: typeof checkServerIdentity;
-  ca: string[];
+  ca?: string[];
 }>;
 
 /**
@@ -56,7 +56,9 @@ export function parseClientOptions(
       config.ssl?.certificateAuthorities
     );
 
-    sslConfig.ca = certificateAuthorities || [];
+    if (certificateAuthorities && certificateAuthorities.length > 0) {
+      sslConfig.ca = certificateAuthorities;
+    }
   }
 
   const clientOptions: ClientOptions = {
