@@ -71,6 +71,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add create workspace page ([#6179](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6179))
 - [Multiple Datasource] Make sure customer always have a default datasource ([#6237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6237))
 - [Workspace] Add workspace list page ([#6182](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6182))
+- [Workspace] Add copy saved objects API
 
 
 ### 🐛 Bug Fixes
