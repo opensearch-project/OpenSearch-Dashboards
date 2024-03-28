@@ -155,7 +155,7 @@ describe('Table', () => {
     );
 
     table = component.find('EuiBasicTable');
-    columns = table.prop('columns') as any[];
+    columns = table.prop('columns');
     content = columns[1].render('My-Dashboard-test', item);
     expect(content.props.href).toEqual(
       `http://localhost/w/${currentWorkspaceId}/app/dashboards#/view/dashboard-1`
