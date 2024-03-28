@@ -10,6 +10,7 @@ import React from 'react';
 import { DataSourceSelectable } from './data_source_selectable';
 import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
+import { render } from '@testing-library/react';
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -30,7 +31,7 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={jest.fn()}
+        onSelectedDataSources={jest.fn()}
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
@@ -50,7 +51,7 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={jest.fn()}
+        onSelectedDataSources={jest.fn()}
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
@@ -70,7 +71,7 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={jest.fn()}
+        onSelectedDataSources={jest.fn()}
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
@@ -81,5 +82,23 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     expect(component).toMatchSnapshot();
     expect(toasts.addWarning).toBeCalledTimes(0);
+  });
+
+  it('should show popover when click on button', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    button.click();
+    expect(container).toMatchSnapshot();
   });
 });

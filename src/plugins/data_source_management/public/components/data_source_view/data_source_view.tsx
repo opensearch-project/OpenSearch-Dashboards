@@ -6,7 +6,7 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiPopover, EuiButtonEmpty, EuiButtonIcon, EuiContextMenu } from '@elastic/eui';
-import { DataSourceOption } from '../data_source_selector/data_source_selector';
+import { DataSourceOption } from '../data_source_menu/types';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
