@@ -17,7 +17,7 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../../../../types';
-import { AuthenticationMethod, AuthenticationMethodRegistery } from '../../../../auth_registry';
+import { AuthenticationMethod, AuthenticationMethodRegistry } from '../../../../auth_registry';
 
 const titleIdentifier = '[data-test-subj="createDataSourceFormTitleField"]';
 const descriptionIdentifier = `[data-test-subj="createDataSourceFormDescriptionField"]`;
@@ -30,13 +30,13 @@ const testConnectionButtonIdentifier = '[data-test-subj="createDataSourceTestCon
 
 describe('Datasource Management: Create Datasource form', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
     noAuthCredentialAuthMethod
   );
-  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
     usernamePasswordAuthMethod
   );
-  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(sigV4AuthMethod);
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(sigV4AuthMethod);
 
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const mockSubmitHandler = jest.fn();
@@ -257,10 +257,10 @@ describe('Datasource Management: Create Datasource form with different authType 
 
     authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
       const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
       authMethodCombination.forEach((authMethod) => {
-        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
       });
 
       component = mount(
@@ -296,10 +296,10 @@ describe('Datasource Management: Create Datasource form with different authType 
 
     authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
       const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
       authMethodCombination.forEach((authMethod) => {
-        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
       });
 
       component = mount(
@@ -335,10 +335,10 @@ describe('Datasource Management: Create Datasource form with different authType 
 
     authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
       const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
       authMethodCombination.forEach((authMethod) => {
-        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
       });
 
       component = mount(
@@ -398,10 +398,10 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
     authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
       const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
       authMethodCombination.forEach((authMethod) => {
-        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
       });
 
       component = mount(
@@ -451,10 +451,10 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
     authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
       const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
       authMethodCombination.forEach((authMethod) => {
-        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
       });
 
       component = mount(
@@ -498,10 +498,10 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
     authMethodCombinationsToBeTested.forEach((authMethodCombination) => {
       const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-      mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
       authMethodCombination.forEach((authMethod) => {
-        mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
       });
 
       component = mount(
@@ -541,8 +541,8 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
     } as AuthenticationMethod;
 
     const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-    mockedContext.authenticationMethodRegistery = new AuthenticationMethodRegistery();
-    mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+    mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
+    mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
     component = mount(
       wrapWithIntl(

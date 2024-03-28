@@ -8,7 +8,7 @@ import { extractRegisteredAuthTypeCredentials, isValidUrl } from '../utils';
 import { CreateDataSourceState } from '../create_data_source_wizard/components/create_form/create_data_source_form';
 import { EditDataSourceState } from '../edit_data_source/components/edit_form/edit_data_source_form';
 import { AuthType } from '../../types';
-import { AuthenticationMethodRegistery } from '../../auth_registry';
+import { AuthenticationMethodRegistry } from '../../auth_registry';
 
 export interface CreateEditDataSourceValidation {
   title: string[];
@@ -70,7 +70,7 @@ export const performDataSourceFormValidation = (
   formValues: CreateDataSourceState | EditDataSourceState,
   existingDatasourceNamesList: string[],
   existingTitle: string,
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
   /* Title validation */
   const titleValid = isTitleValid(formValues?.title, existingDatasourceNamesList, existingTitle);
@@ -122,7 +122,7 @@ export const performDataSourceFormValidation = (
     const registeredCredentials = extractRegisteredAuthTypeCredentials(
       (formValues?.auth?.credentials ?? {}) as { [key: string]: string },
       formValues?.auth?.type ?? '',
-      authenticationMethodRegistery
+      authenticationMethodRegistry
     );
 
     for (const credentialValue of Object.values(registeredCredentials)) {

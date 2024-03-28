@@ -7,12 +7,12 @@ import { deepFreeze } from '@osd/std';
 import { AuthenticationMethod } from '../../server/types';
 import { AuthType } from '../../common/data_sources';
 
-export type IAuthenticationMethodRegistery = Omit<
-  AuthenticationMethodRegistery,
+export type IAuthenticationMethodRegistry = Omit<
+  AuthenticationMethodRegistry,
   'registerAuthenticationMethod'
 >;
 
-export class AuthenticationMethodRegistery {
+export class AuthenticationMethodRegistry {
   private readonly authMethods = new Map<string, AuthenticationMethod>();
   /**
    * Register a authMethods with function to return credentials inside the registry.

@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { AuthenticationMethodRegistery } from '../../../../auth_registry';
+import { AuthenticationMethodRegistry } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import {
   AuthType,
@@ -77,17 +77,17 @@ export class CreateDataSourceForm extends React.Component<
 
   authOptions: Array<EuiSuperSelectOption<string>> = [];
   isNoAuthOptionEnabled: boolean;
-  authenticationMethodRegistery: AuthenticationMethodRegistery;
+  authenticationMethodRegistry: AuthenticationMethodRegistry;
 
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
 
-    this.authenticationMethodRegistery = context.services.authenticationMethodRegistery;
-    const registeredAuthMethods = this.authenticationMethodRegistery.getAllAuthenticationMethods();
-    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistery);
+    this.authenticationMethodRegistry = context.services.authenticationMethodRegistry;
+    const registeredAuthMethods = this.authenticationMethodRegistry.getAllAuthenticationMethods();
+    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistry);
 
     this.isNoAuthOptionEnabled =
-      this.authenticationMethodRegistery.getAuthenticationMethod(AuthType.NoAuth) !== undefined;
+      this.authenticationMethodRegistry.getAuthenticationMethod(AuthType.NoAuth) !== undefined;
 
     this.authOptions = registeredAuthMethods.map((authMethod) => {
       return authMethod.credentialSourceOption;
@@ -114,7 +114,7 @@ export class CreateDataSourceForm extends React.Component<
       this.state,
       this.props.existingDatasourceNamesList,
       '',
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
   };
 
@@ -158,7 +158,7 @@ export class CreateDataSourceForm extends React.Component<
     const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
       (credentials ?? {}) as { [key: string]: string },
       authType,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
 
     this.setState({
@@ -337,7 +337,7 @@ export class CreateDataSourceForm extends React.Component<
       credentials = extractRegisteredAuthTypeCredentials(
         currentCredentials,
         authType,
-        this.authenticationMethodRegistery
+        this.authenticationMethodRegistry
       );
     }
 
@@ -354,7 +354,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   getCredentialFormFromRegistry = (authType: string) => {
-    const registeredAuthMethod = this.authenticationMethodRegistery.getAuthenticationMethod(
+    const registeredAuthMethod = this.authenticationMethodRegistry.getAuthenticationMethod(
       authType
     );
     const authCredentialForm = registeredAuthMethod?.credentialForm;
