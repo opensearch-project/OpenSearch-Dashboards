@@ -78,6 +78,42 @@ export const getSingleDataSourceResponse = {
   ],
 };
 
+export const getDataSource = [
+  {
+    id: '1',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 1',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+  {
+    id: '2',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 1',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+  {
+    id: '3',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 1',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+];
+
 /* Mock data responses - JSON*/
 export const getDataSourcesResponse = {
   savedObjects: [

@@ -16,6 +16,7 @@ import {
   noAuthCredentialAuthMethod,
 } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
+import { DataSourceOption } from './data_source_selector/data_source_selector';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -75,6 +76,51 @@ export async function setFirstDataSourceAsDefault(
   if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
     const datasourceId = listOfDataSources[0].id;
     return await uiSettings.set('defaultDataSource', datasourceId);
+  }
+}
+
+export function getFilteredDataSources(
+  dataSources: Array<SavedObject<DataSourceAttributes>>,
+  filter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean
+) {
+  return filter ? dataSources.filter((ds) => filter!(ds)) : dataSources;
+}
+
+export function getDefaultDataSource(
+  dataSources: Array<SavedObject<DataSourceAttributes>>,
+  LocalCluster: DataSourceOption,
+  uiSettings?: IUiSettingsClient,
+  hideLocalCluster?: boolean,
+  defaultOption?: DataSourceOption[]
+) {
+  const defaultOptionId = defaultOption?.[0]?.id;
+  const defaultOptionDataSource = dataSources.find(
+    (dataSource) => dataSource.id === defaultOptionId
+  );
+
+  const defaultDataSourceId = uiSettings?.get('defaultDataSource', null) ?? null;
+  const defaultDataSourceAfterCheck = dataSources.find(
+    (dataSource) => dataSource.id === defaultDataSourceId
+  );
+
+  if (defaultOptionDataSource) {
+    return [
+      {
+        id: defaultOptionDataSource.id,
+        label: defaultOption?.[0]?.label || defaultOptionDataSource.attributes?.title,
+      },
+    ];
+  } else if (defaultDataSourceAfterCheck) {
+    return [
+      {
+        id: defaultDataSourceAfterCheck.id,
+        label: defaultDataSourceAfterCheck.attributes?.title || '',
+      },
+    ];
+  } else if (!hideLocalCluster) {
+    return [LocalCluster];
+  } else {
+    return [];
   }
 }
 

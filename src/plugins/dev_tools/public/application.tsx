@@ -39,6 +39,7 @@ import {
   ApplicationStart,
   ChromeStart,
   CoreStart,
+  IUiSettingsClient,
   NotificationsStart,
   SavedObjectsStart,
   ScopedHistory,
@@ -48,7 +49,6 @@ import { DataSourceSelector } from '../../data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
-
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
@@ -57,6 +57,7 @@ interface DevToolsWrapperProps {
   notifications: NotificationsStart;
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
+  uiSettings: IUiSettingsClient;
 }
 
 interface MountedDevToolDescriptor {
@@ -73,8 +74,10 @@ function DevToolsWrapper({
   notifications: { toasts },
   dataSourceEnabled,
   hideLocalCluster,
+  uiSettings,
 }: DevToolsWrapperProps) {
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   useEffect(
     () => () => {
@@ -111,6 +114,7 @@ function DevToolsWrapper({
       mountpoint: mountPoint,
       unmountHandler,
     };
+    setIsLoading(true);
   };
 
   return (
@@ -131,7 +135,7 @@ function DevToolsWrapper({
             </EuiTab>
           </EuiToolTip>
         ))}
-        {dataSourceEnabled ? (
+        {dataSourceEnabled && isLoading ? (
           <div className="devAppDataSourceSelector">
             <DataSourceSelector
               savedObjectsClient={savedObjects.client}
@@ -140,6 +144,7 @@ function DevToolsWrapper({
               disabled={!dataSourceEnabled}
               hideLocalCluster={hideLocalCluster}
               fullWidth={false}
+              uiSettings={uiSettings}
             />
           </div>
         ) : null}
@@ -213,7 +218,7 @@ function setBreadcrumbs(chrome: ChromeStart) {
 }
 
 export function renderApp(
-  { application, chrome, docLinks, savedObjects, notifications }: CoreStart,
+  { application, chrome, docLinks, savedObjects, notifications, uiSettings }: CoreStart,
   element: HTMLElement,
   history: ScopedHistory,
   devTools: readonly DevToolApp[],
@@ -251,6 +256,7 @@ export function renderApp(
                     notifications={notifications}
                     dataSourceEnabled={dataSourceEnabled}
                     hideLocalCluster={hideLocalCluster}
+                    uiSettings={uiSettings}
                   />
                 )}
               />
