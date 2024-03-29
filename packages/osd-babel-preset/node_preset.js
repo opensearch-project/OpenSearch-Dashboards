@@ -40,7 +40,7 @@ module.exports = (_, options = {}) => {
             // `nvm install 8 && node ./src/cli` will run OpenSearch Dashboards
             // in node version 8 and babel will stop transpiling async/await
             // because they are supported in the "current" version of node
-            node: 'current',
+            node: 14,
           },
 
           // replaces `import "core-js/stable"` with a list of require statements

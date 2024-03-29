@@ -31,7 +31,6 @@
 import React, { Fragment, PureComponent } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSearchBar, EuiFormErrorText, Query } from '@elastic/eui';
-
 import { getCategoryName } from '../../lib';
 
 interface SearchProps {
@@ -111,6 +110,7 @@ export class Search extends PureComponent<SearchProps> {
 
     return (
       <Fragment>
+        {/* @ts-ignore The Query types that typescript complains about here are identical and is a false flag. Once OUI migration is complete, this ignore can be removed */}
         <EuiSearchBar box={box} filters={filters} onChange={this.onChange} query={query} />
         {queryParseError}
       </Fragment>

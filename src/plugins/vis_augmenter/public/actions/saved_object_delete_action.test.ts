@@ -18,6 +18,20 @@ jest.mock('src/plugins/vis_augmenter/public/services.ts', () => {
         },
       };
     },
+    getUISettings: () => {
+      return {
+        get: (config: string) => {
+          switch (config) {
+            case 'visualization:enablePluginAugmentation':
+              return true;
+            case 'visualization:enablePluginAugmentation.maxPluginObjects':
+              return 10;
+            default:
+              throw new Error(`Accessing ${config} is not supported in the mock.`);
+          }
+        },
+      };
+    },
   };
 });
 

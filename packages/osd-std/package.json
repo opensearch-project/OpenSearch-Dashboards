@@ -1,14 +1,12 @@
 {
   "name": "@osd/std",
-  "main": "./target/index.js",
-  "types": "./target/index.d.ts",
+  "browser": "./target/web/index.js",
+  "main": "./target/node/index.js",
+  "types": "./target/types/index.d.ts",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
-  "scripts": {
-    "build": "tsc",
-    "osd:bootstrap": "yarn build"
-  },
+  "sideEffects": false,
   "dependencies": {
     "lodash": "^4.17.21"
   },
@@ -16,5 +14,9 @@
     "@osd/utility-types": "1.0.0",
     "typescript": "4.0.2",
     "tsd": "^0.21.0"
+  },
+  "@osd/pm": {
+    "node": true,
+    "web": true
   }
 }

@@ -304,17 +304,38 @@ describe('utils', () => {
       pluginResource
     );
 
-    it('returns no matching saved objs with filtering', async () => {
-      const loader = createSavedAugmentVisLoader({
-        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2, obj3]),
-      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
-      expect((await getAugmentVisSavedObjs(visId3, loader)).length).toEqual(0);
-    });
     it('returns no matching saved objs when client returns empty list', async () => {
       const loader = createSavedAugmentVisLoader({
         savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
       expect((await getAugmentVisSavedObjs(visId1, loader)).length).toEqual(0);
+    });
+    it('throws error when feature setting is disabled', async () => {
+      uiSettingsMock.get.mockImplementation((key: string) => {
+        return false;
+      });
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      try {
+        await getAugmentVisSavedObjs(visId1, loader);
+      } catch (e: any) {
+        expect(
+          e.message.includes(
+            'Visualization augmentation is disabled, please enable visualization:enablePluginAugmentation.'
+          )
+        );
+      }
+    });
+    it('returns no matching saved objs when loader throws error', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: {
+          findAll: () => {
+            return new Error();
+          },
+        },
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      expect((await getAugmentVisSavedObjs(visId3, loader)).length).toEqual(0);
     });
     it('returns one matching saved obj', async () => {
       const loader = createSavedAugmentVisLoader({
@@ -322,17 +343,81 @@ describe('utils', () => {
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
       expect((await getAugmentVisSavedObjs(visId1, loader)).length).toEqual(1);
     });
-    it('returns multiple matching saved objs without filtering', async () => {
+    it('returns multiple matching saved objs', async () => {
       const loader = createSavedAugmentVisLoader({
         savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
       expect((await getAugmentVisSavedObjs(visId1, loader)).length).toEqual(2);
     });
-    it('returns multiple matching saved objs with filtering', async () => {
+    it('undefined plugin resource list has no effect', async () => {
       const loader = createSavedAugmentVisLoader({
-        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2, obj3]),
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
-      expect((await getAugmentVisSavedObjs(visId1, loader)).length).toEqual(2);
+      expect((await getAugmentVisSavedObjs(visId1, loader, undefined, undefined)).length).toEqual(
+        2
+      );
+    });
+    it('empty plugin resource list has no effect', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      expect((await getAugmentVisSavedObjs(visId1, loader, undefined, [])).length).toEqual(2);
+    });
+    it('empty / undefined plugin resource list passes correct findAll() params', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      loader.findAll = jest.fn().mockImplementation(loader.findAll);
+      expect((await getAugmentVisSavedObjs(visId1, loader, undefined, [])).length).toEqual(2);
+      expect(loader.findAll).toHaveBeenCalledWith(
+        '',
+        100,
+        undefined,
+        {
+          type: 'visualization',
+          id: visId1 as string,
+        },
+        undefined
+      );
+    });
+    it('single plugin resource is propagated to findAll()', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      loader.findAll = jest.fn().mockImplementation(loader.findAll);
+      expect(
+        (await getAugmentVisSavedObjs(visId1, loader, undefined, ['resource-1'])).length
+      ).toEqual(2);
+      expect(loader.findAll).toHaveBeenCalledWith(
+        'resource-1',
+        100,
+        undefined,
+        {
+          type: 'visualization',
+          id: visId1 as string,
+        },
+        ['pluginResource.id']
+      );
+    });
+    it('multiple plugin resources are propagated to findAll()', async () => {
+      const loader = createSavedAugmentVisLoader({
+        savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
+      } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      loader.findAll = jest.fn().mockImplementation(loader.findAll);
+      expect(
+        (await getAugmentVisSavedObjs(visId1, loader, undefined, ['resource-1', 'resource-2']))
+          .length
+      ).toEqual(2);
+      expect(loader.findAll).toHaveBeenCalledWith(
+        'resource-1|resource-2',
+        100,
+        undefined,
+        {
+          type: 'visualization',
+          id: visId1 as string,
+        },
+        ['pluginResource.id']
+      );
     });
   });
 

@@ -42,7 +42,7 @@ import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
-import { PluginName } from './types';
+import { PluginName, CompatibleEnginePluginVersions } from './types';
 import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
 import { Logger } from '../logging';
@@ -53,13 +53,13 @@ function createPlugin(
   {
     required = [],
     optional = [],
-    requiredOSPlugin = [],
+    requiredOSPlugin = {},
     server = true,
     ui = true,
   }: {
     required?: string[];
     optional?: string[];
-    requiredOSPlugin?: string[];
+    requiredOSPlugin?: CompatibleEnginePluginVersions;
     server?: boolean;
     ui?: boolean;
   } = {}
@@ -72,7 +72,7 @@ function createPlugin(
       configPath: 'path',
       opensearchDashboardsVersion: '7.0.0',
       requiredPlugins: required,
-      requiredOpenSearchPlugins: requiredOSPlugin,
+      requiredEnginePlugins: requiredOSPlugin,
       optionalPlugins: optional,
       requiredBundles: [],
       server,
@@ -195,7 +195,12 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   }
   const plugins = new Map([
     [
-      createPlugin('order-4', { required: ['order-2'], requiredOSPlugin: ['test-plugin'] }),
+      createPlugin('order-4', {
+        required: ['order-2'],
+        requiredOSPlugin: {
+          'test-plugin-1': '^1.1.1',
+        },
+      }),
       {
         setup: { 'order-2': 'added-as-2' },
         start: { 'order-2': 'started-as-2' },
@@ -253,12 +258,12 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   );
 
   const opensearch = startDeps.opensearch;
-  opensearch.client.asInternalUser.cat.plugins.mockResolvedValue({
+  opensearch.client.asInternalUser.cat.plugins.mockResolvedValueOnce({
     body: [
       {
         name: 'node-1',
-        component: 'test-plugin',
-        version: 'v1',
+        component: 'test-plugin-1',
+        version: '1.9.9',
       },
     ],
   } as any);
@@ -509,7 +514,7 @@ describe('start', () => {
       {
         name: 'node-1',
         component: 'test-plugin',
-        version: 'v1',
+        version: '2.1.0',
       },
     ],
   } as any);
@@ -547,10 +552,14 @@ describe('start', () => {
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
   });
 
-  it('validates opensearch plugin installation when dependency is fulfilled', async () => {
+  it('validates plugin start when opensearch dependency is fulfilled', async () => {
     [
-      createPlugin('order-1', { requiredOSPlugin: ['test-plugin'] }),
-      createPlugin('order-2'),
+      createPlugin('dependency-fulfilled-plugin', {
+        requiredOSPlugin: {
+          'test-plugin': '^2.0.0',
+        },
+      }),
+      createPlugin('no-dependency-plugin'),
     ].forEach((plugin, index) => {
       jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
       jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
@@ -560,13 +569,16 @@ describe('start', () => {
     await pluginsSystem.setupPlugins(setupDeps);
     const pluginsStart = await pluginsSystem.startPlugins(startDeps);
     expect(pluginsStart).toBeInstanceOf(Map);
-    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
   });
 
-  it('validates opensearch plugin installation and does not error out when plugin is not installed', async () => {
+  it('validates plugin start when opensearch plugin dependency is not installed', async () => {
     [
-      createPlugin('id-1', { requiredOSPlugin: ['missing-opensearch-dep'] }),
-      createPlugin('id-2'),
+      createPlugin('dependency-missing-plugin', {
+        requiredOSPlugin: {
+          'missing-opensearch-dep': '^2.0.0',
+        },
+      }),
+      createPlugin('no-dependency-plugin'),
     ].forEach((plugin, index) => {
       jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
       jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
@@ -576,18 +588,5 @@ describe('start', () => {
     await pluginsSystem.setupPlugins(setupDeps);
     const pluginsStart = await pluginsSystem.startPlugins(startDeps);
     expect(pluginsStart).toBeInstanceOf(Map);
-    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
-  });
-
-  it('validates opensearch plugin installation and does not error out when there is no dependency', async () => {
-    [createPlugin('id-1'), createPlugin('id-2')].forEach((plugin, index) => {
-      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
-      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
-      pluginsSystem.addPlugin(plugin);
-    });
-    await pluginsSystem.setupPlugins(setupDeps);
-    const pluginsStart = await pluginsSystem.startPlugins(startDeps);
-    expect(pluginsStart).toBeInstanceOf(Map);
-    expect(opensearch.client.asInternalUser.cat.plugins).toHaveBeenCalledTimes(1);
   });
 });

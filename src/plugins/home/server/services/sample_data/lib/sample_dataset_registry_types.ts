@@ -85,6 +85,7 @@ export interface SampleDatasetSchema<T = unknown> {
   description: string;
   previewImagePath: string;
   darkPreviewImagePath: string;
+  hasNewThemeImages?: boolean;
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: string;

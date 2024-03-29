@@ -176,7 +176,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
     // code + styles + style/css-loader runtimes + public path updater
-    17
+    25
   );
 
   expect(bar.cache.getReferencedFiles()?.map(absolutePathSerializer.serialize).sort())
@@ -193,6 +193,8 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts",
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7dark.scss",
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7light.scss",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8dark.scss",
+      "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8light.scss",
       "<absolute path>/packages/osd-optimizer/target/worker/entry_point_creator.js",
       "<absolute path>/packages/osd-ui-shared-deps/public_path_module_creator.js",
     ]

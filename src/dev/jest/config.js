@@ -28,27 +28,113 @@
  * under the License.
  */
 
+import { readdirSync } from 'fs';
+import path from 'path';
 import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
 
-export default {
-  rootDir: '../../..',
-  roots: [
-    '<rootDir>/src/plugins',
-    '<rootDir>/src/legacy/ui',
+const rootDir = '../../..';
+/* The rootGroups will go through a transformation to narrow down the CI groups.
+ * The transformation pattern is not RegExp or glob compatible and only accepts
+ * a pattern of `/<regex char class or negated char class>`, like `/[a-d]` or
+ * `/[^a-z]` to select any sub-path with a name beginning or not beginning with
+ * any one of the enclosed characters case-insensitively. Each entry can only
+ * have one pattern and the pattern can only be at the end of the entry.
+ *
+ * Example: '<rootDir>/src/plugins/[a-d]'
+ * All directories under <rootDir>/src/plugins with names starting with a, A, b,
+ * B, c, C, d, or D will be included.
+ *
+ * Example: '<rootDir>/src/plugins/[^a-z]'
+ * All directories under <rootDir>/src/plugins with names that start with any
+ * non A to Z character.
+ */
+const rootGroups = [
+  [
+    /* CI Group 0 is left empty to make numbering natural */
+  ],
+  [
+    // CI Group 1 (roughly 280 files)
+    '<rootDir>/src/plugins/[v-z]', // plugins v-u
+    '<rootDir>/src/plugins/[^a-z]', // To cover anything that might not start with `a-z`
+  ],
+  [
+    // CI Group 2 (roughly 450 files)
     '<rootDir>/src/core',
-    '<rootDir>/src/legacy/server',
+    '<rootDir>/packages/osd-test/target/functional_test_runner',
+    '<rootDir>/packages',
+  ],
+  [
+    // CI Group 3 (roughly 400 files)
+    '<rootDir>/src/plugins/[a-d]', // plugins a-d
+  ],
+  [
+    // CI Group 4 (roughly 410 files)
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
-    '<rootDir>/packages/osd-test/target/functional_test_runner',
     '<rootDir>/src/dev',
-    '<rootDir>/src/optimize',
+    '<rootDir>/src/plugins/[e-u]', // plugins e-u
+    '<rootDir>/src/legacy/server',
+    '<rootDir>/src/legacy/ui',
     '<rootDir>/src/legacy/utils',
+    '<rootDir>/src/optimize',
     '<rootDir>/src/setup_node_env',
-    '<rootDir>/packages',
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
   ],
+];
+
+const roots = [];
+const cachedRoots = {};
+const rootPattern = /^(.+)\/(\[.+])$/; // Anything that ends with /[<something>]
+const addRoots = (items) => {
+  // Lazy way of making sure we have a flat array, even if dealing with a single string
+  [items].flat(Infinity).forEach((item) => {
+    const match = item.match(rootPattern);
+    if (match?.[2]) {
+      // Check if the content of the folder we previously fetched; if not, do so now
+      if (!Array.isArray(cachedRoots[match[1]])) {
+        const itemRealPath = path.join(__dirname, match[1].replace('<rootDir>', rootDir));
+        cachedRoots[match[1]] = readdirSync(itemRealPath, { withFileTypes: true })
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => entry.name);
+      }
+
+      // Convert the pattern portion of the item into regex
+      const rePattern = new RegExp(`^${match[2]}`, 'i');
+      roots.push(
+        ...cachedRoots[match[1]]
+          .filter((name) => rePattern.test(name))
+          .map((name) => `${match[1]}/${name}`)
+      );
+    } else {
+      // item doesn't end with a pattern; just add it to roots
+      roots.push(item);
+    }
+  });
+};
+
+// Looks for --ci-group=<number> and captures the number
+const ciGroupPattern = /^--ci-group=(\d+)$/;
+const ciGroups = process.argv.reduce((acc, arg) => {
+  const match = arg.match(ciGroupPattern);
+  if (isFinite(match?.[1])) acc.push(parseInt(match[1], 10));
+  return acc;
+}, []);
+
+console.log('ciGroups', ciGroups);
+if (ciGroups.length > 0) {
+  console.log(`Requested group${ciGroups.length === 1 ? '' : 's'}: ${ciGroups.join(', ')}`);
+  ciGroups.forEach((id) => {
+    if (Array.isArray(rootGroups[id])) addRoots(rootGroups[id]);
+  });
+} else {
+  addRoots(rootGroups);
+}
+
+export default {
+  rootDir,
+  roots,
   moduleNameMapper: {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
@@ -112,4 +198,5 @@ export default {
     Uint8Array: Uint8Array,
   },
   flakyTestRetries: 2,
+  verbose: true,
 };

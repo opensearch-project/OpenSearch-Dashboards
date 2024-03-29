@@ -5,7 +5,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
-import { EuiDataGridProps, EuiDataGrid, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
+import {
+  EuiDataGridProps,
+  EuiDataGrid,
+  EuiDataGridSorting,
+  EuiTitle,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { FormattedTableContext } from '../table_vis_response_handler';
@@ -31,7 +37,7 @@ export const TableVisComponent = ({
   event,
   uiState: { sort, setSort, colWidth, setWidth },
 }: TableVisComponentProps) => {
-  const { rows, formattedColumns } = table;
+  const { rows, columns, formattedColumns } = table;
 
   const pagination = usePagination(visConfig, rows.length);
 
@@ -53,7 +59,15 @@ export const TableVisComponent = ({
     formattedColumns,
   ]);
 
-  const dataGridColumns = getDataGridColumns(table, event, colWidth);
+  const sortedTable = useMemo(() => {
+    return {
+      rows: sortedRows,
+      columns,
+      formattedColumns,
+    };
+  }, [sortedRows, columns, formattedColumns]);
+
+  const dataGridColumns = getDataGridColumns(sortedTable, event, colWidth);
 
   const sortedColumns = useMemo(() => {
     if (
@@ -102,7 +116,7 @@ export const TableVisComponent = ({
     : undefined;
 
   return (
-    <>
+    <EuiFlexItem>
       {title && (
         <EuiTitle size="xs" className="eui-textCenter">
           <h3>{title}</h3>
@@ -140,6 +154,6 @@ export const TableVisComponent = ({
           ),
         }}
       />
-    </>
+    </EuiFlexItem>
   );
 };

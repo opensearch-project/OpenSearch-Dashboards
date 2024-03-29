@@ -1,0 +1,11 @@
+.dshAppContainer {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+#dashboardViewport {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}

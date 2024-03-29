@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "server": false,
   "ui": true,
-  "optionalPlugins": ["dataSource"],
+  "optionalPlugins": ["dataSource", "managementOverview"],
   "requiredPlugins": ["urlForwarding"],
   "requiredBundles": ["dataSourceManagement"]
 }

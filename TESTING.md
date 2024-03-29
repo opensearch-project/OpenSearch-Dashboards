@@ -24,7 +24,7 @@ In general, we recommend four tiers of tests:
 
 # Requirements
 * Install the latest NodeJS, [NPM](https://www.npmjs.com/get-npm) and [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable)
-    * `nvm install v14.20.1`
+    * `nvm install v18.19.0`
     * `npm install -g yarn`
 
 # Running tests
@@ -35,6 +35,8 @@ To run all the unit tests:
 `yarn test:jest`
 To run specific unit tests, pass the path to the test:
 `yarn test:jest [test path]`
+To run specific unit test groups:
+`yarn test:jest --ci-group=1 --ci-group=2`
 
 ### Integration tests
 To run all the integration tests:

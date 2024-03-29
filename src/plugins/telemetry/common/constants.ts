@@ -42,7 +42,7 @@ export const getConfigTelemetryDesc = () => {
   // Can't find where it's used but copying it over from the legacy code just in case...
   return i18n.translate('telemetry.telemetryConfigDescription', {
     defaultMessage:
-      'Help us improve the OpenSearch Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.',
+      'Help us improve the OpenSearch Stack by providing usage statistics for basic features. We will not share this data outside of OpenSearch.',
   });
 };
 

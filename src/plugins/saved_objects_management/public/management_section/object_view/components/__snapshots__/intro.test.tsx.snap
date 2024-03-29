@@ -60,7 +60,7 @@ exports[`Intro component renders correctly 1`] = `
             <div
               className="euiTextColor euiTextColor--default"
             >
-              <div>
+              <p>
                 <FormattedMessage
                   defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be."
                   id="savedObjectsManagement.view.howToModifyObjectDescription"
@@ -68,7 +68,7 @@ exports[`Intro component renders correctly 1`] = `
                 >
                   Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be.
                 </FormattedMessage>
-              </div>
+              </p>
             </div>
           </EuiTextColor>
         </div>

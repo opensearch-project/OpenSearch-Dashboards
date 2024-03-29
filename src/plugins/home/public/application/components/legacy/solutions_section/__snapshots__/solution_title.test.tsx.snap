@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SolutionTitle  renders correctly by default 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="none"
+>
+  <EuiFlexItem
+    className="eui-textCenter"
+  >
+    <EuiToken
+      className="homSolutionPanel__icon"
+      fill="light"
+      iconType="/ui/logos/opensearch_mark_on_light.svg"
+      shape="circle"
+      size="l"
+    />
+    <EuiTitle
+      className="homSolutionPanel__title eui-textInheritColor"
+      data-test-subj="dashboardCustomTitle"
+      data-test-title="Page Title"
+      size="s"
+    >
+      <h3>
+        Page Title
+      </h3>
+    </EuiTitle>
+    <EuiText
+      size="s"
+    >
+      <p
+        className="homSolutionPanel__subtitle"
+      >
+        Visualize & analyze
+         
+        <EuiIcon
+          type="sortRight"
+        />
+      </p>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`SolutionTitle  renders correctly when branded 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="none"
+>
+  <EuiFlexItem
+    className="eui-textCenter"
+  >
+    <div
+      className="homSolutionPanel__customIcon"
+    >
+      <img
+        alt="Page Title logo"
+        className="homSolutionPanel__customIconContainer"
+        data-test-image-url="/custom/branded/mark.svg"
+        data-test-subj="dashboardCustomLogo"
+        src="/custom/branded/mark.svg"
+      />
+    </div>
+    <EuiTitle
+      className="homSolutionPanel__title eui-textInheritColor"
+      data-test-subj="dashboardCustomTitle"
+      data-test-title="Page Title"
+      size="s"
+    >
+      <h3>
+        Page Title
+      </h3>
+    </EuiTitle>
+    <EuiText
+      size="s"
+    >
+      <p
+        className="homSolutionPanel__subtitle"
+      >
+        Visualize & analyze
+         
+        <EuiIcon
+          type="sortRight"
+        />
+      </p>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

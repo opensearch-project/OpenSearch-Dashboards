@@ -1,6 +1,900 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview render 1`] = `
+exports[`Overview renders with news without solutions and without features 1`] = `
+<main
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="osdOverviewWrapper"
+>
+  <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
+    hideToolbar={false}
+    logos={
+      Object {
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+        },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
+      }
+    }
+    showIcon={true}
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="osdOverviewContent"
+  >
+    <section
+      aria-labelledby="osdOverviewApps__title"
+      className="osdOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="osdOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="opensearchDashboardsOverview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="osdOverviewApps__group osdOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="osdOverviewSupplements osdOverviewSupplements--hasNews"
+    >
+      <EuiFlexItem
+        grow={1}
+      >
+        <NewsFeed
+          newsFetchResult={
+            Object {
+              "error": null,
+              "feedItems": Array [
+                Object {
+                  "badge": null,
+                  "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "8e18fcedbc",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://opensearch.org/docs/latest/clients/go/",
+                  "publishOn": "2020-08-31T10:23:47.000Z",
+                  "title": "The Go client for OpenSearch: Introduction",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "fb3e3d42ef",
+                  "linkText": "Read more on the blog",
+                  "linkUrl": "https://opensearch.org/docs/latest/monitoring-plugins/ad/index/",
+                  "publishOn": "2020-08-14T10:23:47.000Z",
+                  "title": "Alerting and anomaly detection for uptime and reliability",
+                },
+                Object {
+                  "badge": null,
+                  "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
+                  "expireOn": "2050-12-31T11:59:59.000Z",
+                  "hash": "b2fc7d47d5",
+                  "linkText": "Learn more on the blog",
+                  "linkUrl": "https://opensearch.org/docs/latest/opensearch/cluster/#advanced-step-7-set-up-a-hot-warm-architecture",
+                  "publishOn": "2020-08-01T10:23:47.000Z",
+                  "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
+                },
+              ],
+              "hasNew": true,
+              "opensearchDashboardsVersion": "8.0.0",
+            }
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={3}
+      >
+        <EuiFlexGroup
+          className="osdOverviewData osdOverviewData--expanded"
+        >
+          <EuiFlexItem>
+            <AddData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
+              features={Array []}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ManageData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
+              features={Array []}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
+      path="/app/opensearch_dashboards_overview"
+    />
+  </div>
+</main>
+`;
+
+exports[`Overview renders with news, solutions, and features 1`] = `
 <main
   aria-labelledby="osdOverviewPageHeader__title"
   className="osdOverviewWrapper"
@@ -70,17 +964,73 @@ exports[`Overview render 1`] = `
         ],
       }
     }
-    branding={
+    hideToolbar={false}
+    logos={
       Object {
-        "darkMode": false,
-        "mark": Object {
-          "darkModeUrl": "/darkModeUrl",
-          "defaultUrl": "/defaultModeUrl",
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
         },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
       }
     }
-    hideToolbar={false}
-    iconType="inputOutput"
+    showIcon={true}
     title={
       <FormattedMessage
         defaultMessage="OpenSearch Dashboards"
@@ -182,7 +1132,7 @@ exports[`Overview render 1`] = `
               id="osdOverviewMore__title"
             >
               <FormattedMessage
-                defaultMessage="Do more with Elastic"
+                defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
                 values={Object {}}
               />
@@ -373,7 +1323,7 @@ exports[`Overview render 1`] = `
 </main>
 `;
 
-exports[`Overview without features 1`] = `
+exports[`Overview renders with news, with solutions, and without features 1`] = `
 <main
   aria-labelledby="osdOverviewPageHeader__title"
   className="osdOverviewWrapper"
@@ -499,17 +1449,73 @@ exports[`Overview without features 1`] = `
         ],
       }
     }
-    branding={
+    hideToolbar={false}
+    logos={
       Object {
-        "darkMode": false,
-        "mark": Object {
-          "darkModeUrl": "/darkModeUrl",
-          "defaultUrl": "/defaultModeUrl",
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
         },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
       }
     }
-    hideToolbar={false}
-    iconType="inputOutput"
+    showIcon={true}
     title={
       <FormattedMessage
         defaultMessage="OpenSearch Dashboards"
@@ -611,7 +1617,7 @@ exports[`Overview without features 1`] = `
               id="osdOverviewMore__title"
             >
               <FormattedMessage
-                defaultMessage="Do more with Elastic"
+                defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
                 values={Object {}}
               />
@@ -858,7 +1864,7 @@ exports[`Overview without features 1`] = `
 </main>
 `;
 
-exports[`Overview without solutions 1`] = `
+exports[`Overview renders with news, without solutions, and with features 1`] = `
 <main
   aria-labelledby="osdOverviewPageHeader__title"
   className="osdOverviewWrapper"
@@ -928,17 +1934,73 @@ exports[`Overview without solutions 1`] = `
         ],
       }
     }
-    branding={
+    hideToolbar={false}
+    logos={
       Object {
-        "darkMode": false,
-        "mark": Object {
-          "darkModeUrl": "/darkModeUrl",
-          "defaultUrl": "/defaultModeUrl",
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
         },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
       }
     }
-    hideToolbar={false}
-    iconType="inputOutput"
+    showIcon={true}
     title={
       <FormattedMessage
         defaultMessage="OpenSearch Dashboards"
@@ -1207,6 +2269,3256 @@ exports[`Overview without solutions 1`] = `
             ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
+      path="/app/opensearch_dashboards_overview"
+    />
+  </div>
+</main>
+`;
+
+exports[`Overview renders without news and features, with solutions 1`] = `
+<main
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="osdOverviewWrapper"
+>
+  <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
+    hideToolbar={false}
+    logos={
+      Object {
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+        },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
+      }
+    }
+    showIcon={true}
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="osdOverviewContent"
+  >
+    <section
+      aria-labelledby="osdOverviewApps__title"
+      className="osdOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="osdOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="opensearchDashboardsOverview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="osdOverviewApps__group osdOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="osdOverviewSupplements osdOverviewSupplements--noNews"
+    >
+      <EuiFlexItem
+        grow={3}
+      >
+        <section
+          aria-labelledby="osdOverviewMore__title"
+          className="osdOverviewMore"
+        >
+          <EuiTitle
+            size="s"
+          >
+            <h2
+              id="osdOverviewMore__title"
+            >
+              <FormattedMessage
+                defaultMessage="Do more with OpenSearch"
+                id="opensearchDashboardsOverview.more.title"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGroup
+            className="osdOverviewMore__content"
+          >
+            <EuiFlexItem
+              className="osdOverviewMore__item"
+              key="opensearchDashboards"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="osdOverviewSolution"
+                  description=""
+                  href="opensearch_dashboards_landing_page"
+                  icon={
+                    <EuiToken
+                      className="osdOverviewSolution__icon"
+                      fill="light"
+                      iconType="inputOutput"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png"
+                  title="OpenSearch Dashboards"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="osdOverviewMore__item"
+              key="solution-2"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="osdOverviewSolution"
+                  description="Description of solution two"
+                  href="path-to-solution-two"
+                  icon={
+                    <EuiToken
+                      className="osdOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png"
+                  title="Solution two"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="osdOverviewMore__item"
+              key="solution-3"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="osdOverviewSolution"
+                  description="Description of solution three"
+                  href="path-to-solution-three"
+                  icon={
+                    <EuiToken
+                      className="osdOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png"
+                  title="Solution three"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="osdOverviewMore__item"
+              key="solution-4"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="osdOverviewSolution"
+                  description="Description of solution four"
+                  href="path-to-solution-four"
+                  icon={
+                    <EuiToken
+                      className="osdOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png"
+                  title="Solution four"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
+      path="/app/opensearch_dashboards_overview"
+    />
+  </div>
+</main>
+`;
+
+exports[`Overview renders without news and solutions, with features 1`] = `
+<main
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="osdOverviewWrapper"
+>
+  <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
+    hideToolbar={false}
+    logos={
+      Object {
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+        },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
+      }
+    }
+    showIcon={true}
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="osdOverviewContent"
+  >
+    <section
+      aria-labelledby="osdOverviewApps__title"
+      className="osdOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="osdOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="opensearchDashboardsOverview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="osdOverviewApps__group osdOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="osdOverviewSupplements osdOverviewSupplements--noNews"
+    >
+      <EuiFlexItem
+        grow={3}
+      >
+        <EuiFlexGroup
+          className="osdOverviewData osdOverviewData--expanded"
+        >
+          <EuiFlexItem>
+            <AddData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
+              features={Array []}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ManageData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
+              features={Array []}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
+      path="/app/opensearch_dashboards_overview"
+    />
+  </div>
+</main>
+`;
+
+exports[`Overview renders without news, solutions, and features 1`] = `
+<main
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="osdOverviewWrapper"
+>
+  <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
+    hideToolbar={false}
+    logos={
+      Object {
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+        },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
+      }
+    }
+    showIcon={true}
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="osdOverviewContent"
+  >
+    <section
+      aria-labelledby="osdOverviewApps__title"
+      className="osdOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="osdOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="opensearchDashboardsOverview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="osdOverviewApps__group osdOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="osdOverviewSupplements osdOverviewSupplements--noNews"
+    >
+      <EuiFlexItem
+        grow={3}
+      >
+        <EuiFlexGroup
+          className="osdOverviewData osdOverviewData--expanded"
+        >
+          <EuiFlexItem>
+            <AddData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
+              features={Array []}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ManageData
+              addBasePath={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                    Array [
+                      "opensearch_dashboards_landing_page",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-two",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-three",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    ],
+                    Array [
+                      "path-to-solution-four",
+                    ],
+                    Array [
+                      "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "opensearch_dashboards_landing_page",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-two",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-three",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "path-to-solution-four",
+                    },
+                    Object {
+                      "type": "return",
+                      "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+                    },
+                  ],
+                }
+              }
+              features={Array []}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+          ],
+        }
+      }
+      path="/app/opensearch_dashboards_overview"
+    />
+  </div>
+</main>
+`;
+
+exports[`Overview renders without news, with solutions and features 1`] = `
+<main
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="osdOverviewWrapper"
+>
+  <mockConstructor
+    addBasePath={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+          Array [
+            "opensearch_dashboards_landing_page",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-two",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-three",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          ],
+          Array [
+            "path-to-solution-four",
+          ],
+          Array [
+            "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "opensearch_dashboards_landing_page",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-two",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-three",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+          },
+          Object {
+            "type": "return",
+            "value": "path-to-solution-four",
+          },
+          Object {
+            "type": "return",
+            "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+          },
+        ],
+      }
+    }
+    hideToolbar={false}
+    logos={
+      Object {
+        "AnimatedMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+        },
+        "Application": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "CenterMark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "Mark": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "OpenSearch": Object {
+          "dark": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_dark.svg",
+          },
+          "light": Object {
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "colorScheme": "light",
+      }
+    }
+    showIcon={true}
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="osdOverviewContent"
+  >
+    <section
+      aria-labelledby="osdOverviewApps__title"
+      className="osdOverviewApps"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="osdOverviewApps__title"
+        >
+          <FormattedMessage
+            defaultMessage="Explore these apps"
+            id="opensearchDashboardsOverview.apps.title"
+            values={Object {}}
+          />
+        </h2>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup
+        className="osdOverviewApps__group osdOverviewApps__group--primary"
+        justifyContent="center"
+      />
+      <EuiSpacer
+        size="l"
+      />
+    </section>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <EuiFlexGroup
+      alignItems="flexStart"
+      className="osdOverviewSupplements osdOverviewSupplements--noNews"
+    >
+      <EuiFlexItem
+        grow={3}
+      >
+        <section
+          aria-labelledby="osdOverviewMore__title"
+          className="osdOverviewMore"
+        >
+          <EuiTitle
+            size="s"
+          >
+            <h2
+              id="osdOverviewMore__title"
+            >
+              <FormattedMessage
+                defaultMessage="Do more with OpenSearch"
+                id="opensearchDashboardsOverview.more.title"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="m"
+          />
+          <EuiFlexGroup
+            className="osdOverviewMore__content"
+          >
+            <EuiFlexItem
+              className="osdOverviewMore__item"
+              key="opensearchDashboards"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="osdOverviewSolution"
+                  description=""
+                  href="opensearch_dashboards_landing_page"
+                  icon={
+                    <EuiToken
+                      className="osdOverviewSolution__icon"
+                      fill="light"
+                      iconType="inputOutput"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png"
+                  title="OpenSearch Dashboards"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="osdOverviewMore__item"
+              key="solution-2"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="osdOverviewSolution"
+                  description="Description of solution two"
+                  href="path-to-solution-two"
+                  icon={
+                    <EuiToken
+                      className="osdOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png"
+                  title="Solution two"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="osdOverviewMore__item"
+              key="solution-3"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="osdOverviewSolution"
+                  description="Description of solution three"
+                  href="path-to-solution-three"
+                  icon={
+                    <EuiToken
+                      className="osdOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png"
+                  title="Solution three"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="osdOverviewMore__item"
+              key="solution-4"
+            >
+              <mockConstructor>
+                <EuiCard
+                  className="osdOverviewSolution"
+                  description="Description of solution four"
+                  href="path-to-solution-four"
+                  icon={
+                    <EuiToken
+                      className="osdOverviewSolution__icon"
+                      fill="light"
+                      iconType="empty"
+                      shape="circle"
+                      size="l"
+                    />
+                  }
+                  image="/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png"
+                  title="Solution four"
+                  titleElement="h3"
+                  titleSize="xs"
+                />
+              </mockConstructor>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <mockConstructor
+      addBasePath={
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+            Array [
+              "opensearch_dashboards_landing_page",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-two",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-three",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            ],
+            Array [
+              "path-to-solution-four",
+            ],
+            Array [
+              "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "opensearch_dashboards_landing_page",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_opensearch_dashboards_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-two",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_2_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-three",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_3_light_2x.png",
+            },
+            Object {
+              "type": "return",
+              "value": "path-to-solution-four",
+            },
+            Object {
+              "type": "return",
+              "value": "/plugins/opensearchDashboardsOverview/assets/solutions_solution_4_light_2x.png",
+            },
             Object {
               "type": "return",
               "value": "opensearch_dashboards_landing_page",

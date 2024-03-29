@@ -194,6 +194,8 @@ describe('helpers', function () {
   describe('createSpecFromXYChartDatatable()', function () {
     // Following 3 tests fail since they are persisting temporal data
     // which can cause snapshots to fail depending on the test env they are run on.
+    // Tracking issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4555
+    // TODO: Add a test for the fix in this PR: https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4554
     it.skip('build simple line chart"', function () {
       expect(
         JSON.stringify(

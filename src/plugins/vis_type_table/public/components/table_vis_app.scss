@@ -1,7 +1,5 @@
 // Container for the Table Visualization component
 .visTable {
-  display: flex;
-  flex-direction: column;
   flex: 1 0 0;
   overflow: auto;
 
@@ -10,15 +8,5 @@
 
 // Group container for table visualization components
 .visTable__group {
-  padding: $euiSizeS;
-  margin-bottom: $euiSizeL;
-  display: flex;
-  flex-direction: column;
   flex: 0 0 auto;
-}
-
-// Modifier for visTables__group when displayed in columns
-.visTable__groupInColumns {
-  flex-direction: row;
-  align-items: flex-start;
 }

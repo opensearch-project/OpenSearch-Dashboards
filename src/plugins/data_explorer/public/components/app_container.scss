@@ -1,0 +1,22 @@
+$osdHeaderOffset: $euiHeaderHeightCompensation;
+
+.deSidebar {
+  height: 100%;
+
+  @include ouiBreakpoint("xs", "s", "m") {
+    max-width: initial;
+    width: 100%;
+  }
+}
+
+.deLayout {
+  height: calc(100vh - #{$osdHeaderOffset});
+
+  &__canvas {
+    height: 100%;
+  }
+}
+
+.headerIsExpanded .deLayout {
+  height: calc(100vh - #{$osdHeaderOffset * 2});
+}

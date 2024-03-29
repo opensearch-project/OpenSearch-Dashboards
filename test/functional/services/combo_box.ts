@@ -188,9 +188,12 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       log.debug(`comboBox.getOptionsList, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
       const menu = await retry.try(async () => {
-        await testSubjects.click(comboBoxSelector);
+        let isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
+        if (!isOptionsListOpen) {
+          await testSubjects.click('comboBoxToggleListButton', undefined, comboBoxSelector);
+        }
         await this.waitForOptionsListLoading(comboBox);
-        const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
+        isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
         if (!isOptionsListOpen) {
           throw new Error('Combo box options list did not open on click');
         }

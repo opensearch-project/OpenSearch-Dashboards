@@ -28,9 +28,12 @@
  * under the License.
  */
 
-import { SavedObjectEmbeddableInput } from 'src/plugins/embeddable/public';
+import {
+  SavedObjectEmbeddableInput,
+  PanelState,
+  EmbeddableInput,
+} from '../../../../embeddable/public';
 import { GridData } from '../../../common';
-import { PanelState, EmbeddableInput } from '../../embeddable_plugin';
 export type PanelId = string;
 export type SavedObjectId = string;
 

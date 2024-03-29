@@ -1,0 +1,25 @@
+.dscResultCount {
+  padding-top: $euiSizeXS;
+}
+
+.dscTimechart {
+  display: block;
+  position: relative;
+
+  // SASSTODO: the visualizing component should have an option or a modifier
+  .series > rect {
+    fill-opacity: 0.5;
+    stroke-width: 1;
+  }
+}
+
+.dscHistogram {
+  display: flex;
+  height: 200px;
+  padding: $euiSizeS;
+}
+
+.dscHistogram__header--partial {
+  font-weight: $euiFontWeightRegular;
+  min-width: $euiSize * 12;
+}

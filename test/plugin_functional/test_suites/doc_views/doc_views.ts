@@ -36,25 +36,19 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
-  describe('custom doc views', function () {
+  describe('custom doc views with datagrid table', function () {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      // TODO: change back to setDefaultRange() once we resolve
+      // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5241
+      await PageObjects.timePicker.setDefaultRangeForDiscover();
+      await PageObjects.discover.switchDiscoverTable('new');
     });
 
     it('should show custom doc views', async () => {
-      await testSubjects.click('docTableExpandToggleColumn');
-      const angularTab = await find.byButtonText('Angular doc view');
+      await testSubjects.click('docTableExpandToggleColumn-0');
       const reactTab = await find.byButtonText('React doc view');
-      expect(await angularTab.isDisplayed()).to.be(true);
       expect(await reactTab.isDisplayed()).to.be(true);
-    });
-
-    it('should render angular doc view', async () => {
-      const angularTab = await find.byButtonText('Angular doc view');
-      await angularTab.click();
-      const angularContent = await testSubjects.find('angular-docview');
-      expect(await angularContent.getVisibleText()).to.be('logstash-2015.09.22');
     });
 
     it('should render react doc view', async () => {

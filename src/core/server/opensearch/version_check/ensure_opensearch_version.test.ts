@@ -277,7 +277,6 @@ describe('pollOpenSearchNodesVersion', () => {
     delete filteredNodes.nodes['node-1'];
     delete filteredNodes.nodes['node-3'];
 
-    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
     internalClient.cluster.state.mockReturnValueOnce({ body: nodes });
 
     nodeInfosSuccessOnce(nodes);
@@ -330,7 +329,6 @@ describe('pollOpenSearchNodesVersion', () => {
     delete filteredNodes.nodes['node-1'];
     delete filteredNodes.nodes['node-3'];
 
-    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
     internalClient.cluster.state.mockReturnValueOnce({ body: nodes });
 
     nodeInfosSuccessOnce(nodes);
@@ -389,11 +387,9 @@ describe('pollOpenSearchNodesVersion', () => {
   it.skip('starts polling immediately and then every opensearchVersionCheckInterval', () => {
     expect.assertions(1);
 
-    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
     internalClient.nodes.info.mockReturnValueOnce([
       { body: createNodes('5.1.0', '5.2.0', '5.0.0') },
     ]);
-    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
     internalClient.nodes.info.mockReturnValueOnce([
       { body: createNodes('5.1.1', '5.2.0', '5.0.0') },
     ]);
@@ -433,11 +429,9 @@ describe('pollOpenSearchNodesVersion', () => {
       const expected = '100ms a 99ms (b|)';
 
       internalClient.nodes.info.mockReturnValueOnce(
-        // @ts-expect-error we need to return an incompatible type to use the testScheduler here
         of({ body: createNodes('5.1.0', '5.2.0', '5.0.0') }).pipe(delay(100))
       );
       internalClient.nodes.info.mockReturnValueOnce(
-        // @ts-expect-error we need to return an incompatible type to use the testScheduler here
         of({ body: createNodes('5.1.1', '5.2.0', '5.0.0') }).pipe(delay(100))
       );
 

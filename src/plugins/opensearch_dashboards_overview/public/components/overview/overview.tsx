@@ -41,7 +41,7 @@ import {
   EuiToken,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { CoreStart } from 'opensearch-dashboards/public';
+import { CoreStart, Logos } from 'opensearch-dashboards/public';
 import {
   RedirectAppLinks,
   useOpenSearchDashboards,
@@ -60,18 +60,18 @@ import { AddData } from '../add_data';
 import { GettingStarted } from '../getting_started';
 import { ManageData } from '../manage_data';
 import { NewsFeed } from '../news_feed';
-import { OverviewPluginBranding } from '../../plugin';
 
 const sortByOrder = (featureA: FeatureCatalogueEntry, featureB: FeatureCatalogueEntry) =>
   (featureA.order || Infinity) - (featureB.order || Infinity);
+
 interface Props {
   newsFetchResult: FetchResult | null | void;
   solutions: FeatureCatalogueSolution[];
   features: FeatureCatalogueEntry[];
-  branding: OverviewPluginBranding;
+  logos: Logos;
 }
 
-export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, branding }) => {
+export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, logos }) => {
   const [isNewOpenSearchDashboardsInstance, setNewOpenSearchDashboardsInstance] = useState(false);
   const {
     services: { http, data, uiSettings, application },
@@ -147,14 +147,14 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, bran
       <OverviewPageHeader
         addBasePath={addBasePath}
         hideToolbar={isNewOpenSearchDashboardsInstance}
-        iconType="inputOutput"
+        showIcon={true}
         title={
           <FormattedMessage
             defaultMessage="OpenSearch Dashboards"
             id="opensearchDashboardsOverview.header.title"
           />
         }
-        branding={branding}
+        logos={logos}
       />
 
       <div className="osdOverviewContent">
@@ -222,7 +222,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, bran
                       <h2 id="osdOverviewMore__title">
                         <FormattedMessage
                           id="opensearchDashboardsOverview.more.title"
-                          defaultMessage="Do more with Elastic"
+                          defaultMessage="Do more with OpenSearch"
                         />
                       </h2>
                     </EuiTitle>

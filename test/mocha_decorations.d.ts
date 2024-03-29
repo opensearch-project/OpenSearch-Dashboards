@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Suite } from 'mocha';
+import { Suite } from 'mocha-next';
 
 type Tags =
   | 'ciGroup1'

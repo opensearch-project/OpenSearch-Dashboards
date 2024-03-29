@@ -293,7 +293,7 @@ class MarkdownPanelConfigUi extends Component {
             <EuiSpacer size="s" />
             <EuiCodeEditor
               mode="less"
-              theme="github"
+              theme="textmate"
               width="100%"
               name={`ace-css-${model.id}`}
               setOptions={{ fontSize: '14px' }}

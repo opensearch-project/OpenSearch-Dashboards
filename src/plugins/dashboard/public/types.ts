@@ -28,14 +28,40 @@
  * under the License.
  */
 
-import { Query, Filter } from 'src/plugins/data/public';
-import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
+import { Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
+import {
+  SavedObject as SavedObjectType,
+  SavedObjectAttributes,
+  CoreStart,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+  ChromeStart,
+  ScopedHistory,
+  AppMountParameters,
+  ToastsStart,
+} from 'src/core/public';
+import {
+  IOsdUrlStateStorage,
+  ReduxLikeStateContainer,
+  Storage,
+} from 'src/plugins/opensearch_dashboards_utils/public';
+import { SavedObjectLoader, SavedObjectsStart } from 'src/plugins/saved_objects/public';
+import { OpenSearchDashboardsLegacyStart } from 'src/plugins/opensearch_dashboards_legacy/public';
+import { SharePluginStart } from 'src/plugins/share/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { History } from 'history';
+import { EmbeddableStart, ViewMode } from '../../embeddable/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SavedDashboardPanel730ToLatest } from '../common';
-import { ViewMode } from './embeddable_plugin';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
   createNew: boolean;
+  showSavedQuery: boolean;
+  saveQuery: boolean;
+  createShortUrl: boolean;
 }
 
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
@@ -129,7 +155,15 @@ export interface DashboardAppStateTransitions {
     prop: T,
     value: DashboardAppState['options'][T]
   ) => DashboardAppState;
+  setDashboard: (
+    state: DashboardAppState
+  ) => (dashboard: Partial<DashboardAppState>) => DashboardAppState;
 }
+
+export type DashboardAppStateContainer = ReduxLikeStateContainer<
+  DashboardAppState,
+  DashboardAppStateTransitions
+>;
 
 export interface SavedDashboardPanelMap {
   [key: string]: SavedDashboardPanel;
@@ -211,4 +245,38 @@ export interface DashboardProvider {
   // At onClick of rendered table "edit" link for item {id: 'abc123', ...}, the navigated path will be:
   //   "http://../app/myplugin#/edit/abc123"
   editUrlPathFn: (obj: SavedObjectType) => string;
+}
+
+export interface DashboardServices extends CoreStart {
+  pluginInitializerContext: PluginInitializerContext;
+  opensearchDashboardsVersion: string;
+  history: History;
+  osdUrlStateStorage: IOsdUrlStateStorage;
+  core: CoreStart;
+  data: DataPublicPluginStart;
+  navigation: NavigationStart;
+  savedObjectsClient: SavedObjectsClientContract;
+  savedDashboards: SavedObjectLoader;
+  dashboardProviders: () => { [key: string]: DashboardProvider } | undefined;
+  dashboardConfig: OpenSearchDashboardsLegacyStart['dashboardConfig'];
+  dashboardCapabilities: DashboardCapabilities;
+  embeddableCapabilities: {
+    visualizeCapabilities: any;
+    mapsCapabilities: any;
+  };
+  uiSettings: IUiSettingsClient;
+  chrome: ChromeStart;
+  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  embeddable: EmbeddableStart;
+  localStorage: Storage;
+  share?: SharePluginStart;
+  usageCollection?: UsageCollectionSetup;
+  navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
+  navigateToLegacyOpenSearchDashboardsUrl: UrlForwardingStart['navigateToLegacyOpenSearchDashboardsUrl'];
+  scopedHistory: ScopedHistory;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  savedObjectsPublic: SavedObjectsStart;
+  restorePreviousUrl: () => void;
+  addBasePath?: (url: string) => string;
+  toastNotifications: ToastsStart;
 }

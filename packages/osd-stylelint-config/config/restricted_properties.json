@@ -1,7 +1,7 @@
 {
   "font-family": {
+    "explanation": "All \"font-family\" styles should be inherited from OUI themes and components. Remove the rule.",
     "approved": [
-      "src/plugins/discover/public/application/_discover.scss",
       "src/plugins/maps_legacy/public/map/_leaflet_overrides.scss",
       "src/plugins/maps_legacy/public/map/_legend.scss",
       "src/plugins/opensearch_dashboards_legacy/public/font_awesome/font_awesome.scss",

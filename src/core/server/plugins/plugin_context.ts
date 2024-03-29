@@ -205,6 +205,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerType: deps.savedObjects.registerType,
       getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
       setRepositoryFactoryProvider: deps.savedObjects.setRepositoryFactoryProvider,
+      setStatus: deps.savedObjects.setStatus,
     },
     status: {
       core$: deps.status.core$,
@@ -219,6 +220,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     getStartServices: () => plugin.startDependencies,
     auditTrail: deps.auditTrail,
+    security: deps.security,
   };
 }
 
@@ -269,5 +271,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     },
     auditTrail: deps.auditTrail,
     coreUsageData: deps.coreUsageData,
+    crossCompatibility: deps.crossCompatibility,
   };
 }

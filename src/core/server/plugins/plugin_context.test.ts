@@ -56,7 +56,9 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     configPath: 'path',
     opensearchDashboardsVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
-    requiredOpenSearchPlugins: ['some-backend-plugin'],
+    requiredEnginePlugins: {
+      'test-os-plugin1': '^2.2.1',
+    },
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
     server: true,
@@ -96,6 +98,7 @@ describe('createPluginInitializerContext', () => {
     expect(configObject).toStrictEqual({
       opensearchDashboards: {
         index: '.kibana',
+        configIndex: '.opensearch_dashboards_config',
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),
       },

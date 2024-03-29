@@ -171,6 +171,55 @@ const TEST_VALUES_MULTIPLE_VIS_LAYERS = [
   },
 ];
 
+const TEST_VALUES_MULTIPLE_VIS_LAYERS_ONE_EMPTY = [
+  {
+    [TEST_X_AXIS_ID]: 0,
+    [TEST_VALUE_AXIS_ID]: 5,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+  {
+    [TEST_X_AXIS_ID]: 5,
+    [TEST_VALUE_AXIS_ID]: 10,
+    [TEST_PLUGIN_EVENT_TYPE]: 2,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+  {
+    [TEST_X_AXIS_ID]: 10,
+    [TEST_VALUE_AXIS_ID]: 6,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+  {
+    [TEST_X_AXIS_ID]: 15,
+    [TEST_VALUE_AXIS_ID]: 4,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+  {
+    [TEST_X_AXIS_ID]: 20,
+    [TEST_VALUE_AXIS_ID]: 5,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+  { [TEST_X_AXIS_ID]: 25, [TEST_PLUGIN_EVENT_TYPE]: 0, [TEST_PLUGIN_EVENT_TYPE_2]: 0 },
+  { [TEST_X_AXIS_ID]: 30, [TEST_PLUGIN_EVENT_TYPE]: 0, [TEST_PLUGIN_EVENT_TYPE_2]: 0 },
+  { [TEST_X_AXIS_ID]: 35, [TEST_PLUGIN_EVENT_TYPE]: 1, [TEST_PLUGIN_EVENT_TYPE_2]: 0 },
+  { [TEST_X_AXIS_ID]: 40, [TEST_PLUGIN_EVENT_TYPE]: 0, [TEST_PLUGIN_EVENT_TYPE_2]: 0 },
+  {
+    [TEST_X_AXIS_ID]: 45,
+    [TEST_VALUE_AXIS_ID]: 3,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+  {
+    [TEST_X_AXIS_ID]: 50,
+    [TEST_VALUE_AXIS_ID]: 5,
+    [TEST_PLUGIN_EVENT_TYPE]: 0,
+    [TEST_PLUGIN_EVENT_TYPE_2]: 0,
+  },
+];
+
 export const TEST_COLUMNS_NO_VIS_LAYERS = [
   {
     id: TEST_X_AXIS_ID,
@@ -267,6 +316,12 @@ export const TEST_DATATABLE_MULTIPLE_VIS_LAYERS = {
   type: 'opensearch_dashboards_datatable',
   columns: TEST_COLUMNS_MULTIPLE_VIS_LAYERS,
   rows: TEST_VALUES_MULTIPLE_VIS_LAYERS,
+} as OpenSearchDashboardsDatatable;
+
+export const TEST_DATATABLE_MULTIPLE_VIS_LAYERS_ONE_EMPTY = {
+  type: 'opensearch_dashboards_datatable',
+  columns: TEST_COLUMNS_MULTIPLE_VIS_LAYERS,
+  rows: TEST_VALUES_MULTIPLE_VIS_LAYERS_ONE_EMPTY,
 } as OpenSearchDashboardsDatatable;
 
 const TEST_BASE_CONFIG = {
@@ -507,6 +562,22 @@ export const TEST_VIS_LAYERS_MULTIPLE = [
         },
       },
     ],
+  },
+];
+
+export const TEST_VIS_LAYERS_MULTIPLE_ONE_EMPTY = [
+  ...TEST_VIS_LAYERS_SINGLE,
+  {
+    originPlugin: TEST_PLUGIN,
+    type: VisLayerTypes.PointInTimeEvents,
+    pluginResource: {
+      type: TEST_PLUGIN_RESOURCE_TYPE,
+      id: TEST_PLUGIN_RESOURCE_ID_2,
+      name: TEST_PLUGIN_RESOURCE_NAME_2,
+      urlPath: TEST_PLUGIN_RESOURCE_PATH_2,
+    },
+    pluginEventType: TEST_PLUGIN_EVENT_TYPE_2,
+    events: [],
   },
 ];
 

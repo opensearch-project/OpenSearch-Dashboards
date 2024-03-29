@@ -76,9 +76,15 @@ interface IndexAliases {
 
 type IndicesOrAliases = string | string[] | null;
 
+const SETTING_KEY_TO_PATH_MAP = {
+  fields: '_mapping',
+  indices: '_aliases',
+  templates: '_template',
+};
+
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
-const POLL_INTERVAL = 60000;
+export const POLL_INTERVAL = 60000;
 let pollTimeoutId: NodeJS.Timeout | null;
 
 let perIndexTypes: { [index: string]: { [type: string]: Field[] } } = {};
@@ -316,27 +322,16 @@ export function clear() {
 
 function retrieveSettings(
   http: HttpSetup,
-  settingsKey: string,
+  settingsKey: keyof typeof SETTING_KEY_TO_PATH_MAP,
   settingsToRetrieve: any,
   dataSourceId: string
-): Promise<HttpResponse<any>> | Promise<void> | Promise<{}> {
-  const settingKeyToPathMap: { [settingsKey: string]: string } = {
-    fields: '_mapping',
-    indices: '_aliases',
-    templates: '_template',
-  };
-
+): Promise<HttpResponse<any>> | Promise<void> {
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
-    return opensearch.send(http, 'GET', settingKeyToPathMap[settingsKey], null, dataSourceId);
+    return opensearch.send(http, 'GET', SETTING_KEY_TO_PATH_MAP[settingsKey], null, dataSourceId);
   } else {
-    if (settingsToRetrieve[settingsKey] === false) {
-      // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return Promise.resolve({});
-    } else {
-      // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return Promise.resolve();
-    }
+    // If the user doesn't want autocomplete suggestions, then clear any that exist
+    return Promise.resolve();
   }
 }
 
@@ -385,7 +380,7 @@ const retrieveMappings = async (http: HttpSetup, settingsToRetrieve: any, dataSo
 };
 
 const retrieveAliases = async (http: HttpSetup, settingsToRetrieve: any, dataSourceId: string) => {
-  const response = await retrieveSettings(http, 'fields', settingsToRetrieve, dataSourceId);
+  const response = await retrieveSettings(http, 'indices', settingsToRetrieve, dataSourceId);
 
   if (isHttpResponse(response) && response.body) {
     const aliases = response.body as IndexAliases;
@@ -398,7 +393,7 @@ const retrieveTemplates = async (
   settingsToRetrieve: any,
   dataSourceId: string
 ) => {
-  const response = await retrieveSettings(http, 'fields', settingsToRetrieve, dataSourceId);
+  const response = await retrieveSettings(http, 'templates', settingsToRetrieve, dataSourceId);
 
   if (isHttpResponse(response) && response.body) {
     const resTemplates = response.body;
@@ -418,7 +413,6 @@ export function retrieveAutoCompleteInfo(
   dataSourceId: string
 ) {
   clearSubscriptions();
-
   Promise.allSettled([
     retrieveMappings(http, settingsToRetrieve, dataSourceId),
     retrieveAliases(http, settingsToRetrieve, dataSourceId),

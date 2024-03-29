@@ -116,7 +116,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
         }
         color="danger"
       >
-        {error}
+        <p>{error}</p>
       </EuiCallOut>
     );
   }

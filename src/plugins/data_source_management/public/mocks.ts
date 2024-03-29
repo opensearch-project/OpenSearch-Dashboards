@@ -3,10 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { throwError } from 'rxjs';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { AuthType } from './types';
+import { IUiSettingsClient } from 'src/core/public';
+import { AuthType, DataSourceAttributes } from './types';
 import { coreMock } from '../../../core/public/mocks';
+import {
+  DataSourceManagementPlugin,
+  DataSourceManagementPluginSetup,
+  DataSourceManagementPluginStart,
+} from './plugin';
+import { managementPluginMock } from '../../management/public/mocks';
+import { mockManagementPlugin as indexPatternManagementPluginMock } from '../../index_pattern_management/public/mocks';
+import { AuthenticationMethod, AuthenticationMethodRegistery } from './auth_registry';
 
 /* Mock Types */
 
@@ -20,6 +30,8 @@ export const docLinks = {
     },
   },
 };
+
+export const authenticationMethodRegistery = new AuthenticationMethodRegistery();
 
 const createDataSourceManagementContext = () => {
   const {
@@ -42,12 +54,28 @@ const createDataSourceManagementContext = () => {
     http,
     docLinks,
     setBreadcrumbs: () => {},
+    authenticationMethodRegistery,
   };
 };
 
 export const mockManagementPlugin = {
   createDataSourceManagementContext,
   docLinks,
+};
+
+export const getSingleDataSourceResponse = {
+  savedObjects: [
+    {
+      id: 'test',
+      type: 'data-source',
+      description: 'test datasource',
+      title: 'test',
+      get(field: string) {
+        const me: any = this || {};
+        return me[field];
+      },
+    },
+  ],
 };
 
 /* Mock data responses - JSON*/
@@ -96,6 +124,43 @@ export const getDataSourcesResponse = {
   ],
 };
 
+export const getDataSourcesWithFieldsResponse = {
+  savedObjects: [
+    {
+      id: 'test1',
+      type: 'data-source',
+      attributes: {
+        title: 'test1',
+        auth: {
+          type: AuthType.NoAuth,
+        },
+      },
+    },
+    {
+      id: 'test2',
+      type: 'data-source',
+      description: 'test datasource2',
+      attributes: {
+        title: 'test3',
+        auth: {
+          type: AuthType.UsernamePasswordType,
+        },
+      },
+    },
+    {
+      id: 'test3',
+      type: 'data-source',
+      description: 'test datasource3',
+      attributes: {
+        title: 'test3',
+        auth: {
+          type: AuthType.SigV4,
+        },
+      },
+    },
+  ],
+};
+
 export const existingDatasourceNamesList = [
   'test123',
   'testTest20',
@@ -131,6 +196,10 @@ export const getMappedDataSources = [
   },
 ];
 
+export const fetchDataSourceVersion = {
+  dataSourceVersion: '2.11.0',
+};
+
 export const mockDataSourceAttributesWithAuth = {
   id: 'test',
   title: 'create-test-ds',
@@ -155,6 +224,18 @@ export const mockDataSourceAttributesWithNoAuth = {
     credentials: undefined,
   },
 };
+
+export const mockDataSourceAttributesWithRegisteredAuth = {
+  id: 'testRegisteredAuth',
+  title: 'create-test-ds-registered-auth',
+  description: 'jest testing',
+  endpoint: 'https://test.com',
+  auth: {
+    type: 'Some Auth Type',
+    credentials: {} as { [key: string]: string },
+  },
+} as DataSourceAttributes;
+
 export const getDataSourceByIdWithCredential = {
   attributes: {
     id: 'alpha-test',
@@ -197,3 +278,50 @@ export const mockErrorResponseForSavedObjectsCalls = (
     throwError(new Error('Error while fetching data sources'))
   );
 };
+
+export const mockUiSettingsCalls = (
+  uiSettings: IUiSettingsClient,
+  uiSettingsMethodName: 'get' | 'set',
+  response: any
+) => {
+  (uiSettings[uiSettingsMethodName] as jest.Mock).mockReturnValue(response);
+};
+
+export interface TestPluginReturn {
+  setup: DataSourceManagementPluginSetup;
+  doStart: () => DataSourceManagementPluginStart;
+}
+
+export const testDataSourceManagementPlugin = (
+  coreSetup: any,
+  coreStart: any
+): TestPluginReturn => {
+  const plugin = new DataSourceManagementPlugin();
+  const setup = plugin.setup(coreSetup, {
+    management: managementPluginMock.createSetupContract(),
+    indexPatternManagement: indexPatternManagementPluginMock.createSetupContract(),
+    dataSource: {
+      dataSourceEnabled: true,
+      hideLocalCluster: true,
+      noAuthenticationTypeEnabled: true,
+      usernamePasswordAuthEnabled: true,
+      awsSigV4AuthEnabled: true,
+    },
+  });
+  const doStart = () => {
+    const start = plugin.start(coreStart);
+    return start;
+  };
+  return { setup, doStart };
+};
+
+export const createAuthenticationMethod = (
+  authMethod: Partial<AuthenticationMethod>
+): AuthenticationMethod => ({
+  name: 'unknown',
+  credentialForm: React.createElement('div', {}, 'Hello, world!'),
+  credentialSourceOption: {
+    value: 'unknown',
+  },
+  ...authMethod,
+});

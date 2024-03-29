@@ -41,6 +41,7 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
+import { overlayServiceMock } from '../mocks';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -67,6 +68,7 @@ function defaultStartDeps(availableApps?: App[]) {
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    overlays: overlayServiceMock.createStartContract(),
   };
 
   if (availableApps) {
@@ -142,36 +144,6 @@ describe('start', () => {
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
-    });
-  });
-
-  describe('brand', () => {
-    it('updates/emits the brand as it changes', async () => {
-      const { chrome, service } = await start();
-      const promise = chrome.getBrand$().pipe(toArray()).toPromise();
-
-      chrome.setBrand({
-        logo: 'big logo',
-        smallLogo: 'not so big logo',
-      });
-      chrome.setBrand({
-        logo: 'big logo without small logo',
-      });
-      service.stop();
-
-      await expect(promise).resolves.toMatchInlineSnapshot(`
-                      Array [
-                        Object {},
-                        Object {
-                          "logo": "big logo",
-                          "smallLogo": "not so big logo",
-                        },
-                        Object {
-                          "logo": "big logo without small logo",
-                          "smallLogo": undefined,
-                        },
-                      ]
-                  `);
     });
   });
 
@@ -478,7 +450,6 @@ describe('stop', () => {
   it('completes applicationClass$, getIsNavDrawerLocked, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const { chrome, service } = await start();
     const promise = Rx.combineLatest(
-      chrome.getBrand$(),
       chrome.getApplicationClasses$(),
       chrome.getIsNavDrawerLocked$(),
       chrome.getBreadcrumbs$(),
@@ -496,7 +467,6 @@ describe('stop', () => {
 
     await expect(
       Rx.combineLatest(
-        chrome.getBrand$(),
         chrome.getApplicationClasses$(),
         chrome.getIsNavDrawerLocked$(),
         chrome.getBreadcrumbs$(),

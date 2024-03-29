@@ -1,15 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target",
     "declaration": true,
-    "sourceMap": true,
-    "types": [
-      "jest",
-      "node"
-    ]
+    "declarationDir": "./target/types",
+    "outDir": "./target",
+    "emitDeclarationOnly": true,
+    "stripInternal": true,
+    "declarationMap": true,
+    "types": ["jest", "node"]
   },
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["./src/**/*"],
+  "exclude": ["target"]
 }

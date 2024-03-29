@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import mocha from 'mocha';
+import mocha from 'mocha-next';
 import { setupJUnitReportGeneration } from './junit_report_generation';
 
 const MochaSpecReporter = mocha.reporters.spec;

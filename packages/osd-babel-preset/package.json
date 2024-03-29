@@ -7,19 +7,21 @@
     "devOnly": true
   },
   "dependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.16.5",
-    "@babel/plugin-proposal-export-namespace-from": "^7.16.5",
-    "@babel/plugin-proposal-logical-assignment-operators": "^7.16.5",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.5",
-    "@babel/plugin-proposal-optional-chaining": "^7.16.5",
-    "@babel/plugin-proposal-private-methods": "^7.16.5",
-    "@babel/preset-env": "^7.16.5",
-    "@babel/preset-react": "^7.16.5",
-    "@babel/preset-typescript": "^7.16.5",
+    "@babel/plugin-transform-export-namespace-from": "^7.22.9",
+    "@babel/plugin-transform-logical-assignment-operators": "^7.22.9",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.22.9",
+    "@babel/plugin-transform-optional-chaining": "^7.22.9",
+    "@babel/preset-env": "^7.22.9",
+    "@babel/preset-react": "^7.22.9",
+    "@babel/preset-typescript": "^7.22.9",
     "babel-plugin-add-module-exports": "^1.0.4",
     "babel-plugin-styled-components": "^2.0.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "browserslist": "^4.21.10",
     "react-is": "^16.8.0",
     "styled-components": "^5.3.9"
+  },
+  "devDependencies": {
+    "@types/browserslist": "^4.15.0"
   }
 }

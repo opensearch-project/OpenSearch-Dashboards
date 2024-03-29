@@ -41,7 +41,7 @@ import { ContainerInput } from '../../../../containers';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { coreMock } from '../../../../../../../../core/public/mocks';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from 'test_utils/helpers';
 import { embeddablePluginMock } from '../../../../../mocks';
 
 function DummySavedObjectFinder(props: { children: React.ReactNode }) {

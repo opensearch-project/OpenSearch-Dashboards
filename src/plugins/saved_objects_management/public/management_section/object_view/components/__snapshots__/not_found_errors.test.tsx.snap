@@ -62,7 +62,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
             <div
               className="euiTextColor euiTextColor--default"
             >
-              <div>
+              <p>
                 <FormattedMessage
                   defaultMessage="The index pattern associated with this object no longer exists."
                   id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
@@ -70,8 +70,8 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
                 >
                   The index pattern associated with this object no longer exists.
                 </FormattedMessage>
-              </div>
-              <div>
+              </p>
+              <p>
                 <FormattedMessage
                   defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
                   id="savedObjectsManagement.view.howToFixErrorDescription"
@@ -79,7 +79,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
                 >
                   If you know what this error means, go ahead and fix it — otherwise click the delete button above.
                 </FormattedMessage>
-              </div>
+              </p>
             </div>
           </EuiTextColor>
         </div>
@@ -151,7 +151,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
             <div
               className="euiTextColor euiTextColor--default"
             >
-              <div>
+              <p>
                 <FormattedMessage
                   defaultMessage="A field associated with this object no longer exists in the index pattern."
                   id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
@@ -159,8 +159,8 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
                 >
                   A field associated with this object no longer exists in the index pattern.
                 </FormattedMessage>
-              </div>
-              <div>
+              </p>
+              <p>
                 <FormattedMessage
                   defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
                   id="savedObjectsManagement.view.howToFixErrorDescription"
@@ -168,7 +168,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
                 >
                   If you know what this error means, go ahead and fix it — otherwise click the delete button above.
                 </FormattedMessage>
-              </div>
+              </p>
             </div>
           </EuiTextColor>
         </div>
@@ -240,7 +240,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
             <div
               className="euiTextColor euiTextColor--default"
             >
-              <div>
+              <p>
                 <FormattedMessage
                   defaultMessage="The saved search associated with this object no longer exists."
                   id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
@@ -248,8 +248,8 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
                 >
                   The saved search associated with this object no longer exists.
                 </FormattedMessage>
-              </div>
-              <div>
+              </p>
+              <p>
                 <FormattedMessage
                   defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
                   id="savedObjectsManagement.view.howToFixErrorDescription"
@@ -257,7 +257,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
                 >
                   If you know what this error means, go ahead and fix it — otherwise click the delete button above.
                 </FormattedMessage>
-              </div>
+              </p>
             </div>
           </EuiTextColor>
         </div>
@@ -329,8 +329,8 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
             <div
               className="euiTextColor euiTextColor--default"
             >
-              <div />
-              <div>
+              <p />
+              <p>
                 <FormattedMessage
                   defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
                   id="savedObjectsManagement.view.howToFixErrorDescription"
@@ -338,7 +338,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
                 >
                   If you know what this error means, go ahead and fix it — otherwise click the delete button above.
                 </FormattedMessage>
-              </div>
+              </p>
             </div>
           </EuiTextColor>
         </div>

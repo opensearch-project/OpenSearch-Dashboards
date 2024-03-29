@@ -7,7 +7,7 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Action, IncompatibleActionError } from '../../../ui_actions/public';
-import { getAllAugmentVisSavedObjs } from '../utils';
+import { getAugmentVisSavedObjs } from '../utils';
 import { getSavedAugmentVisLoader } from '../services';
 import { SavedObjectDeleteContext } from '../ui_actions_bootstrap';
 
@@ -45,12 +45,19 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
       throw new IncompatibleActionError();
     }
 
-    const loader = getSavedAugmentVisLoader();
-    const allAugmentVisObjs = await getAllAugmentVisSavedObjs(loader);
-    const augmentVisIdsToDelete = allAugmentVisObjs
-      .filter((augmentVisObj) => augmentVisObj.visId === savedObjectId)
-      .map((augmentVisObj) => augmentVisObj.id as string);
+    try {
+      const loader = getSavedAugmentVisLoader();
+      const augmentVisObjs = await getAugmentVisSavedObjs(savedObjectId, loader);
+      const augmentVisIdsToDelete = augmentVisObjs.map(
+        (augmentVisObj) => augmentVisObj.id as string
+      );
 
-    if (!isEmpty(augmentVisIdsToDelete)) loader.delete(augmentVisIdsToDelete);
+      if (!isEmpty(augmentVisIdsToDelete)) loader.delete(augmentVisIdsToDelete);
+      // silently fail. this is because this is doing extra cleanup on objects unrelated
+      // to the user flow so we dont want to add confusing errors on UI.
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
   }
 }

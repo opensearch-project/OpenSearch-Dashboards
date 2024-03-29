@@ -75,7 +75,7 @@ describe('TableVisApp', () => {
         handlers={handlersMock}
       />
     );
-    expect(container.outerHTML.includes('visTable visTable__groupInColumns')).toBe(true);
+    expect(container.outerHTML.includes('visTable')).toBe(true);
     expect(getByTestId('TableVisComponentGroup')).toBeInTheDocument();
   });
 

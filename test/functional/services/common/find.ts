@@ -435,11 +435,19 @@ export async function FindProvider({ getService }: FtrProviderContext) {
 
     public async clickByCssSelector(
       selector: string,
-      timeout: number = defaultFindTimeout
+      timeout: number = defaultFindTimeout,
+      parentSelector?: string
     ): Promise<void> {
       log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
       await retry.try(async () => {
-        const element = await this.byCssSelector(selector, timeout);
+        let element;
+        if (parentSelector) {
+          const parent = await this.byCssSelector(parentSelector, timeout);
+          const child = await parent._webElement.findElement(By.css(selector));
+          element = wrap(child, By.css(selector));
+        } else {
+          element = await this.byCssSelector(selector, timeout);
+        }
         if (element) {
           // await element.moveMouseTo();
           await element.click();

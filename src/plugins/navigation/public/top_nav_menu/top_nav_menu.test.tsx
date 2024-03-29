@@ -43,7 +43,6 @@ const dataShim = {
 };
 
 describe('TopNavMenu', () => {
-  const WRAPPER_SELECTOR = '.osdTopNavMenu__wrapper';
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
   const SEARCH_BAR_SELECTOR = 'SearchBar';
   const menuItems: TopNavMenuData[] = [
@@ -66,28 +65,24 @@ describe('TopNavMenu', () => {
 
   it('Should render nothing when no config is provided', () => {
     const component = shallowWithIntl(<TopNavMenu appName={'test'} />);
-    expect(component.find(WRAPPER_SELECTOR).length).toBe(0);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should not render menu items when config is empty', () => {
     const component = shallowWithIntl(<TopNavMenu appName={'test'} config={[]} />);
-    expect(component.find(WRAPPER_SELECTOR).length).toBe(0);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should render 1 menu item', () => {
     const component = shallowWithIntl(<TopNavMenu appName={'test'} config={[menuItems[0]]} />);
-    expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(1);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should render multiple menu items', () => {
     const component = shallowWithIntl(<TopNavMenu appName={'test'} config={menuItems} />);
-    expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
@@ -96,7 +91,6 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu appName={'test'} showSearchBar={true} data={dataShim as any} />
     );
-    expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
   });
@@ -105,7 +99,6 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu appName={'test'} config={menuItems} showSearchBar={true} data={dataShim as any} />
     );
-    expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
   });
@@ -122,6 +115,46 @@ describe('TopNavMenu', () => {
     );
     expect(component.find('.osdTopNavMenu').length).toBe(1);
     expect(component.find('.myCoolClass').length).toBeTruthy();
+  });
+
+  it('mounts the data source menu if showDataSourceMenu is true', async () => {
+    const component = shallowWithIntl(
+      <TopNavMenu
+        appName={'test'}
+        showDataSourceMenu={true}
+        dataSourceMenuConfig={{
+          componentType: 'DataSourceView',
+          componentConfig: {
+            hideLocalCluster: true,
+            fullWidth: true,
+            activeOption: [{ label: 'what', id: '1' }],
+          },
+        }}
+      />
+    );
+
+    expect(component.find('DataSourceMenu').length).toBe(1);
+  });
+
+  it('mounts the data source menu as well as top nav menu', async () => {
+    const component = shallowWithIntl(
+      <TopNavMenu
+        appName={'test'}
+        showDataSourceMenu={true}
+        config={menuItems}
+        dataSourceMenuConfig={{
+          componentType: 'DataSourceView',
+          componentConfig: {
+            hideLocalCluster: true,
+            fullWidth: true,
+            activeOption: [{ label: 'what', id: '1' }],
+          },
+        }}
+      />
+    );
+
+    expect(component.find('DataSourceMenu').length).toBe(1);
+    expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
   });
 
   describe('when setMenuMountPoint is provided', () => {
@@ -170,7 +203,6 @@ describe('TopNavMenu', () => {
 
       await refresh();
 
-      expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
       expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
 
       // menu is rendered outside of the component

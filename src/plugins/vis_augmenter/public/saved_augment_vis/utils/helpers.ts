@@ -33,23 +33,24 @@ export const createAugmentVisSavedObject = async (
   }
   const maxAssociatedCount = config.get(PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING);
 
-  await loader.findAll().then(async (resp) => {
-    if (resp !== undefined) {
-      const savedAugmentObjects = get(resp, 'hits', []);
-      // gets all the saved object for this visualization
-      const savedObjectsForThisVisualization = savedAugmentObjects.filter(
-        (savedObj) => get(savedObj, 'visId', '') === AugmentVis.visId
-      );
+  await loader
+    .findAll('', 100, [], {
+      type: 'visualization',
+      id: AugmentVis.visId as string,
+    })
+    .then(async (resp) => {
+      if (resp !== undefined) {
+        const savedObjectsForThisVisualization = get(resp, 'hits', []);
 
-      if (maxAssociatedCount <= savedObjectsForThisVisualization.length) {
-        throw new Error(
-          `Cannot associate the plugin resource to the visualization due to the limit of the max
+        if (maxAssociatedCount <= savedObjectsForThisVisualization.length) {
+          throw new Error(
+            `Cannot associate the plugin resource to the visualization due to the limit of the max
           amount of associated plugin resources (${maxAssociatedCount}) with
           ${savedObjectsForThisVisualization.length} associated to the visualization`
-        );
+          );
+        }
       }
-    }
-  });
+    });
 
   return await loader.get((AugmentVis as any) as Record<string, unknown>);
 };

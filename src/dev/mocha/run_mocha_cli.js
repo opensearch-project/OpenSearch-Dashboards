@@ -101,8 +101,8 @@ export function runMochaCli() {
   }
 
   if (runInBand) {
-    require('mocha/bin/_mocha');
+    require('mocha-next/bin/_mocha');
   } else {
-    require('mocha/bin/mocha');
+    require('mocha-next/bin/mocha');
   }
 }

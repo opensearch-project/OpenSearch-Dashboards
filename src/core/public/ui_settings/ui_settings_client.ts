@@ -97,11 +97,11 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       return JSON.parse(value);
     }
 
-    if (type === 'number') {
-      return parseFloat(value);
-    }
-
-    return value;
+    return type === 'number' && typeof value !== 'bigint'
+      ? isFinite(value) && (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER)
+        ? BigInt(value)
+        : parseFloat(value)
+      : value;
   }
 
   get$<T = any>(key: string, defaultOverride?: T) {

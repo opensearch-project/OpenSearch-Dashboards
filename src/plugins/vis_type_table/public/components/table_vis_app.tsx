@@ -5,10 +5,10 @@
 
 import './table_vis_app.scss';
 import React, { useEffect } from 'react';
-import classNames from 'classnames';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { I18nProvider } from '@osd/i18n/react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { EuiFlexGroup } from '@elastic/eui';
 import { PersistedState } from '../../../visualizations/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { TableVisData } from '../table_vis_response_handler';
@@ -35,17 +35,17 @@ export const TableVisApp = ({
     handlers.done();
   }, [handlers]);
 
-  const className = classNames('visTable', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    visTable__groupInColumns: direction === 'column',
-  });
-
   const tableUiState: TableUiState = getTableUIState(handlers.uiState as PersistedState);
 
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>
-        <div className={className} data-test-subj="visTable">
+        <EuiFlexGroup
+          className="visTable"
+          data-test-subj="visTable"
+          direction={direction === 'column' ? 'row' : 'column'}
+          alignItems={direction === 'column' ? 'flexStart' : 'stretch'}
+        >
           {table ? (
             <TableVisComponent
               table={table}
@@ -61,7 +61,7 @@ export const TableVisApp = ({
               uiState={tableUiState}
             />
           )}
-        </div>
+        </EuiFlexGroup>
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );

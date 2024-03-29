@@ -5,7 +5,6 @@
 
 import moment from 'moment';
 import { cloneDeep, isEmpty, get } from 'lodash';
-import { Item } from 'vega';
 import { YAxisConfig } from 'src/plugins/vis_type_vega/public';
 import {
   OpenSearchDashboardsDatatable,
@@ -225,7 +224,6 @@ export const addPointInTimeEventsLayersToTable = (
   });
 
   visLayers.forEach((visLayer: PointInTimeEventsVisLayer) => {
-    if (isEmpty(visLayer.events)) return;
     const visLayerColumnId = `${visLayer.pluginEventType}`;
 
     // Add placeholder values of 0 for every event value. This is so the tooltip
@@ -406,10 +404,6 @@ export const addPointInTimeEventsLayersToSpec = (
   });
 
   return newSpec;
-};
-
-export const isPointInTimeAnnotation = (item?: Item | null) => {
-  return item?.datum?.annotationType === VisAnnotationType.POINT_IN_TIME_ANNOTATION;
 };
 
 // This is the total y-axis padding such that if this is added to the "padding" value of the view, if there is no axis,

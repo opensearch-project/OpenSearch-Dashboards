@@ -8,6 +8,7 @@ import {
   OpenSearchDashboardsDatatable,
   OpenSearchDashboardsDatatableColumn,
 } from '../../../expressions/public';
+import { YAxisConfig } from '../../../vis_type_vega/public';
 import {
   enableVisLayersInSpecConfig,
   isVisLayerColumn,
@@ -16,10 +17,21 @@ import {
   addPointInTimeEventsLayersToTable,
   addPointInTimeEventsLayersToSpec,
   generateVisLayerTooltipFields,
+  addVisEventSignalsToSpecConfig,
+  calculateYAxisPadding,
+  augmentEventChartSpec,
 } from './helpers';
-import { VIS_LAYER_COLUMN_TYPE, VisLayerTypes, PointInTimeEventsVisLayer, VisLayer } from '../';
+import {
+  VIS_LAYER_COLUMN_TYPE,
+  VisLayerTypes,
+  PointInTimeEventsVisLayer,
+  VisLayer,
+  VisFlyoutContext,
+  VisAugmenterEmbeddableConfig,
+} from '../';
 import {
   TEST_DATATABLE_MULTIPLE_VIS_LAYERS,
+  TEST_DATATABLE_MULTIPLE_VIS_LAYERS_ONE_EMPTY,
   TEST_DATATABLE_NO_VIS_LAYERS,
   TEST_DATATABLE_ONLY_VIS_LAYERS,
   TEST_DATATABLE_SINGLE_ROW_NO_VIS_LAYERS,
@@ -37,6 +49,7 @@ import {
   TEST_SPEC_NO_VIS_LAYERS,
   TEST_SPEC_SINGLE_VIS_LAYER,
   TEST_VIS_LAYERS_MULTIPLE,
+  TEST_VIS_LAYERS_MULTIPLE_ONE_EMPTY,
   TEST_VIS_LAYERS_SINGLE,
   TEST_VIS_LAYERS_SINGLE_INVALID_BOUNDS,
   TEST_VIS_LAYERS_SINGLE_ON_BOUNDS,
@@ -399,6 +412,16 @@ describe('helpers', function () {
         )
       ).toStrictEqual(TEST_DATATABLE_ONLY_VIS_LAYERS);
     });
+    it('vis layers with one having events and the other empty are added correctly', function () {
+      expect(
+        addPointInTimeEventsLayersToTable(
+          TEST_DATATABLE_NO_VIS_LAYERS,
+
+          TEST_DIMENSIONS,
+          TEST_VIS_LAYERS_MULTIPLE_ONE_EMPTY
+        )
+      ).toStrictEqual(TEST_DATATABLE_MULTIPLE_VIS_LAYERS_ONE_EMPTY);
+    });
     it('vis layer with out-of-bounds timestamps are not added', function () {
       expect(
         addPointInTimeEventsLayersToTable(
@@ -458,6 +481,138 @@ describe('helpers', function () {
       delete expectedSpec.vconcat[1].encoding.x.scale;
       delete returnSpec.vconcat[1].encoding.x.scale;
       expect(returnSpec).toEqual(expectedSpec);
+    });
+  });
+
+  describe('addVisEventSignalsToSpecConfig()', () => {
+    it('vis event signal is added for point in time annotations', () => {
+      const startSpec = {
+        kibana: {},
+      };
+      const endSpec = addVisEventSignalsToSpecConfig(startSpec);
+      expect(endSpec.kibana.signals.POINT_IN_TIME_ANNOTATION.length).toBeGreaterThan(0);
+    });
+    it('tooltip configuration is specified', () => {
+      const startSpec = {
+        kibana: {},
+      };
+      const endSpec = addVisEventSignalsToSpecConfig(startSpec);
+      expect(endSpec.tooltips).not.toBeNull();
+    });
+  });
+
+  describe('calculateYAxisPadding()', () => {
+    it('calculation includes sum of all y axis fields', () => {
+      const sampleConfig = {
+        minExtent: 1,
+        offset: 1,
+        translate: 1,
+        domainWidth: 1,
+        labelPadding: 1,
+        titlePadding: 1,
+        tickOffset: 1,
+        tickSize: 1,
+      } as YAxisConfig;
+      // derived from each value in sample config + default padding of 3
+      expect(calculateYAxisPadding(sampleConfig)).toEqual(11);
+    });
+    it('calculation defaults to 0 for missing y axis fields', () => {
+      const sampleConfig = {
+        minExtent: 1,
+      } as YAxisConfig;
+      // derived from each value in sample config + default padding of 3
+      expect(calculateYAxisPadding(sampleConfig)).toEqual(4);
+    });
+  });
+
+  describe('augmentEventChartSpec()', () => {
+    it('not in flyout - no change', () => {
+      const config = {
+        inFlyout: false,
+        flyoutContext: VisFlyoutContext.BASE_VIS,
+      } as VisAugmenterEmbeddableConfig;
+      const origSpec = {
+        config: { some: 'config' },
+        vconcat: [{ base: 'vis' }, { event: 'vis' }],
+      };
+
+      expect(augmentEventChartSpec(config, origSpec)).toEqual(origSpec);
+    });
+    it('in flyout + base vis context', () => {
+      const config = {
+        inFlyout: true,
+        flyoutContext: VisFlyoutContext.BASE_VIS,
+      } as VisAugmenterEmbeddableConfig;
+      const origSpec = {
+        config: { some: 'config' },
+        vconcat: [{ base: 'vis' }, { event: 'vis' }],
+      };
+
+      const returnSpec = augmentEventChartSpec(config, origSpec) as any;
+      // legend should be forced to the top
+      expect(returnSpec.config.legend.orient).toEqual('top');
+      // y-axis should be a set, consistent, nonzero width
+      expect(returnSpec.config.axisY.minExtent).toBeGreaterThan(0);
+      expect(returnSpec.config.axisY.maxExtent).toBeGreaterThan(0);
+      expect(returnSpec.config.axisY.offset).toEqual(0);
+      expect(returnSpec.vconcat.length).toEqual(2);
+    });
+    it('in flyout + event vis context', () => {
+      const config = {
+        inFlyout: true,
+        flyoutContext: VisFlyoutContext.EVENT_VIS,
+      } as VisAugmenterEmbeddableConfig;
+      const origSpec = {
+        config: { some: 'config' },
+        vconcat: [
+          { base: 'vis' },
+          {
+            event: 'vis',
+            encoding: {
+              x: {
+                axis: {
+                  some: 'field',
+                },
+              },
+            },
+            mark: {
+              some: 'other-field',
+            },
+          },
+        ],
+      };
+
+      const returnSpec = augmentEventChartSpec(config, origSpec) as any;
+      const xAxisConfig = returnSpec.vconcat[0].encoding.x.axis;
+      // y-axis should be a set, consistent, nonzero width
+      expect(returnSpec.config.axisY.minExtent).toBeGreaterThan(0);
+      expect(returnSpec.config.axisY.maxExtent).toBeGreaterThan(0);
+      expect(returnSpec.config.axisY.offset).toEqual(0);
+      // x-axis should be hidden
+      expect(xAxisConfig.grid).toEqual(false);
+      expect(xAxisConfig.ticks).toEqual(false);
+      expect(xAxisConfig.labels).toEqual(false);
+      expect(xAxisConfig.title).toEqual(null);
+      expect(returnSpec.vconcat.length).toEqual(1);
+    });
+    it('in flyout + timeline vis context', () => {
+      const config = {
+        inFlyout: true,
+        flyoutContext: VisFlyoutContext.TIMELINE_VIS,
+      } as VisAugmenterEmbeddableConfig;
+      const origSpec = {
+        config: { some: 'config' },
+        vconcat: [{ base: 'vis' }, { event: 'vis' }],
+      };
+
+      const returnSpec = augmentEventChartSpec(config, origSpec) as any;
+      // y-axis should be a set, consistent, nonzero width
+      expect(returnSpec.config.axisY.minExtent).toBeGreaterThan(0);
+      expect(returnSpec.config.axisY.maxExtent).toBeGreaterThan(0);
+      expect(returnSpec.config.axisY.offset).toEqual(0);
+      // should have transform param set on the event chart
+      expect(returnSpec.vconcat[0].transform.length).toBeGreaterThan(0);
+      expect(returnSpec.vconcat.length).toEqual(1);
     });
   });
 });

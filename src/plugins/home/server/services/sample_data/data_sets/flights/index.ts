@@ -53,6 +53,7 @@ export const flightsSpecProvider = function (): SampleDatasetSchema {
     description: flightsDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.png',
+    hasNewThemeImages: true,
     overviewDashboard: DASHBOARD_ID,
     getDataSourceIntegratedDashboard: appendDataSourceId(DASHBOARD_ID),
     appLinks: initialAppLinks,

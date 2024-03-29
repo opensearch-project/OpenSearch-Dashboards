@@ -48,6 +48,8 @@ import { InternalStatusServiceSetup } from './status';
 import { AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
+import { InternalSecurityServiceSetup } from './security/types';
+import { CrossCompatibilityServiceStart } from './cross_compatibility';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -64,6 +66,7 @@ export interface InternalCoreSetup {
   auditTrail: AuditTrailSetup;
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
+  security: InternalSecurityServiceSetup;
 }
 
 /**
@@ -78,6 +81,7 @@ export interface InternalCoreStart {
   uiSettings: InternalUiSettingsServiceStart;
   auditTrail: AuditTrailStart;
   coreUsageData: CoreUsageDataStart;
+  crossCompatibility: CrossCompatibilityServiceStart;
 }
 
 /**

@@ -198,7 +198,7 @@ export class RenderingService {
 
   /**
    * Assign values for branding related configurations based on branding validation
-   * by calling checkBrandingValid(). For dark mode URLs, add additonal validation
+   * by calling checkBrandingValid(). For dark mode URLs, add additional validation
    * to see if there is a valid default mode URL exist first. If URL is valid, pass in
    * the actual URL; if not, pass in undefined.
    *
@@ -371,6 +371,9 @@ export class RenderingService {
     if (url.match(/\.(png|svg|gif|PNG|SVG|GIF)$/) === null) {
       this.logger.get('branding').error(`${configName} config is invalid. Using default branding.`);
       return false;
+    }
+    if (url.startsWith('/')) {
+      return true;
     }
     return await Axios.get(url, {
       httpsAgent: this.httpsAgent,

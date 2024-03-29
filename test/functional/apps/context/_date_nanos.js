@@ -36,13 +36,15 @@ const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const opensearchArchiver = getService('opensearchArchiver');
 
   describe('context view for date_nanos', () => {
     before(async function () {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.switchDiscoverTable('new');
       await security.testUser.setRoles([
         'opensearch_dashboards_admin',
         'opensearch_dashboards_date_nanos',
@@ -62,11 +64,11 @@ export default function ({ getService, getPageObjects }) {
 
     it('displays predessors - anchor - successors in right order ', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
-      const actualRowsText = await docTable.getRowsText();
+      const actualRowsText = await dataGrid.getDataGridTableColumn('date');
       const expectedRowsText = [
-        'Sep 18, 2019 @ 06:50:13.000000000-2',
-        'Sep 18, 2019 @ 06:50:12.999999999-3',
-        'Sep 19, 2015 @ 06:50:13.0001000011',
+        'Sep 18, 2019 @ 06:50:13.000000000',
+        'Sep 18, 2019 @ 06:50:12.999999999',
+        'Sep 19, 2015 @ 06:50:13.000100001',
       ];
       expect(actualRowsText).to.eql(expectedRowsText);
     });
@@ -75,17 +77,17 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
-      const actualRowsText = await docTable.getRowsText();
+      const actualRowsText = await dataGrid.getDataGridTableColumn('date');
       const expectedRowsText = [
-        'Sep 22, 2019 @ 23:50:13.2531233455',
-        'Sep 18, 2019 @ 06:50:13.0000001044',
-        'Sep 18, 2019 @ 06:50:13.0000001032',
-        'Sep 18, 2019 @ 06:50:13.0000001021',
-        'Sep 18, 2019 @ 06:50:13.0000001010',
-        'Sep 18, 2019 @ 06:50:13.000000001-1',
-        'Sep 18, 2019 @ 06:50:13.000000000-2',
-        'Sep 18, 2019 @ 06:50:12.999999999-3',
-        'Sep 19, 2015 @ 06:50:13.0001000011',
+        'Sep 22, 2019 @ 23:50:13.253123345',
+        'Sep 18, 2019 @ 06:50:13.000000104',
+        'Sep 18, 2019 @ 06:50:13.000000103',
+        'Sep 18, 2019 @ 06:50:13.000000102',
+        'Sep 18, 2019 @ 06:50:13.000000101',
+        'Sep 18, 2019 @ 06:50:13.000000001',
+        'Sep 18, 2019 @ 06:50:13.000000000',
+        'Sep 18, 2019 @ 06:50:12.999999999',
+        'Sep 19, 2015 @ 06:50:13.000100001',
       ];
       expect(actualRowsText).to.eql(expectedRowsText);
     });

@@ -64,7 +64,7 @@ export class ColorsService {
   ) {
     if (!Array.isArray(arrayOfStringsOrNumbers)) {
       throw new Error(
-        `createColorLookupFunction expects an array but recived: ${typeof arrayOfStringsOrNumbers}`
+        `createColorLookupFunction expects an array but received: ${typeof arrayOfStringsOrNumbers}`
       );
     }
 

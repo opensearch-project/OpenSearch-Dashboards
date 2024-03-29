@@ -71,8 +71,6 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await opensearchArchiver.load('discover');
-      // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
-      await opensearchDashboardsServer.uiSettings.replace({});
       await opensearchDashboardsServer.uiSettings.update({});
     });
 
@@ -163,7 +161,9 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.switchDiscoverTable('new');
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await retry.try(async function () {
@@ -171,35 +171,35 @@ export default function ({ getService, getPageObjects }) {
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\n18');
-        });
+        const rowData = await PageObjects.discover.getDataGridTableValues();
+        expect(rowData[0][0]).to.be('Sep 18, 2015 @ 18:20:57.916');
+        expect(rowData[0][1]).to.be('18');
       });
 
       //add a test to sort numeric scripted field
       it('should sort scripted field value in Discover', async function () {
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
-        // after the first click on the scripted field, it becomes secondary sort after time.
-        // click on the timestamp twice to make it be the secondary sort key.
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await testSubjects.click(`dataGridHeaderCell-${scriptedPainlessFieldName}`);
+        await PageObjects.discover.clickTableHeaderListItem(scriptedPainlessFieldName, 'Sort A-Z');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 10:53:14.181\n-1');
-        });
+        await testSubjects.click('dataGridHeaderCell-@timestamp');
+        await PageObjects.discover.clickTableHeaderListItem('@timestamp', 'Sort A-Z');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const sortedDataByTimeField = await PageObjects.discover.getDataGridTableValues();
+        expect(sortedDataByTimeField[0][0]).contain('Sep 17, 2015 @ 10:53:14.181');
+        expect(sortedDataByTimeField[0][1]).contain('-1');
 
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
+        // click the column sorting button to remove painless field sort
+        // should sort only by time field
+        await testSubjects.click('dataGridColumnSortingButton');
+        await PageObjects.discover.removeSort(`${scriptedPainlessFieldName}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\n20');
-        });
+        const sortedDataByPainlessField = await PageObjects.discover.getDataGridTableValues();
+        expect(sortedDataByPainlessField[0][0]).contain('Sep 17, 2015 @ 06:32:29.479');
+        expect(sortedDataByPainlessField[0][1]).contain('20');
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
+        await PageObjects.discover.clickFieldListItemDetails(scriptedPainlessFieldName);
         await log.debug('filter by the first value (14) in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -280,7 +280,9 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.switchDiscoverTable('new');
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -288,35 +290,35 @@ export default function ({ getService, getPageObjects }) {
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ngood');
-        });
+        const rowData = await PageObjects.discover.getDataGridTableValues();
+        expect(rowData[0][0]).to.be('Sep 18, 2015 @ 18:20:57.916');
+        expect(rowData[0][1]).to.be('good');
       });
 
       //add a test to sort string scripted field
       it('should sort scripted field value in Discover', async function () {
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
-        // after the first click on the scripted field, it becomes secondary sort after time.
-        // click on the timestamp twice to make it be the secondary sort key.
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await testSubjects.click(`dataGridHeaderCell-${scriptedPainlessFieldName2}`);
+        await PageObjects.discover.clickTableHeaderListItem(scriptedPainlessFieldName2, 'Sort A-Z');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 09:48:40.594\nbad');
-        });
+        await testSubjects.click('dataGridHeaderCell-@timestamp');
+        await PageObjects.discover.clickTableHeaderListItem('@timestamp', 'Sort A-Z');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const sortedDataByTimeField = await PageObjects.discover.getDataGridTableValues();
+        expect(sortedDataByTimeField[0][0]).contain('Sep 17, 2015 @ 09:48:40.594');
+        expect(sortedDataByTimeField[0][1]).contain('bad');
 
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        // click the column sorting button to remove painless field sort
+        // should sort only by time field
+        await testSubjects.click('dataGridColumnSortingButton');
+        await PageObjects.discover.removeSort(`${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\ngood');
-        });
+        const sortedDataByPainlessField = await PageObjects.discover.getDataGridTableValues();
+        expect(sortedDataByPainlessField[0][0]).contain('Sep 17, 2015 @ 06:32:29.479');
+        expect(sortedDataByPainlessField[0][1]).contain('good');
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.discover.clickFieldListItemDetails(scriptedPainlessFieldName2);
         await log.debug('filter by "bad" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -375,7 +377,9 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.switchDiscoverTable('new');
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -383,14 +387,38 @@ export default function ({ getService, getPageObjects }) {
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
-        });
+        const rowData = await PageObjects.discover.getDataGridTableValues();
+        expect(rowData[0][0]).to.be('Sep 18, 2015 @ 18:20:57.916');
+        expect(rowData[0][1]).to.be('true');
+      });
+
+      // existing bug: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5126 hence the issue is skipped
+      // TODO: replace updateExpectedResultHere with actual data value once bug is fixed
+      it.skip('should sort scripted field value in Discover', async function () {
+        await testSubjects.click(`dataGridHeaderCell-${scriptedPainlessFieldName2}`);
+        await PageObjects.discover.clickTableHeaderListItem(
+          scriptedPainlessFieldName2,
+          'Sort True-False'
+        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.click('dataGridHeaderCell-@timestamp');
+        await PageObjects.discover.clickTableHeaderListItem('@timestamp', 'Sort A-Z');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const sortedDataByTimeField = await PageObjects.discover.getDataGridTableValues();
+        expect(sortedDataByTimeField[0][0]).contain('updateExpectedResultHere');
+        expect(sortedDataByTimeField[0][1]).contain('true');
+
+        await testSubjects.click('dataGridColumnSortingButton');
+        await PageObjects.discover.removeSort(`${scriptedPainlessFieldName2}`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const sortedDataByPainlessField = await PageObjects.discover.getDataGridTableValues();
+        expect(sortedDataByPainlessField[0][0]).contain('updateExpectedResultHere');
+        expect(sortedDataByPainlessField[0][1]).contain('false');
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await testSubjects.moveMouseTo(`field-${scriptedPainlessFieldName2}`);
+        await PageObjects.discover.clickFieldListItemDetails(scriptedPainlessFieldName2);
         await log.debug('filter by "true" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -399,28 +427,6 @@ export default function ({ getService, getPageObjects }) {
           expect(await PageObjects.discover.getHitCount()).to.be('359');
         });
         await filterBar.removeAllFilters();
-      });
-
-      //add a test to sort boolean
-      //existing bug: https://github.com/elastic/kibana/issues/75519 hence the issue is skipped.
-      it.skip('should sort scripted field value in Discover', async function () {
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
-        // after the first click on the scripted field, it becomes secondary sort after time.
-        // click on the timestamp twice to make it be the secondary sort key.
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('updateExpectedResultHere\ntrue');
-        });
-
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('updateExpectedResultHere\nfalse');
-        });
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
@@ -471,7 +477,9 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = 'Sep 17, 2015 @ 19:22:00.000';
         const toTime = 'Sep 18, 2015 @ 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.switchDiscoverTable('new');
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -479,36 +487,34 @@ export default function ({ getService, getPageObjects }) {
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.953\n2015-09-18 07:00');
-        });
+        const rowData = await PageObjects.discover.getDataGridTableValues();
+        expect(rowData[0][0]).to.be('Sep 18, 2015 @ 06:52:55.953');
+        expect(rowData[0][1]).to.be('2015-09-18 07:00');
       });
 
-      //add a test to sort date scripted field
-      //https://github.com/elastic/kibana/issues/75711
+      // existing bug: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5127 hence the issue is skipped
+      // TODO: replace updateExpectedResultHere with actual data value once bug is fixed
       it.skip('should sort scripted field value in Discover', async function () {
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
-        // after the first click on the scripted field, it becomes secondary sort after time.
-        // click on the timestamp twice to make it be the secondary sort key.
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await testSubjects.click(`dataGridHeaderCell-${scriptedPainlessFieldName2}`);
+        await PageObjects.discover.clickTableHeaderListItem(scriptedPainlessFieldName2, 'Sort A-Z');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
-        });
+        await testSubjects.click('dataGridHeaderCell-@timestamp');
+        await PageObjects.discover.clickTableHeaderListItem('@timestamp', 'Sort A-Z');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const sortedDataByTimeField = await PageObjects.discover.getDataGridTableValues();
+        expect(sortedDataByTimeField[0][0]).contain('updateExpectedResultHere');
+        expect(sortedDataByTimeField[0][1]).contain('2015-09-18 07:00');
 
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        await testSubjects.click('dataGridColumnSortingButton');
+        await PageObjects.discover.removeSort(`${scriptedPainlessFieldName2}`);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('updateExpectedResultHere\n2015-09-18 07:00');
-        });
+        const sortedDataByPainlessField = await PageObjects.discover.getDataGridTableValues();
+        expect(sortedDataByPainlessField[0][0]).contain('updateExpectedResultHere');
+        expect(sortedDataByPainlessField[0][1]).contain('2015-09-18 07:00');
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await PageObjects.discover.clickFieldListItemDetails(scriptedPainlessFieldName2);
         await log.debug('filter by "Sep 18, 2015 @ 7:52" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(
           scriptedPainlessFieldName2,

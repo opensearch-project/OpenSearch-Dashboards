@@ -5,7 +5,10 @@
 
 import { Client } from '@opensearch-project/opensearch-next';
 import { Client as LegacyClient } from 'elasticsearch';
-import { SavedObjectsClientContract } from '../../../../../src/core/server';
+import {
+  OpenSearchDashboardsRequest,
+  SavedObjectsClientContract,
+} from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
   DataSourceAttributes,
@@ -15,6 +18,8 @@ import {
 } from '../../common/data_sources';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { createDataSourceError } from '../lib/error';
+import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { AuthenticationMethod, ClientParameters } from '../types';
 
 /**
  * Get the root client of datasource from
@@ -28,23 +33,23 @@ import { createDataSourceError } from '../lib/error';
 export const getRootClient = (
   dataSourceAttr: DataSourceAttributes,
   getClientFromPool: (endpoint: string, authType: AuthType) => Client | LegacyClient | undefined,
-  dataSourceId?: string
+  clientParams?: ClientParameters
 ): Client | LegacyClient | undefined => {
-  const {
+  let cacheKeySuffix;
+  let {
     auth: { type },
-    lastUpdatedTime,
+    endpoint,
   } = dataSourceAttr;
-  let cachedClient;
-  const cacheKey = generateCacheKey(dataSourceAttr, dataSourceId);
 
-  // return undefined when building SigV4 test client with new credentials
-  if (type === AuthType.SigV4) {
-    cachedClient = dataSourceId && lastUpdatedTime ? getClientFromPool(cacheKey, type) : undefined;
-  } else {
-    cachedClient = getClientFromPool(cacheKey, type);
+  if (clientParams !== undefined) {
+    endpoint = clientParams.endpoint;
+    cacheKeySuffix = clientParams.cacheKeySuffix;
+    type = clientParams.authType;
   }
 
-  return cachedClient;
+  const cacheKey = generateCacheKey(endpoint, cacheKeySuffix);
+
+  return getClientFromPool(cacheKey, type);
 };
 
 export const getDataSource = async (
@@ -128,20 +133,17 @@ export const getAWSCredential = async (
   return credential;
 };
 
-export const generateCacheKey = (dataSourceAttr: DataSourceAttributes, dataSourceId?: string) => {
+export const generateCacheKey = (endpoint: string, cacheKeySuffix?: string) => {
   const CACHE_KEY_DELIMITER = ',';
-  const {
-    auth: { type },
-    endpoint,
-    lastUpdatedTime,
-  } = dataSourceAttr;
-  // opensearch-js client doesn't support spawning child with aws sigv4 connection class,
-  // we are storing/getting the actual client instead of rootClient in/from aws client pool,
-  // by a key of "<endpoint>,<dataSourceId>,<lastUpdatedTime>"
-  const key =
-    type === AuthType.SigV4
-      ? endpoint + CACHE_KEY_DELIMITER + dataSourceId + CACHE_KEY_DELIMITER + lastUpdatedTime
-      : endpoint;
-
+  let key = endpoint;
+  if (cacheKeySuffix) key += CACHE_KEY_DELIMITER + cacheKeySuffix;
   return key;
+};
+
+export const getAuthenticationMethod = (
+  dataSourceAttr: DataSourceAttributes,
+  authRegistry?: IAuthenticationMethodRegistery
+): AuthenticationMethod => {
+  const name = dataSourceAttr.name ?? dataSourceAttr.auth.type;
+  return authRegistry?.getAuthenticationMethod(name) as AuthenticationMethod;
 };

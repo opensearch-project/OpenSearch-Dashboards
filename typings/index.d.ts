@@ -46,6 +46,12 @@ declare module '*.svg' {
   export default content;
 }
 
+declare module '*.txt' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
 type MethodKeysOf<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
 }[keyof T];

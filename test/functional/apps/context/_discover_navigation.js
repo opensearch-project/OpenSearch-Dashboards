@@ -37,22 +37,24 @@ const TEST_FILTER_COLUMN_NAMES = [
 ];
 
 export default function ({ getService, getPageObjects }) {
-  const retry = getService('retry');
-  const docTable = getService('docTable');
+  const browser = getService('browser');
+  const dataGrid = getService('dataGrid');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const testSubjects = getService('testSubjects');
 
   describe('context link in discover', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.switchDiscoverTable('new');
 
       for (const columnName of TEST_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItemAdd(columnName);
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
+        await PageObjects.discover.clickFieldListItemDetails(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
     });
@@ -61,25 +63,27 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should open the context view with the selected document as anchor', async () => {
-      // check the anchor timestamp in the context view
-      await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
-        // get the timestamp of the first row
-        const discoverFields = await docTable.getFields();
-        const firstTimestamp = discoverFields[0][0];
+      // get the timestamps
+      const dataGridTableTimeStamps = await dataGrid.getDataGridTableColumn('date');
 
-        // navigate to the context view
-        await docTable.clickRowToggle({ rowIndex: 0 });
-        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
-        await rowActions[0].click();
-        const contextFields = await docTable.getFields({ isAnchorRow: true });
-        const anchorTimestamp = contextFields[0][0];
-        return anchorTimestamp === firstTimestamp;
-      });
+      // click inspect row
+      await testSubjects.click('docTableExpandToggleColumn-10');
+
+      // click view surrounding documents
+      await testSubjects.click('docTableRowAction-0');
+
+      //navigate to the new window and get the new timestamp
+      await testSubjects.exists('docTable');
+      await browser.switchTab(1);
+      const surroundingTableTimeStamps = await dataGrid.getDataGridTableColumn('date');
+
+      return dataGridTableTimeStamps[10] === surroundingTableTimeStamps[5];
     });
 
     it('should open the context view with the same columns', async () => {
-      const columnNames = await docTable.getHeaderFields();
-      expect(columnNames).to.eql(['Time', ...TEST_COLUMN_NAMES]);
+      const data = await dataGrid.getDataGridTableData();
+
+      expect(data.columns).to.eql(['', 'Time (@timestamp)', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {
@@ -90,6 +94,11 @@ export default function ({ getService, getPageObjects }) {
         }
       }
       expect(disabledFilterCounter).to.be(TEST_FILTER_COLUMN_NAMES.length);
+      //close the new tab and get back to the old tab
+      await browser.closeCurrentWindow();
+      await browser.switchTab(0);
+
+      await testSubjects.click('euiFlyoutCloseButton');
     });
   });
 }

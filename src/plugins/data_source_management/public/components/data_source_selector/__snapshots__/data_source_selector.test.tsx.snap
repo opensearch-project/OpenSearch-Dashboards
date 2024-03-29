@@ -1,0 +1,275 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceSelector should render normally with local cluster is hidden 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={Array []}
+  placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={Array []}
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector should render normally with local cluster not hidden 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should always place local cluster option as the first option when local cluster not hidden 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+      Object {
+        "id": "test1",
+        "label": "test1",
+      },
+      Object {
+        "id": "test2",
+        "label": "test3",
+      },
+      Object {
+        "id": "test3",
+        "label": "test3",
+      },
+    ]
+  }
+  placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should filter options if configured 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+      Object {
+        "id": "test2",
+        "label": "test3",
+      },
+      Object {
+        "id": "test3",
+        "label": "test3",
+      },
+    ]
+  }
+  placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should hide prepend if removePrepend is true 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+      Object {
+        "id": "test1",
+        "label": "test1",
+      },
+      Object {
+        "id": "test2",
+        "label": "test3",
+      },
+      Object {
+        "id": "test3",
+        "label": "test3",
+      },
+    ]
+  }
+  placeholder="Select a data source"
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should return empty options if filter out all options and hide local cluster 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={Array []}
+  placeholder="Select a data source"
+  prepend="Data source"
+  selectedOptions={Array []}
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should show custom placeholder text if configured 1`] = `
+<EuiComboBox
+  aria-label="Make a selection"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+      Object {
+        "id": "test1",
+        "label": "test1",
+      },
+      Object {
+        "id": "test2",
+        "label": "test3",
+      },
+      Object {
+        "id": "test3",
+        "label": "test3",
+      },
+    ]
+  }
+  placeholder="Make a selection"
+  prepend="Data source"
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;

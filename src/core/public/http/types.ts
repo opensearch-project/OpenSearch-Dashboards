@@ -257,6 +257,15 @@ export interface HttpFetchOptions extends HttpRequestInit {
    * response information. When `false`, the return type will just be the parsed response body. Defaults to `false`.
    */
   asResponse?: boolean;
+
+  /**
+   * When `true`, if the response has a JSON mime type, the {@link HttpResponse} will use an alternate JSON parser
+   * that converts long numerals to BigInts. Defaults to `false`.
+   */
+  withLongNumeralsSupport?: boolean;
+
+  /** @deprecated use {@link withLongNumeralsSupport} instead */
+  withLongNumerals?: boolean;
 }
 
 /**

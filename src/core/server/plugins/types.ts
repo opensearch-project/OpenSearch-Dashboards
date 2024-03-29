@@ -105,6 +105,9 @@ export type PluginName = string;
 /** @public */
 export type PluginOpaqueId = symbol;
 
+/** @public */
+export type CompatibleEnginePluginVersions = Record<string, string>;
+
 /** @internal */
 export interface PluginDependencies {
   asNames: ReadonlyMap<PluginName, PluginName[]>;
@@ -155,10 +158,10 @@ export interface PluginManifest {
   readonly requiredPlugins: readonly PluginName[];
 
   /**
-   * An optional list of component names of the backend OpenSearch plugins that **must be** installed on the cluster
+   * An optional list of the OpenSearch plugins that **must be** installed on the cluster
    * for this plugin to function properly.
    */
-  readonly requiredOpenSearchPlugins: readonly PluginName[];
+  readonly requiredEnginePlugins: CompatibleEnginePluginVersions;
 
   /**
    * List of plugin ids that this plugin's UI code imports modules from that are
@@ -229,6 +232,12 @@ export interface DiscoveredPlugin {
   readonly optionalPlugins: readonly PluginName[];
 
   /**
+   * An optional list of the OpenSearch plugins that **must be** installed on the cluster
+   * for this plugin to function properly.
+   */
+  readonly requiredEnginePlugins: CompatibleEnginePluginVersions;
+
+  /**
    * List of plugin ids that this plugin's UI code imports modules from that are
    * not in `requiredPlugins`.
    *
@@ -278,7 +287,12 @@ export interface Plugin<
 
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
-  opensearchDashboards: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
+  opensearchDashboards: [
+    'index',
+    'configIndex',
+    'autocompleteTerminateAfter',
+    'autocompleteTimeout',
+  ] as const,
   opensearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
   savedObjects: ['maxImportPayloadBytes'] as const,

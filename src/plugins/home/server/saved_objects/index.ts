@@ -29,3 +29,4 @@
  */
 
 export { sampleDataTelemetry } from './sample_data_telemetry';
+export { homepageSavedObjectType } from './homepage';

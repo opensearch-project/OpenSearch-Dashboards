@@ -36,12 +36,14 @@ const TEST_STEP_SIZE = 2;
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const retry = getService('retry');
-  const docTable = getService('docTable');
-  const PageObjects = getPageObjects(['context']);
+  const dataGrid = getService('dataGrid');
+  const PageObjects = getPageObjects(['common', 'context', 'discover']);
   let expectedRowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
   describe('context size', function contextSize() {
     before(async function () {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.switchDiscoverTable('new');
       await opensearchDashboardsServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
@@ -53,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.waitFor(
         `number of rows displayed initially is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
+          const rows = await dataGrid.getDataGridTableColumn('date');
           return rows.length === expectedRowLength;
         }
       );
@@ -74,8 +76,8 @@ export default function ({ getService, getPageObjects }) {
       await retry.waitFor(
         `number of rows displayed after clicking load more predecessors is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
-          return rows.length === expectedRowLength;
+          const data = await dataGrid.getDataGridTableColumn('date');
+          return data.length === expectedRowLength;
         }
       );
     });
@@ -87,8 +89,8 @@ export default function ({ getService, getPageObjects }) {
       await retry.waitFor(
         `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
-          return rows.length === expectedRowLength;
+          const data = await dataGrid.getDataGridTableColumn('date');
+          return data.length === expectedRowLength;
         }
       );
     });

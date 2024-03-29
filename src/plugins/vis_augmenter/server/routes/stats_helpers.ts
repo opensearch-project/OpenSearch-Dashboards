@@ -68,7 +68,7 @@ export const getStats = (
     const originPlugin = augmentVisObj.attributes.originPlugin;
     const pluginResourceType = augmentVisObj.attributes.pluginResource.type;
     const pluginResourceId = augmentVisObj.attributes.pluginResource.id;
-    const visualizationId = augmentVisObj.attributes.visId as string;
+    const visualizationId = augmentVisObj.references[0].id as string;
 
     originPluginMap[originPlugin] = (get(originPluginMap, originPlugin, 0) as number) + 1;
     pluginResourceTypeMap[pluginResourceType] =

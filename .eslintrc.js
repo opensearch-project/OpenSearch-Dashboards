@@ -108,8 +108,8 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
 `;
 
 const allMochaRulesOff = {};
-Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
-  allMochaRulesOff['mocha/' + k] = 'off';
+Object.keys(require('eslint-plugin-mocha-next').rules).forEach((k) => {
+  allMochaRulesOff['mocha-next/' + k] = 'off';
 });
 
 module.exports = {

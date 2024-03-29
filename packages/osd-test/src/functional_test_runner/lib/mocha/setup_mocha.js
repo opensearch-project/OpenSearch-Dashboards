@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import Mocha from 'mocha';
+import Mocha from 'mocha-next';
 import { relative } from 'path';
 import { REPO_ROOT } from '@osd/utils';
 

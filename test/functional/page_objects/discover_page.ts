@@ -42,7 +42,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const defaultFindTimeout = config.get('timeouts.find');
   const opensearchChart = getService('opensearchChart');
   const docTable = getService('docTable');
+  const dataGridTable = getService('dataGrid');
+  const comboBox = getService('comboBox');
 
+  /*
+   * This page is left unchanged since some of the other selenium tests, ex. dashboard tests, visualization tests
+   * are still using some of the below helper functions.
+   */
   class DiscoverPage {
     public async getChartTimespan() {
       const el = await find.byCssSelector('[data-test-subj="discoverIntervalDateRange"]');
@@ -100,7 +106,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
-      return await docTable.getHeaderFields('embeddedSavedSearchDocTable');
+      return await dataGridTable.getHeaderFields();
     }
 
     public async openLoadSavedSearchPanel() {
@@ -200,6 +206,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getDocHeader() {
+      const table = this.dataGrid;
       const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
       return await docHeader.getVisibleText();
     }
@@ -280,6 +287,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.click(`field-${field}`);
     }
 
+    public async clickFieldListItemDetails(field: string) {
+      return await testSubjects.click(`field-${field}-showDetails`);
+    }
+
     public async clickFieldSort(field: string) {
       return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
     }
@@ -340,18 +351,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async selectIndexPattern(indexPattern: string) {
-      await testSubjects.click('indexPattern-switch-link');
-      await find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
-      await find.clickByCssSelector(
-        `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
-      );
+    public async selectIndexPattern(indexPatternTitle: string) {
+      const dataExplorerComboBoxElement = await testSubjects.find('dataExplorerDSSelect');
+      await comboBox.setElement(dataExplorerComboBoxElement, indexPatternTitle);
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async removeHeaderColumn(name: string) {
-      await testSubjects.moveMouseTo(`docTableHeader-${name}`);
-      await testSubjects.click(`docTableRemoveHeader-${name}`);
+    public async removeHeaderColumn(columnName: string) {
+      await dataGridTable.clickRemoveColumn(columnName);
     }
 
     public async openSidebarFieldFilter() {
@@ -432,6 +439,111 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async clearSavedQuery() {
       await testSubjects.click('saved-query-management-clear-button');
+    }
+
+    /**
+     * Retrieves data grid table values.
+     *
+     * This function fetches the values present in a data grid table.
+     *
+     * @returns {Promise<string[][]>} A promise resolving to the table values.
+     */
+    public async getDataGridTableValues(): Promise<string[][]> {
+      return await dataGridTable.getDataGridTableValues();
+    }
+
+    /**
+     * Removes sorting from a specified column in a data grid.
+     *
+     * This function removes sorting of column if applied in the sort field.
+     *
+     * @param {string} columnName - The name of the column from which sorting should be removed.
+     * @returns {Promise<void>}
+     */
+    public async removeSort(columnName: string): Promise<void> {
+      const parentDiv = await testSubjects.find(
+        `euiDataGridColumnSorting-sortColumn-${columnName}`
+      );
+
+      // Within this parent div, locate the button with the specified aria-label using CSS and click it
+      const cssSelector = `.euiDataGridColumnSorting__button[aria-label^="Remove from data grid sort: ${columnName}"]`;
+      const buttonToRemoveSort = await parentDiv.findByCssSelector(cssSelector);
+      await buttonToRemoveSort.click();
+    }
+
+    /**
+     * Clicks on a list item within the table column header based on column name and title.
+     *
+     * This function searches for a list item via title associated with a given column name.
+     * Once the item is found, its associated button is clicked.
+     *
+     * @param {string} columnName - The name of the column.
+     * @param {string} title - The title of the list item to be clicked.
+     * @returns {Promise<void>}
+     * @throws Will throw an error if a clickable list item with the specified title is not found.
+     */
+    public async clickTableHeaderListItem(columnName: string, title: string): Promise<void> {
+      // locate the ul using the columnName
+      const ulElement = await testSubjects.find(`dataGridHeaderCellActionGroup-${columnName}`);
+      const $ = await ulElement.parseDomContent();
+
+      // loop through each <li> within the ul
+      const liElements = $('li').toArray();
+      let index = 0;
+
+      for (const liElement of liElements) {
+        const li = $(liElement);
+
+        // Check if the li contains the isClickable class substring
+        if (li.is('li[class*="euiListGroupItem-isClickable"]')) {
+          const span = li.find(`span[title="${title}"]`);
+
+          // If the span with the given title is found
+          if (span.length > 0) {
+            // find and click the button
+            const seleniumLiElement = await ulElement.findByCssSelector(
+              `li:nth-child(${index + 1}) button`
+            );
+            // Click on the located WebElement
+            await seleniumLiElement.click();
+            return;
+          }
+        }
+        index++;
+      }
+
+      throw new Error(
+        `Could not find a clickable list item for column "${columnName}" with list item "${title}".`
+      );
+    }
+
+    public async switchDiscoverTable(tableType: string) {
+      await retry.try(async () => {
+        const optionsButton = await testSubjects.find('discoverOptionsButton');
+        await optionsButton.click();
+
+        const switchButton = await testSubjects.find('discoverOptionsLegacySwitch');
+        const isLegacyChecked = (await switchButton.getAttribute('aria-checked')) === 'true';
+
+        if (tableType === 'new' && isLegacyChecked) {
+          await switchButton.click();
+        } else if (tableType === 'legacy' && !isLegacyChecked) {
+          await switchButton.click();
+        }
+      });
+
+      // Wait for the query input to be visible
+      await this.waitForQueryInput();
+    }
+
+    async waitForQueryInput() {
+      // Wait for the query input to be visible
+      await retry.try(async () => {
+        const queryInputVisible = await testSubjects.exists('queryInput');
+        if (!queryInputVisible) {
+          throw new Error('Query input not yet visible');
+        }
+      });
     }
   }
 

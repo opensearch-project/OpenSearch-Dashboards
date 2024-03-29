@@ -35,6 +35,8 @@ it('returns default tags when passed undefined', () => {
     Array [
       "v7dark",
       "v7light",
+      "v8dark",
+      "v8light",
     ]
   `);
 });

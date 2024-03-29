@@ -30,6 +30,7 @@
 
 import {
   EuiHeader,
+  EuiHeaderProps,
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
@@ -40,7 +41,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
-import React, { createRef, useState } from 'react';
+import React, { createRef, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
@@ -63,7 +64,8 @@ import { HomeLoader } from './home_loader';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
-
+import type { Logos } from '../../../../common/types';
+import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
@@ -89,7 +91,9 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   branding: ChromeBranding;
+  logos: Logos;
   survey: string | undefined;
+  sidecarConfig$: Observable<ISidecarConfig | undefined>;
 }
 
 export function Header({
@@ -101,11 +105,17 @@ export function Header({
   homeHref,
   branding,
   survey,
+  logos,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
   const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
+
+  const sidecarPaddingStyle = useMemo(() => {
+    return getOsdSidecarPaddingStyle(sidecarConfig);
+  }, [sidecarConfig]);
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
@@ -114,7 +124,9 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
-  const { useExpandedHeader = true, darkMode } = branding;
+  const { useExpandedHeader = true } = branding;
+
+  const expandedHeaderColorScheme: EuiHeaderProps['theme'] = 'dark';
 
   return (
     <>
@@ -123,7 +135,8 @@ export function Header({
           {useExpandedHeader && (
             <EuiHeader
               className="expandedHeader"
-              theme="dark"
+              theme={expandedHeaderColorScheme}
+              style={sidecarPaddingStyle}
               position="fixed"
               sections={[
                 {
@@ -134,6 +147,9 @@ export function Header({
                       navLinks$={observables.navLinks$}
                       navigateToApp={application.navigateToApp}
                       branding={branding}
+                      logos={logos}
+                      /* This color-scheme should match the `theme` of the parent EuiHeader */
+                      backgroundColorScheme={expandedHeaderColorScheme}
                     />,
                   ],
                   borders: 'none',
@@ -159,7 +175,7 @@ export function Header({
             />
           )}
 
-          <EuiHeader position="fixed" className="primaryHeader">
+          <EuiHeader position="fixed" className="primaryHeader" style={sidecarPaddingStyle}>
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
                 <EuiHeaderSectionItemButton
@@ -194,6 +210,7 @@ export function Header({
                   navLinks$={observables.navLinks$}
                   navigateToApp={application.navigateToApp}
                   branding={branding}
+                  logos={logos}
                   loadingCount$={observables.loadingCount$}
                 />
               </EuiHeaderSectionItem>
@@ -202,7 +219,6 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
-              isDarkMode={darkMode}
             />
 
             <EuiHeaderSectionItem border="none">
@@ -219,7 +235,7 @@ export function Header({
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem border="left">
-                <HeaderNavControls navControls$={observables.navControlsRight$} />
+                <HeaderNavControls side="right" navControls$={observables.navControlsRight$} />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem border="left">
@@ -254,7 +270,7 @@ export function Header({
             }
           }}
           customNavLink$={observables.customNavLink$}
-          branding={branding}
+          logos={logos}
         />
       </header>
     </>

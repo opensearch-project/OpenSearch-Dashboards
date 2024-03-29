@@ -7,11 +7,15 @@ import {
   createSingleDataSource,
   deleteDataSourceById,
   deleteMultipleDataSources,
+  extractRegisteredAuthTypeCredentials,
   getDataSourceById,
   getDataSources,
+  getDefaultAuthMethod,
   isValidUrl,
   testConnection,
   updateDataSourceById,
+  handleSetDefaultDatasource,
+  setFirstDataSourceAsDefault,
 } from './utils';
 import { coreMock } from '../../../../core/public/mocks';
 import {
@@ -22,11 +26,21 @@ import {
   mockDataSourceAttributesWithAuth,
   mockErrorResponseForSavedObjectsCalls,
   mockResponseForSavedObjectsCalls,
+  mockUiSettingsCalls,
+  getSingleDataSourceResponse,
 } from '../mocks';
-import { AuthType } from '../types';
+import {
+  AuthType,
+  noAuthCredentialAuthMethod,
+  sigV4AuthMethod,
+  usernamePasswordAuthMethod,
+} from '../types';
 import { HttpStart } from 'opensearch-dashboards/public';
+import { AuthenticationMethod, AuthenticationMethodRegistery } from '../auth_registry';
+import { deepEqual } from 'assert';
 
 const { savedObjects } = coreMock.createStart();
+const { uiSettings } = coreMock.createStart();
 
 describe('DataSourceManagement: Utils.ts', () => {
   describe('Get data source', () => {
@@ -218,5 +232,267 @@ describe('DataSourceManagement: Utils.ts', () => {
 
     /* True cases: port number scenario*/
     expect(isValidUrl('http://192.168.1.1:1234/')).toBeTruthy();
+  });
+
+  describe('Check default auth method', () => {
+    test('default auth method is Username & Password when Username & Password is enabled', () => {
+      const authMethodCombinationsToBeTested = [
+        [usernamePasswordAuthMethod],
+        [sigV4AuthMethod, usernamePasswordAuthMethod],
+        [noAuthCredentialAuthMethod, usernamePasswordAuthMethod],
+        [noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod],
+      ];
+
+      authMethodCombinationsToBeTested.forEach((authOptions) => {
+        const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+
+        authOptions.forEach((authMethod) => {
+          authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        });
+
+        expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(
+          AuthType.UsernamePasswordType
+        );
+      });
+    });
+
+    test('default auth method is first one in AuthList when Username & Password is not enabled', () => {
+      const authMethodCombinationsToBeTested = [
+        [sigV4AuthMethod],
+        [noAuthCredentialAuthMethod],
+        [sigV4AuthMethod, noAuthCredentialAuthMethod],
+      ];
+
+      authMethodCombinationsToBeTested.forEach((authOptions) => {
+        const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+
+        authOptions.forEach((authMethod) => {
+          authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+        });
+
+        expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(authOptions[0].name);
+      });
+    });
+
+    test('default auth type is NoAuth when no auth options registered in authenticationMethodRegistery, this should not happen in real customer scenario for MD', () => {
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(AuthType.NoAuth);
+    });
+  });
+  describe('handle set default datasource', () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Reset all mock calls before each test
+    });
+    test('should set default datasource when it does not have default datasource ', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should not set default datasource when it has default datasouce', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'test');
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+  });
+  describe('set first aataSource as default', () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Reset all mock calls before each test
+    });
+    test('should set defaultDataSource if more than one data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should set defaultDataSource if only one data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getSingleDataSourceResponse);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should not set defaultDataSource if no data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.remove).toHaveBeenCalled();
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+    test('should not set defaultDataSource if no data source exists and no default datasouce', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, false);
+      expect(uiSettings.remove).not.toHaveBeenCalled();
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+  });
+  describe('Check extractRegisteredAuthTypeCredentials method', () => {
+    test('Should extract credential field successfully', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        credentialFormField: {
+          userNameRegistered: '',
+          passWordRegistered: '',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: 'some filled in password from registed auth credential form',
+      } as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: 'some filled in password from registed auth credential form',
+      };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+
+    test('Should extract empty object when no credentialFormField registered ', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+      } as { [key: string]: string };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, {}));
+    });
+
+    test('Should fill in empty value when credentail state not have registered field', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        credentialFormField: {
+          userNameRegistered: '',
+          passWordRegistered: '',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+      } as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: '',
+      };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+
+    test('Should inherit value from registered field when credential state not have registered field', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        credentialFormField: {
+          registeredField: 'some value',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {} as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        registeredField: 'some value',
+      };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+
+    test('Should not inherit value from registered field when credentail state have registered field', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        credentialFormField: {
+          registeredField: 'Some value',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        registeredField: 'some other values',
+      } as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        registeredField: 'some other values',
+      };
+
+      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistery
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
   });
 });

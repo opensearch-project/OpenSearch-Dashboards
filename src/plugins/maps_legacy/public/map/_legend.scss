@@ -2,7 +2,7 @@
   @include fontSize(11px);
   @include euiBottomShadowMedium($color: $euiShadowColorLarge, $opacity: 0.1);
 
-  font-family: $euiFontFamily;
+  font-family: var(--font-text);
   font-weight: $euiFontWeightMedium;
   line-height: $euiLineHeight;
   color: $euiColorDarkShade;

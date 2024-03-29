@@ -41,7 +41,9 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await browser.setWindowSize(1200, 800);
       await opensearchArchiver.loadIfNeeded('logstash_functional');
       await opensearchArchiver.load('visualize');
-      await opensearchDashboardsServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+      await opensearchDashboardsServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+      });
       await PageObjects.common.navigateToApp('discover');
     });
 

@@ -106,6 +106,9 @@ describe(`VegaParser._setDefaultColors`, () => {
             fill: euiThemeVars.euiColorDarkestShade,
           },
         },
+        text: {
+          fill: euiThemeVars.euiTextColor,
+        },
         title: {
           color: euiThemeVars.euiColorDarkestShade,
         },
@@ -132,6 +135,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         rule: { stroke: '#54B399' },
         shape: { stroke: '#54B399' },
         symbol: { fill: '#54B399' },
+        text: { fill: euiThemeVars.euiTextColor },
         trail: { fill: '#54B399' },
         style: {
           'group-title': {

@@ -34,7 +34,7 @@ import { readFileSync } from 'fs';
 import { fromNode as fcb } from 'bluebird';
 import { parseString } from 'xml2js';
 import del from 'del';
-import Mocha from 'mocha';
+import Mocha from 'mocha-next';
 import expect from '@osd/expect';
 import { getUniqueJunitReportPath } from '@osd/test';
 

@@ -34,6 +34,8 @@ import {
   SavedObjectOpenSearchDashboardsServices,
 } from '../../../saved_objects/public';
 
+export const SAVED_OBJECT_TYPE = 'search';
+
 export function createSavedSearchClass(services: SavedObjectOpenSearchDashboardsServices) {
   const SavedObjectClass = createSavedObjectClass(services);
 
@@ -78,7 +80,7 @@ export function createSavedSearchClass(services: SavedObjectOpenSearchDashboards
       });
       this.showInRecentlyAccessed = true;
       this.id = id;
-      this.getFullPath = () => `/app/discover#/view/${String(id)}`;
+      this.getFullPath = () => `/app/discover#/view/${String(this.id)}`;
     }
   }
 

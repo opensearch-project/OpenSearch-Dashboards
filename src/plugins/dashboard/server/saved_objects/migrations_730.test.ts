@@ -68,6 +68,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
         "panelsJSON": "[{\\"id\\":\\"1\\",\\"type\\":\\"visualization\\",\\"foo\\":true},{\\"id\\":\\"2\\",\\"type\\":\\"visualization\\",\\"bar\\":true}]",
         "timeRestore": false,
         "title": "hi",
+        "uiStateJSON": "{}",
         "useMargins": true,
         "version": 1,
       },

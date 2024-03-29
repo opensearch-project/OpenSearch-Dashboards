@@ -28,8 +28,10 @@
  * under the License.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { first, filter, take, switchMap } from 'rxjs/operators';
+import { Subject, Observable, BehaviorSubject } from 'rxjs';
+import { first, filter, take, switchMap, map, distinctUntilChanged } from 'rxjs/operators';
+import { isDeepStrictEqual } from 'util';
+
 import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
@@ -62,7 +64,7 @@ import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
 import { registerRoutes } from './routes';
-import { ServiceStatus } from '../status';
+import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationOpenSearchClient } from './migrations/core/';
 /**
@@ -175,6 +177,12 @@ export interface SavedObjectsServiceSetup {
   setRepositoryFactoryProvider: (
     respositoryFactoryProvider: SavedObjectRepositoryFactoryProvider
   ) => void;
+
+  /**
+   * Allows a plugin to specify a custom status dependent on its own criteria.
+   * Completely overrides the default status.
+   */
+  setStatus(status$: Observable<ServiceStatus<SavedObjectStatusMeta>>): void;
 }
 
 /**
@@ -301,6 +309,11 @@ export class SavedObjectsService
   private started = false;
 
   private respositoryFactoryProvider?: SavedObjectRepositoryFactoryProvider;
+  private savedObjectServiceCustomStatus$?: Observable<ServiceStatus<SavedObjectStatusMeta>>;
+  private savedObjectServiceStatus$ = new BehaviorSubject<ServiceStatus<SavedObjectStatusMeta>>({
+    level: ServiceStatusLevels.unavailable,
+    summary: `waiting`,
+  });
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
@@ -329,10 +342,7 @@ export class SavedObjectsService
     });
 
     return {
-      status$: calculateStatus$(
-        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
-        setupDeps.opensearch.status$
-      ),
+      status$: this.savedObjectServiceStatus$.asObservable(),
       setClientFactoryProvider: (provider) => {
         if (this.started) {
           throw new Error('cannot call `setClientFactoryProvider` after service startup.');
@@ -368,6 +378,17 @@ export class SavedObjectsService
         }
         this.respositoryFactoryProvider = repositoryProvider;
       },
+      setStatus: (status$) => {
+        if (this.started) {
+          throw new Error('cannot call `setStatus` after service startup.');
+        }
+        if (this.savedObjectServiceCustomStatus$) {
+          throw new Error(
+            'custom saved object service status is already set, and can only be set once'
+          );
+        }
+        this.savedObjectServiceCustomStatus$ = status$;
+      },
     };
   }
 
@@ -380,6 +401,29 @@ export class SavedObjectsService
     }
 
     this.logger.debug('Starting SavedObjects service');
+
+    if (this.savedObjectServiceCustomStatus$) {
+      this.savedObjectServiceCustomStatus$
+        .pipe(
+          map((savedObjectServiceCustomStatus) => {
+            return savedObjectServiceCustomStatus;
+          }),
+          distinctUntilChanged<ServiceStatus<SavedObjectStatusMeta>>(isDeepStrictEqual)
+        )
+        .subscribe((value) => this.savedObjectServiceStatus$.next(value));
+    } else {
+      calculateStatus$(
+        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
+        this.setupDeps.opensearch.status$
+      )
+        .pipe(
+          map((defaultstatus) => {
+            return defaultstatus;
+          }),
+          distinctUntilChanged<ServiceStatus<SavedObjectStatusMeta>>(isDeepStrictEqual)
+        )
+        .subscribe((value) => this.savedObjectServiceStatus$.next(value));
+    }
 
     const opensearchDashboardsConfig = await this.coreContext.configService
       .atPath<OpenSearchDashboardsConfigType>('opensearchDashboards')
@@ -492,7 +536,9 @@ export class SavedObjectsService
     };
   }
 
-  public async stop() {}
+  public async stop() {
+    this.savedObjectServiceStatus$.unsubscribe();
+  }
 
   private createMigrator(
     opensearchDashboardsConfig: OpenSearchDashboardsConfigType,

@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import fs from 'fs';
-import Path from 'path';
+import { existsSync, unlinkSync } from 'fs';
+import { resolve, relative } from 'path';
 import { inspect } from 'util';
 
 import { CliError } from './errors';
@@ -43,10 +43,12 @@ import {
 } from './package_json';
 import {
   installInDir,
+  patchFile,
   runScriptInPackage,
   runScriptInPackageStreaming,
   yarnWorkspacesInfo,
 } from './scripts';
+import { buildTargetedPackage, BuildTargets, BuildTargetTypes } from './targeted_build';
 
 interface BuildConfig {
   skip?: boolean;
@@ -84,6 +86,10 @@ export class Project {
   public readonly devDependencies: IPackageDependencies;
   /** scripts defined in the package.json file for the project [name => body] */
   public readonly scripts: IPackageScripts;
+  /** custom definitions for the project, @osd/pm: { key: value } */
+  public readonly customDefinitions: IPackageJson;
+  /** build targets from the custom definitions, @osd/pm: { node: true, web: true } */
+  public readonly buildTargets: BuildTargetTypes[];
 
   public isWorkspaceRoot = false;
   public isWorkspaceProject = false;
@@ -92,9 +98,9 @@ export class Project {
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
 
-    this.packageJsonLocation = Path.resolve(this.path, 'package.json');
-    this.nodeModulesLocation = Path.resolve(this.path, 'node_modules');
-    this.targetLocation = Path.resolve(this.path, 'target');
+    this.packageJsonLocation = resolve(this.path, 'package.json');
+    this.nodeModulesLocation = resolve(this.path, 'node_modules');
+    this.targetLocation = resolve(this.path, 'target');
 
     this.version = this.json.version;
     this.productionDependencies = this.json.dependencies || {};
@@ -106,6 +112,12 @@ export class Project {
     this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
 
     this.scripts = this.json.scripts || {};
+    this.customDefinitions = this.json['@osd/pm'] || {};
+
+    this.buildTargets = [];
+    for (const target of BuildTargets) {
+      if (this.customDefinitions[target]) this.buildTargets.push(target);
+    }
   }
 
   public get name(): string {
@@ -119,7 +131,7 @@ export class Project {
     if (dependentProjectIsInWorkspace) {
       expectedVersionInPackageJson = project.json.version;
     } else {
-      const relativePathToProject = normalizePath(Path.relative(this.path, project.path));
+      const relativePathToProject = normalizePath(relative(this.path, project.path));
       expectedVersionInPackageJson = `link:${relativePathToProject}`;
     }
 
@@ -157,7 +169,7 @@ export class Project {
    * instead of everything located in the project directory.
    */
   public getIntermediateBuildDirectory() {
-    return Path.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+    return resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
   }
 
   public getCleanConfig(): CleanConfig {
@@ -172,6 +184,10 @@ export class Project {
     return name in this.scripts;
   }
 
+  public hasBuildTargets() {
+    return this.buildTargets.length > 0;
+  }
+
   public getExecutables(): { [key: string]: string } {
     const raw = this.json.bin;
 
@@ -181,14 +197,14 @@ export class Project {
 
     if (typeof raw === 'string') {
       return {
-        [this.name]: Path.resolve(this.path, raw),
+        [this.name]: resolve(this.path, raw),
       };
     }
 
     if (typeof raw === 'object') {
       const binsConfig: { [k: string]: string } = {};
       for (const binName of Object.keys(raw)) {
-        binsConfig[binName] = Path.resolve(this.path, raw[binName]);
+        binsConfig[binName] = resolve(this.path, raw[binName]);
       }
       return binsConfig;
     }
@@ -220,6 +236,18 @@ export class Project {
     });
   }
 
+  public buildForTargets(options: { sourceMaps?: boolean } = {}) {
+    if (!this.hasBuildTargets()) {
+      log.warning(`There are no build targets defined for [${this.name}]`);
+      return false;
+    }
+
+    return buildTargetedPackage({
+      pkg: this,
+      sourceMaps: options.sourceMaps,
+    });
+  }
+
   public hasDependencies() {
     return Object.keys(this.allDependencies).length > 0;
   }
@@ -229,6 +257,51 @@ export class Project {
 
     log.write('');
     await installInDir(this.path, extraArgs);
+    log.write('');
+
+    await this.removeExtraneousNodeModules();
+  }
+
+  /**
+   * Install a specific version of a dependency and update the package.json.
+   * When a range is not specified, ^<version> is used. The range is then
+   * placed in the package.json with intentionally no validation.
+   */
+  public async installDependencyVersion(
+    depName: string,
+    version: string,
+    dev: boolean = false,
+    range?: string
+  ) {
+    log.info(`[${this.name}] running yarn to install ${depName}@${version}`);
+
+    log.write('');
+
+    const rangeToUse = range || `^${version}`;
+
+    const extraArgs = [`${depName}@${version}`];
+    if (dev) extraArgs.push('--dev');
+
+    if (this.isWorkspaceProject) {
+      await installInDir(this.path);
+    } else {
+      await installInDir(this.path, extraArgs, true);
+    }
+
+    log.info(`[${this.name}] updating manifests with ${depName}@${rangeToUse}`);
+
+    await patchFile(
+      this.packageJsonLocation,
+      `"${depName}": "${version}"`,
+      `"${depName}": "${rangeToUse}"`
+    );
+    // The lock-file of workspace packages are symlinked to the root project's and editing the one in the project suffices
+    await patchFile(
+      resolve(this.path, 'yarn.lock'),
+      `${depName}@${version}`,
+      `${depName}@${rangeToUse}`
+    );
+
     log.write('');
 
     await this.removeExtraneousNodeModules();
@@ -256,13 +329,13 @@ export class Project {
 
     unusedWorkspaces.forEach((name) => {
       const { dependencies, devDependencies } = this.json;
-      const nodeModulesPath = Path.resolve(this.nodeModulesLocation, name);
+      const nodeModulesPath = resolve(this.nodeModulesLocation, name);
       const isDependency = dependencies && dependencies.hasOwnProperty(name);
       const isDevDependency = devDependencies && devDependencies.hasOwnProperty(name);
 
-      if (!isDependency && !isDevDependency && fs.existsSync(nodeModulesPath)) {
+      if (!isDependency && !isDevDependency && existsSync(nodeModulesPath)) {
         log.debug(`No dependency on ${name}, removing link in node_modules`);
-        fs.unlinkSync(nodeModulesPath);
+        unlinkSync(nodeModulesPath);
       }
     });
   }

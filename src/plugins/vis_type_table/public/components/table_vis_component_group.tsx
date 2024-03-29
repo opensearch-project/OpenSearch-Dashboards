@@ -4,8 +4,8 @@
  */
 
 import React, { memo } from 'react';
-
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { EuiFlexItem } from '@elastic/eui';
 import { TableGroup } from '../table_vis_response_handler';
 import { TableVisConfig } from '../types';
 import { TableVisComponent } from './table_vis_component';
@@ -23,7 +23,7 @@ export const TableVisComponentGroup = memo(
     return (
       <>
         {tableGroups.map(({ table, title }) => (
-          <div key={title} className="visTable__group">
+          <EuiFlexItem key={title} className="visTable__group" grow={false}>
             <TableVisComponent
               title={title}
               table={table}
@@ -31,7 +31,7 @@ export const TableVisComponentGroup = memo(
               event={event}
               uiState={uiState}
             />
-          </div>
+          </EuiFlexItem>
         ))}
       </>
     );

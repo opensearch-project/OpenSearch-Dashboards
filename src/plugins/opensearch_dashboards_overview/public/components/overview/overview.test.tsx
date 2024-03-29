@@ -33,6 +33,7 @@ import React from 'react';
 import { Overview } from './overview';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
+import { getLogosMock } from '../../../../../core/common/mocks';
 
 jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -42,6 +43,7 @@ jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', ()
       uiSettings: { get: jest.fn() },
     },
   }),
+  withOpenSearchDashboards: jest.fn((component: React.Component) => component),
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   OverviewPageHeader: jest.fn().mockReturnValue(<></>),
@@ -163,46 +165,89 @@ const mockFeatures = [
   },
 ];
 
-const mockBranding = {
-  darkMode: false,
-  mark: {
-    defaultUrl: '/defaultModeUrl',
-    darkModeUrl: '/darkModeUrl',
-  },
-};
+const makeProps = () => ({
+  newsFetchResult: mockNewsFetchResult,
+  solutions: mockSolutions,
+  features: mockFeatures,
+  logos: getLogosMock.default,
+});
 
 describe('Overview', () => {
-  test('render', () => {
-    const component = shallowWithIntl(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={mockSolutions}
-        features={mockFeatures}
-        branding={mockBranding}
-      />
-    );
-    expect(component).toMatchSnapshot();
-  });
-  test('without solutions', () => {
-    const component = shallowWithIntl(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={[]}
-        features={mockFeatures}
-        branding={mockBranding}
-      />
-    );
-    expect(component).toMatchSnapshot();
-  });
-  test('without features', () => {
-    const component = shallowWithIntl(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={mockSolutions}
-        features={[]}
-        branding={mockBranding}
-      />
-    );
-    expect(component).toMatchSnapshot();
+  describe('renders', () => {
+    it('with news, solutions, and features', () => {
+      const props = {
+        ...makeProps(),
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('with news, without solutions, and with features', () => {
+      const props = {
+        ...makeProps(),
+        solutions: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('with news, with solutions, and without features', () => {
+      const props = {
+        ...makeProps(),
+        features: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('without news, with solutions and features', () => {
+      const props = {
+        ...makeProps(),
+        newsFetchResult: null,
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('with news without solutions and without features', () => {
+      const props = {
+        ...makeProps(),
+        features: [],
+        solutions: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('without news and solutions, with features', () => {
+      const props = {
+        ...makeProps(),
+        newsFetchResult: null,
+        solutions: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('without news and features, with solutions', () => {
+      const props = {
+        ...makeProps(),
+        newsFetchResult: null,
+        features: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
+
+    it('without news, solutions, and features', () => {
+      const props = {
+        ...makeProps(),
+        newsFetchResult: null,
+        features: [],
+        solutions: [],
+      };
+      const component = shallowWithIntl(<Overview {...props} />);
+      expect(component).toMatchSnapshot();
+    });
   });
 });

@@ -34,8 +34,6 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
 import { getServices } from '../opensearch_dashboards_services';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { getDataSources } from '../../../../data_source_management/public/components/utils';
 
 import {
   EuiPage,
@@ -48,12 +46,12 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiPageBody,
-  EuiComboBox,
 } from '@elastic/eui';
 
 import { getTutorials } from '../load_tutorials';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
+import { DataSourceSelector } from '../../../../data_source_management/public';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -61,9 +59,6 @@ const SAMPLE_DATA_TAB_ID = 'sampleData';
 const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const addDataTitle = i18n.translate('home.breadcrumbs.addDataTitle', {
   defaultMessage: 'Add data',
-});
-const localCluster = i18n.translate('home.dataSource.localCluster', {
-  defaultMessage: 'Local Cluster',
 });
 
 class TutorialDirectoryUi extends React.Component {
@@ -88,7 +83,7 @@ class TutorialDirectoryUi extends React.Component {
       tutorialCards: [],
       notices: getServices().tutorialService.getDirectoryNotices(),
       isDataSourceEnabled: !!getServices().dataSource,
-      selectedOption: [{ label: localCluster }],
+      isLocalClusterHidden: getServices().dataSource?.hideLocalCluster ?? false,
     };
   }
 
@@ -160,31 +155,6 @@ class TutorialDirectoryUi extends React.Component {
       return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
 
-    if (this.state.isDataSourceEnabled) {
-      getDataSources(getServices().savedObjectsClient)
-        .then((fetchedDataSources) => {
-          if (fetchedDataSources?.length) {
-            const dataSourceOptions = fetchedDataSources.map((dataSource) => ({
-              id: dataSource.id,
-              label: dataSource.title,
-            }));
-
-            dataSourceOptions.push({ label: localCluster });
-            this.setState({
-              // eslint-disable-line react/no-did-mount-set-state
-              dataSources: dataSourceOptions,
-            });
-          }
-        })
-        .catch(() => {
-          getServices().toastNotifications.addWarning(
-            i18n.translate('home.dataSource.fetchDataSourceError', {
-              defaultMessage: 'Unable to fetch existing data sources',
-            })
-          );
-        });
-    }
-
     this.setState({
       // eslint-disable-line react/no-did-mount-set-state
       tutorialCards: tutorialCards,
@@ -195,12 +165,6 @@ class TutorialDirectoryUi extends React.Component {
     this.setState({
       selectedTabId: id,
     });
-  };
-
-  onSelectedDataSourceChange = (e) => {
-    this.setState({ selectedOption: e });
-    const dataSourceId = e[0] ? e[0].id : undefined;
-    this.setState({ selectedDataSourceId: dataSourceId });
   };
 
   renderTabs = () => {
@@ -222,6 +186,7 @@ class TutorialDirectoryUi extends React.Component {
           addBasePath={this.props.addBasePath}
           dataSourceId={this.state.selectedDataSourceId}
           isDataSourceEnabled={this.state.isDataSourceEnabled}
+          isLocalClusterHidden={this.state.isLocalClusterHidden}
         />
       );
     }
@@ -255,25 +220,22 @@ class TutorialDirectoryUi extends React.Component {
     );
   };
 
+  onSelectedDataSourceChange = (e) => {
+    const dataSourceId = e[0] ? e[0].id : undefined;
+    this.setState({ selectedDataSourceId: dataSourceId });
+  };
+
   renderDataSourceSelector = () => {
-    const { isDataSourceEnabled, dataSources, selectedOption } = this.state;
+    const { isDataSourceEnabled, isLocalClusterHidden } = this.state;
 
     return isDataSourceEnabled ? (
-      <div className="sampledataSourcePicker">
-        <EuiComboBox
-          aria-label={i18n.translate('sampleData.DataSourceComboBoxAriaLabel', {
-            defaultMessage: 'Select a Data Source',
-          })}
-          placeholder={i18n.translate('sampleData.DataSourceComboBoxPlaceholder', {
-            defaultMessage: 'Select a Data Source',
-          })}
-          singleSelection={{ asPlainText: true }}
-          options={dataSources}
-          selectedOptions={selectedOption}
-          onChange={this.onSelectedDataSourceChange}
-          prepend="DataSource"
-          compressed
-          isDisabled={!isDataSourceEnabled}
+      <div className="sampleDataSourceSelector">
+        <DataSourceSelector
+          savedObjectsClient={getServices().savedObjectsClient}
+          notifications={getServices().toastNotifications}
+          onSelectedDataSource={this.onSelectedDataSourceChange}
+          disabled={!isDataSourceEnabled}
+          hideLocalCluster={isLocalClusterHidden}
         />
       </div>
     ) : null;
