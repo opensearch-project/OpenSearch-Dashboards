@@ -319,6 +319,8 @@ export {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
+  updateDataSourceNameInVegaSpec,
+  extractVegaSpecFromSavedObject,
 } from './saved_objects';
 
 export {
