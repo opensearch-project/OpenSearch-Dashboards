@@ -7,7 +7,7 @@ import { parse, stringify } from 'hjson';
 import { SavedObject, SavedObjectsClientContract } from '../types';
 
 /**
- * Given a Vega spec, the new datasource (by name), and spacing,
+ * Given a Vega spec, the new datasource (by name), and spacing, update the Vega spec to add the new datasource name to each local cluster query
  *
  * @param {string} spec - the stringified Vega spec (HJSON or JSON)
  * @param {string} newDataSourceName - the datasource name to append
