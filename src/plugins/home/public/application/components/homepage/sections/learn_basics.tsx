@@ -21,15 +21,13 @@ import { getServices } from '../../../opensearch_dashboards_services';
 import '../_homepage.scss';
 
 const render = renderFn(() => {
-  const [isExpanded, setExpanded] = useState(true);
-  const toggleExpanded = () => setExpanded((expanded) => !expanded);
   const services = getServices();
   const navigateToUrl = services.application.navigateToUrl;
 
-  const content = (
+  return (
     <div>
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem grow={1}>
           <EuiCard
             layout="horizontal"
             icon={<EuiIcon size="xl" type="document" />}
@@ -48,7 +46,7 @@ const render = renderFn(() => {
             }
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={1}>
           <EuiCard
             layout="horizontal"
             icon={<EuiIcon size="xl" type="document" />}
@@ -155,46 +153,6 @@ const render = renderFn(() => {
       </EuiFlexGroup>
     </div>
   );
-
-  return (
-    <>
-      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow>
-          <EuiTitle size="m">
-            <h2>
-              {i18n.translate('home.sections.learnBasics.title', {
-                defaultMessage: 'Learn OpenSearch basics',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            href="https://opensearch.org/docs/latest/"
-            target="_blank"
-            className="learn-basics-links"
-          >
-            See all documentation
-          </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggleExpanded}
-            size="s"
-            iconSize="m"
-            color="text"
-            aria-label={
-              isExpanded
-                ? i18n.translate('home.section.collapse', { defaultMessage: 'Collapse section' })
-                : i18n.translate('home.section.expand', { defaultMessage: 'Expand section' })
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {isExpanded && content}
-    </>
-  );
 });
 
 export const learnBasicsSection: Section = {
@@ -203,4 +161,13 @@ export const learnBasicsSection: Section = {
     defaultMessage: 'Learn OpenSearch basics',
   }),
   render,
+  headerComponent: (
+    <EuiLink
+      href="https://opensearch.org/docs/latest/"
+      target="_blank"
+      className="learn-basics-links"
+    >
+      See all documentation
+    </EuiLink>
+  ),
 };

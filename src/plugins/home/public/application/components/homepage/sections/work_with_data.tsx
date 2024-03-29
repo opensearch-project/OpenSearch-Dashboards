@@ -19,8 +19,6 @@ import { renderFn } from './utils';
 import { getServices } from '../../../opensearch_dashboards_services';
 
 const render = renderFn(() => {
-  const [isExpanded, setExpanded] = useState(true);
-  const toggleExpanded = () => setExpanded((expanded) => !expanded);
   const services = getServices();
   const navigateToApp = services.application.navigateToApp;
   const navigateToUrl = services.application.navigateToUrl;
@@ -36,7 +34,7 @@ const render = renderFn(() => {
     });
   });
 
-  const content = (
+  return (
     <EuiFlexGroup wrap direction="row" alignItems="stretch">
       <EuiFlexItem>
         <EuiCard
@@ -95,6 +93,12 @@ const render = renderFn(() => {
               defaultMessage: 'with integrations',
             })}
             onClick={() => navigateToApp('integrations')}
+            image={
+              <EuiImage
+                src={services.addBasePath(`/plugins/home/assets/integration.png`)}
+                alt="Integration image"
+              />
+            }
           />
         </EuiFlexItem>
       )}
@@ -120,37 +124,6 @@ const render = renderFn(() => {
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-
-  return (
-    <>
-      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow>
-          <EuiTitle size="m">
-            <h2>
-              {i18n.translate('home.sections.workWithData.title', {
-                defaultMessage: 'Start working with data',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggleExpanded}
-            size="s"
-            iconSize="m"
-            color="text"
-            aria-label={
-              isExpanded
-                ? i18n.translate('home.section.collapse', { defaultMessage: 'Collapse section' })
-                : i18n.translate('home.section.expand', { defaultMessage: 'Expand section' })
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {isExpanded && content}
-    </>
   );
 });
 

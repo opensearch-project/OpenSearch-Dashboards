@@ -23,6 +23,7 @@ export interface Section {
   id: string;
   title: string;
   render: RenderFn;
+  headerComponent?: React.ReactNode;
 }
 
 export interface Homepage {

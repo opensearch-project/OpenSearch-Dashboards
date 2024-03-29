@@ -196,9 +196,9 @@ const Content = () => {
   return (
     <>
       {hero && <HeroSection render={hero.render} />}
-      {sections?.map(({ render, title }, i) => (
+      {sections?.map(({ render, title, headerComponent }, i) => (
         <>
-          <Section key={i} title={title} render={render} />
+          <Section key={i} title={title} render={render} headerComponent={headerComponent} />
           <EuiHorizontalRule />
         </>
       ))}
