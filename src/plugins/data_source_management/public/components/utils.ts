@@ -3,14 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpStart, SavedObjectsClientContract, SavedObject } from 'src/core/public';
+import {
+  HttpStart,
+  SavedObjectsClientContract,
+  SavedObject,
+  IUiSettingsClient,
+} from 'src/core/public';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
   defaultAuthType,
   noAuthCredentialAuthMethod,
 } from '../types';
-import { AuthenticationMethodRegistery } from '../auth_registry';
+import { AuthenticationMethodRegistry } from '../auth_registry';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -47,6 +52,30 @@ export async function getDataSourcesWithFields(
   });
 
   return response?.savedObjects;
+}
+
+export async function handleSetDefaultDatasource(
+  savedObjectsClient: SavedObjectsClientContract,
+  uiSettings: IUiSettingsClient
+) {
+  if (uiSettings.get('defaultDataSource', null) === null) {
+    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
+  }
+}
+
+export async function setFirstDataSourceAsDefault(
+  savedObjectsClient: SavedObjectsClientContract,
+  uiSettings: IUiSettingsClient,
+  exists: boolean
+) {
+  if (exists) {
+    uiSettings.remove('defaultDataSource');
+  }
+  const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
+  if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
+    const datasourceId = listOfDataSources[0].id;
+    return await uiSettings.set('defaultDataSource', datasourceId);
+  }
 }
 
 export async function getDataSourceById(
@@ -150,17 +179,17 @@ export const isValidUrl = (endpoint: string) => {
 };
 
 export const getDefaultAuthMethod = (
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
-  const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
+  const registeredAuthMethods = authenticationMethodRegistry.getAllAuthenticationMethods();
 
   const defaultAuthMethod =
     registeredAuthMethods.length > 0
-      ? authenticationMethodRegistery.getAuthenticationMethod(registeredAuthMethods[0].name)
+      ? authenticationMethodRegistry.getAuthenticationMethod(registeredAuthMethods[0].name)
       : noAuthCredentialAuthMethod;
 
   const initialSelectedAuthMethod =
-    authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
+    authenticationMethodRegistry.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
 
   return initialSelectedAuthMethod;
 };
@@ -168,15 +197,15 @@ export const getDefaultAuthMethod = (
 export const extractRegisteredAuthTypeCredentials = (
   currentCredentialState: { [key: string]: string },
   authType: string,
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
   const registeredCredentials = {} as { [key: string]: string };
   const registeredCredentialField =
-    authenticationMethodRegistery.getAuthenticationMethod(authType)?.credentialFormField ?? {};
+    authenticationMethodRegistry.getAuthenticationMethod(authType)?.credentialFormField ?? {};
 
-  Object.keys(registeredCredentialField).forEach((credentialFiled) => {
-    registeredCredentials[credentialFiled] =
-      currentCredentialState[credentialFiled] ?? registeredCredentialField[credentialFiled];
+  Object.keys(registeredCredentialField).forEach((credentialField) => {
+    registeredCredentials[credentialField] =
+      currentCredentialState[credentialField] ?? registeredCredentialField[credentialField];
   });
 
   return registeredCredentials;
