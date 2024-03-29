@@ -55,7 +55,7 @@ export function parseClientOptions(
       config.ssl?.certificateAuthorities
     );
 
-    sslConfig.ca = certificateAuthorities || [];
+    sslConfig.ca = certificateAuthorities;
   }
 
   const configOptions: ConfigOptions = {
