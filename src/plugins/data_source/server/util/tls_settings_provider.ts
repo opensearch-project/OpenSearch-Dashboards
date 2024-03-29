@@ -8,7 +8,7 @@ import { readFileSync } from 'fs';
 export const readCertificateAuthorities = (
   listOfCertificateAuthorities: string | string[] | undefined
 ) => {
-  let certificateAuthorities: string[] | undefined = [];
+  let certificateAuthorities: string[] | undefined;
 
   const addCertificateAuthorities = (ca: string[]) => {
     if (ca && ca.length) {
