@@ -281,6 +281,14 @@
 #    'ff00::/8',
 # ]
 
+# Optional setting that enables you to specify a path to PEM files for the certificate
+# authority for your connected datasources.
+#data_source.ssl.certificateAuthorities: [ "/path/to/your/CA.pem" ]
+
+# To disregard the validity of SSL certificates for connected data sources, change this setting's value to 'none'.
+# Possible values include full, certificate and none
+#data_source.ssl.verificationMode: full
+
 # Set enabled false to hide authentication method in OpenSearch Dashboards.
 # If this setting is commented then all 3 options will be available in OpenSearch Dashboards.
 # Default value will be considered to True.
