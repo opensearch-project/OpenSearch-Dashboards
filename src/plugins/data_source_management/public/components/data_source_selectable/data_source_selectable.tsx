@@ -165,6 +165,7 @@ export class DataSourceSelectable extends React.Component<
         closePopover={this.closePopover.bind(this)}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        data-test-subj={'dataSourceSelectableContextMenuPopover'}
       >
         <EuiContextMenuPanel>
           <EuiPanel color="transparent" paddingSize="s">

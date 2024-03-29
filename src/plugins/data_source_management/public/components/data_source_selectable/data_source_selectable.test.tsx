@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { ShallowWrapper, shallow, mount } from 'enzyme';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
@@ -97,8 +97,70 @@ describe('DataSourceSelectable', () => {
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
+
+    await nextTick();
+
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     button.click();
+
+    expect(container.getByTestId('dataSourceSelectableContextMenuPopover')).toBeVisible();
     expect(container).toMatchSnapshot();
+  });
+
+  it('should callback if changed state', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = mount(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+
+    const containerInstance = container.instance();
+
+    containerInstance.onChange([{ id: 'test2', label: 'test2' }]);
+    expect(onSelectedDataSource).toBeCalledTimes(0);
+    expect(containerInstance.state).toEqual({
+      dataSourceOptions: [
+        {
+          id: 'test2',
+          label: 'test2',
+        },
+      ],
+      isPopoverOpen: false,
+      selectedOption: [
+        {
+          id: '',
+          label: 'Local cluster',
+        },
+      ],
+    });
+
+    containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
+    expect(containerInstance.state).toEqual({
+      dataSourceOptions: [
+        {
+          checked: 'on',
+          id: 'test2',
+          label: 'test2',
+        },
+      ],
+      isPopoverOpen: false,
+      selectedOption: [
+        {
+          checked: 'on',
+          id: 'test2',
+          label: 'test2',
+        },
+      ],
+    });
+    expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
+    expect(onSelectedDataSource).toBeCalledTimes(1);
   });
 });
