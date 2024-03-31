@@ -3,19 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiImage } from '@elastic/eui';
+import moment from 'moment';
+import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ChromeRecentlyAccessedHistoryItem } from 'opensearch-dashboards/public';
 import { Section } from '../../../../services/section_type/section_type';
 import { renderFn } from './utils';
 import { getServices } from '../../../opensearch_dashboards_services';
-import { RecentWorkFilter } from './recent_work_filter';
 
 import '../_homepage.scss';
 
-const render = renderFn((opts) => {
+const itemType = [
+  {
+    type: 'dashboard',
+    name: 'Dashboard',
+    icon: 'dashboardApp',
+  },
+  {
+    type: 'visualization',
+    name: 'Visualization',
+    icon: 'visualizeApp',
+  },
+  {
+    type: 'search',
+    name: 'Search',
+    icon: 'discoverApp',
+  },
+  {
+    type: 'visualization-visbuilder',
+    name: 'Visualization(visbuilder)',
+    icon: 'visualizeApp',
+  },
+];
+
+const render = renderFn(() => {
   const services = getServices();
   const navigateToUrl = services.application.navigateToUrl;
   const recentAccessed = useObservable(services.chrome.recentlyAccessed.get$(), []);
@@ -31,55 +54,36 @@ const render = renderFn((opts) => {
 
   return (
     <div>
-      <EuiFlexGroup>
-        {recentAccessed.slice(0, 4).map((recentAccessItem: ChromeRecentlyAccessedHistoryItem) => {
+      <EuiFlexGrid columns={4}>
+        {recentAccessed.slice(0, 8).map((recentAccessItem: ChromeRecentlyAccessedHistoryItem) => {
+          const recentWorkItem = itemType.filter((item) => item.type === recentAccessItem.type);
           return (
             <EuiFlexItem>
               <EuiCard
                 layout="horizontal"
                 title={recentAccessItem.label}
                 titleSize="xs"
-                description={recentAccessItem.type || ' ' + recentAccessItem.updatedAt}
+                description={
+                  <>
+                    <EuiIcon
+                      size="m"
+                      className="recent-work-title-icon"
+                      type={recentWorkItem[0].icon}
+                    />
+                    {recentWorkItem[0].name}
+                    <br />
+                    {'Last updated ' + moment(recentAccessItem?.updatedAt).fromNow()}
+                  </>
+                }
                 onClick={() => navigateToUrl(services.addBasePath(recentAccessItem.link))}
               />
             </EuiFlexItem>
           );
         })}
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        {recentAccessed.slice(4, 8).map((recentAccessItem: ChromeRecentlyAccessedHistoryItem) => {
-          return (
-            <EuiFlexItem>
-              <EuiCard
-                layout="horizontal"
-                title={recentAccessItem.label}
-                titleSize="xs"
-                description={recentAccessItem.type || ' '}
-                onClick={() => navigateToUrl(services.addBasePath(recentAccessItem.link))}
-              />
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
+      </EuiFlexGrid>
     </div>
   );
 });
-
-const HeaderFilter = () => {
-  const services = getServices();
-  const recentAccessed = useObservable(services.chrome.recentlyAccessed.get$(), []);
-  const [filteredTypes, setFilteredTypes] = useState<string[]>([]);
-  const savedObjectTypes = recentAccessed
-    .map((item) => item.type)
-    .filter((item, index, arr) => arr.indexOf(item) === index);
-  return (
-    <RecentWorkFilter
-      filteredTypes={filteredTypes}
-      setFilteredTypes={setFilteredTypes}
-      savedObjectTypes={savedObjectTypes}
-    />
-  );
-};
 
 export const recentWorkSection: Section = {
   id: 'home:recentWork',
@@ -87,5 +91,4 @@ export const recentWorkSection: Section = {
     defaultMessage: 'Recent work',
   }),
   render,
-  opts: 4,
 };

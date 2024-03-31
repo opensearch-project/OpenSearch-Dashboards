@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import moment from 'moment';
+
 import {
   SavedObject,
   SavedObjectConfig,
@@ -37,7 +39,6 @@ import {
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { createSource } from './create_source';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
-import { type } from '../../../../../core/target/types/common/types';
 
 /**
  * @param error {Error} the error
@@ -125,7 +126,8 @@ export async function saveSavedObject(
         savedObject.getFullPath(),
         savedObject.title,
         String(savedObject.id),
-        savedObject.getOpenSearchType()
+        savedObject.getOpenSearchType(),
+        moment(Date.now()).format('MM/DD/YYYY HH:mm')
       );
     }
     savedObject.isSaving = false;

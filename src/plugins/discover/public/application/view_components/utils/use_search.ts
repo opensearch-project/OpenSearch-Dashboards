@@ -10,6 +10,7 @@ import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
+import moment from 'moment';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { search } from '../../../../../data/public';
@@ -309,7 +310,8 @@ export const useSearch = (services: DiscoverViewServices) => {
           savedSearchInstance.getFullPath(),
           savedSearchInstance.title,
           savedSearchInstance.id,
-          savedSearchInstance.getOpenSearchType()
+          savedSearchInstance.getOpenSearchType(),
+          moment(Date.now()).format('MM/DD/YYYY HH:mm')
         );
       }
     })();

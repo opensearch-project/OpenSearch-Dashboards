@@ -5,16 +5,7 @@
 
 import React, { FC, useState, useMemo } from 'react';
 import { i18n } from '@osd/i18n';
-import {
-  EuiPanel,
-  EuiButtonIcon,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPanel, EuiButtonIcon, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RenderFn, Section as SectionType } from '../../../services/section_type/section_type';
 import { LazyRender } from './lazy_render';
 

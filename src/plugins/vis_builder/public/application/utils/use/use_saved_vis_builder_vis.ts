@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { useEffect, useState } from 'react';
+import moment from 'moment';
 import { SavedObject } from '../../../../../saved_objects/public';
 import {
   InvalidJSONProperty,
@@ -23,7 +24,6 @@ import {
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setEditorState } from '../state_management/metadata_slice';
 import { getStateFromSavedObject } from '../../../saved_visualizations/transforms';
-import { SavedObjectsClient } from '../../../../../../core/server';
 
 // This function can be used when instantiating a saved vis or creating a new one
 // using url parameters, embedding and destroying it in DOM
@@ -79,7 +79,8 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
             savedVisBuilderVis.getFullPath(),
             title,
             savedVisBuilderVis.id,
-            savedVisBuilderVis.getOpenSearchType()
+            savedVisBuilderVis.getOpenSearchType(),
+            moment(Date.now()).format('MM/DD/YYYY HH:mm')
           );
 
           dispatch(setUIStateState(state.ui));
