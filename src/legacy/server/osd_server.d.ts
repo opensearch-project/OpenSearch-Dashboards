@@ -60,6 +60,14 @@ declare module 'hapi' {
   }
 }
 
+declare module '@hapi/hapi' {
+  interface PluginsStates {
+    workspace?: {
+      id?: string;
+    };
+  }
+}
+
 type OsdMixinFunc = (osdServer: OsdServer, server: Server, config: any) => Promise<any> | void;
 
 export interface PluginsSetup {
