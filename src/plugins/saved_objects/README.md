@@ -770,14 +770,14 @@ POST api/saved_objects/_import?createNewCopies=true --form file=@export.ndjson -
 }
 ```
 
-### Copy saved objects API
+### Duplicate saved objects API
 
-Copy saved objects among workspaces.
+Duplicate saved objects among workspaces.
 
 * Path and HTTP methods
 
 ```json
-POST <osd host>:<port>/api/saved_objects/_copy
+POST <osd host>:<port>/api/workspaces/_duplicate_saved_objects
 ```
 
 * Request body
@@ -797,7 +797,7 @@ The attrbutes of the object in the `objects` parameter are as follows:
 * Example request
 
 ```json
-POST api/saved_objects/_copy
+POST api/workspaces/_duplicate_saved_objects
 {
     "objects": [
         {
