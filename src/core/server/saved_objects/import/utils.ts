@@ -6,15 +6,24 @@
 import { parse, stringify } from 'hjson';
 import { SavedObject, SavedObjectsClientContract } from '../types';
 
+/**
+ * Given a Vega spec, the new datasource (by name), and spacing, update the Vega spec to add the new datasource name to each local cluster query
+ *
+ * @param {string} spec - the stringified Vega spec (HJSON or JSON)
+ * @param {string} newDataSourceName - the datasource name to append
+ * @param {number} [spacing=2] - how large the indenting should be after updating the spec (should be set to > 0 for a readable spec)
+ */
 export interface UpdateDataSourceNameInVegaSpecProps {
   spec: string;
   newDataSourceName: string;
+  spacing?: number;
 }
 
 export const updateDataSourceNameInVegaSpec = (
   props: UpdateDataSourceNameInVegaSpecProps
 ): string => {
-  const { spec } = props;
+  const { spec, spacing } = props;
+  const stringifiedSpacing = spacing || 2;
 
   let parsedSpec = parseJSONSpec(spec);
   const isJSONString = !!parsedSpec;
@@ -39,6 +48,7 @@ export const updateDataSourceNameInVegaSpec = (
     : stringify(parsedSpec, {
         bracesSameLine: true,
         keepWsc: true,
+        space: stringifiedSpacing,
       });
 };
 
