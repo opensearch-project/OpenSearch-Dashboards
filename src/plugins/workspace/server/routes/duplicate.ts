@@ -4,17 +4,20 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter } from '../../http';
-import { SavedObjectConfig } from '../saved_objects_config';
-import { exportSavedObjectsToStream } from '../export';
-import { importSavedObjectsFromStream } from '../import';
+import {
+  IRouter,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+} from '../../../../core/server';
 
-export const registerCopyRoute = (router: IRouter, config: SavedObjectConfig) => {
-  const { maxImportExportSize } = config;
-
+export const registerDuplicateRoute = (
+  router: IRouter,
+  path: string,
+  maxImportExportSize: number
+) => {
   router.post(
     {
-      path: '/_copy',
+      path: `${path}/_duplicate_saved_objects`,
       validate: {
         body: schema.object({
           objects: schema.arrayOf(
@@ -41,7 +44,7 @@ export const registerCopyRoute = (router: IRouter, config: SavedObjectConfig) =>
       if (invalidObjects.length) {
         return res.badRequest({
           body: {
-            message: `Trying to copy object(s) with unsupported types: ${invalidObjects
+            message: `Trying to duplicate object(s) with unsupported types: ${invalidObjects
               .map((obj) => `${obj.type}:${obj.id}`)
               .join(', ')}`,
           },

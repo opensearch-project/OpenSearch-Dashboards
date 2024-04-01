@@ -61,10 +61,13 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     );
     this.proxyWorkspaceTrafficToRealHandler(core);
 
+    const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
+
     registerRoutes({
       http: core.http,
       logger: this.logger,
       client: this.client as IWorkspaceClientImpl,
+      maxImportExportSize,
     });
 
     return {

@@ -6,6 +6,7 @@
 import { schema } from '@osd/config-schema';
 import { CoreSetup, Logger } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
+import { registerDuplicateRoute } from './duplicate';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -23,10 +24,12 @@ export function registerRoutes({
   client,
   logger,
   http,
+  maxImportExportSize,
 }: {
   client: IWorkspaceClientImpl;
   logger: Logger;
   http: CoreSetup['http'];
+  maxImportExportSize: number;
 }) {
   const router = http.createRouter();
   router.post(
@@ -159,4 +162,6 @@ export function registerRoutes({
       return res.ok({ body: result });
     })
   );
+
+  registerDuplicateRoute(router, WORKSPACES_API_BASE_URL, maxImportExportSize);
 }

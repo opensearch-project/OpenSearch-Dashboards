@@ -259,4 +259,138 @@ describe('workspace service', () => {
       expect(listResult.body.result.total).toEqual(1);
     });
   });
+
+  describe('Duplicate saved objects APIs', () => {
+    const mockIndexPattern = {
+      type: 'index-pattern',
+      id: 'my-pattern',
+      attributes: { title: 'my-pattern-*' },
+      references: [],
+    };
+    const mockDashboard = {
+      type: 'dashboard',
+      id: 'my-dashboard',
+      attributes: { title: 'Look at my dashboard' },
+      references: [],
+    };
+
+    afterEach(async () => {
+      const listResult = await osdTestServer.request
+        .post(root, `/api/workspaces/_list`)
+        .send({
+          page: 1,
+        })
+        .expect(200);
+      const savedObjectsRepository = osd.coreStart.savedObjects.createInternalRepository([
+        WORKSPACE_TYPE,
+      ]);
+      await Promise.all(
+        listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
+          // this will delete reserved workspace
+          savedObjectsRepository.delete(WORKSPACE_TYPE, item.id)
+        )
+      );
+    });
+
+    it('requires objects', async () => {
+      const result = await osdTestServer.request
+        .post(root, `/api/workspaces/_duplicate_saved_objects`)
+        .send({})
+        .expect(400);
+
+      expect(result.body.message).toMatchInlineSnapshot(
+        `"[request body.objects]: expected value of type [array] but got [undefined]"`
+      );
+    });
+
+    it('requires target workspace', async () => {
+      const result = await osdTestServer.request
+        .post(root, `/api/workspaces/_duplicate_saved_objects`)
+        .send({
+          objects: [
+            {
+              type: 'index-pattern',
+              id: 'my-pattern',
+            },
+            {
+              type: 'dashboard',
+              id: 'my-dashboard',
+            },
+          ],
+          includeReferencesDeep: true,
+        })
+        .expect(400);
+
+      expect(result.body.message).toMatchInlineSnapshot(
+        `"[request body.targetWorkspace]: expected value of type [string] but got [undefined]"`
+      );
+    });
+
+    it('duplicate unsupported objects', async () => {
+      const result = await osdTestServer.request
+        .post(root, `/api/workspaces/_duplicate_saved_objects`)
+        .send({
+          objects: [
+            {
+              type: 'unknown',
+              id: 'my-pattern',
+            },
+          ],
+          includeReferencesDeep: true,
+          targetWorkspace: 'test_workspace',
+        })
+        .expect(400);
+
+      expect(result.body.message).toMatchInlineSnapshot(
+        `"Trying to duplicate object(s) with unsupported types: unknown:my-pattern"`
+      );
+    });
+
+    it('duplicate index pattern and dashboard into a workspace successfully', async () => {
+      const createWorkspaceResult: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      expect(createWorkspaceResult.body.success).toEqual(true);
+      expect(typeof createWorkspaceResult.body.result.id).toBe('string');
+
+      const targetWorkspace = createWorkspaceResult.body.result.id;
+      const result = await osdTestServer.request
+        .post(root, `/api/workspaces/_duplicate_saved_objects`)
+        .send({
+          objects: [
+            {
+              type: 'index-pattern',
+              id: 'my-pattern',
+            },
+            {
+              type: 'dashboard',
+              id: 'my-dashboard',
+            },
+          ],
+          includeReferencesDeep: true,
+          targetWorkspace,
+        })
+        .expect(200);
+      expect(result.body).toEqual({
+        success: true,
+        successCount: 2,
+        successResults: [
+          {
+            type: mockIndexPattern.type,
+            id: mockIndexPattern.id,
+            meta: { title: mockIndexPattern.attributes.title, icon: 'index-pattern-icon' },
+          },
+          {
+            type: mockDashboard.type,
+            id: mockDashboard.id,
+            meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+          },
+        ],
+      });
+    });
+  });
 });
