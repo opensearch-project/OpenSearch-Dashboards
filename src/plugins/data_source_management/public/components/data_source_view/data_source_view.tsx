@@ -11,10 +11,10 @@ import { DataSourceOption } from '../data_source_menu/types';
 import { getDataSourceById } from '../utils';
 
 interface DataSourceViewProps {
-  savedObjectsClient: SavedObjectsClientContract;
-  notifications: ToastsStart;
   fullWidth: boolean;
   selectedOption?: DataSourceOption[];
+  savedObjectsClient?: SavedObjectsClientContract;
+  notifications?: ToastsStart;
 }
 
 interface DataSourceViewState {
@@ -40,24 +40,29 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
   async componentDidMount() {
     this._isMounted = true;
     const selectedOption = this.props.selectedOption;
-    if (selectedOption && selectedOption.length === 1) {
-      if (selectedOption[0].id && !selectedOption[0].label) {
-        const title = (await getDataSourceById(selectedOption[0].id, this.props.savedObjectsClient))
+    // early return if not possible to fetch data source
+    if (!selectedOption
+      || !this.props.savedObjectsClient
+      || !this.props.notifications ) return;
+
+    const option = selectedOption[0];
+    const optionId = option.id;
+      if (optionId && !option.label) {
+        const title = (await getDataSourceById(optionId, this.props.savedObjectsClient))
           .title;
         if (!title) {
           this.props.notifications.addWarning(
             i18n.translate('dataSource.fetchDataSourceError', {
-              defaultMessage: `Invalid selectedOption: ${selectedOption[0].id}`,
+              defaultMessage: `Data source with id ${optionId} is not available`,
             })
           );
         } else {
           if (!this._isMounted) return;
           this.setState({
-            selectedOption: [{ id: selectedOption[0].id, label: title }],
+            selectedOption: [{ id: optionId, label: title }],
           });
         }
       }
-    }
   }
 
   onClick() {
@@ -68,18 +73,8 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.setState({ ...this.state, isPopoverOpen: false });
   }
 
-  render() {
-    const button = (
-      <EuiButtonIcon
-        iconType="iInCircle"
-        display="empty"
-        aria-label="Next"
-        onClick={this.onClick.bind(this)}
-      />
-    );
-
+  getPanels(){
     let items: Array<{ name: string | undefined; disabled: boolean }> = [];
-
     if (this.state.selectedOption) {
       items = this.state.selectedOption.map((option) => {
         return {
@@ -97,6 +92,20 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       },
     ];
 
+    return { panels };
+  }
+
+  render() {
+    const { panels} = this.getPanels();
+
+    const button = (
+      <EuiButtonIcon
+        iconType="iInCircle"
+        display="empty"
+        aria-label="Next"
+        onClick={this.onClick.bind(this)}
+      />
+    );
     return (
       <>
         <EuiButtonEmpty

@@ -25,10 +25,10 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     const { activeOption, fullWidth, savedObjects, notifications } = config;
     return (
       <DataSourceView
-        savedObjectsClient={savedObjects!}
-        notifications={notifications!.toasts}
         fullWidth={fullWidth}
         selectedOption={activeOption && activeOption.length > 0 ? activeOption : undefined}
+        savedObjectsClient={savedObjects || undefined}
+        notifications={notifications ? notifications.toasts : undefined}
       />
     );
   }

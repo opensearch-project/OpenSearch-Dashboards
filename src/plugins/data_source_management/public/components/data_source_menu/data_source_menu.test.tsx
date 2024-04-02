@@ -60,8 +60,6 @@ describe('DataSourceMenu', () => {
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceView}
         componentConfig={{
-          savedObjects: client,
-          notifications,
           fullWidth: true,
           hideLocalCluster: true,
         }}
