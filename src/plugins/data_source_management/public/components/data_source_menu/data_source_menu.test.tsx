@@ -59,7 +59,12 @@ describe('DataSourceMenu', () => {
     component = shallow(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceView}
-        componentConfig={{ fullWidth: true, hideLocalCluster: true }}
+        componentConfig={{
+          savedObjects: client,
+          notifications,
+          fullWidth: true,
+          hideLocalCluster: true,
+        }}
       />
     );
     expect(component).toMatchSnapshot();

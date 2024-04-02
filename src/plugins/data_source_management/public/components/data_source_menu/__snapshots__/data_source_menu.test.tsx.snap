@@ -277,6 +277,23 @@ exports[`DataSourceMenu should render data source selectable only with local clu
 exports[`DataSourceMenu should render data source view only 1`] = `
 <DataSourceView
   fullWidth={true}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction],
+    }
+  }
 />
 `;
 
