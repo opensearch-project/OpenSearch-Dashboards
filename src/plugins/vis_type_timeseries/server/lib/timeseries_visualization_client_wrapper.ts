@@ -4,6 +4,7 @@
  */
 
 import {
+  SavedObjectsClientContract,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsCreateOptions,
@@ -36,12 +37,19 @@ export const timeSeriesVisualizationClientWrapper: SavedObjectsClientWrapperFact
     );
 
     if (visState.params.data_source_id) {
-      newReferences?.push({
-        id: visState.params.data_source_id,
-        name: 'dataSource',
-        type: 'data-source',
-      });
+      if (await checkIfDataSourceExists(visState.params.data_source_id, wrapperOptions.client)) {
+        newReferences?.push({
+          id: visState.params.data_source_id,
+          name: 'dataSource',
+          type: 'data-source',
+        });
+      } else {
+        delete visState.params.data_source_id;
+      }
     }
+
+    // @ts-expect-error
+    attributes.visState = JSON.stringify(visState);
 
     return await wrapperOptions.client.create(type, attributes, {
       ...options,
@@ -64,4 +72,11 @@ export const timeSeriesVisualizationClientWrapper: SavedObjectsClientWrapperFact
     addToNamespaces: wrapperOptions.client.addToNamespaces,
     deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
   };
+};
+
+const checkIfDataSourceExists = async (
+  id: string,
+  client: SavedObjectsClientContract
+): Promise<boolean> => {
+  return client.get('data-source', id).then((response) => !!response.attributes);
 };
