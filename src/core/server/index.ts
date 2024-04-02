@@ -326,6 +326,8 @@ export {
   PrincipalType,
   Permissions,
   SavedObjectsDeleteByWorkspaceOptions,
+  updateDataSourceNameInVegaSpec,
+  extractVegaSpecFromSavedObject,
 } from './saved_objects';
 
 export {

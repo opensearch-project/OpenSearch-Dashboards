@@ -1,0 +1,73 @@
+{
+    "saved_objects": [
+        {
+            "id": "935afa20-e0cd-11e7-9d07-1398ccfcefa3",
+            "type": "visualization",
+            "updated_at": "2018-08-29T13:22:17.617Z",
+            "version": "1",
+            "migrationVersion": {},
+            "attributes": {
+                "title": "[Logs] Heatmap",
+                "visState": "{\"title\":\"[Logs] Heatmap\",\"type\":\"heatmap\",\"params\":{\"type\":\"heatmap\",\"addTooltip\":true,\"addLegend\":true,\"enableHover\":true,\"legendPosition\":\"right\",\"times\":[],\"colorsNumber\":10,\"colorSchema\":\"Reds\",\"setColorRange\":false,\"colorsRange\":[],\"invertColors\":false,\"percentageMode\":false,\"valueAxes\":[{\"show\":false,\"id\":\"ValueAxis-1\",\"type\":\"value\",\"scale\":{\"type\":\"linear\",\"defaultYExtents\":false},\"labels\":{\"show\":false,\"rotate\":0,\"color\":\"#555\",\"overwriteColor\":false}}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"clientip\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"geo.src\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Country Source\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"hour_of_day\",\"size\":25,\"order\":\"asc\",\"orderBy\":\"_key\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Hour of Day\"}}]}",
+                "uiStateJSON": "{}",
+                "description": "",
+                "version": 1,
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"index\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+                }
+            },
+            "references": []
+        },
+        {
+            "id": "some-id",
+            "type": "visualization",
+            "references": [],
+            "attributes": {
+                "title": "Some non-OpenSearch query Vega visualization",
+                "description": "This is a sample Vega visualization without an OpenSearch query.",
+                "kibanaSavedObjectMeta": {},
+                "visState": "{\"title\":\"Vega Visualization without OpenSearch Query\",\"type\":\"vega\",\"params\":{\"spec\":\"{\\\"$schema\\\":\\\"https://vega.github.io/schema/vega-lite/v5.json\\\",\\\"description\\\":\\\"A simple scatter plot.\\\",\\\"data\\\":{\\\"values\\\":[{\\\"x\\\":1,\\\"y\\\":2},{\\\"x\\\":2,\\\"y\\\":3},{\\\"x\\\":3,\\\"y\\\":4},{\\\"x\\\":4,\\\"y\\\":5},{\\\"x\\\":5,\\\"y\\\":6},{\\\"x\\\":6,\\\"y\\\":7},{\\\"x\\\":7,\\\"y\\\":8},{\\\"x\\\":8,\\\"y\\\":9},{\\\"x\\\":9,\\\"y\\\":10}],\\\"mark\\\":\\\"point\\\",\\\"encoding\\\":{\\\"x\\\":{\\\"field\\\":\\\"x\\\",\\\"type\\\":\\\"quantitative\\\"},\\\"y\\\":{\\\"field\\\":\\\"y\\\",\\\"type\\\":\\\"quantitative\\\"}}},\\\"width\\\":400,\\\"height\\\":200}\"},\"aggs\":[]}",
+                "uiStateJSON": "{}",
+                "version": 1
+            }
+        },
+        {
+            "attributes": {
+                "description": "",
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+                },
+                "title": "(Vega) Top destination count",
+                "uiStateJSON": "{}",
+                "version": 1,
+                "visState": "{\"title\":\"(Vega) Top destination count\",\"type\":\"vega\",\"aggs\":[],\"params\":{\"spec\":\"{\\n  $schema: https://vega.github.io/schema/vega-lite/v5.json\\n  data: {\\n    url: {\\n      %context%: true\\n      %timefield%: @timestamp\\n      index: opensearch_dashboards_sample_data_logs\\n      body: {\\n        aggs: {\\n          1: {\\n            terms: {\\n              field: geo.dest\\n              order: {\\n                _count: desc\\n              }\\n              size: 5\\n            }\\n          }\\n        }\\n      }\\n    }\\n    format: {\\n      property: aggregations.1.buckets\\n    }\\n  }\\n  transform: [\\n    {\\n      calculate: datum.key\\n      as: dest\\n    }\\n    {\\n      calculate: datum.doc_count\\n      as: count\\n    }\\n  ]\\n  layer: [\\n    {\\n      mark: {\\n        type: bar\\n        tooltip: true\\n      }\\n    }\\n  ]\\n  encoding: {\\n    x: {\\n      field: count\\n      type: quantitative\\n      axis: {\\n        title: Count\\n      }\\n    }\\n    y: {\\n      field: dest\\n      type: nominal\\n      axis: {\\n        title: Dest\\n      }\\n      sort: -x\\n    }\\n  }\\n}\"}}"
+            },
+            "id": "f0d162c0-227b-11ee-b88b-47a93b5c527c",
+            "migrationVersion": {
+                "visualization": "7.10.0"
+            },
+            "references": [],
+            "type": "visualization",
+            "updated_at": "2023-07-25T19:39:50.773Z",
+            "version": "WzgxLDFd"
+        },
+        {
+            "id": "06cf9c40-9ee8-11e7-8711-e7a007dcef99",
+            "type": "visualization",
+            "updated_at": "2018-08-29T13:22:17.617Z",
+            "version": "1",
+            "migrationVersion": {},
+            "attributes": {
+                "title": "[Logs] Visitors Map",
+                "visState": "{\"title\":\"[Logs] Visitors Map\",\"type\":\"vega\",\"aggs\":[],\"params\":{\"spec\":\"{\\n  $schema: https://vega.github.io/schema/vega/v5.json\\n  config: {\\n    kibana: {type: \\\"map\\\", latitude: 30, longitude: -120, zoom: 3}\\n  }\\n  data: [\\n    {\\n      name: table\\n      url: {\\n        index: opensearch_dashboards_sample_data_logs\\n        %context%: true\\n        %timefield%: timestamp\\n        body: {\\n          size: 0\\n          aggs: {\\n            gridSplit: {\\n              geotile_grid: {field: \\\"geo.coordinates\\\", precision: 5, size: 10000}\\n              aggs: {\\n                gridCentroid: {\\n                  geo_centroid: {\\n                    field: \\\"geo.coordinates\\\"\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n      format: {property: \\\"aggregations.gridSplit.buckets\\\"}\\n      transform: [\\n        {\\n          type: geopoint\\n          projection: projection\\n          fields: [\\n            gridCentroid.location.lon\\n            gridCentroid.location.lat\\n          ]\\n        }\\n      ]\\n    }\\n  ]\\n  scales: [\\n    {\\n      name: gridSize\\n      type: linear\\n      domain: {data: \\\"table\\\", field: \\\"doc_count\\\"}\\n      range: [\\n        50\\n        1000\\n      ]\\n    }\\n    {\\n      name: bubbleColor\\n      type: linear\\n      domain: {\\n        data: table\\n        field: doc_count\\n      }\\n      range: [\\\"rgb(255, 255, 255)\\\",\\\"rgb(249, 212, 204)\\\",\\\"rgb(238, 170, 156)\\\", \\\"rgb(223, 129, 110)\\\"]\\n    }\\n  ]\\n  marks: [\\n    {\\n      name: gridMarker\\n      type: symbol\\n      from: {data: \\\"table\\\"}\\n      encode: {\\n        update: {\\n          fill: {\\n            scale: bubbleColor\\n            field: doc_count\\n          }\\n          size: {scale: \\\"gridSize\\\", field: \\\"doc_count\\\"}\\n          xc: {signal: \\\"datum.x\\\"}\\n          yc: {signal: \\\"datum.y\\\"}\\n          tooltip: {\\n            signal: \\\"{flights: datum.doc_count}\\\"\\n          }\\n        }\\n      }\\n    }\\n  ]\\n}\"}}",
+                "uiStateJSON": "{}",
+                "description": "",
+                "version": 1,
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"index\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+                }
+            },
+            "references": []
+        }
+    ]
+}
