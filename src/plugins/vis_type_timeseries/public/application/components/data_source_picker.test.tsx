@@ -48,6 +48,7 @@ describe('DataSourcePicker', () => {
       ).setup,
       toasts: notificationServiceMock.createStartContract().toasts,
       handleChange: jest.fn(),
+      hideLocalCluster: false,
     };
   };
 

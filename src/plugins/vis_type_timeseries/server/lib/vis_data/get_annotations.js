@@ -55,7 +55,7 @@ export async function getAnnotations({
   const annotations = panel.annotations.filter(validAnnotation);
   const lastSeriesTimestamp = getLastSeriesTimestamp(series);
   const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
-  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY] || undefined;
+  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY];
 
   const bodiesPromises = annotations.map((annotation) =>
     getAnnotationRequestParams(req, panel, annotation, opensearchQueryConfig, capabilities)

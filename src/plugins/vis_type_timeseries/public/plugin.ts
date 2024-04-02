@@ -37,6 +37,7 @@ import {
   Plugin,
 } from 'opensearch-dashboards/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
@@ -52,6 +53,7 @@ import {
   setChartsSetup,
   setDataSourceManagementSetup,
   setNotifications,
+  setHideLocalCluster,
 } from './services';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
@@ -62,6 +64,7 @@ export interface MetricsPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 /** @internal */
@@ -79,13 +82,20 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, charts, dataSourceManagement }: MetricsPluginSetupDependencies
+    {
+      expressions,
+      visualizations,
+      charts,
+      dataSourceManagement,
+      dataSource,
+    }: MetricsPluginSetupDependencies
   ) {
     expressions.registerFunction(createMetricsFn);
     setUISettings(core.uiSettings);
     setChartsSetup(charts);
     visualizations.createReactVisualization(metricsVisDefinition);
     setDataSourceManagementSetup({ dataSourceManagement });
+    setHideLocalCluster({ hideLocalCluster: dataSource?.hideLocalCluster });
   }
 
   public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {

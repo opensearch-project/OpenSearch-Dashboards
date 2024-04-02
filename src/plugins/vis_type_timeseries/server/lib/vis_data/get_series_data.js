@@ -42,7 +42,7 @@ export async function getSeriesData(req, panel) {
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategyForPanel(req, panel);
   const opensearchQueryConfig = await getOpenSearchQueryConfig(req);
-  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY] || undefined;
+  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY];
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,

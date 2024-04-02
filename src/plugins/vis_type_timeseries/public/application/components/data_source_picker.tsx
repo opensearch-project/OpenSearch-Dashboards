@@ -7,7 +7,11 @@ import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 
 import { SavedObjectsClientContract, ToastsStart } from 'src/core/public';
-import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import {
+  DataSourceManagementPluginSetup,
+  DataSourceOption,
+} from 'src/plugins/data_source_management/public';
+import { PanelSchema } from 'src/plugins/vis_type_timeseries/common/types';
 import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 /**
@@ -17,14 +21,16 @@ import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
  * @property {DataSourceManagementPluginSetup} dataSourceManagement
  * @property {ToastsStart} toasts
  * @property {string} [defaultDataSourceId] - the datasource id as the default option when the component first renders
- * @property {(e: Array<{}>) => void} handleChange - the function that will update the model when a datasource is selected
+ * @property {(e: DataSourceOption[]) => void} handleChange - the function that will update the model when a datasource is selected
+ * @property {boolean} hideLocalCluster - the config option to hide the local cluster
  */
 export interface DataSourcePickerProps {
   savedObjectsClient: SavedObjectsClientContract;
   dataSourceManagement: DataSourceManagementPluginSetup;
   toasts: ToastsStart;
   defaultDataSourceId?: string;
-  handleChange: (e: Array<{}>) => void;
+  handleChange: (e: DataSourceOption[]) => void;
+  hideLocalCluster: boolean;
 }
 
 /**
@@ -35,16 +41,16 @@ export interface DataSourcePickerProps {
  */
 export const DataSourcePicker = (props: DataSourcePickerProps) => {
   const { savedObjectsClient, defaultDataSourceId, handleChange } = props;
-  const [defaultOption, setDefaultOption] = useState<Array<{ id: string; label: string }>>();
+  const [defaultOption, setDefaultOption] = useState<DataSourceOption[]>();
   const DataSourceSelector = props.dataSourceManagement.ui.DataSourceSelector;
 
-  const onDataSourceSelectChange = (dataSourceOption: Array<{ id: string; label: string }>) => {
+  const onDataSourceSelectChange = (dataSourceOption: DataSourceOption[]) => {
     setDefaultOption(dataSourceOption);
     handleChange(dataSourceOption);
   };
 
   useEffect(() => {
-    if (!defaultDataSourceId || defaultDataSourceId === '') {
+    if (!defaultDataSourceId) {
       // @ts-expect-error
       setDefaultOption(null);
       return;
@@ -78,17 +84,16 @@ export const DataSourcePicker = (props: DataSourcePickerProps) => {
       disabled={false}
       fullWidth={false}
       removePrepend={true}
-      // @ts-expect-error
-      filterFunc={(ds) => ds.attributes.auth.type !== 'no_auth'}
+      hideLocalCluster={props.hideLocalCluster}
     />
   );
 };
 
-export const createDataSourcePickerHandler = (handleChange: any) => {
+export const createDataSourcePickerHandler = (handleChange: (e: PanelSchema) => void) => {
   return (selectedOptions: []): void => {
     return handleChange?.({
       [DATA_SOURCE_ID_KEY]: _.get(selectedOptions, '[0].id', null),
-    });
+    } as PanelSchema);
   };
 };
 

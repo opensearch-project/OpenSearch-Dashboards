@@ -38,7 +38,7 @@ import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
-  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY] || undefined;
+  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY];
 
   const {
     searchStrategy,

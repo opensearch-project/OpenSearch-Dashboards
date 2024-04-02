@@ -6,8 +6,8 @@ exports[`DataSourcePicker render correct default option when datasource id is va
     Object {
       "registerAuthenticationMethod": [Function],
       "ui": Object {
-        "DataSourceMenu": [Function],
         "DataSourceSelector": [Function],
+        "getDataSourceMenu": [Function],
       },
     }
   }
@@ -82,7 +82,6 @@ exports[`DataSourcePicker render correct default option when datasource id is va
       ]
     }
     disabled={false}
-    filterFunc={[Function]}
     fullWidth={false}
     notifications={
       Object {
@@ -155,7 +154,6 @@ exports[`DataSourcePicker render correct default option when datasource id is va
         ]
       }
       disabled={false}
-      filterFunc={[Function]}
       fullWidth={false}
       notifications={
         Object {
@@ -510,8 +508,8 @@ exports[`DataSourcePicker render local cluster when datasource id = "" 1`] = `
     Object {
       "registerAuthenticationMethod": [Function],
       "ui": Object {
-        "DataSourceMenu": [Function],
         "DataSourceSelector": [Function],
+        "getDataSourceMenu": [Function],
       },
     }
   }
@@ -566,7 +564,6 @@ exports[`DataSourcePicker render local cluster when datasource id = "" 1`] = `
   <Component
     defaultOption={null}
     disabled={false}
-    filterFunc={[Function]}
     fullWidth={false}
     notifications={
       Object {
@@ -619,7 +616,6 @@ exports[`DataSourcePicker render local cluster when datasource id = "" 1`] = `
     <DataSourceSelector
       defaultOption={null}
       disabled={false}
-      filterFunc={[Function]}
       fullWidth={false}
       notifications={
         Object {
@@ -961,8 +957,8 @@ exports[`DataSourcePicker render local cluster when datasource id is not in save
     Object {
       "registerAuthenticationMethod": [Function],
       "ui": Object {
-        "DataSourceMenu": [Function],
         "DataSourceSelector": [Function],
+        "getDataSourceMenu": [Function],
       },
     }
   }
@@ -1030,7 +1026,6 @@ exports[`DataSourcePicker render local cluster when datasource id is not in save
   <Component
     defaultOption={null}
     disabled={false}
-    filterFunc={[Function]}
     fullWidth={false}
     notifications={
       Object {
@@ -1096,7 +1091,6 @@ exports[`DataSourcePicker render local cluster when datasource id is not in save
     <DataSourceSelector
       defaultOption={null}
       disabled={false}
-      filterFunc={[Function]}
       fullWidth={false}
       notifications={
         Object {
@@ -1451,8 +1445,8 @@ exports[`DataSourcePicker should render local cluster without datasource id prov
     Object {
       "registerAuthenticationMethod": [Function],
       "ui": Object {
-        "DataSourceMenu": [Function],
         "DataSourceSelector": [Function],
+        "getDataSourceMenu": [Function],
       },
     }
   }
@@ -1506,7 +1500,6 @@ exports[`DataSourcePicker should render local cluster without datasource id prov
   <Component
     defaultOption={null}
     disabled={false}
-    filterFunc={[Function]}
     fullWidth={false}
     notifications={
       Object {
@@ -1559,7 +1552,6 @@ exports[`DataSourcePicker should render local cluster without datasource id prov
     <DataSourceSelector
       defaultOption={null}
       disabled={false}
-      filterFunc={[Function]}
       fullWidth={false}
       notifications={
         Object {

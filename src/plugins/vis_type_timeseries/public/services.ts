@@ -64,6 +64,10 @@ export const [getDataSourceManagementSetup, setDataSourceManagementSetup] = crea
   dataSourceManagement: DataSourceManagementPluginSetup | undefined;
 }>('DataSourceManagementSetup');
 
+export const [getHideLocalCluster, setHideLocalCluster] = createGetterSetter<{
+  hideLocalCluster: boolean | undefined;
+}>('HideLocalCluster');
+
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
