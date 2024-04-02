@@ -124,6 +124,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🪛 Refactoring
 
 - Remove unused Sass in `tile_map` plugin ([#4110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4110))
+- [Multiple Datasource] Move data source selectable to its own folder, fix test and a few type errors for data source selectable component ([#6287](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6287))
 
 ### 🔩 Tests
 
