@@ -346,6 +346,26 @@ describe('workspace service', () => {
       );
     });
 
+    it('target workspace does not exist', async () => {
+      const result = await osdTestServer.request
+        .post(root, `/api/workspaces/_duplicate_saved_objects`)
+        .send({
+          objects: [
+            {
+              type: 'index-pattern',
+              id: 'my-pattern',
+            },
+          ],
+          includeReferencesDeep: true,
+          targetWorkspace: 'test_workspace',
+        })
+        .expect(400);
+
+      expect(result.body.message).toMatchInlineSnapshot(
+        `"Get target workspace test_workspace error: Saved object [workspace/test_workspace] not found"`
+      );
+    });
+
     it('duplicate index pattern and dashboard into a workspace successfully', async () => {
       const createWorkspaceResult: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
@@ -356,6 +376,12 @@ describe('workspace service', () => {
 
       expect(createWorkspaceResult.body.success).toEqual(true);
       expect(typeof createWorkspaceResult.body.result.id).toBe('string');
+
+      const createSavedObjectsResult = await osdTestServer.request
+        .post(root, '/api/saved_objects/_bulk_create')
+        .send([mockIndexPattern, mockDashboard])
+        .expect(200);
+      expect(createSavedObjectsResult.body.saved_objects.length).toBe(2);
 
       const targetWorkspace = createWorkspaceResult.body.result.id;
       const result = await osdTestServer.request
