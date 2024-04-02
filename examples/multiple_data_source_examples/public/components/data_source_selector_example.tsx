@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -33,6 +33,7 @@ export const DataSourceSelectorExample = ({
   savedObjects,
   notifications,
   dataSourceManagement,
+  dataSourceEnabled,
 }: DataSourceSelectorExampleProps) => {
   const [selectedDataSources, setSelectedDataSources] = useState<string[]>([]);
 
@@ -143,7 +144,21 @@ export const DataSourceSelectorExample = ({
       name: 'Deprecated',
     },
   ];
-  const DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+
+  const renderDataSourceComponent = useMemo(() => {
+    const DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
+    return (
+      <DataSourceSelector
+        savedObjectsClient={savedObjects.client}
+        notifications={notifications.toasts}
+        fullWidth={false}
+        onSelectedDataSource={(ds) => setSelectedDataSources(ds)}
+        disabled={false}
+        hideLocalCluster={true}
+      />
+    );
+  }, [savedObjects, notifications, dataSourceManagement]);
+
   return (
     <EuiPageBody component="main">
       <EuiPageHeader>
@@ -156,25 +171,23 @@ export const DataSourceSelectorExample = ({
       <EuiPageContent>
         <EuiPageContentBody>
           <EuiText>
-            The data source selector component is introduced in 2.12 which uses OuiComboBox as the
-            base component. When multi data source feature is enabled, this component would show up
-            in the devtools page and add sample data page. Here is an example to render the data
-            source selector within the page. This component can be used to select a single connected
-            data source. Find the selector component rendered below with selected option
-            <EuiTextColor color="accent">
-              {' '}
-              {selectedDataSources.map((ds) => ds.label).join(', ')}
-            </EuiTextColor>
+            <p>
+              The data source selector component is introduced in 2.12 which uses OuiComboBox as the
+              base component. When multi data source feature is enabled, this component would show
+              up in the devtools page and add sample data page. Here is an example to render the
+              data source selector within the page. This component can be used to select a single
+              connected data source. Find the selector component rendered below with selected option
+              below
+            </p>
+            <p>
+              <EuiTextColor color="accent">
+                Selected: {selectedDataSources.map((ds) => ds.label).join(', ')}
+              </EuiTextColor>
+            </p>
           </EuiText>
           <EuiSpacer />
-          <DataSourceSelector
-            savedObjectsClient={savedObjects.client}
-            notifications={notifications.toasts}
-            fullWidth={false}
-            onSelectedDataSource={(ds) => setSelectedDataSources(ds)}
-            disabled={false}
-            hideLocalCluster={true}
-          />
+          {dataSourceEnabled && renderDataSourceComponent}
+
           <EuiSpacer />
           <EuiText>
             There are a few properties exposed by this component which can be used to customize the

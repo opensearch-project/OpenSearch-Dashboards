@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -111,21 +111,28 @@ export const DataSourceSelectableExample = ({
       name: 'Deprecated',
     },
   ];
+
+  const renderDataSourceComponent = useMemo(() => {
+    return (
+      <DataSourceMenu
+        setMenuMountPoint={setActionMenu}
+        componentType={'DataSourceSelectable'}
+        componentConfig={{
+          fullWidth: false,
+          savedObjects: savedObjects.client,
+          notifications,
+          onSelectedDataSources: (ds) => {
+            setSelectedDataSources(ds);
+          },
+        }}
+      />
+    );
+  }, [savedObjects, notifications, setActionMenu]);
+
   return (
     <EuiPageBody component="main">
       <EuiPageHeader>
-        {dataSourceEnabled && (
-          <DataSourceMenu
-            setMenuMountPoint={setActionMenu}
-            componentType={'DataSourceSelectable'}
-            componentConfig={{
-              fullWidth: false,
-              savedObjects: savedObjects.client,
-              notifications,
-              onSelectedDataSources: (ds) => setSelectedDataSources(ds),
-            }}
-          />
-        )}
+        {dataSourceEnabled && renderDataSourceComponent}
         <EuiPageHeaderSection>
           <EuiTitle size="l">
             <h1>Data Source Selectable Example </h1>
@@ -135,17 +142,20 @@ export const DataSourceSelectableExample = ({
       <EuiPageContent>
         <EuiPageContentBody>
           <EuiText>
-            The data source selectable component is introduced in 2.14 which uses OuiFieldSearch and
-            OuiPopover as the base components. When multi data source feature is enabled, this
-            component can be consumed by adding dataSourceManagement as option plugin, and then
-            mounted to the navigation bar by passing setHeaderActionMenu from AppMountParameters to
-            the getDataSourceMenu function exposed from the plugin. This component can be used to
-            select single connected data sources. Find the mounted example in the navigation bar
-            with selected option
-            <EuiTextColor color="accent">
-              {' '}
-              {selectedDataSources.map((ds) => ds.label).join(', ')}
-            </EuiTextColor>
+            <p>
+              The data source selectable component is introduced in 2.14 which uses OuiFieldSearch
+              and OuiPopover as the base components. When multi data source feature is enabled, this
+              component can be consumed by adding dataSourceManagement as option plugin, and then
+              mounted to the navigation bar by passing setHeaderActionMenu from AppMountParameters
+              to the getDataSourceMenu function exposed from the plugin. This component can be used
+              to select single connected data sources. Find the mounted example in the navigation
+              bar with selected option
+            </p>
+            <p>
+              <EuiTextColor color="accent">
+                Selected: {selectedDataSources.map((ds) => ds.label).join(', ')}
+              </EuiTextColor>
+            </p>
           </EuiText>
           <EuiSpacer />
           <EuiText>
