@@ -79,6 +79,7 @@ describe('DataSourceMenu', () => {
           hideLocalCluster: true,
           savedObjects: client,
           notifications,
+          displayAllCompatibleDataSources: true,
         }}
       />
     );
@@ -103,12 +104,12 @@ describe('DataSourceMenu', () => {
   it('should render data source multi select component', () => {
     const container = render(
       <DataSourceMenu
-        showDataSourceMultiSelectable={true}
-        appName={'myapp'}
-        fullWidth={true}
-        className={'myclass'}
-        savedObjects={client}
-        notifications={notifications}
+        componentType={DataSourceComponentType.DataSourceMultiSelectable}
+        componentConfig={{
+          fullWidth: true,
+          savedObjects: client,
+          notifications,
+        }}
       />
     );
     expect(container).toMatchSnapshot();

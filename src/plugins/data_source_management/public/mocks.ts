@@ -141,7 +141,7 @@ export const getDataSourcesWithFieldsResponse = {
       type: 'data-source',
       description: 'test datasource2',
       attributes: {
-        title: 'test3',
+        title: 'test2',
         auth: {
           type: AuthType.UsernamePasswordType,
         },

@@ -165,9 +165,79 @@ exports[`DataSourceMenu should render data source multi select component 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
-    <div />
+    <div>
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+        id="popoverExampleMultiSelect"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+            data-test-subj="dataSourceFilterGroupButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Data sources
+              </span>
+            </span>
+          </button>
+          <span
+            class="euiNotificationBadge euiNotificationBadge--subdued"
+          >
+            0
+          </span>
+        </div>
+      </div>
+    </div>
   </body>,
-  "container": <div />,
+  "container": <div>
+    <div
+      class="euiPopover euiPopover--anchorDownCenter"
+      id="popoverExampleMultiSelect"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+          data-test-subj="dataSourceFilterGroupButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Data sources
+            </span>
+          </span>
+        </button>
+        <span
+          class="euiNotificationBadge euiNotificationBadge--subdued"
+        >
+          0
+        </span>
+      </div>
+    </div>
+  </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
   "findAllByDisplayValue": [Function],

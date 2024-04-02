@@ -5,10 +5,9 @@
 
 import React, { ReactElement } from 'react';
 
-import { DataSourceSelectable } from './data_source_selectable';
 import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';
-import { DataSourceMultiSelectable } from '../data_source_multi_selectable/data_source_multi_selectable';
+import { DataSourceMultiSelectable } from '../data_source_multi_selectable';
 import {
   DataSourceAggregatedViewConfig,
   DataSourceComponentType,
@@ -17,6 +16,7 @@ import {
   DataSourceSelectableConfig,
   DataSourceViewConfig,
 } from './types';
+import { DataSourceSelectable } from '../data_source_selectable';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
   const { componentType, componentConfig } = props;
