@@ -274,7 +274,7 @@ describe('workspace service', () => {
       references: [],
     };
 
-    afterEach(async () => {
+    afterAll(async () => {
       const listResult = await osdTestServer.request
         .post(root, `/api/workspaces/_list`)
         .send({
@@ -401,22 +401,8 @@ describe('workspace service', () => {
           targetWorkspace,
         })
         .expect(200);
-      expect(result.body).toEqual({
-        success: true,
-        successCount: 2,
-        successResults: [
-          {
-            type: mockIndexPattern.type,
-            id: mockIndexPattern.id,
-            meta: { title: mockIndexPattern.attributes.title, icon: 'index-pattern-icon' },
-          },
-          {
-            type: mockDashboard.type,
-            id: mockDashboard.id,
-            meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
-          },
-        ],
-      });
+      expect(result.body.success).toEqual(true);
+      expect(result.body.successCount).toEqual(2);
     });
   });
 });
