@@ -11,7 +11,6 @@ import {
   importSavedObjectsFromStream,
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
-import { registerDuplicateRoute } from './duplicate';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
