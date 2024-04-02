@@ -62,6 +62,8 @@ describe('DataSourceMenu', () => {
         componentConfig={{
           fullWidth: true,
           hideLocalCluster: true,
+          savedObjects: client,
+          notifications,
         }}
       />
     );

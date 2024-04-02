@@ -8,10 +8,12 @@ import React from 'react';
 import { DataSourceView } from './data_source_view';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
-import { getSingleDataSourceResponse, mockErrorResponseForSavedObjectsCalls, mockResponseForSavedObjectsCalls } from '../../mocks';
+import {
+  getSingleDataSourceResponse,
+  mockErrorResponseForSavedObjectsCalls,
+  mockResponseForSavedObjectsCalls,
+} from '../../mocks';
 import { render } from '@testing-library/react';
-import { getDataSourceById } from '../utils';
-import { i18n } from 'packages/osd-i18n/target/types';
 
 describe('DataSourceView', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -27,20 +29,14 @@ describe('DataSourceView', () => {
 
   it('should render normally with local cluster not hidden', () => {
     component = shallow(
-      <DataSourceView
-        fullWidth={false}
-        selectedOption={[{ id: 'test1', label: 'test1' }]}
-      />
+      <DataSourceView fullWidth={false} selectedOption={[{ id: 'test1', label: 'test1' }]} />
     );
     expect(component).toMatchSnapshot();
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
   it('should show popover when click on button', async () => {
     const container = render(
-      <DataSourceView
-        fullWidth={false}
-        selectedOption={[{ id: 'test1', label: 'test1' }]}
-      />
+      <DataSourceView fullWidth={false} selectedOption={[{ id: 'test1', label: 'test1' }]} />
     );
     const button = await container.findByTestId('dataSourceViewContextMenuHeaderLink');
     button.click();
@@ -60,7 +56,7 @@ describe('DataSourceView', () => {
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
   it('should call notification warning when there is data source fetch error', async () => {
-    jest.mock("../utils", () => ({
+    jest.mock('../utils', () => ({
       getDataSourceById: jest.fn(),
     }));
     component = shallow(
@@ -74,8 +70,6 @@ describe('DataSourceView', () => {
     expect(component).toMatchSnapshot();
     mockErrorResponseForSavedObjectsCalls(client, 'get');
     expect(toasts.addWarning).toBeCalledTimes(1);
-    expect(toasts.addWarning).toBeCalledWith(
-      `Data source with id test1 is not available`
-    );
+    expect(toasts.addWarning).toBeCalledWith(`Data source with id test1 is not available`);
   });
 });

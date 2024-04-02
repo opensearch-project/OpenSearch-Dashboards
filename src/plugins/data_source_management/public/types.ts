@@ -162,3 +162,8 @@ export interface SigV4Content extends SavedObjectAttributes {
   region: string;
   service?: SigV4ServiceName;
 }
+
+export interface MenuPanelItem {
+  name: string | undefined;
+  disabled: boolean;
+}
