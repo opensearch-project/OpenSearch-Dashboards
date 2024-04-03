@@ -5,7 +5,6 @@
 import React from 'react';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
@@ -21,6 +20,7 @@ import {
   DataSourceManagementPluginSetup,
 } from 'src/plugins/data_source_management/public';
 import { ComponentProp } from './types';
+import { COLUMNS } from './constants';
 
 interface DataSourceListAllExampleProps {
   savedObjects: CoreStart['savedObjects'];
@@ -88,29 +88,6 @@ export const DataSourceListAllExample = ({
     },
   ];
 
-  const columns: Array<EuiBasicTableColumn<ComponentProp>> = [
-    {
-      field: 'name', // need to match the type
-      name: 'Name',
-    },
-    {
-      field: 'required',
-      name: 'Required',
-    },
-    {
-      field: 'defaultValue',
-      name: 'Default Value',
-    },
-    {
-      field: 'description',
-      name: 'Description',
-    },
-    {
-      field: 'deprecated',
-      name: 'Deprecated',
-    },
-  ];
-
   return (
     <EuiPageBody component="main">
       <EuiPageHeader>
@@ -128,7 +105,7 @@ export const DataSourceListAllExample = ({
         )}
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>Data Source Aggregated View to List All Example</h1>
+            <h1>Data Source Aggregated View To List All Example</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
@@ -151,7 +128,7 @@ export const DataSourceListAllExample = ({
             tableCaption="dataSourceListAllEuiBasicTable"
             items={data}
             rowHeader="name"
-            columns={columns}
+            columns={COLUMNS}
           />
         </EuiPageContentBody>
       </EuiPageContent>

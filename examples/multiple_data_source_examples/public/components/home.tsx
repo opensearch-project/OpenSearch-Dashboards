@@ -163,103 +163,17 @@ export const Home = ({
       ),
     },
   ];
+
+  const routes = pages.map((page, i) => (
+    <Route key={i} path={`/${page.id}`} render={(props) => page.component} />
+  ));
   return (
     <Router basename={basename}>
       <EuiPage>
         <EuiPageSideBar>
           <Nav navigateToApp={navigateToApp} pages={pages} />
         </EuiPageSideBar>
-        <Route
-          path={`/selector`}
-          render={(props) => (
-            <DataSourceSelectorExample
-              setActionMenu={setActionMenu}
-              dataSourceManagement={dataSourceManagement}
-              savedObjects={savedObjects}
-              dataSourceEnabled={dataSourceEnabled}
-              notifications={notifications}
-              {...props}
-            />
-          )}
-        />
-        <Route
-          path={`/multi_selectable`}
-          render={(props) => (
-            <DataSourceMultiSelectableExample
-              setActionMenu={setActionMenu}
-              dataSourceManagement={dataSourceManagement}
-              savedObjects={savedObjects}
-              dataSourceEnabled={dataSourceEnabled}
-              notifications={notifications}
-              {...props}
-            />
-          )}
-        />
-        <Route
-          path={`/single_selectable`}
-          render={(props) => (
-            <DataSourceSelectableExample
-              setActionMenu={setActionMenu}
-              dataSourceManagement={dataSourceManagement}
-              savedObjects={savedObjects}
-              dataSourceEnabled={dataSourceEnabled}
-              notifications={notifications}
-              {...props}
-            />
-          )}
-        />
-        <Route
-          path={`/single_readonly`}
-          render={(props) => (
-            <DataSourceViewExample
-              setActionMenu={setActionMenu}
-              dataSourceManagement={dataSourceManagement}
-              savedObjects={savedObjects}
-              dataSourceEnabled={dataSourceEnabled}
-              notifications={notifications}
-              {...props}
-            />
-          )}
-        />
-        <Route
-          path={`/list_all`}
-          render={(props) => (
-            <DataSourceListAllExample
-              setActionMenu={setActionMenu}
-              dataSourceManagement={dataSourceManagement}
-              savedObjects={savedObjects}
-              dataSourceEnabled={dataSourceEnabled}
-              notifications={notifications}
-              {...props}
-            />
-          )}
-        />
-        <Route
-          path={`/list_active`}
-          render={(props) => (
-            <DataSourceListActiveExample
-              setActionMenu={setActionMenu}
-              dataSourceManagement={dataSourceManagement}
-              savedObjects={savedObjects}
-              dataSourceEnabled={dataSourceEnabled}
-              notifications={notifications}
-              {...props}
-            />
-          )}
-        />
-        <Route
-          path={`/top_nav_menu`}
-          render={(props) => (
-            <DataSourceViaTopNavMenuExample
-              setActionMenu={setActionMenu}
-              savedObjects={savedObjects}
-              dataSourceEnabled={dataSourceEnabled}
-              notifications={notifications}
-              navigation={navigation}
-              {...props}
-            />
-          )}
-        />
+        {routes}
       </EuiPage>
     </Router>
   );

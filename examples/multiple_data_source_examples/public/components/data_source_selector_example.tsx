@@ -5,7 +5,6 @@
 import React, { useState, useMemo } from 'react';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
@@ -20,6 +19,7 @@ import { MountPoint } from 'opensearch-dashboards/public';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { ComponentProp } from './types';
+import { COLUMNS } from './constants';
 
 interface DataSourceSelectorExampleProps {
   savedObjects: CoreStart['savedObjects'];
@@ -122,29 +122,6 @@ export const DataSourceSelectorExample = ({
     },
   ];
 
-  const columns: Array<EuiBasicTableColumn<ComponentProp>> = [
-    {
-      field: 'name', // need to match the type
-      name: 'Name',
-    },
-    {
-      field: 'required',
-      name: 'Required',
-    },
-    {
-      field: 'defaultValue',
-      name: 'Default Value',
-    },
-    {
-      field: 'description',
-      name: 'Description',
-    },
-    {
-      field: 'deprecated',
-      name: 'Deprecated',
-    },
-  ];
-
   const renderDataSourceComponent = useMemo(() => {
     const DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
     return (
@@ -197,7 +174,7 @@ export const DataSourceSelectorExample = ({
             tableCaption="Demo of EuiBasicTable"
             items={data}
             rowHeader="name"
-            columns={columns}
+            columns={COLUMNS}
           />
         </EuiPageContentBody>
       </EuiPageContent>

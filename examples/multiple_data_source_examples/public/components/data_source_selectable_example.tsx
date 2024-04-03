@@ -5,7 +5,6 @@
 import React, { useMemo, useState } from 'react';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
@@ -23,6 +22,7 @@ import {
   DataSourceSelectableConfig,
 } from 'src/plugins/data_source_management/public';
 import { ComponentProp } from './types';
+import { COLUMNS } from './constants';
 
 interface DataSourceSelectableExampleProps {
   savedObjects: CoreStart['savedObjects'];
@@ -89,29 +89,6 @@ export const DataSourceSelectableExample = ({
     },
   ];
 
-  const columns: Array<EuiBasicTableColumn<ComponentProp>> = [
-    {
-      field: 'name', // need to match the type
-      name: 'Name',
-    },
-    {
-      field: 'required',
-      name: 'Required',
-    },
-    {
-      field: 'defaultValue',
-      name: 'Default Value',
-    },
-    {
-      field: 'description',
-      name: 'Description',
-    },
-    {
-      field: 'deprecated',
-      name: 'Deprecated',
-    },
-  ];
-
   const renderDataSourceComponent = useMemo(() => {
     return (
       <DataSourceMenu
@@ -165,7 +142,7 @@ export const DataSourceSelectableExample = ({
             tableCaption="dataSourceSelectableOuiBasicTable"
             items={data}
             rowHeader="name"
-            columns={columns}
+            columns={COLUMNS}
           />
         </EuiPageContentBody>
       </EuiPageContent>

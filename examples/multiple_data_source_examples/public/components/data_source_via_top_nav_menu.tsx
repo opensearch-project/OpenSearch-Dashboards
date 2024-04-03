@@ -6,7 +6,6 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
@@ -20,6 +19,7 @@ import { MountPoint } from 'opensearch-dashboards/public';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { NavigationPublicPluginStart, TopNavMenuData } from 'src/plugins/navigation/public';
 import { ComponentProp } from './types';
+import { COLUMNS } from './constants';
 
 interface DataSourceViaTopNavMenuExampleProps {
   savedObjects: CoreStart['savedObjects'];
@@ -53,29 +53,6 @@ export const DataSourceViaTopNavMenuExample = ({
       description:
         'The config for the data source menu to determine the component to mount and configuration for the component',
       deprecated: false,
-    },
-  ];
-
-  const columns: Array<EuiBasicTableColumn<ComponentProp>> = [
-    {
-      field: 'name', // need to match the type
-      name: 'Name',
-    },
-    {
-      field: 'required',
-      name: 'Required',
-    },
-    {
-      field: 'defaultValue',
-      name: 'Default Value',
-    },
-    {
-      field: 'description',
-      name: 'Description',
-    },
-    {
-      field: 'deprecated',
-      name: 'Deprecated',
     },
   ];
 
@@ -137,7 +114,7 @@ export const DataSourceViaTopNavMenuExample = ({
             tableCaption="TopNavMenuOuiBasicTable"
             items={data}
             rowHeader="name"
-            columns={columns}
+            columns={COLUMNS}
           />
         </EuiPageContentBody>
       </EuiPageContent>
