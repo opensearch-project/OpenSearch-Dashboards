@@ -72,6 +72,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Make sure customer always have a default datasource ([#6237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6237))
 - [Workspace] Add workspace list page ([#6182](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6182))
 - [Multiple Datasource] Add multi data source support to sample vega visualizations ([#6218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6218))
+- [Multiple Datasource] Add data source query to fetch missing lable for DataSourceView ([#6315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6315))
 
 ### 🐛 Bug Fixes
 
@@ -163,7 +164,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Discover] Add collapsible and resizeable sidebar ([#5789](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5789))
 - [Discover] Enhanced the data source selector with added sorting functionality ([#5719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5719))
 - [Multiple Datasource] Add datasource picker component and use it in devtools and tutorial page when multiple datasource is enabled ([#5756](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5756))
-- [Multiple Datasource] Add data source query to fetch missing lable for DataSourceView ([#6315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6315))
 - [Multiple Datasource] Add datasource picker to import saved object flyout when multiple data source is enabled ([#5781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5781))
 
 ### 🐛 Bug Fixes
