@@ -51,6 +51,28 @@ export const WorkspaceUpdater = () => {
       try {
         const { ...attributes } = data;
         result = await workspaceClient.update(currentWorkspace.id, attributes);
+        if (result?.success) {
+          notifications?.toasts.addSuccess({
+            title: i18n.translate('workspace.update.success', {
+              defaultMessage: 'Update workspace successfully',
+            }),
+          });
+          if (application && http) {
+            // Redirect page after one second, leave one second time to show update successful toast.
+            window.setTimeout(() => {
+              window.location.href = formatUrlWithWorkspaceId(
+                application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                  absolute: true,
+                }),
+                currentWorkspace.id,
+                http.basePath
+              );
+            }, 1000);
+          }
+          return;
+        } else {
+          throw new Error(result?.error ? result?.error : 'update workspace failed');
+        }
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.update.failed', {
@@ -60,32 +82,6 @@ export const WorkspaceUpdater = () => {
         });
         return;
       }
-      if (result?.success) {
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('workspace.update.success', {
-            defaultMessage: 'Update workspace successfully',
-          }),
-        });
-        if (application && http) {
-          // Redirect page after one second, leave one second time to show update successful toast.
-          window.setTimeout(() => {
-            window.location.href = formatUrlWithWorkspaceId(
-              application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
-                absolute: true,
-              }),
-              currentWorkspace.id,
-              http.basePath
-            );
-          }, 1000);
-        }
-        return;
-      }
-      notifications?.toasts.addDanger({
-        title: i18n.translate('workspace.update.failed', {
-          defaultMessage: 'Failed to update workspace',
-        }),
-        text: result?.error,
-      });
     },
     [notifications?.toasts, currentWorkspace, http, application, workspaceClient]
   );
