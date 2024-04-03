@@ -72,7 +72,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Make sure customer always have a default datasource ([#6237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6237))
 - [Workspace] Add workspace list page ([#6182](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6182))
 - [Multiple Datasource] Add multi data source support to sample vega visualizations ([#6218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6218))
-- [Multiple Datasource] Add data source query to fetch missing lable for DataSourceView ([#6315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6315))
+- [Multiple Datasource] Fetch data source title for DataSourceView when only id is provided ([#6315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6315))
 
 ### 🐛 Bug Fixes
 
