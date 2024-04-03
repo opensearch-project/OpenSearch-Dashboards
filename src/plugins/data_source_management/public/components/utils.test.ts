@@ -36,7 +36,7 @@ import {
   usernamePasswordAuthMethod,
 } from '../types';
 import { HttpStart } from 'opensearch-dashboards/public';
-import { AuthenticationMethod, AuthenticationMethodRegistery } from '../auth_registry';
+import { AuthenticationMethod, AuthenticationMethodRegistry } from '../auth_registry';
 import { deepEqual } from 'assert';
 
 const { savedObjects } = coreMock.createStart();
@@ -244,13 +244,13 @@ describe('DataSourceManagement: Utils.ts', () => {
       ];
 
       authMethodCombinationsToBeTested.forEach((authOptions) => {
-        const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+        const authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
         authOptions.forEach((authMethod) => {
-          authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+          authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
         });
 
-        expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(
+        expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(
           AuthType.UsernamePasswordType
         );
       });
@@ -264,19 +264,19 @@ describe('DataSourceManagement: Utils.ts', () => {
       ];
 
       authMethodCombinationsToBeTested.forEach((authOptions) => {
-        const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+        const authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
         authOptions.forEach((authMethod) => {
-          authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+          authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
         });
 
-        expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(authOptions[0].name);
+        expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(authOptions[0].name);
       });
     });
 
-    test('default auth type is NoAuth when no auth options registered in authenticationMethodRegistery, this should not happen in real customer scenario for MD', () => {
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(AuthType.NoAuth);
+    test('default auth type is NoAuth when no auth options registered in authenticationMethodRegistry, this should not happen in real customer scenario for MD', () => {
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(AuthType.NoAuth);
     });
   });
   describe('handle set default datasource', () => {
@@ -351,13 +351,13 @@ describe('DataSourceManagement: Utils.ts', () => {
         passWordRegistered: 'some filled in password from registed auth credential form',
       };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
@@ -379,13 +379,13 @@ describe('DataSourceManagement: Utils.ts', () => {
         passWord: 'some password',
       } as { [key: string]: string };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, {}));
@@ -417,13 +417,13 @@ describe('DataSourceManagement: Utils.ts', () => {
         passWordRegistered: '',
       };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
@@ -449,13 +449,13 @@ describe('DataSourceManagement: Utils.ts', () => {
         registeredField: 'some value',
       };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
@@ -483,13 +483,13 @@ describe('DataSourceManagement: Utils.ts', () => {
         registeredField: 'some other values',
       };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
