@@ -28,7 +28,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         fullWidth={fullWidth}
         selectedOption={activeOption}
         savedObjectsClient={savedObjects}
-        notifications={notifications ? notifications.toasts : undefined}
+        notifications={notifications?.toasts}
       />
     );
   }
