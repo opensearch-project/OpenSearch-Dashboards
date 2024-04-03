@@ -22,11 +22,17 @@ import {
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
+import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
+import { getWorkspaceColumn } from './components/workspace_column';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
-export class WorkspacePlugin implements Plugin<{}, {}, {}> {
+interface WorkspacePluginSetupDeps {
+  savedObjectsManagement?: SavedObjectsManagementPluginSetup;
+}
+
+export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private _changeSavedObjectCurrentWorkspace() {
@@ -39,7 +45,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     }
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
 
@@ -139,6 +145,11 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
         return mountWorkspaceApp(params, renderListApp);
       },
     });
+
+    /**
+     * register workspace column into saved objects table
+     */
+    savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
     return {};
   }
