@@ -11,6 +11,23 @@ import { DataPublicPluginStart } from '../../../../data/public';
 import { SavedObjectLoader } from '../../../../saved_objects/public';
 import { createSavedHomepageLoader, SavedHomepage } from '../../saved_homepage';
 
+// TODO: This is temporarily hardcoded for the playground
+const PLAYGROUND_HOMEPAGE = {
+  heroes: [
+    {
+      id: 'home:query-assist',
+    },
+  ],
+  sections: [
+    {
+      id: 'home:workWithData',
+    },
+    {
+      id: 'home:learnBasics',
+    },
+  ],
+};
+
 // TODO: this should support error handling explicitly
 // TODO: this should support async rendering through a promise
 export type RenderFn = (element: HTMLElement) => () => void;
@@ -102,42 +119,43 @@ export class SectionTypeService {
 
     const subscriptions = new Subscription();
 
-    this.fetchHomepageData()
-      .then((homepage) => {
-        const initialHeroes = Array.isArray(homepage.heroes) ? homepage.heroes : [homepage.heroes];
-        const initialSections = Array.isArray(homepage.sections)
-          ? homepage.sections
-          : [homepage.sections];
+    // this.fetchHomepageData()
+    //   .then((homepage) => {
+    const homepage = PLAYGROUND_HOMEPAGE;
+    const initialHeroes = Array.isArray(homepage.heroes) ? homepage.heroes : [homepage.heroes];
+    const initialSections = Array.isArray(homepage.sections)
+      ? homepage.sections
+      : [homepage.sections];
 
-        heroes$.next(initialHeroes.map((hero) => this.heroSections[hero.id]).filter(Boolean));
-        sections$.next(initialSections.map((section) => this.sections[section.id]).filter(Boolean));
-        error$.next(undefined);
+    heroes$.next(initialHeroes.map((hero) => this.heroSections[hero.id]).filter(Boolean));
+    sections$.next(initialSections.map((section) => this.sections[section.id]).filter(Boolean));
+    error$.next(undefined);
 
-        // TODO: make this debounce time configurable
-        const combinedSave$ = combineLatest([heroes$, sections$]).pipe(debounceTime(1000));
+    // TODO: make this debounce time configurable
+    const combinedSave$ = combineLatest([heroes$, sections$]).pipe(debounceTime(1000));
 
-        subscriptions.add(
-          combinedSave$.subscribe(([heroes, sections]) => {
-            if (heroes) {
-              homepage.heroes = heroes.map((hero) => ({ id: hero.id }));
-            }
+    subscriptions.add(
+      combinedSave$.subscribe(([heroes, sections]) => {
+        if (heroes) {
+          homepage.heroes = heroes.map((hero) => ({ id: hero.id }));
+        }
 
-            if (sections) {
-              homepage.sections = sections.map((section) => ({ id: section.id }));
-            }
+        if (sections) {
+          homepage.sections = sections.map((section) => ({ id: section.id }));
+        }
 
-            if (heroes || sections) {
-              homepage
-                .save({})
-                .then(() => error$.next(undefined))
-                .catch((e) => error$.next(e));
-            }
-          })
-        );
+        // if (heroes || sections) {
+        //   homepage
+        //     .save({})
+        //     .then(() => error$.next(undefined))
+        //     .catch((e) => error$.next(e));
+        // }
       })
-      .catch((e) => {
-        error$.next(e);
-      });
+    );
+    // })
+    // .catch((e) => {
+    //   error$.next(e);
+    // });
 
     return {
       heroes$: heroes$.asObservable(),
