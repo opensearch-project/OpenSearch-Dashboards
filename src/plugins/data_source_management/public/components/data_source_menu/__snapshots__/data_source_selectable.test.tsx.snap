@@ -5,16 +5,13 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
   anchorPosition="downLeft"
   button={
     <React.Fragment>
-      <EuiIcon
-        type="database"
-      />
       <EuiButtonEmpty
         aria-label="dataSourceMenuButton"
         className="euiHeaderLink"
         data-test-subj="dataSourceSelectableContextMenuHeaderLink"
         disabled={false}
-        iconSide="right"
-        iconType="arrowDown"
+        iconSide="left"
+        iconType="database"
         onClick={[Function]}
         size="s"
       >
@@ -82,16 +79,13 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
   anchorPosition="downLeft"
   button={
     <React.Fragment>
-      <EuiIcon
-        type="database"
-      />
       <EuiButtonEmpty
         aria-label="dataSourceMenuButton"
         className="euiHeaderLink"
         data-test-subj="dataSourceSelectableContextMenuHeaderLink"
         disabled={false}
-        iconSide="right"
-        iconType="arrowDown"
+        iconSide="left"
+        iconType="database"
         onClick={[Function]}
         size="s"
       >
@@ -144,16 +138,13 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
   anchorPosition="downLeft"
   button={
     <React.Fragment>
-      <EuiIcon
-        type="database"
-      />
       <EuiButtonEmpty
         aria-label="dataSourceMenuButton"
         className="euiHeaderLink"
         data-test-subj="dataSourceSelectableContextMenuHeaderLink"
         disabled={false}
-        iconSide="right"
-        iconType="arrowDown"
+        iconSide="left"
+        iconType="database"
         onClick={[Function]}
         size="s"
       >
