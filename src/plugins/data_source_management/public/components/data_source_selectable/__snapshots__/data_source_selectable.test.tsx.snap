@@ -20,6 +20,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
     </React.Fragment>
   }
   closePopover={[Function]}
+  data-test-subj="dataSourceSelectableContextMenuPopover"
   display="inlineBlock"
   hasArrow={true}
   id="dataSourceSelectableContextMenuPopover"
@@ -51,7 +52,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
             },
             Object {
               "id": "test2",
-              "label": "test3",
+              "label": "test2",
             },
             Object {
               "id": "test3",
@@ -94,6 +95,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
     </React.Fragment>
   }
   closePopover={[Function]}
+  data-test-subj="dataSourceSelectableContextMenuPopover"
   display="inlineBlock"
   hasArrow={true}
   id="dataSourceSelectableContextMenuPopover"
@@ -153,6 +155,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
     </React.Fragment>
   }
   closePopover={[Function]}
+  data-test-subj="dataSourceSelectableContextMenuPopover"
   display="inlineBlock"
   hasArrow={true}
   id="dataSourceSelectableContextMenuPopover"
@@ -199,6 +202,7 @@ Object {
     <div>
       <div
         class="euiPopover euiPopover--anchorDownLeft"
+        data-test-subj="dataSourceSelectableContextMenuPopover"
         id="dataSourceSelectableContextMenuPopover"
       >
         <div
@@ -338,6 +342,7 @@ Object {
   "container": <div>
     <div
       class="euiPopover euiPopover--anchorDownLeft"
+      data-test-subj="dataSourceSelectableContextMenuPopover"
       id="dataSourceSelectableContextMenuPopover"
     >
       <div
