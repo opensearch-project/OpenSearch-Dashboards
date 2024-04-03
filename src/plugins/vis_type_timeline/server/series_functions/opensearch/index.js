@@ -112,6 +112,14 @@ export default new Datasource('es', {
         defaultMessage: `**DO NOT USE THIS**. It's fun for debugging fit functions, but you really should use the interval picker`,
       }),
     },
+    {
+      name: 'data_source_name',
+      types: ['string, null'], // If null, the query will proceed with local cluster
+      help: i18n.translate('timeline.help.functions.opensearch.args.dataSourceNameHelpText', {
+        defaultMessage:
+          'Specify a data source to query from. This will only work if multiple data sources is enabled',
+      }),
+    },
   ],
   help: i18n.translate('timeline.help.functions.opensearchHelpText', {
     defaultMessage: 'Pull data from an opensearch instance',
@@ -148,7 +156,7 @@ export default new Datasource('es', {
 
     const opensearchShardTimeout = tlConfig.opensearchShardTimeout;
 
-    const body = buildRequest(config, tlConfig, scriptedFields, opensearchShardTimeout);
+    const body = await buildRequest(config, tlConfig, scriptedFields, opensearchShardTimeout);
 
     const deps = (await tlConfig.getStartServices())[1];
 

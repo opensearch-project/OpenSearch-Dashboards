@@ -33,8 +33,9 @@ import moment from 'moment';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 import { UI_SETTINGS } from '../../../../../data/server';
+import { getDataSourceEnabled } from '../../../lib/services';
 
-export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
+export default async function buildRequest(config, tlConfig, scriptedFields, timeout) {
   const bool = { must: [] };
 
   const timeFilter = {
@@ -47,6 +48,33 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
     },
   };
   bool.must.push(timeFilter);
+
+  let dataSourceId = undefined;
+  if (config.data_source_name) {
+    if (!getDataSourceEnabled().enabled) {
+      throw new Error('data_source_name cannot be used because data_source.enabled is false');
+    }
+
+    const dataSources = await tlConfig.savedObjectsClient.find({
+      type: 'data-source',
+      perPage: 10,
+      search: `"${config.data_source_name}"`,
+      searchFields: ['title'],
+      fields: ['id', 'title'],
+    });
+
+    const possibleDataSourceIds = dataSources.saved_objects.filter(
+      (obj) => obj.attributes.title === config.data_source_name
+    );
+
+    if (possibleDataSourceIds.length !== 1) {
+      throw new Error(
+        `Expected exactly 1 result for data_source_name "${config.data_source_name}" but got ${possibleDataSourceIds.length} results`
+      );
+    }
+
+    dataSourceId = possibleDataSourceIds.pop()?.id;
+  }
 
   // Use the opensearchDashboards and kibana filter bar filters
   if (config.opensearchDashboards && config.kibana) {
@@ -105,6 +133,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
   }
 
   return {
+    ...(!!dataSourceId && { dataSourceId }),
     params: request,
   };
 }
