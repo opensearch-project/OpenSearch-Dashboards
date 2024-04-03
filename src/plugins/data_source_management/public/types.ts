@@ -164,6 +164,6 @@ export interface SigV4Content extends SavedObjectAttributes {
 }
 
 export interface MenuPanelItem {
-  name: string | undefined;
+  name?: string;
   disabled: boolean;
 }

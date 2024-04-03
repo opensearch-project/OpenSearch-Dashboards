@@ -13,7 +13,7 @@ import { MenuPanelItem } from '../../types';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
-  selectedOption?: DataSourceOption[];
+  selectedOption: DataSourceOption[];
   savedObjectsClient?: SavedObjectsClientContract;
   notifications?: ToastsStart;
 }
@@ -42,23 +42,30 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this._isMounted = true;
     const selectedOption = this.props.selectedOption;
     // early return if not possible to fetch data source
-    if (!selectedOption || !this.props.savedObjectsClient || !this.props.notifications) return;
 
     const option = selectedOption[0];
     const optionId = option.id;
-    if (optionId && !option.label) {
-      const title = (await getDataSourceById(optionId, this.props.savedObjectsClient)).title;
-      if (!title) {
+    if (!option.label) {
+      try {
+        const title = (await getDataSourceById(optionId, this.props.savedObjectsClient)).title;
+        if (!title) {
+          this.props.notifications.addWarning(
+            i18n.translate('dataSource.fetchDataSourceError', {
+              defaultMessage: `Data source with id ${optionId} is not available`,
+            })
+          );
+        } else {
+          if (!this._isMounted) return;
+          this.setState({
+            selectedOption: [{ id: optionId, label: title }],
+          });
+        }
+      } catch (error) {
         this.props.notifications.addWarning(
           i18n.translate('dataSource.fetchDataSourceError', {
-            defaultMessage: `Data source with id ${optionId} is not available`,
+            defaultMessage: `Failed to fetch data source due to ${error}`,
           })
         );
-      } else {
-        if (!this._isMounted) return;
-        this.setState({
-          selectedOption: [{ id: optionId, label: title }],
-        });
       }
     }
   }
