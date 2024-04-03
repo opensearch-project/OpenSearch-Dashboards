@@ -77,7 +77,7 @@ function DevToolsWrapper({
   uiSettings,
 }: DevToolsWrapperProps) {
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   useEffect(
     () => () => {
@@ -114,7 +114,7 @@ function DevToolsWrapper({
       mountpoint: mountPoint,
       unmountHandler,
     };
-    setIsLoading(true);
+    setIsLoading(false);
   };
 
   return (
@@ -135,7 +135,7 @@ function DevToolsWrapper({
             </EuiTab>
           </EuiToolTip>
         ))}
-        {dataSourceEnabled && isLoading ? (
+        {dataSourceEnabled && !isLoading ? (
           <div className="devAppDataSourceSelector">
             <DataSourceSelector
               savedObjectsClient={savedObjects.client}

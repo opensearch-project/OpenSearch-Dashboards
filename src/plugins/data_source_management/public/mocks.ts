@@ -95,7 +95,7 @@ export const getDataSource = [
     type: '',
     references: [],
     attributes: {
-      title: 'DataSource 1',
+      title: 'DataSource 2',
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,

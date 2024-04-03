@@ -110,8 +110,8 @@ export function getDefaultDataSource(
         label: defaultOption?.[0]?.label || defaultOptionDataSource.attributes?.title,
       },
     ];
-}
-if (defaultDataSourceAfterCheck) {
+  }
+  if (defaultDataSourceAfterCheck) {
     return [
       {
         id: defaultDataSourceAfterCheck.id,
@@ -121,9 +121,16 @@ if (defaultDataSourceAfterCheck) {
   }
   if (!hideLocalCluster) {
     return [LocalCluster];
-  } 
-    return [];
-  
+  }
+  if (dataSources.length > 0) {
+    return [
+      {
+        id: dataSources[0].id,
+        label: dataSources[0].attributes.title,
+      },
+    ];
+  }
+  return [];
 }
 
 export async function getDataSourceById(

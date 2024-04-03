@@ -531,7 +531,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           type: '',
           references: [],
           attributes: {
-            title: 'DataSource 1',
+            title: 'DataSource 2',
             endpoint: '',
             auth: { type: AuthType.NoAuth, credentials: undefined },
             name: AuthType.NoAuth,
@@ -568,15 +568,15 @@ describe('DataSourceManagement: Utils.ts', () => {
     });
 
     it('should return the default datasource if hideLocalCluster is false', () => {
-      mockUiSettingsCalls(uiSettings, 'get', '1');
+      mockUiSettingsCalls(uiSettings, 'get', '2');
       const result = getDefaultDataSource(getDataSource, LocalCluster, uiSettings, true);
-      expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
+      expect(result).toEqual([{ id: '2', label: 'DataSource 2' }]);
     });
 
-    it('should return an empty default data source if no default option, hideLocalCluster is ture and no default datasource', () => {
+    it('should return the first data source if no default option, hideLocalCluster is ture and no default datasource', () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
       const result = getDefaultDataSource(getDataSource, LocalCluster, uiSettings, true);
-      expect(result).toEqual([]);
+      expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
     });
   });
 });
