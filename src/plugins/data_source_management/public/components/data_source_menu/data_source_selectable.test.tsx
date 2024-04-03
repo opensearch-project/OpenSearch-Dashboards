@@ -30,7 +30,7 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={jest.fn()}
+        onSelectedDataSources={jest.fn()}
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
@@ -50,7 +50,7 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={jest.fn()}
+        onSelectedDataSources={jest.fn()}
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
@@ -70,11 +70,11 @@ describe('DataSourceSelectable', () => {
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
-        onSelectedDataSource={jest.fn()}
+        onSelectedDataSources={jest.fn()}
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
-        filterFn={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
     component.instance().componentDidMount!();

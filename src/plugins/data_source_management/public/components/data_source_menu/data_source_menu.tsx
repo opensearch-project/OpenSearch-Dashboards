@@ -4,94 +4,93 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiHeaderLinks } from '@elastic/eui';
-import classNames from 'classnames';
 
-import {
-  MountPoint,
-  NotificationsStart,
-  SavedObjectsClientContract,
-} from '../../../../../core/public';
-import { MountPointPortal } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceSelectable } from './data_source_selectable';
-import { DataSourceOption } from '../data_source_selector/data_source_selector';
+import { DataSourceAggregatedView } from '../data_source_aggregated_view';
+import { DataSourceView } from '../data_source_view';
+import {
+  DataSourceAggregatedViewConfig,
+  DataSourceComponentType,
+  DataSourceMenuProps,
+  DataSourceSelectableConfig,
+  DataSourceViewConfig,
+} from './types';
 
-export interface DataSourceMenuProps {
-  showDataSourceSelectable: boolean;
-  appName: string;
-  savedObjects: SavedObjectsClientContract;
-  notifications: NotificationsStart;
-  fullWidth: boolean;
-  hideLocalCluster: boolean;
-  dataSourceCallBackFunc: (dataSource: DataSourceOption) => void;
-  disableDataSourceSelectable?: boolean;
-  className?: string;
-  selectedOption?: DataSourceOption[];
-  setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-  filterFn?: (dataSource: any) => boolean;
-}
+export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
+  const { componentType, componentConfig } = props;
 
-export function DataSourceMenu(props: DataSourceMenuProps): ReactElement | null {
-  const {
-    savedObjects,
-    notifications,
-    dataSourceCallBackFunc,
-    showDataSourceSelectable,
-    disableDataSourceSelectable,
-    fullWidth,
-    hideLocalCluster,
-    selectedOption,
-    filterFn,
-  } = props;
-
-  if (!showDataSourceSelectable) {
-    return null;
-  }
-
-  function renderMenu(className: string): ReactElement | null {
-    if (!showDataSourceSelectable) return null;
+  function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
+    const { activeOption, fullWidth } = config;
     return (
-      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
-        {renderDataSourceSelectable()}
-      </EuiHeaderLinks>
-    );
-  }
-
-  function renderDataSourceSelectable(): ReactElement | null {
-    if (!showDataSourceSelectable) return null;
-    return (
-      <DataSourceSelectable
+      <DataSourceView
+        selectedOption={activeOption && activeOption.length > 0 ? activeOption : undefined}
         fullWidth={fullWidth}
-        hideLocalCluster={hideLocalCluster}
-        savedObjectsClient={savedObjects}
-        notifications={notifications.toasts}
-        onSelectedDataSource={dataSourceCallBackFunc}
-        disabled={disableDataSourceSelectable || false}
-        selectedOption={selectedOption && selectedOption.length > 0 ? selectedOption : undefined}
-        filterFn={filterFn}
       />
     );
   }
 
-  function renderLayout() {
-    const { setMenuMountPoint } = props;
-    const menuClassName = classNames('osdTopNavMenu', props.className);
-    if (setMenuMountPoint) {
-      return (
-        <>
-          <MountPointPortal setMountPoint={setMenuMountPoint}>
-            {renderMenu(menuClassName)}
-          </MountPointPortal>
-        </>
-      );
-    } else {
-      return <>{renderMenu(menuClassName)}</>;
+  function renderDataSourceSelectable(config: DataSourceSelectableConfig): ReactElement | null {
+    const {
+      onSelectedDataSources,
+      disabled,
+      activeOption,
+      hideLocalCluster,
+      fullWidth,
+      savedObjects,
+      notifications,
+      dataSourceFilter,
+    } = config;
+    return (
+      <DataSourceSelectable
+        savedObjectsClient={savedObjects!}
+        notifications={notifications!.toasts}
+        onSelectedDataSources={onSelectedDataSources}
+        disabled={disabled || false}
+        selectedOption={activeOption && activeOption.length > 0 ? activeOption : undefined}
+        dataSourceFilter={dataSourceFilter}
+        hideLocalCluster={hideLocalCluster || false}
+        fullWidth={fullWidth}
+      />
+    );
+  }
+
+  function renderDataSourceAggregatedView(
+    config: DataSourceAggregatedViewConfig
+  ): ReactElement | null {
+    const {
+      fullWidth,
+      hideLocalCluster,
+      activeDataSourceIds,
+      displayAllCompatibleDataSources,
+      savedObjects,
+      notifications,
+      dataSourceFilter,
+    } = config;
+    return (
+      <DataSourceAggregatedView
+        fullWidth={fullWidth}
+        hideLocalCluster={hideLocalCluster || false}
+        savedObjectsClient={savedObjects!}
+        notifications={notifications!.toasts}
+        activeDataSourceIds={activeDataSourceIds}
+        dataSourceFilter={dataSourceFilter}
+        displayAllCompatibleDataSources={displayAllCompatibleDataSources || false}
+      />
+    );
+  }
+
+  function renderLayout(): ReactElement | null {
+    switch (componentType) {
+      case DataSourceComponentType.DataSourceAggregatedView:
+        return renderDataSourceAggregatedView(componentConfig as DataSourceAggregatedViewConfig);
+      case DataSourceComponentType.DataSourceSelectable:
+        return renderDataSourceSelectable(componentConfig as DataSourceSelectableConfig);
+      case DataSourceComponentType.DataSourceView:
+        return renderDataSourceView(componentConfig as DataSourceViewConfig);
+      default:
+        return null;
     }
   }
 
   return renderLayout();
 }
-
-DataSourceMenu.defaultProps = {
-  disableDataSourceSelectable: false,
-};
