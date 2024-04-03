@@ -5,7 +5,7 @@
 
 import { WorkspaceAttribute } from 'src/core/types';
 import * as osdTestServer from '../../../../core/test_helpers/osd_server';
-import { WORKSPACE_TYPE } from '../../../../core/server';
+import { WORKSPACE_TYPE, Permissions } from '../../../../core/server';
 
 const omitId = <T extends { id?: string }>(object: T): Omit<T, 'id'> => {
   const { id, ...others } = object;
@@ -18,7 +18,7 @@ const testWorkspace: WorkspaceAttribute = {
   description: 'test_workspace_description',
 };
 
-describe('workspace service', () => {
+describe('workspace service api integration test', () => {
   let root: ReturnType<typeof osdTestServer.createRoot>;
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
   let osd: osdTestServer.TestOpenSearchDashboardsUtils;
@@ -29,6 +29,11 @@ describe('workspace service', () => {
         osd: {
           workspace: {
             enabled: true,
+          },
+          savedObjects: {
+            permission: {
+              enabled: false,
+            },
           },
           migrations: { skip: false },
         },
@@ -403,6 +408,110 @@ describe('workspace service', () => {
         .expect(200);
       expect(result.body.success).toEqual(true);
       expect(result.body.successCount).toEqual(2);
+    });
+  });
+});
+
+describe('workspace service api integration test when savedObjects.permission.enabled equal true', () => {
+  let root: ReturnType<typeof osdTestServer.createRoot>;
+  let opensearchServer: osdTestServer.TestOpenSearchUtils;
+  let osd: osdTestServer.TestOpenSearchDashboardsUtils;
+  beforeAll(async () => {
+    const { startOpenSearch, startOpenSearchDashboards } = osdTestServer.createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+      settings: {
+        osd: {
+          workspace: {
+            enabled: true,
+          },
+          savedObjects: {
+            permission: {
+              enabled: true,
+            },
+          },
+          migrations: { skip: false },
+        },
+      },
+    });
+    opensearchServer = await startOpenSearch();
+    osd = await startOpenSearchDashboards();
+    root = osd.root;
+  });
+  afterAll(async () => {
+    await root.shutdown();
+    await opensearchServer.stop();
+  });
+  describe('Workspace CRUD APIs', () => {
+    afterEach(async () => {
+      const listResult = await osdTestServer.request
+        .post(root, `/api/workspaces/_list`)
+        .send({
+          page: 1,
+        })
+        .expect(200);
+      const savedObjectsRepository = osd.coreStart.savedObjects.createInternalRepository([
+        WORKSPACE_TYPE,
+      ]);
+      await Promise.all(
+        listResult.body.result.workspaces.map((item: WorkspaceAttribute) =>
+          // this will delete reserved workspace
+          savedObjectsRepository.delete(WORKSPACE_TYPE, item.id)
+        )
+      );
+    });
+    it('create', async () => {
+      await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+          permissions: { invalid_type: { users: ['foo'] } },
+        })
+        .expect(400);
+
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+          permissions: { read: { users: ['foo'] } },
+        })
+        .expect(200);
+
+      expect(result.body.success).toEqual(true);
+      expect(typeof result.body.result.id).toBe('string');
+      expect(
+        (
+          await osd.coreStart.savedObjects
+            .createInternalRepository([WORKSPACE_TYPE])
+            .get<{ permissions: Permissions }>(WORKSPACE_TYPE, result.body.result.id)
+        ).permissions
+      ).toEqual({ read: { users: ['foo'] } });
+    });
+    it('update', async () => {
+      const result: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: omitId(testWorkspace),
+        })
+        .expect(200);
+
+      const updateResult = await osdTestServer.request
+        .put(root, `/api/workspaces/${result.body.result.id}`)
+        .send({
+          attributes: {
+            ...omitId(testWorkspace),
+          },
+          permissions: { write: { users: ['foo'] } },
+        })
+        .expect(200);
+      expect(updateResult.body.result).toBe(true);
+
+      expect(
+        (
+          await osd.coreStart.savedObjects
+            .createInternalRepository([WORKSPACE_TYPE])
+            .get<{ permissions: Permissions }>(WORKSPACE_TYPE, result.body.result.id)
+        ).permissions
+      ).toEqual({ write: { users: ['foo'] } });
     });
   });
 });
