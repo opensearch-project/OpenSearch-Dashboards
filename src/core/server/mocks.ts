@@ -89,6 +89,9 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
     path: { data: '/tmp' },
     savedObjects: {
       maxImportPayloadBytes: new ByteSizeValue(26214400),
+      permission: {
+        enabled: true,
+      },
     },
   };
 
