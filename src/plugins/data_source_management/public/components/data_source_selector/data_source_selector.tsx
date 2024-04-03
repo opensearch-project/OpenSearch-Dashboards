@@ -130,7 +130,7 @@ export class DataSourceSelector extends React.Component<
         ? 'Select a data source'
         : this.props.placeholderText;
 
-    // We render again here to make sure each time we will get the latest filtered data sources
+    // The filter condition can be changed, thus we filter again here to make sure each time we will get the filtered data sources before rendering
     const dataSources = getFilteredDataSources(
       this.state.allDataSources,
       this.props.dataSourceFilter
