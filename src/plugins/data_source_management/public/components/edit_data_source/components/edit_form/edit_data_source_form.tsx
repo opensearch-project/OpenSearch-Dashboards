@@ -25,7 +25,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import deepEqual from 'fast-deep-equal';
-import { AuthenticationMethodRegistery } from '../../../../auth_registry';
+import { AuthenticationMethodRegistry } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import { Header } from '../header';
 import {
@@ -50,9 +50,11 @@ import { extractRegisteredAuthTypeCredentials, getDefaultAuthMethod } from '../.
 export interface EditDataSourceProps {
   existingDataSource: DataSourceAttributes;
   existingDatasourceNamesList: string[];
+  isDefault: boolean;
   handleSubmit: (formValues: DataSourceAttributes) => Promise<void>;
   handleTestConnection: (formValues: DataSourceAttributes) => Promise<void>;
   onDeleteDataSource?: () => Promise<void>;
+  onSetDefaultDataSource: () => Promise<void>;
   displayToastMessage: (info: ToastMessageItem) => void;
 }
 export interface EditDataSourceState {
@@ -79,19 +81,19 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   public readonly context!: DataSourceManagementContextValue;
   maskedPassword: string = '********';
   authOptions: Array<EuiSuperSelectOption<string>> = [];
-  authenticationMethodRegistery: AuthenticationMethodRegistery;
+  authenticationMethodRegistry: AuthenticationMethodRegistry;
 
   constructor(props: EditDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
 
-    this.authenticationMethodRegistery = context.services.authenticationMethodRegistery;
-    this.authOptions = this.authenticationMethodRegistery
+    this.authenticationMethodRegistry = context.services.authenticationMethodRegistry;
+    this.authOptions = this.authenticationMethodRegistry
       .getAllAuthenticationMethods()
       .map((authMethod) => {
         return authMethod.credentialSourceOption;
       });
 
-    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistery);
+    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistry);
 
     this.state = {
       formErrorsByField: { ...defaultValidation },
@@ -127,7 +129,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
         (auth.credentials ?? {}) as { [key: string]: string },
         auth.type,
-        this.authenticationMethodRegistery
+        this.authenticationMethodRegistry
       );
 
       this.setState({
@@ -151,7 +153,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       this.state,
       this.props.existingDatasourceNamesList,
       this.props.existingDataSource.title,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
   };
 
@@ -184,7 +186,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
       (credentials ?? {}) as { [key: string]: string },
       authType,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
 
     this.setState(
@@ -372,7 +374,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           formValues.auth.credentials = extractRegisteredAuthTypeCredentials(
             currentCredentials,
             this.state.auth.type,
-            this.authenticationMethodRegistery
+            this.authenticationMethodRegistry
           );
           break;
       }
@@ -397,6 +399,12 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   onClickDeleteDataSource = async () => {
     if (this.props.onDeleteDataSource) {
       await this.props.onDeleteDataSource();
+    }
+  };
+
+  setDefaultDataSource = async () => {
+    if (this.props.onSetDefaultDataSource) {
+      await this.props.onSetDefaultDataSource();
     }
   };
 
@@ -432,7 +440,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         credentials = extractRegisteredAuthTypeCredentials(
           currentCredentials,
           this.state.auth.type,
-          this.authenticationMethodRegistery
+          this.authenticationMethodRegistry
         );
         break;
     }
@@ -549,7 +557,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   getCredentialFormFromRegistry = (authType: string) => {
-    const registeredAuthMethod = this.authenticationMethodRegistery.getAuthenticationMethod(
+    const registeredAuthMethod = this.authenticationMethodRegistry.getAuthenticationMethod(
       authType
     );
     const authCredentialForm = registeredAuthMethod?.credentialForm;
@@ -634,6 +642,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         onClickDeleteIcon={this.onClickDeleteDataSource}
         dataSourceName={this.props.existingDataSource.title}
         onClickTestConnection={this.onClickTestConnection}
+        onClickSetDefault={this.setDefaultDataSource}
+        isDefault={this.props.isDefault}
       />
     );
   };
@@ -1068,13 +1078,13 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     const existingAuthCredentials = extractRegisteredAuthTypeCredentials(
       (auth?.credentials ?? {}) as { [key: string]: string },
       currentAuth.type,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
 
     const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
       (currentAuth?.credentials ?? {}) as { [key: string]: string },
       currentAuth.type,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
 
     return !deepEqual(existingAuthCredentials, registeredAuthCredentials);

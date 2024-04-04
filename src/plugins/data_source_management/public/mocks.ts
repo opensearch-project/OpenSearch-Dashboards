@@ -6,6 +6,7 @@
 import React from 'react';
 import { throwError } from 'rxjs';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { AuthType, DataSourceAttributes } from './types';
 import { coreMock } from '../../../core/public/mocks';
 import {
@@ -15,7 +16,7 @@ import {
 } from './plugin';
 import { managementPluginMock } from '../../management/public/mocks';
 import { mockManagementPlugin as indexPatternManagementPluginMock } from '../../index_pattern_management/public/mocks';
-import { AuthenticationMethod, AuthenticationMethodRegistery } from './auth_registry';
+import { AuthenticationMethod, AuthenticationMethodRegistry } from './auth_registry';
 
 /* Mock Types */
 
@@ -30,7 +31,7 @@ export const docLinks = {
   },
 };
 
-export const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+export const authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
 const createDataSourceManagementContext = () => {
   const {
@@ -53,7 +54,7 @@ const createDataSourceManagementContext = () => {
     http,
     docLinks,
     setBreadcrumbs: () => {},
-    authenticationMethodRegistery,
+    authenticationMethodRegistry,
   };
 };
 
@@ -61,6 +62,57 @@ export const mockManagementPlugin = {
   createDataSourceManagementContext,
   docLinks,
 };
+
+export const getSingleDataSourceResponse = {
+  savedObjects: [
+    {
+      id: 'test',
+      type: 'data-source',
+      description: 'test datasource',
+      title: 'test',
+      get(field: string) {
+        const me: any = this || {};
+        return me[field];
+      },
+    },
+  ],
+};
+
+export const getDataSource = [
+  {
+    id: '1',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 1',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+  {
+    id: '2',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 2',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+  {
+    id: '3',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 1',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+];
 
 /* Mock data responses - JSON*/
 export const getDataSourcesResponse = {
@@ -125,7 +177,7 @@ export const getDataSourcesWithFieldsResponse = {
       type: 'data-source',
       description: 'test datasource2',
       attributes: {
-        title: 'test3',
+        title: 'test2',
         auth: {
           type: AuthType.UsernamePasswordType,
         },
@@ -179,6 +231,10 @@ export const getMappedDataSources = [
     sort: 'beta-test',
   },
 ];
+
+export const fetchDataSourceVersion = {
+  dataSourceVersion: '2.11.0',
+};
 
 export const mockDataSourceAttributesWithAuth = {
   id: 'test',
@@ -257,6 +313,14 @@ export const mockErrorResponseForSavedObjectsCalls = (
   (savedObjectsClient[savedObjectsMethodName] as jest.Mock).mockRejectedValue(
     throwError(new Error('Error while fetching data sources'))
   );
+};
+
+export const mockUiSettingsCalls = (
+  uiSettings: IUiSettingsClient,
+  uiSettingsMethodName: 'get' | 'set',
+  response: any
+) => {
+  (uiSettings[uiSettingsMethodName] as jest.Mock).mockReturnValue(response);
 };
 
 export interface TestPluginReturn {

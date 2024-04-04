@@ -321,7 +321,13 @@ export {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
+  ACL,
+  Principals,
+  PrincipalType,
+  Permissions,
   SavedObjectsDeleteByWorkspaceOptions,
+  updateDataSourceNameInVegaSpec,
+  extractVegaSpecFromSavedObject,
 } from './saved_objects';
 
 export {

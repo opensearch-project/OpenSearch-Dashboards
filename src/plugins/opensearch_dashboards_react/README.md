@@ -153,6 +153,7 @@ class MyPlugin {
 
 - `overlays.openModal` &mdash; opens modal window.
 - `overlays.openFlyout` &mdash; opens right side panel.
+- `overlays.sidecar().open` &mdash; opens sidecar.
 
 You can access `overlays` service through React context.
 

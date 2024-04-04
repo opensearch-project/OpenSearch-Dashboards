@@ -3,14 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
+import {
+  HttpStart,
+  SavedObjectsClientContract,
+  SavedObject,
+  IUiSettingsClient,
+} from 'src/core/public';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
   defaultAuthType,
   noAuthCredentialAuthMethod,
 } from '../types';
-import { AuthenticationMethodRegistery } from '../auth_registry';
+import { AuthenticationMethodRegistry } from '../auth_registry';
+import { DataSourceOption } from './data_source_selector/data_source_selector';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -39,14 +45,92 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
 export async function getDataSourcesWithFields(
   savedObjectsClient: SavedObjectsClientContract,
   fields: string[]
-) {
-  const response = await savedObjectsClient.find({
+): Promise<Array<SavedObject<DataSourceAttributes>>> {
+  const response = await savedObjectsClient.find<DataSourceAttributes>({
     type: 'data-source',
     fields,
     perPage: 10000,
   });
 
   return response?.savedObjects;
+}
+
+export async function handleSetDefaultDatasource(
+  savedObjectsClient: SavedObjectsClientContract,
+  uiSettings: IUiSettingsClient
+) {
+  if (uiSettings.get('defaultDataSource', null) === null) {
+    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
+  }
+}
+
+export async function setFirstDataSourceAsDefault(
+  savedObjectsClient: SavedObjectsClientContract,
+  uiSettings: IUiSettingsClient,
+  exists: boolean
+) {
+  if (exists) {
+    uiSettings.remove('defaultDataSource');
+  }
+  const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
+  if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
+    const datasourceId = listOfDataSources[0].id;
+    return await uiSettings.set('defaultDataSource', datasourceId);
+  }
+}
+
+export function getFilteredDataSources(
+  dataSources: Array<SavedObject<DataSourceAttributes>>,
+  filter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean
+) {
+  return filter ? dataSources.filter((ds) => filter!(ds)) : dataSources;
+}
+
+export function getDefaultDataSource(
+  dataSources: Array<SavedObject<DataSourceAttributes>>,
+  LocalCluster: DataSourceOption,
+  uiSettings?: IUiSettingsClient,
+  hideLocalCluster?: boolean,
+  defaultOption?: DataSourceOption[]
+) {
+  const defaultOptionId = defaultOption?.[0]?.id;
+  const defaultOptionDataSource = dataSources.find(
+    (dataSource) => dataSource.id === defaultOptionId
+  );
+
+  const defaultDataSourceId = uiSettings?.get('defaultDataSource', null) ?? null;
+  const defaultDataSourceAfterCheck = dataSources.find(
+    (dataSource) => dataSource.id === defaultDataSourceId
+  );
+
+  if (defaultOptionDataSource) {
+    return [
+      {
+        id: defaultOptionDataSource.id,
+        label: defaultOption?.[0]?.label || defaultOptionDataSource.attributes?.title,
+      },
+    ];
+  }
+  if (defaultDataSourceAfterCheck) {
+    return [
+      {
+        id: defaultDataSourceAfterCheck.id,
+        label: defaultDataSourceAfterCheck.attributes?.title || '',
+      },
+    ];
+  }
+  if (!hideLocalCluster) {
+    return [LocalCluster];
+  }
+  if (dataSources.length > 0) {
+    return [
+      {
+        id: dataSources[0].id,
+        label: dataSources[0].attributes.title,
+      },
+    ];
+  }
+  return [];
 }
 
 export async function getDataSourceById(
@@ -119,6 +203,27 @@ export async function testConnection(
   });
 }
 
+export async function fetchDataSourceVersion(
+  http: HttpStart,
+  { endpoint, auth: { type, credentials } }: DataSourceAttributes,
+  dataSourceID?: string
+) {
+  const query: any = {
+    id: dataSourceID,
+    dataSourceAttr: {
+      endpoint,
+      auth: {
+        type,
+        credentials,
+      },
+    },
+  };
+
+  return await http.post(`/internal/data-source-management/fetchDataSourceVersion`, {
+    body: JSON.stringify(query),
+  });
+}
+
 export const isValidUrl = (endpoint: string) => {
   try {
     const url = new URL(endpoint);
@@ -129,17 +234,17 @@ export const isValidUrl = (endpoint: string) => {
 };
 
 export const getDefaultAuthMethod = (
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
-  const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
+  const registeredAuthMethods = authenticationMethodRegistry.getAllAuthenticationMethods();
 
   const defaultAuthMethod =
     registeredAuthMethods.length > 0
-      ? authenticationMethodRegistery.getAuthenticationMethod(registeredAuthMethods[0].name)
+      ? authenticationMethodRegistry.getAuthenticationMethod(registeredAuthMethods[0].name)
       : noAuthCredentialAuthMethod;
 
   const initialSelectedAuthMethod =
-    authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
+    authenticationMethodRegistry.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
 
   return initialSelectedAuthMethod;
 };
@@ -147,15 +252,15 @@ export const getDefaultAuthMethod = (
 export const extractRegisteredAuthTypeCredentials = (
   currentCredentialState: { [key: string]: string },
   authType: string,
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
   const registeredCredentials = {} as { [key: string]: string };
   const registeredCredentialField =
-    authenticationMethodRegistery.getAuthenticationMethod(authType)?.credentialFormField ?? {};
+    authenticationMethodRegistry.getAuthenticationMethod(authType)?.credentialFormField ?? {};
 
-  Object.keys(registeredCredentialField).forEach((credentialFiled) => {
-    registeredCredentials[credentialFiled] =
-      currentCredentialState[credentialFiled] ?? registeredCredentialField[credentialFiled];
+  Object.keys(registeredCredentialField).forEach((credentialField) => {
+    registeredCredentials[credentialField] =
+      currentCredentialState[credentialField] ?? registeredCredentialField[credentialField];
   });
 
   return registeredCredentials;

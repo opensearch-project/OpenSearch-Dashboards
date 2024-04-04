@@ -3,24 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthenticationMethodRegistery } from './authentication_methods_registry';
+import { AuthenticationMethodRegistry } from './authentication_methods_registry';
 import { AuthenticationMethod } from '../../server/types';
-import { AuthType } from '../../common/data_sources';
 
 const createAuthenticationMethod = (
   authMethod: Partial<AuthenticationMethod>
 ): AuthenticationMethod => ({
   name: 'unknown',
-  authType: AuthType.NoAuth,
   credentialProvider: jest.fn(),
   ...authMethod,
 });
 
-describe('AuthenticationMethodRegistery', () => {
-  let registry: AuthenticationMethodRegistery;
+describe('AuthenticationMethodRegistry', () => {
+  let registry: AuthenticationMethodRegistry;
 
   beforeEach(() => {
-    registry = new AuthenticationMethodRegistery();
+    registry = new AuthenticationMethodRegistry();
   });
 
   it('allows to register authentication method', () => {
@@ -61,14 +59,14 @@ describe('AuthenticationMethodRegistery', () => {
       registry.registerAuthenticationMethod(
         createAuthenticationMethod({
           name: 'typeA',
-          authType: AuthType.NoAuth,
+          credentialProvider: jest.fn(),
         })
       );
 
       const typeA = registry.getAuthenticationMethod('typeA')!;
 
       expect(() => {
-        typeA.authType = AuthType.SigV4;
+        typeA.credentialProvider = jest.fn();
       }).toThrow();
       expect(() => {
         typeA.name = 'foo';

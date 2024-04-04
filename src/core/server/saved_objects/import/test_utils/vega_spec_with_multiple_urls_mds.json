@@ -1,0 +1,96 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "width": 800,
+  "height": 600,
+  "padding": 5,
+  "signals": [
+    {"name": "mapType", "value": "topojson"}
+  ],
+  "data": [
+    {
+      "name": "exampleIndexSource",
+      "url": {
+        "%context%": true,
+        "%timefield%": "@timestamp",
+        "index": "your_index_name",
+        "data_source_name": "some datasource name",
+        "body": {
+          "size": 1000,
+          "query": {
+            "match_all": {}
+          }
+        }
+      },
+      "format": {"property": "hits.hits"}
+    },
+    {
+      "name": "urlData",
+      "url": "https://example.com/data.json",
+      "format": {"type": "json"}
+    },
+    {
+      "name": "topojsonData",
+      "url": "https://example.com/map.topojson",
+      "format": {"type": "topojson", "feature": "your_feature_name"}
+    },
+    {
+      "name": "geojsonData",
+      "url": "https://example.com/map.geojson",
+      "format": {"type": "json"}
+    }
+  ],
+  "projections": [
+    {
+      "name": "projection",
+      "type": {"signal": "mapType"}
+    }
+  ],
+  "marks": [
+    {
+      "type": "symbol",
+      "from": {"data": "exampleIndexSource"},
+      "encode": {
+        "enter": {
+          "x": {"field": "_source.location.lon"},
+          "y": {"field": "_source.location.lat"},
+          "size": {"value": 50},
+          "fill": {"value": "steelblue"},
+          "stroke": {"value": "white"},
+          "tooltip": {"signal": "datum._source.name"}
+        }
+      }
+    },
+    {
+      "type": "symbol",
+      "from": {"data": "urlData"},
+      "encode": {
+        "enter": {
+          "x": {"field": "longitude"},
+          "y": {"field": "latitude"},
+          "size": {"value": 50},
+          "fill": {"value": "green"},
+          "stroke": {"value": "white"},
+          "tooltip": {"field": "name"}
+        }
+      }
+    },
+    {
+      "type": "shape",
+      "from": {"data": "topojsonData"},
+      "encode": {
+        "enter": {
+          "fill": {"value": "lightgray"}
+        }
+      }
+    },
+    {
+      "type": "shape",
+      "from": {"data": "geojsonData"},
+      "encode": {
+        "enter": {
+          "fill": {"value": "lightblue"}
+        }
+      }
+    }
+  ]
+}

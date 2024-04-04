@@ -18,7 +18,7 @@ import { SavedObjectAttributes } from 'src/core/types';
 import { i18n } from '@osd/i18n';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
-import { AuthenticationMethodRegistery } from './auth_registry';
+import { AuthenticationMethodRegistry } from './auth_registry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
@@ -33,7 +33,7 @@ export interface DataSourceManagementContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-  authenticationMethodRegistery: AuthenticationMethodRegistery;
+  authenticationMethodRegistry: AuthenticationMethodRegistry;
 }
 
 export interface DataSourceTableItem {
@@ -140,6 +140,7 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
   description?: string;
   endpoint?: string;
+  dataSourceVersion?: string;
   auth: {
     type: AuthType | string;
     credentials:
@@ -160,4 +161,9 @@ export interface SigV4Content extends SavedObjectAttributes {
   secretKey: string;
   region: string;
   service?: SigV4ServiceName;
+}
+
+export interface MenuPanelItem {
+  name?: string;
+  disabled: boolean;
 }

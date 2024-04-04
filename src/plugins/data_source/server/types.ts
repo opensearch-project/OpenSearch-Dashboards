@@ -18,7 +18,7 @@ import {
 
 import { CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceError } from './lib/error';
-import { IAuthenticationMethodRegistery } from './auth_registry';
+import { IAuthenticationMethodRegistry } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
 
 export interface LegacyClientCallAPIParams {
@@ -40,7 +40,7 @@ export interface DataSourceClientParams {
   // When client parameters are required to be retrieved from the request header, the caller should provide the request.
   request?: OpenSearchDashboardsRequest;
   // To retrieve the credentials provider for the authentication method from the registry in order to return the client.
-  authRegistry?: IAuthenticationMethodRegistery;
+  authRegistry?: IAuthenticationMethodRegistry;
 }
 
 export interface DataSourceCredentialsProviderOptions {
@@ -51,11 +51,17 @@ export interface DataSourceCredentialsProviderOptions {
 
 export type DataSourceCredentialsProvider = (
   options: DataSourceCredentialsProviderOptions
-) => Promise<UsernamePasswordTypedContent | SigV4Content>;
+) => Promise<ClientParameters>;
+
+export interface ClientParameters {
+  authType: AuthType;
+  endpoint: string;
+  cacheKeySuffix: string;
+  credentials: UsernamePasswordTypedContent | SigV4Content;
+}
 
 export interface AuthenticationMethod {
   name: string;
-  authType: AuthType;
   credentialProvider: DataSourceCredentialsProvider;
 }
 
@@ -89,6 +95,6 @@ export interface DataSourcePluginSetup {
 }
 
 export interface DataSourcePluginStart {
-  getAuthenticationMethodRegistery: () => IAuthenticationMethodRegistery;
+  getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
   getCustomApiSchemaRegistry: () => CustomApiSchemaRegistry;
 }

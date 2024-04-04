@@ -6,22 +6,29 @@
 import { SavedObjectsClientContract } from '../../../../core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/server/mocks';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
-import { AuthType, DataSourceAttributes, SigV4Content } from '../../common/data_sources';
+import {
+  AuthType,
+  DataSourceAttributes,
+  SigV4Content,
+  SigV4ServiceName,
+} from '../../common/data_sources';
 import { DataSourcePluginConfigType } from '../../config';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { CryptographyServiceSetup } from '../cryptography_service';
-import { DataSourceClientParams, LegacyClientCallAPIParams, AuthenticationMethod } from '../types';
-import { OpenSearchClientPoolSetup } from '../client';
+import {
+  DataSourceClientParams,
+  LegacyClientCallAPIParams,
+  AuthenticationMethod,
+  ClientParameters,
+} from '../types';
+import { OpenSearchClientPool, OpenSearchClientPoolSetup } from '../client';
 import { ConfigOptions } from 'elasticsearch';
 import { ClientMock, parseClientOptionsMock } from './configure_legacy_client.test.mocks';
-import {
-  authRegistryCredentialProviderMock,
-  CredentialsMock,
-} from '../client/./configure_client.test.mocks';
+import { authRegistryCredentialProviderMock } from '../client/configure_client.test.mocks';
 import { configureLegacyClient } from './configure_legacy_client';
 import { CustomApiSchemaRegistry } from '../schema_registry';
-import { IAuthenticationMethodRegistery } from '../auth_registry';
-import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
+import { IAuthenticationMethodRegistry } from '../auth_registry';
+import { authenticationMethodRegistryMock } from '../auth_registry/authentication_methods_registry.mock';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
@@ -31,11 +38,11 @@ describe('configureLegacyClient', () => {
   let config: DataSourcePluginConfigType;
   let savedObjectsMock: jest.Mocked<SavedObjectsClientContract>;
   let cryptographyMock: jest.Mocked<CryptographyServiceSetup>;
-  let clientPoolSetup: OpenSearchClientPoolSetup;
   let configOptions: ConfigOptions;
   let dataSourceAttr: DataSourceAttributes;
   let sigV4AuthContent: SigV4Content;
-  let authenticationMethodRegistery: jest.Mocked<IAuthenticationMethodRegistery>;
+  let authenticationMethodRegistry: jest.Mocked<IAuthenticationMethodRegistry>;
+  let clientParameters: ClientParameters;
 
   let mockOpenSearchClientInstance: {
     close: jest.Mock;
@@ -52,9 +59,13 @@ describe('configureLegacyClient', () => {
     roleARN: 'test-role',
   };
 
+  const clientPoolSetup: OpenSearchClientPoolSetup = {
+    getClientFromPool: jest.fn(),
+    addClientToPool: jest.fn(),
+  };
+
   const authMethod: AuthenticationMethod = {
     name: 'typeA',
-    authType: AuthType.SigV4,
     credentialProvider: jest.fn(),
   };
 
@@ -66,7 +77,7 @@ describe('configureLegacyClient', () => {
     logger = loggingSystemMock.createLogger();
     savedObjectsMock = savedObjectsClientMock.create();
     cryptographyMock = cryptographyServiceSetupMock.create();
-    authenticationMethodRegistery = authenticationMethodRegisteryMock.create();
+    authenticationMethodRegistry = authenticationMethodRegistryMock.create();
     config = {
       enabled: true,
       clientPool: {
@@ -99,11 +110,6 @@ describe('configureLegacyClient', () => {
       secretKey: 'secretKey',
     };
 
-    clientPoolSetup = {
-      getClientFromPool: jest.fn(),
-      addClientToPool: jest.fn(),
-    };
-
     callApiParams = {
       endpoint: 'ping',
     };
@@ -122,6 +128,13 @@ describe('configureLegacyClient', () => {
       customApiSchemaRegistryPromise: Promise.resolve(customApiSchemaRegistry),
     };
 
+    clientParameters = {
+      authType: AuthType.SigV4,
+      endpoint: dataSourceAttr.endpoint,
+      cacheKeySuffix: '',
+      credentials: sigV4AuthContent,
+    };
+
     ClientMock.mockImplementation(() => mockOpenSearchClientInstance);
 
     mockOpenSearchClientInstance.ping.mockImplementation(function mockCall(this: any) {
@@ -131,12 +144,13 @@ describe('configureLegacyClient', () => {
       });
     });
 
-    authenticationMethodRegistery.getAuthenticationMethod.mockImplementation(() => authMethod);
+    authenticationMethodRegistry.getAuthenticationMethod.mockImplementation(() => authMethod);
+    authRegistryCredentialProviderMock.mockReturnValue(clientParameters);
   });
 
   afterEach(() => {
     ClientMock.mockReset();
-    CredentialsMock.mockReset();
+    authRegistryCredentialProviderMock.mockReset();
     jest.resetAllMocks();
   });
 
@@ -220,9 +234,21 @@ describe('configureLegacyClient', () => {
 
     expect(parseClientOptionsMock).toHaveBeenCalled();
     expect(ClientMock).toHaveBeenCalledTimes(1);
-    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining({ service: 'aoss' }));
 
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+      headers: {
+        auth: {
+          credentials: {
+            accessKeyId: 'accessKey',
+            secretAccessKey: 'accessKey',
+            sessionToken: '',
+          },
+          region: sigV4AuthContent.region,
+          service: 'aoss',
+        },
+      },
+    });
   });
 
   test('configure client with auth.type == username_password and password contaminated', async () => {
@@ -291,26 +317,30 @@ describe('configureLegacyClient', () => {
       references: [],
     });
 
-    authRegistryCredentialProviderMock.mockReturnValue({
-      credential: sigV4AuthContent,
-      type: AuthType.SigV4,
-    });
-
     await configureLegacyClient(
-      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
       callApiParams,
       clientPoolSetup,
       config,
       logger
     );
     expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
-    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(authenticationMethodRegistry.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toBeCalledWith({
-      accessKeyId: sigV4AuthContent.accessKey,
-      secretAccessKey: sigV4AuthContent.secretKey,
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+      headers: {
+        auth: {
+          credentials: {
+            accessKeyId: sigV4AuthContent.accessKey,
+            secretAccessKey: sigV4AuthContent.secretKey,
+            sessionToken: '',
+          },
+          region: sigV4AuthContent.region,
+          service: SigV4ServiceName.OpenSearch,
+        },
+      },
     });
   });
 
@@ -330,26 +360,382 @@ describe('configureLegacyClient', () => {
     });
 
     authRegistryCredentialProviderMock.mockReturnValue({
-      credential: mockCredentials,
-      type: AuthType.SigV4,
+      ...clientParameters,
+      credentials: mockCredentials,
     });
 
     await configureLegacyClient(
-      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
       callApiParams,
       clientPoolSetup,
       config,
       logger
     );
     expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
-    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(authenticationMethodRegistry.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toHaveBeenCalledTimes(1);
-    expect(CredentialsMock).toBeCalledWith({
-      accessKeyId: mockCredentials.accessKey,
-      secretAccessKey: mockCredentials.secretKey,
-      sessionToken: mockCredentials.sessionToken,
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+      headers: {
+        auth: {
+          credentials: {
+            accessKeyId: mockCredentials.accessKey,
+            secretAccessKey: mockCredentials.secretKey,
+            sessionToken: mockCredentials.sessionToken,
+          },
+          region: mockCredentials.region,
+          service: SigV4ServiceName.OpenSearch,
+        },
+      },
+    });
+  });
+  test('configureLegacyClient with auth method from registry, service == aoss, should successfully call new Client()', async () => {
+    savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: {
+          type: AuthType.SigV4,
+          credentials: { ...customAuthContent, service: 'aoss' },
+        },
+      },
+      references: [],
+    });
+
+    await configureLegacyClient(
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
+      callApiParams,
+      clientPoolSetup,
+      config,
+      logger
+    );
+    expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
+    expect(authenticationMethodRegistry.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
+    expect(mockOpenSearchClientInstance.ping).toHaveBeenLastCalledWith({
+      headers: {
+        auth: {
+          credentials: {
+            accessKeyId: sigV4AuthContent.accessKey,
+            secretAccessKey: sigV4AuthContent.secretKey,
+            sessionToken: '',
+          },
+          region: sigV4AuthContent.region,
+          service: 'aoss',
+        },
+      },
+    });
+  });
+
+  describe('Client Pool', () => {
+    let opensearchClientPoolSetup: OpenSearchClientPoolSetup;
+    let openSearchClientPool: OpenSearchClientPool;
+    beforeEach(() => {
+      openSearchClientPool = new OpenSearchClientPool(logger);
+      opensearchClientPoolSetup = openSearchClientPool.setup(config);
+    });
+
+    describe('NoAuth', () => {
+      beforeEach(() => {
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...dataSourceAttr,
+            auth: {
+              type: AuthType.NoAuth,
+            },
+          },
+          references: [],
+        });
+      });
+
+      test('For same endpoint only one client object should be created', async () => {
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(1);
+      });
+
+      test('For different endpoints multiple client objects should be created', async () => {
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        const mockDataSourceAttr = { ...dataSourceAttr, endpoint: 'http://test.com' };
+
+        savedObjectsMock.get.mockReset().mockResolvedValueOnce({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...mockDataSourceAttr,
+            auth: {
+              type: AuthType.NoAuth,
+            },
+          },
+          references: [],
+        });
+
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('UserNamePassword', () => {
+      beforeEach(() => {
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: dataSourceAttr,
+          references: [],
+        });
+        jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+          decryptedText: 'password',
+          encryptionContext: { endpoint: 'http://localhost' },
+        });
+      });
+
+      test('For same endpoint only one client object should be created', async () => {
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(1);
+      });
+
+      test('For different endpoints multiple client objects should be created', async () => {
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        const mockDataSourceAttr = { ...dataSourceAttr, endpoint: 'http://test.com' };
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: mockDataSourceAttr,
+          references: [],
+        });
+        jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+          decryptedText: 'password',
+          encryptionContext: { endpoint: 'http://test.com' },
+        });
+
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('AWSSigV4', () => {
+      beforeEach(() => {
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...dataSourceAttr,
+            auth: {
+              type: AuthType.SigV4,
+              credentials: sigV4AuthContent,
+            },
+          },
+          references: [],
+        });
+
+        jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+          decryptedText: 'accessKey',
+          encryptionContext: { endpoint: 'http://localhost' },
+        });
+      });
+      test('For same endpoint only one client object should be created', async () => {
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(1);
+      });
+
+      test('For different endpoints multiple client objects should be created', async () => {
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+        const mockDataSourceAttr = { ...dataSourceAttr, endpoint: 'http://test.com' };
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...mockDataSourceAttr,
+            auth: {
+              type: AuthType.SigV4,
+              credentials: sigV4AuthContent,
+            },
+          },
+          references: [],
+        });
+
+        jest.spyOn(cryptographyMock, 'decodeAndDecrypt').mockResolvedValue({
+          decryptedText: 'accessKey',
+          encryptionContext: { endpoint: 'http://test.com' },
+        });
+        await configureLegacyClient(
+          dataSourceClientParams,
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('Auth Method from Registry', () => {
+      beforeEach(() => {
+        const authMethodWithClientPool: AuthenticationMethod = {
+          name: 'clientPoolTest',
+          credentialProvider: jest.fn(),
+        };
+        authenticationMethodRegistry.getAuthenticationMethod
+          .mockReset()
+          .mockImplementation(() => authMethodWithClientPool);
+        const mockDataSourceAttr = { ...dataSourceAttr, name: 'custom_auth' };
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...mockDataSourceAttr,
+            auth: {
+              type: AuthType.SigV4,
+              credentials: customAuthContent,
+            },
+          },
+          references: [],
+        });
+      });
+      test(' If endpoint is same for multiple requests client pool size should be 1', async () => {
+        await configureLegacyClient(
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        await configureLegacyClient(
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(1);
+      });
+
+      test('If endpoint is different for two requests client pool size should be 2', async () => {
+        await configureLegacyClient(
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        const mockDataSourceAttr = {
+          ...dataSourceAttr,
+          endpoint: 'http://test.com',
+          name: 'custom_auth',
+        };
+        savedObjectsMock.get.mockReset().mockResolvedValue({
+          id: DATA_SOURCE_ID,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {
+            ...mockDataSourceAttr,
+            auth: {
+              type: AuthType.SigV4,
+              credentials: customAuthContent,
+            },
+          },
+          references: [],
+        });
+        authRegistryCredentialProviderMock.mockReturnValue({
+          ...clientParameters,
+          endpoint: 'http://test.com',
+          cacheKeySuffix: 'test',
+        });
+
+        await configureLegacyClient(
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
+          callApiParams,
+          opensearchClientPoolSetup,
+          config,
+          logger
+        );
+
+        expect(ClientMock).toHaveBeenCalledTimes(2);
+      });
     });
   });
 });

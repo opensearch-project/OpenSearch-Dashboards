@@ -259,6 +259,7 @@ describe('#importSavedObjectsFromStream', () => {
           objects: collectedObjects,
           ignoreRegularConflicts: overwrite,
           dataSourceId: testDataSourceId,
+          savedObjectsClient,
         };
         expect(checkConflictsForDataSource).toHaveBeenCalledWith(checkConflictsForDataSourceParams);
       });

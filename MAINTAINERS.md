@@ -23,6 +23,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Su Zhou                   | [SuZhou-Joe](https://github.com/SuZhou-Joe)         | Amazon      |
 | Yulong Ruan               | [ruanyl](https://github.com/ruanyl)                 | Amazon      |
 | Lu Yu                     | [BionIT](https://github.com/BionIT)                 | Amazon      |
+| Xinrui Bai                | [xinruiba](https://github.com/xinruiba)             | Amazon      |
 
 ## Emeritus
 
