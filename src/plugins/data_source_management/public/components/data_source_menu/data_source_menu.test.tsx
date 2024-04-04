@@ -59,7 +59,58 @@ describe('DataSourceMenu', () => {
     component = shallow(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceView}
-        componentConfig={{ fullWidth: true, hideLocalCluster: true }}
+        componentConfig={{
+          fullWidth: true,
+          hideLocalCluster: true,
+          savedObjects: client,
+          notifications,
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render data source view if not pass saved object or notification', () => {
+    component = shallow(
+      <DataSourceMenu
+        componentType={DataSourceComponentType.DataSourceView}
+        componentConfig={{
+          fullWidth: true,
+          hideLocalCluster: true,
+          notifications,
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('can render data source view when provide activeOption', () => {
+    component = shallow(
+      <DataSourceMenu
+        componentType={DataSourceComponentType.DataSourceView}
+        componentConfig={{
+          fullWidth: true,
+          hideLocalCluster: true,
+          savedObjects: client,
+          notifications,
+          activeOption: [{ id: 'test', label: 'test-label' }],
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('can render data source view when only pass id in the activeOption', () => {
+    component = shallow(
+      <DataSourceMenu
+        componentType={DataSourceComponentType.DataSourceView}
+        componentConfig={{
+          fullWidth: true,
+          hideLocalCluster: true,
+          savedObjects: client,
+          notifications,
+          activeOption: [{ id: 'test' }],
+        }}
       />
     );
     expect(component).toMatchSnapshot();
@@ -74,6 +125,7 @@ describe('DataSourceMenu', () => {
           hideLocalCluster: true,
           savedObjects: client,
           notifications,
+          displayAllCompatibleDataSources: true,
         }}
       />
     );
@@ -87,6 +139,20 @@ describe('DataSourceMenu', () => {
         componentConfig={{
           fullWidth: true,
           hideLocalCluster: true,
+          savedObjects: client,
+          notifications,
+        }}
+      />
+    );
+    expect(container).toMatchSnapshot();
+  });
+
+  it('should render data source multi select component', () => {
+    const container = render(
+      <DataSourceMenu
+        componentType={DataSourceComponentType.DataSourceMultiSelectable}
+        componentConfig={{
+          fullWidth: true,
           savedObjects: client,
           notifications,
         }}

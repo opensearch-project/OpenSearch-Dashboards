@@ -18,16 +18,23 @@ import {
   WORKSPACE_FATAL_ERROR_APP_ID,
   WORKSPACE_OVERVIEW_APP_ID,
   WORKSPACE_CREATE_APP_ID,
+  WORKSPACE_LIST_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
+import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
+import { getWorkspaceColumn } from './components/workspace_column';
 import { featureMatchesConfig } from './utils';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
-export class WorkspacePlugin implements Plugin<{}, {}, {}> {
+interface WorkspacePluginSetupDeps {
+  savedObjectsManagement?: SavedObjectsManagementPluginSetup;
+}
+
+export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private currentWorkspaceIdSubscription?: Subscription;
@@ -88,7 +95,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     });
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
 
@@ -177,6 +184,22 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
       }
       return React.createElement(WorkspaceMenu, { coreStart: this.coreStart });
     });
+
+    // workspace list
+    core.application.register({
+      id: WORKSPACE_LIST_APP_ID,
+      title: '',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderListApp } = await import('./application');
+        return mountWorkspaceApp(params, renderListApp);
+      },
+    });
+
+    /**
+     * register workspace column into saved objects table
+     */
+    savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
     return {};
   }
