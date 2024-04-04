@@ -104,7 +104,7 @@ export class DataSourceManagementPlugin
       registerAuthenticationMethod,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings),
-        getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
+        getDataSourceMenu: <T>() => createDataSourceMenu<T>(uiSettings),
       },
     };
   }

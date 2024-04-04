@@ -35,6 +35,11 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
     <EuiPanel
       color="transparent"
       paddingSize="s"
+      style={
+        Object {
+          "width": "300px",
+        }
+      }
     >
       <EuiSpacer
         size="s"
@@ -47,6 +52,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
         options={
           Array [
             Object {
+              "checked": "on",
               "id": "",
               "label": "Local cluster",
             },
@@ -60,6 +66,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
             },
           ]
         }
+        renderOption={[Function]}
         searchProps={
           Object {
             "placeholder": "Search",
@@ -110,6 +117,11 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
     <EuiPanel
       color="transparent"
       paddingSize="s"
+      style={
+        Object {
+          "width": "300px",
+        }
+      }
     >
       <EuiSpacer
         size="s"
@@ -120,6 +132,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
         isPreFiltered={false}
         onChange={[Function]}
         options={Array []}
+        renderOption={[Function]}
         searchProps={
           Object {
             "placeholder": "Search",
@@ -150,7 +163,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
         onClick={[Function]}
         size="s"
       >
-        Local cluster
+        
       </EuiButtonEmpty>
     </React.Fragment>
   }
@@ -170,6 +183,11 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
     <EuiPanel
       color="transparent"
       paddingSize="s"
+      style={
+        Object {
+          "width": "300px",
+        }
+      }
     >
       <EuiSpacer
         size="s"
@@ -180,6 +198,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
         isPreFiltered={false}
         onChange={[Function]}
         options={Array []}
+        renderOption={[Function]}
         searchProps={
           Object {
             "placeholder": "Search",
@@ -264,6 +283,7 @@ Object {
                 <div>
                   <div
                     class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow"
+                    style="width: 300px;"
                   >
                     <div
                       class="euiSpacer euiSpacer--s"
