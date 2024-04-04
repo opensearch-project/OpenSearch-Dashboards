@@ -16,6 +16,8 @@ import {
   updateDataSourceById,
   handleSetDefaultDatasource,
   setFirstDataSourceAsDefault,
+  getFilteredDataSources,
+  getDefaultDataSource,
 } from './utils';
 import { coreMock } from '../../../../core/public/mocks';
 import {
@@ -28,6 +30,7 @@ import {
   mockResponseForSavedObjectsCalls,
   mockUiSettingsCalls,
   getSingleDataSourceResponse,
+  getDataSource,
 } from '../mocks';
 import {
   AuthType,
@@ -35,9 +38,10 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../types';
-import { HttpStart } from 'opensearch-dashboards/public';
+import { HttpStart, SavedObject } from 'opensearch-dashboards/public';
 import { AuthenticationMethod, AuthenticationMethodRegistry } from '../auth_registry';
 import { deepEqual } from 'assert';
+import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 
 const { savedObjects } = coreMock.createStart();
 const { uiSettings } = coreMock.createStart();
@@ -493,6 +497,86 @@ describe('DataSourceManagement: Utils.ts', () => {
       );
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+  });
+
+  describe('Check on get filter datasource', () => {
+    test('should return all data sources when no filter is provided', () => {
+      const dataSources: Array<SavedObject<DataSourceAttributes>> = [
+        {
+          id: '1',
+          type: '',
+          references: [],
+          attributes: {
+            title: 'DataSource 1',
+            endpoint: '',
+            auth: { type: AuthType.NoAuth, credentials: undefined },
+            name: AuthType.NoAuth,
+          },
+        },
+      ];
+
+      const result = getFilteredDataSources(dataSources);
+
+      expect(result).toEqual(dataSources);
+    });
+
+    test('should return filtered data sources when a filter is provided', () => {
+      const filter = (dataSource: SavedObject<DataSourceAttributes>) => dataSource.id === '2';
+      const result = getFilteredDataSources(getDataSource, filter);
+
+      expect(result).toEqual([
+        {
+          id: '2',
+          type: '',
+          references: [],
+          attributes: {
+            title: 'DataSource 2',
+            endpoint: '',
+            auth: { type: AuthType.NoAuth, credentials: undefined },
+            name: AuthType.NoAuth,
+          },
+        },
+      ]);
+    });
+  });
+  describe('getDefaultDataSource', () => {
+    const LocalCluster = { id: 'local', label: 'Local Cluster' };
+    const hideLocalCluster = false;
+    const defaultOption = [{ id: '2', label: 'Default Option' }];
+
+    it('should return the default option if it exists in the data sources', () => {
+      const result = getDefaultDataSource(
+        getDataSource,
+        LocalCluster,
+        uiSettings,
+        hideLocalCluster,
+        defaultOption
+      );
+      expect(result).toEqual([defaultOption[0]]);
+    });
+
+    it('should return local cluster if it exists and no default options in the data sources', () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      const result = getDefaultDataSource(
+        getDataSource,
+        LocalCluster,
+        uiSettings,
+        hideLocalCluster
+      );
+      expect(result).toEqual([LocalCluster]);
+    });
+
+    it('should return the default datasource if hideLocalCluster is false', () => {
+      mockUiSettingsCalls(uiSettings, 'get', '2');
+      const result = getDefaultDataSource(getDataSource, LocalCluster, uiSettings, true);
+      expect(result).toEqual([{ id: '2', label: 'DataSource 2' }]);
+    });
+
+    it('should return the first data source if no default option, hideLocalCluster is ture and no default datasource', () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      const result = getDefaultDataSource(getDataSource, LocalCluster, uiSettings, true);
+      expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
     });
   });
 });
