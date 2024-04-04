@@ -77,15 +77,23 @@ export class DataSourceSelectable extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
+    console.log("iiiiiiiiiiiiii")
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
+        console.log("1234567", fetchedDataSources)
         if (fetchedDataSources?.length) {
+          console.log("fetchedDataSources?.length is true")
+
           let filteredDataSources: Array<SavedObject<DataSourceAttributes>> = [];
           if (this.props.dataSourceFilter) {
+            console.log('dataSourceFilter exist', this.props.dataSourceFilter)
             filteredDataSources = fetchedDataSources.filter((ds) =>
               this.props.dataSourceFilter!(ds)
             );
+            console.log('dataSourceFilter filteredDataSources', filteredDataSources)
+
           }
+          console.log("2222222")
 
           if (filteredDataSources.length === 0) {
             filteredDataSources = fetchedDataSources;
@@ -100,11 +108,31 @@ export class DataSourceSelectable extends React.Component<
           if (!this.props.hideLocalCluster) {
             dataSourceOptions.unshift(LocalCluster);
           }
+          // check if the label of the selectedOption is empty
+          const selectedOption = this.state.selectedOption; // selectedOption will always has a value
+          let option = selectedOption[0];
 
+          if (option && !option.label){
+
+            const selectedMappingOption = dataSourceOptions.find(dataSourceOption => dataSourceOption.id === option.id);
+            const label = selectedMappingOption ? selectedMappingOption.label : null;
+
+            if (!label) {
+              this.props.notifications.addWarning(
+                i18n.translate('dataSource.fetchDataSourceError', {
+                  defaultMessage: `Data source with id ${option.id} is not available`,
+                })
+              );
+            } else {
+              option.label = label;
+            }
+
+          }
           if (!this._isMounted) return;
           this.setState({
             ...this.state,
             dataSourceOptions,
+            selectedOption: [option]
           });
         }
       })
@@ -138,6 +166,7 @@ export class DataSourceSelectable extends React.Component<
     const button = (
       <>
         <EuiButtonEmpty
+          id={'dataSourceSelectableContextMenuHeaderLink'}
           className="euiHeaderLink"
           onClick={this.onClick.bind(this)}
           data-test-subj="dataSourceSelectableContextMenuHeaderLink"
@@ -150,9 +179,8 @@ export class DataSourceSelectable extends React.Component<
           disabled={this.props.disabled || false}
         >
           {(this.state.selectedOption &&
-            this.state.selectedOption.length > 0 &&
-            this.state.selectedOption[0].label) ||
-            ''}
+            this.state.selectedOption.length > 0 ?
+            this.state.selectedOption[0].label : '')}
         </EuiButtonEmpty>
       </>
     );

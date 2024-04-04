@@ -163,4 +163,95 @@ describe('DataSourceSelectable', () => {
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toBeCalledTimes(1);
   });
+
+  it('should display selected option label normally', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{id: 'test-id', label: 'test-label'}]}
+
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('test-label');
+  });
+
+
+  it('should display Local Cluster when not provide selectedOption', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('Local cluster');
+  });
+
+  it('should render normally even only provide dataSourceId', async () => {
+    const fetchDataMock = jest.fn(() => Promise.resolve([{ id: 'test-id', attributes: { title: 'test-label' } }]));
+     // Spy on componentDidMount
+     jest.spyOn(DataSourceSelectable.prototype, 'componentDidMount').mockImplementation(async function () {
+      await fetchDataMock();
+    });
+
+
+    const onSelectedDataSource = jest.fn();
+    // const container = render(
+    //   <DataSourceSelectable
+    //     savedObjectsClient={client}
+    //     notifications={toasts}
+    //     onSelectedDataSources={onSelectedDataSource}
+    //     disabled={false}
+    //     hideLocalCluster={false}
+    //     fullWidth={false}
+    //     selectedOption={[{id: 'test1'}]}
+    //     dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+    //   />
+    // );
+
+      // Render the component
+      const wrapper = shallow(
+        <DataSourceSelectable
+          savedObjectsClient={client}
+          notifications={toasts}
+          onSelectedDataSources={jest.fn()}
+          disabled={false}
+          hideLocalCluster={false}
+          fullWidth={false}
+          selectedOption={[{id: 'test-id'}]}
+          dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        />
+      );
+
+
+      expect(DataSourceSelectable.prototype.componentDidMount).toHaveBeenCalled();
+      expect(fetchDataMock).toHaveBeenCalled();
+      // expect(wrapper.state('dataSourceOptions')).toEqual([{ id: 'test-id', label: 'test-label' }]);
+      expect(wrapper.state('selectedOption')).toEqual([{ id: 'test-id', label: 'test-label' }]);
+
+    // const containerInstance =  component.instance();
+    // containerInstance.componentDidMount!();
+
+    // await nextTick();
+    // expect(component).toMatchSnapshot();
+    // const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+  });
 });
