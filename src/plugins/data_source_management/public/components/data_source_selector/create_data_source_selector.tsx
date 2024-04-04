@@ -4,8 +4,11 @@
  */
 
 import React from 'react';
+import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceSelector, DataSourceSelectorProps } from './data_source_selector';
 
-export function createDataSourceSelector() {
-  return (props: DataSourceSelectorProps) => <DataSourceSelector {...props} />;
+export function createDataSourceSelector(uiSettings: IUiSettingsClient) {
+  return (props: DataSourceSelectorProps) => (
+    <DataSourceSelector {...props} uiSettings={uiSettings} />
+  );
 }
