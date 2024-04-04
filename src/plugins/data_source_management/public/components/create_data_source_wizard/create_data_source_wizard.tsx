@@ -20,7 +20,7 @@ import {
   createSingleDataSource,
   getDataSources,
   testConnection,
-  fetchDataSourceVersion,
+  fetchDataMetaData,
   handleSetDefaultDatasource,
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
@@ -75,8 +75,10 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   const handleSubmit = async (attributes: DataSourceAttributes) => {
     setIsLoading(true);
     try {
-      const version = await fetchDataSourceVersion(http, attributes);
-      attributes.dataSourceVersion = version.dataSourceVersion;
+      // Fetch data source metadata from added OS/ES domain/cluster
+      const metadata = await fetchDataMetaData(http, attributes);
+      attributes.dataSourceVersion = metadata.dataSourceVersion;
+      attributes.installedPlugins = metadata.installedPlugins;
       await createSingleDataSource(savedObjects.client, attributes);
       // Set the first create data source as default data source.
       await handleSetDefaultDatasource(savedObjects.client, uiSettings);
