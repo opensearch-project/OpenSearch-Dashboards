@@ -124,6 +124,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
   const dataSourceManagementEnabled =
     !!getDataSourceManagementSetup().dataSourceManagement || false;
   const handleDataSourceSelectChange = createDataSourcePickerHandler(onChange);
+  const DataSourceSelector = getDataSourceManagementSetup().dataSourceManagement.ui.DataSourceSelector;
 
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
@@ -179,12 +180,14 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 defaultMessage: 'Data source',
               })}
             >
-              <DataSourcePicker
+              <DataSourceSelector
                 savedObjectsClient={getSavedObjectsClient().client}
-                toasts={getNotifications().toasts}
-                defaultDataSourceId={model[DATA_SOURCE_ID_KEY] || undefined}
-                dataSourceManagement={getDataSourceManagementSetup().dataSourceManagement}
-                handleChange={handleDataSourceSelectChange}
+                notifications={getNotifications().toasts}
+                onSelectedDataSource={handleDataSourceSelectChange}
+                defaultOption={model.data_source_id ? [{ id: model.data_source_id }] : [{id: ""}]}
+                disabled={false}
+                fullWidth={false}
+                removePrepend={true}
                 hideLocalCluster={!!getHideLocalCluster().hideLocalCluster}
               />
             </EuiFormRow>
