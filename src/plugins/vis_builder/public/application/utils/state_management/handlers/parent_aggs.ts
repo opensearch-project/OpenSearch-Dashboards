@@ -42,7 +42,7 @@ export const handlerParentAggs = async (
   const metricAggs = aggConfigs.aggs.filter((agg) => agg.schema === 'metric');
   const lastParentPipelineAgg = findLast(
     metricAggs,
-    ({ type }: { type: IMetricAggType }) => type.subtype === search.aggs.parentPipelineType
+    ({ type }: { type: IMetricAggType }) => type && type.subtype === search.aggs.parentPipelineType
   );
   const lastBucket = findLast(aggConfigs.aggs, (agg) => agg.type.type === 'buckets');
 

@@ -21,9 +21,6 @@ export const saveStateToSavedObject = (
   state: VisBuilderRootState,
   indexPattern: IndexPattern
 ): VisBuilderSavedObject => {
-  if (state.metadata.indexPattern !== indexPattern.id)
-    throw new Error('indexPattern id should match the value in redux state');
-
   obj.visualizationState = JSON.stringify(state.visualization);
   obj.styleState = JSON.stringify(state.style);
   obj.searchSourceFields = { index: indexPattern };

@@ -127,6 +127,7 @@ export class VisBuilderPlugin
         navigateToApp('data-explorer', {
           replace: true,
           path: `/${PLUGIN_ID}${migratePath}`,
+          state: params.history.location.state,
         });
 
         return () => {

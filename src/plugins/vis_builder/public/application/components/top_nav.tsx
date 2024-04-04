@@ -41,19 +41,24 @@ export const TopNav = ({
     query: true,
   });
   const [config, setConfig] = useState<TopNavMenuData[] | undefined>();
-  const getConfig = useCallback(() => {
-    if (!savedVisBuilderVis || !indexPattern) return;
 
-    return getTopNavConfig(
-      {
-        visualizationIdFromUrl: savedVisBuilderId,
-        savedVisBuilderVis: saveStateToSavedObject(savedVisBuilderVis, rootState, indexPattern),
-        saveDisabledReason,
-        dispatch,
-        originatingApp: rootState.metadata.originatingApp,
-      },
-      services
-    );
+  useEffect(() => {
+    const getConfig = () => {
+      if (!savedVisBuilderVis || !indexPattern) return;
+      const topNavConfigs = getTopNavConfig(
+        {
+          visualizationIdFromUrl: savedVisBuilderId,
+          savedVisBuilderVis: saveStateToSavedObject(savedVisBuilderVis, rootState, indexPattern),
+          saveDisabledReason,
+          dispatch,
+          originatingApp: rootState.metadata.originatingApp,
+        },
+        services
+      );
+
+      return topNavConfigs;
+    };
+    setConfig(getConfig());
   }, [
     savedVisBuilderVis,
     rootState,
@@ -64,11 +69,6 @@ export const TopNav = ({
     savedVisBuilderId,
   ]);
 
-  useEffect(() => {
-    setConfig(getConfig());
-  }, [getConfig]);
-
-  // reset validity before component destroyed
   useUnmount(() => {
     dispatch(setStatus({ status: 'loading' }));
   });
