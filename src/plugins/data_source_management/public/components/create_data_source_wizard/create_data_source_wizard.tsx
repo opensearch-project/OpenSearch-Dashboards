@@ -16,7 +16,13 @@ import {
 } from '../../types';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CreateDataSourceForm } from './components/create_form';
-import { createSingleDataSource, getDataSources, testConnection } from '../utils';
+import {
+  createSingleDataSource,
+  getDataSources,
+  testConnection,
+  fetchDataSourceVersion,
+  handleSetDefaultDatasource,
+} from '../utils';
 import { LoadingMask } from '../loading_mask';
 
 type CreateDataSourceWizardProps = RouteComponentProps;
@@ -30,6 +36,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     setBreadcrumbs,
     http,
     notifications: { toasts },
+    uiSettings,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* State Variables */
@@ -68,7 +75,11 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   const handleSubmit = async (attributes: DataSourceAttributes) => {
     setIsLoading(true);
     try {
+      const version = await fetchDataSourceVersion(http, attributes);
+      attributes.dataSourceVersion = version.dataSourceVersion;
       await createSingleDataSource(savedObjects.client, attributes);
+      // Set the first create data source as default data source.
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
       props.history.push('');
     } catch (e) {
       setIsLoading(false);

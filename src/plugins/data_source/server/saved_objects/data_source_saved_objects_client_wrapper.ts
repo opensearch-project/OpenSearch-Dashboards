@@ -25,7 +25,7 @@ import {
 } from '../../common/data_sources';
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
 import { isValidURL } from '../util/endpoint_validator';
-import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { IAuthenticationMethodRegistry } from '../auth_registry';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
@@ -141,7 +141,7 @@ export class DataSourceSavedObjectsClientWrapper {
   constructor(
     private cryptography: CryptographyServiceSetup,
     private logger: Logger,
-    private authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
+    private authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
     private endpointBlockedIps?: string[]
   ) {}
 

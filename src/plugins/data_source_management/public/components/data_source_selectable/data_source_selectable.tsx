@@ -6,7 +6,6 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiPanel,
@@ -16,14 +15,15 @@ import {
 } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
 import { getDataSourcesWithFields } from '../utils';
-import { DataSourceOption, LocalCluster } from '../data_source_selector/data_source_selector';
+import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
+import { DataSourceOption } from '../data_source_menu/types';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: ToastsStart;
-  onSelectedDataSource: (dataSource: DataSourceOption) => void;
+  onSelectedDataSources: (dataSources: DataSourceOption[]) => void;
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
@@ -32,9 +32,13 @@ interface DataSourceSelectableProps {
 }
 
 interface DataSourceSelectableState {
-  dataSourceOptions: DataSourceOption[];
-  selectedOption: DataSourceOption[];
+  dataSourceOptions: SelectedDataSourceOption[];
   isPopoverOpen: boolean;
+  selectedOption?: SelectedDataSourceOption[];
+}
+
+interface SelectedDataSourceOption extends DataSourceOption {
+  checked?: boolean;
 }
 
 export class DataSourceSelectable extends React.Component<
@@ -47,6 +51,7 @@ export class DataSourceSelectable extends React.Component<
     super(props);
 
     this.state = {
+      dataSourceOptions: [],
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption
         ? this.props.selectedOption
@@ -75,7 +80,7 @@ export class DataSourceSelectable extends React.Component<
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
-          let filteredDataSources = [];
+          let filteredDataSources: Array<SavedObject<DataSourceAttributes>> = [];
           if (this.props.dataSourceFilter) {
             filteredDataSources = fetchedDataSources.filter((ds) =>
               this.props.dataSourceFilter!(ds)
@@ -112,20 +117,26 @@ export class DataSourceSelectable extends React.Component<
       });
   }
 
-  onChange(options) {
+  onChange(options: SelectedDataSourceOption[]) {
     if (!this._isMounted) return;
     const selectedDataSource = options.find(({ checked }) => checked);
 
-    this.setState({
-      selectedOption: [selectedDataSource],
-    });
-    this.props.onSelectedDataSource({ ...selectedDataSource });
+    this.setState({ dataSourceOptions: options });
+
+    if (selectedDataSource) {
+      this.setState({
+        selectedOption: [selectedDataSource],
+      });
+
+      this.props.onSelectedDataSources([
+        { id: selectedDataSource.id!, label: selectedDataSource.label },
+      ]);
+    }
   }
 
   render() {
     const button = (
       <>
-        <EuiIcon type="database" />
         <EuiButtonEmpty
           className="euiHeaderLink"
           onClick={this.onClick.bind(this)}
@@ -133,8 +144,8 @@ export class DataSourceSelectable extends React.Component<
           aria-label={i18n.translate('dataSourceSelectable.dataSourceOptionsButtonAriaLabel', {
             defaultMessage: 'dataSourceMenuButton',
           })}
-          iconType="arrowDown"
-          iconSide="right"
+          iconType="database"
+          iconSide="left"
           size="s"
           disabled={this.props.disabled || false}
         >
@@ -154,6 +165,7 @@ export class DataSourceSelectable extends React.Component<
         closePopover={this.closePopover.bind(this)}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        data-test-subj={'dataSourceSelectableContextMenuPopover'}
       >
         <EuiContextMenuPanel>
           <EuiPanel color="transparent" paddingSize="s">
@@ -167,6 +179,7 @@ export class DataSourceSelectable extends React.Component<
               options={this.state.dataSourceOptions}
               onChange={(newOptions) => this.onChange(newOptions)}
               singleSelection={true}
+              data-test-subj={'dataSourceSelectable'}
             >
               {(list, search) => (
                 <>

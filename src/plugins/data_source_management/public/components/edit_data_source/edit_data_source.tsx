@@ -17,6 +17,7 @@ import {
   getDataSources,
   testConnection,
   updateDataSourceById,
+  setFirstDataSourceAsDefault,
 } from '../utils';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
@@ -38,6 +39,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 ) => {
   /* Initialization */
   const {
+    uiSettings,
     savedObjects,
     setBreadcrumbs,
     http,
@@ -83,6 +85,12 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     }
   };
 
+  const handleSetDefault = async () => {
+    await uiSettings.set('defaultDataSource', dataSourceID);
+  };
+
+  const isDefaultDataSource = uiSettings.get('defaultDataSource', null) === dataSourceID;
+
   /* Handle submit - create data source*/
   const handleSubmit = async (attributes: DataSourceAttributes) => {
     await updateDataSourceById(savedObjects.client, dataSourceID, attributes);
@@ -102,12 +110,30 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     setIsLoading(true);
     try {
       await deleteDataSourceById(props.match.params.id, savedObjects.client);
+
+      // If deleted datasource is the default datasource, then set the first existing
+      // datasource as default datasource.
+      setDefaultDataSource();
       props.history.push('');
     } catch (e) {
       setIsLoading(false);
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.editDataSource.deleteDataSourceFailMsg',
         defaultMessage: 'Unable to delete the Data Source due to some errors. Please try it again.',
+      });
+    }
+  };
+
+  const setDefaultDataSource = async () => {
+    try {
+      if (uiSettings.get('defaultDataSource') === dataSourceID) {
+        await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      }
+    } catch (e) {
+      setIsLoading(false);
+      handleDisplayToastMessage({
+        id: 'dataSourcesManagement.editDataSource.setDefaultDataSourceFailMsg',
+        defaultMessage: 'Unable to find a default datasource. Please set a new default datasource.',
       });
     }
   };
@@ -128,7 +154,9 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
           <EditDataSourceForm
             existingDataSource={dataSource}
             existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={isDefaultDataSource}
             onDeleteDataSource={handleDelete}
+            onSetDefaultDataSource={handleSetDefault}
             handleSubmit={handleSubmit}
             displayToastMessage={handleDisplayToastMessage}
             handleTestConnection={handleTestConnection}
