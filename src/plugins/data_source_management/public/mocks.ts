@@ -232,8 +232,9 @@ export const getMappedDataSources = [
   },
 ];
 
-export const fetchDataSourceVersion = {
+export const fetchDataSourceMetaData = {
   dataSourceVersion: '2.11.0',
+  installedPlugins: ['opensearch-ml', 'opensearch-sql'],
 };
 
 export const mockDataSourceAttributesWithAuth = {

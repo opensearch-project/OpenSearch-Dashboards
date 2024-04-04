@@ -203,7 +203,7 @@ export async function testConnection(
   });
 }
 
-export async function fetchDataMetaData(
+export async function fetchDataSourceMetaData(
   http: HttpStart,
   { endpoint, auth: { type, credentials } }: DataSourceAttributes,
   dataSourceID?: string

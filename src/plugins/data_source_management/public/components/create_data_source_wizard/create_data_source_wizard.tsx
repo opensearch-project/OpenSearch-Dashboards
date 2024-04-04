@@ -20,7 +20,7 @@ import {
   createSingleDataSource,
   getDataSources,
   testConnection,
-  fetchDataMetaData,
+  fetchDataSourceMetaData,
   handleSetDefaultDatasource,
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
@@ -76,7 +76,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     setIsLoading(true);
     try {
       // Fetch data source metadata from added OS/ES domain/cluster
-      const metadata = await fetchDataMetaData(http, attributes);
+      const metadata = await fetchDataSourceMetaData(http, attributes);
       attributes.dataSourceVersion = metadata.dataSourceVersion;
       attributes.installedPlugins = metadata.installedPlugins;
       await createSingleDataSource(savedObjects.client, attributes);
