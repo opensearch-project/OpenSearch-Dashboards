@@ -22,10 +22,6 @@ export const updateWorkspaceState = (
 ) => {
   const rawRequest = ensureRawRequest(request);
 
-  if (!rawRequest.app) {
-    rawRequest.app = {};
-  }
-
   rawRequest.app = {
     ...rawRequest.app,
     ...payload,
